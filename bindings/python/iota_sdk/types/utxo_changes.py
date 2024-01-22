@@ -18,9 +18,9 @@ class UtxoChanges():
     - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 
     Arguments:
-        commitment_id: TODO
-        created_outputs: TODO
-        consumed_outputs: TODO
+        commitment_id: The commitment ID of the requested slot that contains the changes. Hex-encoded with 0x prefix.
+        created_outputs: The created outputs of the given slot.
+        consumed_outputs: The consumed outputs of the given slot.
     """
     commitment_id: HexStr
     created_outputs: List[OutputId]
@@ -49,9 +49,9 @@ class UtxoChangesFull():
     - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
 
     Arguments:
-        commitment_id: TODO
-        created_outputs: TODO
-        consumed_outputs: TODO
+        commitment_id: The commitment ID of the requested slot that contains the changes. Hex-encoded with 0x prefix.
+        created_outputs: The created outputs of the given slot.
+        consumed_outputs: The consumed outputs of the given slot.
     """
     commitment_id: HexStr
     created_outputs: List[OutputWithId]

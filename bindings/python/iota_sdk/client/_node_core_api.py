@@ -281,9 +281,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        # TODO: remove
-        # return from_dict(OutputMetadata,
-        # self._call_method('getOutputMetadata', {
         return OutputMetadata.from_dict(self._call_method('getOutputMetadata', {
             'outputId': output_id_str
         }))

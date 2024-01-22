@@ -122,9 +122,9 @@ class TransactionMetadata:
     """Response of a GET transaction metadata REST API call.
 
     Attributes:
-        transaction_id: TODO
-        transaction_state: TODO
-        transaction_failure_reason: TODO
+        transaction_id: The identifier of the transaction. Hex-encoded with 0x prefix.
+        transaction_state: If 'pending', the transaction is not included yet. If 'accepted', the transaction is included. If 'confirmed' means transaction is included and its included block is confirmed. If 'finalized' means transaction is included, its included block is finalized and cannot be reverted anymore. If 'failed' means transaction is issued but failed due to the transaction failure reason.
+        transaction_failure_reason: The optional transaction failure reason.
     """
     transaction_id: HexStr
     transaction_state: TransactionState

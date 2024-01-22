@@ -17,10 +17,10 @@ class BlockMetadata:
     Response of GET /api/core/v3/blocks/{blockId}/metadata.
 
     Attributes:
-        block_id: TODO.
-        block_state: TODO.
-        block_failure_reason: TODO.
-        transaction_metadata: TODO.
+        block_id: The identifier of the block. Hex-encoded with 0x prefix.
+        block_state: If pending, the block is stored but not confirmed. If confirmed, the block is confirmed with the first level of knowledge. If finalized, the block is included and cannot be reverted anymore. If rejected, the block is rejected by the node, and user should reissue payload if it contains one. If failed, the block is not successfully issued due to failure reason.
+        block_failure_reason: The optional block failure reason.
+        transaction_metadata: The optional metadata of a given transaction.
     """
     block_id: HexStr
     block_state: BlockState
