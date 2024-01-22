@@ -1,9 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
-
-use hashbrown::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use super::{Error, InputSelection, Requirement};
 use crate::{
@@ -164,7 +162,7 @@ impl AmountSelection {
             if let Some(nt) = input.output.native_tokens() {
                 let mut selected_native_tokens = self.selected_native_tokens.clone();
                 selected_native_tokens.extend(nt.iter().map(|t| t.token_id()));
-                // Don't select input if it would end up with more than allowed native tokens.
+                // Don't select input if the tx would end up with more than allowed native tokens.
                 if selected_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
                     continue;
                 } else {
@@ -335,7 +333,10 @@ impl InputSelection {
             return Ok(r);
         }
 
-        let max_input_nts = HashSet::<TokenId>::from_iter(
+        // If the available inputs have more NTs than are allowed in a single tx, we might not be able to find inputs
+        // without exceeding the threshold, so in this case we also try again with the outputs ordered the other way
+        // around.
+        let potentially_too_many_native_tokens = HashSet::<TokenId>::from_iter(
             self.available_inputs
                 .iter()
                 .flat_map(|i| {
@@ -345,10 +346,11 @@ impl InputSelection {
                 })
                 .flatten(),
         )
-        .len();
+        .len()
+            > NativeTokens::COUNT_MAX.into();
 
         if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into()
-            || max_input_nts > NativeTokens::COUNT_MAX.into()
+            || potentially_too_many_native_tokens
         {
             // Clear before trying with reversed ordering.
             log::debug!("Clearing amount selection");
