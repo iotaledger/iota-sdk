@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Ed25519Signature` type no longer requires validated public key bytes to construct;
+- Input selection for > max native tokens;
 
 ## 1.1.3 - 2023-12-07
 
