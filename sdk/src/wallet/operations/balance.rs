@@ -10,7 +10,7 @@ use crate::{
     },
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
-        types::{Balance, NativeTokensBalance},
+        types::{balance::ManaBalance, Balance, NativeTokensBalance},
         Result, Wallet,
     },
 };
@@ -53,7 +53,7 @@ where
         for account in wallet_data.accounts() {
             let account_id = *account.output.as_account().account_id();
             // TODO: Maybe cache this in the wallet?
-            *balance.block_issuance_credits.entry(account_id).or_default() += self
+            *balance.mana.block_issuance_credits.entry(account_id).or_default() += self
                 .client()
                 .get_account_congestion(&account_id)
                 .await?
@@ -62,7 +62,7 @@ where
 
         log::debug!(
             "[BALANCE] block issuance credits: {:#?}",
-            balance.block_issuance_credits
+            balance.mana.block_issuance_credits
         );
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
@@ -81,13 +81,13 @@ where
                     // Add amount
                     balance.base_coin.total += account.amount();
                     // Add stored mana
-                    balance.stored_mana += protocol_parameters.mana_with_decay(
+                    balance.mana.total.stored_mana += protocol_parameters.mana_with_decay(
                         account.mana(),
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
                     // Add potential mana
-                    balance.potential_mana += protocol_parameters.generate_mana_with_decay(
+                    balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
                         account.amount(),
                         output_id.transaction_id().slot_index(),
                         slot_index,
@@ -147,13 +147,13 @@ where
                         // Add amount
                         balance.base_coin.total += output.amount();
                         // Add stored mana
-                        balance.stored_mana += protocol_parameters.mana_with_decay(
+                        balance.mana.total.stored_mana += protocol_parameters.mana_with_decay(
                             output.mana(),
                             output_id.transaction_id().slot_index(),
                             slot_index,
                         )?;
                         // Add potential mana
-                        balance.potential_mana += protocol_parameters.generate_mana_with_decay(
+                        balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
                             output.amount(),
                             output_id.transaction_id().slot_index(),
                             slot_index,
@@ -228,13 +228,13 @@ where
                                 // Add amount
                                 balance.base_coin.total += amount;
                                 // Add stored mana
-                                balance.stored_mana += protocol_parameters.mana_with_decay(
+                                balance.mana.total.stored_mana += protocol_parameters.mana_with_decay(
                                     output.mana(),
                                     output_id.transaction_id().slot_index(),
                                     slot_index,
                                 )?;
                                 // Add potential mana
-                                balance.potential_mana += protocol_parameters.generate_mana_with_decay(
+                                balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
                                     output.amount(),
                                     output_id.transaction_id().slot_index(),
                                     slot_index,
@@ -289,6 +289,8 @@ where
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_data.locked_outputs);
 
         let mut locked_amount = 0;
+        let mut locked_potential_mana = 0;
+        let mut locked_stored_mana = 0;
         let mut locked_native_tokens = NativeTokensBuilder::default();
 
         for locked_output in &wallet_data.locked_outputs {
@@ -300,6 +302,16 @@ where
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
+                    locked_stored_mana += protocol_parameters.mana_with_decay(
+                        output_data.output.mana(),
+                        output_data.output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
+                    locked_potential_mana += protocol_parameters.generate_mana_with_decay(
+                        output_data.output.amount(),
+                        output_data.output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
                     if let Some(native_token) = output_data.output.native_token() {
                         locked_native_tokens.add_native_token(*native_token)?;
                     }
@@ -308,11 +320,13 @@ where
         }
 
         log::debug!(
-            "[BALANCE] total_amount: {}, potential_mana: {}, stored_mana: {}, locked_amount: {}, total_storage_cost: {}",
+            "[BALANCE] total_amount: {}, total_potential_mana: {}, total_stored_mana: {}, locked_amount: {}, locked_potential_mana: {}, locked_stored_mana: {}, total_storage_cost: {}",
             balance.base_coin.total,
-            balance.potential_mana,
-            balance.stored_mana,
+            balance.mana.total.potential_mana,
+            balance.mana.total.stored_mana,
             locked_amount,
+            locked_potential_mana,
+            locked_stored_mana,
             total_storage_cost,
         );
 
@@ -356,6 +370,10 @@ where
                 .saturating_sub(locked_amount)
                 .saturating_sub(balance.base_coin.voting_power);
         }
+        balance.mana.available = ManaBalance {
+            potential_mana: balance.mana.total.potential_mana.saturating_sub(locked_potential_mana),
+            stored_mana: balance.mana.total.stored_mana.saturating_sub(locked_stored_mana),
+        };
 
         Ok(balance)
     }

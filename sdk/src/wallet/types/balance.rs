@@ -20,6 +20,8 @@ use crate::{
 pub struct Balance {
     /// Total and available amount of the base coin
     pub(crate) base_coin: BaseCoinBalance,
+    /// Various mana balances
+    pub(crate) mana: ManaCreditsBalance,
     /// Current required storage deposit amount
     pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
@@ -37,9 +39,6 @@ pub struct Balance {
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
     pub(crate) potentially_locked_outputs: BTreeMap<OutputId, bool>,
-    pub(crate) potential_mana: u64,
-    pub(crate) stored_mana: u64,
-    pub(crate) block_issuance_credits: BTreeMap<AccountId, i128>,
 }
 
 impl std::ops::AddAssign for Balance {
@@ -55,11 +54,6 @@ impl std::ops::AddAssign for Balance {
         self.foundries.extend(rhs.foundries);
         self.nfts.extend(rhs.nfts);
         self.delegations.extend(rhs.delegations);
-        self.potential_mana += rhs.potential_mana;
-        self.stored_mana += rhs.stored_mana;
-        for (account_id, rhs_bic) in rhs.block_issuance_credits.into_iter() {
-            *self.block_issuance_credits.entry(account_id).or_default() += rhs_bic;
-        }
     }
 }
 
@@ -88,6 +82,77 @@ impl std::ops::AddAssign for BaseCoinBalance {
         {
             self.voting_power += rhs.voting_power;
         }
+    }
+}
+
+/// Mana and BIC fields for [`Balance`]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
+#[serde(rename_all = "camelCase")]
+#[getset(get_copy = "pub")]
+pub struct ManaCreditsBalance {
+    /// Total mana.
+    pub(crate) total: ManaBalance,
+    /// Available mana.
+    pub(crate) available: ManaBalance,
+    /// Block issuance credits by account.
+    #[serde(with = "bic_serde")]
+    pub(crate) block_issuance_credits: BTreeMap<AccountId, i128>,
+}
+
+pub mod bic_serde {
+    use alloc::string::String;
+    use core::str::FromStr;
+
+    use serde::{de, Deserialize, Deserializer, Serializer};
+
+    use super::*;
+
+    pub fn serialize<S>(value: &BTreeMap<AccountId, i128>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_map(value.iter().map(|(id, bic)| (id, bic.to_string())))
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<BTreeMap<AccountId, i128>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        BTreeMap::<AccountId, String>::deserialize(deserializer)?
+            .into_iter()
+            .map(|(id, bic)| Ok((id, bic.parse()?)))
+            .collect::<Result<BTreeMap<_, i128>, <i128 as FromStr>::Err>>()
+            .map_err(|e| de::Error::custom(e.to_string()))
+    }
+}
+
+impl std::ops::AddAssign for ManaCreditsBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.total += rhs.total;
+        self.available += rhs.available;
+        for (account_id, rhs_bic) in rhs.block_issuance_credits.into_iter() {
+            *self.block_issuance_credits.entry(account_id).or_default() += rhs_bic;
+        }
+    }
+}
+
+/// Mana fields for [`Balance`]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[serde(rename_all = "camelCase")]
+#[getset(get_copy = "pub")]
+pub struct ManaBalance {
+    /// Decayed potential mana of owned outputs.
+    #[serde(with = "string")]
+    pub(crate) potential_mana: u64,
+    /// Decayed stored mana of owned outputs.
+    #[serde(with = "string")]
+    pub(crate) stored_mana: u64,
+}
+
+impl std::ops::AddAssign for ManaBalance {
+    fn add_assign(&mut self, rhs: Self) {
+        self.potential_mana += rhs.potential_mana;
+        self.stored_mana += rhs.stored_mana;
     }
 }
 
