@@ -3,8 +3,9 @@
 
 use iota_sdk::types::{
     api::core::{
-        BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
-        ManaRewardsResponse, RoutesResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+        BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+        IssuanceBlockHeaderResponse, ManaRewardsResponse, RoutesResponse, UtxoChangesResponse, ValidatorResponse,
+        ValidatorsResponse,
     },
     block::{
         output::{OutputMetadata, OutputWithMetadata},
@@ -59,8 +60,9 @@ fn responses() {
     // GET /api/core/v3/rewards/{outputId}
     json_response::<ManaRewardsResponse>("get-mana-rewards-example.json").unwrap();
     // GET /api/core/v3/validators
-    json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
     json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
+    // GET /api/core/v3/validators/{bech32Address}
+    json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
     // GET /api/core/v3/committee
     json_response::<CommitteeResponse>("get-committee-example.json").unwrap();
     // GET /api/core/v3/blocks/issuance
@@ -79,7 +81,7 @@ fn responses() {
     json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed.json").unwrap();
     json_response::<BlockMetadataResponse>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/full
-    // TODO ?
+    json_response::<BlockWithMetadataResponse>("get-full-block-by-id-tagged-data-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}
     // json_response("get-outputs-by-id-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/metadata
