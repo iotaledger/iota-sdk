@@ -133,6 +133,7 @@ pub enum Response {
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
     /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
     /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
+    /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
@@ -224,6 +225,7 @@ pub enum Response {
     /// Response for:
     /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
     /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
+    /// - [`BlockHashWithoutNonce`](crate::method::UtilsMethod::BlockHashWithoutNonce)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
@@ -290,6 +292,7 @@ pub enum Response {
     /// - [`StartBackgroundSync`](crate::method::WalletMethod::StartBackgroundSync),
     /// - [`StoreMnemonic`](crate::method::WalletMethod::StoreMnemonic),
     /// - [`StopBackgroundSync`](crate::method::WalletMethod::StopBackgroundSync),
+    /// - [`VerifyTransactionSyntax`](crate::method::UtilsMethod::VerifyTransactionSyntax),
     Ok,
     /// Response for any method that returns an error.
     Error(Error),
