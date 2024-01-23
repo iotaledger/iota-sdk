@@ -19,7 +19,7 @@ use crate::{
         Error,
     },
     types::{
-        api::core::OutputWithMetadataResponse,
+        api::core::OutputWithMetadata,
         block::{
             output::{AccountId, Output},
             payload::signed_transaction::SignedTransactionPayload,
@@ -168,7 +168,7 @@ where
         let inputs = signed_transaction_data
             .inputs_data
             .into_iter()
-            .map(|input| OutputWithMetadataResponse {
+            .map(|input| OutputWithMetadata {
                 metadata: input.output_metadata,
                 output: input.output,
             })

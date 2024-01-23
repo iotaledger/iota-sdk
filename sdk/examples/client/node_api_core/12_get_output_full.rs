@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .parse::<OutputId>()?;
 
     // Get the output with its metadata.
-    let output_with_metadata = client.get_output_with_metadata(&output_id).await?;
+    let output_with_metadata = client.get_output_with_metadata_full(&output_id).await?;
 
     println!("{output_with_metadata:?}");
 

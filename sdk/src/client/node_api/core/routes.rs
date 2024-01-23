@@ -17,13 +17,13 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithProof, RoutesResponse, SubmitBlockResponse,
             TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
             ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
-            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadataFull},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -235,7 +235,7 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputResponse> {
+    pub async fn get_output_with_proof(&self, output_id: &OutputId) -> Result<OutputWithProof> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.get_request(path, None, false, true).await
@@ -243,7 +243,7 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as raw bytes.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
+    pub async fn get_output_with_proof_raw(&self, output_id: &OutputId) -> Result<Vec<u8>> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.get_request_bytes(path, None).await
@@ -259,7 +259,7 @@ impl ClientInner {
 
     /// Finds an output with its metadata by output ID.
     /// GET /api/core/v3/outputs/{outputId}/full
-    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+    pub async fn get_output_with_metadata_full(&self, output_id: &OutputId) -> Result<OutputWithMetadataFull> {
         let path = &format!("api/core/v3/outputs/{output_id}/full");
 
         self.get_request(path, None, false, true).await

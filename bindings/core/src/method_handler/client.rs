@@ -6,7 +6,7 @@ use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{request_funds_from_faucet, Client},
     types::{
-        api::core::OutputWithMetadataResponse,
+        api::core::OutputWithMetadata,
         block::{
             output::{
                 AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder,
@@ -220,17 +220,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockWithMetadata(client.get_block_with_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
-        ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
-            client
-                .get_output_with_metadata(&output_id)
-                .await
-                .map(OutputWithMetadataResponse::from)?,
-        ),
+        ClientMethod::GetOutput { output_id } => {
+            Response::OutputWithProof(client.get_output_with_proof(&output_id).await?)
+        }
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
-        ClientMethod::GetOutputWithMetadata { output_id } => {
-            Response::OutputWithMetadata(client.get_output_with_metadata(&output_id).await?)
+        ClientMethod::GetOutputWithMetadataFull { output_id } => {
+            Response::OutputWithMetadataFull(client.get_output_with_metadata_full(&output_id).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
@@ -294,7 +291,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .get_outputs_with_metadata(&output_ids)
                 .await?
                 .iter()
-                .map(OutputWithMetadataResponse::from)
+                .map(OutputWithMetadata::from)
                 .collect();
             Response::Outputs(outputs_response)
         }
@@ -303,7 +300,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .get_outputs_with_metadata_ignore_not_found(&output_ids)
                 .await?
                 .iter()
-                .map(OutputWithMetadataResponse::from)
+                .map(OutputWithMetadata::from)
                 .collect();
             Response::Outputs(outputs_response)
         }

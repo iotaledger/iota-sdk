@@ -400,7 +400,7 @@ where
 
         // Foundry was not found in the wallet, try to get it from the node
         let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
-        let output_response = self.client().get_output(&foundry_output_id).await?;
+        let output_response = self.client().get_output_with_proof(&foundry_output_id).await?;
 
         Ok(output_response.output)
     }

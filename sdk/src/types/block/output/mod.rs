@@ -81,13 +81,13 @@ pub enum OutputBuilderAmount {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct OutputWithMetadata {
+pub struct OutputWithMetadataFull {
     pub output: Output,
     pub output_id_proof: OutputIdProof,
     pub metadata: OutputMetadata,
 }
 
-impl OutputWithMetadata {
+impl OutputWithMetadataFull {
     /// Creates a new [`OutputWithMetadata`].
     pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
         Self {

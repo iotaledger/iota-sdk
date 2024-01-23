@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
+        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadataFull},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -438,13 +438,13 @@ pub struct BlockWithMetadataResponse {
 /// An output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputWithMetadataResponse {
-    pub metadata: OutputMetadata,
+pub struct OutputWithMetadata {
     pub output: Output,
+    pub metadata: OutputMetadata,
 }
 
-impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
-    fn from(value: &OutputWithMetadata) -> Self {
+impl From<&OutputWithMetadataFull> for OutputWithMetadata {
+    fn from(value: &OutputWithMetadataFull) -> Self {
         Self {
             metadata: value.metadata,
             output: value.output().clone(),
@@ -452,8 +452,8 @@ impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     }
 }
 
-impl From<OutputWithMetadata> for OutputWithMetadataResponse {
-    fn from(value: OutputWithMetadata) -> Self {
+impl From<OutputWithMetadataFull> for OutputWithMetadata {
+    fn from(value: OutputWithMetadataFull) -> Self {
         Self::from(&value)
     }
 }
@@ -494,14 +494,14 @@ pub struct UtxoChangesFullResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithId {
-    pub output_id: OutputId,
     pub output: Output,
+    pub output_id: OutputId,
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputResponse {
+pub struct OutputWithProof {
     pub output: Output,
     pub output_id_proof: OutputIdProof,
 }

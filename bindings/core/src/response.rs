@@ -17,16 +17,16 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
-                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse,
-                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-                ValidatorResponse, ValidatorsResponse,
+                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadata,
+                OutputWithProof, RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse,
+                UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId},
+            output::{AccountId, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadataFull, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             semantic::TransactionFailureReason,
@@ -160,17 +160,17 @@ pub enum Response {
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
-    OutputWithMetadataResponse(OutputWithMetadataResponse),
+    OutputWithProof(OutputWithProof),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
     OutputMetadata(OutputMetadata),
     /// Response for:
     /// - [`GetOutputWithMetadata`](crate::method::ClientMethod::GetOutputWithMetadata)
-    OutputWithMetadata(OutputWithMetadata),
+    OutputWithMetadataFull(OutputWithMetadataFull),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
-    Outputs(Vec<OutputWithMetadataResponse>),
+    Outputs(Vec<OutputWithMetadata>),
     /// Response for:
     /// - [`AccountOutputId`](crate::method::ClientMethod::AccountOutputId)
     /// - [`AnchorOutputId`](crate::method::ClientMethod::AnchorOutputId)

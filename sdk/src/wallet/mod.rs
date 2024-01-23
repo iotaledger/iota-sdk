@@ -71,7 +71,7 @@ pub use self::{
 };
 use crate::{
     types::{
-        api::core::OutputWithMetadataResponse,
+        api::core::OutputWithMetadata,
         block::{
             output::{AccountId, AnchorId, DelegationId, FoundryId, NftId},
             payload::signed_transaction::{SignedTransactionPayload, TransactionId},
@@ -108,7 +108,7 @@ pub struct FilterOptions {
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
     tx_payload: SignedTransactionPayload,
-    inputs: Vec<OutputWithMetadataResponse>,
+    inputs: Vec<OutputWithMetadata>,
 ) -> crate::wallet::Result<TransactionWithMetadata> {
     Ok(TransactionWithMetadata {
         payload: tx_payload.clone(),
