@@ -19,14 +19,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.5 - 2024-MM-DD
+
+### Added
+
+- `Display` for `SecretManager`;
+- `StrongholdAdapter::snapshot_path` getter method;
+
 ## 1.1.4 - 2024-01-22
 
 ### Added
 
 - `Ed25519Signature` methods `new_from_bytes`, `public_key_bytes`, `from_bytes`, `try_verify`;
 - `Block::hash_without_nonce()` method;
-- `Display` for `SecretManager`;
-- `StrongholdAdapter::snapshot_path` getter method;
 
 ### Deprecated
 
