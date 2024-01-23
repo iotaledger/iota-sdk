@@ -367,49 +367,18 @@ fn verify_context_inputs_packable<const VERIFY: bool>(
 }
 
 fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
-    is_unique_sorted_by(context_inputs.iter(), |a, b| {
+    if !is_unique_sorted_by(context_inputs.iter(), |a, b| {
         a.kind().cmp(&b.kind()).then_with(|| match (a, b) {
             (ContextInput::Commitment(_), ContextInput::Commitment(_)) => core::cmp::Ordering::Equal,
             (ContextInput::BlockIssuanceCredit(a), ContextInput::BlockIssuanceCredit(b)) => {
                 a.account_id().cmp(b.account_id())
             }
             (ContextInput::Reward(a), ContextInput::Reward(b)) => a.index().cmp(&b.index()),
-
-            // No need to evaluate all combinations as `then_with` is only called if the first cmp is Equal.
+            // No need to evaluate all combinations as `then_with` is only called on Equal.
             _ => unreachable!(),
         })
-    });
-
-    let mut commitment = false;
-    let mut bic_account_id_set = HashSet::new();
-    let mut reward_index_set = HashSet::new();
-
-    for input in context_inputs.iter() {
-        match input {
-            ContextInput::Commitment(_) => {
-                // There must be zero or one Commitment Input.
-                if commitment {
-                    return Err(Error::TooManyCommitmentInputs);
-                }
-                commitment = true;
-            }
-            ContextInput::BlockIssuanceCredit(bic) => {
-                let account_id = bic.account_id();
-
-                // All Block Issuance Credit Inputs must reference a different Account ID.
-                if !bic_account_id_set.insert(account_id) {
-                    return Err(Error::DuplicateBicAccountId(*account_id));
-                }
-            }
-            ContextInput::Reward(r) => {
-                let index = r.index();
-
-                // All Rewards Inputs must reference a different Index
-                if !reward_index_set.insert(index) {
-                    return Err(Error::DuplicateRewardInputIndex(index));
-                }
-            }
-        }
+    }) {
+        return Err(Error::ContextInputsNotUniqueSorted);
     }
 
     Ok(())
