@@ -74,7 +74,8 @@ class PreparedCreateTokenTransaction:
         """Sign a prepared transaction using the wallet's private key and returns
         the signed transaction.
         """
-        return self.transaction.sign()
+        return self.wallet.sign_transaction(
+            self.prepared_transaction_data.transaction)
 
     def sign_and_submit_transaction(self) -> CreateNativeTokenTransaction:
         """Sign and submit a transaction using prepared transaction data.
@@ -83,7 +84,7 @@ class PreparedCreateTokenTransaction:
             The transaction after it has been signed and submitted.
         """
         tx = self.wallet.sign_and_submit_transaction(
-            self.prepared_transaction_data)
+            self.prepared_transaction_data.transaction)
         CreateNativeTokenTransaction(
             self.prepared_transaction_data.token_id, tx)
 
@@ -124,7 +125,8 @@ class PreparedCreateDelegationTransaction:
         """Sign a prepared transaction using the wallet's private key and returns
         the signed transaction.
         """
-        return self.transaction.sign()
+        return self.wallet.sign_transaction(
+            self.prepared_transaction_data.transaction)
 
     def sign_and_submit_transaction(self) -> CreateDelegationTransaction:
         """Sign and submit a transaction using prepared transaction data.
@@ -133,7 +135,7 @@ class PreparedCreateDelegationTransaction:
             The transaction after it has been signed and submitted.
         """
         tx = self.wallet.sign_and_submit_transaction(
-            self.prepared_transaction_data)
+            self.prepared_transaction_data.transaction)
         CreateDelegationTransaction(
             self.prepared_transaction_data.delegation_id, tx)
 
