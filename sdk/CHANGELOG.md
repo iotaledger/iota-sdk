@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.5 - 2024-MM-DD
+
+### Added
+
+- `Display` for `SecretManager`;
+- `StrongholdAdapter::snapshot_path` getter method;
+
 ## 1.1.4 - 2024-01-22
 
 ### Added

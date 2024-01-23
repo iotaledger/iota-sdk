@@ -3,7 +3,10 @@
 
 use clap::Parser;
 use colored::Colorize;
-use iota_sdk::wallet::{Account, Wallet};
+use iota_sdk::{
+    client::secret::SecretManager,
+    wallet::{Account, Wallet},
+};
 use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use crate::{
@@ -22,7 +25,7 @@ use crate::{
         account_completion::AccountPromptHelper,
     },
     error::Error,
-    helper::bytes_from_hex_or_file,
+    helper::{bytes_from_hex_or_file, get_password},
     println_log_error,
 };
 
@@ -60,6 +63,17 @@ pub enum AccountPromptResponse {
     Reprompt,
     Done,
     Switch(Account),
+}
+
+async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
+    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+        && !wallet.is_stronghold_password_available().await?
+    {
+        let password = get_password("Stronghold password", false)?;
+        wallet.set_stronghold_password(password).await?;
+    }
+
+    Ok(())
 }
 
 // loop on the account prompt
@@ -110,19 +124,33 @@ pub async fn account_prompt_internal(
                         AccountCommand::Addresses => addresses_command(account).await,
                         AccountCommand::Balance { addresses } => balance_command(account, addresses).await,
                         AccountCommand::BurnNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             burn_native_token_command(account, token_id, amount).await
                         }
-                        AccountCommand::BurnNft { nft_id } => burn_nft_command(account, nft_id).await,
-                        AccountCommand::Claim { output_id } => claim_command(account, output_id).await,
+                        AccountCommand::BurnNft { nft_id } => {
+                            ensure_password(wallet).await?;
+                            burn_nft_command(account, nft_id).await
+                        }
+                        AccountCommand::Claim { output_id } => {
+                            ensure_password(wallet).await?;
+                            claim_command(account, output_id).await
+                        }
                         AccountCommand::ClaimableOutputs => claimable_outputs_command(account).await,
-                        AccountCommand::Consolidate => consolidate_command(account).await,
-                        AccountCommand::CreateAliasOutput => create_alias_outputs_command(account).await,
+                        AccountCommand::Consolidate => {
+                            ensure_password(wallet).await?;
+                            consolidate_command(account).await
+                        }
+                        AccountCommand::CreateAliasOutput => {
+                            ensure_password(wallet).await?;
+                            create_alias_outputs_command(account).await
+                        }
                         AccountCommand::CreateNativeToken {
                             circulating_supply,
                             maximum_supply,
                             foundry_metadata_hex,
                             foundry_metadata_file,
                         } => {
+                            ensure_password(wallet).await?;
                             create_native_token_command(
                                 account,
                                 circulating_supply,
@@ -131,8 +159,12 @@ pub async fn account_prompt_internal(
                             )
                             .await
                         }
-                        AccountCommand::DestroyAlias { alias_id } => destroy_alias_command(account, alias_id).await,
+                        AccountCommand::DestroyAlias { alias_id } => {
+                            ensure_password(wallet).await?;
+                            destroy_alias_command(account, alias_id).await
+                        }
                         AccountCommand::DestroyFoundry { foundry_id } => {
+                            ensure_password(wallet).await?;
                             destroy_foundry_command(account, foundry_id).await
                         }
                         AccountCommand::Exit => {
@@ -140,9 +172,11 @@ pub async fn account_prompt_internal(
                         }
                         AccountCommand::Faucet { address, url } => faucet_command(account, address, url).await,
                         AccountCommand::MeltNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             melt_native_token_command(account, token_id, amount).await
                         }
                         AccountCommand::MintNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             mint_native_token(account, token_id, amount).await
                         }
                         AccountCommand::MintNft {
@@ -155,6 +189,7 @@ pub async fn account_prompt_internal(
                             sender,
                             issuer,
                         } => {
+                            ensure_password(wallet).await?;
                             mint_nft_command(
                                 account,
                                 address,
@@ -166,7 +201,10 @@ pub async fn account_prompt_internal(
                             )
                             .await
                         }
-                        AccountCommand::NewAddress => new_address_command(account).await,
+                        AccountCommand::NewAddress => {
+                            ensure_password(wallet).await?;
+                            new_address_command(account).await
+                        }
                         AccountCommand::NodeInfo => node_info_command(account).await,
                         AccountCommand::Output { selector } => output_command(account, selector).await,
                         AccountCommand::Outputs => outputs_command(account).await,
@@ -177,6 +215,7 @@ pub async fn account_prompt_internal(
                             expiration,
                             allow_micro_amount,
                         } => {
+                            ensure_password(wallet).await?;
                             let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
                                 true
                             } else {
@@ -197,8 +236,14 @@ pub async fn account_prompt_internal(
                             token_id,
                             amount,
                             gift_storage_deposit,
-                        } => send_native_token_command(account, address, token_id, amount, gift_storage_deposit).await,
-                        AccountCommand::SendNft { address, nft_id } => send_nft_command(account, address, nft_id).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            send_native_token_command(account, address, token_id, amount, gift_storage_deposit).await
+                        }
+                        AccountCommand::SendNft { address, nft_id } => {
+                            ensure_password(wallet).await?;
+                            send_nft_command(account, address, nft_id).await
+                        }
                         AccountCommand::Switch { account_id } => {
                             return Ok(AccountPromptResponse::Switch(wallet.get_account(account_id).await?));
                         }
@@ -208,8 +253,12 @@ pub async fn account_prompt_internal(
                             transactions_command(account, show_details).await
                         }
                         AccountCommand::UnspentOutputs => unspent_outputs_command(account).await,
-                        AccountCommand::Vote { event_id, answers } => vote_command(account, event_id, answers).await,
+                        AccountCommand::Vote { event_id, answers } => {
+                            ensure_password(wallet).await?;
+                            vote_command(account, event_id, answers).await
+                        }
                         AccountCommand::StopParticipating { event_id } => {
+                            ensure_password(wallet).await?;
                             stop_participating_command(account, event_id).await
                         }
                         AccountCommand::ParticipationOverview { event_ids } => {
@@ -218,9 +267,11 @@ pub async fn account_prompt_internal(
                         }
                         AccountCommand::VotingPower => voting_power_command(account).await,
                         AccountCommand::IncreaseVotingPower { amount } => {
+                            ensure_password(wallet).await?;
                             increase_voting_power_command(account, amount).await
                         }
                         AccountCommand::DecreaseVotingPower { amount } => {
+                            ensure_password(wallet).await?;
                             decrease_voting_power_command(account, amount).await
                         }
                         AccountCommand::VotingOutput => voting_output_command(account).await,
