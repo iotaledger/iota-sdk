@@ -78,12 +78,20 @@ impl SlotIndex {
             .unwrap_or_default()
     }
 
+    /// Calculates the past bounded slot for the given slot.
+    /// Given any slot index of a commitment input, the result of this function is a slot index
+    /// that is at least equal to the slot of the block in which it was issued, or higher.
+    /// That means no commitment input can be chosen such that the index lies behind the slot index of the block,
+    /// hence the past is bounded.
+    pub fn past_bounded_slot(self, max_commitable_age: u32) -> Self {
+        Self(self.0 + max_commitable_age)
+    }
     /// Calculates the future bounded slot for the given slot.
     /// Given any slot index of a commitment input, the result of this function is a slot index
     /// that is at most equal to the slot of the block in which it was issued, or lower.
     /// That means no commitment input can be chosen such that the index lies ahead of the slot index of the block,
     /// hence the future is bounded.
-    pub fn future_bounded_slot(self, min_commitable_age: u32) -> SlotIndex {
+    pub fn future_bounded_slot(self, min_commitable_age: u32) -> Self {
         Self(self.0 + min_commitable_age)
     }
 }

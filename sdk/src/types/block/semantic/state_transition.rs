@@ -329,9 +329,43 @@ impl StateTransitionVerifier for NftOutput {
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+        let protocol_parameters = &context.protocol_parameters;
+
         if !next_state.delegation_id().is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
+        }
+
+        let slot_commitment_id = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find(|i| i.kind() == CommitmentContextInput::KIND)
+            .map(|s| s.as_commitment().slot_commitment_id())
+            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+
+        let past_bounded_slot_index = slot_commitment_id
+            .slot_index()
+            .past_bounded_slot(protocol_parameters.min_committable_age);
+        let past_bounded_epoch_index =
+            past_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
+
+        let registration_slot = past_bounded_epoch_index.registration_slot(
+            protocol_parameters.slots_per_epoch_exponent,
+            protocol_parameters.epoch_nearing_threshold,
+        );
+
+        let start_epoch = if past_bounded_slot_index <= registration_slot {
+            past_bounded_epoch_index + 1
+        } else {
+            past_bounded_epoch_index + 2
+        };
+
+        if next_state.start_epoch() != start_epoch {
+            // TODO: is there a specific error?
+            return Err(StateTransitionError::TransactionFailure(
+                TransactionFailureReason::SemanticValidationFailed,
+            ));
         }
 
         if next_state.amount() != next_state.delegated_amount() {
