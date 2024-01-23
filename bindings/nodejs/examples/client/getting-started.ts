@@ -20,7 +20,7 @@ async function run() {
         if (error instanceof ClientError && error.name === 'healthyNodePoolEmpty') {
             console.error("No healthy node available, please provide a healthy one.");
         } else {
-            console.error('Client error: ', error)
+            console.error(error)
         }
     }
 }
