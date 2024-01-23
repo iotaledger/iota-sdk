@@ -346,7 +346,7 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let past_bounded_slot_index = slot_commitment_id
             .slot_index()
-            .past_bounded_slot(protocol_parameters.min_committable_age);
+            .past_bounded_slot(protocol_parameters.max_committable_age);
         let past_bounded_epoch_index =
             past_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
 
