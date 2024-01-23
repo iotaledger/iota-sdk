@@ -58,7 +58,7 @@ impl std::ops::AddAssign for Balance {
 }
 
 /// Base coin fields for [`Balance`]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters, derive_more::AddAssign)]
 #[serde(rename_all = "camelCase")]
 #[getset(get_copy = "pub")]
 pub struct BaseCoinBalance {
@@ -72,17 +72,6 @@ pub struct BaseCoinBalance {
     #[cfg(feature = "participation")]
     #[serde(with = "string")]
     pub(crate) voting_power: u64,
-}
-
-impl std::ops::AddAssign for BaseCoinBalance {
-    fn add_assign(&mut self, rhs: Self) {
-        self.total += rhs.total;
-        self.available += rhs.available;
-        #[cfg(feature = "participation")]
-        {
-            self.voting_power += rhs.voting_power;
-        }
-    }
 }
 
 /// Mana and BIC fields for [`Balance`]
@@ -137,7 +126,7 @@ impl std::ops::AddAssign for ManaCreditsBalance {
 }
 
 /// Mana fields for [`Balance`]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters, derive_more::AddAssign)]
 #[serde(rename_all = "camelCase")]
 #[getset(get_copy = "pub")]
 pub struct ManaBalance {
@@ -149,14 +138,7 @@ pub struct ManaBalance {
     pub(crate) stored_mana: u64,
 }
 
-impl std::ops::AddAssign for ManaBalance {
-    fn add_assign(&mut self, rhs: Self) {
-        self.potential_mana += rhs.potential_mana;
-        self.stored_mana += rhs.stored_mana;
-    }
-}
-
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters, derive_more::AddAssign)]
 #[getset(get_copy = "pub")]
 pub struct RequiredStorageDeposit {
     #[serde(with = "crate::utils::serde::string")]
@@ -169,16 +151,6 @@ pub struct RequiredStorageDeposit {
     pub(crate) nft: u64,
     #[serde(with = "crate::utils::serde::string")]
     pub(crate) delegation: u64,
-}
-
-impl std::ops::AddAssign for RequiredStorageDeposit {
-    fn add_assign(&mut self, rhs: Self) {
-        self.basic += rhs.basic;
-        self.account += rhs.account;
-        self.foundry += rhs.foundry;
-        self.nft += rhs.nft;
-        self.delegation += rhs.delegation;
-    }
 }
 
 /// Native tokens fields for [`Balance`]
