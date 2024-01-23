@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
+use tokio::task::JoinSet;
 
 use crate::{
     client::secret::SecretManage,
@@ -27,7 +28,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
 
-        let wallet_data = self.data().await;
+        let wallet_data = self.data().await.clone();
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
 
@@ -49,15 +50,21 @@ where
             }
         }
 
-        // Add block issuance credits
+        // Add block issuance credits using parallel requests
+        let mut tasks = JoinSet::new();
         for account in wallet_data.accounts() {
             let account_id = *account.output.as_account().account_id();
-            // TODO: Maybe cache this in the wallet?
-            *balance.mana.block_issuance_credits.entry(account_id).or_default() += self
-                .client()
-                .get_account_congestion(&account_id)
-                .await?
-                .block_issuance_credits;
+            let client = self.client().clone();
+            tasks.spawn(async move {
+                Result::Ok((
+                    account_id,
+                    client.get_account_congestion(&account_id).await?.block_issuance_credits,
+                ))
+            });
+        }
+        while let Some(res) = tasks.join_next().await {
+            let (account_id, bic) = res??;
+            *balance.mana.block_issuance_credits.entry(account_id).or_default() += bic;
         }
 
         log::debug!(
@@ -88,7 +95,7 @@ where
                     )?;
                     // Add potential mana
                     balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
-                        account.amount(),
+                        account.amount() - storage_cost,
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
@@ -154,7 +161,7 @@ where
                         )?;
                         // Add potential mana
                         balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
-                            output.amount(),
+                            output.amount() - storage_cost,
                             output_id.transaction_id().slot_index(),
                             slot_index,
                         )?;
@@ -235,7 +242,7 @@ where
                                 )?;
                                 // Add potential mana
                                 balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
-                                    output.amount(),
+                                    output.amount() - storage_cost,
                                     output_id.transaction_id().slot_index(),
                                     slot_index,
                                 )?;
@@ -308,7 +315,7 @@ where
                         slot_index,
                     )?;
                     locked_potential_mana += protocol_parameters.generate_mana_with_decay(
-                        output_data.output.amount(),
+                        output_data.output.amount() - output_data.output.minimum_amount(storage_score_params),
                         output_data.output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
