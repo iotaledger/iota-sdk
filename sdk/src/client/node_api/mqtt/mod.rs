@@ -10,14 +10,16 @@ use std::{sync::Arc, time::Instant};
 
 use crypto::utils;
 use log::warn;
-use packable::PackableExt;
 use rumqttc::{AsyncClient, Event, EventLoop, Incoming, MqttOptions, NetworkOptions, QoS, SubscribeFilter, Transport};
 use tokio::sync::watch::Receiver as WatchReceiver;
 
 pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
-    types::block::Block,
+    types::{
+        block::{Block, BlockDto},
+        TryFromDto,
+    },
 };
 
 impl Client {
@@ -56,10 +58,12 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
     let exists = client.mqtt.client.read().await.is_some();
 
     if !exists {
-        let node_manager = client.node_manager.read().await;
-        let nodes = if !node_manager.ignore_node_health {
+        let nodes = {
+            let node_manager = client.node_manager.read().await;
             #[cfg(not(target_family = "wasm"))]
-            {
+            if node_manager.ignore_node_health {
+                node_manager.nodes.clone()
+            } else {
                 node_manager
                     .healthy_nodes
                     .read()
@@ -68,10 +72,6 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
                     })
             }
             #[cfg(target_family = "wasm")]
-            {
-                client.node_manager.nodes.clone()
-            }
-        } else {
             node_manager.nodes.clone()
         };
         for node in &nodes {
@@ -79,7 +79,7 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             let mut entropy = [0u8; 8];
             utils::rand::fill(&mut entropy)?;
             let id = format!("iotasdk{}", prefix_hex::encode(entropy));
-            let broker_options = client.mqtt.broker_options.read().await;
+            let broker_options = *client.mqtt.broker_options.read().await;
             let port = broker_options.port;
             let secure = node.url.scheme() == "https";
             let mqtt_options = if broker_options.use_ws {
@@ -174,9 +174,9 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                     .inner
                                     .mqtt
                                     .client
-                                    .write()
+                                    .read()
                                     .await
-                                    .as_mut()
+                                    .as_ref()
                                     .unwrap()
                                     .subscribe_many(topics)
                                     .await;
@@ -195,13 +195,21 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
-                                        match Block::unpack_verified(payload, protocol_parameters) {
-                                            Ok(block) => Ok(TopicEvent {
-                                                topic: p.topic.clone(),
-                                                payload: MqttPayload::Block((&block).into()),
-                                            }),
+                                        match serde_json::from_slice::<BlockDto>(payload) {
+                                            Ok(block_dto) => {
+                                                match Block::try_from_dto_with_params(block_dto, protocol_parameters) {
+                                                    Ok(block) => Ok(TopicEvent {
+                                                        topic: p.topic.clone(),
+                                                        payload: MqttPayload::Block((&block).into()),
+                                                    }),
+                                                    Err(e) => {
+                                                        warn!("Block dto conversion failed: {:?}", e);
+                                                        Err(())
+                                                    }
+                                                }
+                                            }
                                             Err(e) => {
-                                                warn!("Block unpacking failed: {:?}", e);
+                                                warn!("Block parsing failed: {:?}", e);
                                                 Err(())
                                             }
                                         }
@@ -276,7 +284,7 @@ impl<'a> MqttManager<'a> {
     /// Disconnects the broker.
     /// This will clear the stored topic handlers and close the MQTT connection.
     pub async fn disconnect(self) -> Result<(), Error> {
-        if let Some(client) = &*self.client.mqtt.client.write().await {
+        if let Some(client) = &*self.client.mqtt.client.read().await {
             client.disconnect().await?;
             self.client.mqtt.topic_handlers.write().await.clear();
         }
@@ -330,7 +338,7 @@ impl<'a> MqttTopicManager<'a> {
             .inner
             .mqtt
             .client
-            .write()
+            .read()
             .await
             .as_ref()
             .ok_or(Error::ConnectionNotFound)?

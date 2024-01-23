@@ -32,8 +32,15 @@ export class SecretManager {
     /**
      * @param options A secret manager type or a secret manager method handler.
      */
-    constructor(options: SecretManagerType | SecretManagerMethodHandler) {
-        this.methodHandler = new SecretManagerMethodHandler(options);
+    constructor(methodHandler: SecretManagerMethodHandler) {
+        this.methodHandler = methodHandler;
+    }
+
+    /**
+     * @param options The secret manager options.
+     */
+    static create(options: SecretManagerType): SecretManager {
+        return new SecretManager(SecretManagerMethodHandler.create(options));
     }
 
     /**
@@ -208,5 +215,34 @@ export class SecretManager {
         });
 
         return JSON.parse(response).payload;
+    }
+
+    /**
+     * Set the Stronghold password.
+     */
+    async setStrongholdPassword(password: string): Promise<void> {
+        await this.methodHandler.callMethod({
+            name: 'setStrongholdPassword',
+            data: { password },
+        });
+    }
+
+    /**
+     * Change the Stronghold password.
+     */
+    async changeStrongholdPassword(password: string): Promise<void> {
+        await this.methodHandler.callMethod({
+            name: 'changeStrongholdPassword',
+            data: { password },
+        });
+    }
+
+    /**
+     * Clear the Stronghold password.
+     */
+    async clearStrongholdPassword(): Promise<void> {
+        await this.methodHandler.callMethod({
+            name: 'clearStrongholdPassword',
+        });
     }
 }

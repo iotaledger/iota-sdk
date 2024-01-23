@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## Unreleased - 2023-MM-DD
+## 1.1.3 - 2023-12-07
 
 ### Added
 
@@ -27,11 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bump `iota-ledger-nano` dependency;
 - Display of `WalletError::InsufficientFunds`;
 
 ### Fixed
 
 - `needs_blind_signing()` for non Ed25519 addresses;
+- `InvalidTransactionNativeTokensCount` error for multiple entries with the same native token;
 
 ## 1.1.2 - 2023-10-26
 

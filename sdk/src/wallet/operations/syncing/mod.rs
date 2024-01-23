@@ -33,8 +33,7 @@ where
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
         #[cfg(feature = "storage")]
         {
-            let storage_manager = self.storage_manager.read().await;
-            storage_manager.set_default_sync_options(&options).await?;
+            self.storage_manager().set_default_sync_options(&options).await?;
         }
 
         *self.default_sync_options.lock().await = options;
@@ -238,10 +237,7 @@ where
 
                 let account_or_nft_outputs_with_metadata = self.get_outputs(account_or_nft_output_ids).await?;
                 let account_or_nft_outputs_data = self
-                    .output_response_to_output_data(
-                        account_or_nft_outputs_with_metadata,
-                        address_with_unspent_output_ids,
-                    )
+                    .output_response_to_output_data(account_or_nft_outputs_with_metadata)
                     .await?;
 
                 new_unspent_outputs_data.push((address_with_unspent_output_ids.clone(), account_or_nft_outputs_data));

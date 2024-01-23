@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    Event,
-    ConsolidationRequiredWalletEvent,
+    WalletEvent,
     TransactionProgressWalletEvent,
     SelectingInputsProgress,
 } from '@iota/sdk';
@@ -24,13 +23,12 @@ async function run() {
         // Create the wallet
         const wallet = await getUnlockedWallet();
 
-        const callback = function (err: any, event: Event) {
+        const callback = function (err: any, event: WalletEvent) {
             console.log('Event:', event);
         };
 
         await wallet.listen([], callback);
 
-        await wallet.emitTestEvent(new ConsolidationRequiredWalletEvent());
         await wallet.emitTestEvent(
             new TransactionProgressWalletEvent(new SelectingInputsProgress()),
         );
@@ -41,4 +39,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

@@ -24,8 +24,11 @@ pub use self::{
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
 use crate::types::block::{
-    address::Address,
-    output::{StorageScore, StorageScoreParameters},
+    address::{Address, AddressCapabilityFlag, RestrictedAddress},
+    output::{
+        feature::NativeTokenFeature, AccountOutput, AnchorOutput, DelegationOutput, NftOutput, StorageScore,
+        StorageScoreParameters,
+    },
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore},
     slot::SlotIndex,
     Error,
@@ -314,6 +317,22 @@ impl UnlockConditions {
 
         Ok(address)
     }
+
+    /// Returns an iterator over all addresses except StorageDepositReturn address.
+    pub fn addresses(&self) -> impl Iterator<Item = &Address> {
+        self.iter().filter_map(|uc| match uc {
+            UnlockCondition::Address(uc) => Some(uc.address()),
+            UnlockCondition::Expiration(uc) => Some(uc.return_address()),
+            UnlockCondition::StateControllerAddress(uc) => Some(uc.address()),
+            UnlockCondition::GovernorAddress(uc) => Some(uc.address()),
+            _ => None,
+        })
+    }
+
+    /// Returns an iterator over all restricted addresses.
+    pub fn restricted_addresses(&self) -> impl Iterator<Item = &RestrictedAddress> {
+        self.addresses().filter_map(Address::as_restricted_opt)
+    }
 }
 
 impl StorageScore for UnlockConditions {
@@ -352,6 +371,73 @@ pub(crate) fn verify_allowed_unlock_conditions(
         }
     }
 
+    Ok(())
+}
+
+pub(crate) fn verify_restricted_addresses(
+    unlock_conditions: &UnlockConditions,
+    output_kind: u8,
+    native_token: Option<&NativeTokenFeature>,
+    mana: u64,
+) -> Result<(), Error> {
+    let addresses = unlock_conditions.restricted_addresses();
+
+    for address in addresses {
+        if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithNativeTokens,
+            ));
+        }
+
+        if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithMana,
+            ));
+        }
+
+        if unlock_conditions.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
+        {
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithTimelock,
+            ));
+        }
+
+        if unlock_conditions.expiration().is_some()
+            && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
+        {
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithExpiration,
+            ));
+        }
+
+        if unlock_conditions.storage_deposit_return().is_some()
+            && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
+        {
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithStorageDepositReturn,
+            ));
+        }
+
+        match output_kind {
+            AccountOutput::KIND if !address.has_capability(AddressCapabilityFlag::AccountOutputs) => {
+                return Err(Error::RestrictedAddressCapability(
+                    AddressCapabilityFlag::AccountOutputs,
+                ));
+            }
+            AnchorOutput::KIND if !address.has_capability(AddressCapabilityFlag::AnchorOutputs) => {
+                return Err(Error::RestrictedAddressCapability(AddressCapabilityFlag::AnchorOutputs));
+            }
+            NftOutput::KIND if !address.has_capability(AddressCapabilityFlag::NftOutputs) => {
+                return Err(Error::RestrictedAddressCapability(AddressCapabilityFlag::NftOutputs));
+            }
+            DelegationOutput::KIND if !address.has_capability(AddressCapabilityFlag::DelegationOutputs) => {
+                return Err(Error::RestrictedAddressCapability(
+                    AddressCapabilityFlag::DelegationOutputs,
+                ));
+            }
+            _ => {}
+        }
+    }
     Ok(())
 }
 

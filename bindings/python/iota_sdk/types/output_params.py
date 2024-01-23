@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json, opt_int_encoder
 from iota_sdk.types.native_token import NativeToken
@@ -62,7 +62,7 @@ class StorageDeposit():
 @json
 @dataclass
 class OutputParams():
-    """Params for `Account.prepare_output()`.
+    """Params for `Wallet.prepare_output()`.
     """
     recipient_address: str
     amount: int = field(metadata=config(

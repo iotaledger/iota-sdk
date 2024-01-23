@@ -14,7 +14,7 @@ async fn invalid_url() {
 
 #[tokio::test]
 async fn valid_url() {
-    let client = Client::builder().with_node("http://localhost:14265");
+    let client = Client::builder().with_node("http://localhost:8050");
     assert!(client.is_ok());
 }
 
@@ -23,7 +23,7 @@ async fn client_builder() {
     let client_builder_json = serde_json::json!({
         "nodes": [
             {
-                "url":"http://localhost:14265/",
+                "url":"http://localhost:8050/",
                 "disabled": false
             }
         ],

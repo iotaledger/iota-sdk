@@ -6,7 +6,7 @@ pub(crate) mod operations;
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{atomic::AtomicUsize, Arc},
+    sync::Arc,
 };
 
 use crypto::keys::{
@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 pub use self::builder::WalletBuilder;
+use self::operations::background_syncing::BackgroundSyncStatus;
 use super::types::{TransactionWithMetadata, TransactionWithMetadataDto};
 #[cfg(feature = "events")]
 use crate::wallet::events::{
@@ -84,8 +85,10 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     // again, because sending transactions can change that
     pub(crate) last_synced: Mutex<u128>,
     pub(crate) default_sync_options: Mutex<SyncOptions>,
-    // 0 = not running, 1 = running, 2 = stopping
-    pub(crate) background_syncing_status: AtomicUsize,
+    pub(crate) background_syncing_status: (
+        Arc<tokio::sync::watch::Sender<BackgroundSyncStatus>>,
+        tokio::sync::watch::Receiver<BackgroundSyncStatus>,
+    ),
     pub(crate) client: Client,
     // TODO: make this optional?
     pub(crate) secret_manager: Arc<RwLock<S>>,
@@ -94,7 +97,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: tokio::sync::RwLock<StorageManager>,
+    pub(crate) storage_manager: StorageManager,
 }
 
 /// Wallet data.
@@ -310,6 +313,14 @@ impl WalletData {
             .filter(|output_data| output_data.output.is_account())
     }
 
+    // Returns the first possible Account id, which can be an implicit account.
+    pub fn first_account_id(&self) -> Option<AccountId> {
+        self.accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
+            .or_else(|| self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
+    }
+
     /// Get the [`OutputData`] of an output stored in the wallet.
     pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
         self.outputs.get(output_id)
@@ -354,8 +365,6 @@ where
         #[cfg(feature = "storage")]
         let default_sync_options = inner
             .storage_manager
-            .read()
-            .await
             .get_default_sync_options()
             .await?
             .unwrap_or_default();
@@ -391,31 +400,9 @@ where
 
         // Foundry was not found in the wallet, try to get it from the node
         let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
-        let output = self.client().get_output(&foundry_output_id).await?;
+        let output_response = self.client().get_output(&foundry_output_id).await?;
 
-        Ok(output)
-    }
-
-    /// Save the wallet to the database, accepts the updated wallet data as option so we don't need to drop it before
-    /// saving
-    #[cfg(feature = "storage")]
-    pub(crate) async fn save(&self, updated_wallet: Option<&WalletData>) -> Result<()> {
-        log::debug!("[save] wallet data");
-        match updated_wallet {
-            Some(wallet) => {
-                let mut storage_manager = self.storage_manager.write().await;
-                storage_manager.save_wallet_data(wallet).await?;
-                drop(storage_manager);
-            }
-            None => {
-                let wallet_data = self.data.read().await;
-                let mut storage_manager = self.storage_manager.write().await;
-                storage_manager.save_wallet_data(&wallet_data).await?;
-                drop(storage_manager);
-                drop(wallet_data);
-            }
-        }
-        Ok(())
+        Ok(output_response.output)
     }
 
     #[cfg(feature = "events")]
@@ -429,6 +416,11 @@ where
 
     pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData> {
         self.data.write().await
+    }
+
+    #[cfg(feature = "storage")]
+    pub(crate) fn storage_manager(&self) -> &StorageManager {
+        &self.storage_manager
     }
 
     /// Get the alias of the wallet if one was set.
@@ -522,6 +514,12 @@ impl<S: SecretManage> WalletInner<S> {
 impl<S: SecretManage> Drop for Wallet<S> {
     fn drop(&mut self) {
         log::debug!("drop Wallet");
+    }
+}
+
+impl<S: SecretManage> Drop for WalletInner<S> {
+    fn drop(&mut self) {
+        log::debug!("drop WalletInner");
     }
 }
 

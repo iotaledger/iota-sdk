@@ -21,6 +21,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
+        mana::ManaAllotment,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
@@ -45,6 +46,7 @@ pub struct InputSelection {
     slot_index: SlotIndex,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
+    mana_allotments: u64,
 }
 
 /// Result of the input selection algorithm.
@@ -101,6 +103,8 @@ impl InputSelection {
     }
 
     fn init(&mut self) -> Result<(), Error> {
+        // Adds an initial mana requirement.
+        self.requirements.push(Requirement::Mana(self.mana_allotments));
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
@@ -151,10 +155,20 @@ impl InputSelection {
         available_inputs: impl Into<Vec<InputSigningData>>,
         outputs: impl Into<Vec<Output>>,
         addresses: impl IntoIterator<Item = Address>,
+        slot_index: impl Into<SlotIndex>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let available_inputs = available_inputs.into();
-        let mut addresses = HashSet::from_iter(addresses);
+
+        let mut addresses = HashSet::from_iter(addresses.into_iter().map(|a| {
+            // Get a potential Ed25519 address directly since we're only interested in that
+            #[allow(clippy::option_if_let_else)] // clippy's suggestion requires a clone
+            if let Some(address) = a.backing_ed25519() {
+                Address::Ed25519(*address)
+            } else {
+                a
+            }
+        }));
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
             Output::Account(output) => Some(Address::Account(AccountAddress::from(
@@ -176,11 +190,11 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            // TODO may want to make this mandatory at some point
             // Should be set from a commitment context input
-            slot_index: SlotIndex::from(0),
+            slot_index: slot_index.into(),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
+            mana_allotments: 0,
         }
     }
 
@@ -208,9 +222,9 @@ impl InputSelection {
         self
     }
 
-    /// Sets the slot index of an [`InputSelection`].
-    pub fn with_slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
-        self.slot_index = slot_index.into();
+    /// Sets the mana allotments sum of an [`InputSelection`].
+    pub fn with_mana_allotments<'a>(mut self, mana_allotments: impl Iterator<Item = &'a ManaAllotment>) -> Self {
+        self.mana_allotments = mana_allotments.map(ManaAllotment::mana).sum();
         self
     }
 
@@ -364,8 +378,8 @@ impl InputSelection {
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn is provided, outputs will be added later
-            if !(self.outputs.is_empty() && self.burn.is_some()) {
+            // If burn or mana allotments are provided, outputs will be added later.
+            if !(self.outputs.is_empty() && (self.burn.is_some() || self.mana_allotments != 0)) {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
         }

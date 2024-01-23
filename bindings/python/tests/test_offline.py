@@ -3,7 +3,6 @@
 
 import json
 import unittest
-import pytest
 from iota_sdk import Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 
 
@@ -33,17 +32,19 @@ def test_mnemonic_address_generation():
         assert test['bech32_address'] == generated_address[0]
 
 
-@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
 def test_sign_verify_ed25519():
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
     message = utf8_to_hex('IOTA')
 
+    bip_path = Bip44(
+        coin_type=CoinType.IOTA
+    )
+
     secret_manager = SecretManager(secret_manager)
     signature = secret_manager.sign_ed25519(
         message,
-        # IOTA coin type
-        Bip44(CoinType.IOTA),
+        bip_path,
     )
     assert signature.signature == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
 
@@ -60,12 +61,12 @@ class TestTypes(unittest.TestCase):
         output_index = 42
         output_id = OutputId(transaction_id, output_index)
         assert repr(
-            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000'
 
         new_output_id = OutputId.from_string(
-            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00')
+            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a0000000000')
         assert repr(
-            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a0000000000'
         assert new_output_id.transaction_id == transaction_id
         assert new_output_id.output_index == output_index
 
@@ -78,16 +79,13 @@ class TestTypes(unittest.TestCase):
         transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
         with self.assertRaises(ValueError):
             OutputId(transaction_id_invalid_hex_char, output_index)
-        invalid_output_index = 129
-        with self.assertRaises(ValueError):
-            OutputId(transaction_id, invalid_output_index)
-        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_missing_0x_prefix)
-        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_char)
-        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_prefix)
 

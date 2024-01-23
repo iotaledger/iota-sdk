@@ -2,24 +2,22 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Wallet, Utils, NodeIndexerAPI, SyncOptions, AccountSyncOptions, SendParams
+from iota_sdk import Wallet, WalletOptions, Utils, NodeIndexerAPI, SyncOptions, WalletSyncOptions, SendParams
 
 # In this example we send funds from an account wallet.
 
 load_dotenv()
 
-sync_options = SyncOptions(alias=AccountSyncOptions(basic_outputs=True))
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f".env {env_var} is undefined, see .env.example")
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
-
-account = wallet.get_account('Alice')
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-balance = account.sync(sync_options)
+sync_options = SyncOptions(wallet=WalletSyncOptions(basic_outputs=True))
+balance = wallet.sync(sync_options)
 
 total_base_token_balance = balance.base_coin.total
 print(f'Balance before sending funds from account: {total_base_token_balance}')
@@ -43,11 +41,11 @@ params = [SendParams(
 options = {
     'mandatoryInputs': inputs,
 }
-transaction = account.send_with_params(params, options)
-account.reissue_transaction_until_included(
+transaction = wallet.send_with_params(params, options)
+wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transaction_id}')
 
-total_base_token_balance = account.sync(sync_options).base_coin.total
+total_base_token_balance = wallet.sync(sync_options).base_coin.total
 print(f'Balance after sending funds from account: {total_base_token_balance}')

@@ -1,5 +1,6 @@
 module.exports = {
     env: {
+        node: true,
         commonjs: true,
         es2019: true,
     },
@@ -13,6 +14,7 @@ module.exports = {
     parserOptions: {
         ecmaVersion: 12,
         sourceType: 'module',
+        project: ["./tsconfig.eslint.json"],
     },
     rules: {
         '@typescript-eslint/no-var-requires': 0,
@@ -21,5 +23,6 @@ module.exports = {
             { 'ts-ignore': 'allow-with-description' },
         ],
         '@typescript-eslint/no-explicit-any': 'off',
+        "@typescript-eslint/no-floating-promises": ["error"],
     },
 };

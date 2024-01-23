@@ -12,6 +12,7 @@ use crate::{
     },
     types::block::{
         address::Address,
+        mana::ManaAllotment,
         output::{Output, OutputId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
@@ -35,14 +36,16 @@ where
         mandatory_inputs: Option<HashSet<OutputId>>,
         remainder_address: Option<Address>,
         burn: Option<&Burn>,
+        mana_allotments: Option<Vec<ManaAllotment>>,
     ) -> crate::wallet::Result<Selected> {
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let slot_index = self.client().get_slot_index().await?;
         // lock so the same inputs can't be selected in multiple transactions
         let mut wallet_data = self.data_mut().await;
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -50,7 +53,6 @@ where
         ))
         .await;
 
-        let slot_index = self.client().get_slot_index().await?;
         #[allow(unused_mut)]
         let mut forbidden_inputs = wallet_data.locked_outputs.clone();
 
@@ -92,6 +94,7 @@ where
                 available_outputs_signing_data,
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
+                slot_index,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
@@ -103,6 +106,10 @@ where
 
             if let Some(burn) = burn {
                 input_selection = input_selection.with_burn(burn.clone());
+            }
+
+            if let Some(mana_allotments) = mana_allotments {
+                input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -127,6 +134,7 @@ where
                 available_outputs_signing_data,
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
+                slot_index,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
@@ -138,6 +146,10 @@ where
 
             if let Some(burn) = burn {
                 input_selection = input_selection.with_burn(burn.clone());
+            }
+
+            if let Some(mana_allotments) = mana_allotments {
+                input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -159,6 +171,7 @@ where
             available_outputs_signing_data,
             outputs,
             Some(wallet_data.address.clone().into_inner()),
+            slot_index,
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs);
@@ -171,22 +184,11 @@ where
             input_selection = input_selection.with_burn(burn.clone());
         }
 
-        let selected_transaction_data = match input_selection.select() {
-            Ok(r) => r,
-            // TODO this error doesn't exist with the new ISA
-            // Err(crate::client::Error::ConsolidationRequired(output_count)) => {
-            //     #[cfg(feature = "events")]
-            //     self.event_emitter
-            //         .lock()
-            //         .await
-            //         .emit(account.index, WalletEvent::ConsolidationRequired);
-            //     return Err(crate::wallet::Error::ConsolidationRequired {
-            //         output_count,
-            //         output_count_max: INPUT_COUNT_MAX,
-            //     });
-            // }
-            Err(e) => return Err(e.into()),
-        };
+        if let Some(mana_allotments) = mana_allotments {
+            input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
+        }
+
+        let selected_transaction_data = input_selection.select()?;
 
         // lock outputs so they don't get used by another transaction
         for output in &selected_transaction_data.inputs {

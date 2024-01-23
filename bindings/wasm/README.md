@@ -129,7 +129,7 @@ const {Client, initLogger} = require('@iota/sdk-wasm/node');
 async function run() {
     initLogger();
 
-    const client = new Client({
+    const client = await Client.create({
         nodes: ['https://api.testnet.shimmer.network'],
         localPow: true,
     });
@@ -142,7 +142,7 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());
 ```
 
 ### Web
@@ -153,7 +153,7 @@ import init, {Client, initLogger} from "@iota/sdk-wasm/web";
 init().then(async () => {
     initLogger();
 
-    const client = new Client({
+    const client = await Client.create({
         nodes: ['https://api.testnet.shimmer.network'],
         localPow: true,
     });
@@ -205,7 +205,7 @@ async function run() {
     } catch (err) { console.error }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());
 ```
 
 ### Web

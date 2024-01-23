@@ -261,10 +261,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('outputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 
@@ -276,10 +274,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the basic outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('basicOutputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 
@@ -291,10 +287,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the account outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('accountOutputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 
@@ -316,10 +310,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the anchor outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('anchorOutputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 
@@ -341,10 +333,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the delegation outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('delegationOutputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 
@@ -366,10 +356,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the foundry outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('foundryOutputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 
@@ -391,10 +379,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             The corresponding output IDs of the NFT outputs.
         """
 
-        query_parameters_camelized = query_parameters.to_dict()
-
         response = self._call_method('nftOutputIds', {
-            'queryParameters': query_parameters_camelized,
+            'queryParameters': query_parameters,
         })
         return OutputIdsResponse(response)
 

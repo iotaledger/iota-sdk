@@ -186,6 +186,7 @@ impl ProtocolParameters {
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
         SlotIndex::from_timestamp(
             timestamp,
+            self.genesis_slot(),
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
@@ -201,9 +202,49 @@ impl ProtocolParameters {
         epoch_index.into().last_slot_index(self.slots_per_epoch_exponent())
     }
 
+    /// Calculates the number of slots before the next epoch.
+    pub fn slots_before_next_epoch(&self, slot_index: impl Into<SlotIndex>) -> u32 {
+        let slot_index = slot_index.into();
+
+        if slot_index.0 < self.genesis_slot() {
+            0
+        } else {
+            self.genesis_slot() + self.first_slot_of(self.epoch_index_of(slot_index) + 1).0 - slot_index.0
+        }
+    }
+
+    /// Calculates the number of slots since the start of the epoch.
+    pub fn slots_since_epoch_start(&self, slot_index: impl Into<SlotIndex>) -> u32 {
+        let slot_index = slot_index.into();
+
+        if slot_index.0 < self.genesis_slot() {
+            0
+        } else {
+            self.genesis_slot() + slot_index.0 - self.first_slot_of(self.epoch_index_of(slot_index)).0
+        }
+    }
+
     /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
     pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
         EpochIndex::from_slot_index(slot_index.into(), self.slots_per_epoch_exponent())
+    }
+
+    /// Calculates the duration of an epoch in seconds.
+    pub fn epoch_duration_in_seconds(&self) -> u64 {
+        self.slot_duration_in_seconds() as u64 * self.slots_per_epoch() as u64
+    }
+
+    /// Calculates the number of epochs per year.
+    pub fn epochs_per_year(&self) -> f64 {
+        (365_u64 * 24 * 60 * 60) as f64 / self.epoch_duration_in_seconds() as f64
+    }
+
+    /// Calculates the decay per epoch based on the annual decay factor and number of epochs in a year.
+    #[cfg(feature = "std")]
+    pub fn decay_per_epoch(&self) -> f64 {
+        self.mana_parameters()
+            .annual_decay_factor()
+            .powf(self.epochs_per_year().recip())
     }
 
     /// Returns the hash of the [`ProtocolParameters`].

@@ -11,10 +11,10 @@ mod kind;
 mod manager;
 /// Storage options.
 mod options;
-/// Storage functions related to participation.
-#[cfg(feature = "participation")]
-#[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-mod participation;
+// /// Storage functions related to participation.
+// #[cfg(feature = "participation")]
+// #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+// mod participation;
 
 use async_trait::async_trait;
 use crypto::ciphers::chacha;

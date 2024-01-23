@@ -103,6 +103,8 @@ export interface SyncOptions {
     syncOnlyMostBasicOutputs?: boolean;
     /** Sync native token foundries, so their metadata can be returned in the balance. Default: false. */
     syncNativeTokenFoundries?: boolean;
+    /// Sync implicit accounts.
+    syncImplicitAccounts?: boolean;
 }
 
 /** Specifies what outputs should be synced for the ed25519 address from the wallet. */

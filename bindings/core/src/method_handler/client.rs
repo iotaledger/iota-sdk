@@ -9,7 +9,7 @@ use iota_sdk::{
         api::core::OutputWithMetadataResponse,
         block::{
             output::{
-                AccountOutput, BasicOutput, FoundryOutput, MinimumOutputAmount, NftOutput, Output, OutputBuilderAmount,
+                AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder,
             },
             payload::Payload,
             Block, BlockDto, UnsignedBlockDto,
@@ -64,21 +64,23 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(AccountOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmount::Amount(amount)
-                } else {
-                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
-                },
-                mana,
-                &account_id,
-                foundry_counter,
-                unlock_conditions,
-                features,
-                immutable_features,
-            )?);
+            let mut output_builder = if let Some(amount) = amount {
+                AccountOutputBuilder::new_with_amount(amount, account_id)
+            } else {
+                AccountOutputBuilder::new_with_minimum_amount(client.get_storage_score_parameters().await?, account_id)
+            }
+            .with_mana(mana)
+            .with_foundry_counter(foundry_counter)
+            .with_unlock_conditions(unlock_conditions);
 
-            Response::Output(output)
+            if let Some(features) = features {
+                output_builder = output_builder.with_features(features);
+            }
+            if let Some(immutable_features) = immutable_features {
+                output_builder = output_builder.with_immutable_features(immutable_features)
+            }
+
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildBasicOutput {
             amount,
@@ -86,18 +88,19 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             unlock_conditions,
             features,
         } => {
-            let output = Output::from(BasicOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmount::Amount(amount)
-                } else {
-                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
-                },
-                mana,
-                unlock_conditions,
-                features,
-            )?);
+            let mut output_builder = if let Some(amount) = amount {
+                BasicOutputBuilder::new_with_amount(amount)
+            } else {
+                BasicOutputBuilder::new_with_minimum_amount(client.get_storage_score_parameters().await?)
+            }
+            .with_mana(mana)
+            .with_unlock_conditions(unlock_conditions);
 
-            Response::Output(output)
+            if let Some(features) = features {
+                output_builder = output_builder.with_features(features);
+            }
+
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildFoundryOutput {
             amount,
@@ -107,20 +110,25 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(FoundryOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmount::Amount(amount)
-                } else {
-                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
-                },
-                serial_number,
-                token_scheme,
-                unlock_conditions,
-                features,
-                immutable_features,
-            )?);
+            let mut output_builder = if let Some(amount) = amount {
+                FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
+            } else {
+                FoundryOutputBuilder::new_with_minimum_amount(
+                    client.get_storage_score_parameters().await?,
+                    serial_number,
+                    token_scheme,
+                )
+            }
+            .with_unlock_conditions(unlock_conditions);
 
-            Response::Output(output)
+            if let Some(features) = features {
+                output_builder = output_builder.with_features(features);
+            }
+            if let Some(immutable_features) = immutable_features {
+                output_builder = output_builder.with_immutable_features(immutable_features)
+            }
+
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildNftOutput {
             amount,
@@ -130,20 +138,22 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             features,
             immutable_features,
         } => {
-            let output = Output::from(NftOutput::try_from_dtos(
-                if let Some(amount) = amount {
-                    OutputBuilderAmount::Amount(amount)
-                } else {
-                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
-                },
-                mana,
-                &nft_id,
-                unlock_conditions,
-                features,
-                immutable_features,
-            )?);
+            let mut output_builder = if let Some(amount) = amount {
+                NftOutputBuilder::new_with_amount(amount, nft_id)
+            } else {
+                NftOutputBuilder::new_with_minimum_amount(client.get_storage_score_parameters().await?, nft_id)
+            }
+            .with_mana(mana)
+            .with_unlock_conditions(unlock_conditions);
 
-            Response::Output(output)
+            if let Some(features) = features {
+                output_builder = output_builder.with_features(features);
+            }
+            if let Some(immutable_features) = immutable_features {
+                output_builder = output_builder.with_immutable_features(immutable_features)
+            }
+
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildBasicBlock { issuer_id, payload } => {
             let payload = if let Some(payload) = payload {
@@ -173,7 +183,17 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
-        ClientMethod::GetPeers => Response::Peers(client.get_peers().await?),
+        ClientMethod::GetAccountCongestion { account_id } => {
+            Response::Congestion(client.get_account_congestion(&account_id).await?)
+        }
+        ClientMethod::GetRewards { output_id, slot_index } => {
+            Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
+        }
+        ClientMethod::GetValidators { page_size, cursor } => {
+            Response::Validators(client.get_validators(page_size, cursor).await?)
+        }
+        ClientMethod::GetValidator { account_id } => Response::Validator(client.get_validator(&account_id).await?),
+        ClientMethod::GetCommittee { epoch_index } => Response::Committee(client.get_committee(epoch_index).await?),
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
@@ -208,11 +228,37 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
+        ClientMethod::GetOutputWithMetadata { output_id } => {
+            Response::OutputWithMetadata(client.get_output_with_metadata(&output_id).await?)
+        }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
         }
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
+        }
+        ClientMethod::GetTransactionMetadata { transaction_id } => {
+            Response::TransactionMetadata(client.get_transaction_metadata(&transaction_id).await?)
+        }
+        ClientMethod::GetCommitment { commitment_id } => {
+            Response::SlotCommitment(client.get_slot_commitment_by_id(&commitment_id).await?)
+        }
+        ClientMethod::GetUtxoChanges { commitment_id } => {
+            Response::UtxoChanges(client.get_utxo_changes_by_slot_commitment_id(&commitment_id).await?)
+        }
+        ClientMethod::GetUtxoChangesFull { commitment_id } => Response::UtxoChangesFull(
+            client
+                .get_utxo_changes_full_by_slot_commitment_id(&commitment_id)
+                .await?,
+        ),
+        ClientMethod::GetCommitmentByIndex { slot } => {
+            Response::SlotCommitment(client.get_slot_commitment_by_slot(slot).await?)
+        }
+        ClientMethod::GetUtxoChangesByIndex { slot } => {
+            Response::UtxoChanges(client.get_utxo_changes_by_slot(slot).await?)
+        }
+        ClientMethod::GetUtxoChangesFullByIndex { slot } => {
+            Response::UtxoChangesFull(client.get_utxo_changes_full_by_slot(slot).await?)
         }
         ClientMethod::OutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.output_ids(query_parameters).await?)

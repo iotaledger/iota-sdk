@@ -1,7 +1,10 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::string::{FromUtf8Error, String};
+use alloc::{
+    string::{FromUtf8Error, String},
+    vec::Vec,
+};
 use core::{convert::Infallible, fmt};
 
 use bech32::primitives::hrp::Error as Bech32HrpError;
@@ -11,14 +14,15 @@ use primitive_types::U256;
 
 use super::slot::EpochIndex;
 use crate::types::block::{
-    address::WeightedAddressCount,
+    address::{AddressCapabilityFlag, WeightedAddressCount},
     context_input::RewardContextInputIndex,
     input::UtxoInput,
     mana::ManaAllotmentCount,
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureEntryCount, MetadataFeatureKeyLength, MetadataFeatureValueLength,
+        NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
     },
     payload::{
         tagged_data::{TagLength, TaggedDataLength},
@@ -56,6 +60,7 @@ pub enum Error {
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockBodyKind(u8),
+    NonGraphicAsciiMetadataKey(Vec<u8>),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     /// Invalid transaction failure reason byte.
@@ -104,7 +109,10 @@ pub enum Error {
     },
     InvalidBlockLength(usize),
     InvalidManaValue(u64),
-    InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
+    InvalidMetadataFeature(String),
+    InvalidMetadataFeatureEntryCount(<MetadataFeatureEntryCount as TryFrom<usize>>::Error),
+    InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
+    InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
     InvalidManaDecayFactors,
@@ -196,11 +204,12 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
-    InvalidEpochDelta {
+    InvalidEpochDiff {
         created: EpochIndex,
         target: EpochIndex,
     },
     TrailingCapabilityBytes,
+    RestrictedAddressCapability(AddressCapabilityFlag),
 }
 
 #[cfg(feature = "std")]
@@ -249,6 +258,7 @@ impl fmt::Display for Error {
                 write!(f, "invalid capability byte at index {index}: {byte:x}")
             }
             Self::InvalidBlockBodyKind(k) => write!(f, "invalid block body kind: {k}"),
+            Self::NonGraphicAsciiMetadataKey(b) => write!(f, "non graphic ASCII key: {b:?}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
@@ -303,8 +313,17 @@ impl fmt::Display for Error {
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
-            Self::InvalidMetadataFeatureLength(length) => {
-                write!(f, "invalid metadata feature length: {length}")
+            Self::InvalidMetadataFeature(e) => {
+                write!(f, "invalid metadata feature: {e}")
+            }
+            Self::InvalidMetadataFeatureEntryCount(count) => {
+                write!(f, "invalid metadata feature entry count: {count}")
+            }
+            Self::InvalidMetadataFeatureKeyLength(length) => {
+                write!(f, "invalid metadata feature key length: {length}")
+            }
+            Self::InvalidMetadataFeatureValueLength(length) => {
+                write!(f, "invalid metadata feature value length: {length}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
@@ -428,10 +447,11 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
-            Self::InvalidEpochDelta { created, target } => {
-                write!(f, "invalid epoch delta: created {created}, target {target}")
+            Self::InvalidEpochDiff { created, target } => {
+                write!(f, "invalid epoch diff: created {created}, target {target}")
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
+            Self::RestrictedAddressCapability(cap) => write!(f, "restricted address capability: {cap:?}"),
         }
     }
 }
