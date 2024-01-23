@@ -50,7 +50,6 @@ describe('Utils methods', () => {
         );
     });
 
-
     it('compute foundry id', () => {
         const accountId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
@@ -106,7 +105,6 @@ describe('Utils methods', () => {
             output, creationSlot, targetSlot, protocolParameters)
         expect(decayedMana.stored).toBe(BigInt(2272));
         expect(decayedMana.potential).toBe(BigInt(2502459));
-
 
         const decayedStoredMana = Utils.manaWithDecay(
             output.mana, creationSlot, targetSlot, protocolParameters)
