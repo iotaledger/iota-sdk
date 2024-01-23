@@ -1,11 +1,11 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 from dataclasses_json import config
-from iota_sdk.types.address import AccountAddress, Address
+from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
 

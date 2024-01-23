@@ -1,14 +1,11 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
-        secret::SecretManage,
-    },
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::AccountAddress,
         output::{
@@ -16,11 +13,7 @@ use crate::{
             AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
-    wallet::{
-        operations::transaction::TransactionOptions,
-        types::{TransactionWithMetadata, TransactionWithMetadataDto},
-        Wallet,
-    },
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
 
 /// Address and foundry data for `create_native_token()`
