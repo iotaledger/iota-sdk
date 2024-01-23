@@ -23,8 +23,8 @@ impl BlockIssuanceCreditContextInput {
     }
 
     /// Returns the account id of the [`BlockIssuanceCreditContextInput`].
-    pub fn account_id(&self) -> AccountId {
-        self.0
+    pub fn account_id(&self) -> &AccountId {
+        &self.0
     }
 }
 
@@ -54,7 +54,7 @@ mod dto {
         fn from(value: &BlockIssuanceCreditContextInput) -> Self {
             Self {
                 kind: BlockIssuanceCreditContextInput::KIND,
-                account_id: value.account_id(),
+                account_id: *value.account_id(),
             }
         }
     }

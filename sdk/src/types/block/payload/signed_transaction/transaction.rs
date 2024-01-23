@@ -5,6 +5,7 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
+use iterator_sorted::is_unique_sorted_by;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::{
@@ -366,36 +367,48 @@ fn verify_context_inputs_packable<const VERIFY: bool>(
 }
 
 fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
-    // There must be zero or one Commitment Input.
-    if context_inputs
-        .iter()
-        .filter(|i| matches!(i, ContextInput::Commitment(_)))
-        .count()
-        > 1
-    {
-        return Err(Error::TooManyCommitmentInputs);
-    }
+    is_unique_sorted_by(context_inputs.iter(), |a, b| {
+        a.kind().cmp(&b.kind()).then_with(|| match (a, b) {
+            (ContextInput::Commitment(_), ContextInput::Commitment(_)) => core::cmp::Ordering::Equal,
+            (ContextInput::BlockIssuanceCredit(a), ContextInput::BlockIssuanceCredit(b)) => {
+                a.account_id().cmp(b.account_id())
+            }
+            (ContextInput::Reward(a), ContextInput::Reward(b)) => a.index().cmp(&b.index()),
 
-    let mut reward_index_set = HashSet::new();
+            // No need to evaluate all combinations as `then_with` is only called if the first cmp is Equal.
+            _ => unreachable!(),
+        })
+    });
+
+    let mut commitment = false;
     let mut bic_account_id_set = HashSet::new();
+    let mut reward_index_set = HashSet::new();
 
     for input in context_inputs.iter() {
         match input {
+            ContextInput::Commitment(_) => {
+                // There must be zero or one Commitment Input.
+                if commitment {
+                    return Err(Error::TooManyCommitmentInputs);
+                }
+                commitment = true;
+            }
             ContextInput::BlockIssuanceCredit(bic) => {
                 let account_id = bic.account_id();
+
                 // All Block Issuance Credit Inputs must reference a different Account ID.
                 if !bic_account_id_set.insert(account_id) {
-                    return Err(Error::DuplicateBicAccountId(account_id));
+                    return Err(Error::DuplicateBicAccountId(*account_id));
                 }
             }
             ContextInput::Reward(r) => {
-                let idx = r.index();
+                let index = r.index();
+
                 // All Rewards Inputs must reference a different Index
-                if !reward_index_set.insert(idx) {
-                    return Err(Error::DuplicateRewardInputIndex(idx));
+                if !reward_index_set.insert(index) {
+                    return Err(Error::DuplicateRewardInputIndex(index));
                 }
             }
-            _ => (),
         }
     }
 
