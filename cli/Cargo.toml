@@ -1,6 +1,6 @@
 [package]
 name = "cli-wallet"
-version = "1.2.0"
+version = "1.3.0"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 homepage = "https://iota.org"
@@ -22,6 +22,7 @@ iota-sdk = { path = "../sdk", default-features = false, features = [
     "rocksdb",
     "stronghold",
     "participation",
+    "ledger_nano",
 ] }
 
 chrono = { version = "0.4.31", default-features = false, features = ["std"] }
