@@ -230,19 +230,19 @@ pub enum ClientMethod {
         /// Block ID
         block_id: BlockId,
     },
-    /// Get output
+    /// Get output with its output ID proof.
     #[serde(rename_all = "camelCase")]
     GetOutput {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output metadata
+    /// Get output metadata.
     #[serde(rename_all = "camelCase")]
     GetOutputMetadata {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output with its metadata
+    /// Get output with its metadata including the output ID proof.
     #[serde(rename_all = "camelCase")]
     GetOutputWithMetadataFull {
         /// Output ID
