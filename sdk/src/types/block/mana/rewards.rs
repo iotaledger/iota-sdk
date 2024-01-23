@@ -35,15 +35,14 @@ pub struct RewardsParameters {
 
 impl Default for RewardsParameters {
     fn default() -> Self {
-        // TODO: use actual values
         Self {
-            profit_margin_exponent: Default::default(),
-            bootstrapping_duration: Default::default(),
-            mana_share_coefficient: Default::default(),
-            decay_balancing_constant_exponent: Default::default(),
-            decay_balancing_constant: Default::default(),
-            pool_coefficient_exponent: Default::default(),
-            retention_period: Default::default(),
+            profit_margin_exponent: 8,
+            bootstrapping_duration: EpochIndex(1079),
+            mana_share_coefficient: 2,
+            decay_balancing_constant_exponent: 8,
+            decay_balancing_constant: 1,
+            pool_coefficient_exponent: 11,
+            retention_period: 384,
         }
     }
 }
