@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Display` for `SecretManager`;
 - `StrongholdAdapter::snapshot_path` getter method;
 
+### Fixed
+
+- Prefer permanodes `Client::{get_utxo_changes_by_id(), get_utxo_changes_by_index()}` routes;
+
 ## 1.1.4 - 2024-01-22
 
 ### Added
