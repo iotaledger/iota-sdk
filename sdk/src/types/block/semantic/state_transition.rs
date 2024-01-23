@@ -384,6 +384,8 @@ impl StateTransitionVerifier for DelegationOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
+        Self::transition_inner(current_state, next_state)?;
+
         let protocol_parameters = &context.protocol_parameters;
 
         let slot_commitment_id = context
@@ -415,7 +417,7 @@ impl StateTransitionVerifier for DelegationOutput {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 
-        Self::transition_inner(current_state, next_state)
+        Ok(())
     }
 
     fn destruction(
