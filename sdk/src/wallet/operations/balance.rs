@@ -95,7 +95,7 @@ where
                     )?;
                     // Add potential mana
                     balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
-                        account.amount() - storage_cost,
+                        account.amount().saturating_sub(storage_cost),
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
@@ -161,7 +161,7 @@ where
                         )?;
                         // Add potential mana
                         balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
-                            output.amount() - storage_cost,
+                            output.amount().saturating_sub(storage_cost),
                             output_id.transaction_id().slot_index(),
                             slot_index,
                         )?;
@@ -242,7 +242,7 @@ where
                                 )?;
                                 // Add potential mana
                                 balance.mana.total.potential_mana += protocol_parameters.generate_mana_with_decay(
-                                    output.amount() - storage_cost,
+                                    output.amount().saturating_sub(storage_cost),
                                     output_id.transaction_id().slot_index(),
                                     slot_index,
                                 )?;
@@ -315,7 +315,10 @@ where
                         slot_index,
                     )?;
                     locked_potential_mana += protocol_parameters.generate_mana_with_decay(
-                        output_data.output.amount() - output_data.output.minimum_amount(storage_score_params),
+                        output_data
+                            .output
+                            .amount()
+                            .saturating_sub(output_data.output.minimum_amount(storage_score_params)),
                         output_data.output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
