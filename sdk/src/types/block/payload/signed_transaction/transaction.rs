@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{collections::BTreeSet, vec::Vec};
+use core::cmp::Ordering;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
@@ -127,7 +128,7 @@ impl TransactionBuilder {
 
     /// Finishes a [`TransactionBuilder`] into a [`Transaction`].
     pub fn finish_with_params<'a>(
-        self,
+        mut self,
         params: impl Into<Option<&'a ProtocolParameters>>,
     ) -> Result<Transaction, Error> {
         let params = params.into();
@@ -158,6 +159,8 @@ impl TransactionBuilder {
                 creation_slot
             })
             .ok_or(Error::InvalidField("creation slot"))?;
+
+        self.context_inputs.sort_by(context_inputs_cmp);
 
         let context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount> = self
             .context_inputs
@@ -366,18 +369,20 @@ fn verify_context_inputs_packable<const VERIFY: bool>(
     Ok(())
 }
 
+fn context_inputs_cmp(a: &ContextInput, b: &ContextInput) -> Ordering {
+    a.kind().cmp(&b.kind()).then_with(|| match (a, b) {
+        (ContextInput::Commitment(_), ContextInput::Commitment(_)) => Ordering::Equal,
+        (ContextInput::BlockIssuanceCredit(a), ContextInput::BlockIssuanceCredit(b)) => {
+            a.account_id().cmp(b.account_id())
+        }
+        (ContextInput::Reward(a), ContextInput::Reward(b)) => a.index().cmp(&b.index()),
+        // No need to evaluate all combinations as `then_with` is only called on Equal.
+        _ => unreachable!(),
+    })
+}
+
 fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
-    if !is_unique_sorted_by(context_inputs.iter(), |a, b| {
-        a.kind().cmp(&b.kind()).then_with(|| match (a, b) {
-            (ContextInput::Commitment(_), ContextInput::Commitment(_)) => core::cmp::Ordering::Equal,
-            (ContextInput::BlockIssuanceCredit(a), ContextInput::BlockIssuanceCredit(b)) => {
-                a.account_id().cmp(b.account_id())
-            }
-            (ContextInput::Reward(a), ContextInput::Reward(b)) => a.index().cmp(&b.index()),
-            // No need to evaluate all combinations as `then_with` is only called on Equal.
-            _ => unreachable!(),
-        })
-    }) {
+    if !is_unique_sorted_by(context_inputs.iter(), |a, b| context_inputs_cmp(a, b)) {
         return Err(Error::ContextInputsNotUniqueSorted);
     }
 
