@@ -1,4 +1,4 @@
-// Copyright 2020-2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{
@@ -401,6 +401,28 @@ pub enum BlockFailureReason {
     PayloadInvalid = 12,
     /// The block is invalid.
     Invalid = 255,
+}
+
+impl core::fmt::Display for BlockFailureReason {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::TooOldToIssue => write!(f, "The block is too old to issue."),
+            Self::ParentTooOld => write!(f, "One of the block's parents is too old."),
+            Self::ParentDoesNotExist => write!(f, "One of the block's parents does not exist."),
+            Self::ParentInvalid => write!(f, "One of the block's parents is invalid."),
+            Self::IssuerAccountNotFound => write!(f, "The block's issuer account could not be found."),
+            Self::VersionInvalid => write!(f, "The block's protocol version is invalid."),
+            Self::ManaCostCalculationFailed => write!(f, "The mana cost could not be calculated."),
+            Self::BurnedInsufficientMana => {
+                write!(f, "The block's issuer account burned insufficient Mana for a block.")
+            }
+            Self::AccountInvalid => write!(f, "The account is invalid."),
+            Self::SignatureInvalid => write!(f, "The block's signature is invalid."),
+            Self::DroppedDueToCongestion => write!(f, "The block is dropped due to congestion."),
+            Self::PayloadInvalid => write!(f, "The block payload is invalid."),
+            Self::Invalid => write!(f, "The block is invalid."),
+        }
+    }
 }
 
 // Response of a GET transaction metadata REST API call.
