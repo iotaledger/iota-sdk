@@ -11,7 +11,7 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
-        context_input::{BlockIssuanceCreditContextInput, ContextInput},
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput},
         input::{Input, UtxoInput},
         output::Output,
         payload::signed_transaction::Transaction,
@@ -74,6 +74,17 @@ where
             if let Some(mana_allotments) = options.mana_allotments {
                 builder = builder.with_mana_allotments(mana_allotments);
             }
+        }
+
+        // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
+        if context_inputs
+            .iter()
+            .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
+            && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
+        {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1740
+            let issuance = self.client().get_issuance().await?;
+            context_inputs.insert(CommitmentContextInput::new(issuance.latest_commitment.id()).into());
         }
 
         let transaction = builder
