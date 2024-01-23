@@ -18,12 +18,12 @@ export enum TransactionFailureReason {
     ConflictingWithAnotherTx = 2,
 
     /**
-     * The referenced UTXO is Invalid.
+     * The referenced UTXO is invalid.
      */
     InvalidReferencedUtxo = 3,
 
     /**
-     * The transaction is Invalid.
+     * The transaction is invalid.
      */
     InvalidTransaction = 4,
 
@@ -33,7 +33,7 @@ export enum TransactionFailureReason {
     SumInputsOutputsAmountMismatch = 5,
 
     /**
-     * The unlock block signature is Invalid.
+     * The unlock block signature is invalid.
      */
     InvalidUnlockBlockSignature = 6,
 
@@ -43,7 +43,7 @@ export enum TransactionFailureReason {
     TimelockNotExpired = 7,
 
     /**
-     * The given native tokens are Invalid.
+     * The given native tokens are invalid.
      */
     InvalidNativeTokens = 8,
 
@@ -53,7 +53,7 @@ export enum TransactionFailureReason {
     StorageDepositReturnUnfulfilled = 9,
 
     /**
-     * An input unlock was Invalid.
+     * An input unlock was invalid.
      */
     InvalidInputUnlock = 10,
 
@@ -63,7 +63,7 @@ export enum TransactionFailureReason {
     SenderNotUnlocked = 11,
 
     /**
-     * The chain state transition is Invalid.
+     * The chain state transition is invalid.
      */
     InvalidChainStateTransition = 12,
 
@@ -73,22 +73,22 @@ export enum TransactionFailureReason {
     InvalidTransactionIssuingTime = 13,
 
     /**
-     * The mana amount is Invalid.
+     * The mana amount is invalid.
      */
     InvalidManaAmount = 14,
 
     /**
-     * The Block Issuance Credits amount is Invalid.
+     * The Block Issuance Credits amount is invalid.
      */
     InvalidBlockIssuanceCreditsAmount = 15,
 
     /**
-     * Reward Context Input is Invalid.
+     * Reward Context Input is invalid.
      */
     InvalidRewardContextInput = 16,
 
     /**
-     * Commitment Context Input is Invalid.
+     * Commitment Context Input is invalid.
      */
     InvalidCommitmentContextInput = 17,
 
