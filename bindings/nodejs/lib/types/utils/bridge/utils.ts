@@ -17,6 +17,7 @@ import {
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
 import { InputSigningData } from '../../client';
+import { NumericString } from '../numeric';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -60,8 +61,8 @@ export interface __ComputeOutputIdMethod__ {
     };
 }
 
-export interface __ComputeStorageDepositMethod__ {
-    name: 'computeStorageDeposit';
+export interface __ComputeMinimumOutputAmountMethod__ {
+    name: 'computeMinimumOutputAmount';
     data: {
         output: Output;
         storageScoreParameters: StorageScoreParameters;
@@ -222,5 +223,35 @@ export interface __VerifyTransactionSemantic__ {
         transaction: SignedTransactionPayload;
         inputs: InputSigningData[];
         unlocks?: Unlock[];
+    };
+}
+
+export interface __ManaWithDecay__ {
+    name: 'manaWithDecay';
+    data: {
+        mana: NumericString;
+        slotIndexCreated: number;
+        slotIndexTarget: number;
+        protocolParameters: ProtocolParameters;
+    };
+}
+
+export interface __GenerateManaWithDecay__ {
+    name: 'generateManaWithDecay';
+    data: {
+        amount: NumericString;
+        slotIndexCreated: number;
+        slotIndexTarget: number;
+        protocolParameters: ProtocolParameters;
+    };
+}
+
+export interface __OutputManaWithDecay__ {
+    name: 'outputManaWithDecay';
+    data: {
+        output: Output;
+        slotIndexCreated: number;
+        slotIndexTarget: number;
+        protocolParameters: ProtocolParameters;
     };
 }

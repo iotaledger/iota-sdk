@@ -79,7 +79,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ComputeMinimumOutputAmount {
             output,
             storage_score_parameters: storage_params,
-        } => Response::OutputAmount(output.minimum_amount(storage_params)),
+        } => Response::Amount(output.minimum_amount(storage_params)),
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);
             verify_mnemonic(mnemonic)?;
@@ -122,6 +122,36 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 SemanticValidationContext::new(&transaction, &inputs, unlocks.as_deref(), protocol_parameters);
 
             Response::TransactionFailureReason(context.validate()?)
+        }
+        UtilsMethod::ManaWithDecay {
+            mana,
+            slot_index_created,
+            slot_index_target,
+            protocol_parameters,
+        } => Response::Amount(protocol_parameters.mana_with_decay(mana, slot_index_created, slot_index_target)?),
+        UtilsMethod::GenerateManaWithDecay {
+            amount,
+            slot_index_created,
+            slot_index_target,
+            protocol_parameters,
+        } => Response::Amount(protocol_parameters.generate_mana_with_decay(
+            amount,
+            slot_index_created,
+            slot_index_target,
+        )?),
+        UtilsMethod::OutputManaWithDecay {
+            output,
+            slot_index_created,
+            slot_index_target,
+            protocol_parameters,
+        } => {
+            let decayed_mana = output.decayed_stored_and_potential_mana(
+                &protocol_parameters,
+                slot_index_created,
+                slot_index_target,
+            )?;
+
+            Response::DecayedMana(decayed_mana)
         }
     };
 

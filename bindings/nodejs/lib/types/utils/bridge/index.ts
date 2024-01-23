@@ -6,7 +6,7 @@ import type {
     __ComputeTokenIdMethod__,
     __ComputeNftIdMethod__,
     __ComputeFoundryIdMethod__,
-    __ComputeStorageDepositMethod__,
+    __ComputeMinimumOutputAmountMethod__,
     __ParseBech32AddressMethod__,
     __BlockIdMethod__,
     __TransactionIdMethod__,
@@ -26,6 +26,9 @@ import type {
     __ComputeSlotCommitmentId__,
     __OutputHexBytes__,
     __VerifyTransactionSemantic__,
+    __ManaWithDecay__,
+    __GenerateManaWithDecay__,
+    __OutputManaWithDecay__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -36,7 +39,7 @@ export type __UtilsMethods__ =
     | __ComputeFoundryIdMethod__
     | __ComputeOutputIdMethod__
     | __ComputeTokenIdMethod__
-    | __ComputeStorageDepositMethod__
+    | __ComputeMinimumOutputAmountMethod__
     | __ParseBech32AddressMethod__
     | __BlockIdMethod__
     | __TransactionIdMethod__
@@ -55,4 +58,7 @@ export type __UtilsMethods__ =
     | __OutputIdToUtxoInput__
     | __ComputeSlotCommitmentId__
     | __OutputHexBytes__
-    | __VerifyTransactionSemantic__;
+    | __VerifyTransactionSemantic__
+    | __ManaWithDecay__
+    | __GenerateManaWithDecay__
+    | __OutputManaWithDecay__;

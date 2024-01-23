@@ -58,6 +58,8 @@ use crate::types::block::{
     slot::SlotIndex,
     Error,
 };
+#[cfg(feature = "serde")]
+use crate::utils::serde::string;
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -224,6 +226,20 @@ impl Output {
         creation_index: SlotIndex,
         target_index: SlotIndex,
     ) -> Result<u64, Error> {
+        let decayed_mana = self.decayed_stored_and_potential_mana(protocol_parameters, creation_index, target_index)?;
+        decayed_mana
+            .stored
+            .checked_add(decayed_mana.potential)
+            .ok_or(Error::ConsumedManaOverflow)
+    }
+
+    /// Returns the decayed stored and potential mana of the output.
+    pub fn decayed_stored_and_potential_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<DecayedMana, Error> {
         let (amount, mana) = match self {
             Self::Basic(output) => (output.amount(), output.mana()),
             Self::Account(output) => (output.amount(), output.mana()),
@@ -235,13 +251,14 @@ impl Output {
 
         let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
         let generation_amount = amount.saturating_sub(min_deposit);
+        let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
         let potential_mana =
             protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
-        let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
 
-        potential_mana
-            .checked_add(stored_mana)
-            .ok_or(Error::ConsumedManaOverflow)
+        Ok(DecayedMana {
+            stored: stored_mana,
+            potential: potential_mana,
+        })
     }
 
     /// Returns the unlock conditions of an [`Output`], if any.
@@ -415,4 +432,16 @@ pub trait MinimumOutputAmount: StorageScore {
     fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
         self.storage_score(params) * params.storage_cost()
     }
+}
+
+/// Decayed stored and potential Mana of an output.
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct DecayedMana {
+    /// Decayed stored mana.
+    #[cfg_attr(feature = "serde", serde(with = "string"))]
+    pub stored: u64,
+    /// Decayed potential mana.
+    #[cfg_attr(feature = "serde", serde(with = "string"))]
+    pub potential: u64,
 }
