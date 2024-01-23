@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use serde::{Deserialize, Serialize};
@@ -21,15 +21,29 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateDelegationParams {
-    /// Bech32 encoded address which will control the delegation. Default will use the
-    /// ed25519 wallet address
+    /// Bech32 encoded address which will control the delegation.
+    /// By default, the ed25519 wallet address will be used.
     pub address: Option<Bech32Address>,
     /// The amount to delegate.
-    // TODO: Not sure about this
-    // https://github.com/iotaledger/tips-draft/blob/tip40/tips/TIP-0040/tip-0040.md#created-outputs
     pub delegated_amount: u64,
     /// The Account Address of the validator to which this output will delegate.
     pub validator_address: AccountAddress,
+}
+
+/// The result of a transaction to create a delegation
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateDelegationTransaction {
+    pub delegation_id: DelegationId,
+    pub transaction: TransactionWithMetadata,
+}
+
+/// The result of preparing a transaction to create a delegation
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PreparedCreateDelegationTransaction {
+    pub delegation_id: DelegationId,
+    pub transaction: PreparedTransactionData,
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -58,12 +72,16 @@ where
         &self,
         params: CreateDelegationParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> crate::wallet::Result<CreateDelegationTransaction> {
         let options = options.into();
-        let prepared_transaction = self.prepare_create_delegation_output(params, options.clone()).await?;
+        let prepared = self.prepare_create_delegation_output(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
+        self.sign_and_submit_transaction(prepared.transaction, None, options)
             .await
+            .map(|transaction| CreateDelegationTransaction {
+                delegation_id: prepared.delegation_id,
+                transaction,
+            })
     }
 
     /// Prepares the transaction for [Wallet::create_delegation_output()].
@@ -71,7 +89,7 @@ where
         &self,
         params: CreateDelegationParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedCreateDelegationTransaction> {
         log::debug!("[TRANSACTION] prepare_create_delegation_output");
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
@@ -134,9 +152,14 @@ where
         })
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
-        let outputs = [delegation_output_builder.finish_output()?];
+        let output = delegation_output_builder.finish_output()?;
 
-        self.prepare_transaction(outputs, options).await
+        let transaction = self.prepare_transaction([output], options).await?;
+
+        Ok(PreparedCreateDelegationTransaction {
+            delegation_id: DelegationId::from(&transaction.transaction.id().into_output_id(0)),
+            transaction,
+        })
     }
 
     /// Gets an existing delegation output.

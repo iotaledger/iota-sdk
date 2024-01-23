@@ -28,6 +28,7 @@ import {
     PreparedTransaction,
     PreparedCreateNativeTokenTransactionData,
     ConsolidationParams,
+    CreateDelegationTransaction,
 } from '../types/wallet';
 import { Client, INode, Burn, PreparedTransactionData } from '../client';
 import {
@@ -45,16 +46,20 @@ import {
     TransactionId,
     NumericString,
     Bech32Address,
+    DelegationId,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
-import type {
+import {
     WalletOptions,
     WalletEventType,
     WalletEvent,
+    CreateDelegationParams,
+    PreparedCreateDelegationTransactionData,
 } from '../types/wallet';
 import { IAuth, IClientOptions, LedgerNanoStatus } from '../types/client';
 import { SecretManager } from '../secret_manager';
+import { PreparedCreateDelegationTransaction } from '../types/wallet/create-delegation-transaction';
 
 /** The Wallet class. */
 export class Wallet {
@@ -1214,6 +1219,136 @@ export class Wallet {
                 options,
             },
         });
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * Create a delegation.
+     *
+     * @param params The options for creating a delegation.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The created transaction and the delegation ID.
+     */
+    async createDelegation(
+        params: CreateDelegationParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<CreateDelegationTransaction> {
+        const tx = await this.prepareCreateDelegation(
+            params,
+            transactionOptions,
+        );
+        const delegationId = tx.delegationId();
+        const transaction = await tx.send();
+        return {
+            delegationId,
+            transaction,
+        };
+    }
+
+    /**
+     * Prepare a transaction to create a delegation.
+     *
+     * @param params The options for creating a delegation.
+     * @param transactionOptions Additional transaction options
+     * or custom inputs.
+     * @returns The prepared transaction and the delegation ID.
+     */
+    async prepareCreateDelegation(
+        params: CreateDelegationParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<PreparedCreateDelegationTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareCreateDelegation',
+            data: {
+                params,
+                options: transactionOptions,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedCreateDelegationTransactionData>;
+        return new PreparedCreateDelegationTransaction(
+            plainToInstance(
+                PreparedCreateDelegationTransactionData,
+                parsed.payload,
+            ),
+            this,
+        );
+    }
+
+    /**
+     * Delay a delegation's claiming.
+     *
+     * @param delegationId The id of the delegation to delay.
+     * @returns The created transaction.
+     */
+    async delayDelegationClaiming(
+        delegationId: DelegationId,
+    ): Promise<TransactionWithMetadata> {
+        return (await this.prepareDelayDelegationClaiming(delegationId)).send();
+    }
+
+    /**
+     * Prepare a transaction to delay a delegation's claiming.
+     *
+     * @param delegationId The id of the delegation to delay.
+     * @returns The prepared transaction.
+     */
+    async prepareDelayDelegationClaiming(
+        delegationId: DelegationId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareDelayDelegationClaiming',
+            data: {
+                delegationId,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * Destroy a delegation.
+     *
+     * @param delegationId The id of the delegation to destroy.
+     * @returns The created transaction.
+     */
+    async destroyDelegation(
+        delegationId: DelegationId,
+    ): Promise<TransactionWithMetadata> {
+        return (await this.prepareDestroyDelegation(delegationId)).send();
+    }
+
+    /**
+     * Prepare a transaction to destroy a delegation.
+     *
+     * @param delegationId The id of the delegation to destroy.
+     * @returns The prepared transaction.
+     */
+    async prepareDestroyDelegation(
+        delegationId: DelegationId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareDestroyDelegation',
+            data: {
+                delegationId,
+            },
+        });
+
         const parsed = JSON.parse(
             response,
         ) as Response<PreparedTransactionData>;

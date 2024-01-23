@@ -187,9 +187,17 @@ impl DelegationOutputBuilder {
             unlock_conditions,
         };
 
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
+        match self.amount {
+            OutputBuilderAmount::Amount(amount) => output.amount = amount,
+            OutputBuilderAmount::MinimumAmount(params) => {
+                let min = output.minimum_amount(params);
+                if output.delegated_amount > min {
+                    output.amount = output.delegated_amount;
+                } else {
+                    output.amount = min;
+                    output.delegated_amount = min;
+                }
+            }
         };
 
         Ok(output)

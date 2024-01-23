@@ -74,6 +74,15 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
     }
 }
 
+impl Serialize for PreparedTransactionData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        PreparedTransactionDataDto::from(self).serialize(serializer)
+    }
+}
+
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignedTransactionData {

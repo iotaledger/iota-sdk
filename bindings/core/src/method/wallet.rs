@@ -22,13 +22,13 @@ use iota_sdk::{
     },
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{Output, OutputId, TokenId},
+        output::{DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
     wallet::{
-        ClientOptions, ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-        OutputParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
-        TransactionOptions,
+        ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams, CreateNativeTokenParams,
+        FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams,
+        SyncOptions, TransactionOptions,
     },
     U256,
 };
@@ -318,6 +318,14 @@ pub enum WalletMethod {
         params: Vec<SendNftParams>,
         options: Option<TransactionOptions>,
     },
+    PrepareCreateDelegation {
+        params: CreateDelegationParams,
+        options: Option<TransactionOptions>,
+    },
+    #[serde(rename_all = "camelCase")]
+    PrepareDelayDelegationClaiming { delegation_id: DelegationId },
+    #[serde(rename_all = "camelCase")]
+    PrepareDestroyDelegation { delegation_id: DelegationId },
     // /// Stop participating for an event.
     // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     // #[cfg(feature = "participation")]

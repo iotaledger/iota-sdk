@@ -52,10 +52,12 @@ pub use self::{
         transaction::{
             high_level::{
                 create_account::CreateAccountParams,
+                delegation::create::{
+                    CreateDelegationParams, CreateDelegationTransaction, PreparedCreateDelegationTransaction,
+                },
                 minting::{
                     create_native_token::{
-                        CreateNativeTokenParams, CreateNativeTokenTransactionDto,
-                        PreparedCreateNativeTokenTransactionDto,
+                        CreateNativeTokenParams, CreateNativeTokenTransaction, PreparedCreateNativeTokenTransaction,
                     },
                     mint_nfts::MintNftParams,
                 },

@@ -39,51 +39,19 @@ pub struct CreateNativeTokenParams {
 }
 
 /// The result of a transaction to create a native token
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: TransactionWithMetadata,
 }
 
-/// Dto for NativeTokenTransaction
+/// The result of preparing a transaction to create a native token
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CreateNativeTokenTransactionDto {
-    pub token_id: TokenId,
-    pub transaction: TransactionWithMetadataDto,
-}
-
-impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
-    fn from(value: &CreateNativeTokenTransaction) -> Self {
-        Self {
-            token_id: value.token_id,
-            transaction: TransactionWithMetadataDto::from(&value.transaction),
-        }
-    }
-}
-
-/// The result of preparing a transaction to create a native token
-#[derive(Debug)]
 pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,
-}
-
-/// Dto for PreparedNativeTokenTransaction
-#[derive(Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PreparedCreateNativeTokenTransactionDto {
-    pub token_id: TokenId,
-    pub transaction: PreparedTransactionDataDto,
-}
-
-impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTransactionDto {
-    fn from(value: &PreparedCreateNativeTokenTransaction) -> Self {
-        Self {
-            token_id: value.token_id,
-            transaction: PreparedTransactionDataDto::from(&value.transaction),
-        }
-    }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>

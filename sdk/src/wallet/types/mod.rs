@@ -172,6 +172,15 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
     }
 }
 
+impl Serialize for TransactionWithMetadata {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        TransactionWithMetadataDto::from(self).serialize(serializer)
+    }
+}
+
 /// Possible InclusionStates for transactions
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
