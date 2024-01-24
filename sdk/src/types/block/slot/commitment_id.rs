@@ -19,7 +19,7 @@ impl SlotCommitmentId {
     /// That means no commitment input can be chosen such that the index lies behind the slot index of the block,
     /// hence the past is bounded.
     pub fn past_bounded_slot(self, max_committable_age: u32) -> SlotIndex {
-        (*self.slot_index() + max_committable_age).into()
+        self.slot_index() + max_committable_age
     }
     /// Calculates the future bounded slot for the given slot of the SlotCommitment.
     /// Given any slot index of a commitment input, the result of this function is a slot index
@@ -27,6 +27,6 @@ impl SlotCommitmentId {
     /// That means no commitment input can be chosen such that the index lies ahead of the slot index of the block,
     /// hence the future is bounded.
     pub fn future_bounded_slot(self, min_committable_age: u32) -> SlotIndex {
-        SlotIndex(*self.slot_index() + min_committable_age)
+        self.slot_index() + min_committable_age
     }
 }
