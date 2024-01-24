@@ -10,7 +10,7 @@ use crate::{
         address::Address,
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{
-            feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+            feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
             unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutput, OutputId,
         },
@@ -98,7 +98,9 @@ where
             ))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
+                BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519PublicKeyHashBlockIssuerKey::from(
+                    public_key,
+                ))])?,
             )?])
             .finish_output()?;
 

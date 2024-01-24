@@ -27,7 +27,7 @@ pub(crate) use self::{
     tag::TagFeatureLength,
 };
 pub use self::{
-    block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+    block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
     issuer::IssuerFeature,
     metadata::{MetadataFeature, MetadataFeatureMap},
     native_token::NativeTokenFeature,

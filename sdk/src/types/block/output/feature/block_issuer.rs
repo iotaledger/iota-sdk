@@ -28,15 +28,15 @@ use crate::types::block::{
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidBlockIssuerKeyKind)]
 pub enum BlockIssuerKey {
-    /// An Ed25519 block issuer key.
-    #[packable(tag = Ed25519BlockIssuerKey::KIND)]
-    Ed25519(Ed25519BlockIssuerKey),
+    /// An Ed25519 public key hash block issuer key.
+    #[packable(tag = Ed25519PublicKeyHashBlockIssuerKey::KIND)]
+    Ed25519PublicKeyHash(Ed25519PublicKeyHashBlockIssuerKey),
 }
 
 impl core::fmt::Debug for BlockIssuerKey {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Ed25519(key) => key.fmt(f),
+            Self::Ed25519PublicKeyHash(key) => key.fmt(f),
         }
     }
 }
@@ -45,17 +45,17 @@ impl BlockIssuerKey {
     /// Returns the block issuer key kind of a [`BlockIssuerKey`].
     pub fn kind(&self) -> u8 {
         match self {
-            Self::Ed25519(_) => Ed25519BlockIssuerKey::KIND,
+            Self::Ed25519PublicKeyHash(_) => Ed25519PublicKeyHashBlockIssuerKey::KIND,
         }
     }
 
-    crate::def_is_as_opt!(BlockIssuerKey: Ed25519);
+    crate::def_is_as_opt!(BlockIssuerKey: Ed25519PublicKeyHash);
 }
 
 impl StorageScore for BlockIssuerKey {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Ed25519(e) => e.storage_score(params),
+            Self::Ed25519PublicKeyHash(e) => e.storage_score(params),
         }
     }
 }
@@ -64,15 +64,15 @@ impl StorageScore for BlockIssuerKey {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Ed25519BlockIssuerKey(ed25519::PublicKey);
+pub struct Ed25519PublicKeyHashBlockIssuerKey(ed25519::PublicKey);
 
-impl Ed25519BlockIssuerKey {
-    /// The block issuer key kind of an [`Ed25519BlockIssuerKey`].
+impl Ed25519PublicKeyHashBlockIssuerKey {
+    /// The block issuer key kind of an [`Ed25519PublicKeyHashBlockIssuerKey`].
     pub const KIND: u8 = 0;
     /// Length of an ED25519 block issuer key.
     pub const LENGTH: usize = ed25519::PublicKey::LENGTH;
 
-    /// Creates a new [`Ed25519BlockIssuerKey`] from bytes.
+    /// Creates a new [`Ed25519PublicKeyHashBlockIssuerKey`] from bytes.
     pub fn try_from_bytes(bytes: [u8; Self::LENGTH]) -> Result<Self, Error> {
         Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
     }
@@ -83,19 +83,19 @@ impl Ed25519BlockIssuerKey {
     }
 }
 
-impl StorageScore for Ed25519BlockIssuerKey {
+impl StorageScore for Ed25519PublicKeyHashBlockIssuerKey {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.ed25519_block_issuer_key_offset()
     }
 }
 
-impl core::fmt::Debug for Ed25519BlockIssuerKey {
+impl core::fmt::Debug for Ed25519PublicKeyHashBlockIssuerKey {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", prefix_hex::encode(self.0.as_slice()))
     }
 }
 
-impl Packable for Ed25519BlockIssuerKey {
+impl Packable for Ed25519PublicKeyHashBlockIssuerKey {
     type UnpackError = Error;
     type UnpackVisitor = ();
 
@@ -263,13 +263,13 @@ mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
     #[serde(untagged)]
     pub enum BlockIssuerKeyDto {
-        Ed25519(Ed25519BlockIssuerKeyDto),
+        Ed25519PublicKeyHash(Ed25519PublicKeyHashBlockIssuerKeyDto),
     }
 
     impl From<&BlockIssuerKey> for BlockIssuerKeyDto {
         fn from(value: &BlockIssuerKey) -> Self {
             match value {
-                BlockIssuerKey::Ed25519(s) => Self::Ed25519(s.into()),
+                BlockIssuerKey::Ed25519PublicKeyHash(s) => Self::Ed25519PublicKeyHash(s.into()),
             }
         }
     }
@@ -279,32 +279,32 @@ mod dto {
 
         fn try_from(value: BlockIssuerKeyDto) -> Result<Self, Self::Error> {
             match value {
-                BlockIssuerKeyDto::Ed25519(s) => Ok(Self::Ed25519(s.try_into()?)),
+                BlockIssuerKeyDto::Ed25519PublicKeyHash(s) => Ok(Self::Ed25519PublicKeyHash(s.try_into()?)),
             }
         }
     }
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct Ed25519BlockIssuerKeyDto {
+    pub struct Ed25519PublicKeyHashBlockIssuerKeyDto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub public_key: String,
     }
 
-    impl From<&Ed25519BlockIssuerKey> for Ed25519BlockIssuerKeyDto {
-        fn from(value: &Ed25519BlockIssuerKey) -> Self {
+    impl From<&Ed25519PublicKeyHashBlockIssuerKey> for Ed25519PublicKeyHashBlockIssuerKeyDto {
+        fn from(value: &Ed25519PublicKeyHashBlockIssuerKey) -> Self {
             Self {
-                kind: Ed25519BlockIssuerKey::KIND,
+                kind: Ed25519PublicKeyHashBlockIssuerKey::KIND,
                 public_key: prefix_hex::encode(value.0.as_slice()),
             }
         }
     }
 
-    impl TryFrom<Ed25519BlockIssuerKeyDto> for Ed25519BlockIssuerKey {
+    impl TryFrom<Ed25519PublicKeyHashBlockIssuerKeyDto> for Ed25519PublicKeyHashBlockIssuerKey {
         type Error = Error;
 
-        fn try_from(value: Ed25519BlockIssuerKeyDto) -> Result<Self, Self::Error> {
+        fn try_from(value: Ed25519PublicKeyHashBlockIssuerKeyDto) -> Result<Self, Self::Error> {
             Self::try_from_bytes(prefix_hex::decode(value.public_key).map_err(|_| Error::InvalidField("publicKey"))?)
         }
     }
