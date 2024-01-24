@@ -144,15 +144,11 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             slot_index_created,
             slot_index_target,
             protocol_parameters,
-        } => {
-            let decayed_mana = output.decayed_stored_and_potential_mana(
-                &protocol_parameters,
-                slot_index_created,
-                slot_index_target,
-            )?;
-
-            Response::DecayedMana(decayed_mana)
-        }
+        } => Response::DecayedMana(output.decayed_stored_and_potential_mana(
+            &protocol_parameters,
+            slot_index_created,
+            slot_index_target,
+        )?),
     };
 
     Ok(response)
