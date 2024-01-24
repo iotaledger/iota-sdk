@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
-use tokio::task::JoinSet;
 
 use crate::{
     client::secret::SecretManage,
@@ -49,50 +48,6 @@ where
                 }
             }
         }
-
-        // Add block issuance credits using parallel requests
-        #[cfg(not(target_family = "wasm"))]
-        {
-            let mut tasks = JoinSet::new();
-            for account in wallet_data.accounts() {
-                let account_id = *account.output.as_account().account_id();
-                let client = self.client().clone();
-                tasks.spawn(async move {
-                    Result::Ok((
-                        account_id,
-                        client.get_account_congestion(&account_id).await?.block_issuance_credits,
-                    ))
-                });
-            }
-            while let Some(res) = tasks.join_next().await {
-                let (account_id, bic) = res??;
-                *balance.mana.block_issuance_credits.entry(account_id).or_default() += bic;
-            }
-        }
-        #[cfg(target_family = "wasm")]
-        {
-            for (account_id, bic) in futures::future::try_join_all(wallet_data.accounts().map(|account| {
-                let account_id = *account.output.as_account().account_id();
-                async move {
-                    Result::Ok((
-                        account_id,
-                        self.client()
-                            .get_account_congestion(&account_id)
-                            .await?
-                            .block_issuance_credits,
-                    ))
-                }
-            }))
-            .await?
-            {
-                *balance.mana.block_issuance_credits.entry(account_id).or_default() += bic;
-            }
-        }
-
-        log::debug!(
-            "[BALANCE] block issuance credits: {:#?}",
-            balance.mana.block_issuance_credits
-        );
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             // Check if output is from the network we're currently connected to

@@ -21,7 +21,7 @@ pub struct Balance {
     /// Total and available amount of the base coin
     pub(crate) base_coin: BaseCoinBalance,
     /// Various mana balances
-    pub(crate) mana: ManaCreditsBalance,
+    pub(crate) mana: ManaBalances,
     /// Current required storage deposit amount
     pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
@@ -75,54 +75,14 @@ pub struct BaseCoinBalance {
 }
 
 /// Mana and BIC fields for [`Balance`]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters, derive_more::AddAssign)]
 #[serde(rename_all = "camelCase")]
 #[getset(get_copy = "pub")]
-pub struct ManaCreditsBalance {
+pub struct ManaBalances {
     /// Total mana.
     pub(crate) total: ManaBalance,
     /// Available mana.
     pub(crate) available: ManaBalance,
-    /// Block issuance credits by account.
-    #[serde(with = "bic_serde")]
-    pub(crate) block_issuance_credits: BTreeMap<AccountId, i128>,
-}
-
-pub mod bic_serde {
-    use alloc::string::String;
-    use core::str::FromStr;
-
-    use serde::{de, Deserialize, Deserializer, Serializer};
-
-    use super::*;
-
-    pub fn serialize<S>(value: &BTreeMap<AccountId, i128>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.collect_map(value.iter().map(|(id, bic)| (id, bic.to_string())))
-    }
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<BTreeMap<AccountId, i128>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        BTreeMap::<AccountId, String>::deserialize(deserializer)?
-            .into_iter()
-            .map(|(id, bic)| Ok((id, bic.parse()?)))
-            .collect::<Result<BTreeMap<_, i128>, <i128 as FromStr>::Err>>()
-            .map_err(|e| de::Error::custom(e.to_string()))
-    }
-}
-
-impl std::ops::AddAssign for ManaCreditsBalance {
-    fn add_assign(&mut self, rhs: Self) {
-        self.total += rhs.total;
-        self.available += rhs.available;
-        for (account_id, rhs_bic) in rhs.block_issuance_credits.into_iter() {
-            *self.block_issuance_credits.entry(account_id).or_default() += rhs_bic;
-        }
-    }
 }
 
 /// Mana fields for [`Balance`]
