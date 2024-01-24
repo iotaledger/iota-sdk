@@ -4,7 +4,6 @@
 #[cfg(feature = "stronghold")]
 use std::path::PathBuf;
 
-use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
@@ -195,13 +194,7 @@ pub enum WalletMethod {
     /// Prepares to transition an implicit account to an account.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareImplicitAccountTransition {
-        output_id: OutputId,
-        #[serde(default)]
-        public_key: Option<String>,
-        #[serde(default)]
-        bip_path: Option<Bip44>,
-    },
+    PrepareImplicitAccountTransition { output_id: OutputId },
     /// Returns the implicit accounts of the wallet.
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     ImplicitAccounts,
