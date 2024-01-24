@@ -63,7 +63,7 @@ impl StorageScore for BlockIssuerKey {
     }
 }
 
-/// An Ed25519 block issuer key.
+/// An Ed25519 public key hash block issuer key.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -72,7 +72,7 @@ pub struct Ed25519PublicKeyHashBlockIssuerKey([u8; Self::LENGTH]);
 impl Ed25519PublicKeyHashBlockIssuerKey {
     /// The block issuer key kind of an [`Ed25519PublicKeyHashBlockIssuerKey`].
     pub const KIND: u8 = 0;
-    /// Length of an ED25519 block issuer key.
+    /// Length of an ED25519 public key hash block issuer key.
     pub const LENGTH: usize = ed25519::PublicKey::LENGTH;
 
     /// Creates a new [`Ed25519PublicKeyHashBlockIssuerKey`] from bytes.
@@ -83,10 +83,6 @@ impl Ed25519PublicKeyHashBlockIssuerKey {
     /// Creates a new [`Ed25519PublicKeyHashBlockIssuerKey`] from an [`ed25519::PublicKey`].
     pub fn from_public_key(public_key: &ed25519::PublicKey) -> Self {
         Self(Blake2b256::digest(public_key.to_bytes()).into())
-    }
-
-    pub(crate) fn null() -> Self {
-        Self([0; Self::LENGTH])
     }
 }
 

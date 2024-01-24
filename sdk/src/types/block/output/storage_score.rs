@@ -172,7 +172,7 @@ impl StorageScoreParameters {
                 BlockIssuerFeature::new(
                     0,
                     [BlockIssuerKey::Ed25519PublicKeyHash(
-                        Ed25519PublicKeyHashBlockIssuerKey::null(),
+                        Ed25519PublicKeyHashBlockIssuerKey::from([0; 32]),
                     )],
                 )
                 .unwrap(),
