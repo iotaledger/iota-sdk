@@ -352,9 +352,7 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let past_bounded_slot_index = slot_commitment_id
-            .slot_index()
-            .past_bounded_slot(protocol_parameters.max_committable_age);
+        let past_bounded_slot_index = slot_commitment_id.past_bounded_slot(protocol_parameters.max_committable_age);
         let past_bounded_epoch_index =
             past_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
 
@@ -396,9 +394,7 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let future_bounded_slot_index = slot_commitment_id
-            .slot_index()
-            .future_bounded_slot(protocol_parameters.min_committable_age);
+        let future_bounded_slot_index = slot_commitment_id.future_bounded_slot(protocol_parameters.min_committable_age);
         let future_bounded_epoch_index =
             future_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
 
