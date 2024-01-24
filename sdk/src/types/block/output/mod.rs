@@ -27,6 +27,7 @@ pub mod unlock_condition;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
+use getset::Getters;
 use packable::Packable;
 
 pub use self::{
@@ -435,13 +436,13 @@ pub trait MinimumOutputAmount: StorageScore {
 }
 
 /// Decayed stored and potential Mana of an output.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DecayedMana {
     /// Decayed stored mana.
     #[cfg_attr(feature = "serde", serde(with = "string"))]
-    pub stored: u64,
+    stored: u64,
     /// Decayed potential mana.
     #[cfg_attr(feature = "serde", serde(with = "string"))]
-    pub potential: u64,
+    potential: u64,
 }
