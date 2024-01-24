@@ -4,7 +4,10 @@
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
 
-use crypto::signatures::ed25519;
+use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
+    signatures::ed25519,
+};
 use derive_more::{AsRef, Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{
@@ -64,7 +67,7 @@ impl StorageScore for BlockIssuerKey {
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Ed25519PublicKeyHashBlockIssuerKey(ed25519::PublicKey);
+pub struct Ed25519PublicKeyHashBlockIssuerKey([u8; Self::LENGTH]);
 
 impl Ed25519PublicKeyHashBlockIssuerKey {
     /// The block issuer key kind of an [`Ed25519PublicKeyHashBlockIssuerKey`].
@@ -73,13 +76,17 @@ impl Ed25519PublicKeyHashBlockIssuerKey {
     pub const LENGTH: usize = ed25519::PublicKey::LENGTH;
 
     /// Creates a new [`Ed25519PublicKeyHashBlockIssuerKey`] from bytes.
-    pub fn try_from_bytes(bytes: [u8; Self::LENGTH]) -> Result<Self, Error> {
-        Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
+    pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
+        Self(bytes)
+    }
+
+    /// Creates a new [`Ed25519PublicKeyHashBlockIssuerKey`] from an [`ed25519::PublicKey`].
+    pub fn from_public_key(public_key: &ed25519::PublicKey) -> Self {
+        Self(Blake2b256::digest(public_key.to_bytes()).into())
     }
 
     pub(crate) fn null() -> Self {
-        // Unwrap: we provide a valid byte array
-        Self::try_from_bytes([0; Self::LENGTH]).unwrap()
+        Self([0; Self::LENGTH])
     }
 }
 
@@ -108,8 +115,9 @@ impl Packable for Ed25519PublicKeyHashBlockIssuerKey {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Self::try_from_bytes(<[u8; Self::LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
-            .map_err(UnpackError::Packable)
+        Ok(Self(
+            <[u8; Self::LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?,
+        ))
     }
 }
 
@@ -305,7 +313,9 @@ mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519PublicKeyHashBlockIssuerKeyDto) -> Result<Self, Self::Error> {
-            Self::try_from_bytes(prefix_hex::decode(value.public_key).map_err(|_| Error::InvalidField("publicKey"))?)
+            Ok(Self(
+                prefix_hex::decode(value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
+            ))
         }
     }
 
