@@ -333,9 +333,6 @@ class NodeInfo:
         metrics: Node metrics.
         protocol_parameters: Supported protocol versions by the node.
         base_token: Gives info about the base token the network uses.
-        features: The features that are supported by the node.
-                  For example, a node could support the feature, which would allow the BIC to be included by the node account.
-                  All features must be lowercase.
     """
     name: str
     version: str
@@ -343,7 +340,6 @@ class NodeInfo:
     metrics: NodeInfoMetrics
     protocol_parameters: List[ProtocolParametersResponse]
     base_token: NodeInfoBaseToken
-    features: List[str]
 
 
 @json
