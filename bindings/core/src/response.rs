@@ -26,7 +26,9 @@ use iota_sdk::{
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId},
+            output::{
+                AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId,
+            },
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             semantic::TransactionFailureReason,
@@ -299,7 +301,12 @@ pub enum Response {
     /// Response for:
     /// - [`ClientMethod::ComputeMinimumOutputAmount`](crate::method::ClientMethod::ComputeMinimumOutputAmount)
     /// - [`UtilsMethod::ComputeMinimumOutputAmount`](crate::method::UtilsMethod::ComputeMinimumOutputAmount)
-    OutputAmount(#[serde(with = "string")] u64),
+    /// - [`UtilsMethod::ManaWithDecay`](crate::method::UtilsMethod::ManaWithDecay)
+    /// - [`UtilsMethod::GenerateManaWithDecay`](crate::method::UtilsMethod::GenerateManaWithDecay)
+    Amount(#[serde(with = "string")] u64),
+    /// Response for:
+    /// - [`UtilsMethod::OutputManaWithDecay`](crate::method::UtilsMethod::OutputManaWithDecay)
+    DecayedMana(DecayedMana),
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
