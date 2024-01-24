@@ -227,8 +227,8 @@ impl Output {
         creation_index: SlotIndex,
         target_index: SlotIndex,
     ) -> Result<u64, Error> {
-        let decayed_mana = self.decayed_stored_and_potential_mana(protocol_parameters, creation_index, target_index)?;
-        
+        let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
+
         decayed_mana
             .stored
             .checked_add(decayed_mana.potential)
@@ -236,7 +236,7 @@ impl Output {
     }
 
     /// Returns the decayed stored and potential mana of the output.
-    pub fn decayed_stored_and_potential_mana(
+    pub fn decayed_mana(
         &self,
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
