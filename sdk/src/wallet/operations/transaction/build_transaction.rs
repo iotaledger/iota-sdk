@@ -8,7 +8,7 @@ use instant::Instant;
 use crate::{
     client::{
         api::{input_selection::Selected, transaction::validate_transaction_length, PreparedTransactionData},
-        secret::{types::InputSigningData, SecretManage},
+        secret::SecretManage,
     },
     types::block::{
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput},
