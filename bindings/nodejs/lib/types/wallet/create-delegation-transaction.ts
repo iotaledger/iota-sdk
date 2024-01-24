@@ -29,9 +29,7 @@ export class PreparedCreateDelegationTransaction extends PreparedTransaction {
     /**
      * The function returns the delegationId.
      *
-     * Returns:
-     *
-     * The delegation id of the prepared transaction.
+     * @returns: The delegation id of the prepared transaction.
      */
     public delegationId(): DelegationId {
         return this._delegationId;
