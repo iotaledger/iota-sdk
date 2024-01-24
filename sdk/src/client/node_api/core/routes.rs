@@ -353,7 +353,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_id(&self, milestone_id: &MilestoneId) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v2/milestones/{milestone_id}/utxo-changes");
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, None, false, true).await
     }
 
     /// Gets the milestone by the given milestone index.
@@ -382,7 +382,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_index(&self, index: u32) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v2/milestones/by-index/{index}/utxo-changes");
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, None, false, true).await
     }
 
     // Peers routes.
