@@ -264,30 +264,6 @@ mod dto {
     use super::*;
     use crate::types::block::{slot::SlotIndex, Error};
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
-    #[serde(untagged)]
-    pub enum BlockIssuerKeyDto {
-        Ed25519PublicKeyHash(Ed25519PublicKeyHashBlockIssuerKeyDto),
-    }
-
-    impl From<&BlockIssuerKey> for BlockIssuerKeyDto {
-        fn from(value: &BlockIssuerKey) -> Self {
-            match value {
-                BlockIssuerKey::Ed25519PublicKeyHash(s) => Self::Ed25519PublicKeyHash(s.into()),
-            }
-        }
-    }
-
-    impl TryFrom<BlockIssuerKeyDto> for BlockIssuerKey {
-        type Error = Error;
-
-        fn try_from(value: BlockIssuerKeyDto) -> Result<Self, Self::Error> {
-            match value {
-                BlockIssuerKeyDto::Ed25519PublicKeyHash(s) => Ok(Self::Ed25519PublicKeyHash(s.try_into()?)),
-            }
-        }
-    }
-
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Ed25519PublicKeyHashBlockIssuerKeyDto {
@@ -321,7 +297,7 @@ mod dto {
         #[serde(rename = "type")]
         kind: u8,
         expiry_slot: SlotIndex,
-        block_issuer_keys: Vec<BlockIssuerKeyDto>,
+        block_issuer_keys: Vec<BlockIssuerKey>,
     }
 
     impl From<&BlockIssuerFeature> for BlockIssuerFeatureDto {
@@ -329,7 +305,7 @@ mod dto {
             Self {
                 kind: BlockIssuerFeature::KIND,
                 expiry_slot: value.expiry_slot,
-                block_issuer_keys: value.block_issuer_keys.iter().map(|key| key.into()).collect(),
+                block_issuer_keys: value.block_issuer_keys.iter().cloned().collect(),
             }
         }
     }
@@ -338,13 +314,7 @@ mod dto {
         type Error = Error;
 
         fn try_from(value: BlockIssuerFeatureDto) -> Result<Self, Self::Error> {
-            let keys = value
-                .block_issuer_keys
-                .into_iter()
-                .map(BlockIssuerKey::try_from)
-                .collect::<Result<Vec<BlockIssuerKey>, Error>>()?;
-
-            Self::new(value.expiry_slot, keys)
+            Self::new(value.expiry_slot, BlockIssuerKeys::from_vec(value.block_issuer_keys)?)
         }
     }
 
