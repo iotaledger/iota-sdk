@@ -33,8 +33,4 @@ export interface INodeInfo {
      * The base token info of the node.
      */
     baseToken: INodeInfoBaseToken;
-    /**
-     * Features supported by the node.
-     */
-    features: string[];
 }
