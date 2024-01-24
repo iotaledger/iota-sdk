@@ -37,11 +37,11 @@ abstract class TokenScheme {
  * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    @Transform(value => hexToBigInt(value.value))
+    @Transform((value) => hexToBigInt(value.value))
     readonly mintedTokens: bigint;
-    @Transform(value => hexToBigInt(value.value))
+    @Transform((value) => hexToBigInt(value.value))
     readonly meltedTokens: bigint;
-    @Transform(value => hexToBigInt(value.value))
+    @Transform((value) => hexToBigInt(value.value))
     readonly maximumSupply: bigint;
 
     /**

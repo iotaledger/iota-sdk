@@ -96,7 +96,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
         discriminator: UnlockConditionDiscriminator,
     })
     readonly unlockConditions: UnlockCondition[];
-    
+
     @Type(() => INativeToken)
     readonly nativeTokens?: INativeToken[];
 

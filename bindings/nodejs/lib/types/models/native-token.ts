@@ -15,6 +15,6 @@ export class INativeToken {
     /**
      * Amount of native tokens of the given Token ID.
      */
-    @Transform(value => hexToBigInt(value.value))
+    @Transform((value) => hexToBigInt(value.value))
     amount!: bigint;
 }
