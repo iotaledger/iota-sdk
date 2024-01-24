@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use packable::Packable;
@@ -106,7 +106,7 @@ impl BasicBlockBodyBuilder {
             MaxBurnedManaAmount::MinimumAmount {
                 params,
                 reference_mana_cost,
-            } => body.work_score(params) as u64 * reference_mana_cost,
+            } => (body.work_score(params) as u64 + params.signature_ed25519() as u64) * reference_mana_cost,
         };
 
         Ok(body)
