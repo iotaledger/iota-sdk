@@ -336,6 +336,14 @@ impl StateTransitionVerifier for DelegationOutput {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
 
+        if next_state.amount() != next_state.delegated_amount() {
+            return Err(StateTransitionError::InvalidDelegatedAmount);
+        }
+
+        if next_state.end_epoch() != 0 {
+            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
+        }
+
         let slot_commitment_id = context
             .transaction
             .context_inputs()
@@ -355,25 +363,17 @@ impl StateTransitionVerifier for DelegationOutput {
             protocol_parameters.epoch_nearing_threshold,
         );
 
-        let start_epoch = if past_bounded_slot_index <= registration_slot {
+        let expected_start_epoch = if past_bounded_slot_index <= registration_slot {
             past_bounded_epoch_index + 1
         } else {
             past_bounded_epoch_index + 2
         };
 
-        if next_state.start_epoch() != start_epoch {
-            // TODO: is there a specific error?
+        if next_state.start_epoch() != expected_start_epoch {
+            // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
             return Err(StateTransitionError::TransactionFailure(
                 TransactionFailureReason::SemanticValidationFailed,
             ));
-        }
-
-        if next_state.amount() != next_state.delegated_amount() {
-            return Err(StateTransitionError::InvalidDelegatedAmount);
-        }
-
-        if next_state.end_epoch() != 0 {
-            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
         }
 
         Ok(())
