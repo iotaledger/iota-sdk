@@ -354,12 +354,12 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let past_bounded_slot_index = slot_commitment_id.past_bounded_slot(protocol_parameters.max_committable_age);
         let past_bounded_epoch_index = past_bounded_slot_index.to_epoch_index(
-            protocol_parameters.genesis_slot.into(),
+            protocol_parameters.genesis_slot,
             protocol_parameters.slots_per_epoch_exponent,
         );
 
         let registration_slot = past_bounded_epoch_index.registration_slot(
-            protocol_parameters.genesis_slot.into(),
+            protocol_parameters.genesis_slot,
             protocol_parameters.slots_per_epoch_exponent,
             protocol_parameters.epoch_nearing_threshold,
         );
@@ -399,12 +399,12 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let future_bounded_slot_index = slot_commitment_id.future_bounded_slot(protocol_parameters.min_committable_age);
         let future_bounded_epoch_index = future_bounded_slot_index.to_epoch_index(
-            protocol_parameters.genesis_slot.into(),
+            protocol_parameters.genesis_slot,
             protocol_parameters.slots_per_epoch_exponent,
         );
 
         let registration_slot = future_bounded_epoch_index.registration_slot(
-            protocol_parameters.genesis_slot.into(),
+            protocol_parameters.genesis_slot,
             protocol_parameters.slots_per_epoch_exponent,
             protocol_parameters.epoch_nearing_threshold,
         );
