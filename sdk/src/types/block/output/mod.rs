@@ -228,6 +228,7 @@ impl Output {
         target_index: SlotIndex,
     ) -> Result<u64, Error> {
         let decayed_mana = self.decayed_stored_and_potential_mana(protocol_parameters, creation_index, target_index)?;
+        
         decayed_mana
             .stored
             .checked_add(decayed_mana.potential)
