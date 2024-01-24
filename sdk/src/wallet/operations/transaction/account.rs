@@ -78,6 +78,7 @@ where
 
         let transaction_options = TransactionOptions {
             context_inputs: Some(vec![
+                // TODO Remove in https://github.com/iotaledger/iota-sdk/pull/1872
                 CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
                 BlockIssuanceCreditContextInput::new(account_id).into(),
             ]),
