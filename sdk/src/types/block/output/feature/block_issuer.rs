@@ -81,7 +81,7 @@ impl Ed25519PublicKeyHashBlockIssuerKey {
     }
 
     /// Creates a new [`Ed25519PublicKeyHashBlockIssuerKey`] from an [`ed25519::PublicKey`].
-    pub fn from_public_key(public_key: &ed25519::PublicKey) -> Self {
+    pub fn from_public_key(public_key: ed25519::PublicKey) -> Self {
         Self(Blake2b256::digest(public_key.to_bytes()).into())
     }
 }

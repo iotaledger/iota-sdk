@@ -99,7 +99,7 @@ where
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
                 BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(
-                    Ed25519PublicKeyHashBlockIssuerKey::from_public_key(&public_key),
+                    Ed25519PublicKeyHashBlockIssuerKey::from_public_key(public_key),
                 )])?,
             )?])
             .finish_output()?;

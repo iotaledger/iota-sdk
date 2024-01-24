@@ -109,7 +109,7 @@ pub fn rand_tag_feature() -> TagFeature {
 /// Generates a valid random Ed25519 public key hash block issuer key.
 pub fn rand_ed25519_public_key_hash_block_issuer_key() -> Ed25519PublicKeyHashBlockIssuerKey {
     Ed25519PublicKeyHashBlockIssuerKey::from_public_key(
-        &crypto::signatures::ed25519::SecretKey::generate().unwrap().public_key(),
+        crypto::signatures::ed25519::SecretKey::generate().unwrap().public_key(),
     )
 }
 
