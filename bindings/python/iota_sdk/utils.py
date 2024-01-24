@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from json import dumps, loads
 import json
 from typing import TYPE_CHECKING, List, Optional
 from iota_sdk.common import custom_encoder
