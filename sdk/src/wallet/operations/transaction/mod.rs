@@ -195,7 +195,7 @@ impl<S: SecretManage> Wallet<SecretData<S>> {
         {
             // TODO: maybe better to use the wallet address as identifier now?
             log::debug!("[TRANSACTION] storing wallet");
-            self.storage_manager().save_wallet_data(&*wallet_data).await?;
+            self.storage_manager().save_wallet_data(&wallet_data).await?;
         }
 
         Ok(transaction)

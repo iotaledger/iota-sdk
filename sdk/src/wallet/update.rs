@@ -23,7 +23,7 @@ impl<T> Wallet<T> {
         let mut wallet_data = self.data_mut().await;
         wallet_data.alias = Some(alias.to_string());
         #[cfg(feature = "storage")]
-        self.storage_manager().save_wallet_data(&*wallet_data).await?;
+        self.storage_manager().save_wallet_data(&wallet_data).await?;
         Ok(())
     }
 
@@ -113,7 +113,7 @@ impl<T> Wallet<T> {
         #[cfg(feature = "storage")]
         {
             log::debug!("[SYNC] storing wallet with new synced data");
-            self.storage_manager().save_wallet_data(&*wallet_data).await?;
+            self.storage_manager().save_wallet_data(&wallet_data).await?;
         }
         Ok(())
     }
@@ -174,7 +174,7 @@ impl<T> Wallet<T> {
         #[cfg(feature = "storage")]
         {
             log::debug!("[SYNC] storing wallet with new synced transactions");
-            self.storage_manager().save_wallet_data(&*wallet_data).await?;
+            self.storage_manager().save_wallet_data(&wallet_data).await?;
         }
         Ok(())
     }
@@ -191,7 +191,7 @@ impl<T> Wallet<T> {
         #[cfg(feature = "storage")]
         {
             log::debug!("[save] wallet data with updated bech32 hrp",);
-            self.storage_manager().save_wallet_data(&*wallet_data).await?;
+            self.storage_manager().save_wallet_data(&wallet_data).await?;
         }
 
         Ok(())
