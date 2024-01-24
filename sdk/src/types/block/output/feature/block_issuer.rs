@@ -293,14 +293,14 @@ mod dto {
     pub struct Ed25519PublicKeyHashBlockIssuerKeyDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub public_key: String,
+        pub public_key_hash: String,
     }
 
     impl From<&Ed25519PublicKeyHashBlockIssuerKey> for Ed25519PublicKeyHashBlockIssuerKeyDto {
         fn from(value: &Ed25519PublicKeyHashBlockIssuerKey) -> Self {
             Self {
                 kind: Ed25519PublicKeyHashBlockIssuerKey::KIND,
-                public_key: prefix_hex::encode(value.0.as_slice()),
+                public_key_hash: prefix_hex::encode(value.0.as_slice()),
             }
         }
     }
@@ -310,7 +310,7 @@ mod dto {
 
         fn try_from(value: Ed25519PublicKeyHashBlockIssuerKeyDto) -> Result<Self, Self::Error> {
             Ok(Self(
-                prefix_hex::decode(value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
+                prefix_hex::decode(value.public_key_hash).map_err(|_| Error::InvalidField("publicKey"))?,
             ))
         }
     }
