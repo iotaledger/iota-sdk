@@ -8,6 +8,7 @@ protocol_params_json = {}
 with open('../../sdk/tests/types/fixtures/protocol_parameters.json', "r", encoding="utf-8") as json_file:
     protocol_params_json = json.load(json_file)
 
+
 def test_basic_block_tagged_data_payload():
     basic_block_tagged_data_payload_json = {}
     with open('../../sdk/tests/types/fixtures/basic_block_tagged_data_payload.json', "r", encoding="utf-8") as json_file:
@@ -22,6 +23,7 @@ def test_basic_block_tagged_data_payload():
     expected_id = basic_block_tagged_data_payload_json['id']
     assert block.id(protocol_params) == expected_id
 
+
 def test_basic_block_transaction_payload():
     basic_block_transaction_payload_json = {}
     with open('../../sdk/tests/types/fixtures/basic_block_transaction_payload.json', "r", encoding="utf-8") as json_file:
@@ -35,6 +37,7 @@ def test_basic_block_transaction_payload():
     protocol_params = ProtocolParameters.from_dict(protocol_params_dict)
     expected_id = basic_block_transaction_payload_json['id']
     assert block.id(protocol_params) == expected_id
+
 
 def test_validation_block():
     validation_block_json = {}
