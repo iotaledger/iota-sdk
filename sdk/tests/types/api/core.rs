@@ -8,7 +8,7 @@ use iota_sdk::types::{
         UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
     },
     block::{
-        output::{Output, OutputMetadata, OutputWithMetadata},
+        output::{OutputMetadata, OutputWithMetadata},
         slot::SlotCommitment,
         BlockDto, BlockId,
     },
@@ -30,7 +30,7 @@ where
     let t = serde_json::from_value::<T>(value_des.clone())?;
     let value_ser = serde_json::to_value(&t)?;
 
-    // assert_eq!(value_des, value_ser);
+    assert_eq!(value_des, value_ser);
 
     Ok(t)
 }

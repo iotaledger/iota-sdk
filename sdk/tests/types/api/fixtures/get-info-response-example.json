@@ -14,9 +14,9 @@
     "pruningEpoch": 4
   },
   "metrics": {
-    "blocksPerSecond": "1.1E+00",
-    "confirmedBlocksPerSecond": "2.2E+00",
-    "confirmationRate": "3.3E+00"
+    "blocksPerSecond": "1.1",
+    "confirmedBlocksPerSecond": "2.2",
+    "confirmationRate": "3.3"
   },
   "protocolParameters": [
     {
@@ -107,8 +107,5 @@
     "unit": "SMR",
     "subunit": "glow",
     "decimals": 6
-  },
-  "features": [
-    "test"
-  ]
+  }
 }
