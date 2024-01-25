@@ -42,6 +42,7 @@ hex = { version = "0.4.3", default-features = false }
 iota-crypto = { version = "0.23.0", default-features = false, features = [
     "blake2b",
     "ed25519",
+    "bip44",
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.2.0", default-features = false }
@@ -190,7 +191,6 @@ client = [
     "serde",
     "iota-crypto/bip39",
     "iota-crypto/bip39-en",
-    "iota-crypto/bip44",
     "iota-crypto/keccak",
     "iota-crypto/random",
     "iota-crypto/slip10",
