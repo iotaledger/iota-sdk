@@ -1,0 +1,25 @@
+{
+  "commitmentId":"0x7387ebe23a3ac1732fcdb6cef77fc003e1fa6e2dad89dd664df249d6aa2dbdc157dec2c6",
+  "createdOutputs":[
+     {
+        "outputId":"0x3130f21c723fa597805763739f3a2a40b674af6b4071ef0494331b644a7e4d52000000001300",
+        "output":{
+           "type":0,
+           "amount":"1000",
+           "unlockConditions":[
+              {
+                 "type":0,
+                 "address":{
+                    "type":0,
+                    "pubKeyHash":"0x8eaf87ac1f52eb05f2c7c0c15502df990a228838dc37bd18de9503d69afd257d"
+                 }
+              }
+           ],
+           "mana":"2000"
+        }
+     }
+  ],
+  "consumedOutputs":[
+     
+  ]
+}
