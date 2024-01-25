@@ -66,7 +66,6 @@ impl StorageScore for BlockIssuerKey {
 /// An Ed25519 public key hash block issuer key.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ed25519PublicKeyHashBlockIssuerKey([u8; Self::LENGTH]);
 
 impl Ed25519PublicKeyHashBlockIssuerKey {
@@ -257,39 +256,45 @@ impl WorkScore for BlockIssuerFeature {
 
 #[cfg(feature = "serde")]
 mod dto {
-    use alloc::{string::String, vec::Vec};
+    use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{slot::SlotIndex, Error};
+    use crate::{
+        types::block::{slot::SlotIndex, Error},
+        utils::serde::prefix_hex_bytes,
+    };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Ed25519PublicKeyHashBlockIssuerKeyDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub public_key_hash: String,
+        #[serde(with = "prefix_hex_bytes")]
+        pub pub_key_hash: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH],
     }
 
     impl From<&Ed25519PublicKeyHashBlockIssuerKey> for Ed25519PublicKeyHashBlockIssuerKeyDto {
         fn from(value: &Ed25519PublicKeyHashBlockIssuerKey) -> Self {
             Self {
                 kind: Ed25519PublicKeyHashBlockIssuerKey::KIND,
-                public_key_hash: prefix_hex::encode(value.0.as_slice()),
+                pub_key_hash: value.0,
             }
         }
     }
 
-    impl TryFrom<Ed25519PublicKeyHashBlockIssuerKeyDto> for Ed25519PublicKeyHashBlockIssuerKey {
-        type Error = Error;
-
-        fn try_from(value: Ed25519PublicKeyHashBlockIssuerKeyDto) -> Result<Self, Self::Error> {
-            Ok(Self(
-                prefix_hex::decode(value.public_key_hash).map_err(|_| Error::InvalidField("publicKey"))?,
-            ))
+    impl From<Ed25519PublicKeyHashBlockIssuerKeyDto> for Ed25519PublicKeyHashBlockIssuerKey {
+        fn from(value: Ed25519PublicKeyHashBlockIssuerKeyDto) -> Self {
+            Self(value.pub_key_hash)
         }
     }
+
+    crate::impl_serde_typed_dto!(
+        Ed25519PublicKeyHashBlockIssuerKey,
+        Ed25519PublicKeyHashBlockIssuerKeyDto,
+        "ed25519 public key hash block issuer key"
+    );
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
