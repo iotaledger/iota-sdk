@@ -5,7 +5,7 @@ use packable::Packable;
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, BlockBody, Parents},
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore},
+    protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
 
@@ -159,8 +159,6 @@ impl ValidationBlockBody {
         self.protocol_parameters_hash
     }
 }
-
-impl WorkScore for ValidationBlockBody {}
 
 fn verify_protocol_parameters_hash<const VERIFY: bool>(
     hash: &ProtocolParametersHash,
