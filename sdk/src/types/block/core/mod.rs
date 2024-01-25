@@ -20,7 +20,7 @@ pub use self::{
 };
 use crate::types::block::{
     core::basic::MaxBurnedManaAmount,
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
+    protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
 
@@ -103,15 +103,6 @@ impl BlockBody {
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
-    }
-}
-
-impl WorkScore for BlockBody {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        match self {
-            Self::Basic(basic) => basic.work_score(params),
-            Self::Validation(validation) => validation.work_score(params),
-        }
     }
 }
 
