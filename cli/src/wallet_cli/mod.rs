@@ -116,6 +116,9 @@ pub enum WalletCommand {
     DelayDelegationClaiming {
         /// ID of the delegation to be delayed.
         delegation_id: DelegationId,
+        /// Whether excess amount above the minimum storage requirement should be reclaimed.
+        /// Otherwise the excess will be transferred into a new delegation.
+        reclaim_excess: bool,
     },
     /// Destroy an account output.
     DestroyAccount {
@@ -1246,7 +1249,10 @@ pub async fn prompt_internal(
                         } => {
                             todo!()
                         }
-                        WalletCommand::DelayDelegationClaiming { delegation_id } => {
+                        WalletCommand::DelayDelegationClaiming {
+                            delegation_id,
+                            reclaim_excess,
+                        } => {
                             todo!()
                         }
                         WalletCommand::DestroyAccount { account_id } => {
