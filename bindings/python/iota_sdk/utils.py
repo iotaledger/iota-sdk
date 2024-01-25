@@ -268,7 +268,8 @@ class Utils():
             'protocolParameters': protocol_parameters,
         })
 
-        return DecayedMana(int(decayed_mana["stored"]), int(decayed_mana["potential"]))
+        return DecayedMana(int(decayed_mana["stored"]), int(
+            decayed_mana["potential"]))
 
 
 class UtilsError(Exception):
