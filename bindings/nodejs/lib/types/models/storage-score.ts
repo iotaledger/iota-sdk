@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { u64 } from "../utils/type-aliases";
+import { u64 } from '../utils/type-aliases';
 
 /**
  * Defines the parameters of storage score calculations on objects which take node resources.
