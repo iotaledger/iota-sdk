@@ -1,0 +1,25 @@
+{
+  "stakers": [
+    {
+      "address": "rms1pp4wuuz0y42caz48vv876qfpmffswsvg40zz8v79sy8cp0jfxm4kunflcgt",
+      "stakingEndEpoch": 100,
+      "poolStake": "200000",
+      "validatorStake": "100000",
+      "fixedCost": "50000",
+      "active": false,
+      "latestSupportedProtocolVersion": 3,
+      "latestSupportedProtocolHash": "0x0c00425134785bf2dbe42e4ec7e288009ebdc38ced797beaa45d5213092021cb"
+    },
+    {
+      "address": "rms1pqm4xk8e9ny5w5rxjkvtp249tfhlwvcshyr3pc0665jvp7g3hc875k538hl",
+      "stakingEndEpoch": 10,
+      "poolStake": "205000",
+      "validatorStake": "90000",
+      "fixedCost": "52000",
+      "active": true,
+      "latestSupportedProtocolVersion": 3,
+      "latestSupportedProtocolHash": "0x0c00425134785bf2dbe42e4ec7e288009ebdc38ced797beaa45d5213092021cb"
+    }
+  ],
+  "pageSize": 50
+}

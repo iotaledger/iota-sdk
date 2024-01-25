@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send native tokens.
@@ -46,15 +46,9 @@ async fn main() -> Result<()> {
     if let Some(token_id) = balance
         .native_tokens()
         .iter()
-        .find(|t| t.available() >= U256::from(SEND_NATIVE_TOKEN_AMOUNT))
-        .map(|t| t.token_id())
+        .find_map(|(id, t)| (t.available() >= U256::from(SEND_NATIVE_TOKEN_AMOUNT)).then_some(id))
     {
-        let available_balance = balance
-            .native_tokens()
-            .iter()
-            .find(|t| t.token_id() == token_id)
-            .unwrap()
-            .available();
+        let available_balance = balance.native_tokens().get(token_id).unwrap().available();
         println!("Balance before sending: {available_balance}");
 
         // Set the stronghold password
@@ -84,12 +78,7 @@ async fn main() -> Result<()> {
 
         let balance = wallet.sync(None).await?;
 
-        let available_balance = balance
-            .native_tokens()
-            .iter()
-            .find(|t| t.token_id() == token_id)
-            .unwrap()
-            .available();
+        let available_balance = balance.native_tokens().get(token_id).unwrap().available();
         println!("Balance after sending: {available_balance}",);
     } else {
         println!("Insufficient native token funds");

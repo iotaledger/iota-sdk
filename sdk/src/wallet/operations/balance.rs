@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
@@ -6,10 +6,9 @@ use primitive_types::U256;
 use crate::{
     client::secret::SecretManage,
     types::block::output::{
-        unlock_condition::UnlockCondition, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
+        unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
-        core::WalletData,
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
         Result, Wallet,
@@ -21,18 +20,10 @@ impl<T> Wallet<T> {
     pub async fn balance(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
 
-        let wallet_data = self.data().await;
-
-        self.balance_inner(&wallet_data).await
-    }
-
-    async fn balance_inner(
-        &self,
-        // addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
-        wallet_data: &WalletData,
-    ) -> Result<Balance> {
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
+
+        let wallet_data = self.data().await.clone();
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
 
@@ -69,6 +60,12 @@ impl<T> Wallet<T> {
                 Output::Account(account) => {
                     // Add amount
                     balance.base_coin.total += account.amount();
+                    balance.mana.total += output.decayed_mana(
+                        &protocol_parameters,
+                        output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
+
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
@@ -76,7 +73,7 @@ impl<T> Wallet<T> {
                     }
 
                     let account_id = account.account_id_non_null(output_id);
-                    balance.accounts.push(account_id);
+                    balance.accounts.insert(account_id);
                 }
                 Output::Foundry(foundry) => {
                     // Add amount
@@ -92,7 +89,7 @@ impl<T> Wallet<T> {
                         total_native_tokens.add_native_token(*native_token)?;
                     }
 
-                    balance.foundries.push(foundry.id());
+                    balance.foundries.insert(foundry.id());
                 }
                 Output::Delegation(delegation) => {
                     // Add amount
@@ -104,7 +101,7 @@ impl<T> Wallet<T> {
                     }
 
                     let delegation_id = delegation.delegation_id_non_null(output_id);
-                    balance.delegations.push(delegation_id);
+                    balance.delegations.insert(delegation_id);
                 }
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
@@ -117,11 +114,17 @@ impl<T> Wallet<T> {
                         // add nft_id for nft outputs
                         if let Output::Nft(nft) = &output {
                             let nft_id = nft.nft_id_non_null(output_id);
-                            balance.nfts.push(nft_id);
+                            balance.nfts.insert(nft_id);
                         }
 
                         // Add amount
                         balance.base_coin.total += output.amount();
+                        // Add decayed mana
+                        balance.mana.total += output.decayed_mana(
+                            &protocol_parameters,
+                            output_id.transaction_id().slot_index(),
+                            slot_index,
+                        )?;
 
                         // Add storage deposit
                         if output.is_basic() {
@@ -186,11 +189,17 @@ impl<T> Wallet<T> {
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {
                                     let nft_id = output.nft_id_non_null(output_id);
-                                    balance.nfts.push(nft_id);
+                                    balance.nfts.insert(nft_id);
                                 }
 
                                 // Add amount
                                 balance.base_coin.total += amount;
+                                // Add decayed mana
+                                balance.mana.total += output.decayed_mana(
+                                    &protocol_parameters,
+                                    output_id.transaction_id().slot_index(),
+                                    slot_index,
+                                )?;
 
                                 // Add storage deposit
                                 if output.is_basic() {
@@ -237,27 +246,11 @@ impl<T> Wallet<T> {
             }
         }
 
-        self.finish(
-            balance,
-            wallet_data,
-            network_id,
-            total_storage_cost,
-            total_native_tokens,
-        )
-    }
-
-    fn finish(
-        &self,
-        mut balance: Balance,
-        wallet_data: &WalletData,
-        network_id: u64,
-        total_storage_cost: u64,
-        total_native_tokens: NativeTokensBuilder,
-    ) -> Result<Balance> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_data.locked_outputs);
 
         let mut locked_amount = 0;
+        let mut locked_mana = DecayedMana::default();
         let mut locked_native_tokens = NativeTokensBuilder::default();
 
         for locked_output in &wallet_data.locked_outputs {
@@ -269,6 +262,12 @@ impl<T> Wallet<T> {
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
+                    locked_mana += output_data.output.decayed_mana(
+                        &protocol_parameters,
+                        output_data.output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
+
                     if let Some(native_token) = output_data.output.native_token() {
                         locked_native_tokens.add_native_token(*native_token)?;
                     }
@@ -277,9 +276,12 @@ impl<T> Wallet<T> {
         }
 
         log::debug!(
-            "[BALANCE] total_amount: {}, locked_amount: {}, total_storage_cost: {}",
+            "[BALANCE] total_amount: {}, total_potential: {}, total_stored: {}, locked_amount: {}, locked_mana: {:?}, total_storage_cost: {}",
             balance.base_coin.total,
+            balance.mana.total.potential,
+            balance.mana.total.stored,
             locked_amount,
+            locked_mana,
             total_storage_cost,
         );
 
@@ -301,12 +303,14 @@ impl<T> Wallet<T> {
                 .and_then(|foundry| foundry.immutable_features().metadata())
                 .cloned();
 
-            balance.native_tokens.push(NativeTokensBalance {
-                token_id: *native_token.token_id(),
-                total: native_token.amount(),
-                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
-                metadata,
-            })
+            balance.native_tokens.insert(
+                *native_token.token_id(),
+                NativeTokensBalance {
+                    total: native_token.amount(),
+                    available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+                    metadata,
+                },
+            );
         }
 
         #[cfg(not(feature = "participation"))]
@@ -321,6 +325,10 @@ impl<T> Wallet<T> {
                 .saturating_sub(locked_amount)
                 .saturating_sub(balance.base_coin.voting_power);
         }
+        balance.mana.available = DecayedMana {
+            potential: balance.mana.total.potential.saturating_sub(locked_mana.potential),
+            stored: balance.mana.total.stored.saturating_sub(locked_mana.stored),
+        };
 
         Ok(balance)
     }
