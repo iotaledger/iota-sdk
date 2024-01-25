@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
@@ -264,17 +264,9 @@ async fn claim_2_native_tokens() -> Result<()> {
     let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.native_tokens().len(), 2);
-    let native_token_0 = balance
-        .native_tokens()
-        .iter()
-        .find(|t| t.token_id() == &create_tx_0.token_id)
-        .unwrap();
+    let native_token_0 = balance.native_tokens().get(&create_tx_0.token_id).unwrap();
     assert_eq!(native_token_0.total(), native_token_amount);
-    let native_token_1 = balance
-        .native_tokens()
-        .iter()
-        .find(|t| t.token_id() == &create_tx_1.token_id)
-        .unwrap();
+    let native_token_1 = balance.native_tokens().get(&create_tx_1.token_id).unwrap();
     assert_eq!(native_token_1.total(), native_token_amount);
 
     tear_down(storage_path_0)?;
@@ -379,17 +371,9 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.native_tokens().len(), 2);
-    let native_token_0 = balance
-        .native_tokens()
-        .iter()
-        .find(|t| t.token_id() == &create_tx_0.token_id)
-        .unwrap();
+    let native_token_0 = balance.native_tokens().get(&create_tx_0.token_id).unwrap();
     assert_eq!(native_token_0.total(), native_token_amount);
-    let native_token_1 = balance
-        .native_tokens()
-        .iter()
-        .find(|t| t.token_id() == &create_tx_1.token_id)
-        .unwrap();
+    let native_token_1 = balance.native_tokens().get(&create_tx_1.token_id).unwrap();
     assert_eq!(native_token_1.total(), native_token_amount);
 
     tear_down(storage_path_0)?;
