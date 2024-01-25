@@ -121,10 +121,12 @@ class Block {
     }
 
     /**
-     * Gets the block id.
+     * Returns the block id.
      */
-    id(params: ProtocolParameters): BlockId {
-        return Utils.blockId(this, params);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    static id(block: Block, params: ProtocolParameters): BlockId {
+        // Implementation injected in lib/index.ts, as it uses bindings.
+        return null as unknown as BlockId;
     }
 }
 

@@ -4,8 +4,14 @@
 // Needed for class-transformer json deserialisation
 import 'reflect-metadata';
 import { callUtilsMethod } from './bindings';
-import { OutputId, UTXOInput } from './types';
-import { bigIntToHex } from './utils';
+import {
+    Block,
+    BlockId,
+    OutputId,
+    UTXOInput,
+    ProtocolParameters,
+} from './types';
+import { HexEncodedString, bigIntToHex, Utils } from './utils';
 
 // Allow bigint to be serialized as hex string.
 //
@@ -16,8 +22,8 @@ import { bigIntToHex } from './utils';
     return bigIntToHex(this);
 };
 
-// Assign the util method on UTXOInput here,
-// to prevent loading bindings (callUtilsMethod) when importing UTXOInput just for typing.
+// Assign the util method on UTXOInput here to prevent loading bindings (callUtilsMethod)
+// when importing UTXOInput just for typing.
 Object.assign(UTXOInput, {
     /**
      * Creates a `UTXOInput` from an output id.
@@ -30,6 +36,17 @@ Object.assign(UTXOInput, {
             },
         });
         return new UTXOInput(input.transactionId, input.transactionOutputIndex);
+    },
+});
+
+// Assign the util method on Block here to prevent loading bindings (callUtilsMethod)
+// when importing Block just for typing.
+Object.assign(Block, {
+    /**
+     * Returns the block id for the given block.
+     */
+    id(block: Block, params: ProtocolParameters): BlockId {
+        return Utils.blockId(block, params);
     },
 });
 

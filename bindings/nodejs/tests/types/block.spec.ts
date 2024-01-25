@@ -17,7 +17,7 @@ describe('Block tests', () => {
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
         const expected_id = basic_block_tagged_data_payload_json.id as BlockId;
-        expect(block.id(params)).toEqual(expected_id);
+        expect(Block.id(block, params)).toEqual(expected_id);
     });
 
     it('compares basic block transaction payload from a fixture', async () => {
@@ -25,7 +25,7 @@ describe('Block tests', () => {
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
         const expected_id = basic_block_transaction_payload_json.id as BlockId;
-        expect(block.id(params)).toEqual(expected_id);
+        expect(Block.id(block, params)).toEqual(expected_id);
     });
 
     it('compares validation block from a fixture', async () => {
@@ -33,6 +33,6 @@ describe('Block tests', () => {
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
         const expected_id = validation_block_json.id as BlockId;
-        expect(block.id(params)).toEqual(expected_id);
+        expect(Block.id(block, params)).toEqual(expected_id);
     });
 });
