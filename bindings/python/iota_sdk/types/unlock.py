@@ -37,11 +37,11 @@ class UnlockType(IntEnum):
 class SignatureUnlock:
     """An unlock holding a signature unlocking one or more inputs.
     """
-    signature: Ed25519Signature
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Signature),
         init=False)
+    signature: Ed25519Signature
 
     def to_dict(self):
         """Custom dict conversion.
@@ -58,11 +58,11 @@ class SignatureUnlock:
 class ReferenceUnlock:
     """An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
     """
-    reference: int
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Reference),
         init=False)
+    reference: int
 
     def to_dict(self):
         """Custom dict conversion.
@@ -79,11 +79,11 @@ class ReferenceUnlock:
 class AccountUnlock:
     """An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
     """
-    reference: int
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Account),
         init=False)
+    reference: int
 
     def to_dict(self):
         """Custom dict conversion.
@@ -100,11 +100,11 @@ class AccountUnlock:
 class AnchorUnlock:
     """An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
     """
-    reference: int
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Anchor),
         init=False)
+    reference: int
 
     def to_dict(self):
         """Custom dict conversion.
@@ -147,13 +147,13 @@ def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
 class MultiUnlock:
     """Unlocks a MultiAddress with a list of other unlocks.
     """
-    unlocks: List[Unlock] = field(metadata=config(
-        decoder=deserialize_unlocks
-    ))
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Multi),
         init=False)
+    unlocks: List[Unlock] = field(metadata=config(
+        decoder=deserialize_unlocks
+    ))
 
     def to_dict(self):
         """Custom dict conversion.

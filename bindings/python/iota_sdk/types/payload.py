@@ -79,12 +79,12 @@ class TaggedDataPayload:
         tag: The tag part of the tagged data payload.
         data: The data part of the tagged data payload.
     """
-    tag: HexStr
-    data: HexStr
     type: int = field(
         default_factory=lambda: int(
             PayloadType.TaggedData),
         init=False)
+    tag: HexStr
+    data: HexStr
 
     def to_dict(self):
         """Custom dict conversion.
@@ -173,14 +173,14 @@ class SignedTransactionPayload:
         transaction: The transaction.
         unlocks: The unlocks of the transaction.
     """
-    transaction: Transaction
-    unlocks: List[Unlock] = field(metadata=config(
-        decoder=deserialize_unlocks
-    ))
     type: int = field(
         default_factory=lambda: int(
             PayloadType.SignedTransaction),
         init=False)
+    transaction: Transaction
+    unlocks: List[Unlock] = field(metadata=config(
+        decoder=deserialize_unlocks
+    ))
 
     def to_dict(self):
         """Custom dict conversion.
