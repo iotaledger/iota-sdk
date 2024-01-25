@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will melt an existing native token with its foundry.
@@ -44,11 +44,7 @@ async fn main() -> Result<()> {
         .map(|s| s.parse::<TokenId>().expect("invalid token id"))
         .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
 
-    if let Some(native_token_balance) = balance
-        .native_tokens()
-        .iter()
-        .find(|native_token| native_token.token_id() == &token_id)
-    {
+    if let Some(native_token_balance) = balance.native_tokens().get(&token_id) {
         let available_balance = native_token_balance.available();
         println!("Balance before melting: {available_balance}");
     } else {
@@ -77,12 +73,7 @@ async fn main() -> Result<()> {
     );
 
     let balance = wallet.sync(None).await?;
-    let available_balance = balance
-        .native_tokens()
-        .iter()
-        .find(|t| t.token_id() == &token_id)
-        .unwrap()
-        .available();
+    let available_balance = balance.native_tokens().get(&token_id).unwrap().available();
     println!("Balance after melting: {available_balance}",);
 
     Ok(())
