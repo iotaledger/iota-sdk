@@ -7,7 +7,10 @@ use crate::{
         address::Address,
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{
-            feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
+            feature::{
+                BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeySource, BlockIssuerKeys,
+                Ed25519PublicKeyHashBlockIssuerKey,
+            },
             unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutput, OutputId,
         },
@@ -24,11 +27,15 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Transitions an implicit account to an account.
-    pub async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
+    pub async fn implicit_account_transition(
+        &self,
+        output_id: &OutputId,
+        key_source: impl Into<BlockIssuerKeySource> + Send,
+    ) -> Result<TransactionWithMetadata> {
         let issuer_id = AccountId::from(output_id);
 
         self.sign_and_submit_transaction(
-            self.prepare_implicit_account_transition(output_id).await?,
+            self.prepare_implicit_account_transition(output_id, key_source).await?,
             issuer_id,
             None,
         )
@@ -36,7 +43,11 @@ where
     }
 
     /// Prepares to transition an implicit account to an account.
-    pub async fn prepare_implicit_account_transition(&self, output_id: &OutputId) -> Result<PreparedTransactionData>
+    pub async fn prepare_implicit_account_transition(
+        &self,
+        output_id: &OutputId,
+        key_source: impl Into<BlockIssuerKeySource> + Send,
+    ) -> Result<PreparedTransactionData>
     where
         crate::wallet::Error: From<S::Error>,
     {
@@ -55,6 +66,25 @@ where
             .as_implicit_account_creation()
             .ed25519_address();
 
+        let block_issuer_key = BlockIssuerKey::from(match key_source.into() {
+            BlockIssuerKeySource::ImplicitAccountAddress => Ed25519PublicKeyHashBlockIssuerKey::new(*ed25519_address),
+            BlockIssuerKeySource::PublicKey(public_key) => {
+                Ed25519PublicKeyHashBlockIssuerKey::from_public_key(public_key)
+            }
+            BlockIssuerKeySource::Bip44Path(bip_path) => Ed25519PublicKeyHashBlockIssuerKey::from_public_key(
+                self.secret_manager
+                    .read()
+                    .await
+                    .generate_ed25519_public_keys(
+                        bip_path.coin_type,
+                        bip_path.account,
+                        bip_path.address_index..bip_path.address_index + 1,
+                        None,
+                    )
+                    .await?[0],
+            ),
+        });
+
         let account_id = AccountId::from(output_id);
         let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
             .with_mana(implicit_account_data.output.available_mana(
@@ -65,9 +95,7 @@ where
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(ed25519_address))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519PublicKeyHashBlockIssuerKey::new(
-                    *ed25519_address,
-                ))])?,
+                BlockIssuerKeys::from_vec(vec![block_issuer_key])?,
             )?])
             .finish_output()?;
 

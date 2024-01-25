@@ -3,11 +3,15 @@
 
 use std::time::Duration;
 
+use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
     client::api::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
-    types::{block::address::ToBech32Ext, TryFromDto},
+    types::{
+        block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
+        TryFromDto,
+    },
     wallet::{types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
@@ -204,9 +208,26 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
-        WalletMethod::PrepareImplicitAccountTransition { output_id } => Response::PreparedTransaction(
-            PreparedTransactionDataDto::from(&wallet.prepare_implicit_account_transition(&output_id).await?),
-        ),
+        WalletMethod::PrepareImplicitAccountTransition {
+            output_id,
+            public_key,
+            bip_path,
+        } => {
+            let data = if let Some(public_key_str) = public_key {
+                let public_key = PublicKey::try_from_bytes(prefix_hex::decode(public_key_str)?)
+                    .map_err(iota_sdk::wallet::Error::from)?;
+                wallet
+                    .prepare_implicit_account_transition(&output_id, public_key)
+                    .await?
+            } else if Some(bip_path) = bip_path {
+                wallet.prepare_implicit_account_transition(&output_id, bip_path).await?
+            } else {
+                wallet
+                    .prepare_implicit_account_transition(&output_id, BlockIssuerKeySource::ImplicitAccountAddress)
+                    .await?
+            };
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::ImplicitAccounts => {
             Response::OutputsData(wallet.data().await.implicit_accounts().cloned().collect())
         }

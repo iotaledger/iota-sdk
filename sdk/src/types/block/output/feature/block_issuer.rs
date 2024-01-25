@@ -6,7 +6,8 @@ use core::ops::RangeInclusive;
 
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    signatures::ed25519,
+    keys::bip44::Bip44,
+    signatures::{ed25519, ed25519::PublicKey},
 };
 use derive_more::{AsRef, Deref, From};
 use iterator_sorted::is_unique_sorted;
@@ -252,6 +253,13 @@ impl WorkScore for BlockIssuerFeature {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
         params.block_issuer()
     }
+}
+
+#[derive(From)]
+pub enum BlockIssuerKeySource {
+    ImplicitAccountAddress,
+    PublicKey(PublicKey),
+    Bip44Path(Bip44),
 }
 
 #[cfg(feature = "serde")]

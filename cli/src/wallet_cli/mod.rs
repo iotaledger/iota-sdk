@@ -13,8 +13,10 @@ use iota_sdk::{
         address::{Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
         output::{
-            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder,
-            FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId, TokenId,
+            feature::{BlockIssuerKeySource, MetadataFeature},
+            unlock_condition::AddressUnlockCondition,
+            AccountId, BasicOutputBuilder, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId,
+            TokenId,
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
@@ -661,7 +663,9 @@ pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Resul
 
 // `implicit-account-transition` command
 pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: OutputId) -> Result<(), Error> {
-    let transaction = wallet.implicit_account_transition(&output_id).await?;
+    let transaction = wallet
+        .implicit_account_transition(&output_id, BlockIssuerKeySource::ImplicitAccountAddress)
+        .await?;
 
     println_log_info!(
         "Implicit account transition transaction sent:\n{:?}\n{:?}",
