@@ -8,7 +8,9 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    types::block::output::{feature::MetadataFeature, AccountId, DelegationId, FoundryId, NftId, OutputId, TokenId},
+    types::block::output::{
+        feature::MetadataFeature, AccountId, DecayedMana, DelegationId, FoundryId, NftId, OutputId, TokenId,
+    },
     utils::serde::string,
 };
 
@@ -20,8 +22,8 @@ use crate::{
 pub struct Balance {
     /// Total and available amount of the base coin
     pub(crate) base_coin: BaseCoinBalance,
-    /// Various mana balances
-    pub(crate) mana: ManaBalances,
+    /// Total and available mana
+    pub(crate) mana: ManaBalance,
     /// Current required storage deposit amount
     pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
@@ -74,28 +76,15 @@ pub struct BaseCoinBalance {
     pub(crate) voting_power: u64,
 }
 
-/// Mana and BIC fields for [`Balance`]
+/// Mana fields for [`Balance`]
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, Getters, derive_more::AddAssign)]
 #[serde(rename_all = "camelCase")]
 #[getset(get_copy = "pub")]
-pub struct ManaBalances {
-    /// Total mana.
-    pub(crate) total: ManaBalance,
-    /// Available mana.
-    pub(crate) available: ManaBalance,
-}
-
-/// Mana fields for [`Balance`]
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters, derive_more::AddAssign)]
-#[serde(rename_all = "camelCase")]
-#[getset(get_copy = "pub")]
 pub struct ManaBalance {
-    /// Decayed potential mana of owned outputs.
-    #[serde(with = "string")]
-    pub(crate) potential_mana: u64,
-    /// Decayed stored mana of owned outputs.
-    #[serde(with = "string")]
-    pub(crate) stored_mana: u64,
+    /// Total mana.
+    pub(crate) total: DecayedMana,
+    /// Available mana.
+    pub(crate) available: DecayedMana,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters, derive_more::AddAssign)]
