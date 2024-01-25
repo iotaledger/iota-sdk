@@ -200,7 +200,6 @@ mod tests {
             validator_address: rand_account_address(),
         };
         let json_none = serde_json::to_string(&params_none_1).unwrap();
-        println!("{json_none}");
         let params_none_2 = serde_json::from_str(&json_none).unwrap();
 
         assert_eq!(params_none_1, params_none_2);
