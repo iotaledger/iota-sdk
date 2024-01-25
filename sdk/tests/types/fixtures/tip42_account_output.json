@@ -28,11 +28,11 @@
         "blockIssuerKeys": [
           {
             "type": 0,
-            "pubKeyHash": "0x9e05a32eafedefd40298e24ad4f8c334580187f7e9afbd9da13b5ba4007dd1b5"
+            "pubKeyHash": "0x295409de79016133647d4078cb01618a4ba018eb74ff613138d8ff8dc05de73c"
           },
           {
             "type": 0,
-            "pubKeyHash": "0xa504844f7a0df2c5101d31696593b309040f8660d41035aba508f24c00668b21"
+            "pubKeyHash": "0x868f4c6ef7b5b1d55838cbfb8ae4f3a9776c53cdd3e3d33000094d72acab5a2f"
           }
         ]
       },
