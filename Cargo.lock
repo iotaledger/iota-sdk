@@ -1574,7 +1574,7 @@ dependencies = [
  "getrandom",
  "hkdf",
  "hmac",
- "iterator-sorted",
+ "iterator-sorted 0.1.0",
  "k256",
  "pbkdf2",
  "rand",
@@ -1626,7 +1626,7 @@ dependencies = [
  "iota-ledger-nano",
  "iota-sdk",
  "iota_stronghold",
- "iterator-sorted",
+ "iterator-sorted 0.2.0",
  "lazy_static",
  "log",
  "num_cpus",
@@ -1760,6 +1760,12 @@ name = "iterator-sorted"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d101775d2bc8f99f4ac18bf29b9ed70c0dd138b9a1e88d7b80179470cbbe8bd2"
+
+[[package]]
+name = "iterator-sorted"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed3c1d66191fc266439b989dc1a9a69d9c4156e803ce456221231398b84c35d1"
 
 [[package]]
 name = "itoa"
