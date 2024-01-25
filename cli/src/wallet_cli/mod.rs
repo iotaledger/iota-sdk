@@ -23,8 +23,9 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
-        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::{OutputData, TransactionWithMetadata},
+        ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams, OutputsToClaim,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -620,6 +621,45 @@ pub async fn create_native_token_command(
     Ok(())
 }
 
+// `create-delegation` command
+pub async fn create_delegation_command(
+    wallet: &Wallet,
+    address: Option<Bech32Address>,
+    delegated_amount: u64,
+    validator_address: AccountAddress,
+) -> Result<(), Error> {
+    println_log_info!("Creating delegation output.");
+
+    let transaction: TransactionWithMetadata = todo!();
+
+    println_log_info!(
+        "Delegation creation transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `delay-delegation-claiming` command
+pub async fn delay_delegation_claiming_command(
+    wallet: &Wallet,
+    delegation_id: DelegationId,
+    reclaim_excess: bool,
+) -> Result<(), Error> {
+    println_log_info!("Delaying delegation claiming.");
+
+    let transaction: TransactionWithMetadata = todo!();
+
+    println_log_info!(
+        "Delay delegation claiming transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `destroy-account` command
 pub async fn destroy_account_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
     println_log_info!("Destroying account {account_id}.");
@@ -643,6 +683,21 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 
     println_log_info!(
         "Destroying foundry transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `destroy-delegation` command
+pub async fn destroy_delegation_command(wallet: &Wallet, delegation_id: DelegationId) -> Result<(), Error> {
+    println_log_info!("Destroying delegation {delegation_id}.");
+
+    let transaction: TransactionWithMetadata = todo!();
+
+    println_log_info!(
+        "Destroying delegation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
@@ -1238,15 +1293,11 @@ pub async fn prompt_internal(
                             address,
                             delegated_amount,
                             validator_address,
-                        } => {
-                            todo!()
-                        }
+                        } => create_delegation_command(wallet, address, delegated_amount, validator_address).await,
                         WalletCommand::DelayDelegationClaiming {
                             delegation_id,
                             reclaim_excess,
-                        } => {
-                            todo!()
-                        }
+                        } => delay_delegation_claiming_command(wallet, delegation_id, reclaim_excess).await,
                         WalletCommand::DestroyAccount { account_id } => {
                             destroy_account_command(wallet, account_id).await
                         }
@@ -1254,7 +1305,7 @@ pub async fn prompt_internal(
                             destroy_foundry_command(wallet, foundry_id).await
                         }
                         WalletCommand::DestroyDelegation { delegation_id } => {
-                            todo!()
+                            destroy_delegation_command(wallet, delegation_id).await
                         }
                         WalletCommand::Exit => {
                             return Ok(PromptResponse::Done);
