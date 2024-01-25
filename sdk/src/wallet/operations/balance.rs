@@ -64,15 +64,8 @@ where
                 Output::Account(account) => {
                     // Add amount
                     balance.base_coin.total += account.amount();
-                    // Add stored mana
-                    balance.mana.total.stored += protocol_parameters.mana_with_decay(
-                        account.mana(),
-                        output_id.transaction_id().slot_index(),
-                        slot_index,
-                    )?;
-                    // Add potential mana
-                    balance.mana.total.potential += protocol_parameters.generate_mana_with_decay(
-                        account.amount().saturating_sub(storage_cost),
+                    balance.mana.total += output.decayed_mana(
+                        &protocol_parameters,
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
@@ -130,15 +123,9 @@ where
 
                         // Add amount
                         balance.base_coin.total += output.amount();
-                        // Add stored mana
-                        balance.mana.total.stored += protocol_parameters.mana_with_decay(
-                            output.mana(),
-                            output_id.transaction_id().slot_index(),
-                            slot_index,
-                        )?;
-                        // Add potential mana
-                        balance.mana.total.potential += protocol_parameters.generate_mana_with_decay(
-                            output.amount().saturating_sub(storage_cost),
+                        // Add decayed mana
+                        balance.mana.total += output.decayed_mana(
+                            &protocol_parameters,
                             output_id.transaction_id().slot_index(),
                             slot_index,
                         )?;
@@ -211,15 +198,9 @@ where
 
                                 // Add amount
                                 balance.base_coin.total += amount;
-                                // Add stored mana
-                                balance.mana.total.stored += protocol_parameters.mana_with_decay(
-                                    output.mana(),
-                                    output_id.transaction_id().slot_index(),
-                                    slot_index,
-                                )?;
-                                // Add potential mana
-                                balance.mana.total.potential += protocol_parameters.generate_mana_with_decay(
-                                    output.amount().saturating_sub(storage_cost),
+                                // Add decayed mana
+                                balance.mana.total += output.decayed_mana(
+                                    &protocol_parameters,
                                     output_id.transaction_id().slot_index(),
                                     slot_index,
                                 )?;
@@ -273,8 +254,7 @@ where
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_data.locked_outputs);
 
         let mut locked_amount = 0;
-        let mut locked_potential = 0;
-        let mut locked_stored = 0;
+        let mut locked_mana = DecayedMana::default();
         let mut locked_native_tokens = NativeTokensBuilder::default();
 
         for locked_output in &wallet_data.locked_outputs {
@@ -286,19 +266,12 @@ where
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
-                    locked_stored += protocol_parameters.mana_with_decay(
-                        output_data.output.mana(),
+                    locked_mana += output_data.output.decayed_mana(
+                        &protocol_parameters,
                         output_data.output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
-                    locked_potential += protocol_parameters.generate_mana_with_decay(
-                        output_data
-                            .output
-                            .amount()
-                            .saturating_sub(output_data.output.minimum_amount(storage_score_params)),
-                        output_data.output_id.transaction_id().slot_index(),
-                        slot_index,
-                    )?;
+
                     if let Some(native_token) = output_data.output.native_token() {
                         locked_native_tokens.add_native_token(*native_token)?;
                     }
@@ -307,13 +280,12 @@ where
         }
 
         log::debug!(
-            "[BALANCE] total_amount: {}, total_potential: {}, total_stored: {}, locked_amount: {}, locked_potential: {}, locked_stored: {}, total_storage_cost: {}",
+            "[BALANCE] total_amount: {}, total_potential: {}, total_stored: {}, locked_amount: {}, locked_mana: {:?}, total_storage_cost: {}",
             balance.base_coin.total,
             balance.mana.total.potential,
             balance.mana.total.stored,
             locked_amount,
-            locked_potential,
-            locked_stored,
+            locked_mana,
             total_storage_cost,
         );
 
@@ -358,8 +330,8 @@ where
                 .saturating_sub(balance.base_coin.voting_power);
         }
         balance.mana.available = DecayedMana {
-            potential: balance.mana.total.potential.saturating_sub(locked_potential),
-            stored: balance.mana.total.stored.saturating_sub(locked_stored),
+            potential: balance.mana.total.potential.saturating_sub(locked_mana.potential),
+            stored: balance.mana.total.stored.saturating_sub(locked_mana.stored),
         };
 
         Ok(balance)
