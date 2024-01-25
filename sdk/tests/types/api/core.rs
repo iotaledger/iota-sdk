@@ -72,7 +72,7 @@ fn responses() {
     // GET /api/core/v3/blocks/{blockId}
     json_response::<BlockDto>("get-block-by-id-empty-response-example.json").unwrap();
     json_response::<BlockDto>("tagged-data-block-example.json").unwrap();
-    // json_response::<BlockDto>("transaction-block-example.json").unwrap();
+    json_response::<BlockDto>("transaction-block-example.json").unwrap();
     json_response::<BlockDto>("get-block-by-id-validation-response-example.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/metadata
     json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new-transaction.json").unwrap();
@@ -96,8 +96,7 @@ fn responses() {
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes
     json_response::<UtxoChangesResponse>("get-utxo-changes-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
-    // json_response::<UtxoChangesFullResponse>("get-utxo-changes-full-response-example.json").unwrap();
+    json_response::<UtxoChangesFullResponse>("get-utxo-changes-full-response-example.json").unwrap();
 
     binary_response::<SlotCommitment>("get-commitment-response-binary-example", &()).unwrap();
-    // TODO add all remaining binary responses
 }
