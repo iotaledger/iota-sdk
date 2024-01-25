@@ -23,6 +23,7 @@ use crate::{
 pub struct CreateDelegationParams {
     /// Bech32 encoded address which will control the delegation.
     /// By default, the ed25519 wallet address will be used.
+    // TODO: https://github.com/iotaledger/iota-sdk/issues/1888
     pub address: Option<Bech32Address>,
     /// The amount to delegate.
     pub delegated_amount: u64,
@@ -128,6 +129,7 @@ where
             latest_id
         };
 
+        // TODO: Replace with methods from https://github.com/iotaledger/iota-sdk/pull/1421
         let past_bounded_slot_index = slot_commitment_id
             .slot_index()
             .past_bounded_slot(protocol_parameters.max_committable_age);
@@ -139,8 +141,7 @@ where
             protocol_parameters.epoch_nearing_threshold,
         );
 
-        let delegation_output_builder = DelegationOutputBuilder::new_with_minimum_amount(
-            protocol_parameters.storage_score_parameters(),
+        let delegation_output_builder = DelegationOutputBuilder::new_with_amount(
             params.delegated_amount,
             DelegationId::null(),
             params.validator_address,
