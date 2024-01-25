@@ -11,7 +11,7 @@ import {
     UTXOInput,
     ProtocolParameters,
 } from './types';
-import { HexEncodedString, bigIntToHex, Utils } from './utils';
+import { bigIntToHex, Utils } from './utils';
 
 // Allow bigint to be serialized as hex string.
 //

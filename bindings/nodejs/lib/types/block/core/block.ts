@@ -10,7 +10,7 @@ import { BlockBody } from './block-body';
 import { BasicBlockBody } from './basic';
 import { ValidationBlockBody } from './validation';
 import { BlockBodyDiscriminator } from '.';
-import { Utils, ProtocolParameters, BlockId } from '../../..';
+import { ProtocolParameters, BlockId } from '../../..';
 
 /**
  * The block header.
