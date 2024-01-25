@@ -189,6 +189,7 @@ export type __PrepareDelayDelegationClaimingMethod__ = {
     name: 'prepareDelayDelegationClaiming';
     data: {
         delegationId: DelegationId;
+        reclaimExcess: boolean;
     };
 };
 

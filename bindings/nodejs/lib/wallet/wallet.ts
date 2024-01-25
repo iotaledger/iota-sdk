@@ -1292,23 +1292,32 @@ export class Wallet {
      */
     async delayDelegationClaiming(
         delegationId: DelegationId,
+        reclaimExcess: boolean,
     ): Promise<TransactionWithMetadata> {
-        return (await this.prepareDelayDelegationClaiming(delegationId)).send();
+        return (
+            await this.prepareDelayDelegationClaiming(
+                delegationId,
+                reclaimExcess,
+            )
+        ).send();
     }
 
     /**
      * Prepare a transaction to delay a delegation's claiming.
      *
      * @param delegationId The id of the delegation to delay.
+     * @param reclaimExcess Whether any excess funds should be reclaimed, or put into a new delegation.
      * @returns The prepared transaction.
      */
     async prepareDelayDelegationClaiming(
         delegationId: DelegationId,
+        reclaimExcess: boolean,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
             name: 'prepareDelayDelegationClaiming',
             data: {
                 delegationId,
+                reclaimExcess,
             },
         });
 

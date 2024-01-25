@@ -323,7 +323,10 @@ pub enum WalletMethod {
         options: Option<TransactionOptions>,
     },
     #[serde(rename_all = "camelCase")]
-    PrepareDelayDelegationClaiming { delegation_id: DelegationId },
+    PrepareDelayDelegationClaiming {
+        delegation_id: DelegationId,
+        reclaim_excess: bool,
+    },
     #[serde(rename_all = "camelCase")]
     PrepareDestroyDelegation { delegation_id: DelegationId },
     // /// Stop participating for an event.

@@ -320,8 +320,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let data = wallet.prepare_create_delegation_output(params, options).await?;
             Response::PreparedCreateDelegationTransaction(data)
         }
-        WalletMethod::PrepareDelayDelegationClaiming { delegation_id } => {
-            let data = wallet.prepare_delay_delegation_claiming(delegation_id).await?;
+        WalletMethod::PrepareDelayDelegationClaiming {
+            delegation_id,
+            reclaim_excess,
+        } => {
+            let data = wallet
+                .prepare_delay_delegation_claiming(delegation_id, reclaim_excess)
+                .await?;
             Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareDestroyDelegation { delegation_id } => {
