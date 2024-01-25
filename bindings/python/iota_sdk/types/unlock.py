@@ -43,6 +43,12 @@ class SignatureUnlock:
             UnlockType.Signature),
         init=False)
 
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "signature": self.signature.to_dict(),
+        }
+
 
 @json
 @dataclass
@@ -54,6 +60,12 @@ class ReferenceUnlock:
         default_factory=lambda: int(
             UnlockType.Reference),
         init=False)
+
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "reference": self.reference,
+        }
 
 
 @json
@@ -67,6 +79,12 @@ class AccountUnlock:
             UnlockType.Account),
         init=False)
 
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "reference": self.reference,
+        }
+
 
 @json
 @dataclass
@@ -79,6 +97,12 @@ class AnchorUnlock:
             UnlockType.Anchor),
         init=False)
 
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "reference": self.reference,
+        }
+
 
 @json
 @dataclass
@@ -88,8 +112,15 @@ class NftUnlock:
     reference: int
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "reference": self.reference,
+        }
 
 # pylint: disable=missing-function-docstring,unused-argument
+
+
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     # Function gets overwritten further below, but needs to be defined here
     # already
@@ -109,6 +140,13 @@ class MultiUnlock:
             UnlockType.Multi),
         init=False)
 
+    def to_dict(self):
+        return {
+            "type": self.type,
+            # TODO: make sure this is correct
+            "unlocks": [unlock.to_dict() for unlock in self.unlocks],
+        }
+
 
 @json
 @dataclass
@@ -119,6 +157,11 @@ class EmptyUnlock:
         default_factory=lambda: int(
             UnlockType.Empty),
         init=False)
+
+    def to_dict(self):
+        return {
+            "type": self.type,
+        }
 
 
 Unlock: TypeAlias = Union[SignatureUnlock,

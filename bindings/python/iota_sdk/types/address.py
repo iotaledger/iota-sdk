@@ -36,11 +36,11 @@ class Ed25519Address:
     Attributes:
         pub_key_hash: The hex encoded Ed25519 public key hash.
     """
-    pub_key_hash: HexStr
     type: int = field(
         default_factory=lambda: int(
             AddressType.ED25519),
         init=False)
+    pub_key_hash: HexStr
 
 
 @json
@@ -50,11 +50,11 @@ class AccountAddress:
     Attributes:
         account_id: The hex encoded account id.
     """
-    account_id: HexStr
     type: int = field(
         default_factory=lambda: int(
             AddressType.ACCOUNT),
         init=False)
+    account_id: HexStr
 
 
 @json
@@ -64,8 +64,8 @@ class NFTAddress:
     Attributes:
         nft_id: The hex encoded NFT id.
     """
-    nft_id: HexStr
     type: int = field(default_factory=lambda: int(AddressType.NFT), init=False)
+    nft_id: HexStr
 
 
 @json
@@ -75,11 +75,11 @@ class AnchorAddress:
     Attributes:
         anchor_id: The hex encoded anchor id.
     """
-    anchor_id: HexStr
     type: int = field(
         default_factory=lambda: int(
             AddressType.ANCHOR),
         init=False)
+    anchor_id: HexStr
 
 
 @json
@@ -133,10 +133,10 @@ class MultiAddress:
         addresses: The weighted unlocked addresses.
         threshold: The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
     """
-    addresses: List[WeightedAddress]
-    threshold: int
     type: int = field(default_factory=lambda: int(
         AddressType.MULTI), init=False)
+    addresses: List[WeightedAddress]
+    threshold: int
 
 
 @json
@@ -147,10 +147,10 @@ class RestrictedAddress:
         address: The inner restricted Address.
         allowed_capabilities: The allowed capabilities bitflags.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
-    allowed_capabilities: Optional[HexStr] = field(default=None, init=False)
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    allowed_capabilities: Optional[HexStr] = field(default=None, init=False)
 
     def with_allowed_capabilities(self, capabilities: bytes):
         """Sets the allowed capabilities from a byte array.

@@ -7,7 +7,7 @@ from typing import List, Optional
 from dataclasses_json import config
 from iota_sdk.types.block.body.type import BlockBodyType
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import Payload
+from iota_sdk.types.payload import Payload, deserialize_payload
 
 
 @json
@@ -29,7 +29,19 @@ class BasicBlockBody:
     ))
     weak_parents: Optional[List[HexStr]] = None
     shallow_like_parents: Optional[List[HexStr]] = None
-    payload: Optional[Payload] = None
+    payload: Optional[Payload] = field(default=None, metadata=config(
+        decoder=deserialize_payload
+    ))
     type: int = field(
         default_factory=lambda: int(BlockBodyType.Basic),
         init=False)
+
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "strongParents": self.strong_parents,
+            "weakParents": self.weak_parents,
+            "shallowLikeParents": self.shallow_like_parents,
+            "payload": self.payload.to_dict(),
+            "maxBurnedMana": str(self.max_burned_mana),
+        }

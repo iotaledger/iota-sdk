@@ -23,11 +23,11 @@ class Ed25519BlockIssuerKey:
     Attributes:
         public_key: The hex encoded Ed25519 public key.
     """
-    public_key: HexStr
     type: int = field(
         default_factory=lambda: int(
             BlockIssuerKeyType.ED25519),
         init=False)
+    public_key: HexStr
 
 
 BlockIssuerKey: TypeAlias = Ed25519BlockIssuerKey

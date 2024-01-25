@@ -20,6 +20,13 @@ class Ed25519Signature:
     signature: HexStr
     type: int = field(default=0, init=False)
 
+    def to_dict(self):
+        return {
+            "type": self.type,
+            "publicKey": self.public_key,
+            "signature": self.signature,
+        }
+
 
 Signature: TypeAlias = Ed25519Signature
 

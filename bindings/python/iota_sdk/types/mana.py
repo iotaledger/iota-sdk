@@ -20,3 +20,9 @@ class ManaAllotment:
     mana: int = field(metadata=config(
         encoder=str
     ))
+
+    def to_dict(self):
+        return {
+            "accountId": self.account_id,
+            "mana": str(self.mana),
+        }
