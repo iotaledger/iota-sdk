@@ -9,11 +9,8 @@ use iota_sdk::{
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         secret::{DowncastSecretManager, SecretManager},
     },
-    types::TryFromDto,
-    wallet::{
-        core::SecretData, types::TransactionWithMetadataDto, BlockIssuerKeySource,
-        PreparedCreateNativeTokenTransactionDto, Wallet,
-    },
+    types::{block::output::feature::BlockIssuerKeySource, TryFromDto},
+    wallet::{core::SecretData, types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
 use crate::{method::WalletMethod, response::Response};
@@ -205,12 +202,13 @@ pub(crate) async fn call_wallet_method_internal(
         } => {
             let source = public_key
                 .map(|s| {
-                    crate::Result::Ok(BlockIssuerKeySource::Key(
+                    crate::Result::Ok(BlockIssuerKeySource::PublicKey(
                         PublicKey::try_from_bytes(prefix_hex::decode(s)?).map_err(iota_sdk::wallet::Error::from)?,
                     ))
                 })
                 .transpose()?
-                .or(public_key_options.map(BlockIssuerKeySource::Options));
+                .or(public_key_options.map(BlockIssuerKeySource::Options))
+                .unwrap_or(BlockIssuerKeySource::ImplicitAccountAddress);
 
             Response::PreparedTransaction(PreparedTransactionDataDto::from(
                 &wallet.prepare_implicit_account_transition(&output_id, source).await?,

@@ -11,10 +11,7 @@ mod prepare_transaction;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
-pub use self::{
-    account::BlockIssuerKeySource,
-    options::{RemainderValueStrategy, TransactionOptions},
-};
+pub use self::options::{RemainderValueStrategy, TransactionOptions};
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},

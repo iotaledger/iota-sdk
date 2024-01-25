@@ -7,8 +7,8 @@ import { HexEncodedString } from '../../utils';
  * All of the block issuer key types.
  */
 enum BlockIssuerKeyType {
-    /** An Ed25519 block issuer key. */
-    Ed25519 = 0,
+    /** An Ed25519 public key hash block issuer key. */
+    Ed25519PublicKeyHash = 0,
 }
 
 /** The base class for a block issuer key. */
@@ -24,17 +24,17 @@ abstract class BlockIssuerKey {
 }
 
 /**
- * Ed25519 Block Issuer Key.
+ * Ed25519 public key hash Block Issuer Key.
  */
-class Ed25519BlockIssuerKey extends BlockIssuerKey {
+class Ed25519PublicKeyHashBlockIssuerKey extends BlockIssuerKey {
     /**
-     * An Ed25519 public key.
+     * An Ed25519 public key hash.
      */
-    readonly publicKey: HexEncodedString;
+    readonly pubKeyHash: HexEncodedString;
 
-    constructor(publicKey: HexEncodedString) {
-        super(BlockIssuerKeyType.Ed25519);
-        this.publicKey = publicKey;
+    constructor(pubKeyHash: HexEncodedString) {
+        super(BlockIssuerKeyType.Ed25519PublicKeyHash);
+        this.pubKeyHash = pubKeyHash;
     }
 }
 
@@ -42,8 +42,8 @@ const BlockIssuerKeyDiscriminator = {
     property: 'type',
     subTypes: [
         {
-            value: Ed25519BlockIssuerKey,
-            name: BlockIssuerKeyType.Ed25519 as any,
+            value: Ed25519PublicKeyHashBlockIssuerKey,
+            name: BlockIssuerKeyType.Ed25519PublicKeyHash as any,
         },
     ],
 };
@@ -52,5 +52,5 @@ export {
     BlockIssuerKeyDiscriminator,
     BlockIssuerKey,
     BlockIssuerKeyType,
-    Ed25519BlockIssuerKey,
+    Ed25519PublicKeyHashBlockIssuerKey,
 };
