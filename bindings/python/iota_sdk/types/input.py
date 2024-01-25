@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Dict, TypeAlias, Union, Any
+from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
 

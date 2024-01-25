@@ -87,6 +87,9 @@ class TaggedDataPayload:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "tag": self.tag,
@@ -118,7 +121,7 @@ class Transaction:
     outputs: List[Output] = field(metadata=config(
         decoder=deserialize_outputs
     ))
-    capabilities: Optional[HexStr] = None  # = field(default=None, init=False)
+    capabilities: Optional[HexStr] = None
     context_inputs: Optional[List[ContextInput]] = field(default=None, metadata=config(
         decoder=deserialize_context_inputs
     ))
@@ -138,6 +141,9 @@ class Transaction:
             self.capabilities = None
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         d = {
             "networkId": self.network_id,
             "creationSlot": self.creation_slot,
@@ -177,6 +183,9 @@ class SignedTransactionPayload:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "transaction": self.transaction.to_dict(),
@@ -195,6 +204,9 @@ class CandidacyAnnouncementPayload:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
         }

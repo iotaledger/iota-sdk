@@ -37,6 +37,9 @@ class BasicBlockBody:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "strongParents": self.strong_parents,

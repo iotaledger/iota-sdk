@@ -44,6 +44,9 @@ class SignatureUnlock:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "signature": self.signature.to_dict(),
@@ -62,6 +65,9 @@ class ReferenceUnlock:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "reference": self.reference,
@@ -80,6 +86,9 @@ class AccountUnlock:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "reference": self.reference,
@@ -98,6 +107,9 @@ class AnchorUnlock:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "reference": self.reference,
@@ -113,6 +125,9 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             "reference": self.reference,
@@ -141,6 +156,9 @@ class MultiUnlock:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
             # TODO: make sure this is correct
@@ -159,6 +177,9 @@ class EmptyUnlock:
         init=False)
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         return {
             "type": self.type,
         }

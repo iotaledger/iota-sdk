@@ -22,6 +22,8 @@ class ManaAllotment:
     ))
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
         return {
             "accountId": self.account_id,
             "mana": str(self.mana),
