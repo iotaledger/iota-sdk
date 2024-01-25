@@ -11,7 +11,7 @@ use packable::Packable;
 use crate::types::block::{
     address::Ed25519Address,
     output::{
-        feature::{BlockIssuerFeature, BlockIssuerKey, Ed25519BlockIssuerKey},
+        feature::{BlockIssuerFeature, BlockIssuerKey, Ed25519PublicKeyHashBlockIssuerKey},
         AccountId, AccountOutputBuilder, AddressUnlockCondition, BasicOutputBuilder, OutputId,
     },
     slot::SlotIndex,
@@ -168,7 +168,15 @@ impl StorageScoreParameters {
             .storage_score(*self);
         let account_output_score = AccountOutputBuilder::new_with_amount(0, AccountId::null())
             .add_unlock_condition(AddressUnlockCondition::new(null_address))
-            .add_feature(BlockIssuerFeature::new(0, [BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::null())]).unwrap())
+            .add_feature(
+                BlockIssuerFeature::new(
+                    0,
+                    [BlockIssuerKey::Ed25519PublicKeyHash(
+                        Ed25519PublicKeyHashBlockIssuerKey::from([0; 32]),
+                    )],
+                )
+                .unwrap(),
+            )
             .finish()
             .unwrap()
             .storage_score(*self);
