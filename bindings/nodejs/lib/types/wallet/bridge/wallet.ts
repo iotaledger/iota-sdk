@@ -193,13 +193,6 @@ export type __PrepareDelayDelegationClaimingMethod__ = {
     };
 };
 
-export type __PrepareDestroyDelegationMethod__ = {
-    name: 'prepareDestroyDelegation';
-    data: {
-        delegationId: DelegationId;
-    };
-};
-
 export type __DeregisterParticipationEventMethod__ = {
     name: 'deregisterParticipationEvent';
     data: {

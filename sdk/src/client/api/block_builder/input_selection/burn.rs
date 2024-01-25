@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::output::{AccountId, FoundryId, NativeToken, NftId, TokenId};
+use crate::types::block::output::{AccountId, DelegationId, FoundryId, NativeToken, NftId, TokenId};
 
 /// A type to specify what needs to be burned during input selection.
 /// Nothing will be burned that has not been explicitly set with this struct.
@@ -20,6 +20,9 @@ pub struct Burn {
     /// NFTs to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) nfts: HashSet<NftId>,
+    /// Delegations to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) delegations: HashSet<DelegationId>,
     /// Foundries to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) foundries: HashSet<FoundryId>,
@@ -66,6 +69,23 @@ impl Burn {
     /// Returns the NFTs to [`Burn`].
     pub fn nfts(&self) -> &HashSet<NftId> {
         &self.nfts
+    }
+
+    /// Adds an delegation to [`Burn`].
+    pub fn add_delegation(mut self, delegation_id: DelegationId) -> Self {
+        self.delegations.insert(delegation_id);
+        self
+    }
+
+    /// Sets the delegation to [`Burn`].
+    pub fn set_delegation(mut self, delegations: HashSet<DelegationId>) -> Self {
+        self.delegations = delegations;
+        self
+    }
+
+    /// Returns the delegation to [`Burn`].
+    pub fn delegations(&self) -> &HashSet<DelegationId> {
+        &self.delegations
     }
 
     /// Adds a foundry to [`Burn`].
@@ -121,6 +141,12 @@ impl From<AccountId> for Burn {
 impl From<NftId> for Burn {
     fn from(id: NftId) -> Self {
         Self::new().add_nft(id)
+    }
+}
+
+impl From<DelegationId> for Burn {
+    fn from(id: DelegationId) -> Self {
+        Self::new().add_delegation(id)
     }
 }
 
