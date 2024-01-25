@@ -13,7 +13,5 @@ export * from './prepared-transaction';
 export * from './signed-transaction-data';
 export * from './transaction';
 export * from './transaction-options';
-export * from './prepared-create-token-transaction-data';
 export * from './create-delegation-transaction';
-export * from './create-delegation-transaction-data';
 export * from './consolidation-params';
