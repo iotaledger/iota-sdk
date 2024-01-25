@@ -1,0 +1,9 @@
+{
+  "blockId": "0x3848a6d17070830206e5032fbce2ae3939e60eec0816546e074316b1f66977d04d010000",
+  "blockState": "confirmed",
+  "transactionMetadata": {
+    "transactionId": "0x72f0dfa9ad116ade8bdac8ef291ed2fb8065c6c75d5d3666e8b2053696c94a9e00001000",
+    "transactionState": "failed",
+    "transactionFailureReason": 2
+  }
+}
