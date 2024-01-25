@@ -437,13 +437,13 @@ pub trait MinimumOutputAmount: StorageScore {
 }
 
 /// Decayed stored and potential Mana of an output.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Getters)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, derive_more::AddAssign)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DecayedMana {
     /// Decayed stored mana.
     #[cfg_attr(feature = "serde", serde(with = "string"))]
-    stored: u64,
+    pub(crate) stored: u64,
     /// Decayed potential mana.
     #[cfg_attr(feature = "serde", serde(with = "string"))]
-    potential: u64,
+    pub(crate) potential: u64,
 }
