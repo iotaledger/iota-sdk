@@ -219,7 +219,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 wallet
                     .prepare_implicit_account_transition(&output_id, public_key)
                     .await?
-            } else if Some(bip_path) = bip_path {
+            } else if let Some(bip_path) = bip_path {
                 wallet.prepare_implicit_account_transition(&output_id, bip_path).await?
             } else {
                 wallet
