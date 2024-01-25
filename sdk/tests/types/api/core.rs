@@ -31,6 +31,7 @@ where
     let t = serde_json::from_value::<T>(value_des.clone())?;
     // let value_ser = serde_json::to_value(&t)?;
 
+    // TODO https://github.com/iotaledger/iota-sdk/issues/1883
     // assert_eq!(value_des, value_ser);
 
     Ok(t)
