@@ -65,7 +65,7 @@ impl Serialize for Error {
             // Only Client and wallet have a proper serde impl
             Self::Client(e) => serde_json::from_str(&serde_json::to_string(&e).expect("json to string error")).unwrap(),
             Self::Wallet(e) => serde_json::from_str(&serde_json::to_string(&e).expect("json to string error")).unwrap(),
-            _ => self.to_string().into()
+            _ => self.to_string().into(),
         };
         seq.serialize_entry("error", &value)?;
         seq.end()
