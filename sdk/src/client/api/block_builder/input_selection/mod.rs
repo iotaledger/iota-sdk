@@ -56,8 +56,8 @@ pub struct Selected {
     pub inputs: Vec<InputSigningData>,
     /// Provided and created outputs.
     pub outputs: Vec<Output>,
-    /// Remainder, if there was one.
-    pub remainder: Option<RemainderData>,
+    /// Remainders, if there are any.
+    pub remainders: Option<Vec<RemainderData>>,
 }
 
 impl InputSelection {
@@ -408,10 +408,10 @@ impl InputSelection {
             return Err(Error::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        let (remainder, storage_deposit_returns) = self.remainder_and_storage_deposit_return_outputs()?;
+        let (remainders, storage_deposit_returns) = self.remainder_and_storage_deposit_return_outputs()?;
 
-        if let Some(remainder) = &remainder {
-            self.outputs.push(remainder.output.clone());
+        if let Some(remainders) = &remainders {
+            self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
         }
 
         self.outputs.extend(storage_deposit_returns);
@@ -430,7 +430,7 @@ impl InputSelection {
                 self.protocol_parameters.committable_age_range(),
             )?,
             outputs: self.outputs,
-            remainder,
+            remainders,
         })
     }
 

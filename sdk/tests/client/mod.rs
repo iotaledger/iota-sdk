@@ -260,8 +260,6 @@ fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native
             return false;
         }
 
-        // assert_eq!(output.as_basic().native_tokens().len(), 0);
-
         if let [UnlockCondition::Address(address_unlock_condition)] = output.unlock_conditions().as_ref() {
             if address_unlock_condition.address() != &address {
                 return false;
@@ -270,7 +268,8 @@ fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native
             return false;
         }
 
-        if output.features().len() != 0 {
+        // Can be 1 for a native token
+        if output.features().len() > 1 {
             return false;
         }
 

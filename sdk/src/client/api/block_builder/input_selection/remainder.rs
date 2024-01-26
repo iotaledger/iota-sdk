@@ -70,24 +70,30 @@ impl InputSelection {
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
         let native_tokens_remainder = native_tokens_diff.is_some();
 
-        let mut remainder_builder =
+        let remainder_builder =
             BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
                 .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
                     [0; 32],
                 ))));
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1631
-        // TODO Only putting one in remainder atm so we can at least create foundries
-        if let Some(native_tokens) = native_tokens_diff {
-            remainder_builder = remainder_builder.with_native_token(*native_tokens.first().unwrap());
-        }
+        let remainder_amount = if let Some(native_tokens) = native_tokens_diff {
+            let nt_remainder_amount = remainder_builder
+                .with_native_token(*native_tokens.first().unwrap())
+                .finish_output()?
+                .amount();
+            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
+            // cost.
+            nt_remainder_amount * native_tokens.len() as u64
+        } else {
+            remainder_builder.finish_output()?.amount()
+        };
 
-        Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
+        Ok((remainder_amount, native_tokens_remainder))
     }
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &mut self,
-    ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
+    ) -> Result<(Option<Vec<RemainderData>>, Vec<Output>), Error> {
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
@@ -184,30 +190,62 @@ impl InputSelection {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        let mut remainder_builder = BasicOutputBuilder::new_with_amount(amount_diff).with_mana(mana_diff);
+        let mut remainder_outputs = Vec::new();
 
-        remainder_builder =
-            remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
-
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1631
-        // TODO Only putting one in remainder atm so we can at least create foundries
         if let Some(native_tokens) = native_tokens_diff {
-            log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
-            remainder_builder = remainder_builder.with_native_token(*native_tokens.first().unwrap());
+            let last_index = native_tokens.len() - 1;
+            let mut last_output_amount = amount_diff;
+            // Create a remainder output with minimum amount for each native token and put remaining amount + mana in
+            // the last one.
+            for (n, native_token) in native_tokens.into_iter().enumerate() {
+                let remainder_builder = if n < last_index {
+                    BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+                } else {
+                    // All remainder mana in the last remainder output which also gets all remaining amount.
+                    BasicOutputBuilder::new_with_amount(last_output_amount).with_mana(mana_diff)
+                };
+
+                let remainder = remainder_builder
+                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                    .with_native_token(native_token)
+                    .finish_output()?;
+
+                if n < last_index {
+                    last_output_amount = last_output_amount.saturating_sub(remainder.amount());
+                } else {
+                    // Only last output uses amount diff and needs to be validated
+                    remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
+                };
+                log::debug!(
+                    "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
+                    remainder.amount(),
+                    remainder.mana()
+                );
+                remainder_outputs.push(remainder);
+            }
+        } else {
+            // No native token, just put all amount and mana in a single output.
+            let remainder = BasicOutputBuilder::new_with_amount(amount_diff)
+                .with_mana(mana_diff)
+                .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                .finish_output()?;
+            log::debug!(
+                "Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}"
+            );
+            remainder_outputs.push(remainder);
         }
 
-        let remainder = remainder_builder.finish_output()?;
-
-        log::debug!("Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}");
-
-        remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
-
         Ok((
-            Some(RemainderData {
-                output: remainder,
-                chain,
-                address: remainder_address,
-            }),
+            Some(
+                remainder_outputs
+                    .into_iter()
+                    .map(|o| RemainderData {
+                        output: o,
+                        chain,
+                        address: remainder_address.clone(),
+                    })
+                    .collect(),
+            ),
             storage_deposit_returns,
         ))
     }

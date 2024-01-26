@@ -115,7 +115,7 @@ fn wallet_events_serde() {
             TransactionProgressEvent::PreparedTransaction(Box::new(PreparedTransactionDataDto {
                 transaction: (&transaction).into(),
                 inputs_data: Vec::new(),
-                remainder: None,
+                remainders: None,
             })),
         ));
     }
