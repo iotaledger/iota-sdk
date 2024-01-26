@@ -230,7 +230,7 @@ impl ProtocolParameters {
 
     /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
     pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
-        EpochIndex::from_slot_index(slot_index.into(), self.genesis_slot, self.slots_per_epoch_exponent())
+        EpochIndex::from_slot_index(slot_index, self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Calculates the duration of an epoch in seconds.
