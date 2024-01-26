@@ -56,9 +56,13 @@ pub struct EpochIndex(pub u32);
 
 impl EpochIndex {
     /// Gets the range of slots this epoch contains.
-    pub fn slot_index_range(&self, slots_per_epoch_exponent: u8) -> core::ops::RangeInclusive<SlotIndex> {
-        // Genesis slot hardcoded to 0 since it doesn't affect the range.
-        self.first_slot_index(0, slots_per_epoch_exponent)..=self.last_slot_index(0, slots_per_epoch_exponent)
+    pub fn slot_index_range(
+        &self,
+        genesis_slot: impl Into<SlotIndex> + std::marker::Copy,
+        slots_per_epoch_exponent: u8,
+    ) -> core::ops::RangeInclusive<SlotIndex> {
+        self.first_slot_index(genesis_slot, slots_per_epoch_exponent)
+            ..=self.last_slot_index(genesis_slot, slots_per_epoch_exponent)
     }
 
     /// Gets the epoch index given a [`SlotIndex`].
@@ -156,7 +160,7 @@ mod test {
             EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());
         assert_eq!(epoch_index, EpochIndex(2));
         assert_eq!(
-            epoch_index.slot_index_range(params.slots_per_epoch_exponent()),
+            epoch_index.slot_index_range(params.genesis_slot, params.slots_per_epoch_exponent()),
             SlotIndex(2048)..=SlotIndex(3071)
         );
 
@@ -165,7 +169,7 @@ mod test {
             EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());
         assert_eq!(epoch_index, EpochIndex(11));
         assert_eq!(
-            epoch_index.slot_index_range(params.slots_per_epoch_exponent()),
+            epoch_index.slot_index_range(params.genesis_slot, params.slots_per_epoch_exponent()),
             SlotIndex(11 * params.slots_per_epoch())..=SlotIndex(12 * params.slots_per_epoch() - 1)
         );
     }
