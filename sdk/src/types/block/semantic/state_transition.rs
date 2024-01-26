@@ -358,7 +358,7 @@ impl StateTransitionVerifier for DelegationOutput {
             protocol_parameters.slots_per_epoch_exponent,
         );
 
-        let registration_slot = past_bounded_epoch_index.registration_slot(
+        let registration_slot = (past_bounded_epoch_index + 1).registration_slot(
             protocol_parameters.genesis_slot,
             protocol_parameters.slots_per_epoch_exponent,
             protocol_parameters.epoch_nearing_threshold,
@@ -403,7 +403,7 @@ impl StateTransitionVerifier for DelegationOutput {
             protocol_parameters.slots_per_epoch_exponent,
         );
 
-        let registration_slot = future_bounded_epoch_index.registration_slot(
+        let registration_slot = (future_bounded_epoch_index + 1).registration_slot(
             protocol_parameters.genesis_slot,
             protocol_parameters.slots_per_epoch_exponent,
             protocol_parameters.epoch_nearing_threshold,

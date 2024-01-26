@@ -52,8 +52,8 @@ impl SlotIndex {
 
     /// Gets the first [`SlotIndex`] of the provided epoch.
     pub fn from_epoch_index(
-        genesis_slot: impl Into<Self>,
         epoch_index: EpochIndex,
+        genesis_slot: impl Into<Self>,
         slots_per_epoch_exponent: u8,
     ) -> Self {
         genesis_slot.into() + Self(*epoch_index << slots_per_epoch_exponent)
