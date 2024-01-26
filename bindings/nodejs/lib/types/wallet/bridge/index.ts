@@ -27,6 +27,7 @@ import type {
     __PrepareSendMethod__,
     __PrepareCreateDelegationMethod__,
     __PrepareDelayDelegationClaimingMethod__,
+    __PrepareDestroyDelegationMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
     __ReissueTransactionUntilIncludedMethod__,
@@ -104,6 +105,7 @@ export type __WalletMethod__ =
     | __PrepareSendMethod__
     | __PrepareCreateDelegationMethod__
     | __PrepareDelayDelegationClaimingMethod__
+    | __PrepareDestroyDelegationMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
     | __ReissueTransactionUntilIncludedMethod__

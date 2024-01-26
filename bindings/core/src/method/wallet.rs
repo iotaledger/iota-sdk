@@ -215,7 +215,7 @@ pub enum WalletMethod {
     /// Returns all pending transactions of the wallet.
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
-    /// A generic function that can be used to burn native tokens, nfts, delegations, foundries and accounts.
+    /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
     /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
@@ -327,6 +327,8 @@ pub enum WalletMethod {
         delegation_id: DelegationId,
         reclaim_excess: bool,
     },
+    #[serde(rename_all = "camelCase")]
+    PrepareDestroyDelegation { delegation_id: DelegationId },
     // /// Stop participating for an event.
     // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     // #[cfg(feature = "participation")]
