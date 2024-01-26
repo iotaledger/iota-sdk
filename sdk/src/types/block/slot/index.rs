@@ -46,13 +46,13 @@ pub struct SlotIndex(pub u32);
 
 impl SlotIndex {
     /// Gets the [`EpochIndex`] of this slot.
-    pub fn to_epoch_index(self, genesis_slot: impl Into<SlotIndex>, slots_per_epoch_exponent: u8) -> EpochIndex {
+    pub fn to_epoch_index(self, genesis_slot: impl Into<Self>, slots_per_epoch_exponent: u8) -> EpochIndex {
         EpochIndex::from_slot_index(genesis_slot, self, slots_per_epoch_exponent)
     }
 
     /// Gets the first [`SlotIndex`] of the provided epoch.
     pub fn from_epoch_index(
-        genesis_slot: impl Into<SlotIndex>,
+        genesis_slot: impl Into<Self>,
         epoch_index: EpochIndex,
         slots_per_epoch_exponent: u8,
     ) -> Self {
