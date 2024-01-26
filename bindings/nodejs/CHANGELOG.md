@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Utils::{verifyTransactionSyntax(), blockBytes(), blockHashWithoutNonce()}`;
 
+### Fixed
+
+- `Output` and `SimpleTokenScheme` (sub) fields not setting the `bigint` properly;
+
 ## 1.1.4 - 2023-12-07
 
 ### Added
