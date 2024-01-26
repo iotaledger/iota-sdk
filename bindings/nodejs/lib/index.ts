@@ -7,8 +7,16 @@ import { callUtilsMethod } from './bindings';
 import {
     Block,
     BlockId,
+    BlockError,
+    ClientError,
+    ClientErrorName,
     OutputId,
+    PrefixHexError,
+    SerdeJsonError,
+    UnpackError,
     UTXOInput,
+    WalletError,
+    WalletErrorName,
     ProtocolParameters,
 } from './types';
 import { bigIntToHex, Utils } from './utils';
@@ -58,42 +66,93 @@ export * from './wallet';
 export * from './logger';
 
 // For future reference to see what we return from rust as a serialized string
-export type Result = {
-    // "error" | "panic", or other binding "Response" enum name, we consider "ok".
+export type Result = OkResult | PanicResult | ErrorResult;
+
+export type OkResult = {
+    // "Response" enum name, we consider "ok".
     type: string;
-    // "panic" means payload is just a string, otherwise its the object below.
+    // The object below.
     payload: {
         // Ok: All method names from types/bridge/__name__.name
-        // Not ok: all variants of iota_sdk_bindings_core::Error type i.e block/client/wallet/
         type: string;
-        // If "ok", json payload
-        payload?: string;
-        // If not "ok", json error
-        error?: string;
+        // json payload
+        payload: string;
     };
+};
+
+export type ErrorResult = {
+    type: 'error';
+    payload: {
+        // All variants of iota_sdk_bindings_core::Error type i.e block/client/wallet.
+        // client and wallet have a full object, the others a string.
+        type: string;
+        // json error
+        error:
+            | {
+                  // all variants of each sub-error type (i.e. healthyNodePoolEmpty )
+                  type: string;
+                  // Error message from the enum.to_string() generation
+                  error: string;
+              }
+            | string;
+    };
+};
+
+export type PanicResult = {
+    type: 'panic';
+    payload: string;
 };
 
 function errorHandle(error: any): Error {
     try {
-        const err: Result = JSON.parse(error.message);
-        if (!err.type) {
+        let err: Result = JSON.parse(error.message);
+        if (!err.type || !(err.type == 'panic' || err.type == 'error')) {
             return error;
         }
 
+        // Guaranteed error
+        err = err as PanicResult | ErrorResult;
         if (err.type == 'panic') {
             // Panic example:
             // {"type":"panic","payload":"Client was destroyed"}
-            return Error(err.payload.toString());
+            return Error((err as PanicResult).payload);
         } else if (err.type == 'error') {
-            // Error example:
-            // {"type":"error","payload":{"type":"client","error":"no healthy node available"}}
-            // TODO: switch on type and create proper js errors https://github.com/iotaledger/iota-sdk/issues/1417
-            return Error(err.payload.error);
-        } else {
-            return Error(
-                'in ErrorHandle without a valid error object. Only call this in catch statements.',
-            );
+            err = err as ErrorResult;
+            if (typeof err.payload.error === 'string') {
+                // Error example:
+                // {"type":"error","payload":{"type":"block","error":"too many commitment inputs"}}
+
+                switch (err.payload.type) {
+                    case 'block':
+                        return new BlockError(err.payload.error);
+                    case 'prefixHex':
+                        return new PrefixHexError(err.payload.error);
+                    case 'serdeJson':
+                        return new SerdeJsonError(err.payload.error);
+                    case 'unpack':
+                        return new UnpackError(err.payload.error);
+                }
+            } else {
+                // Error example:
+                // {"type":"error","payload":{"type":"client","error":{"error":"no healthy node available","type":"healthyNodePoolEmpty"}}}
+
+                switch (err.payload.type) {
+                    case 'client':
+                        return new ClientError({
+                            name: err.payload.error.type as ClientErrorName,
+                            message: err.payload.error.error,
+                        });
+                    case 'wallet':
+                        return new WalletError({
+                            name: err.payload.error.type as WalletErrorName,
+                            message: err.payload.error.error,
+                        });
+                }
+            }
         }
+        return Error(
+            'in ErrorHandle without a valid error object. Only call this in catch statements.',
+        );
     } catch (err: any) {
         // json error, SyntaxError, we must have send a non-json error
         return error;
