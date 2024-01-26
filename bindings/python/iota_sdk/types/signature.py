@@ -16,19 +16,9 @@ class Ed25519Signature:
         signature: The Ed25519 signature of some message.
         type: The Ed25519 signature type.
     """
+    type: int = field(default=0, init=False)
     public_key: HexStr
     signature: HexStr
-    type: int = field(default=0, init=False)
-
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "publicKey": self.public_key,
-            "signature": self.signature,
-        }
 
 
 Signature: TypeAlias = Ed25519Signature

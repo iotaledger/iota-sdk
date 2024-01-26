@@ -16,47 +16,6 @@ from iota_sdk.types.output import Output, deserialize_outputs
 from iota_sdk.types.unlock import Unlock, deserialize_unlocks
 
 
-def deserialize_payload(d: Dict[str, Any]) -> Payload:
-    """
-    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
-
-    Arguments:
-    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
-    """
-    payload_type = d['type']
-    if payload_type == PayloadType.TaggedData:
-        return TaggedDataPayload.from_dict(d)
-    if payload_type == PayloadType.SignedTransaction:
-        return SignedTransactionPayload.from_dict(d)
-    if payload_type == PayloadType.CandidacyAnnouncement:
-        return CandidacyAnnouncementPayload.from_dict(d)
-    raise Exception(f'invalid payload type: {payload_type}')
-
-
-def deserialize_payloads(
-        dicts: List[Dict[str, Any]]) -> List[Payload]:
-    """
-    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
-
-    Arguments:
-    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
-    """
-    return list(map(deserialize_payload, dicts))
-
-
-def deserialize_tagged_data_payload(d: Dict[str, Any]) -> Payload:
-    """
-    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
-
-    Arguments:
-    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
-    """
-    payload_type = d['type']
-    if payload_type == PayloadType.TaggedData:
-        return TaggedDataPayload.from_dict(d)
-    raise Exception(f'invalid payload type: {payload_type}')
-
-
 class PayloadType(IntEnum):
     """Block payload types.
 
@@ -86,15 +45,43 @@ class TaggedDataPayload:
     tag: HexStr
     data: HexStr
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
 
-        return {
-            "type": self.type,
-            "tag": self.tag,
-            "data": self.data,
-        }
+def deserialize_payload(d: Dict[str, Any]) -> Payload:
+    """Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    payload_type = d['type']
+    if payload_type == PayloadType.TaggedData:
+        return TaggedDataPayload.from_dict(d)
+    if payload_type == PayloadType.SignedTransaction:
+        return SignedTransactionPayload.from_dict(d)
+    if payload_type == PayloadType.CandidacyAnnouncement:
+        return CandidacyAnnouncementPayload.from_dict(d)
+    raise Exception(f'invalid payload type: {payload_type}')
+
+
+def deserialize_payloads(
+        dicts: List[Dict[str, Any]]) -> List[Payload]:
+    """Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(deserialize_payload, dicts))
+
+
+def deserialize_tagged_data_payload(d: Dict[str, Any]) -> Payload:
+    """Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    payload_type = d['type']
+    if payload_type == PayloadType.TaggedData:
+        return TaggedDataPayload.from_dict(d)
+    raise Exception(f'invalid payload type: {payload_type}')
 
 
 @json
@@ -140,29 +127,6 @@ class Transaction:
         else:
             self.capabilities = None
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        d = {
-            "networkId": self.network_id,
-            "creationSlot": self.creation_slot,
-            "contextInputs": [context_input.to_dict() for context_input in self.context_inputs],
-            "inputs": [input.to_dict() for input in self.inputs],
-            "allotments": [allotment.to_dict() for allotment in self.allotments],
-            "capabilities": self.capabilities,
-        }
-
-        if self.payload is not None:
-            if isinstance(self.payload, TaggedDataPayload):
-                d["payload"] = self.payload.to_dict()
-            else:
-                raise Exception(f'invalid payload type: {self.payload}')
-
-        d["outputs"] = [output.to_dict() for output in self.outputs]
-
-        return d
-
 
 @json
 @dataclass
@@ -182,16 +146,6 @@ class SignedTransactionPayload:
         decoder=deserialize_unlocks
     ))
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "transaction": self.transaction.to_dict(),
-            "unlocks": [unlock.to_dict() for unlock in self.unlocks],
-        }
-
 
 @json
 @dataclass
@@ -202,14 +156,6 @@ class CandidacyAnnouncementPayload:
         default_factory=lambda: int(
             PayloadType.CandidacyAnnouncement),
         init=False)
-
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-        }
 
 
 Payload: TypeAlias = Union[TaggedDataPayload,

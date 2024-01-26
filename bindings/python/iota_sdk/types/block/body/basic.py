@@ -23,6 +23,9 @@ class BasicBlockBody:
         max_burned_mana: The amount of Mana the Account identified by the AccountId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
+    type: int = field(
+        default_factory=lambda: int(BlockBodyType.Basic),
+        init=False)
     strong_parents: List[HexStr]
     max_burned_mana: int = field(metadata=config(
         encoder=str
@@ -32,19 +35,3 @@ class BasicBlockBody:
     payload: Optional[Payload] = field(default=None, metadata=config(
         decoder=deserialize_payload
     ))
-    type: int = field(
-        default_factory=lambda: int(BlockBodyType.Basic),
-        init=False)
-
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "strongParents": self.strong_parents,
-            "weakParents": self.weak_parents,
-            "shallowLikeParents": self.shallow_like_parents,
-            "payload": self.payload.to_dict(),
-            "maxBurnedMana": str(self.max_burned_mana),
-        }

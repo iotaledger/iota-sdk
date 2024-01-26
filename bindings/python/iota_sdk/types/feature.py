@@ -134,16 +134,16 @@ class StakingFeature:
         start_epoch: The epoch index in which the staking started.
         end_epoch: The epoch index in which the staking ends.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.Staking),
+        init=False)
     staked_amount: int = field(metadata=config(
         encoder=str
     ))
     fixed_cost: int = field(metadata=config(
         encoder=str
     ))
-    type: int = field(
-        default_factory=lambda: int(
-            FeatureType.Staking),
-        init=False)
     start_epoch: EpochIndex
     end_epoch: EpochIndex
 

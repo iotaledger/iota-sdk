@@ -18,13 +18,5 @@ class ManaAllotment:
     """
     account_id: HexStr
     mana: int = field(metadata=config(
-        encoder=str
+        encoder=str, decoder=int
     ))
-
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-        return {
-            "accountId": self.account_id,
-            "mana": str(self.mana),
-        }

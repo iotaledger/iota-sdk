@@ -90,15 +90,5 @@ class Block:
         """
         return Utils.block_id(self, params)
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "header": self.header.to_dict(),
-            "body": self.body.to_dict(),
-            "signature": self.signature.to_dict(),
-        }
-
 
 BlockBody: TypeAlias = Union[BasicBlockBody, ValidationBlockBody]

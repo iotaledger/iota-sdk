@@ -43,15 +43,6 @@ class SignatureUnlock:
         init=False)
     signature: Ed25519Signature
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "signature": self.signature.to_dict(),
-        }
-
 
 @json
 @dataclass
@@ -63,15 +54,6 @@ class ReferenceUnlock:
             UnlockType.Reference),
         init=False)
     reference: int
-
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "reference": self.reference,
-        }
 
 
 @json
@@ -85,15 +67,6 @@ class AccountUnlock:
         init=False)
     reference: int
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "reference": self.reference,
-        }
-
 
 @json
 @dataclass
@@ -106,34 +79,22 @@ class AnchorUnlock:
         init=False)
     reference: int
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "reference": self.reference,
-        }
-
 
 @json
 @dataclass
 class NftUnlock:
     """An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
     """
-    reference: int
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
+    reference: int
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            "reference": self.reference,
-        }
 
 # pylint: disable=missing-function-docstring,unused-argument
+
+def serialize_unlocks(unlock: List[Unlock]) -> List[Dict[str, Any]]:
+    # Function gets overwritten further below, but needs to be defined here
+    # already
+    pass
 
 
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
@@ -155,16 +116,6 @@ class MultiUnlock:
         decoder=deserialize_unlocks
     ))
 
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-            # TODO: make sure this is correct
-            "unlocks": [unlock.to_dict() for unlock in self.unlocks],
-        }
-
 
 @json
 @dataclass
@@ -175,14 +126,6 @@ class EmptyUnlock:
         default_factory=lambda: int(
             UnlockType.Empty),
         init=False)
-
-    def to_dict(self):
-        """Custom dict conversion.
-        """
-
-        return {
-            "type": self.type,
-        }
 
 
 Unlock: TypeAlias = Union[SignatureUnlock,
@@ -220,8 +163,9 @@ def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
         return EmptyUnlock.from_dict(d)
     raise Exception(f'invalid unlock type: {unlock_type}')
 
-
 # pylint: disable=function-redefined
+
+
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
