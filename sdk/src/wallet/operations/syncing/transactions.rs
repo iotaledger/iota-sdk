@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{secret::SecretManage, unix_timestamp_now},
+    client::secret::SecretManage,
     types::{
         api::core::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
@@ -15,7 +15,7 @@ use crate::{
 };
 
 // ignore outputs and transactions from other networks
-// check if outputs are unspent, rebroadcast, reissue...
+// check if outputs are unspent
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
@@ -24,7 +24,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Sync transactions and reissue them if unconfirmed. Returns the transaction with updated metadata and spent
+    /// Sync transactions. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
     /// be synced again
@@ -47,7 +47,6 @@ where
         // Inputs from conflicting transactions that are unspent, but should be removed from the locked outputs so they
         // are available again
         let mut output_ids_to_unlock = Vec::new();
-        let mut transactions_to_reissue = Vec::new();
 
         for transaction_id in &wallet_data.pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
@@ -151,27 +150,16 @@ where
                                 // Do nothing, just need to wait a bit more
                                 TransactionState::Pending => {}
                             }
-                        } else {
-                            // no need to reissue if one input got spent
-                            if input_got_spent {
-                                process_transaction_with_unknown_state(
-                                    &wallet_data,
-                                    transaction,
-                                    &mut updated_transactions,
-                                    &mut output_ids_to_unlock,
-                                )?;
-                            } else {
-                                let time_now = unix_timestamp_now().as_millis();
-                                // Reissue if older than 30 seconds
-                                if transaction.timestamp + 30000 < time_now {
-                                    // only reissue if inputs are still unspent
-                                    transactions_to_reissue.push(transaction);
-                                }
-                            }
+                        } else if input_got_spent {
+                            process_transaction_with_unknown_state(
+                                &wallet_data,
+                                transaction,
+                                &mut updated_transactions,
+                                &mut output_ids_to_unlock,
+                            )?;
                         }
                     }
                     Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
-                        // no need to reissue if one input got spent
                         if input_got_spent {
                             process_transaction_with_unknown_state(
                                 &wallet_data,
@@ -179,37 +167,22 @@ where
                                 &mut updated_transactions,
                                 &mut output_ids_to_unlock,
                             )?;
-                        } else {
-                            let time_now = unix_timestamp_now().as_millis();
-                            // Reissue if older than 30 seconds
-                            if transaction.timestamp + 30000 < time_now {
-                                // only reissue if inputs are still unspent
-                                transactions_to_reissue.push(transaction);
-                            }
                         }
                     }
                     Err(e) => return Err(e.into()),
                 }
             } else {
-                // transaction wasn't submitted yet, so we have to send it again
-                // no need to reissue if one input got spent
                 if input_got_spent {
-                } else {
-                    // only reissue if inputs are still unspent
-                    transactions_to_reissue.push(transaction);
+                    process_transaction_with_unknown_state(
+                        &wallet_data,
+                        transaction,
+                        &mut updated_transactions,
+                        &mut output_ids_to_unlock,
+                    )?;
                 }
             }
         }
         drop(wallet_data);
-
-        for mut transaction in transactions_to_reissue {
-            log::debug!("[SYNC] reissue transaction");
-            let reissued_block = self
-                .submit_signed_transaction(transaction.payload.clone(), None)
-                .await?;
-            transaction.block_id.replace(reissued_block);
-            updated_transactions.push(transaction);
-        }
 
         // updates account with balances, output ids, outputs
         self.update_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)
