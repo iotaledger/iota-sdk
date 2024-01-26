@@ -63,8 +63,8 @@ impl EpochIndex {
 
     /// Gets the epoch index given a [`SlotIndex`].
     pub fn from_slot_index(
-        genesis_slot: impl Into<SlotIndex>,
         slot_index: impl Into<SlotIndex>,
+        genesis_slot: impl Into<SlotIndex>,
         slots_per_epoch_exponent: u8,
     ) -> Self {
         let genesis_slot = genesis_slot.into();
@@ -153,7 +153,7 @@ mod test {
         };
         let slot_index = SlotIndex(3000);
         let epoch_index =
-            EpochIndex::from_slot_index(params.genesis_slot, slot_index, params.slots_per_epoch_exponent());
+            EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());
         assert_eq!(epoch_index, EpochIndex(2));
         assert_eq!(
             epoch_index.slot_index_range(params.slots_per_epoch_exponent()),
@@ -162,7 +162,7 @@ mod test {
 
         let slot_index = SlotIndex(10 * params.slots_per_epoch() + 2000);
         let epoch_index =
-            EpochIndex::from_slot_index(params.genesis_slot, slot_index, params.slots_per_epoch_exponent());
+            EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());
         assert_eq!(epoch_index, EpochIndex(11));
         assert_eq!(
             epoch_index.slot_index_range(params.slots_per_epoch_exponent()),
