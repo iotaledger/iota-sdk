@@ -58,7 +58,7 @@ impl EpochIndex {
     /// Gets the range of slots this epoch contains.
     pub fn slot_index_range(
         &self,
-        genesis_slot: impl Into<SlotIndex> + std::marker::Copy,
+        genesis_slot: impl Into<SlotIndex> + Copy,
         slots_per_epoch_exponent: u8,
     ) -> core::ops::RangeInclusive<SlotIndex> {
         self.first_slot_index(genesis_slot, slots_per_epoch_exponent)
