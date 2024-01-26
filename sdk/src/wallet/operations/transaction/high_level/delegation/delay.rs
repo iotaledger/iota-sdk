@@ -15,6 +15,10 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
+    /// Delay a delegation's claiming. The `reclaim_excess` flag indicates whether excess value over the minimum storage
+    /// requirements will be moved to a basic output that is unlockable by the same address which controls the
+    /// delegation. Otherwise it will be added to a new delegation. In this manner, one can delegate for one epoch
+    /// at a time and never lose out on any rewards.
     pub async fn delay_delegation_claiming(
         &self,
         delegation_id: DelegationId,
@@ -27,6 +31,11 @@ where
         self.sign_and_submit_transaction(prepared_transaction, None, None).await
     }
 
+    /// Prepare to delay a delegation's claiming. The `reclaim_excess` flag indicates whether excess value
+    /// over the minimum storage requirements will be moved to a basic output that is unlockable by the same address
+    /// which controls the delegation.
+    /// Otherwise it will be added to a new delegation. In this manner, one can delegate for one epoch at a time and
+    /// never lose out on any rewards.
     pub async fn prepare_delay_delegation_claiming(
         &self,
         delegation_id: DelegationId,
