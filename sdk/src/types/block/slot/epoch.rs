@@ -64,10 +64,11 @@ impl EpochIndex {
     /// Gets the epoch index given a [`SlotIndex`].
     pub fn from_slot_index(
         genesis_slot: impl Into<SlotIndex>,
-        slot_index: SlotIndex,
+        slot_index: impl Into<SlotIndex>,
         slots_per_epoch_exponent: u8,
     ) -> Self {
         let genesis_slot = genesis_slot.into();
+        let slot_index = slot_index.into();
         if slot_index <= genesis_slot {
             return Self(0);
         }
