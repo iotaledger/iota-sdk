@@ -28,7 +28,7 @@ class Ed25519PublicKeyHashBlockIssuerKey:
         default_factory=lambda: int(
             BlockIssuerKeyType.Ed25519PublicKeyHash),
         init=False)
-    pub_key_hash: HexStr = field(metadata=config(field_name='publicKey'))
+    pub_key_hash: HexStr
 
 
 BlockIssuerKey: TypeAlias = Ed25519PublicKeyHashBlockIssuerKey

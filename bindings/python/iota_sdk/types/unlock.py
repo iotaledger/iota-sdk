@@ -90,13 +90,6 @@ class NftUnlock:
 
 
 # pylint: disable=missing-function-docstring,unused-argument
-
-def serialize_unlocks(unlock: List[Unlock]) -> List[Dict[str, Any]]:
-    # Function gets overwritten further below, but needs to be defined here
-    # already
-    pass
-
-
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     # Function gets overwritten further below, but needs to be defined here
     # already

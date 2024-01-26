@@ -18,5 +18,5 @@ class ManaAllotment:
     """
     account_id: HexStr
     mana: int = field(metadata=config(
-        encoder=str, decoder=int
+        encoder=str
     ))
