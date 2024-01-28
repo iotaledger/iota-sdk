@@ -6,10 +6,7 @@
 use std::fmt::Debug;
 
 use packable::error::UnexpectedEOF;
-use serde::{
-    ser::{SerializeMap, Serializer},
-    Serialize,
-};
+use serde::{ser::Serializer, Serialize};
 
 use crate::{
     client::api::input_selection::Error as InputSelectionError, types::block::semantic::TransactionFailureReason,
@@ -19,7 +16,8 @@ use crate::{
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type of the iota client crate.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, strum::AsRefStr)]
+#[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
 pub enum Error {
     /// Invalid bech32 HRP, should match the one from the used network
@@ -192,17 +190,17 @@ impl Serialize for Error {
     where
         S: Serializer,
     {
-        let mut seq = serializer.serialize_map(Some(2))?;
-        let mut kind_dbg = format!("{self:?}");
-        // Convert first char to lowercase
-        if let Some(r) = kind_dbg.get_mut(0..1) {
-            r.make_ascii_lowercase();
+        #[derive(Serialize)]
+        struct ErrorDto {
+            #[serde(rename = "type")]
+            kind: String,
+            error: String,
         }
-        // Split by whitespace for struct variants and split by `(` for tuple variants
-        // Safe to unwrap because kind_dbg is never an empty string
-        let kind = kind_dbg.split([' ', '(']).next().unwrap();
-        seq.serialize_entry("type", &kind)?;
-        seq.serialize_entry("error", &self.to_string())?;
-        seq.end()
+
+        ErrorDto {
+            kind: self.as_ref().to_owned(),
+            error: self.to_string(),
+        }
+        .serialize(serializer)
     }
 }
