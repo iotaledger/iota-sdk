@@ -1574,7 +1574,7 @@ dependencies = [
  "getrandom",
  "hkdf",
  "hmac",
- "iterator-sorted",
+ "iterator-sorted 0.1.0",
  "k256",
  "pbkdf2",
  "rand",
@@ -1626,7 +1626,7 @@ dependencies = [
  "iota-ledger-nano",
  "iota-sdk",
  "iota_stronghold",
- "iterator-sorted",
+ "iterator-sorted 0.2.0",
  "lazy_static",
  "log",
  "num_cpus",
@@ -1644,6 +1644,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_repr",
+ "strum",
  "thiserror",
  "time",
  "tokio",
@@ -1669,6 +1670,7 @@ dependencies = [
  "primitive-types",
  "serde",
  "serde_json",
+ "strum",
  "thiserror",
  "tokio",
  "url",
@@ -1760,6 +1762,12 @@ name = "iterator-sorted"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d101775d2bc8f99f4ac18bf29b9ed70c0dd138b9a1e88d7b80179470cbbe8bd2"
+
+[[package]]
+name = "iterator-sorted"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed3c1d66191fc266439b989dc1a9a69d9c4156e803ce456221231398b84c35d1"
 
 [[package]]
 name = "itoa"
@@ -2768,6 +2776,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustversion"
+version = "1.0.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ffc183a10b4478d04cbbbfc96d0873219d962dd5accaff2ffbd4ceb7df837f4"
+
+[[package]]
 name = "rustyline"
 version = "13.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3126,6 +3140,28 @@ name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
+
+[[package]]
+name = "strum"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "290d54ea6f91c969195bdbcd7442c8c2a2ba87da8bf60a7ee86a235d4bc1e125"
+dependencies = [
+ "strum_macros",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.25.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23dc1fa9ac9c169a78ba62f0b841814b7abae11bdd047b9c58f893439e309ea0"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn 2.0.48",
+]
 
 [[package]]
 name = "subtle"

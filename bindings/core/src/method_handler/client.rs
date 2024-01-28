@@ -330,7 +330,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::ComputeMinimumOutputAmount { output } => {
             let storage_score_params = client.get_storage_score_parameters().await?;
 
-            Response::OutputAmount(output.minimum_amount(storage_score_params))
+            Response::Amount(output.minimum_amount(storage_score_params))
         }
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)

@@ -27,6 +27,7 @@ from .types.client_options import *
 from .types.common import *
 from .types.committee import *
 from .types.context_input import *
+from .types.decayed_mana import *
 from .types.event import *
 from .types.feature import *
 from .types.input import *

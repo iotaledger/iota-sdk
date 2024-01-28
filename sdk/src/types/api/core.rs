@@ -35,7 +35,6 @@ pub struct InfoResponse {
     pub metrics: MetricsResponse,
     pub protocol_parameters: ProtocolParametersMap,
     pub base_token: BaseTokenResponse,
-    pub features: Box<[String]>,
 }
 
 impl InfoResponse {
