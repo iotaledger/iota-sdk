@@ -8,7 +8,9 @@ from iota_sdk import BasicOutput, AccountOutput, FoundryOutput, NftOutput, Issue
 def test_feature():
     feature_dict = {
         "type": 2,
-        "data": "0x426c61"
+        "entries": {
+            "data": "0x426c61",
+        }
     }
     metadata_feature = from_dict(MetadataFeature, feature_dict)
     assert metadata_feature.to_dict() == feature_dict
@@ -163,7 +165,9 @@ def test_output():
             },
             {
                 "type": 2,
-                "data": "0x6e6f2d6d65746164617461"
+                "entries": {
+                    "data": "0x6e6f2d6d65746164617461"
+                }
             }
         ]
     }
@@ -192,7 +196,9 @@ def test_output():
         "immutableFeatures": [
             {
                 "type": 2,
-                "data": "0x4c9385555f70b41d47f000c08dbe6913"
+                "entries": {
+                    "data": "0x4c9385555f70b41d47f000c08dbe6913"
+                }
             }
         ]
     }
@@ -216,13 +222,17 @@ def test_output():
         "features": [
             {
                 "type": 2,
-                "data": "0x547275657d"
+                "entries": {
+                    "data": "0x547275657d"
+                }
             }
         ],
         "immutableFeatures": [
             {
                 "type": 2,
-                "data": "0x7b69735f6e66743a"
+                "entries": {
+                    "data": "0x7b69735f6e66743a"
+                }
             }
         ]
     }
