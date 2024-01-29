@@ -318,15 +318,22 @@ pub enum WalletMethod {
         params: Vec<SendNftParams>,
         options: Option<TransactionOptions>,
     },
+    /// Prepare to create a delegation.
+    /// Expected response:
+    /// [`PreparedCreateDelegationTransaction`](crate::Response::PreparedCreateDelegationTransaction)
     PrepareCreateDelegation {
         params: CreateDelegationParams,
         options: Option<TransactionOptions>,
     },
+    /// Prepare to delay a delegation's claiming.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareDelayDelegationClaiming {
         delegation_id: DelegationId,
         reclaim_excess: bool,
     },
+    /// Prepare to destroy a delegation.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
     PrepareDestroyDelegation { delegation_id: DelegationId },
     // /// Stop participating for an event.
