@@ -134,15 +134,20 @@ where
         log::debug!("[TRANSACTION] create_native_token");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
-        let (account_id, account_output) = self
+        let (account_id, account_output_data) = self
             .get_account_output(params.account_id)
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
-        if let Output::Account(account_output) = &account_output.output {
-            // Create the new account output with the same feature blocks, just updated foundry_counter.
+        if let Output::Account(account_output) = &account_output_data.output {
+            // Create the new account output with the same features, just updated mana and foundry_counter.
             let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
+                .with_mana(account_output_data.output.available_mana(
+                    &self.client().get_protocol_parameters().await?,
+                    account_output_data.output_id.transaction_id().slot_index(),
+                    self.client().get_slot_index().await?,
+                )?)
                 .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens
