@@ -46,12 +46,17 @@ pub struct SlotIndex(pub u32);
 
 impl SlotIndex {
     /// Gets the [`EpochIndex`] of this slot.
-    pub fn to_epoch_index(self, slots_per_epoch_exponent: u8) -> EpochIndex {
-        EpochIndex::from_slot_index(self, slots_per_epoch_exponent)
+    pub fn to_epoch_index(self, genesis_slot: impl Into<Self>, slots_per_epoch_exponent: u8) -> EpochIndex {
+        EpochIndex::from_slot_index(self, genesis_slot, slots_per_epoch_exponent)
     }
 
-    pub fn from_epoch_index(epoch_index: EpochIndex, slots_per_epoch_exponent: u8) -> Self {
-        Self(*epoch_index << slots_per_epoch_exponent)
+    /// Gets the first [`SlotIndex`] of the provided epoch.
+    pub fn from_epoch_index(
+        epoch_index: EpochIndex,
+        genesis_slot: impl Into<Self>,
+        slots_per_epoch_exponent: u8,
+    ) -> Self {
+        genesis_slot.into() + Self(*epoch_index << slots_per_epoch_exponent)
     }
 
     /// Gets the slot index of a unix timestamp in seconds.
