@@ -6,12 +6,10 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
     client::api::PreparedTransactionDataDto,
-    types::{
-        api::core::OutputWithMetadata,
-        block::{
-            address::Bech32Address,
-            payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
-        },
+    types::block::{
+        address::Bech32Address,
+        output::OutputAndMetadata,
+        payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
     },
     wallet::{
         types::{InclusionState, OutputData},
@@ -175,7 +173,7 @@ pub struct NewOutputEvent {
     pub transaction: Option<SignedTransactionPayloadDto>,
     /// The inputs for the transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub transaction_inputs: Option<Vec<OutputWithMetadata>>,
+    pub transaction_inputs: Option<Vec<OutputAndMetadata>>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

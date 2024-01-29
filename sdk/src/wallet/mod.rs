@@ -70,12 +70,9 @@ pub use self::{
     types::OutputData,
 };
 use crate::{
-    types::{
-        api::core::OutputWithMetadata,
-        block::{
-            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId},
-            payload::signed_transaction::{SignedTransactionPayload, TransactionId},
-        },
+    types::block::{
+        output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputAndMetadata, OutputWithMetadata},
+        payload::signed_transaction::{SignedTransactionPayload, TransactionId},
     },
     wallet::types::InclusionState,
 };
@@ -124,6 +121,12 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         network_id: tx_payload.transaction().network_id(),
         incoming: true,
         note: None,
-        inputs,
+        inputs: inputs
+            .into_iter()
+            .map(|input| OutputAndMetadata {
+                output: input.output,
+                metadata: input.metadata,
+            })
+            .collect(),
     })
 }

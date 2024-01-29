@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .parse::<OutputId>()?;
 
     // Get the output.
-    let output = client.get_output_with_proof(&output_id).await?;
+    let output = client.get_output(&output_id).await?;
 
     println!("{output:#?}");
 

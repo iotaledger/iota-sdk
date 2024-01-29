@@ -17,13 +17,13 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithProof, RoutesResponse, SubmitBlockResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
             TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
             ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
-            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadataFull},
+            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -235,7 +235,7 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output_with_proof(&self, output_id: &OutputId) -> Result<OutputWithProof> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputResponse> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.get_request(path, None, false, true).await
@@ -259,7 +259,7 @@ impl ClientInner {
 
     /// Finds an output with its metadata by output ID.
     /// GET /api/core/v3/outputs/{outputId}/full
-    pub async fn get_output_with_metadata_full(&self, output_id: &OutputId) -> Result<OutputWithMetadataFull> {
+    pub async fn get_output_with_metadata_full(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
         let path = &format!("api/core/v3/outputs/{output_id}/full");
 
         self.get_request(path, None, false, true).await

@@ -78,19 +78,19 @@ pub enum OutputBuilderAmount {
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`] and [`OutputMetadata`].
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct OutputWithMetadataFull {
+pub struct OutputWithMetadata {
     pub output: Output,
     pub output_id_proof: OutputIdProof,
     pub metadata: OutputMetadata,
 }
 
-impl OutputWithMetadataFull {
+impl OutputWithMetadata {
     /// Creates a new [`OutputWithMetadata`].
     pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
         Self {
@@ -129,6 +129,18 @@ impl OutputWithMetadataFull {
     pub fn into_metadata(self) -> OutputMetadata {
         self.metadata
     }
+}
+
+/// Contains the generic [`Output`] and the associated [`OutputMetadata`].
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct OutputAndMetadata {
+    pub output: Output,
+    pub metadata: OutputMetadata,
 }
 
 /// A generic output that can represent different types defining the deposit of funds.

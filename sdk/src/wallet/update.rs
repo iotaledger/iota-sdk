@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{OutputId, OutputMetadata},
+    types::block::output::{OutputId, OutputMetadata, OutputWithMetadata},
     wallet::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
@@ -13,7 +13,6 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::api::core::OutputWithMetadata,
     types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
     wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
@@ -99,9 +98,14 @@ where
                         transaction: transaction
                             .as_ref()
                             .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
-                        transaction_inputs: transaction
-                            .as_ref()
-                            .map(|tx| tx.inputs.clone().into_iter().map(OutputWithMetadata::from).collect()),
+                        transaction_inputs: transaction.as_ref().map(|tx| {
+                            tx.inputs
+                                .clone()
+                                .into_iter()
+                                // TODO 1856: remove
+                                // .map(OutputWithMetadataResponse::from)
+                                .collect()
+                        }),
                     })))
                     .await;
                 }

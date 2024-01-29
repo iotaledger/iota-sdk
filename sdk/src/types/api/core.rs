@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadataFull},
+        output::{Output, OutputId, OutputIdProof, OutputWithMetadata},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -332,7 +332,7 @@ pub struct CongestionResponse {
 /// Returns the block identifier of the submitted block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct SubmitBlockResponse {
+pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 
@@ -456,26 +456,29 @@ pub struct BlockWithMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
-/// An output and its metadata.
+/// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputWithMetadata {
+pub struct OutputResponse {
     pub output: Output,
-    pub metadata: OutputMetadata,
+    pub output_id_proof: OutputIdProof,
 }
 
-impl From<&OutputWithMetadataFull> for OutputWithMetadata {
-    fn from(value: &OutputWithMetadataFull) -> Self {
+impl From<&OutputWithMetadata> for OutputResponse {
+    fn from(value: &OutputWithMetadata) -> Self {
         Self {
-            metadata: value.metadata,
             output: value.output().clone(),
+            output_id_proof: value.output_id_proof().clone(),
         }
     }
 }
 
-impl From<OutputWithMetadataFull> for OutputWithMetadata {
-    fn from(value: OutputWithMetadataFull) -> Self {
-        Self::from(&value)
+impl From<OutputWithMetadata> for OutputResponse {
+    fn from(value: OutputWithMetadata) -> Self {
+        Self {
+            output: value.output,
+            output_id_proof: value.output_id_proof,
+        }
     }
 }
 
@@ -517,12 +520,4 @@ pub struct UtxoChangesFullResponse {
 pub struct OutputWithId {
     pub output: Output,
     pub output_id: OutputId,
-}
-
-/// Contains the generic [`Output`] with associated [`OutputIdProof`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputWithProof {
-    pub output: Output,
-    pub output_id_proof: OutputIdProof,
 }

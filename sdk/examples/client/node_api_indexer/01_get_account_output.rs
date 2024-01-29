@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     println!("Account output ID: {output_id}");
 
     // Get the output by its ID.
-    let output_response = client.get_output_with_proof(&output_id).await?;
+    let output_response = client.get_output(&output_id).await?;
 
     println!("{output_response:#?}",);
 
