@@ -56,23 +56,48 @@ pub struct EpochIndex(pub u32);
 
 impl EpochIndex {
     /// Gets the range of slots this epoch contains.
-    pub fn slot_index_range(&self, slots_per_epoch_exponent: u8) -> core::ops::RangeInclusive<SlotIndex> {
-        self.first_slot_index(slots_per_epoch_exponent)..=self.last_slot_index(slots_per_epoch_exponent)
+    pub fn slot_index_range(
+        &self,
+        genesis_slot: impl Into<SlotIndex> + Copy,
+        slots_per_epoch_exponent: u8,
+    ) -> core::ops::RangeInclusive<SlotIndex> {
+        self.first_slot_index(genesis_slot, slots_per_epoch_exponent)
+            ..=self.last_slot_index(genesis_slot, slots_per_epoch_exponent)
     }
 
     /// Gets the epoch index given a [`SlotIndex`].
-    pub fn from_slot_index(slot_index: SlotIndex, slots_per_epoch_exponent: u8) -> Self {
-        Self(*slot_index >> slots_per_epoch_exponent)
+    pub fn from_slot_index(
+        slot_index: impl Into<SlotIndex>,
+        genesis_slot: impl Into<SlotIndex>,
+        slots_per_epoch_exponent: u8,
+    ) -> Self {
+        let genesis_slot = genesis_slot.into();
+        let slot_index = slot_index.into();
+        if slot_index <= genesis_slot {
+            return Self(0);
+        }
+        Self(*(slot_index - genesis_slot) >> slots_per_epoch_exponent)
     }
 
     /// Gets the first [`SlotIndex`] of this epoch.
-    pub fn first_slot_index(self, slots_per_epoch_exponent: u8) -> SlotIndex {
-        SlotIndex::from_epoch_index(self, slots_per_epoch_exponent)
+    pub fn first_slot_index(self, genesis_slot: impl Into<SlotIndex>, slots_per_epoch_exponent: u8) -> SlotIndex {
+        SlotIndex::from_epoch_index(self, genesis_slot, slots_per_epoch_exponent)
     }
 
     /// Gets the last [`SlotIndex`] of this epoch.
-    pub fn last_slot_index(self, slots_per_epoch_exponent: u8) -> SlotIndex {
-        SlotIndex::from_epoch_index(self + 1, slots_per_epoch_exponent) - 1
+    pub fn last_slot_index(self, genesis_slot: impl Into<SlotIndex>, slots_per_epoch_exponent: u8) -> SlotIndex {
+        SlotIndex::from_epoch_index(self + 1, genesis_slot, slots_per_epoch_exponent) - 1
+    }
+
+    /// Returns the slot at the end of which the validator and delegator registration ends and the voting power
+    /// for the epoch is calculated.
+    pub fn registration_slot(
+        &self,
+        genesis_slot: impl Into<SlotIndex>,
+        slots_per_epoch_exponent: u8,
+        epoch_nearing_threshold: u32,
+    ) -> SlotIndex {
+        self.first_slot_index(genesis_slot, slots_per_epoch_exponent) - epoch_nearing_threshold - 1
     }
 }
 
@@ -131,18 +156,20 @@ mod test {
             ..Default::default()
         };
         let slot_index = SlotIndex(3000);
-        let epoch_index = EpochIndex::from_slot_index(slot_index, params.slots_per_epoch_exponent());
+        let epoch_index =
+            EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());
         assert_eq!(epoch_index, EpochIndex(2));
         assert_eq!(
-            epoch_index.slot_index_range(params.slots_per_epoch_exponent()),
+            epoch_index.slot_index_range(params.genesis_slot, params.slots_per_epoch_exponent()),
             SlotIndex(2048)..=SlotIndex(3071)
         );
 
         let slot_index = SlotIndex(10 * params.slots_per_epoch() + 2000);
-        let epoch_index = EpochIndex::from_slot_index(slot_index, params.slots_per_epoch_exponent());
+        let epoch_index =
+            EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());
         assert_eq!(epoch_index, EpochIndex(11));
         assert_eq!(
-            epoch_index.slot_index_range(params.slots_per_epoch_exponent()),
+            epoch_index.slot_index_range(params.genesis_slot, params.slots_per_epoch_exponent()),
             SlotIndex(11 * params.slots_per_epoch())..=SlotIndex(12 * params.slots_per_epoch() - 1)
         );
     }

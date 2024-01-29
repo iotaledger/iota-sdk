@@ -63,8 +63,8 @@ impl Serialize for Error {
             kind: self.as_ref().to_owned(),
             error: match &self {
                 // Only Client and wallet have a proper serde impl
-                Self::Client(e) => serde_json::to_value(e).map_err(|e| serde::ser::Error::custom(e))?,
-                Self::Wallet(e) => serde_json::to_value(e).map_err(|e| serde::ser::Error::custom(e))?,
+                Self::Client(e) => serde_json::to_value(e).map_err(serde::ser::Error::custom)?,
+                Self::Wallet(e) => serde_json::to_value(e).map_err(serde::ser::Error::custom)?,
                 _ => serde_json::Value::String(self.to_string()),
             },
         }
