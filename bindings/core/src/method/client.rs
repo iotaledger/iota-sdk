@@ -236,6 +236,12 @@ pub enum ClientMethod {
         /// Output ID
         output_id: OutputId,
     },
+    /// Get output raw
+    #[serde(rename_all = "camelCase")]
+    GetOutputRaw {
+        /// Output ID
+        output_id: OutputId,
+    },
     /// Get output metadata.
     #[serde(rename_all = "camelCase")]
     GetOutputMetadata {
