@@ -35,7 +35,7 @@ export class PreparedCreateDelegationTransaction extends PreparedTransaction {
     }
 }
 
-/** The result of preparing an operation to create a native token. */
+/** The result of preparing an operation to create a delegation. */
 export class PreparedCreateDelegationTransactionData {
     /** The id of the delegation */
     delegationId!: DelegationId;
@@ -44,7 +44,7 @@ export class PreparedCreateDelegationTransactionData {
     transaction!: PreparedTransactionData;
 }
 
-/** The result of an operation to create a native token. */
+/** The result of an operation to create a delegation. */
 export class CreateDelegationTransaction {
     /** The id of the delegation */
     delegationId!: DelegationId;
