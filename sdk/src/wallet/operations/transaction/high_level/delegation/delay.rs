@@ -55,9 +55,6 @@ where
             .output
             .minimum_amount(protocol_parameters.storage_score_parameters());
 
-        // In order to split the output, the amount must be at least twice the minimum for a delegation output
-        let can_split = delegation_output.output.amount() >= 2 * min_delegation_amount;
-
         // TODO: Should we return an error if `reclaim_excess == true` and `can_reclaim == false`?
         let can_reclaim = if reclaim_excess {
             let min_basic_amount = BasicOutput::minimum_amount(
@@ -72,6 +69,9 @@ where
         let mut builder = DelegationOutputBuilder::from(delegation_output.output.as_delegation())
             .with_delegation_id(delegation_id)
             .with_end_epoch(protocol_parameters.expected_end_epoch(slot_commitment_id));
+
+        // In order to split the output, the amount must be at least twice the minimum for a delegation output
+        let can_split = delegation_output.output.amount() >= 2 * min_delegation_amount;
 
         if can_split || can_reclaim {
             builder = builder.with_minimum_amount(protocol_parameters.storage_score_parameters());
