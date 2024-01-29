@@ -116,6 +116,7 @@ fn wallet_events_serde() {
                 transaction: (&transaction).into(),
                 inputs_data: Vec::new(),
                 remainder: None,
+                mana_rewards: 0,
             })),
         ));
     }

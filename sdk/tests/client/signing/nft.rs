@@ -89,6 +89,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainder: None,
+        mana_rewards: 0,
     };
 
     let unlocks = secret_manager
@@ -114,7 +115,12 @@ async fn nft_reference_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        0,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

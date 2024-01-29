@@ -128,6 +128,8 @@ pub enum UtilsMethod {
         transaction: TransactionDto,
         inputs: Vec<InputSigningData>,
         unlocks: Option<Vec<Unlock>>,
+        #[serde(with = "string")]
+        mana_rewards: u64,
         protocol_parameters: ProtocolParameters,
     },
     /// Applies mana decay to the given mana.

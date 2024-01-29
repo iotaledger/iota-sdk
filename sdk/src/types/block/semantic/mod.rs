@@ -49,6 +49,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
+        mana_rewards: u64,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
@@ -84,7 +85,7 @@ impl<'a> SemanticValidationContext<'a> {
             inputs,
             unlocks,
             input_amount: 0,
-            input_mana: 0,
+            input_mana: mana_rewards,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
             output_amount: 0,
@@ -173,8 +174,6 @@ impl<'a> SemanticValidationContext<'a> {
                     self.transaction.creation_slot(),
                 )?)
                 .ok_or(Error::ConsumedManaOverflow)?;
-
-            // TODO: Add reward mana https://github.com/iotaledger/iota-sdk/issues/1310
 
             if let Some(consumed_native_token) = consumed_native_token {
                 let native_token_amount = self

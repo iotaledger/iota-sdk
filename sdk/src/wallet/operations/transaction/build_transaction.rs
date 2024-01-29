@@ -23,7 +23,7 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Builds the transaction from the selected in and outputs.
+    /// Builds the transaction from the selected inputs and outputs.
     pub(crate) async fn build_transaction(
         &self,
         selected_transaction_data: Selected,
@@ -91,10 +91,52 @@ where
 
         validate_transaction_length(&transaction)?;
 
+        let mut mana_rewards = 0;
+        let transaction_id = transaction.id();
+        for input in &selected_transaction_data.inputs {
+            if match &input.output {
+                // Validator Rewards
+                Output::Account(account_input) => {
+                    // If the input is an account and the staking feature is removed
+                    account_input.features().staking().is_some()
+                        && transaction
+                            .outputs()
+                            .iter()
+                            .filter_map(|o| o.as_account_opt())
+                            .find(|account_output| {
+                                account_output.account_id() == &account_input.account_id_non_null(input.output_id())
+                            })
+                            // TODO: should destroying an account add rewards?
+                            .map_or(false, |o| o.features().staking().is_none())
+                }
+                // Delegator Rewards
+                Output::Delegation(delegation_input) => {
+                    // If the input is a delegation and the outputs do not contain a matching delegation
+                    transaction
+                        .outputs()
+                        .iter()
+                        .filter_map(|o| o.as_delegation_opt())
+                        .find(|delegation_output| {
+                            delegation_output.delegation_id()
+                                == &delegation_input.delegation_id_non_null(input.output_id())
+                        })
+                        .is_none()
+                }
+                _ => false,
+            } {
+                mana_rewards += self
+                    .client()
+                    .get_output_mana_rewards(input.output_id(), transaction_id.slot_index())
+                    .await?
+                    .rewards;
+            }
+        }
+
         let prepared_transaction_data = PreparedTransactionData {
             transaction,
             inputs_data: selected_transaction_data.inputs,
             remainder: selected_transaction_data.remainder,
+            mana_rewards,
         };
 
         log::debug!(

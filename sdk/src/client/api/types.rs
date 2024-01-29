@@ -22,7 +22,7 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::bip44::option_bip44,
+    utils::serde::{bip44::option_bip44, string},
 };
 
 /// Helper struct for offline signing
@@ -34,6 +34,8 @@ pub struct PreparedTransactionData {
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
     pub remainder: Option<RemainderData>,
+    /// Mana rewards
+    pub mana_rewards: u64,
 }
 
 /// PreparedTransactionData Dto
@@ -46,6 +48,9 @@ pub struct PreparedTransactionDataDto {
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
     pub remainder: Option<RemainderData>,
+    /// Mana rewards
+    #[serde(with = "string")]
+    pub mana_rewards: u64,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
@@ -54,6 +59,7 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
             transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.clone(),
             remainder: value.remainder.clone(),
+            mana_rewards: value.mana_rewards,
         }
     }
 }
@@ -70,6 +76,7 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
                 .map_err(|_| Error::InvalidField("transaction"))?,
             inputs_data: dto.inputs_data,
             remainder: dto.remainder,
+            mana_rewards: dto.mana_rewards,
         })
     }
 }
@@ -81,6 +88,8 @@ pub struct SignedTransactionData {
     pub payload: SignedTransactionPayload,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
+    /// Mana rewards
+    pub mana_rewards: u64,
 }
 
 /// SignedTransactionData Dto
@@ -91,6 +100,9 @@ pub struct SignedTransactionDataDto {
     pub payload: SignedTransactionPayloadDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
+    /// Mana rewards
+    #[serde(with = "string")]
+    pub mana_rewards: u64,
 }
 
 impl From<&SignedTransactionData> for SignedTransactionDataDto {
@@ -98,6 +110,7 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
         Self {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.clone(),
+            mana_rewards: value.mana_rewards,
         }
     }
 }
@@ -113,6 +126,7 @@ impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
             payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
             inputs_data: dto.inputs_data,
+            mana_rewards: dto.mana_rewards,
         })
     }
 }

@@ -426,7 +426,6 @@ impl StateTransitionVerifier for DelegationOutput {
         _current_state: &Self,
         _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        // TODO handle mana rewards
         Ok(())
     }
 }

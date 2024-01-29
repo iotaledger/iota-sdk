@@ -58,6 +58,7 @@ async fn main() -> Result<()> {
     let signed_transaction_data = SignedTransactionData {
         payload: signed_transaction,
         inputs_data: prepared_transaction_data.inputs_data,
+        mana_rewards: prepared_transaction_data.mana_rewards,
     };
 
     println!("Signed transaction.");

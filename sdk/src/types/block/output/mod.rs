@@ -319,7 +319,7 @@ impl Output {
             Self::Anchor(output) => Some(output.chain_id()),
             Self::Foundry(output) => Some(output.chain_id()),
             Self::Nft(output) => Some(output.chain_id()),
-            Self::Delegation(_) => None,
+            Self::Delegation(output) => Some(output.chain_id()),
         }
     }
 
