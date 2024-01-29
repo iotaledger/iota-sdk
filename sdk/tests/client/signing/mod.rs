@@ -327,7 +327,7 @@ async fn all_combined() -> Result<()> {
     let conflict = verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
-        0,
+        prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 

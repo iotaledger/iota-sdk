@@ -96,7 +96,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let conflict = verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
-        0,
+        prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
@@ -191,7 +191,7 @@ async fn account_reference_unlocks() -> Result<()> {
     let conflict = verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
-        0,
+        prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
