@@ -169,7 +169,7 @@ class Utils():
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block.to_dict(),
+            'block': block,
             'protocolParameters': params,
         })
 
