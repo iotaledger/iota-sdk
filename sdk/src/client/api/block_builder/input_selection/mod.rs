@@ -56,7 +56,7 @@ pub struct Selected {
     pub inputs: Vec<InputSigningData>,
     /// Provided and created outputs.
     pub outputs: Vec<Output>,
-    /// Remainders, if there are any.
+    /// Remainder outputs information.
     pub remainders: Vec<RemainderData>,
 }
 
