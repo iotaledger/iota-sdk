@@ -3,15 +3,16 @@
 
 use std::collections::HashMap;
 
-use super::{Error, InputSelection, Requirement};
+use super::{native_tokens::get_native_tokens, Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AddressUnlockCondition,
+            BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
+            StorageScoreParameters,
         },
         slot::SlotIndex,
     },
@@ -85,6 +86,7 @@ struct AmountSelection {
     remainder_amount: u64,
     native_tokens_remainder: bool,
     slot_index: SlotIndex,
+    storage_score_parameters: StorageScoreParameters,
 }
 
 impl AmountSelection {
@@ -105,6 +107,7 @@ impl AmountSelection {
             remainder_amount,
             native_tokens_remainder,
             slot_index: input_selection.slot_index,
+            storage_score_parameters: input_selection.protocol_parameters.storage_score_parameters(),
         })
     }
 
@@ -153,12 +156,46 @@ impl AmountSelection {
             self.inputs_sum += input.output.amount();
             self.newly_selected_inputs.insert(*input.output_id(), input.clone());
 
+            if input.output.native_token().is_some() {
+                // Recalculate the remaining amount, as a new native token may require a new remainder output.
+                let (remainder_amount, native_tokens_remainder) = self.remainder_amount().unwrap();
+                log::debug!(
+                    "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
+                );
+                self.remainder_amount = remainder_amount;
+                self.native_tokens_remainder = native_tokens_remainder;
+            }
+
             if self.missing_amount() == 0 {
                 return true;
             }
         }
 
         false
+    }
+
+    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
+        let input_native_tokens_set =
+            get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish_set()?;
+
+        let remainder_builder = BasicOutputBuilder::new_with_minimum_amount(self.storage_score_parameters)
+            .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
+                [0; 32],
+            ))));
+
+        let remainder_amount = if !input_native_tokens_set.is_empty() {
+            let nt_remainder_amount = remainder_builder
+                .with_native_token(*input_native_tokens_set.first().unwrap())
+                .finish_output()?
+                .amount();
+            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
+            // cost.
+            nt_remainder_amount * input_native_tokens_set.len() as u64
+        } else {
+            remainder_builder.finish_output()?.amount()
+        };
+
+        Ok((remainder_amount, !input_native_tokens_set.is_empty()))
     }
 
     fn into_newly_selected_inputs(self) -> Vec<InputSigningData> {

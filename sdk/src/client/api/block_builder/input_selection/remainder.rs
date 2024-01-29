@@ -93,7 +93,7 @@ impl InputSelection {
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &mut self,
-    ) -> Result<(Option<Vec<RemainderData>>, Vec<Output>), Error> {
+    ) -> Result<(Vec<RemainderData>, Vec<Output>), Error> {
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
@@ -144,7 +144,7 @@ impl InputSelection {
 
         if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
-            return Ok((None, storage_deposit_returns));
+            return Ok((Vec::new(), storage_deposit_returns));
         }
 
         let amount_diff = input_amount
@@ -182,7 +182,7 @@ impl InputSelection {
                     _ => panic!("only account, nft can be automatically created and can hold mana"),
                 };
 
-                return Ok((None, storage_deposit_returns));
+                return Ok((Vec::new(), storage_deposit_returns));
             }
         }
 
@@ -193,16 +193,16 @@ impl InputSelection {
         let mut remainder_outputs = Vec::new();
 
         if let Some(native_tokens) = native_tokens_diff {
-            let last_index = native_tokens.len() - 1;
-            let mut last_output_amount = amount_diff;
+            let native_tokens_len = native_tokens.len();
+            let mut remaining_amount = amount_diff;
             // Create a remainder output with minimum amount for each native token and put remaining amount + mana in
             // the last one.
             for (n, native_token) in native_tokens.into_iter().enumerate() {
-                let remainder_builder = if n < last_index {
+                let remainder_builder = if n + 1 < native_tokens_len {
                     BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
                 } else {
                     // All remainder mana in the last remainder output which also gets all remaining amount.
-                    BasicOutputBuilder::new_with_amount(last_output_amount).with_mana(mana_diff)
+                    BasicOutputBuilder::new_with_amount(remaining_amount).with_mana(mana_diff)
                 };
 
                 let remainder = remainder_builder
@@ -210,8 +210,8 @@ impl InputSelection {
                     .with_native_token(native_token)
                     .finish_output()?;
 
-                if n < last_index {
-                    last_output_amount = last_output_amount.saturating_sub(remainder.amount());
+                if n + 1 < native_tokens_len {
+                    remaining_amount = remaining_amount.saturating_sub(remainder.amount());
                 } else {
                     // Only last output uses amount diff and needs to be validated
                     remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
@@ -236,16 +236,14 @@ impl InputSelection {
         }
 
         Ok((
-            Some(
-                remainder_outputs
-                    .into_iter()
-                    .map(|o| RemainderData {
-                        output: o,
-                        chain,
-                        address: remainder_address.clone(),
-                    })
-                    .collect(),
-            ),
+            remainder_outputs
+                .into_iter()
+                .map(|o| RemainderData {
+                    output: o,
+                    chain,
+                    address: remainder_address.clone(),
+                })
+                .collect(),
             storage_deposit_returns,
         ))
     }

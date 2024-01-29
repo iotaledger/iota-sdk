@@ -51,11 +51,11 @@ class PreparedTransactionData:
     Attributes:
         transaction: The transaction.
         inputs_data: Data about the inputs which is required for signing.
-        remainder: Data about a remainder.
+        remainders: Data about remainder outputs.
     """
     transaction: Transaction
     inputs_data: List[InputSigningData]
-    remainder: Optional[RemainderData] = None
+    remainders: Optional[List[RemainderData]] = None
 
 
 @json

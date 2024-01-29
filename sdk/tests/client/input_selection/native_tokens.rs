@@ -1413,6 +1413,26 @@ fn multiple_remainders() {
             Basic(
                 5_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                Some((TOKEN_ID_1, 100)),
+                None,
+                None,
+                None,
+                None,
+                None,
+            ),
+            Basic(
+                5_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                Some((TOKEN_ID_1, 100)),
+                None,
+                None,
+                None,
+                None,
+                None,
+            ),
+            Basic(
+                5_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 Some((TOKEN_ID_2, 100)),
                 None,
                 None,
@@ -1424,7 +1444,7 @@ fn multiple_remainders() {
         Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
-        8_000_000,
+        15_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
@@ -1444,7 +1464,7 @@ fn multiple_remainders() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs, inputs);
+    assert_eq!(selected.inputs.len(), 4);
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
     let nt_remainder_min_storage_deposit = 106000;
@@ -1455,10 +1475,10 @@ fn multiple_remainders() {
                     output,
                     nt_remainder_min_storage_deposit,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                    Some((TOKEN_ID_1, 100))
+                    Some((TOKEN_ID_1, 300))
                 ) || is_remainder_or_return(
                     output,
-                    2_000_000 - nt_remainder_min_storage_deposit,
+                    5_000_000 - nt_remainder_min_storage_deposit,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     Some((TOKEN_ID_2, 100))
                 )

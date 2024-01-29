@@ -57,7 +57,7 @@ pub struct Selected {
     /// Provided and created outputs.
     pub outputs: Vec<Output>,
     /// Remainders, if there are any.
-    pub remainders: Option<Vec<RemainderData>>,
+    pub remainders: Vec<RemainderData>,
 }
 
 impl InputSelection {
@@ -410,11 +410,8 @@ impl InputSelection {
 
         let (remainders, storage_deposit_returns) = self.remainder_and_storage_deposit_return_outputs()?;
 
-        if let Some(remainders) = &remainders {
-            self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
-        }
-
         self.outputs.extend(storage_deposit_returns);
+        self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
 
         // Check again, because more outputs may have been added.
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {

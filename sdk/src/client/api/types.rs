@@ -33,7 +33,7 @@ pub struct PreparedTransactionData {
     /// Required input information for signing. Inputs need to be ordered by address type
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder outputs information
-    pub remainders: Option<Vec<RemainderData>>,
+    pub remainders: Vec<RemainderData>,
 }
 
 /// PreparedTransactionData Dto
@@ -45,7 +45,8 @@ pub struct PreparedTransactionDataDto {
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder outputs information
-    pub remainders: Option<Vec<RemainderData>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub remainders: Vec<RemainderData>,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
