@@ -68,7 +68,7 @@ where
 
         let mut builder = DelegationOutputBuilder::from(delegation_output.output.as_delegation())
             .with_delegation_id(delegation_id)
-            .with_end_epoch(protocol_parameters.expected_end_epoch(slot_commitment_id));
+            .with_end_epoch(protocol_parameters.delegation_end_epoch(slot_commitment_id));
 
         // In order to split the output, the amount must be at least twice the minimum for a delegation output
         let can_split = delegation_output.output.amount() >= 2 * min_delegation_amount;
@@ -89,7 +89,7 @@ where
                     DelegationId::null(),
                     *output.as_delegation().validator_address(),
                 )
-                .with_start_epoch(protocol_parameters.expected_start_epoch(slot_commitment_id))
+                .with_start_epoch(protocol_parameters.delegation_start_epoch(slot_commitment_id))
                 .add_unlock_condition(AddressUnlockCondition::new(output.as_delegation().address().clone()))
                 .finish_output()?,
             );

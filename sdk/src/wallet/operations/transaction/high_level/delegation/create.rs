@@ -134,7 +134,7 @@ where
             DelegationId::null(),
             params.validator_address,
         )
-        .with_start_epoch(protocol_parameters.expected_start_epoch(slot_commitment_id))
+        .with_start_epoch(protocol_parameters.delegation_start_epoch(slot_commitment_id))
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
         let output = delegation_output_builder.finish_output()?;

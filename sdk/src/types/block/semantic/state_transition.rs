@@ -352,7 +352,7 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        if next_state.start_epoch() != protocol_parameters.expected_start_epoch(slot_commitment_id) {
+        if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
             // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
             return Err(StateTransitionError::TransactionFailure(
                 TransactionFailureReason::SemanticValidationFailed,
@@ -379,7 +379,7 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        if next_state.end_epoch() != protocol_parameters.expected_end_epoch(slot_commitment_id) {
+        if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 

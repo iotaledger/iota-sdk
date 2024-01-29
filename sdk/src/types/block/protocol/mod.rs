@@ -292,8 +292,8 @@ impl ProtocolParameters {
         )
     }
 
-    /// TODO what is a good name + description for these methods?
-    pub fn expected_start_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
+    /// Gets the start epoch for a delegation with the given slot commitment id.
+    pub fn delegation_start_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
         let past_bounded_slot_index = self.past_bounded_slot(slot_commitment_id);
         let past_bounded_epoch_index = self.epoch_index_of(past_bounded_slot_index);
 
@@ -306,8 +306,8 @@ impl ProtocolParameters {
         }
     }
 
-    /// TODO
-    pub fn expected_end_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
+    /// Gets the end epoch for a delegation with the given slot commitment id
+    pub fn delegation_end_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
         let future_bounded_slot_index = self.future_bounded_slot(slot_commitment_id);
         let future_bounded_epoch_index = self.epoch_index_of(future_bounded_slot_index);
 
