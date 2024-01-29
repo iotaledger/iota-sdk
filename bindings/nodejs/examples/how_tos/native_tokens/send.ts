@@ -38,7 +38,7 @@ async function run() {
                 Number(SEND_NATIVE_TOKEN_AMOUNT),
         );
 
-        if (!!tokenId) {
+        if (tokenId) {
             const outputs: SendNativeTokenParams[] = [
                 {
                     address: RECV_ADDRESS,
