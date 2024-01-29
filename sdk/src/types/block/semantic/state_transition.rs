@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
+    context_input::CommitmentContextInput,
     output::{
         AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
         TokenScheme,
@@ -25,6 +26,7 @@ pub enum StateTransitionError {
     InvalidBlockIssuerTransition,
     IssuerNotUnlocked,
     MissingAccountForFoundry,
+    MissingCommitmentContextInput,
     MutatedFieldWithoutRights,
     MutatedImmutableField,
     NonDelayedClaimingTransition,
@@ -327,7 +329,9 @@ impl StateTransitionVerifier for NftOutput {
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+        let protocol_parameters = &context.protocol_parameters;
+
         if !next_state.delegation_id().is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -340,15 +344,46 @@ impl StateTransitionVerifier for DelegationOutput {
             return Err(StateTransitionError::NonZeroDelegationEndEpoch);
         }
 
+        let slot_commitment_id = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find(|i| i.kind() == CommitmentContextInput::KIND)
+            .map(|s| s.as_commitment().slot_commitment_id())
+            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+
+        if next_state.start_epoch() != protocol_parameters.expected_start_epoch(slot_commitment_id) {
+            // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
+            return Err(StateTransitionError::TransactionFailure(
+                TransactionFailureReason::SemanticValidationFailed,
+            ));
+        }
+
         Ok(())
     }
 
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
+        Self::transition_inner(current_state, next_state)?;
+
+        let protocol_parameters = &context.protocol_parameters;
+
+        let slot_commitment_id = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find(|i| i.kind() == CommitmentContextInput::KIND)
+            .map(|s| s.as_commitment().slot_commitment_id())
+            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+
+        if next_state.end_epoch() != protocol_parameters.expected_end_epoch(slot_commitment_id) {
+            return Err(StateTransitionError::NonDelayedClaimingTransition);
+        }
+
+        Ok(())
     }
 
     fn destruction(

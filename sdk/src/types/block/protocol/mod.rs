@@ -17,7 +17,7 @@ use crate::{
         helper::network_name_to_id,
         mana::{ManaParameters, RewardsParameters},
         output::StorageScoreParameters,
-        slot::{EpochIndex, SlotIndex},
+        slot::{EpochIndex, SlotCommitmentId, SlotIndex},
         Error, PROTOCOL_VERSION,
     },
     utils::ConvertTo,
@@ -194,12 +194,16 @@ impl ProtocolParameters {
 
     /// Gets the first [`SlotIndex`] of a given [`EpochIndex`].
     pub fn first_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
-        epoch_index.into().first_slot_index(self.slots_per_epoch_exponent())
+        epoch_index
+            .into()
+            .first_slot_index(self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Gets the last [`SlotIndex`] of a given [`EpochIndex`].
     pub fn last_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
-        epoch_index.into().last_slot_index(self.slots_per_epoch_exponent())
+        epoch_index
+            .into()
+            .last_slot_index(self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Calculates the number of slots before the next epoch.
@@ -226,7 +230,7 @@ impl ProtocolParameters {
 
     /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
     pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
-        EpochIndex::from_slot_index(slot_index.into(), self.slots_per_epoch_exponent())
+        EpochIndex::from_slot_index(slot_index, self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Calculates the duration of an epoch in seconds.
@@ -257,6 +261,62 @@ impl ProtocolParameters {
         CommittableAgeRange {
             min: self.min_committable_age(),
             max: self.max_committable_age(),
+        }
+    }
+
+    /// Calculates the past bounded slot for the given slot of the SlotCommitment.
+    /// Given any slot index of a commitment input, the result of this function is a slot index
+    /// that is at least equal to the slot of the block in which it was issued, or higher.
+    /// That means no commitment input can be chosen such that the index lies behind the slot index of the block,
+    /// hence the past is bounded.
+    pub fn past_bounded_slot(&self, slot_commitment_id: SlotCommitmentId) -> SlotIndex {
+        slot_commitment_id.past_bounded_slot(self.max_committable_age())
+    }
+
+    /// Calculates the future bounded slot for the given slot of the SlotCommitment.
+    /// Given any slot index of a commitment input, the result of this function is a slot index
+    /// that is at most equal to the slot of the block in which it was issued, or lower.
+    /// That means no commitment input can be chosen such that the index lies ahead of the slot index of the block,
+    /// hence the future is bounded.
+    pub fn future_bounded_slot(&self, slot_commitment_id: SlotCommitmentId) -> SlotIndex {
+        slot_commitment_id.future_bounded_slot(self.min_committable_age())
+    }
+
+    /// Returns the slot at the end of which the validator and delegator registration ends and the voting power
+    /// for the epoch is calculated.
+    pub fn registration_slot(&self, epoch_index: EpochIndex) -> SlotIndex {
+        epoch_index.registration_slot(
+            self.genesis_slot(),
+            self.slots_per_epoch_exponent(),
+            self.epoch_nearing_threshold(),
+        )
+    }
+
+    /// TODO what is a good name + description for these methods?
+    pub fn expected_start_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
+        let past_bounded_slot_index = self.past_bounded_slot(slot_commitment_id);
+        let past_bounded_epoch_index = self.epoch_index_of(past_bounded_slot_index);
+
+        let registration_slot = self.registration_slot(past_bounded_epoch_index + 1);
+
+        if past_bounded_slot_index <= registration_slot {
+            past_bounded_epoch_index + 1
+        } else {
+            past_bounded_epoch_index + 2
+        }
+    }
+
+    /// TODO
+    pub fn expected_end_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
+        let future_bounded_slot_index = self.future_bounded_slot(slot_commitment_id);
+        let future_bounded_epoch_index = self.epoch_index_of(future_bounded_slot_index);
+
+        let registration_slot = self.registration_slot(future_bounded_epoch_index + 1);
+
+        if future_bounded_slot_index <= registration_slot {
+            future_bounded_epoch_index
+        } else {
+            future_bounded_epoch_index + 1
         }
     }
 }

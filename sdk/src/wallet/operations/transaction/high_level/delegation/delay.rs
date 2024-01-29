@@ -65,25 +65,9 @@ where
                 false
             };
 
-            // TODO: Replace with methods from https://github.com/iotaledger/iota-sdk/pull/1421
-            let future_bounded_slot_index = slot_commitment_id
-                .slot_index()
-                .future_bounded_slot(protocol_parameters.min_committable_age);
-            let future_bounded_epoch_index =
-                future_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
-
-            let registration_slot = (future_bounded_epoch_index + 1).registration_slot(
-                protocol_parameters.slots_per_epoch_exponent,
-                protocol_parameters.epoch_nearing_threshold,
-            );
-
             let mut builder = DelegationOutputBuilder::from(delegation_output.output.as_delegation())
                 .with_delegation_id(delegation_id)
-                .with_end_epoch(if future_bounded_slot_index < registration_slot {
-                    future_bounded_epoch_index
-                } else {
-                    future_bounded_epoch_index + 1
-                });
+                .with_end_epoch(protocol_parameters.expected_end_epoch(slot_commitment_id));
 
             if can_split || can_reclaim {
                 builder = builder.with_minimum_amount(protocol_parameters.storage_score_parameters());
@@ -95,29 +79,13 @@ where
 
             // If we can split and we aren't reclaiming, we will create a new delegation with those funds
             if can_split && !reclaim_excess {
-                // TODO: Replace with methods from https://github.com/iotaledger/iota-sdk/pull/1421
-                let past_bounded_slot_index = slot_commitment_id
-                    .slot_index()
-                    .past_bounded_slot(protocol_parameters.max_committable_age);
-                let past_bounded_epoch_index =
-                    past_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
-
-                let registration_slot = (past_bounded_epoch_index + 1).registration_slot(
-                    protocol_parameters.slots_per_epoch_exponent,
-                    protocol_parameters.epoch_nearing_threshold,
-                );
-
                 outputs.push(
                     DelegationOutputBuilder::new_with_amount(
                         delegation_output.output.amount() - output.amount(),
                         DelegationId::null(),
                         *output.as_delegation().validator_address(),
                     )
-                    .with_start_epoch(if past_bounded_slot_index <= registration_slot {
-                        past_bounded_epoch_index + 1
-                    } else {
-                        past_bounded_epoch_index + 2
-                    })
+                    .with_start_epoch(protocol_parameters.expected_start_epoch(slot_commitment_id))
                     .add_unlock_condition(AddressUnlockCondition::new(output.as_delegation().address().clone()))
                     .finish_output()?,
                 );

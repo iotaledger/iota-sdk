@@ -90,9 +90,9 @@ class CreateDelegationParams():
     """Parameters for creating native tokens.
 
     Attributes:
-        address: Bech32 encoded address which will control the delegation. By default, the ed25519 wallet address will be used.
         delegated_amount: The amount to delegate.
         validator_address: The Account Address of the validator to which this output will delegate.
+        address: Bech32 encoded address which will control the delegation. By default, the ed25519 wallet address will be used.
     """
     delegated_amount: int = field(metadata=config(
         encoder=str

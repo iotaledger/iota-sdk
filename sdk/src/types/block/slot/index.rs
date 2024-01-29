@@ -46,12 +46,17 @@ pub struct SlotIndex(pub u32);
 
 impl SlotIndex {
     /// Gets the [`EpochIndex`] of this slot.
-    pub fn to_epoch_index(self, slots_per_epoch_exponent: u8) -> EpochIndex {
-        EpochIndex::from_slot_index(self, slots_per_epoch_exponent)
+    pub fn to_epoch_index(self, genesis_slot: impl Into<Self>, slots_per_epoch_exponent: u8) -> EpochIndex {
+        EpochIndex::from_slot_index(self, genesis_slot, slots_per_epoch_exponent)
     }
 
-    pub fn from_epoch_index(epoch_index: EpochIndex, slots_per_epoch_exponent: u8) -> Self {
-        Self(*epoch_index << slots_per_epoch_exponent)
+    /// Gets the first [`SlotIndex`] of the provided epoch.
+    pub fn from_epoch_index(
+        epoch_index: EpochIndex,
+        genesis_slot: impl Into<Self>,
+        slots_per_epoch_exponent: u8,
+    ) -> Self {
+        genesis_slot.into() + Self(*epoch_index << slots_per_epoch_exponent)
     }
 
     /// Gets the slot index of a unix timestamp in seconds.
@@ -76,20 +81,6 @@ impl SlotIndex {
             .checked_sub(1)
             .map(|adjusted_slot| (adjusted_slot as u64 * slot_duration_in_seconds as u64) + genesis_unix_timestamp)
             .unwrap_or_default()
-    }
-
-    /// Calculates the past bounded slot for the given slot.
-    pub fn past_bounded_slot(self, max_commitable_age: u32) -> SlotIndex {
-        Self(self.0 + max_commitable_age)
-    }
-
-    /// Calculates the future bounded slot for the given slot.
-    /// Given any slot index of a commitment input, the result of this function is a slot index
-    /// that is at most equal to the slot of the block in which it was issued, or lower.
-    /// That means no commitment input can be chosen such that the index lies ahead of the slot index of the block,
-    /// hence the future is bounded.
-    pub fn future_bounded_slot(self, min_commitable_age: u32) -> SlotIndex {
-        Self(self.0 + min_commitable_age)
     }
 }
 

@@ -129,28 +129,12 @@ where
             latest_id
         };
 
-        // TODO: Replace with methods from https://github.com/iotaledger/iota-sdk/pull/1421
-        let past_bounded_slot_index = slot_commitment_id
-            .slot_index()
-            .past_bounded_slot(protocol_parameters.max_committable_age);
-        let past_bounded_epoch_index =
-            past_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
-
-        let registration_slot = (past_bounded_epoch_index + 1).registration_slot(
-            protocol_parameters.slots_per_epoch_exponent,
-            protocol_parameters.epoch_nearing_threshold,
-        );
-
         let delegation_output_builder = DelegationOutputBuilder::new_with_amount(
             params.delegated_amount,
             DelegationId::null(),
             params.validator_address,
         )
-        .with_start_epoch(if past_bounded_slot_index <= registration_slot {
-            past_bounded_epoch_index + 1
-        } else {
-            past_bounded_epoch_index + 2
-        })
+        .with_start_epoch(protocol_parameters.expected_start_epoch(slot_commitment_id))
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
         let output = delegation_output_builder.finish_output()?;
