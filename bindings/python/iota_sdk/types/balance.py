@@ -83,7 +83,6 @@ class NativeTokensBalance:
         available: The available amount of the total native token balance.
         metadata: Some metadata of the native token.
     """
-    token_id: HexStr
     total: int = field(metadata=config(
         encoder=hex,
         decoder=hex_str_decoder,
@@ -114,7 +113,7 @@ class Balance:
     base_coin: BaseCoinBalance
     mana: ManaBalance
     required_storage_deposit: RequiredStorageDeposit
-    native_tokens: List[NativeTokensBalance]
+    native_tokens: dict[HexStr, NativeTokensBalance]
     accounts: List[HexStr]
     foundries: List[HexStr]
     nfts: List[HexStr]
