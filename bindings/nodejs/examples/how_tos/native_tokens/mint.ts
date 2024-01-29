@@ -43,7 +43,7 @@ async function run() {
 
         // Mint some more native tokens
         const transaction = await wallet
-            .prepareMintNativeToken(token.tokenId, MINT_AMOUNT)
+            .prepareMintNativeToken(tokenId, MINT_AMOUNT)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);

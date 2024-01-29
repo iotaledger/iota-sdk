@@ -35,7 +35,7 @@ async function run() {
             (t) => balance.nativeTokens[t].available >= MIN_AVAILABLE_AMOUNT,
         );
 
-        let token = balance.nativeTokens[tokenId];
+        let token = tokenId ? balance.nativeTokens[tokenId] : null;
         if (!token) {
             throw new Error(
                 `Native token '${tokenId}' doesn't exist or there's not at least '${Number(
