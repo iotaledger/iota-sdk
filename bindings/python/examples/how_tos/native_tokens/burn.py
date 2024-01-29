@@ -17,17 +17,15 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Find native token with enough balance
-token = [
-    native_balance for native_balance in balance.native_tokens if int(
-        native_balance.available,
-        0) >= 10][0]
-print(f'Balance before burning: {int(token.available, 0)}')
+token_id, token = next(
+    (k, v) for k, v in balance.native_tokens.items() if v.available >= 10)
+print(f'Balance before burning: {token.available}')
 
 burn_amount = 1
 
 # Send transaction.
 transaction = wallet.prepare_burn_native_token(
-    token.token_id, burn_amount).send()
+    token_id, burn_amount).send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
@@ -36,6 +34,5 @@ block_id = wallet.reissue_transaction_until_included(
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = wallet.sync()
-available_balance = int(
-    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token.token_id][0].available, 0)
+available_balance = balance.native_tokens[token_id].available
 print(f'Balance after burning: {available_balance}')

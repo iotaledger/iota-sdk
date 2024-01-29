@@ -32,11 +32,13 @@ async function run() {
         let balance = await wallet.sync();
 
         // Get a token with sufficient balance
-        const tokenId = balance.nativeTokens.find(
-            (t) => Number(t.available) >= Number(SEND_NATIVE_TOKEN_AMOUNT),
-        )?.tokenId;
+        const tokenId = Object.keys(balance.nativeTokens).find(
+            (t) =>
+                Number(balance.nativeTokens[t].available) >=
+                Number(SEND_NATIVE_TOKEN_AMOUNT),
+        );
 
-        if (tokenId != null) {
+        if (!!tokenId) {
             const outputs: SendNativeTokenParams[] = [
                 {
                     address: RECV_ADDRESS,
@@ -44,9 +46,7 @@ async function run() {
                 },
             ];
 
-            let token = balance.nativeTokens.find(
-                (nativeToken) => nativeToken.tokenId == tokenId,
-            );
+            let token = balance.nativeTokens[tokenId];
             if (token == null) {
                 throw new Error(
                     `Couldn't find native token '${tokenId}' in the wallet`,
@@ -68,9 +68,7 @@ async function run() {
             );
 
             balance = await wallet.sync();
-            token = balance.nativeTokens.find(
-                (nativeToken) => nativeToken.tokenId == tokenId,
-            );
+            token = balance.nativeTokens[tokenId];
             if (token == null) {
                 throw new Error(
                     `Couldn't find native token '${tokenId}' in the wallet`,

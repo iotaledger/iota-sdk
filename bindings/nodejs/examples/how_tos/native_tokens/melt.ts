@@ -33,9 +33,7 @@ async function run() {
         // Find first foundry and corresponding token id
         const tokenId = balance.foundries[0];
 
-        let token = balance.nativeTokens.find(
-            (nativeToken) => nativeToken.tokenId == tokenId,
-        );
+        let token = balance.nativeTokens[tokenId];
         if (token == null) {
             throw new Error(
                 `Couldn't find native token '${tokenId}' in the wallet`,
@@ -62,9 +60,7 @@ async function run() {
         );
 
         balance = await wallet.sync();
-        token = balance.nativeTokens.find(
-            (nativeToken) => nativeToken.tokenId == tokenId,
-        );
+        token = balance.nativeTokens[tokenId];
         if (token == null) {
             throw new Error(
                 `Couldn't find native token '${tokenId}' in the wallet`,
