@@ -25,19 +25,18 @@ where
         &self,
         delegation_id: DelegationId,
     ) -> crate::wallet::Result<PreparedTransactionData> {
-        if let Some(delegation_output) = self.get_delegation_output(delegation_id).await {
-            self.prepare_transaction(
-                [],
-                TransactionOptions {
-                    custom_inputs: Some(vec![delegation_output.output_id]),
-                    ..Default::default()
-                },
-            )
-            .await
-        } else {
-            Err(crate::wallet::Error::DelegationTransitionFailed(format!(
+        let delegation_output = self.get_delegation_output(delegation_id).await.ok_or_else(|| {
+            crate::wallet::Error::DelegationTransitionFailed(format!(
                 "no delegation output found with id {delegation_id}"
-            )))
-        }
+            ))
+        })?;
+        self.prepare_transaction(
+            [],
+            TransactionOptions {
+                custom_inputs: Some(vec![delegation_output.output_id]),
+                ..Default::default()
+            },
+        )
+        .await
     }
 }
