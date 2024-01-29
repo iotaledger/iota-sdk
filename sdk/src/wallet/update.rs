@@ -98,14 +98,7 @@ where
                         transaction: transaction
                             .as_ref()
                             .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
-                        transaction_inputs: transaction.as_ref().map(|tx| {
-                            tx.inputs
-                                .clone()
-                                .into_iter()
-                                // TODO 1856: remove
-                                // .map(OutputWithMetadataResponse::from)
-                                .collect()
-                        }),
+                        transaction_inputs: transaction.as_ref().map(|tx| tx.inputs.clone()),
                     })))
                     .await;
                 }
