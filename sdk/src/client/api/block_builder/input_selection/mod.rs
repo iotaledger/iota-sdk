@@ -408,7 +408,7 @@ impl InputSelection {
             return Err(Error::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        let (remainders, storage_deposit_returns) = self.remainder_and_storage_deposit_return_outputs()?;
+        let (storage_deposit_returns, remainders) = self.remainder_and_storage_deposit_return_outputs()?;
 
         self.outputs.extend(storage_deposit_returns);
         self.outputs.extend(remainders.iter().map(|r| r.output.clone()));

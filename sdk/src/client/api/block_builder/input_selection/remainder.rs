@@ -74,7 +74,7 @@ impl InputSelection {
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &mut self,
-    ) -> Result<(Vec<RemainderData>, Vec<Output>), Error> {
+    ) -> Result<(Vec<Output>, Vec<RemainderData>), Error> {
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
@@ -163,7 +163,7 @@ impl InputSelection {
                     _ => panic!("only account, nft can be automatically created and can hold mana"),
                 };
 
-                return Ok((Vec::new(), storage_deposit_returns));
+                return Ok((storage_deposit_returns, Vec::new()));
             }
         }
 
@@ -180,7 +180,7 @@ impl InputSelection {
             self.protocol_parameters.storage_score_parameters(),
         )?;
 
-        Ok((remainder_outputs, storage_deposit_returns))
+        Ok((storage_deposit_returns, remainder_outputs))
     }
 }
 
