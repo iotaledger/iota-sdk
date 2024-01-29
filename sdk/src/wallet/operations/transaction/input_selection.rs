@@ -81,12 +81,21 @@ where
         // if custom inputs are provided we should only use them (validate if we have the outputs in this account and
         // that the amount is enough)
         if let Some(custom_inputs) = custom_inputs {
+            let mut mana_rewards = 0;
+
             // Check that no input got already locked
-            for input in custom_inputs.iter() {
+            for input in &custom_inputs {
                 if wallet_data.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
+                }
+                if wallet_data
+                    .outputs
+                    .get(input)
+                    .map_or(false, |o| o.output.is_delegation())
+                {
+                    mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
                 }
             }
 
@@ -98,7 +107,8 @@ where
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
-            .with_forbidden_inputs(forbidden_inputs);
+            .with_forbidden_inputs(forbidden_inputs)
+            .with_mana_rewards(mana_rewards);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -121,12 +131,21 @@ where
 
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
+            let mut mana_rewards = 0;
+
             // Check that no input got already locked
-            for input in mandatory_inputs.iter() {
+            for input in &mandatory_inputs {
                 if wallet_data.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
+                }
+                if wallet_data
+                    .outputs
+                    .get(input)
+                    .map_or(false, |o| o.output.is_delegation())
+                {
+                    mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
                 }
             }
 
@@ -138,7 +157,8 @@ where
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
-            .with_forbidden_inputs(forbidden_inputs);
+            .with_forbidden_inputs(forbidden_inputs)
+            .with_mana_rewards(mana_rewards);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);

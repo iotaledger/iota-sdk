@@ -123,7 +123,7 @@ impl InputSelection {
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
-        let mut input_mana = 0;
+        let mut input_mana = self.mana_rewards;
 
         for input in &self.selected_inputs {
             input_mana += input.output.available_mana(
@@ -131,7 +131,6 @@ impl InputSelection {
                 input.output_id().transaction_id().slot_index(),
                 self.slot_index,
             )?;
-            // TODO rewards https://github.com/iotaledger/iota-sdk/issues/1310
         }
 
         let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;

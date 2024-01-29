@@ -47,6 +47,7 @@ pub struct InputSelection {
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
     mana_allotments: u64,
+    mana_rewards: u64,
 }
 
 /// Result of the input selection algorithm.
@@ -195,6 +196,7 @@ impl InputSelection {
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
             mana_allotments: 0,
+            mana_rewards: 0,
         }
     }
 
@@ -225,6 +227,12 @@ impl InputSelection {
     /// Sets the mana allotments sum of an [`InputSelection`].
     pub fn with_mana_allotments<'a>(mut self, mana_allotments: impl Iterator<Item = &'a ManaAllotment>) -> Self {
         self.mana_allotments = mana_allotments.map(ManaAllotment::mana).sum();
+        self
+    }
+
+    /// Sets the total mana rewards.
+    pub fn with_mana_rewards(mut self, mana_rewards: u64) -> Self {
+        self.mana_rewards = mana_rewards;
         self
     }
 

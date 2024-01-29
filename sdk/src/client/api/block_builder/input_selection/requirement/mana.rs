@@ -15,7 +15,6 @@ impl InputSelection {
                 input.output_id().transaction_id().slot_index(),
                 self.slot_index,
             )?;
-            // TODO rewards https://github.com/iotaledger/iota-sdk/issues/1310
         }
 
         if selected_mana >= required_mana {
