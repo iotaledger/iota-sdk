@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountId, DelegationId, FoundryId, NftId } from '../block/id';
-import { HexEncodedString, u256, u64 } from '../utils';
+import { DecayedMana, HexEncodedString, u256, u64 } from '../utils';
 import { IClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
 import { Bech32Address } from '../block';
@@ -25,8 +25,10 @@ export interface WalletOptions {
 
 /** A balance */
 export interface Balance {
-    /** The balance of the base coin */
+    /** Total and available amount of the base coin */
     baseCoin: BaseCoinBalance;
+    /** Total and available mana  */
+    mana: ManaBalance;
     /** The required storage deposit for the outputs */
     requiredStorageDeposit: RequiredStorageDeposit;
     /** The balance of the native tokens */
@@ -54,6 +56,14 @@ export interface BaseCoinBalance {
     available: u64;
     /** Voting power */
     votingPower: string;
+}
+
+/** Mana balances */
+export interface ManaBalance {
+    /** The total mana of the outputs */
+    total: DecayedMana;
+    /** The mana of the outputs that isn't used in a transaction */
+    available: DecayedMana;
 }
 
 /** The required storage deposit per output type */
