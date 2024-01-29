@@ -221,23 +221,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetOutput { output_id } => Response::OutputResponse(client.get_output(&output_id).await?),
-        ClientMethod::GetOutputs { output_ids } => {
-            let outputs_response = client
-                .get_outputs_with_metadata(&output_ids)
-                .await?
-                .into_iter()
-                .map(OutputResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
-        }
+        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(&output_ids).await?),
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
-            let outputs_response = client
-                .get_outputs_with_metadata_ignore_not_found(&output_ids)
-                .await?
-                .into_iter()
-                .map(OutputResponse::from)
-                .collect();
-            Response::Outputs(outputs_response)
+            Response::Outputs(client.get_outputs_ignore_not_found(&output_ids).await?)
         }
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
