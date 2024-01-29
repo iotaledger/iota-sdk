@@ -9,7 +9,7 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt, NumericString } from '../../utils';
+import { HexEncodedString, NumericString } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 
@@ -97,6 +97,7 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
     })
     readonly unlockConditions: UnlockCondition[];
 
+    @Type(() => INativeToken)
     readonly nativeTokens?: INativeToken[];
 
     @Type(() => Feature, {
@@ -127,17 +128,6 @@ abstract class CommonOutput extends Output /*implements ICommonOutput*/ {
      * The native tokens held by the output.
      */
     getNativeTokens(): INativeToken[] | undefined {
-        if (!this.nativeTokens) {
-            return this.nativeTokens;
-        }
-
-        // Make sure the amount of native tokens are of bigint type.
-        for (let i = 0; i < this.nativeTokens.length; i++) {
-            const token = this.nativeTokens[i];
-            if (typeof token.amount === 'string') {
-                this.nativeTokens[i].amount = hexToBigInt(token.amount);
-            }
-        }
         return this.nativeTokens;
     }
 

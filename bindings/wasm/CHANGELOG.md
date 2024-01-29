@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.3 - 2024-01-DD
+## 1.1.3 - 2024-01-29
 
 Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.
 

@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { Transform } from 'class-transformer';
 import { hexToBigInt } from '../../utils/hex-encoding';
 
 /**
@@ -36,8 +37,11 @@ abstract class TokenScheme {
  * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
+    @Transform((value) => hexToBigInt(value.value))
     readonly mintedTokens: bigint;
+    @Transform((value) => hexToBigInt(value.value))
     readonly meltedTokens: bigint;
+    @Transform((value) => hexToBigInt(value.value))
     readonly maximumSupply: bigint;
 
     /**
