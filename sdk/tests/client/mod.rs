@@ -270,7 +270,7 @@ fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native
 
         match output.features().as_ref() {
             [] | [Feature::NativeToken(_)] => {}
-            _ => panic!("remainder should have no or only a native token feature"),
+            _ => return false,
         }
 
         if let Some((token_id, amount)) = native_token {
