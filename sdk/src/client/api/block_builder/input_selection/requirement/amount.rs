@@ -239,17 +239,17 @@ impl InputSelection {
 
             // TODO check that new_amount is enough for the storage cost
 
-            let new_output = match output {
-                Output::Account(output) => {
-                    // Mana generated or stored by an issuer account is locked to that account.
-                    if output.is_block_issuer() {
-                        continue;
-                    }
+            // PANIC: unwrap is fine as non-chain outputs have been filtered out already.
+            log::debug!(
+                "Reducing amount of {} to {} to fulfill amount requirement",
+                output.chain_id().unwrap(),
+                new_amount
+            );
 
-                    AccountOutputBuilder::from(&*output)
-                        .with_amount(new_amount)
-                        .finish_output()?
-                }
+            let new_output = match output {
+                Output::Account(output) => AccountOutputBuilder::from(&*output)
+                    .with_amount(new_amount)
+                    .finish_output()?,
                 Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
                     .with_amount(new_amount)
                     .finish_output()?,
@@ -258,13 +258,6 @@ impl InputSelection {
                     .finish_output()?,
                 _ => panic!("only account, nft and foundry can be automatically created"),
             };
-
-            // PANIC: unwrap is fine as non-chain outputs have been filtered out already.
-            log::debug!(
-                "Reducing amount of {} to {} to fulfill amount requirement",
-                output.chain_id().unwrap(),
-                new_amount
-            );
 
             amount_selection.outputs_sum -= amount - new_amount;
             *output = new_output;
