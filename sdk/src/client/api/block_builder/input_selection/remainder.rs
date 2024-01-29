@@ -72,7 +72,7 @@ impl InputSelection {
         required_remainder_amount(native_tokens_diff, self.protocol_parameters.storage_score_parameters())
     }
 
-    pub(crate) fn remainder_and_storage_deposit_return_outputs(
+    pub(crate) fn storage_deposit_return_outputs_and_remainders(
         &mut self,
     ) -> Result<(Vec<Output>, Vec<RemainderData>), Error> {
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
@@ -125,7 +125,7 @@ impl InputSelection {
 
         if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
-            return Ok((Vec::new(), storage_deposit_returns));
+            return Ok((storage_deposit_returns, Vec::new()));
         }
 
         let amount_diff = input_amount
