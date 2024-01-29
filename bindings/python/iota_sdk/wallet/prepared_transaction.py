@@ -104,7 +104,7 @@ class PreparedCreateTokenTransactionData:
 
 @dataclass
 class PreparedCreateDelegationTransaction:
-    """A helper class for offline signing a create native token transaction.
+    """A helper class for offline signing to create a delegation transaction.
 
     Attributes:
         wallet: A wallet object used to continue building this transaction.

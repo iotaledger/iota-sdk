@@ -46,10 +46,8 @@ class RemainderValueStrategy(Enum):
     """Remainder value strategy variants.
 
     Attributes:
-        ChangeAddress: Allows to move the remainder value to a change address.
         ReuseAddress: Allows to keep the remainder value on the source address.
     """
-    ChangeAddress = None
     ReuseAddress = None
 
     def to_dict(self) -> dict:
