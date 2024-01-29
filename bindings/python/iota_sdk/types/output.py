@@ -353,7 +353,7 @@ class OutputIdProof:
 
 @json
 @dataclass
-class OutputWrapper:
+class OutputResponse:
     """Contains the generic Output with associated OutputIdProof.
 
     Attributes:

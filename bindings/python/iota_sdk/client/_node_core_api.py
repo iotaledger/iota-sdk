@@ -11,7 +11,7 @@ from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
 from iota_sdk.types.issuance import Congestion, IssuanceBlockHeader
 from iota_sdk.types.mana import ManaRewards
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper, Routes
-from iota_sdk.types.output import OutputWrapper
+from iota_sdk.types.output import OutputResponse
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitment
@@ -244,7 +244,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # UTXO routes.
 
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputWrapper:
+            self, output_id: Union[OutputId, HexStr]) -> OutputResponse:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -253,7 +253,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputWrapper.from_dict(self._call_method('getOutput', {
+        return OutputResponse.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 

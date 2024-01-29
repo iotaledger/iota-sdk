@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.common import CoinType, HexStr, json
-from iota_sdk.types.output_metadata import OutputWithMetadata
+from iota_sdk.types.output import OutputResponse
 from iota_sdk.types.output_id import OutputId
 
 
@@ -81,35 +81,35 @@ class HighLevelAPI(metaclass=ABCMeta):
         """
 
     def get_outputs(
-            self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
-        """Fetch OutputWithMetadata from provided OutputIds (requests are sent in parallel).
+            self, output_ids: List[OutputId]) -> List[OutputResponse]:
+        """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
 
         Args:
             output_ids: A list of output ids.
 
         Returns:
-            A list of corresponding `OutputWithMetadata` objects.
+            A list of corresponding `OutputResponse` objects.
         """
         outputs = self._call_method('getOutputs', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
-        return [OutputWithMetadata.from_dict(o) for o in outputs]
+        return [OutputResponse.from_dict(o) for o in outputs]
 
     def get_outputs_ignore_errors(
-            self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
-        """Try to get OutputWithMetadata from provided OutputIds.
+            self, output_ids: List[OutputId]) -> List[OutputResponse]:
+        """Try to get OutputResponse from provided OutputIds.
         Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
 
         Args:
             output_ids: A list of output ids.
 
         Returns:
-            A list of corresponding `OutputWithMetadata` objects.
+            A list of corresponding `OutputResponse` objects.
         """
         outputs = self._call_method('getOutputsIgnoreErrors', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
-        return [OutputWithMetadata.from_dict(o) for o in outputs]
+        return [OutputResponse.from_dict(o) for o in outputs]
 
     def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.
