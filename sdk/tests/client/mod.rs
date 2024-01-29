@@ -28,7 +28,7 @@ use iota_sdk::{
                 AddressUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
-            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NftId,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, Feature, FoundryOutputBuilder, NativeToken, NftId,
             NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
         rand::{
@@ -268,9 +268,9 @@ fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native
             return false;
         }
 
-        // Can be 1 for a native token
-        if output.features().len() > 1 {
-            return false;
+        match output.features().as_ref() {
+            [] | [Feature::NativeToken(_)] => {}
+            _ => panic!("remainder should have no or only a native token feature"),
         }
 
         if let Some((token_id, amount)) = native_token {
