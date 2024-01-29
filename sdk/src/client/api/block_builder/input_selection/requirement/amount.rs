@@ -158,12 +158,18 @@ impl AmountSelection {
 
             if input.output.native_token().is_some() {
                 // Recalculate the remaining amount, as a new native token may require a new remainder output.
-                let (remainder_amount, native_tokens_remainder) = self.remainder_amount().unwrap();
-                log::debug!(
-                    "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
-                );
-                self.remainder_amount = remainder_amount;
-                self.native_tokens_remainder = native_tokens_remainder;
+                match self.remainder_amount() {
+                    Ok((remainder_amount, native_tokens_remainder)) => {
+                        log::debug!(
+                            "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
+                        );
+                        self.remainder_amount = remainder_amount;
+                        self.native_tokens_remainder = native_tokens_remainder;
+                    }
+                    // Can't return an error from this function, but only reason should be `NativeTokensOverflow` which
+                    // should fail on another place then.
+                    Err(e) => log::error!("{e}"),
+                }
             }
 
             if self.missing_amount() == 0 {

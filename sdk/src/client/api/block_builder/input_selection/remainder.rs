@@ -15,8 +15,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokensBuilder,
-            NftOutputBuilder, Output,
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokens,
+            NativeTokensBuilder, NftOutputBuilder, Output, StorageScoreParameters,
         },
         Error as BlockError,
     },
@@ -190,61 +190,77 @@ impl InputSelection {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        let mut remainder_outputs = Vec::new();
+        let remainder_outputs = create_remainder_outputs(
+            amount_diff,
+            mana_diff,
+            native_tokens_diff,
+            remainder_address,
+            chain,
+            self.protocol_parameters.storage_score_parameters(),
+        )?;
 
-        if let Some(native_tokens) = native_tokens_diff {
-            let native_tokens_len = native_tokens.len();
-            let mut remaining_amount = amount_diff;
-            // Create a remainder output with minimum amount for each native token and put remaining amount + mana in
-            // the last one.
-            for (n, native_token) in native_tokens.into_iter().enumerate() {
-                let remainder_builder = if n + 1 < native_tokens_len {
-                    BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
-                } else {
-                    // All remainder mana in the last remainder output which also gets all remaining amount.
-                    BasicOutputBuilder::new_with_amount(remaining_amount).with_mana(mana_diff)
-                };
+        Ok((remainder_outputs, storage_deposit_returns))
+    }
+}
 
-                let remainder = remainder_builder
-                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                    .with_native_token(native_token)
-                    .finish_output()?;
+fn create_remainder_outputs(
+    amount_diff: u64,
+    mana_diff: u64,
+    native_tokens_diff: Option<NativeTokens>,
+    remainder_address: Address,
+    remainder_address_chain: Option<Bip44>,
+    storage_score_parameters: StorageScoreParameters,
+) -> Result<Vec<RemainderData>, Error> {
+    let mut remainder_outputs = Vec::new();
 
-                if n + 1 < native_tokens_len {
-                    remaining_amount = remaining_amount.saturating_sub(remainder.amount());
-                } else {
-                    // Only last output uses amount diff and needs to be validated
-                    remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
-                };
-                log::debug!(
-                    "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
-                    remainder.amount(),
-                    remainder.mana()
-                );
-                remainder_outputs.push(remainder);
-            }
-        } else {
-            // No native token, just put all amount and mana in a single output.
-            let remainder = BasicOutputBuilder::new_with_amount(amount_diff)
-                .with_mana(mana_diff)
+    if let Some(native_tokens) = native_tokens_diff {
+        let native_tokens_len = native_tokens.len();
+        let mut remaining_amount = amount_diff;
+        // Create a remainder output with minimum amount for each native token and put remaining amount + mana in
+        // the last output.
+        for (n, native_token) in native_tokens.into_iter().enumerate() {
+            let remainder_builder = if n + 1 < native_tokens_len {
+                BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
+            } else {
+                // All remainder mana in the last remainder output which also gets all remaining amount.
+                BasicOutputBuilder::new_with_amount(remaining_amount).with_mana(mana_diff)
+            };
+
+            let remainder = remainder_builder
                 .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                .with_native_token(native_token)
                 .finish_output()?;
+
+            if n + 1 < native_tokens_len {
+                remaining_amount = remaining_amount.saturating_sub(remainder.amount());
+            } else {
+                // Only last output uses amount diff and needs to be validated
+                remainder.verify_storage_deposit(storage_score_parameters)?;
+            };
             log::debug!(
-                "Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}"
+                "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
+                remainder.amount(),
+                remainder.mana()
             );
             remainder_outputs.push(remainder);
         }
-
-        Ok((
-            remainder_outputs
-                .into_iter()
-                .map(|o| RemainderData {
-                    output: o,
-                    chain,
-                    address: remainder_address.clone(),
-                })
-                .collect(),
-            storage_deposit_returns,
-        ))
+    } else {
+        // No native token, just put all amount and mana in a single output.
+        let remainder = BasicOutputBuilder::new_with_amount(amount_diff)
+            .with_mana(mana_diff)
+            .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+            .finish_output()?;
+        remainder.verify_storage_deposit(storage_score_parameters)?;
+        log::debug!("Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}");
+        remainder_outputs.push(remainder);
     }
+
+    Ok(remainder_outputs
+        .into_iter()
+        .map(|o| RemainderData {
+            output: o,
+            chain: remainder_address_chain,
+            address: remainder_address.clone(),
+        })
+        .collect())
 }
