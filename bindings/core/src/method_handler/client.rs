@@ -242,8 +242,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
-        ClientMethod::GetOutputWithMetadataFull { output_id } => {
-            Response::OutputWithMetadata(client.get_output_with_metadata_full(&output_id).await?)
+        ClientMethod::GetOutputWithMetadata { output_id } => {
+            Response::OutputWithMetadata(client.get_output_with_metadata(&output_id).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))

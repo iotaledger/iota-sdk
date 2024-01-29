@@ -158,7 +158,7 @@ async fn test_get_output_raw() {
 
     let output = client.get_output(&output_id).await.unwrap();
     let output_raw = Output::unpack_verified(
-        client.get_output_with_proof_raw(&output_id).await.unwrap(),
+        client.get_output_raw(&output_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
     .unwrap();

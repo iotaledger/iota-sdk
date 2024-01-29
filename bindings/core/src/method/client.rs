@@ -244,7 +244,7 @@ pub enum ClientMethod {
     },
     /// Get output with its metadata including the output ID proof.
     #[serde(rename_all = "camelCase")]
-    GetOutputWithMetadataFull {
+    GetOutputWithMetadata {
         /// Output ID
         output_id: OutputId,
     },

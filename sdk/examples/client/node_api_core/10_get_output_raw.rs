@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .parse::<OutputId>()?;
 
     // Get the output as raw bytes.
-    let output_bytes = client.get_output_with_proof_raw(&output_id).await?;
+    let output_bytes = client.get_output_raw(&output_id).await?;
 
     println!("Output bytes:\n{output_bytes:?}");
 

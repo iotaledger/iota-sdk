@@ -45,7 +45,7 @@ impl Client {
 
     /// Requests outputs and their metadata by their output ID in parallel.
     pub async fn get_outputs_with_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadata>> {
-        futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_with_metadata_full(id))).await
+        futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id))).await
     }
 
     /// Requests outputs and their metadata by their output ID in parallel, ignoring outputs not found.
@@ -54,7 +54,7 @@ impl Client {
         &self,
         output_ids: &[OutputId],
     ) -> Result<Vec<OutputWithMetadata>> {
-        futures::future::join_all(output_ids.iter().map(|id| self.get_output_with_metadata_full(id)))
+        futures::future::join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id)))
             .await
             .into_iter()
             .filter(|res| !matches!(res, Err(Error::Node(NodeApiError::NotFound(_)))))
