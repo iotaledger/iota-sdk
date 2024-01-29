@@ -87,7 +87,7 @@ class CreateNativeTokenParams():
 @json
 @dataclass
 class CreateDelegationParams():
-    """Parameters for creating native tokens.
+    """Parameters for creating a delegation output.
 
     Attributes:
         delegated_amount: The amount to delegate.
