@@ -5,14 +5,13 @@ use std::collections::HashMap;
 
 use super::{native_tokens::get_native_tokens, Error, InputSelection, Requirement};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{api::input_selection::remainder::required_remainder_amount, secret::types::InputSigningData},
     types::block::{
-        address::{Address, Ed25519Address},
+        address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AddressUnlockCondition,
-            BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
-            StorageScoreParameters,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
+            MinimumOutputAmount, NftOutputBuilder, Output, OutputId, StorageScoreParameters,
         },
         slot::SlotIndex,
     },
@@ -181,27 +180,10 @@ impl AmountSelection {
     }
 
     pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
-        let input_native_tokens_set =
-            get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish_set()?;
+        let input_native_tokens =
+            get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish()?;
 
-        let remainder_builder = BasicOutputBuilder::new_with_minimum_amount(self.storage_score_parameters)
-            .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
-                [0; 32],
-            ))));
-
-        let remainder_amount = if !input_native_tokens_set.is_empty() {
-            let nt_remainder_amount = remainder_builder
-                .with_native_token(*input_native_tokens_set.first().unwrap())
-                .finish_output()?
-                .amount();
-            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
-            // cost.
-            nt_remainder_amount * input_native_tokens_set.len() as u64
-        } else {
-            remainder_builder.finish_output()?.amount()
-        };
-
-        Ok((remainder_amount, !input_native_tokens_set.is_empty()))
+        required_remainder_amount(Some(input_native_tokens), self.storage_score_parameters)
     }
 
     fn into_newly_selected_inputs(self) -> Vec<InputSigningData> {

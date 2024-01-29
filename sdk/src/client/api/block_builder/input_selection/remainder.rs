@@ -68,27 +68,8 @@ impl InputSelection {
         }
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
-        let native_tokens_remainder = native_tokens_diff.is_some();
 
-        let remainder_builder =
-            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
-                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
-                    [0; 32],
-                ))));
-
-        let remainder_amount = if let Some(native_tokens) = native_tokens_diff {
-            let nt_remainder_amount = remainder_builder
-                .with_native_token(*native_tokens.first().unwrap())
-                .finish_output()?
-                .amount();
-            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
-            // cost.
-            nt_remainder_amount * native_tokens.len() as u64
-        } else {
-            remainder_builder.finish_output()?.amount()
-        };
-
-        Ok((remainder_amount, native_tokens_remainder))
+        required_remainder_amount(native_tokens_diff, self.protocol_parameters.storage_score_parameters())
     }
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
@@ -201,6 +182,33 @@ impl InputSelection {
 
         Ok((remainder_outputs, storage_deposit_returns))
     }
+}
+
+/// Calculates the required amount for required remainder outputs (multiple outputs are required if multiple native
+/// tokens are remaining) and returns if there are native tokens as remainder.
+pub(crate) fn required_remainder_amount(
+    remainder_native_tokens: Option<NativeTokens>,
+    storage_score_parameters: StorageScoreParameters,
+) -> Result<(u64, bool), Error> {
+    let native_tokens_remainder = remainder_native_tokens.is_some();
+
+    let remainder_builder = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters).add_unlock_condition(
+        AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; 32]))),
+    );
+
+    let remainder_amount = if let Some(native_tokens) = remainder_native_tokens {
+        let nt_remainder_amount = remainder_builder
+            .with_native_token(*native_tokens.first().unwrap())
+            .finish_output()?
+            .amount();
+        // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
+        // cost.
+        nt_remainder_amount * native_tokens.len() as u64
+    } else {
+        remainder_builder.finish_output()?.amount()
+    };
+
+    Ok((remainder_amount, native_tokens_remainder))
 }
 
 fn create_remainder_outputs(
