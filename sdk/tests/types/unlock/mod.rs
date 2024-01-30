@@ -145,7 +145,7 @@ fn get_signature_through_reference() {
 }
 
 #[test]
-fn invalid_alias_0() {
+fn invalid_account_0() {
     assert!(matches!(
         Unlocks::new([
             AccountUnlock::new(0).unwrap().into(),
@@ -156,7 +156,7 @@ fn invalid_alias_0() {
 }
 
 #[test]
-fn invalid_alias_index() {
+fn invalid_account_index() {
     assert!(matches!(
         Unlocks::new([
             SignatureUnlock::from(rand_signature()).into(),
