@@ -5,8 +5,10 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, Block, BlockDto, BlockHash,
-        BlockId,
+        protocol::{ProtocolParameters, WorkScore},
+        rand::bytes::rand_bytes_array,
+        slot::SlotIndex,
+        Block, BlockDto, BlockHash, BlockId,
     },
     TryFromDto,
 };
@@ -78,31 +80,37 @@ fn protocol_parameters() -> ProtocolParameters {
 #[test]
 fn basic_block_tagged_data_payload_id() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
+    let protocol_parameters = protocol_parameters();
     let file = std::fs::read_to_string("./tests/types/fixtures/basic_block_tagged_data_payload.json").unwrap();
     let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
     let block_json = &json["block"];
     let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
     let block = Block::try_from_dto(block_dto).unwrap();
     let block_bytes = block.pack_to_vec();
+    let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-    assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
+    assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
+    assert_eq!(block_work_score, json["workScore"]);
 }
 
 #[test]
 fn basic_block_transaction_payload_id() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
+    let protocol_parameters = protocol_parameters();
     let file = std::fs::read_to_string("./tests/types/fixtures/basic_block_transaction_payload.json").unwrap();
     let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
     let block_json = &json["block"];
     let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
     let block = Block::try_from_dto(block_dto).unwrap();
     let block_bytes = block.pack_to_vec();
+    let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-    assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
+    assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
+    assert_eq!(block_work_score, json["workScore"]);
 }
 
 #[test]
