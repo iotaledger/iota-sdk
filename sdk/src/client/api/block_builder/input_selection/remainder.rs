@@ -72,7 +72,7 @@ impl InputSelection {
         required_remainder_amount(native_tokens_diff, self.protocol_parameters.storage_score_parameters())
     }
 
-    pub(crate) fn storage_deposit_return_outputs_and_remainders(
+    pub(crate) fn storage_deposit_returns_and_remainders(
         &mut self,
     ) -> Result<(Vec<Output>, Vec<RemainderData>), Error> {
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
