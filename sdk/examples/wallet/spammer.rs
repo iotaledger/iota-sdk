@@ -168,7 +168,8 @@ async fn ensure_enough_funds(wallet: &Wallet, bech32_address: &Bech32Address) ->
     println!("Min required funds: {min_required_funds}");
     if available_funds < min_required_funds {
         println!("Requesting funds from faucet...");
-        let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), bech32_address).await?;
+        let faucet_response =
+            request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), bech32_address.to_string()).await?;
         println!("Response from faucet: {}", faucet_response.trim_end());
         if faucet_response.contains("error") {
             panic!("Requesting funds failed (error response)");

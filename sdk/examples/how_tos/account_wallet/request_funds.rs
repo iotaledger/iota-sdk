@@ -39,8 +39,10 @@ async fn main() -> Result<()> {
     println!("Account Id: {account_id}");
 
     // Get account address
-    let account_address = AccountAddress::new(*account_id).to_bech32(wallet.client().get_bech32_hrp().await.unwrap());
-    let faucet_response = request_funds_from_faucet(&faucet_url, &account_address).await?;
+    let account_address = AccountAddress::new(*account_id)
+        .to_bech32(wallet.client().get_bech32_hrp().await.unwrap())
+        .to_string();
+    let faucet_response = request_funds_from_faucet(&faucet_url, account_address).await?;
 
     println!("{faucet_response}");
 

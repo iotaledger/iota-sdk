@@ -136,9 +136,9 @@ impl_query_parameters_methods!(BasicOutputQueryParameters);
 impl BasicOutputQueryParameters {
     /// Sets `.address(address).has_expiration(false).has_storage_deposit_return(false).has_timelock(false)` to only
     /// get outputs that can be unlocked by the address without potential further restrictions.
-    pub fn only_address_unlock_condition(address: impl Into<Bech32Address>) -> Self {
+    pub fn only_address_unlock_condition(address: String) -> Self {
         Self::default()
-            .address(address.into().to_string())
+            .address(address)
             .has_expiration(false)
             .has_storage_deposit_return(false)
             .has_timelock(false)

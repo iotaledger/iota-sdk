@@ -21,7 +21,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::Hrp,
         output::{Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
@@ -365,7 +365,7 @@ pub enum WalletMethod {
     Send {
         #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
-        address: Bech32Address,
+        address: String,
         options: Option<TransactionOptions>,
     },
     /// Send base coins to multiple addresses, or with additional parameters.

@@ -30,13 +30,13 @@ async fn main() -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("Wallet synced");
 
-    let wallet_address = wallet.address().await;
+    let wallet_address = wallet.address().await.to_string();
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");
 
     println!("Requesting funds from faucet...");
-    let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &wallet_address).await?;
+    let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), wallet_address).await?;
 
     println!("Response from faucet: {}", faucet_response.trim_end());
 

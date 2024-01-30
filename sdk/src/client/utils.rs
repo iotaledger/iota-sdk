@@ -87,7 +87,7 @@ pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<()> {
 }
 
 /// Requests funds from a faucet
-pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address) -> Result<String> {
+pub async fn request_funds_from_faucet(url: &str, bech32_address: String) -> Result<String> {
     let mut map = HashMap::new();
     map.insert("address", bech32_address.to_string());
 

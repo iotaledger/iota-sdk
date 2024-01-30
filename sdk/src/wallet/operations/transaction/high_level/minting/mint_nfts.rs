@@ -28,10 +28,10 @@ pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
     /// address of the wallet.
     #[getset(get = "pub")]
-    address: Option<Bech32Address>,
+    address: Option<String>,
     /// NFT sender feature.
     #[getset(get = "pub")]
-    sender: Option<Bech32Address>,
+    sender: Option<String>,
     /// NFT metadata feature.
     #[getset(get = "pub")]
     metadata: Option<MetadataFeature>,
@@ -41,7 +41,7 @@ pub struct MintNftParams {
     tag: Option<Vec<u8>>,
     /// NFT issuer feature.
     #[getset(get = "pub")]
-    issuer: Option<Bech32Address>,
+    issuer: Option<String>,
     /// NFT immutable metadata feature.
     #[getset(get = "pub")]
     immutable_metadata: Option<MetadataFeature>,

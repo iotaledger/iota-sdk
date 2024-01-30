@@ -48,7 +48,9 @@ async fn main() -> Result<()> {
     println!("Account Id: {account_id}");
 
     // Get account address
-    let account_address = AccountAddress::new(*account_id).to_bech32(wallet.client().get_bech32_hrp().await.unwrap());
+    let account_address = AccountAddress::new(*account_id)
+        .to_bech32(wallet.client().get_bech32_hrp().await.unwrap())
+        .to_string();
 
     // Find first output unlockable by the account address
     let input = *wallet

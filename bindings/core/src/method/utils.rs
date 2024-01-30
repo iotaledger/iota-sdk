@@ -5,7 +5,7 @@ use derivative::Derivative;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::Hrp,
         output::{AccountId, NftId, Output, OutputId, StorageScoreParameters},
         payload::signed_transaction::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
@@ -30,7 +30,7 @@ use crate::OmittedDebug;
 #[non_exhaustive]
 pub enum UtilsMethod {
     /// Transforms bech32 to hex
-    Bech32ToHex { bech32: Bech32Address },
+    Bech32ToHex { bech32: String },
     /// Transforms a hex encoded address to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     HexToBech32 { hex: String, bech32_hrp: Hrp },
@@ -44,7 +44,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     HexPublicKeyToBech32Address { hex: String, bech32_hrp: Hrp },
     /// Returns a valid Address parsed from a String.
-    ParseBech32Address { address: Bech32Address },
+    ParseBech32Address { address: String },
     /// Checks if a String is a valid bech32 encoded address.
     IsAddressValid { address: String },
     /// Generates a new mnemonic.

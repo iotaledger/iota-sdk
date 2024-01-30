@@ -63,7 +63,9 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         .unwrap();
     println!(
         "{}",
-        request_funds_from_faucet(FAUCET_URL, &addresses[0]).await.unwrap()
+        request_funds_from_faucet(FAUCET_URL, addresses[0].to_string())
+            .await
+            .unwrap()
     );
 
     // Continue only after funds are received
@@ -76,7 +78,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
-                addresses[0].clone(),
+                addresses[0].to_string(),
             ))
             .await
             .unwrap();

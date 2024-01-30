@@ -22,7 +22,7 @@ where
         Ok(self
             .client()
             .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
-                bech32_address,
+                bech32_address.to_string(),
             ))
             .await?
             .items)

@@ -14,7 +14,7 @@ use iota_sdk::{
         node_manager::node::NodeAuth,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::Hrp,
         output::{
             feature::Feature, unlock_condition::UnlockCondition, AccountId, AnchorId, DelegationId, FoundryId, NftId,
             Output, OutputId, TokenScheme,
@@ -399,7 +399,7 @@ pub enum ClientMethod {
     /// Function to find inputs from addresses for a provided amount (useful for offline signing)
     FindInputs {
         /// Addresses
-        addresses: Vec<Bech32Address>,
+        addresses: Vec<String>,
         /// Amount
         amount: u64,
     },
@@ -448,7 +448,7 @@ pub enum ClientMethod {
         /// Faucet URL
         url: String,
         /// The address for request funds
-        address: Bech32Address,
+        address: String,
     },
     /// Returns a block ID from a block
     BlockId {
