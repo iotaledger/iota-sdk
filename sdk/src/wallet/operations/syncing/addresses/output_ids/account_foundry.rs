@@ -30,7 +30,7 @@ where
         bech32_address: impl ConvertTo<Bech32Address>,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[SYNC] get_alias_and_foundry_output_ids");
+        log::debug!("[SYNC] get_account_and_foundry_output_ids");
         let bech32_address = bech32_address.convert()?;
 
         let mut output_ids = self
