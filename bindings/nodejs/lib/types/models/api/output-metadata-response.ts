@@ -1,10 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransactionId } from '../..';
 import { BlockId } from '../../block/id';
 import { OutputId } from '../../block/output';
 import { SlotCommitmentId, SlotIndex } from '../../block/slot';
-import type { HexEncodedString } from '../../utils/hex-encoding';
 
 /**
  * Metadata of an output.
@@ -29,7 +29,7 @@ export interface IOutputMetadataResponse {
     /**
      * Latest commitment ID of the node.
      */
-    latestCommitmentId: HexEncodedString;
+    latestCommitmentId: SlotCommitmentId;
 }
 
 /**
@@ -43,7 +43,7 @@ export interface IOutputInclusionMetadata {
     /**
      * Transaction ID that created the output.
      */
-    transactionId: BlockId;
+    transactionId: TransactionId;
     /**
      * Commitment ID that includes the creation of the output.
      */
@@ -61,7 +61,7 @@ export interface IOutputConsumptionMetadata {
     /**
      * Transaction ID that spent the output.
      */
-    transactionId: BlockId;
+    transactionId: TransactionId;
     /**
      * Commitment ID that includes the spending of the output.
      */
