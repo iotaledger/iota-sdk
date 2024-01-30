@@ -18,6 +18,7 @@ class SimpleTokenScheme:
         maximum_supply: The maximum supply of the token.
         type: The type code of the token scheme.
     """
+    type: int = field(default=0, init=False)
     minted_tokens: int = field(metadata=config(
         encoder=hex,
         decoder=hex_str_decoder,
@@ -30,7 +31,6 @@ class SimpleTokenScheme:
         encoder=hex,
         decoder=hex_str_decoder,
     ))
-    type: int = field(default=0, init=False)
 
 
 TokenScheme: TypeAlias = SimpleTokenScheme

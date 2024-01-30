@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import List, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
+from iota_sdk.types.decayed_mana import DecayedMana
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
 
 
@@ -16,6 +17,7 @@ class BaseCoinBalance:
     Attributes:
         total: The total balance.
         available: The available amount of the total balance.
+        voting_power: The voting power of the wallet.
     """
     total: int = field(metadata=config(
         encoder=str
@@ -23,6 +25,22 @@ class BaseCoinBalance:
     available: int = field(metadata=config(
         encoder=str
     ))
+    voting_power: int = field(metadata=config(
+        encoder=str
+    ))
+
+
+@json
+@dataclass
+class ManaBalance:
+    """Mana fields for Balance.
+
+    Attributes:
+        total: The total balance.
+        available: The available amount of the total balance.
+    """
+    total: DecayedMana
+    available: DecayedMana
 
 
 @json
@@ -65,7 +83,6 @@ class NativeTokensBalance:
         available: The available amount of the total native token balance.
         metadata: Some metadata of the native token.
     """
-    token_id: HexStr
     total: int = field(metadata=config(
         encoder=hex,
         decoder=hex_str_decoder,
@@ -84,6 +101,7 @@ class Balance:
 
     Attributes:
         base_coin: The base coin balance.
+        mana: Total and available mana.
         required_storage_deposit: The required storage deposit.
         native_tokens: The balances of all native tokens.
         accounts: All owned accounts.
@@ -93,8 +111,9 @@ class Balance:
         potentially_locked_outputs: A list of potentially locked outputs.
     """
     base_coin: BaseCoinBalance
+    mana: ManaBalance
     required_storage_deposit: RequiredStorageDeposit
-    native_tokens: List[NativeTokensBalance]
+    native_tokens: dict[HexStr, NativeTokensBalance]
     accounts: List[HexStr]
     foundries: List[HexStr]
     nfts: List[HexStr]
