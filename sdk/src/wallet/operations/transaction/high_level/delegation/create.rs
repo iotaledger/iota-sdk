@@ -8,13 +8,9 @@ use crate::{
     types::block::{
         address::{AccountAddress, Bech32Address},
         context_input::{CommitmentContextInput, ContextInput},
-        output::{unlock_condition::AddressUnlockCondition, DelegationId, DelegationOutputBuilder, Output},
+        output::{unlock_condition::AddressUnlockCondition, DelegationId, DelegationOutputBuilder},
     },
-    wallet::{
-        operations::transaction::TransactionOptions,
-        types::{OutputData, TransactionWithMetadata},
-        Wallet,
-    },
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
 
 /// Params for `create_delegation_output()`
@@ -145,21 +141,6 @@ where
             delegation_id: DelegationId::from(&transaction.transaction.id().into_output_id(0)),
             transaction,
         })
-    }
-
-    /// Gets an existing delegation output.
-    pub(crate) async fn get_delegation_output(&self, delegation_id: DelegationId) -> Option<OutputData> {
-        log::debug!("[get_delegation_output]");
-        self.data()
-            .await
-            .unspent_outputs
-            .values()
-            .find_map(|output_data| match &output_data.output {
-                Output::Delegation(delegation_output) => (delegation_id
-                    == delegation_output.delegation_id_non_null(&output_data.output_id))
-                .then_some(output_data.clone()),
-                _ => None,
-            })
     }
 }
 

@@ -41,11 +41,16 @@ where
         delegation_id: DelegationId,
         reclaim_excess: bool,
     ) -> crate::wallet::Result<PreparedTransactionData> {
-        let delegation_output = self.get_delegation_output(delegation_id).await.ok_or_else(|| {
-            crate::wallet::Error::DelegationTransitionFailed(format!(
-                "no delegation output found with id {delegation_id}"
-            ))
-        })?;
+        let delegation_output = self
+            .data()
+            .await
+            .unspent_delegation_output(&delegation_id)
+            .ok_or_else(|| {
+                crate::wallet::Error::DelegationTransitionFailed(format!(
+                    "no delegation output found with id {delegation_id}"
+                ))
+            })?
+            .clone();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         // Add a commitment context input with the latest slot commitment
         let slot_commitment_id = self.client().get_info().await?.node_info.status.latest_commitment_id;
