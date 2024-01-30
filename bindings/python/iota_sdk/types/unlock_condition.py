@@ -39,14 +39,14 @@ class AddressUnlockCondition:
     Args:
         address: An address unlocked with a private key.
     """
-    address: Address = field(
-        metadata=config(
-            decoder=deserialize_address
-        ))
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Address),
         init=False)
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
 
 
 @json
@@ -57,6 +57,8 @@ class StorageDepositReturnUnlockCondition:
         amount: The amount of base coins the consuming transaction must deposit to `return_address`.
         return_address: The address to return the amount to.
     """
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.StorageDepositReturn), init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -64,8 +66,6 @@ class StorageDepositReturnUnlockCondition:
         metadata=config(
             decoder=deserialize_address
         ))
-    type: int = field(default_factory=lambda: int(
-        UnlockConditionType.StorageDepositReturn), init=False)
 
 
 @json
@@ -75,11 +75,11 @@ class TimelockUnlockCondition:
     Args:
         slot_index: Slot index that defines when the output can be consumed.
     """
-    slot_index: SlotIndex
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Timelock),
         init=False)
+    slot_index: SlotIndex
 
 
 @json
@@ -91,15 +91,15 @@ class ExpirationUnlockCondition:
                     after that only the address defined in Return Address.
         return_address: The return address if the output was not claimed in time.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockConditionType.Expiration),
+        init=False)
     slot_index: SlotIndex
     return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
-    type: int = field(
-        default_factory=lambda: int(
-            UnlockConditionType.Expiration),
-        init=False)
 
 
 @json
@@ -109,12 +109,12 @@ class StateControllerAddressUnlockCondition:
     Args:
         address: The state controller address that owns the output.
     """
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.StateControllerAddress), init=False)
     address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
-    type: int = field(default_factory=lambda: int(
-        UnlockConditionType.StateControllerAddress), init=False)
 
 
 @json
@@ -124,12 +124,12 @@ class GovernorAddressUnlockCondition:
     Args:
         address: The governor address that owns the output.
     """
+    type: int = field(default_factory=lambda: int(
+        UnlockConditionType.GovernorAddress), init=False)
     address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
-    type: int = field(default_factory=lambda: int(
-        UnlockConditionType.GovernorAddress), init=False)
 
 
 @json
@@ -139,9 +139,9 @@ class ImmutableAccountAddressUnlockCondition:
     Args:
         address: The permanent account address that owns this output.
     """
-    address: AccountAddress
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.ImmutableAccountAddress), init=False)
+    address: AccountAddress
 
 
 UnlockCondition: TypeAlias = Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,

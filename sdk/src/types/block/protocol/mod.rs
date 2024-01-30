@@ -194,12 +194,16 @@ impl ProtocolParameters {
 
     /// Gets the first [`SlotIndex`] of a given [`EpochIndex`].
     pub fn first_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
-        epoch_index.into().first_slot_index(self.slots_per_epoch_exponent())
+        epoch_index
+            .into()
+            .first_slot_index(self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Gets the last [`SlotIndex`] of a given [`EpochIndex`].
     pub fn last_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
-        epoch_index.into().last_slot_index(self.slots_per_epoch_exponent())
+        epoch_index
+            .into()
+            .last_slot_index(self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Calculates the number of slots before the next epoch.
@@ -226,7 +230,7 @@ impl ProtocolParameters {
 
     /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
     pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
-        EpochIndex::from_slot_index(slot_index.into(), self.slots_per_epoch_exponent())
+        EpochIndex::from_slot_index(slot_index, self.genesis_slot, self.slots_per_epoch_exponent())
     }
 
     /// Calculates the duration of an epoch in seconds.
