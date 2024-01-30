@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import TypeAlias, Union
+from typing import Any, Dict, TypeAlias, Union
 from dataclasses_json import config
 from iota_sdk.utils import Utils
 from iota_sdk.types.common import HexStr, json, SlotIndex
@@ -11,6 +11,7 @@ from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Signature
 from iota_sdk.types.block.body.basic import BasicBlockBody
 from iota_sdk.types.block.body.validation import ValidationBlockBody
+from iota_sdk.types.block.body.type import BlockBodyType
 
 
 @json
@@ -52,6 +53,21 @@ class UnsignedBlock:
     body: BlockBody
 
 
+def deserialize_block_body(d: Dict[str, Any]) -> BlockBody:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    body_type = d['type']
+    if body_type == BlockBodyType.Basic:
+        return BasicBlockBody.from_dict(d)
+    if body_type == BlockBodyType.Validation:
+        return ValidationBlockBody.from_dict(d)
+    raise Exception(f'invalid block body type: {body_type}')
+
+
 @json
 @dataclass
 class Block:
@@ -64,7 +80,9 @@ class Block:
         signature: The Block signature.
     """
     header: BlockHeader
-    body: BlockBody
+    body: BlockBody = field(metadata=config(
+        decoder=deserialize_block_body
+    ))
     signature: Signature
 
     def id(self, params: ProtocolParameters) -> HexStr:

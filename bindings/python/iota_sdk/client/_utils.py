@@ -92,5 +92,5 @@ class ClientUtils(metaclass=ABCMeta):
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return self._call_method('blockId', {
-            'block': block.to_dict(),
+            'block': block,
         })
