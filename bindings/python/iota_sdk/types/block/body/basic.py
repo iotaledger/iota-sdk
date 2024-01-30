@@ -7,7 +7,7 @@ from typing import List, Optional
 from dataclasses_json import config
 from iota_sdk.types.block.body.type import BlockBodyType
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import Payload
+from iota_sdk.types.payload import Payload, deserialize_payload
 
 
 @json
@@ -23,13 +23,15 @@ class BasicBlockBody:
         max_burned_mana: The amount of Mana the Account identified by the AccountId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
+    type: int = field(
+        default_factory=lambda: int(BlockBodyType.Basic),
+        init=False)
     strong_parents: List[HexStr]
     max_burned_mana: int = field(metadata=config(
         encoder=str
     ))
     weak_parents: Optional[List[HexStr]] = None
     shallow_like_parents: Optional[List[HexStr]] = None
-    payload: Optional[Payload] = None
-    type: int = field(
-        default_factory=lambda: int(BlockBodyType.Basic),
-        init=False)
+    payload: Optional[Payload] = field(default=None, metadata=config(
+        decoder=deserialize_payload
+    ))

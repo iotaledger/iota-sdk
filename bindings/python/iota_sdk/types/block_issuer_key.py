@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, TypeAlias
+from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
 
 
@@ -23,11 +23,11 @@ class Ed25519PublicKeyHashBlockIssuerKey:
     Attributes:
         pub_key_hash: The hex encoded Ed25519 public key hash.
     """
-    pub_key_hash: HexStr
     type: int = field(
         default_factory=lambda: int(
             BlockIssuerKeyType.Ed25519PublicKeyHash),
         init=False)
+    pub_key_hash: HexStr
 
 
 BlockIssuerKey: TypeAlias = Ed25519PublicKeyHashBlockIssuerKey

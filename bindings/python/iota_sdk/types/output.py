@@ -48,6 +48,10 @@ class BasicOutput:
         type :
             The type of output.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            OutputType.Basic),
+        init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -63,10 +67,6 @@ class BasicOutput:
                                                                                        metadata=config(
                                                                                            decoder=deserialize_features
                                                                                        ))
-    type: int = field(
-        default_factory=lambda: int(
-            OutputType.Basic),
-        init=False)
 
 
 @json
@@ -91,6 +91,10 @@ class AccountOutput:
         type :
             The type of output.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            OutputType.Account),
+        init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -113,10 +117,6 @@ class AccountOutput:
                                                                        metadata=config(
                                                                            decoder=deserialize_features
                                                                        ))
-    type: int = field(
-        default_factory=lambda: int(
-            OutputType.Account),
-        init=False)
 
 
 @json
@@ -141,6 +141,10 @@ class AnchorOutput:
         type :
             The type of output.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            OutputType.Anchor),
+        init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -164,10 +168,6 @@ class AnchorOutput:
                                                                        metadata=config(
                                                                            decoder=deserialize_features
                                                                        ))
-    type: int = field(
-        default_factory=lambda: int(
-            OutputType.Anchor),
-        init=False)
 
 
 @json
@@ -190,6 +190,10 @@ class FoundryOutput:
         type :
             The type of output.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            OutputType.Foundry),
+        init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -204,10 +208,6 @@ class FoundryOutput:
                                                                 metadata=config(
                                                                     decoder=deserialize_features
                                                                 ))
-    type: int = field(
-        default_factory=lambda: int(
-            OutputType.Foundry),
-        init=False)
 
 
 @json
@@ -230,6 +230,7 @@ class NftOutput:
         type :
             The type of output.
     """
+    type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -252,7 +253,6 @@ class NftOutput:
                                                   metadata=config(
                                                       decoder=deserialize_features
                                                   ))
-    type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
 
 
 @json
@@ -269,6 +269,8 @@ class DelegationOutput:
         unlock_conditions: Define how the output can be unlocked in a transaction.
         type: The type of output.
     """
+    type: int = field(default_factory=lambda: int(
+        OutputType.Delegation), init=False)
     amount: int = field(metadata=config(
         encoder=str
     ))
@@ -282,8 +284,6 @@ class DelegationOutput:
     unlock_conditions: List[AddressUnlockCondition] = field(metadata=config(
         decoder=deserialize_unlock_conditions
     ))
-    type: int = field(default_factory=lambda: int(
-        OutputType.Delegation), init=False)
 
 
 Output: TypeAlias = Union[BasicOutput,

@@ -22,11 +22,11 @@ class ValidationBlockBody:
         highest_supported_version: The highest supported protocol version the issuer of this block supports.
         protocol_parameters_hash: The hash of the protocol parameters for the Highest Supported Version.
     """
+    type: int = field(
+        default_factory=lambda: int(BlockBodyType.Validation),
+        init=False)
     strong_parents: List[HexStr]
     highest_supported_version: int
     protocol_parameters_hash: HexStr
     weak_parents: Optional[List[HexStr]] = None
     shallow_like_parents: Optional[List[HexStr]] = None
-    type: int = field(
-        default_factory=lambda: int(BlockBodyType.Validation),
-        init=False)
