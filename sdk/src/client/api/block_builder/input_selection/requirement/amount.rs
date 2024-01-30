@@ -129,7 +129,7 @@ impl AmountSelection {
         }
     }
 
-    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData>) -> bool {
+    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData>) -> Result<bool, Error> {
         for input in inputs {
             if self.newly_selected_inputs.contains_key(input.output_id()) {
                 continue;
@@ -157,26 +157,20 @@ impl AmountSelection {
 
             if input.output.native_token().is_some() {
                 // Recalculate the remaining amount, as a new native token may require a new remainder output.
-                match self.remainder_amount() {
-                    Ok((remainder_amount, native_tokens_remainder)) => {
-                        log::debug!(
-                            "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
-                        );
-                        self.remainder_amount = remainder_amount;
-                        self.native_tokens_remainder = native_tokens_remainder;
-                    }
-                    // Can't return an error from this function, but only reason should be `NativeTokensOverflow` which
-                    // should fail on another place then.
-                    Err(e) => log::error!("{e}"),
-                }
+                let (remainder_amount, native_tokens_remainder) = self.remainder_amount()?;
+                log::debug!(
+                    "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
+                );
+                self.remainder_amount = remainder_amount;
+                self.native_tokens_remainder = native_tokens_remainder;
             }
 
             if self.missing_amount() == 0 {
-                return true;
+                return Ok(true);
             }
         }
 
-        false
+        Ok(false)
     }
 
     pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
@@ -196,14 +190,14 @@ impl InputSelection {
         &self,
         base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
         amount_selection: &mut AmountSelection,
-    ) -> bool {
+    ) -> Result<bool, Error> {
         // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // No native token, unexpired SDRUC.
@@ -211,8 +205,8 @@ impl InputSelection {
             input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // Native token, expired SDRUC.
@@ -220,8 +214,8 @@ impl InputSelection {
             input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // Native token, unexpired SDRUC.
@@ -229,16 +223,16 @@ impl InputSelection {
             input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // Everything else.
-        if amount_selection.fulfil(base_inputs) {
-            return true;
+        if amount_selection.fulfil(base_inputs)? {
+            return Ok(true);
         }
 
-        false
+        Ok(false)
     }
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
@@ -324,7 +318,7 @@ impl InputSelection {
         self.available_inputs
             .sort_by(|left, right| left.output.amount().cmp(&right.output.amount()));
 
-        if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection) {
+        if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection)? {
             return Ok(r);
         }
 
@@ -338,7 +332,7 @@ impl InputSelection {
             self.available_inputs
                 .sort_by(|left, right| right.output.amount().cmp(&left.output.amount()));
 
-            if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection) {
+            if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection)? {
                 return Ok(r);
             }
         }
@@ -367,7 +361,7 @@ impl InputSelection {
     fn fulfill_amount_requirement_inner(
         &mut self,
         amount_selection: &mut AmountSelection,
-    ) -> Option<Vec<InputSigningData>> {
+    ) -> Result<Option<Vec<InputSigningData>>, Error> {
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {
             if let Output::Basic(output) = &input.output {
                 output
@@ -385,8 +379,8 @@ impl InputSelection {
             }
         });
 
-        if self.fulfil(basic_ed25519_inputs, amount_selection) {
-            return None;
+        if self.fulfil(basic_ed25519_inputs, amount_selection)? {
+            return Ok(None);
         }
 
         let basic_non_ed25519_inputs = self.available_inputs.iter().filter(|input| {
@@ -406,8 +400,8 @@ impl InputSelection {
             }
         });
 
-        if self.fulfil(basic_non_ed25519_inputs, amount_selection) {
-            return None;
+        if self.fulfil(basic_non_ed25519_inputs, amount_selection)? {
+            return Ok(None);
         }
 
         // Other kinds of outputs.
@@ -421,7 +415,7 @@ impl InputSelection {
             .peekable();
 
         if inputs.peek().is_some() {
-            amount_selection.fulfil(inputs);
+            amount_selection.fulfil(inputs)?;
 
             log::debug!(
                 "Outputs {:?} selected to fulfill the amount requirement",
@@ -436,12 +430,12 @@ impl InputSelection {
                 // TODO explanation of Amount
                 self.requirements.push(Requirement::Amount);
 
-                Some(amount_selection.clone().into_newly_selected_inputs())
+                Ok(Some(amount_selection.clone().into_newly_selected_inputs()))
             } else {
-                None
+                Ok(None)
             }
         } else {
-            None
+            Ok(None)
         }
     }
 }
