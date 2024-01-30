@@ -301,7 +301,7 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Node indexer API
     //////////////////////////////////////////////////////////////////////
-    /// Fetch alias/basic/NFT/foundry output IDs
+    /// Fetch account/basic/NFT/foundry output IDs
     #[serde(rename_all = "camelCase")]
     OutputIds {
         /// Query parameters for output requests

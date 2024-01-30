@@ -295,7 +295,7 @@ impl InputSelection {
                 let required_address = input_signing_data
                     .output
                     .required_address(slot_index, committable_age_range)
-                    // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+                    // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                     .unwrap()
                     .expect("expiration unlockable outputs already filtered out");
 
