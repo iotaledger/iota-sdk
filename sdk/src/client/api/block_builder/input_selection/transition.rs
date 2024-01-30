@@ -61,6 +61,7 @@ impl InputSelection {
             .with_features(features);
 
         if input.is_block_issuer() {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1918
             builder = builder.with_mana(Output::from(input.clone()).available_mana(
                 &self.protocol_parameters,
                 output_id.transaction_id().slot_index(),
