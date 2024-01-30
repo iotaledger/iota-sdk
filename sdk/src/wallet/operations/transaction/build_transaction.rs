@@ -94,7 +94,7 @@ where
         let prepared_transaction_data = PreparedTransactionData {
             transaction,
             inputs_data: selected_transaction_data.inputs,
-            remainder: selected_transaction_data.remainder,
+            remainders: selected_transaction_data.remainders,
         };
 
         log::debug!(
