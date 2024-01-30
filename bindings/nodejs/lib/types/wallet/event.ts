@@ -193,22 +193,22 @@ class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
 class PreparedTransactionProgress extends TransactionProgress {
     transaction: Transaction;
     inputsData: InputSigningData[];
-    remainder?: Remainder;
+    remainders?: Remainder[];
 
     /**
      * @param transaction The prepared transaction.
      * @param inputsData Input signing parameters.
-     * @param remainder Remainder output parameters.
+     * @param remainders Remainder outputs parameters.
      */
     constructor(
         transaction: Transaction,
         inputsData: InputSigningData[],
-        remainder?: Remainder,
+        remainders?: Remainder[],
     ) {
         super(TransactionProgressType.PreparedTransaction);
         this.transaction = transaction;
         this.inputsData = inputsData;
-        this.remainder = remainder;
+        this.remainders = remainders;
     }
 }
 
