@@ -142,7 +142,7 @@ impl InputSelection {
 
         // Gets requirements from outputs.
         // TODO this may re-evaluate outputs added by inputs
-        self.outputs_requirements();
+        self.outputs_requirements(None);
 
         // Gets requirements from burn.
         self.burn_requirements()?;
@@ -231,11 +231,12 @@ impl InputSelection {
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
-            // Filter out non basic/account/foundry/nft outputs.
+            // Filter out non basic/account/foundry/nft/delegation outputs.
             if !input.output.is_basic()
                 && !input.output.is_account()
                 && !input.output.is_foundry()
                 && !input.output.is_nft()
+                && !input.output.is_delegation()
             {
                 return false;
             }
@@ -379,7 +380,12 @@ impl InputSelection {
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later.
-            if !(self.outputs.is_empty() && (self.burn.is_some() || self.mana_allotments != 0)) {
+            if !(self.outputs.is_empty()
+                && (self.burn.is_some()
+                    || self.mana_allotments != 0
+                    // TODO: ??? is this okay ???
+                    || self.available_inputs.iter().any(|o| o.output.is_delegation())))
+            {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
         }
@@ -393,29 +399,46 @@ impl InputSelection {
         // Creates the initial state, selected inputs and requirements, based on the provided outputs.
         self.init()?;
 
-        // Process all the requirements until there are no more.
-        while let Some(requirement) = self.requirements.pop() {
-            // Fulfill the requirement.
-            let inputs = self.fulfill_requirement(requirement)?;
+        let mut remainders = Vec::new();
 
-            // Select suggested inputs.
-            for input in inputs {
-                self.select_input(input)?;
+        // Loop until there are no more remainders
+        loop {
+            // Process all the requirements until there are no more.
+            while let Some(requirement) = self.requirements.pop() {
+                // Fulfill the requirement.
+                let inputs = self.fulfill_requirement(requirement)?;
+
+                // Select suggested inputs.
+                for input in inputs {
+                    self.select_input(input)?;
+                }
             }
-        }
 
-        if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
-            return Err(Error::InvalidInputCount(self.selected_inputs.len()));
-        }
+            if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
+                return Err(Error::InvalidInputCount(self.selected_inputs.len()));
+            }
 
-        let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
+            let (storage_deposit_returns, rem) = self.storage_deposit_returns_and_remainders()?;
 
-        self.outputs.extend(storage_deposit_returns);
-        self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
+            if storage_deposit_returns.is_empty() && rem.is_empty() {
+                break;
+            }
 
-        // Check again, because more outputs may have been added.
-        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            return Err(Error::InvalidOutputCount(self.outputs.len()));
+            let mut new_outputs = storage_deposit_returns;
+            new_outputs.extend(rem.iter().map(|r| r.output.clone()));
+
+            // Re-evaluate only the new output requirements
+            self.outputs_requirements(Some(&new_outputs));
+            // Need to re-evaluate amount differences since outputs have storage requirements
+            self.requirements.push(Requirement::Amount);
+
+            self.outputs.extend(new_outputs);
+            remainders.extend(rem);
+
+            // Check again, because more outputs may have been added.
+            if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
+                return Err(Error::InvalidOutputCount(self.outputs.len()));
+            }
         }
 
         self.validate_transitions()?;

@@ -23,9 +23,9 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::{OutputData, TransactionWithMetadata},
-        ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams, OutputsToClaim,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams, Error as WalletError,
+        MintNftParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
+        TransactionOptions, Wallet,
     },
     U256,
 };
@@ -107,12 +107,12 @@ pub enum WalletCommand {
     },
     /// Create a delegation.
     CreateDelegation {
-        /// The address that will control the delegation. Defaults to the wallet address.
-        address: Option<Bech32Address>,
         /// The amount to delegate.
         delegated_amount: u64,
-        /// The account address of the validator.
-        validator_address: AccountAddress,
+        /// The account ID of the validator.
+        validator_account_id: AccountId,
+        /// The address that will control the delegation. Defaults to the wallet address.
+        address: Option<Bech32Address>,
     },
     /// Delay the claiming of a delegation.
     DelayDelegationClaiming {
@@ -626,16 +626,26 @@ pub async fn create_delegation_command(
     wallet: &Wallet,
     address: Option<Bech32Address>,
     delegated_amount: u64,
-    validator_address: AccountAddress,
+    validator_account_id: AccountId,
 ) -> Result<(), Error> {
     println_log_info!("Creating delegation output.");
 
-    let transaction: TransactionWithMetadata = todo!();
+    let transaction = wallet
+        .create_delegation_output(
+            CreateDelegationParams {
+                address,
+                delegated_amount,
+                validator_address: AccountAddress::new(validator_account_id),
+            },
+            None,
+        )
+        .await?;
 
     println_log_info!(
-        "Delegation creation transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
+        "Delegation creation transaction sent:\n{:?}\n{:?}\n{:?}",
+        transaction.transaction.transaction_id,
+        transaction.transaction.block_id,
+        transaction.delegation_id
     );
 
     Ok(())
@@ -649,7 +659,7 @@ pub async fn delay_delegation_claiming_command(
 ) -> Result<(), Error> {
     println_log_info!("Delaying delegation claiming.");
 
-    let transaction: TransactionWithMetadata = todo!();
+    let transaction = wallet.delay_delegation_claiming(delegation_id, reclaim_excess).await?;
 
     println_log_info!(
         "Delay delegation claiming transaction sent:\n{:?}\n{:?}",
@@ -694,7 +704,7 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 pub async fn destroy_delegation_command(wallet: &Wallet, delegation_id: DelegationId) -> Result<(), Error> {
     println_log_info!("Destroying delegation {delegation_id}.");
 
-    let transaction: TransactionWithMetadata = todo!();
+    let transaction = wallet.destroy_delegation(delegation_id).await?;
 
     println_log_info!(
         "Destroying delegation transaction sent:\n{:?}\n{:?}",
@@ -1292,8 +1302,8 @@ pub async fn prompt_internal(
                         WalletCommand::CreateDelegation {
                             address,
                             delegated_amount,
-                            validator_address,
-                        } => create_delegation_command(wallet, address, delegated_amount, validator_address).await,
+                            validator_account_id,
+                        } => create_delegation_command(wallet, address, delegated_amount, validator_account_id).await,
                         WalletCommand::DelayDelegationClaiming {
                             delegation_id,
                             reclaim_excess,

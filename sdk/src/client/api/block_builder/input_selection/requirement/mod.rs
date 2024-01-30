@@ -64,9 +64,9 @@ impl InputSelection {
     }
 
     /// Gets requirements from outputs.
-    pub(crate) fn outputs_requirements(&mut self) {
+    pub(crate) fn outputs_requirements(&mut self, outputs: Option<&[Output]>) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
-        let outputs = self.outputs.iter();
+        let outputs = outputs.unwrap_or(&self.outputs);
 
         for output in outputs {
             let is_created = match output {

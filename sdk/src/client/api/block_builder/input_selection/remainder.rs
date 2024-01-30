@@ -15,8 +15,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokens,
-            NativeTokensBuilder, NftOutputBuilder, Output, StorageScoreParameters,
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutput, BasicOutputBuilder,
+            NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, StorageScoreParameters,
         },
         Error as BlockError,
     },
@@ -254,7 +254,8 @@ fn create_remainder_outputs(
         }
     } else {
         // No native token, just put all amount and mana in a single output.
-        let remainder = BasicOutputBuilder::new_with_amount(amount_diff)
+        let min_amount = BasicOutput::minimum_amount(&remainder_address, storage_score_parameters);
+        let remainder = BasicOutputBuilder::new_with_amount(amount_diff.max(min_amount))
             .with_mana(mana_diff)
             .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
             .finish_output()?;
