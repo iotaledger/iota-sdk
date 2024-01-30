@@ -78,7 +78,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
         mana_rewards: None,
     };
 
@@ -161,7 +161,7 @@ async fn account_reference_unlocks() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
         mana_rewards: None,
     };
 

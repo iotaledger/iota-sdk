@@ -80,7 +80,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
         mana_rewards: None,
     };
 
@@ -187,7 +187,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
         mana_rewards: None,
     };
 
@@ -305,7 +305,7 @@ async fn two_signature_unlocks() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
         mana_rewards: None,
     };
 

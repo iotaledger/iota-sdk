@@ -306,8 +306,10 @@ impl SecretManage for LedgerSecretManager {
         } else {
             // figure out the remainder output and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
-            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
-                Some(remainder) => {
+            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainders.as_slice() {
+                // Multiple remainder outputs would require blind signing since at least one would contain a native
+                // token, that's why matching a single one is enough.
+                [remainder] => {
                     if let Some(chain) = remainder.chain {
                         (
                             Some(&remainder.output),
@@ -320,7 +322,7 @@ impl SecretManage for LedgerSecretManager {
                         (None, LedgerBIP32Index::default())
                     }
                 }
-                None => (None, LedgerBIP32Index::default()),
+                _ => (None, LedgerBIP32Index::default()),
             };
 
             let mut remainder_index = 0u16;

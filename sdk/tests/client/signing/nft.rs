@@ -88,7 +88,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
         mana_rewards: None,
     };
 
