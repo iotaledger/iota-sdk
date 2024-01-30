@@ -284,7 +284,7 @@ pub(crate) mod irc_27 {
         collection_name: Option<String>,
         /// Royalty payment addresses mapped to the payout percentage.
         #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-        royalties: BTreeMap<Bech32Address, f64>,
+        royalties: BTreeMap<String, f64>,
         /// The human-readable name of the native token creator.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         issuer_name: Option<String>,
@@ -317,12 +317,12 @@ pub(crate) mod irc_27 {
         }
 
         pub fn add_royalty(mut self, address: Bech32Address, percentage: f64) -> Self {
-            self.royalties.insert(address, percentage);
+            self.royalties.insert(address.to_string(), percentage);
             self
         }
 
         pub fn with_royalties(mut self, royalties: BTreeMap<Bech32Address, f64>) -> Self {
-            self.royalties = royalties;
+            self.royalties = royalties.into_iter().map(|(k, v)| (k.to_string(), v)).collect();
             self
         }
 
