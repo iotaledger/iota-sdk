@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
-        address::Bech32Address,
         core::Parents,
         output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
         payload::signed_transaction::TransactionId,
@@ -178,7 +177,7 @@ pub struct BaseTokenResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorResponse {
     /// Account address of the validator.
-    address: Bech32Address,
+    address: String,
     /// The epoch index until which the validator registered to stake.
     staking_end_epoch: EpochIndex,
     /// The total stake of the pool, including delegators.
@@ -258,7 +257,7 @@ pub struct CommitteeResponse {
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
     /// Account address of the validator.
-    pub address: Bech32Address,
+    pub address: String,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
     pub pool_stake: u64,
