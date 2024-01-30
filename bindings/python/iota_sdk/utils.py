@@ -10,14 +10,13 @@ from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.decayed_mana import DecayedMana
-from iota_sdk.types.transaction import Transaction
+from iota_sdk.types.payload import Transaction, SignedTransactionPayload
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.unlock import Unlock
-from iota_sdk.external import call_utils_method
-from iota_sdk.types.payload import SignedTransactionPayload
 from iota_sdk.types.transaction_data import InputSigningData
+from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -171,7 +170,7 @@ class Utils():
         """
         return _call_method('blockId', {
             'block': block,
-            'protocol_parameters': params,
+            'protocolParameters': params,
         })
 
     @staticmethod

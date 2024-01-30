@@ -1,11 +1,17 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountId, DelegationId, FoundryId, NftId } from '../block/id';
-import { HexEncodedString, u256, u64 } from '../utils';
+import {
+    AccountId,
+    DelegationId,
+    FoundryId,
+    NftId,
+    TokenId,
+} from '../block/id';
+import { DecayedMana, u256, u64 } from '../utils';
 import { IClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
-import { Bech32Address } from '../block';
+import { Bech32Address, OutputId } from '../block';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {
@@ -25,25 +31,27 @@ export interface WalletOptions {
 
 /** A balance */
 export interface Balance {
-    /** The balance of the base coin */
+    /** Total and available amount of the base coin */
     baseCoin: BaseCoinBalance;
+    /** Total and available mana  */
+    mana: ManaBalance;
     /** The required storage deposit for the outputs */
     requiredStorageDeposit: RequiredStorageDeposit;
     /** The balance of the native tokens */
-    nativeTokens: NativeTokenBalance[];
+    nativeTokens: { [tokenId: TokenId]: NativeTokenBalance };
     /** Account outputs */
-    accounts: string[];
+    accounts: AccountId[];
     /** Foundry outputs */
-    foundries: string[];
+    foundries: FoundryId[];
     /** Nft outputs */
-    nfts: string[];
+    nfts: NftId[];
     /** Delegation outputs */
-    delegations: string[];
+    delegations: DelegationId[];
     /**
      * Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
      * TimelockUnlockCondition or ExpirationUnlockCondition this can change at any time
      */
-    potentiallyLockedOutputs: { [outputId: string]: boolean };
+    potentiallyLockedOutputs: { [outputId: OutputId]: boolean };
 }
 
 /** The balance of the base coin */
@@ -53,7 +61,15 @@ export interface BaseCoinBalance {
     /** The amount of the outputs that aren't used in a transaction */
     available: u64;
     /** Voting power */
-    votingPower: string;
+    votingPower: u64;
+}
+
+/** Mana balances */
+export interface ManaBalance {
+    /** The total mana of the outputs */
+    total: DecayedMana;
+    /** The mana of the outputs that isn't used in a transaction */
+    available: DecayedMana;
 }
 
 /** The required storage deposit per output type */
@@ -72,8 +88,6 @@ export interface RequiredStorageDeposit {
 
 /** The balance of a native token */
 export interface NativeTokenBalance {
-    /** The native token id. */
-    tokenId: HexEncodedString;
     /** Some metadata of the native token. */
     metadata?: string;
     /** The total native token balance. */

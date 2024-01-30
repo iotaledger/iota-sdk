@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { expect, describe, it } from '@jest/globals';
 import {
     Client,
     utf8ToHex,
@@ -215,7 +214,7 @@ describe.skip('Main examples', () => {
                 ),
             ],
         });
-        
+
         //let payload = await secretManager.signTransaction(prepared);
         const unsignedBlock = await client.buildBasicBlock("", undefined);
         const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
