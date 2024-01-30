@@ -17,7 +17,7 @@ use iota_sdk::{
         unlock::Unlock,
         BlockDto,
     },
-    utils::serde::string,
+    utils::serde::{option_string, string},
 };
 use serde::{Deserialize, Serialize};
 
@@ -128,8 +128,8 @@ pub enum UtilsMethod {
         transaction: TransactionDto,
         inputs: Vec<InputSigningData>,
         unlocks: Option<Vec<Unlock>>,
-        #[serde(default, with = "string")]
-        mana_rewards: u64,
+        #[serde(default, with = "option_string")]
+        mana_rewards: Option<u64>,
         protocol_parameters: ProtocolParameters,
     },
     /// Applies mana decay to the given mana.

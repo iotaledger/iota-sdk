@@ -383,6 +383,11 @@ impl AccountOutput {
         AccountAddress::new(self.account_id_non_null(output_id))
     }
 
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        // TODO: should destroying an account add rewards?
+        self.features().staking().is_some() && next_state.map_or(false, |o| o.features().staking().is_none())
+    }
+
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,

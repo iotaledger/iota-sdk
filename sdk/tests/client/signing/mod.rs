@@ -235,7 +235,7 @@ async fn all_combined() -> Result<()> {
         transaction,
         inputs_data: selected.inputs,
         remainder: None,
-        mana_rewards: 0,
+        mana_rewards: None,
     };
 
     let unlocks = secret_manager

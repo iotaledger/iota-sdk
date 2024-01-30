@@ -22,7 +22,7 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::{bip44::option_bip44, string},
+    utils::serde::{bip44::option_bip44, option_string},
 };
 
 /// Helper struct for offline signing
@@ -35,7 +35,7 @@ pub struct PreparedTransactionData {
     /// Optional remainder output information
     pub remainder: Option<RemainderData>,
     /// Mana rewards
-    pub mana_rewards: u64,
+    pub mana_rewards: Option<u64>,
 }
 
 /// PreparedTransactionData Dto
@@ -49,8 +49,8 @@ pub struct PreparedTransactionDataDto {
     /// Optional remainder output information
     pub remainder: Option<RemainderData>,
     /// Mana rewards
-    #[serde(with = "string")]
-    pub mana_rewards: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none", with = "option_string")]
+    pub mana_rewards: Option<u64>,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
@@ -89,7 +89,7 @@ pub struct SignedTransactionData {
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
     /// Mana rewards
-    pub mana_rewards: u64,
+    pub mana_rewards: Option<u64>,
 }
 
 /// SignedTransactionData Dto
@@ -101,8 +101,8 @@ pub struct SignedTransactionDataDto {
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
     /// Mana rewards
-    #[serde(with = "string")]
-    pub mana_rewards: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none", with = "option_string")]
+    pub mana_rewards: Option<u64>,
 }
 
 impl From<&SignedTransactionData> for SignedTransactionDataDto {

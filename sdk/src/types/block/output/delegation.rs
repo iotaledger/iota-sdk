@@ -321,6 +321,10 @@ impl DelegationOutput {
         ChainId::Delegation(self.delegation_id)
     }
 
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        next_state.is_none()
+    }
+
     // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]

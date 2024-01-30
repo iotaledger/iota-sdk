@@ -79,7 +79,7 @@ async fn sign_account_state_transition() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainder: None,
-        mana_rewards: 0,
+        mana_rewards: None,
     };
 
     let unlocks = secret_manager
@@ -162,7 +162,7 @@ async fn account_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainder: None,
-        mana_rewards: 0,
+        mana_rewards: None,
     };
 
     let unlocks = secret_manager

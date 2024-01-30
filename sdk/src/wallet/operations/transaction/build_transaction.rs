@@ -96,22 +96,17 @@ where
         for input in &selected_transaction_data.inputs {
             if match &input.output {
                 // Validator Rewards
-                Output::Account(account_input) => {
-                    // If the input is an account and the staking feature is removed
-                    account_input.features().staking().is_some()
-                        && transaction
-                            .outputs()
-                            .iter()
-                            .filter_map(|o| o.as_account_opt())
-                            .find(|account_output| {
-                                account_output.account_id() == &account_input.account_id_non_null(input.output_id())
-                            })
-                            // TODO: should destroying an account add rewards?
-                            .map_or(false, |o| o.features().staking().is_none())
-                }
+                Output::Account(account_input) => account_input.can_claim_rewards(
+                    transaction
+                        .outputs()
+                        .iter()
+                        .filter_map(|o| o.as_account_opt())
+                        .find(|account_output| {
+                            account_output.account_id() == &account_input.account_id_non_null(input.output_id())
+                        }),
+                ),
                 // Delegator Rewards
-                Output::Delegation(delegation_input) => {
-                    // If the input is a delegation and the outputs do not contain a matching delegation
+                Output::Delegation(delegation_input) => delegation_input.can_claim_rewards(
                     transaction
                         .outputs()
                         .iter()
@@ -119,9 +114,8 @@ where
                         .find(|delegation_output| {
                             delegation_output.delegation_id()
                                 == &delegation_input.delegation_id_non_null(input.output_id())
-                        })
-                        .is_none()
-                }
+                        }),
+                ),
                 _ => false,
             } {
                 mana_rewards += self
@@ -136,7 +130,7 @@ where
             transaction,
             inputs_data: selected_transaction_data.inputs,
             remainder: selected_transaction_data.remainder,
-            mana_rewards,
+            mana_rewards: Some(mana_rewards),
         };
 
         log::debug!(

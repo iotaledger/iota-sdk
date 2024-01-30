@@ -81,7 +81,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainder: None,
-        mana_rewards: 0,
+        mana_rewards: None,
     };
 
     let unlocks = secret_manager
@@ -188,7 +188,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainder: None,
-        mana_rewards: 0,
+        mana_rewards: None,
     };
 
     let unlocks = secret_manager
@@ -306,7 +306,7 @@ async fn two_signature_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainder: None,
-        mana_rewards: 0,
+        mana_rewards: None,
     };
 
     let unlocks = secret_manager
