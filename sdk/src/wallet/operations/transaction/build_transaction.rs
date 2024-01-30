@@ -8,10 +8,10 @@ use instant::Instant;
 use crate::{
     client::{
         api::{input_selection::Selected, transaction::validate_transaction_length, PreparedTransactionData},
-        secret::{types::InputSigningData, SecretManage},
+        secret::SecretManage,
     },
     types::block::{
-        context_input::{BlockIssuanceCreditContextInput, ContextInput},
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput},
         input::{Input, UtxoInput},
         output::Output,
         payload::signed_transaction::Transaction,
@@ -32,7 +32,6 @@ impl<T> Wallet<T> {
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         let mut inputs: Vec<Input> = Vec::new();
-        let mut inputs_for_signing: Vec<InputSigningData> = Vec::new();
         let mut context_inputs = HashSet::new();
 
         for input in &selected_transaction_data.inputs {
@@ -46,7 +45,6 @@ impl<T> Wallet<T> {
             }
 
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
-            inputs_for_signing.push(input.clone());
         }
 
         // Build transaction
@@ -73,6 +71,17 @@ impl<T> Wallet<T> {
             }
         }
 
+        // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
+        if context_inputs
+            .iter()
+            .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
+            && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
+        {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1740
+            let issuance = self.client().get_issuance().await?;
+            context_inputs.insert(CommitmentContextInput::new(issuance.latest_commitment.id()).into());
+        }
+
         let transaction = builder
             .with_context_inputs(context_inputs)
             .finish_with_params(&protocol_parameters)?;
@@ -81,7 +90,7 @@ impl<T> Wallet<T> {
 
         let prepared_transaction_data = PreparedTransactionData {
             transaction,
-            inputs_data: inputs_for_signing,
+            inputs_data: selected_transaction_data.inputs,
             remainder: selected_transaction_data.remainder,
         };
 

@@ -3,12 +3,12 @@
 
 import type { StorageScoreParameters } from '../storage-score';
 import { EpochIndex } from '../../block/slot';
-import { u64 } from '../../utils';
+import { u64 } from '../../utils/type-aliases';
 
 /**
  * The Protocol Info.
  */
-export interface ProtocolInfo {
+interface ProtocolInfo {
     /**
      * The start epoch of the set of protocol parameters.
      */
@@ -22,7 +22,7 @@ export interface ProtocolInfo {
 /**
  * The Protocol Parameters.
  */
-export interface ProtocolParameters {
+interface ProtocolParameters {
     /**
      * Set to value 0 to denote a IOTA 2.0 protocol parameter.
      */
@@ -129,7 +129,7 @@ export interface ProtocolParameters {
 /**
  * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
  */
-export interface RewardsParameters {
+interface RewardsParameters {
     /**
      * Profit Margin Exponent is used for shift operation for calculation of profit margin.
      */
@@ -164,7 +164,7 @@ export interface RewardsParameters {
 /**
  * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
  */
-export interface WorkScoreParameters {
+interface WorkScoreParameters {
     /**
      * DataByte accounts for the network traffic per kibibyte.
      */
@@ -210,7 +210,7 @@ export interface WorkScoreParameters {
 /**
  * ManaParameters defines the parameters used by mana calculation.
  */
-export interface ManaParameters {
+interface ManaParameters {
     /**
      * The number of bits used to represent Mana.
      */
@@ -244,7 +244,7 @@ export interface ManaParameters {
 /**
  * Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
  */
-export interface CongestionControlParameters {
+interface CongestionControlParameters {
     /**
      * The minimum value of the reference Mana cost.
      */
@@ -282,7 +282,7 @@ export interface CongestionControlParameters {
 /**
  * The version signaling parameters.
  */
-export interface VersionSignalingParameters {
+interface VersionSignalingParameters {
     /**
      * The size of the window in epochs to find which version of protocol parameters was most signaled, from currentEpoch - windowSize to currentEpoch.
      */
@@ -296,3 +296,14 @@ export interface VersionSignalingParameters {
      */
     activationOffset: number;
 }
+
+export {
+    ProtocolInfo,
+    ProtocolParameters,
+    RewardsParameters,
+    WorkScoreParameters,
+    StorageScoreParameters,
+    ManaParameters,
+    VersionSignalingParameters,
+    CongestionControlParameters,
+};

@@ -324,7 +324,7 @@ impl DelegationOutput {
     // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
-        if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
+        if !(current_state.delegation_id.is_null() && !next_state.delegation_id.is_null()) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 
@@ -334,7 +334,7 @@ impl DelegationOutput {
         {
             return Err(StateTransitionError::MutatedImmutableField);
         }
-        // TODO add end_epoch validation rules
+
         Ok(())
     }
 }

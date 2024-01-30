@@ -40,14 +40,14 @@ class SenderFeature:
     Attributes:
         address: A given sender address.
     """
-    address: Address = field(
-        metadata=config(
-            decoder=deserialize_address
-        ))
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Sender),
         init=False)
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
 
 
 @json
@@ -57,14 +57,14 @@ class IssuerFeature:
     Attributes:
         address: A given issuer address.
     """
-    address: Address = field(
-        metadata=config(
-            decoder=deserialize_address
-        ))
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Issuer),
         init=False)
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
 
 
 @json
@@ -72,13 +72,13 @@ class IssuerFeature:
 class MetadataFeature:
     """Defines metadata, arbitrary binary data, that will be stored in the output.
     Attributes:
-        data: Some hex encoded metadata.
+        entries: A key-value map where the keys are graphic ASCII strings and the values hex-encoded binary data.
     """
-    data: HexStr
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Metadata),
         init=False)
+    entries: Dict[str, HexStr]
 
 
 @json
@@ -88,8 +88,8 @@ class TagFeature:
     Attributes:
         tag: A hex encoded tag used to index the output.
     """
-    tag: HexStr
     type: int = field(default_factory=lambda: int(FeatureType.Tag), init=False)
+    tag: HexStr
 
 
 @json
@@ -99,13 +99,13 @@ class NativeTokenFeature:
         id: The unique identifier of the native token.
         amount: The amount of native tokens.
     """
+    type: int = field(default_factory=lambda: int(
+        FeatureType.NativeToken), init=False)
     id: HexStr
     amount: int = field(metadata=config(
         encoder=hex,
         decoder=hex_str_decoder,
     ))
-    type: int = field(default_factory=lambda: int(
-        FeatureType.NativeToken), init=False)
 
 
 @json
@@ -116,12 +116,12 @@ class BlockIssuerFeature:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
         block_issuer_keys: The Block Issuer Keys.
     """
-    expiry_slot: SlotIndex
-    block_issuer_keys: List[BlockIssuerKey]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.BlockIssuer),
         init=False)
+    expiry_slot: SlotIndex
+    block_issuer_keys: List[BlockIssuerKey]
 
 
 @json
@@ -134,6 +134,10 @@ class StakingFeature:
         start_epoch: The epoch index in which the staking started.
         end_epoch: The epoch index in which the staking ends.
     """
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.Staking),
+        init=False)
     staked_amount: int = field(metadata=config(
         encoder=str
     ))
@@ -142,10 +146,6 @@ class StakingFeature:
     ))
     start_epoch: EpochIndex
     end_epoch: EpochIndex
-    type: int = field(
-        default_factory=lambda: int(
-            FeatureType.Staking),
-        init=False)
 
 
 Feature: TypeAlias = Union[SenderFeature, IssuerFeature,

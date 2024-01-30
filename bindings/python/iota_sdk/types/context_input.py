@@ -25,11 +25,11 @@ class CommitmentContextInput:
         type: The type of context input.
         commitment_id: The commitment identifier to reference.
     """
-    commitment_id: HexStr
     type: int = field(
         default_factory=lambda: int(
             ContextInputType.Commitment),
         init=False)
+    commitment_id: HexStr
 
 
 @json
@@ -42,11 +42,11 @@ class BlockIssuanceCreditContextInput:
         type: The type of context input.
         account_id: The ID of the Account for which this input provides the BIC.
     """
-    account_id: HexStr
     type: int = field(
         default_factory=lambda: int(
             ContextInputType.BlockIssuanceCredit),
         init=False)
+    account_id: HexStr
 
 
 @json
@@ -58,11 +58,11 @@ class RewardContextInput:
         type: The type of context input.
         index: The index of the transaction input for which to claim rewards.
     """
-    index: int
     type: int = field(
         default_factory=lambda: int(
             ContextInputType.Reward),
         init=False)
+    index: int
 
 
 ContextInput: TypeAlias = Union[CommitmentContextInput,
@@ -76,7 +76,7 @@ def deserialize_context_input(d: Dict[str, Any]) -> ContextInput:
     Arguments:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    context_input_type = dict['type']
+    context_input_type = d['type']
     if context_input_type == ContextInputType.Commitment:
         return CommitmentContextInput.from_dict(d)
     if context_input_type == ContextInputType.BlockIssuanceCredit:

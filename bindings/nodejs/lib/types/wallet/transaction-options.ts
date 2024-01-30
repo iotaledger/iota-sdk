@@ -30,20 +30,7 @@ export interface TransactionOptions {
 }
 
 /** The possible remainder value strategies. */
-export type RemainderValueStrategy =
-    | ChangeAddress
-    | ReuseAddress
-    | CustomAddress;
-
-/**
- * Allows to move the remainder value to a change address.
- */
-export type ChangeAddress = {
-    /** The name of the strategy. */
-    strategy: 'ChangeAddress';
-    /** Only required for `CustomAddress`. */
-    value: null;
-};
+export type RemainderValueStrategy = ReuseAddress | CustomAddress;
 
 /**
  * Allows to keep the remainder value on the source address.

@@ -16,8 +16,7 @@ balance = wallet.sync()
 # Find first foundry and corresponding token id
 token_id = balance.foundries[0]
 
-available_balance = int(
-    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token_id][0].available, 0)
+available_balance = balance.native_tokens[token_id].available
 print(f'Balance before melting: {available_balance}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
@@ -37,6 +36,5 @@ block_id = wallet.reissue_transaction_until_included(
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = wallet.sync()
-available_balance = int(
-    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token_id][0].available, 0)
+available_balance = balance.native_tokens[token_id].available
 print(f'Balance after melting: {available_balance}')

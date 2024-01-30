@@ -11,7 +11,6 @@ use iota_sdk::{
 };
 use iota_sdk_bindings_core::Error;
 use pretty_assertions::assert_eq;
-use serde_json::json;
 
 #[test]
 fn custom_error_serialization() {
@@ -19,9 +18,12 @@ fn custom_error_serialization() {
     let error = Error::Client(ClientError::HealthyNodePoolEmpty);
     assert_eq!(
         serde_json::to_value(&error).unwrap(),
-        json!({
-            "type": "wallet",
-            "error:": "no healthy node available"
+        serde_json::json!({
+            "type": "client",
+            "error": {
+                "type": "healthyNodePoolEmpty",
+                "error": "no healthy node available"
+            }
         })
     );
 
@@ -29,9 +31,12 @@ fn custom_error_serialization() {
     let error = Error::Wallet(WalletError::InvalidMnemonic("nilly willy".to_string()));
     assert_eq!(
         serde_json::to_value(&error).unwrap(),
-        json!({
+        serde_json::json!({
             "type": "wallet",
-            "error:": "invalid mnemonic: nilly willy"
+            "error": {
+                "type": "invalidMnemonic",
+                "error": "invalid mnemonic: nilly willy"
+            }
         })
     );
 
@@ -42,9 +47,12 @@ fn custom_error_serialization() {
     });
     assert_eq!(
         serde_json::to_value(&error).unwrap(),
-        json!({
+        serde_json::json!({
             "type": "wallet",
-            "error:": "public key options mismatch, new: PublicKeyOptions { coin_type: 4218, account: 0, change: 0, address_index: 0 }, previous: PublicKeyOptions { coin_type: 4219, account: 0, change: 0, address_index: 0 }"
+            "error": {
+                "type": "bipPathMismatch",
+                "error": "BIP44 mismatch: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 }), existing bip path is: None"
+            }
         })
     );
 }
