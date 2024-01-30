@@ -29,7 +29,7 @@ pub async fn create_client(options: String) -> Result<External<ClientMethodHandl
 
 #[napi(js_name = "destroyClient")]
 pub async fn destroy_client(client: External<ClientMethodHandler>) {
-    *client.as_ref().write().await = None;
+    client.as_ref().write().await.take();
 }
 
 #[napi(js_name = "callClientMethod")]
