@@ -22,7 +22,7 @@ where
 
         Ok(self
             .client()
-            .nft_output_ids(NftOutputQueryParameters::new().unlockable_by_address(bech32_address))
+            .nft_output_ids(NftOutputQueryParameters::new().unlockable_by_address(bech32_address.to_string()))
             .await?
             .items)
     }

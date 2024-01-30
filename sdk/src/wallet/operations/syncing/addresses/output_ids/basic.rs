@@ -38,7 +38,7 @@ where
 
         Ok(self
             .client()
-            .basic_output_ids(BasicOutputQueryParameters::new().unlockable_by_address(bech32_address.clone()))
+            .basic_output_ids(BasicOutputQueryParameters::new().unlockable_by_address(bech32_address.to_string()))
             .await?
             .items)
     }

@@ -67,7 +67,7 @@ pub struct OutputQueryParameters {
     /// Filters outputs based on the presence of a specific native token.
     native_token: Option<TokenId>,
     /// Returns outputs that are unlockable by the bech32 address.
-    unlockable_by_address: Option<Bech32Address>,
+    unlockable_by_address: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
@@ -92,19 +92,19 @@ pub struct BasicOutputQueryParameters {
     /// Filters outputs based on the presence of a specific native token.
     native_token: Option<TokenId>,
     /// Returns outputs that are unlockable by the bech32 address.
-    unlockable_by_address: Option<Bech32Address>,
+    unlockable_by_address: Option<String>,
     /// Bech32-encoded address that should be searched for.
-    address: Option<Bech32Address>,
+    address: Option<String>,
     /// Filters outputs based on the presence of storage deposit return unlock condition.
     has_storage_deposit_return: Option<bool>,
     /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
     /// condition.
-    storage_deposit_return_address: Option<Bech32Address>,
+    storage_deposit_return_address: Option<String>,
     /// Filters outputs based on the presence of expiration unlock condition.
     has_expiration: Option<bool>,
     /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
     /// condition.
-    expiration_return_address: Option<Bech32Address>,
+    expiration_return_address: Option<String>,
     /// Returns outputs that expire before a certain slot index.
     expires_before: Option<SlotIndex>,
     /// Returns outputs that expire after a certain slot index.
@@ -116,7 +116,7 @@ pub struct BasicOutputQueryParameters {
     /// Returns outputs that are timelocked after a certain slot index.
     timelocked_after: Option<SlotIndex>,
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
-    sender: Option<Bech32Address>,
+    sender: Option<String>,
     /// Filters outputs based on matching Tag Block.
     tag: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
@@ -138,7 +138,7 @@ impl BasicOutputQueryParameters {
     /// get outputs that can be unlocked by the address without potential further restrictions.
     pub fn only_address_unlock_condition(address: impl Into<Bech32Address>) -> Self {
         Self::default()
-            .address(address.into())
+            .address(address.into().to_string())
             .has_expiration(false)
             .has_storage_deposit_return(false)
             .has_timelock(false)
@@ -151,11 +151,11 @@ impl BasicOutputQueryParameters {
 #[serde(rename_all = "camelCase")]
 pub struct AccountOutputQueryParameters {
     /// Bech32-encoded address that should be searched for.
-    address: Option<Bech32Address>,
+    address: Option<String>,
     /// Filters outputs based on bech32-encoded issuer address.
-    issuer: Option<Bech32Address>,
+    issuer: Option<String>,
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
-    sender: Option<Bech32Address>,
+    sender: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
@@ -176,15 +176,15 @@ impl_query_parameters_methods!(AccountOutputQueryParameters);
 #[serde(rename_all = "camelCase")]
 pub struct AnchorOutputQueryParameters {
     /// Returns outputs that are unlockable by the bech32 address.
-    unlockable_by_address: Option<Bech32Address>,
+    unlockable_by_address: Option<String>,
     /// Filters outputs based on bech32-encoded state controller address.
-    state_controller: Option<Bech32Address>,
+    state_controller: Option<String>,
     /// Filters outputs based on bech32-encoded governor (governance controller) address.
-    governor: Option<Bech32Address>,
+    governor: Option<String>,
     /// Filters outputs based on bech32-encoded issuer address.
-    issuer: Option<Bech32Address>,
+    issuer: Option<String>,
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
-    sender: Option<Bech32Address>,
+    sender: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
@@ -205,9 +205,9 @@ impl_query_parameters_methods!(AnchorOutputQueryParameters);
 #[serde(rename_all = "camelCase")]
 pub struct DelegationOutputQueryParameters {
     /// Bech32-encoded address that should be searched for.
-    address: Option<Bech32Address>,
+    address: Option<String>,
     /// Filter foundry outputs based on bech32-encoded address of the validator.
-    validator: Option<Bech32Address>,
+    validator: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
@@ -232,7 +232,7 @@ pub struct FoundryOutputQueryParameters {
     /// Filters outputs based on the presence of a specific native token.
     native_token: Option<TokenId>,
     /// Filter foundry outputs based on bech32-encoded address of the controlling account.
-    account: Option<Bech32Address>,
+    account: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
@@ -253,19 +253,19 @@ impl_query_parameters_methods!(FoundryOutputQueryParameters);
 #[serde(rename_all = "camelCase")]
 pub struct NftOutputQueryParameters {
     /// Returns outputs that are unlockable by the bech32 address.
-    unlockable_by_address: Option<Bech32Address>,
+    unlockable_by_address: Option<String>,
     /// Bech32-encoded address that should be searched for.
-    address: Option<Bech32Address>,
+    address: Option<String>,
     /// Filters outputs based on the presence of storage deposit return unlock condition.
     has_storage_deposit_return: Option<bool>,
     /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
     /// condition.
-    storage_deposit_return_address: Option<Bech32Address>,
+    storage_deposit_return_address: Option<String>,
     /// Filters outputs based on the presence of expiration unlock condition.
     has_expiration: Option<bool>,
     /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
     /// condition.
-    expiration_return_address: Option<Bech32Address>,
+    expiration_return_address: Option<String>,
     /// Returns outputs that expire before a certain slot index.
     expires_before: Option<SlotIndex>,
     /// Returns outputs that expire after a certain slot index.
@@ -277,9 +277,9 @@ pub struct NftOutputQueryParameters {
     /// Returns outputs that are timelocked after a certain slot index.
     timelocked_after: Option<SlotIndex>,
     /// Filters outputs based on bech32-encoded issuer address.
-    issuer: Option<Bech32Address>,
+    issuer: Option<String>,
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
-    sender: Option<Bech32Address>,
+    sender: Option<String>,
     /// Filters outputs based on matching Tag Block.
     tag: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
@@ -301,7 +301,7 @@ impl NftOutputQueryParameters {
     /// get outputs that can be unlocked by the address without potential further restrictions.
     pub fn only_address_unlock_condition(address: impl Into<Bech32Address>) -> Self {
         Self::default()
-            .address(address.into())
+            .address(address.into().to_string())
             .has_expiration(false)
             .has_storage_deposit_return(false)
             .has_timelock(false)
@@ -318,10 +318,7 @@ mod tests {
         assert_eq!(empty_basic_outputs_query_parameters.to_query_string(), None);
 
         let mut basic_outputs_query_parameters = BasicOutputQueryParameters::new()
-            .address(
-                Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
-                    .unwrap(),
-            )
+            .address("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string())
             .cursor("".into());
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),

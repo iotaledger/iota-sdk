@@ -11,10 +11,7 @@
 //! cargo run --release --example node_api_indexer_get_account_outputs <ADDRESS> [NODE URL]
 //! ```
 
-use iota_sdk::{
-    client::{node_api::indexer::query_parameters::AccountOutputQueryParameters, Client, Result},
-    types::block::address::Bech32Address,
-};
+use iota_sdk::client::{node_api::indexer::query_parameters::AccountOutputQueryParameters, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -37,7 +34,8 @@ async fn main() -> Result<()> {
     let address = std::env::args()
         .nth(1)
         .expect("missing example argument: ADDRESS")
-        .parse::<Bech32Address>()?;
+        .parse::<String>()
+        .unwrap();
 
     // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
