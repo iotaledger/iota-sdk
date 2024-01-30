@@ -38,6 +38,7 @@ pub enum SecretManagerMethod {
         /// Transaction signing hash
         transaction_signing_hash: String,
         /// Options used to sign the hash
+        #[serde(default)]
         signing_options: serde_json::Value,
     },
     /// Signs a message with an Ed25519 private key.
@@ -46,6 +47,7 @@ pub enum SecretManagerMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Options used to sign the message
+        #[serde(default)]
         signing_options: serde_json::Value,
     },
     /// Signs a message with an Secp256k1Ecdsa private key.
@@ -54,6 +56,7 @@ pub enum SecretManagerMethod {
         /// The message to sign, hex encoded String
         message: String,
         /// Options used to sign the hash
+        #[serde(default)]
         signing_options: serde_json::Value,
     },
     /// Sign a transaction
@@ -63,6 +66,7 @@ pub enum SecretManagerMethod {
         prepared_transaction_data: PreparedTransactionDataDto,
         protocol_parameters: Box<ProtocolParameters>,
         /// Options used to sign the transaction
+        #[serde(default)]
         signing_options: serde_json::Value,
     },
     // Sign a block.
@@ -70,6 +74,7 @@ pub enum SecretManagerMethod {
     SignBlock {
         unsigned_block: UnsignedBlockDto,
         /// Options used to sign the block
+        #[serde(default)]
         signing_options: serde_json::Value,
     },
     /// Store a mnemonic in the Stronghold vault
