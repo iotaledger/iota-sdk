@@ -132,7 +132,8 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] create_native_token");
-        let storage_score_params = self.client().get_storage_score_parameters().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let storage_score_params = protocol_parameters.storage_score_parameters();
 
         let (account_id, account_output_data) = self
             .get_account_output(params.account_id)
@@ -144,7 +145,7 @@ where
             let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
                 .with_mana(account_output_data.output.available_mana(
-                    &self.client().get_protocol_parameters().await?,
+                    &protocol_parameters,
                     account_output_data.output_id.transaction_id().slot_index(),
                     self.client().get_slot_index().await?,
                 )?)
