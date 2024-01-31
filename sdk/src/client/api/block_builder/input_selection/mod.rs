@@ -56,8 +56,8 @@ pub struct Selected {
     pub inputs: Vec<InputSigningData>,
     /// Provided and created outputs.
     pub outputs: Vec<Output>,
-    /// Remainder, if there was one.
-    pub remainder: Option<RemainderData>,
+    /// Remainder outputs information.
+    pub remainders: Vec<RemainderData>,
 }
 
 impl InputSelection {
@@ -295,7 +295,7 @@ impl InputSelection {
                 let required_address = input_signing_data
                     .output
                     .required_address(slot_index, committable_age_range)
-                    // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+                    // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                     .unwrap()
                     .expect("expiration unlockable outputs already filtered out");
 
@@ -408,13 +408,10 @@ impl InputSelection {
             return Err(Error::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        let (remainder, storage_deposit_returns) = self.remainder_and_storage_deposit_return_outputs()?;
-
-        if let Some(remainder) = &remainder {
-            self.outputs.push(remainder.output.clone());
-        }
+        let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
 
         self.outputs.extend(storage_deposit_returns);
+        self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
 
         // Check again, because more outputs may have been added.
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
@@ -430,7 +427,7 @@ impl InputSelection {
                 self.protocol_parameters.committable_age_range(),
             )?,
             outputs: self.outputs,
-            remainder,
+            remainders,
         })
     }
 

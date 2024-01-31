@@ -27,7 +27,7 @@ use crate::{
         Sign, SignTransaction,
     },
     types::block::{
-        address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
+        address::{AccountAddress, Address, Ed25519Address, NftAddress},
         output::Output,
         protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
@@ -372,15 +372,17 @@ impl SignTransaction for LedgerSecretManager {
         } else {
             // figure out the remainder output and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
-            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
-                Some(remainder) => (
+            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainders.as_slice() {
+                // Multiple remainder outputs would require blind signing since at least one would contain a native
+                // token, that's why matching a single one is enough.
+                [remainder] => (
                     Some(&remainder.output),
                     LedgerBIP32Index {
                         bip32_change: chain.change.harden().into(),
                         bip32_index: chain.address_index.harden().into(),
                     },
                 ),
-                None => (None, LedgerBIP32Index::default()),
+                _ => (None, LedgerBIP32Index::default()),
             };
 
             let mut remainder_index = 0u16;

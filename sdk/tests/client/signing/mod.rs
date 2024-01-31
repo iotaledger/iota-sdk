@@ -333,7 +333,7 @@ async fn all_combined() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: selected.inputs,
-        remainder: None,
+        remainders: Vec::new(),
     };
 
     let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
