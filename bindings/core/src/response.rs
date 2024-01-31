@@ -18,8 +18,8 @@ use iota_sdk::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
                 InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse,
-                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-                ValidatorResponse, ValidatorsResponse,
+                TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+                ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
