@@ -10,7 +10,7 @@ use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::{
-        address::{AccountAddress, Bech32Address, ToBech32Ext},
+        address::{Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
         output::{
             feature::{BlockIssuerKeySource, MetadataFeature},
@@ -23,9 +23,8 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams, Error as WalletError,
-        MintNftParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
-        TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
+        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -630,23 +629,23 @@ pub async fn create_delegation_command(
 ) -> Result<(), Error> {
     println_log_info!("Creating delegation output.");
 
-    let transaction = wallet
-        .create_delegation_output(
-            CreateDelegationParams {
-                address,
-                delegated_amount,
-                validator_address: AccountAddress::new(validator_account_id),
-            },
-            None,
-        )
-        .await?;
+    // let transaction = wallet
+    //     .create_delegation_output(
+    //         CreateDelegationParams {
+    //             address,
+    //             delegated_amount,
+    //             validator_address: AccountAddress::new(validator_account_id),
+    //         },
+    //         None,
+    //     )
+    //     .await?;
 
-    println_log_info!(
-        "Delegation creation transaction sent:\n{:?}\n{:?}\n{:?}",
-        transaction.transaction.transaction_id,
-        transaction.transaction.block_id,
-        transaction.delegation_id
-    );
+    // println_log_info!(
+    //     "Delegation creation transaction sent:\n{:?}\n{:?}\n{:?}",
+    //     transaction.transaction.transaction_id,
+    //     transaction.transaction.block_id,
+    //     transaction.delegation_id
+    // );
 
     Ok(())
 }
@@ -659,13 +658,13 @@ pub async fn delay_delegation_claiming_command(
 ) -> Result<(), Error> {
     println_log_info!("Delaying delegation claiming.");
 
-    let transaction = wallet.delay_delegation_claiming(delegation_id, reclaim_excess).await?;
+    // let transaction = wallet.delay_delegation_claiming(delegation_id, reclaim_excess).await?;
 
-    println_log_info!(
-        "Delay delegation claiming transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+    // println_log_info!(
+    //     "Delay delegation claiming transaction sent:\n{:?}\n{:?}",
+    //     transaction.transaction_id,
+    //     transaction.block_id
+    // );
 
     Ok(())
 }
@@ -704,13 +703,13 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 pub async fn destroy_delegation_command(wallet: &Wallet, delegation_id: DelegationId) -> Result<(), Error> {
     println_log_info!("Destroying delegation {delegation_id}.");
 
-    let transaction = wallet.destroy_delegation(delegation_id).await?;
+    // let transaction = wallet.destroy_delegation(delegation_id).await?;
 
-    println_log_info!(
-        "Destroying delegation transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+    // println_log_info!(
+    //     "Destroying delegation transaction sent:\n{:?}\n{:?}",
+    //     transaction.transaction_id,
+    //     transaction.block_id
+    // );
 
     Ok(())
 }
