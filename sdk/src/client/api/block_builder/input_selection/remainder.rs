@@ -4,10 +4,7 @@
 use crypto::keys::bip44::Bip44;
 
 use super::{
-    requirement::{
-        amount::amount_sums,
-        native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
-    },
+    requirement::native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     Error, InputSelection,
 };
 use crate::{
@@ -75,8 +72,7 @@ impl InputSelection {
     pub(crate) fn storage_deposit_returns_and_remainders(
         &mut self,
     ) -> Result<(Vec<Output>, Vec<RemainderData>), Error> {
-        let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
-            amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
+        let (input_amount, output_amount, inputs_sdr, outputs_sdr) = self.amount_sums();
         let mut storage_deposit_returns = Vec::new();
 
         for (address, amount) in inputs_sdr {

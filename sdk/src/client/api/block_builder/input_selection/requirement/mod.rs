@@ -47,7 +47,7 @@ pub enum Requirement {
     /// Amount requirement.
     Amount,
     /// Mana requirement.
-    Mana(u64),
+    Mana,
 }
 
 impl InputSelection {
@@ -66,7 +66,7 @@ impl InputSelection {
             Requirement::Delegation(delegation_id) => self.fulfill_delegation_requirement(delegation_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
-            Requirement::Mana(allotments) => self.fulfill_mana_requirement(allotments),
+            Requirement::Mana => self.fulfill_mana_requirement(),
         }
     }
 

@@ -105,7 +105,7 @@ impl InputSelection {
 
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial mana requirement.
-        self.requirements.push(Requirement::Mana(self.mana_allotments));
+        self.requirements.push(Requirement::Mana);
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
