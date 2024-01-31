@@ -14,6 +14,7 @@ use crate::{
         unix_timestamp_now, Client,
     },
     types::block::{
+        address::Bech32AddressString,
         core::{BasicBlockBody, Block, BlockBody},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
@@ -60,7 +61,7 @@ impl Client {
 
     /// Function to find inputs from addresses for a provided amount (useful for offline signing), ignoring outputs with
     /// additional unlock conditions
-    pub async fn find_inputs(&self, addresses: Vec<String>, amount: u64) -> Result<Vec<UtxoInput>> {
+    pub async fn find_inputs(&self, addresses: Vec<Bech32AddressString>, amount: u64) -> Result<Vec<UtxoInput>> {
         // Get outputs from node and select inputs
         let available_outputs = futures::stream::iter(addresses)
             .then(|address| self.basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(address)))

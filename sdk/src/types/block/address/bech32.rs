@@ -172,6 +172,11 @@ impl Bech32Address {
         self.inner
     }
 
+    /// Discard the hrp and get the address.
+    pub fn to_bech32_address_string(&self) -> Bech32AddressString {
+        Bech32AddressString(self.to_string())
+    }
+
     /// Parses a bech32 address string.
     pub fn try_from_str(address: impl AsRef<str>) -> Result<Self, Error> {
         Self::from_str(address.as_ref())
@@ -230,7 +235,7 @@ impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
 }
 
 /// A valid bech32 encoded address.
-#[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Bech32AddressString(String);
 

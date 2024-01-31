@@ -19,7 +19,7 @@ pub(crate) use self::multi::WeightedAddressCount;
 pub use self::{
     account::AccountAddress,
     anchor::AnchorAddress,
-    bech32::{Bech32Address, Hrp},
+    bech32::{Bech32Address, Bech32AddressString, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
     multi::{MultiAddress, WeightedAddress},

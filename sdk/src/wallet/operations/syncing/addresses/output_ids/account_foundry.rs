@@ -35,7 +35,7 @@ where
 
         let mut output_ids = self
             .client()
-            .account_output_ids(AccountOutputQueryParameters::new().address(bech32_address.to_string()))
+            .account_output_ids(AccountOutputQueryParameters::new().address(bech32_address.into()))
             .await?
             .items;
 
@@ -70,9 +70,7 @@ where
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
-                        .foundry_output_ids(
-                            FoundryOutputQueryParameters::new().account(account_bech32_address.to_string()),
-                        )
+                        .foundry_output_ids(FoundryOutputQueryParameters::new().account(account_bech32_address.into()))
                         .await
                         .map_err(From::from)
                 })));
