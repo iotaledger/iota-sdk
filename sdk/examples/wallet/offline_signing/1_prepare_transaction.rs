@@ -9,11 +9,9 @@
 //! ```
 
 use iota_sdk::{
-    client::{api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager},
-    crypto::keys::bip44::Bip44,
-    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet, WalletBuilder},
+    client::api::PreparedTransactionDataDto,
+    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, WalletBuilder},
 };
-use serde::Serialize;
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
@@ -41,12 +39,10 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
-    // Create the wallet with the secret_manager and client options
+    // Create the wallet with the client options and address
     let wallet = WalletBuilder::new()
-        .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
-        // .with_public_key_options(())
         .with_address(address)
         .finish()
         .await?;
