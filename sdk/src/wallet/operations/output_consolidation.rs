@@ -1,5 +1,7 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2021-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
+use std::collections::{HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -10,14 +12,14 @@ use crate::{
     types::block::{
         address::{Address, Bech32Address},
         input::INPUT_COUNT_MAX,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
+        output::{MinimumOutputAmount, Output},
         slot::SlotIndex,
     },
     wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
-        Result, Wallet,
+        RemainderValueStrategy, Result, Wallet,
     },
 };
 
@@ -70,6 +72,80 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
+    /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to a provided
+    /// address or to an own address again if the output amount is >= the output_threshold. When `force`
+    /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
+    /// transaction.
+    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
+        let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
+        let consolidation_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
+
+        log::debug!(
+            "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
+            consolidation_tx.block_id,
+            consolidation_tx.transaction_id
+        );
+
+        Ok(consolidation_tx)
+    }
+
+    /// Prepares the transaction for [Wallet::consolidate_outputs()].
+    pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
+        log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
+        let wallet_address = self.data().await.address.clone();
+
+        let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
+
+        let max_inputs = self.get_max_inputs().await?;
+
+        // let mut total_amount = 0;
+
+        // let mut custom_inputs = Vec::with_capacity(max_inputs.into());
+        // let mut total_native_tokens = NativeTokensBuilder::new();
+
+        // for output_data in outputs_to_consolidate.iter().take(max_inputs.into()) {
+        // if let Some(native_token) = output_data.output.native_token() {
+        //     total_native_tokens.add_native_token(*native_token)?;
+        // };
+        // total_amount += output_data.output.amount();
+
+        //     custom_inputs.push(output_data.output_id);
+        // }
+
+        let custom_inputs = outputs_to_consolidate
+            .iter()
+            .take(max_inputs.into())
+            .map(|o| o.output_id)
+            .collect();
+
+        // let consolidation_output = [BasicOutputBuilder::new_with_amount(total_amount)
+        //     .add_unlock_condition(AddressUnlockCondition::new(
+        //         params
+        //             .target_address
+        //             .map(|bech32| bech32.into_inner())
+        //             .unwrap_or_else(|| wallet_address.into_inner()),
+        //     ))
+        //     // TODO https://github.com/iotaledger/iota-sdk/issues/1632
+        //     // .with_native_tokens(total_native_tokens.finish()?)
+        //     .finish_output()?];
+
+        let options = Some(TransactionOptions {
+            custom_inputs: Some(custom_inputs),
+            remainder_value_strategy: RemainderValueStrategy::CustomAddress(
+                params
+                    .target_address
+                    .map(|bech32| bech32.into_inner())
+                    .unwrap_or_else(|| wallet_address.into_inner()),
+            ),
+            ..Default::default()
+        });
+
+        self.prepare_transaction([], options).await
+    }
+
+    /// Determines whether an output should be consolidated or not.
     async fn should_consolidate_output(
         &self,
         output_data: &OutputData,
@@ -108,35 +184,17 @@ where
         })
     }
 
-    /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to a provided
-    /// address or to an own address again if the output amount is >= the output_threshold. When `force`
-    /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
-    /// transaction.
-    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
-        let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
-        let consolidation_tx = self
-            .sign_and_submit_transaction(prepared_transaction, None, None)
-            .await?;
-
-        log::debug!(
-            "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
-            consolidation_tx.block_id,
-            consolidation_tx.transaction_id
-        );
-
-        Ok(consolidation_tx)
-    }
-
-    /// Prepares the transaction for [Wallet::consolidate_outputs()].
-    pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
-        log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
+    /// Returns all outputs that should be consolidated.
+    async fn get_outputs_to_consolidate(&self, params: &ConsolidationParams) -> Result<Vec<OutputData>> {
         // #[cfg(feature = "participation")]
         // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
-        let mut outputs_to_consolidate = Vec::new();
+        let storage_score_parameters = self.client().get_protocol_parameters().await?.storage_score_parameters;
         let wallet_data = self.data().await;
-
         let wallet_address = wallet_data.address.clone();
+
+        let mut outputs_to_consolidate = Vec::new();
+        let mut native_token_inputs = HashMap::new();
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             // #[cfg(feature = "participation")]
@@ -153,41 +211,36 @@ where
                 .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
+
+                // Keep track of inputs with native tokens.
+                if let Some(nt) = &output_data.output.native_token() {
+                    native_token_inputs
+                        .entry(*nt.token_id())
+                        .or_insert_with(HashSet::new)
+                        .insert(output_data.output_id);
+                }
             }
         }
 
+        // Remove outputs if they have a native token, <= minimum amount and there are no other outputs with the same
+        // native token.
+        outputs_to_consolidate.retain(|output_data| {
+            output_data.output.native_token().as_ref().map_or(true, |nt| {
+                if output_data.output.amount() <= output_data.output.minimum_amount(storage_score_parameters) {
+                    // If there is only a single output with this native token, then it shouldn't be consolidated,
+                    // because no amount will be made available, since we need to create a remainder output with the
+                    // native token again.
+                    // Safe to unwrap, we added it in the loop before
+                    native_token_inputs.get(nt.token_id()).unwrap().len() > 1
+                } else {
+                    true
+                }
+            })
+        });
+
         drop(wallet_data);
 
-        #[allow(clippy::option_if_let_else)]
-        let output_threshold = match params.output_threshold {
-            Some(t) => t,
-            None => {
-                #[cfg(feature = "ledger_nano")]
-                {
-                    use crate::client::secret::SecretManager;
-                    let secret_manager = self.secret_manager.read().await;
-                    if secret_manager
-                        .downcast::<LedgerSecretManager>()
-                        .or_else(|| {
-                            secret_manager.downcast::<SecretManager>().and_then(|s| {
-                                if let SecretManager::LedgerNano(n) = s {
-                                    Some(n)
-                                } else {
-                                    None
-                                }
-                            })
-                        })
-                        .is_some()
-                    {
-                        DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
-                    } else {
-                        DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
-                    }
-                }
-                #[cfg(not(feature = "ledger_nano"))]
-                DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
-            }
-        };
+        let output_threshold = self.get_output_consolidation_threshold(params).await?;
 
         // only consolidate if the unlocked outputs are >= output_threshold
         if outputs_to_consolidate.is_empty() || (!params.force && outputs_to_consolidate.len() < output_threshold) {
@@ -202,6 +255,17 @@ where
             });
         }
 
+        log::debug!(
+            "outputs_to_consolidate: {:?}",
+            outputs_to_consolidate.iter().map(|o| o.output_id).collect::<Vec<_>>()
+        );
+
+        Ok(outputs_to_consolidate)
+    }
+
+    /// Returns the max amount of inputs that can be used in a consolidation transaction. For Ledger Nano it's more
+    /// limited.
+    async fn get_max_inputs(&self) -> Result<u16> {
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
             use crate::client::secret::SecretManager;
@@ -237,36 +301,43 @@ where
         };
         #[cfg(not(feature = "ledger_nano"))]
         let max_inputs = INPUT_COUNT_MAX;
+        Ok(max_inputs)
+    }
 
-        let mut total_amount = 0;
-        let mut custom_inputs = Vec::with_capacity(max_inputs.into());
-        let mut total_native_tokens = NativeTokensBuilder::new();
+    /// Returns the threshold value above which outputs should be consolidated. Lower for ledger nano secret manager, as
+    /// their memory size is limited.
+    async fn get_output_consolidation_threshold(&self, params: &ConsolidationParams) -> Result<usize> {
+        #[allow(clippy::option_if_let_else)]
+        let output_threshold = match params.output_threshold {
+            Some(t) => t,
+            None => {
+                #[cfg(feature = "ledger_nano")]
+                {
+                    use crate::client::secret::SecretManager;
+                    let secret_manager = self.secret_manager.read().await;
+                    if secret_manager
+                        .downcast::<LedgerSecretManager>()
+                        .or_else(|| {
+                            secret_manager.downcast::<SecretManager>().and_then(|s| {
+                                if let SecretManager::LedgerNano(n) = s {
+                                    Some(n)
+                                } else {
+                                    None
+                                }
+                            })
+                        })
+                        .is_some()
+                    {
+                        DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
+                    } else {
+                        DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
+                    }
+                }
+                #[cfg(not(feature = "ledger_nano"))]
+                DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
+            }
+        };
 
-        for output_data in outputs_to_consolidate.iter().take(max_inputs.into()) {
-            if let Some(native_token) = output_data.output.native_token() {
-                total_native_tokens.add_native_token(*native_token)?;
-            };
-            total_amount += output_data.output.amount();
-
-            custom_inputs.push(output_data.output_id);
-        }
-
-        let consolidation_output = [BasicOutputBuilder::new_with_amount(total_amount)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                params
-                    .target_address
-                    .map(|bech32| bech32.into_inner())
-                    .unwrap_or_else(|| wallet_address.into_inner()),
-            ))
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1632
-            // .with_native_tokens(total_native_tokens.finish()?)
-            .finish_output()?];
-
-        let options = Some(TransactionOptions {
-            custom_inputs: Some(custom_inputs),
-            ..Default::default()
-        });
-
-        self.prepare_transaction(consolidation_output, options).await
+        Ok(output_threshold)
     }
 }
