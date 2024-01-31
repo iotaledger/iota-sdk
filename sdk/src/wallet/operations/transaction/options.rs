@@ -10,7 +10,8 @@ use crate::{
         context_input::ContextInput,
         mana::ManaAllotment,
         output::{AccountId, OutputId},
-        payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload}, slot::SlotCommitmentId,
+        payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
+        slot::SlotCommitmentId,
     },
 };
 

@@ -17,7 +17,7 @@ use crate::{
         },
     },
     wallet::{
-        operations::transaction::{options::BlockOptions, TransactionOptions},
+        operations::transaction::options::BlockOptions,
         types::{TransactionWithMetadata, TransactionWithMetadataDto},
         Wallet,
     },

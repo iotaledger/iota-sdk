@@ -16,7 +16,7 @@ use crate::{
     },
     utils::ConvertTo,
     wallet::{
-        operations::transaction::{options::BlockOptions, TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{options::BlockOptions, TransactionWithMetadata},
         Wallet,
     },
 };

@@ -10,7 +10,7 @@ use crate::{
         TokenScheme,
     },
     wallet::{
-        operations::transaction::{options::BlockOptions, TransactionOptions},
+        operations::transaction::options::BlockOptions,
         types::{OutputData, TransactionWithMetadata},
         Error, Wallet,
     },

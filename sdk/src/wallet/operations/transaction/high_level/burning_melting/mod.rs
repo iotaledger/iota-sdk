@@ -3,11 +3,7 @@
 
 use crate::{
     client::api::{input_selection::Burn, PreparedTransactionData},
-    wallet::{
-        operations::transaction::{options::BlockOptions, TransactionOptions},
-        types::TransactionWithMetadata,
-        Wallet,
-    },
+    wallet::{operations::transaction::options::BlockOptions, types::TransactionWithMetadata, Wallet},
 };
 
 pub(crate) mod melt_native_token;

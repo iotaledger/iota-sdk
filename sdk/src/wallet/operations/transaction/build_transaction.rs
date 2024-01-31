@@ -17,7 +17,7 @@ use crate::{
         output::Output,
         payload::signed_transaction::Transaction,
     },
-    wallet::{operations::transaction::TransactionOptions, Wallet},
+    wallet::Wallet,
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -60,7 +60,7 @@ where
         {
             let id = match options.as_ref().and_then(|o| o.latest_slot_commitment_id) {
                 Some(id) => id,
-                None => self.client().get_issuance().await?.latest_commitment.id()
+                None => self.client().get_issuance().await?.latest_commitment.id(),
             };
             context_inputs.insert(CommitmentContextInput::new(id).into());
         }

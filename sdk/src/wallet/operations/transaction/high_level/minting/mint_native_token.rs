@@ -8,11 +8,7 @@ use crate::{
     types::block::output::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
-    wallet::{
-        operations::transaction::{options::BlockOptions, TransactionOptions},
-        types::TransactionWithMetadata,
-        Error, Wallet,
-    },
+    wallet::{operations::transaction::options::BlockOptions, types::TransactionWithMetadata, Error, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>

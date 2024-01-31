@@ -17,7 +17,7 @@ use crate::{
     utils::{serde::string, ConvertTo},
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
-        operations::transaction::{options::BlockOptions, TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{options::BlockOptions, TransactionWithMetadata},
         Error, Wallet,
     },
 };

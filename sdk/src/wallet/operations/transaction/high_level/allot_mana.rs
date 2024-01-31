@@ -5,7 +5,7 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::mana::ManaAllotment,
     wallet::{
-        operations::transaction::{options::BlockOptions, TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{options::BlockOptions, TransactionWithMetadata},
         Wallet,
     },
 };

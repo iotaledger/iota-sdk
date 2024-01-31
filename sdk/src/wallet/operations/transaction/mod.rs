@@ -21,10 +21,7 @@ use crate::{
     },
     types::{
         api::core::OutputWithMetadataResponse,
-        block::{
-            output::{AccountId, Output},
-            payload::signed_transaction::SignedTransactionPayload,
-        },
+        block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
     },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
