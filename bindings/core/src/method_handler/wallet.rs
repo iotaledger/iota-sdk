@@ -336,10 +336,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .await?;
             Response::PreparedTransaction(data)
         }
-        WalletMethod::PrepareDestroyDelegation { delegation_id } => {
-            let data = wallet.prepare_destroy_delegation(delegation_id).await?;
-            Response::PreparedTransaction(data)
-        }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareStopParticipating { event_id } => {
         //     let data = wallet.prepare_stop_participating(event_id).await?;

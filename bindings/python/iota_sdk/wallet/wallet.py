@@ -636,21 +636,6 @@ class Wallet():
         ))
         return PreparedTransaction(self, prepared)
 
-    def destroy_delegation(self, delegation_id: HexStr) -> TransactionWithMetadata:
-        """Destroy a delegation.
-        """
-        return self.prepare_destroy_delegation(delegation_id).send()
-
-    def prepare_destroy_delegation(self, delegation_id: HexStr) -> PreparedTransaction:
-        """Prepare to destroy a delegation.
-        """
-        prepared = PreparedTransactionData.from_dict(self._call_method(
-            'prepareDestroyDelegation', {
-                'delegationId': delegation_id,
-            }
-        ))
-        return PreparedTransaction(self, prepared)
-
     def send_transaction(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send a transaction.

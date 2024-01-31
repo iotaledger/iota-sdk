@@ -6,7 +6,7 @@ use crate::{
     types::block::output::{
         AddressUnlockCondition, BasicOutput, DelegationId, DelegationOutputBuilder, MinimumOutputAmount,
     },
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
+    wallet::{types::TransactionWithMetadata, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -45,29 +45,28 @@ where
             .await
             .unspent_delegation_output(&delegation_id)
             .ok_or(crate::wallet::Error::MissingDelegation(delegation_id))?
+            .output
             .clone();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        let min_delegation_amount = delegation_output
-            .output
-            .minimum_amount(protocol_parameters.storage_score_parameters());
+        let min_delegation_amount = delegation_output.minimum_amount(protocol_parameters.storage_score_parameters());
 
         // TODO: Should we return an error if `reclaim_excess == true` and `can_reclaim == false`?
         let can_reclaim = if reclaim_excess {
             let min_basic_amount = BasicOutput::minimum_amount(
-                delegation_output.output.as_delegation().address(),
+                delegation_output.as_delegation().address(),
                 protocol_parameters.storage_score_parameters(),
             );
-            delegation_output.output.amount() >= min_delegation_amount + min_basic_amount
+            delegation_output.amount() >= min_delegation_amount + min_basic_amount
         } else {
             false
         };
 
         let mut builder =
-            DelegationOutputBuilder::from(delegation_output.output.as_delegation()).with_delegation_id(delegation_id);
+            DelegationOutputBuilder::from(delegation_output.as_delegation()).with_delegation_id(delegation_id);
 
         // In order to split the output, the amount must be at least twice the minimum for a delegation output
-        let can_split = delegation_output.output.amount() >= 2 * min_delegation_amount;
+        let can_split = delegation_output.amount() >= 2 * min_delegation_amount;
 
         if can_split || can_reclaim {
             builder = builder.with_minimum_amount(protocol_parameters.storage_score_parameters());
@@ -81,7 +80,7 @@ where
         if can_split && !reclaim_excess {
             outputs.push(
                 DelegationOutputBuilder::new_with_amount(
-                    delegation_output.output.amount() - output.amount(),
+                    delegation_output.amount() - output.amount(),
                     DelegationId::null(),
                     *output.as_delegation().validator_address(),
                 )
@@ -92,13 +91,6 @@ where
 
         outputs.push(output);
 
-        self.prepare_transaction(
-            outputs,
-            TransactionOptions {
-                custom_inputs: Some(vec![delegation_output.output_id]),
-                ..Default::default()
-            },
-        )
-        .await
+        self.prepare_transaction(outputs, None).await
     }
 }

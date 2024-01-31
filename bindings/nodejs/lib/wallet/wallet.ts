@@ -1316,43 +1316,6 @@ export class Wallet {
     }
 
     /**
-     * Destroy a delegation.
-     *
-     * @param delegationId The id of the delegation to destroy.
-     * @returns The created transaction.
-     */
-    async destroyDelegation(
-        delegationId: DelegationId,
-    ): Promise<TransactionWithMetadata> {
-        return (await this.prepareDestroyDelegation(delegationId)).send();
-    }
-
-    /**
-     * Prepare a transaction to destroy a delegation.
-     *
-     * @param delegationId The id of the delegation to destroy.
-     * @returns The prepared transaction.
-     */
-    async prepareDestroyDelegation(
-        delegationId: DelegationId,
-    ): Promise<PreparedTransaction> {
-        const response = await this.methodHandler.callMethod({
-            name: 'prepareDestroyDelegation',
-            data: {
-                delegationId,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<PreparedTransactionData>;
-        return new PreparedTransaction(
-            plainToInstance(PreparedTransactionData, parsed.payload),
-            this,
-        );
-    }
-
-    /**
      * Send a transaction.
      *
      * @param outputs Outputs to use in the transaction.
