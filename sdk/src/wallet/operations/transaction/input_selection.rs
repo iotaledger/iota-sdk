@@ -90,12 +90,23 @@ where
                         "provided custom input {input} is already used in another transaction",
                     )));
                 }
-                if wallet_data
+                // TODO: use can_claim_rewards from https://github.com/iotaledger/iota-sdk/pull/1906
+                if let Some(delegation) = wallet_data
                     .outputs
                     .get(input)
-                    .map_or(false, |o| o.output.is_delegation())
+                    .and_then(|o| o.output.as_delegation_opt())
                 {
-                    mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
+                    if outputs
+                        .iter()
+                        .find(|o| {
+                            o.as_delegation_opt().map_or(false, |o| {
+                                o.delegation_id() == &delegation.delegation_id_non_null(input)
+                            })
+                        })
+                        .is_none()
+                    {
+                        mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
+                    }
                 }
             }
 
@@ -140,12 +151,23 @@ where
                         "provided custom input {input} is already used in another transaction",
                     )));
                 }
-                if wallet_data
+                // TODO: use can_claim_rewards from https://github.com/iotaledger/iota-sdk/pull/1906
+                if let Some(delegation) = wallet_data
                     .outputs
                     .get(input)
-                    .map_or(false, |o| o.output.is_delegation())
+                    .and_then(|o| o.output.as_delegation_opt())
                 {
-                    mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
+                    if outputs
+                        .iter()
+                        .find(|o| {
+                            o.as_delegation_opt().map_or(false, |o| {
+                                o.delegation_id() == &delegation.delegation_id_non_null(input)
+                            })
+                        })
+                        .is_none()
+                    {
+                        mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
+                    }
                 }
             }
 
