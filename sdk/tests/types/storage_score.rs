@@ -29,21 +29,28 @@ fn output_fixture(filename: &str) -> Result<OutputFixture, Box<dyn std::error::E
     )?)?)?)
 }
 
-// From https://github.com/iotaledger/tips/blob/tip41/tips/TIP-0041/tip-0041.md#storage-score
 #[test]
 fn output_storage_score() {
+    let storage_score_parameters = storage_score_parameters().unwrap();
+
     for filename in [
-        "tip41_basic_output.json",
-        "tip42_account_output.json",
-        "tip43_nft_output.json",
-        "tip44_foundry_output.json",
-        "tip54_anchor_output.json",
+        // https://github.com/iotaledger/tips/blob/tip40/tips/TIP-0040/tip-0040.md#storage-score-1
         "tip40_delegation_output.json",
+        // https://github.com/iotaledger/tips/blob/tip41/tips/TIP-0041/tip-0041.md#storage-score
+        "tip41_basic_output.json",
+        // https://github.com/iotaledger/tips/blob/tip42/tips/TIP-0042/tip-0042.md#storage-score-3
+        "tip42_account_output.json",
+        // https://github.com/iotaledger/tips/blob/tip43/tips/TIP-0043/tip-0043.md#storage-score
+        "tip43_nft_output.json",
+        // https://github.com/iotaledger/tips/blob/tip44/tips/TIP-0044/tip-0044.md#storage-score
+        "tip44_foundry_output.json",
+        // https://github.com/iotaledger/tips/blob/tip54/tips/TIP-0054/tip-0054.md#storage-score
+        "tip54_anchor_output.json",
     ] {
         let fixture = output_fixture(filename).unwrap_or_else(|e| panic!("failed to deserialize {filename}: {e}"));
 
         assert_eq!(
-            fixture.output.storage_score(storage_score_parameters().unwrap()),
+            fixture.output.storage_score(storage_score_parameters),
             fixture.storage_score,
             "storage score mismatch for {filename}"
         );
