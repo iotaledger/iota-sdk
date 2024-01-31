@@ -228,3 +228,14 @@ impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
         Bech32Address::try_from_str(self)
     }
 }
+
+/// A valid bech32 encoded address.
+#[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Bech32AddressString(String);
+
+impl From<Bech32Address> for Bech32AddressString {
+    fn from(address: Bech32Address) -> Self {
+        Self(address.to_string())
+    }
+}
