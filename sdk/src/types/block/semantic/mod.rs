@@ -106,6 +106,10 @@ impl<'a> SemanticValidationContext<'a> {
         // Validation of inputs.
         let mut has_implicit_account_creation_address = false;
 
+        if let Some(mana_rewards) = self.mana_rewards {
+            self.input_mana = mana_rewards
+        }
+
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
@@ -168,9 +172,6 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::ConsumedAmountOverflow)?;
 
-            if let Some(mana_rewards) = self.mana_rewards {
-                self.input_mana = mana_rewards
-            }
             self.input_mana = self
                 .input_mana
                 .checked_add(consumed_output.available_mana(

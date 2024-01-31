@@ -143,7 +143,7 @@ impl InputSelection {
 
         // Gets requirements from outputs.
         // TODO this may re-evaluate outputs added by inputs
-        self.outputs_requirements(None);
+        self.outputs_requirements();
 
         // Gets requirements from burn.
         self.burn_requirements()?;
