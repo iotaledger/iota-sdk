@@ -230,7 +230,7 @@ impl InputSelection {
         self
     }
 
-    /// Sets the total mana rewards.
+    /// Sets the total mana rewards for required inputs.
     pub fn with_mana_rewards(mut self, mana_rewards: u64) -> Self {
         self.mana_rewards = mana_rewards;
         self
