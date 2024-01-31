@@ -71,7 +71,7 @@ pub use self::{
 };
 use crate::{
     types::block::{
-        output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputAndMetadata, OutputWithMetadata},
+        output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata, OutputWithMetadataResponse},
         payload::signed_transaction::{SignedTransactionPayload, TransactionId},
     },
     wallet::types::InclusionState,
@@ -123,7 +123,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         note: None,
         inputs: inputs
             .into_iter()
-            .map(|input| OutputAndMetadata {
+            .map(|input| OutputWithMetadataResponse {
                 output: input.output,
                 metadata: input.metadata,
             })

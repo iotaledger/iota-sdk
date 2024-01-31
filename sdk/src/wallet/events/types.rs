@@ -8,7 +8,7 @@ use crate::{
     client::api::PreparedTransactionDataDto,
     types::block::{
         address::Bech32Address,
-        output::OutputAndMetadata,
+        output::OutputWithMetadataResponse,
         payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
     },
     wallet::{
@@ -173,7 +173,7 @@ pub struct NewOutputEvent {
     pub transaction: Option<SignedTransactionPayloadDto>,
     /// The inputs for the transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub transaction_inputs: Option<Vec<OutputAndMetadata>>,
+    pub transaction_inputs: Option<Vec<OutputWithMetadataResponse>>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

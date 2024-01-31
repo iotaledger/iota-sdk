@@ -138,7 +138,7 @@ impl OutputWithMetadata {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-pub struct OutputAndMetadata {
+pub struct OutputWithMetadataResponse {
     pub output: Output,
     pub metadata: OutputMetadata,
 }

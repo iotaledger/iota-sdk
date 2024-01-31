@@ -17,9 +17,9 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse, RoutesResponse,
-            SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-            ValidatorResponse, ValidatorsResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
+            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+            ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -235,7 +235,7 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputWithMetadataResponse> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputResponse> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.get_request(path, None, false, true).await
