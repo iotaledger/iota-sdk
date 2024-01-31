@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountId, Bech32Address } from '../block';
+import { AccountAddress, AccountId, Bech32Address } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
 import { u256, HexEncodedString, NumericString } from '../utils';
@@ -98,5 +98,5 @@ export interface CreateDelegationParams {
     /** The amount to delegate. */
     delegatedAmount: NumericString;
     /** The Account Address of the validator to which this output will delegate. */
-    validatorAddress: HexEncodedString;
+    validatorAddress: AccountAddress;
 }

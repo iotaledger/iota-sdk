@@ -1232,8 +1232,7 @@ export class Wallet {
      * Create a delegation.
      *
      * @param params The options for creating a delegation.
-     * @param transactionOptions Additional transaction options
-     * or custom inputs.
+     * @param transactionOptions Additional transaction options or custom inputs.
      * @returns The created transaction and the delegation ID.
      */
     async createDelegation(
@@ -1288,6 +1287,10 @@ export class Wallet {
      * Delay a delegation's claiming.
      *
      * @param delegationId The id of the delegation to delay.
+     * @param reclaimExcess Indicates whether excess value over the minimum storage requirements
+     * will be moved to a basic output that is unlockable by the same address which controls the delegation.
+     * Otherwise it will be added to a new delegation. In this manner, one can delegate for one epoch at a time and
+     * never lose out on any rewards.
      * @returns The created transaction.
      */
     async delayDelegationClaiming(

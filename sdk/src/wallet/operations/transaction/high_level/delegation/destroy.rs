@@ -29,11 +29,7 @@ where
             .data()
             .await
             .unspent_delegation_output(&delegation_id)
-            .ok_or_else(|| {
-                crate::wallet::Error::DelegationTransitionFailed(format!(
-                    "no delegation output found with id {delegation_id}"
-                ))
-            })?
+            .ok_or(crate::wallet::Error::MissingDelegation(delegation_id))?
             .clone();
         self.prepare_transaction(
             [],

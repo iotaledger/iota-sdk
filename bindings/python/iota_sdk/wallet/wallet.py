@@ -642,7 +642,7 @@ class Wallet():
         return self.prepare_destroy_delegation(delegation_id).send()
 
     def prepare_destroy_delegation(self, delegation_id: HexStr) -> PreparedTransaction:
-        """Prepare to delay a delegation's claiming.
+        """Prepare to destroy a delegation.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
             'prepareDestroyDelegation', {
