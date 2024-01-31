@@ -7,7 +7,7 @@ use crate::client::secret::types::InputSigningData;
 impl InputSelection {
     pub(crate) fn fulfill_mana_requirement(&mut self, allotments: u64) -> Result<Vec<InputSigningData>, Error> {
         let required_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + allotments;
-        let mut selected_mana = 0;
+        let mut selected_mana = self.mana_rewards;
 
         for input in &self.selected_inputs {
             selected_mana += input.output.available_mana(
