@@ -53,7 +53,8 @@ impl WalletCli {
 }
 
 /// Commands
-#[derive(Debug, Subcommand)]
+#[derive(Debug, Subcommand, strum::EnumVariantNames)]
+#[strum(serialize_all = "kebab-case")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
     /// Lists the accounts of the wallet.
@@ -69,6 +70,7 @@ pub enum WalletCommand {
         /// Token ID to be burnt, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: TokenId,
         /// Amount to be burnt, e.g. 100.
+        #[arg(value_parser = parse_u256)]
         amount: U256,
     },
     /// Burn an NFT.
@@ -92,8 +94,10 @@ pub enum WalletCommand {
     /// Create a native token.
     CreateNativeToken {
         /// Circulating supply of the native token to be minted, e.g. 100.
+        #[arg(value_parser = parse_u256)]
         circulating_supply: U256,
         /// Maximum supply of the native token to be minted, e.g. 500.
+        #[arg(value_parser = parse_u256)]
         maximum_supply: U256,
         /// Metadata key, e.g. --foundry-metadata-key data.
         #[arg(long, default_value = "data")]
@@ -120,6 +124,7 @@ pub enum WalletCommand {
         delegation_id: DelegationId,
         /// Whether excess amount above the minimum storage requirement should be reclaimed.
         /// Otherwise the excess will be transferred into a new delegation.
+        #[arg(short, long)]
         reclaim_excess: bool,
     },
     /// Destroy an account output.
@@ -161,6 +166,7 @@ pub enum WalletCommand {
         /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: TokenId,
         /// Amount to be minted, e.g. 100.
+        #[arg(value_parser = parse_u256)]
         amount: U256,
     },
     /// Mint an NFT.
@@ -201,6 +207,7 @@ pub enum WalletCommand {
         /// Token ID to be melted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: TokenId,
         /// Amount to be melted, e.g. 100.
+        #[arg(value_parser = parse_u256)]
         amount: U256,
     },
     /// Get information about currently set node.
@@ -244,9 +251,10 @@ pub enum WalletCommand {
         /// Token ID to be sent, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: TokenId,
         /// Amount to send, e.g. 1000000.
+        #[arg(value_parser = parse_u256)]
         amount: U256,
         /// Whether to gift the storage deposit for the output or not, e.g. `true`.
-        #[arg(value_parser = clap::builder::BoolishValueParser::new())]
+        #[arg(short, long)]
         gift_storage_deposit: Option<bool>,
     },
     /// Send an NFT.
@@ -308,6 +316,10 @@ pub enum WalletCommand {
     // },
     // /// Get the voting output of the wallet.
     // VotingOutput,
+}
+
+fn parse_u256(s: &str) -> Result<U256, Error> {
+    U256::from_dec_str(s).map_err(|e| Error::Miscellaneous(e.to_string()))
 }
 
 /// Select by transaction ID or list index
