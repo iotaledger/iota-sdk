@@ -3,9 +3,8 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        context_input::{CommitmentContextInput, ContextInput},
-        output::{AddressUnlockCondition, BasicOutput, DelegationId, DelegationOutputBuilder, MinimumOutputAmount},
+    types::block::output::{
+        AddressUnlockCondition, BasicOutput, DelegationId, DelegationOutputBuilder, MinimumOutputAmount,
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
@@ -48,9 +47,6 @@ where
             .ok_or(crate::wallet::Error::MissingDelegation(delegation_id))?
             .clone();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        // Add a commitment context input with the latest slot commitment
-        let slot_commitment_id = self.client().get_info().await?.node_info.status.latest_commitment_id;
-        let context_input = ContextInput::from(CommitmentContextInput::new(slot_commitment_id));
 
         let min_delegation_amount = delegation_output
             .output
@@ -67,9 +63,8 @@ where
             false
         };
 
-        let mut builder = DelegationOutputBuilder::from(delegation_output.output.as_delegation())
-            .with_delegation_id(delegation_id)
-            .with_end_epoch(protocol_parameters.delegation_end_epoch(slot_commitment_id));
+        let mut builder =
+            DelegationOutputBuilder::from(delegation_output.output.as_delegation()).with_delegation_id(delegation_id);
 
         // In order to split the output, the amount must be at least twice the minimum for a delegation output
         let can_split = delegation_output.output.amount() >= 2 * min_delegation_amount;
@@ -90,7 +85,6 @@ where
                     DelegationId::null(),
                     *output.as_delegation().validator_address(),
                 )
-                .with_start_epoch(protocol_parameters.delegation_start_epoch(slot_commitment_id))
                 .add_unlock_condition(AddressUnlockCondition::new(output.as_delegation().address().clone()))
                 .finish_output()?,
             );
@@ -102,7 +96,6 @@ where
             outputs,
             TransactionOptions {
                 custom_inputs: Some(vec![delegation_output.output_id]),
-                context_inputs: Some(vec![context_input]),
                 ..Default::default()
             },
         )

@@ -13,7 +13,7 @@ use crate::{
     types::block::{
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput},
         input::{Input, UtxoInput},
-        output::Output,
+        output::{DelegationOutputBuilder, Output},
         payload::signed_transaction::Transaction,
     },
     wallet::{operations::transaction::TransactionOptions, Wallet},
@@ -26,7 +26,7 @@ where
     /// Builds the transaction from the selected in and outputs.
     pub(crate) async fn build_transaction(
         &self,
-        selected_transaction_data: Selected,
+        mut selected_transaction_data: Selected,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] build_transaction");
@@ -48,6 +48,29 @@ where
             }
 
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+        }
+
+        let issuance = self.client().get_issuance().await?;
+        let latest_slot_commitment_id = issuance.latest_commitment.id();
+
+        for output in selected_transaction_data
+            .outputs
+            .iter_mut()
+            .filter(|o| o.is_delegation())
+        {
+            // Created delegations have their start epoch set, and delayed delegations have their end set
+            if output.as_delegation().delegation_id().is_null() {
+                *output = DelegationOutputBuilder::from(output.as_delegation())
+                    .with_start_epoch(protocol_parameters.delegation_start_epoch(latest_slot_commitment_id))
+                    .finish_output()?;
+            } else {
+                *output = DelegationOutputBuilder::from(output.as_delegation())
+                    .with_end_epoch(protocol_parameters.delegation_end_epoch(latest_slot_commitment_id))
+                    .finish_output()?;
+            }
+            if !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND) {
+                context_inputs.insert(CommitmentContextInput::new(latest_slot_commitment_id).into());
+            }
         }
 
         // Build transaction
@@ -81,8 +104,7 @@ where
             && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
         {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-            let issuance = self.client().get_issuance().await?;
-            context_inputs.insert(CommitmentContextInput::new(issuance.latest_commitment.id()).into());
+            context_inputs.insert(CommitmentContextInput::new(latest_slot_commitment_id).into());
         }
 
         let transaction = builder

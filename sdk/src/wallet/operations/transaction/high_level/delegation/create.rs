@@ -7,7 +7,6 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{AccountAddress, Bech32Address},
-        context_input::{CommitmentContextInput, ContextInput},
         output::{unlock_condition::AddressUnlockCondition, DelegationId, DelegationOutputBuilder},
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
@@ -88,7 +87,6 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateDelegationTransaction> {
         log::debug!("[TRANSACTION] prepare_create_delegation_output");
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         let address = match params.address.as_ref() {
             Some(bech32_address) => {
@@ -98,39 +96,11 @@ where
             None => self.address().await.inner().clone(),
         };
 
-        let mut options = options.into();
-        let slot_commitment_id = if let Some(commitment_context) = options
-            .iter()
-            .flat_map(|opts| opts.context_inputs.iter())
-            .flat_map(|c| c.iter())
-            .find_map(|c| c.as_commitment_opt())
-        {
-            commitment_context.slot_commitment_id()
-        } else {
-            // Add a commitment context input with the latest slot commitment
-            let latest_id = self.client().get_info().await?.node_info.status.latest_commitment_id;
-            let context_input = ContextInput::from(CommitmentContextInput::new(latest_id));
-            if let Some(options) = &mut options {
-                if let Some(context_inputs) = &mut options.context_inputs {
-                    context_inputs.push(context_input);
-                } else {
-                    options.context_inputs.replace(vec![context_input]);
-                }
-            } else {
-                options.replace(TransactionOptions {
-                    context_inputs: Some(vec![context_input]),
-                    ..Default::default()
-                });
-            }
-            latest_id
-        };
-
         let output = DelegationOutputBuilder::new_with_amount(
             params.delegated_amount,
             DelegationId::null(),
             params.validator_address,
         )
-        .with_start_epoch(protocol_parameters.delegation_start_epoch(slot_commitment_id))
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_output()?;
 
