@@ -25,16 +25,16 @@ where
         &self,
         delegation_id: DelegationId,
     ) -> crate::wallet::Result<PreparedTransactionData> {
-        let delegation_output = self
+        let delegation_output_id = self
             .data()
             .await
             .unspent_delegation_output(&delegation_id)
             .ok_or(crate::wallet::Error::MissingDelegation(delegation_id))?
-            .clone();
+            .output_id;
         self.prepare_transaction(
             [],
             TransactionOptions {
-                custom_inputs: Some(vec![delegation_output.output_id]),
+                custom_inputs: Some(vec![delegation_output_id]),
                 ..Default::default()
             },
         )

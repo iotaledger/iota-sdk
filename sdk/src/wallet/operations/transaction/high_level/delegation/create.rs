@@ -125,15 +125,14 @@ where
             latest_id
         };
 
-        let delegation_output_builder = DelegationOutputBuilder::new_with_amount(
+        let output = DelegationOutputBuilder::new_with_amount(
             params.delegated_amount,
             DelegationId::null(),
             params.validator_address,
         )
         .with_start_epoch(protocol_parameters.delegation_start_epoch(slot_commitment_id))
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
-
-        let output = delegation_output_builder.finish_output()?;
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .finish_output()?;
 
         let transaction = self.prepare_transaction([output], options).await?;
 
