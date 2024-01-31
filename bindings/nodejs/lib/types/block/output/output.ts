@@ -266,7 +266,7 @@ class AnchorOutput extends ImmutableFeaturesOutput {
  */
 class FoundryOutput extends ImmutableFeaturesOutput {
     /**
-     * The serial number of the Foundry with respect to the controlling alias.
+     * The serial number of the Foundry with respect to the controlling account.
      */
     readonly serialNumber: number;
 
@@ -280,7 +280,7 @@ class FoundryOutput extends ImmutableFeaturesOutput {
 
     /**
      * @param amount The amount of the output.
-     * @param serialNumber The serial number of the Foundry with respect to the controlling alias.
+     * @param serialNumber The serial number of the Foundry with respect to the controlling account.
      * @param unlockConditions The unlock conditions of the output.
      * @param tokenScheme The token scheme for the Foundry.
      */
