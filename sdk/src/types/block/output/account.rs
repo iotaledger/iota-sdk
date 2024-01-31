@@ -383,6 +383,11 @@ impl AccountOutput {
         AccountAddress::new(self.account_id_non_null(output_id))
     }
 
+    /// Checks whether the account is a block issuer.
+    pub fn is_block_issuer(&self) -> bool {
+        self.features.block_issuer().is_some()
+    }
+
     pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
         // TODO: should destroying an account add rewards?
         self.features().staking().is_some() && next_state.map_or(false, |o| o.features().staking().is_none())
