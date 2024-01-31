@@ -10,7 +10,7 @@ use crate::{
         TokenScheme,
     },
     wallet::{
-        operations::transaction::TransactionOptions,
+        operations::transaction::{options::BlockOptions, TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Error, Wallet,
     },
@@ -30,15 +30,14 @@ where
         &self,
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared_transaction = self
             .prepare_melt_native_token(token_id, melt_amount, options.clone())
             .await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::melt_native_token()].
@@ -46,7 +45,7 @@ where
         &self,
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_melt_native_token");
 

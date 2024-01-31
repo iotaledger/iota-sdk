@@ -5,6 +5,7 @@ use std::collections::HashSet;
 
 use instant::Instant;
 
+use super::options::BlockOptions;
 use crate::{
     client::{
         api::{input_selection::Selected, transaction::validate_transaction_length, PreparedTransactionData},
@@ -27,12 +28,13 @@ where
     pub(crate) async fn build_transaction(
         &self,
         selected_transaction_data: Selected,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] build_transaction");
 
         let build_transaction_start_time = Instant::now();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let options: Option<BlockOptions> = options.into();
 
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = HashSet::new();
@@ -50,6 +52,19 @@ where
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
         }
 
+        // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
+        if context_inputs
+            .iter()
+            .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
+            && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
+        {
+            let id = match options.as_ref().and_then(|o| o.latest_slot_commitment_id) {
+                Some(id) => id,
+                None => self.client().get_issuance().await?.latest_commitment.id()
+            };
+            context_inputs.insert(CommitmentContextInput::new(id).into());
+        }
+
         // Build transaction
 
         // TODO: Add an appropriate mana allotment here for this account
@@ -57,7 +72,7 @@ where
             .with_inputs(inputs)
             .with_outputs(selected_transaction_data.outputs);
 
-        if let Some(options) = options.into() {
+        if let Some(options) = options.and_then(|o| o.transaction_options) {
             // Optional add a tagged payload
             builder = builder.with_payload(options.tagged_data_payload);
 
@@ -72,17 +87,6 @@ where
             if let Some(mana_allotments) = options.mana_allotments {
                 builder = builder.with_mana_allotments(mana_allotments);
             }
-        }
-
-        // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
-        if context_inputs
-            .iter()
-            .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
-            && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
-        {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-            let issuance = self.client().get_issuance().await?;
-            context_inputs.insert(CommitmentContextInput::new(issuance.latest_commitment.id()).into());
         }
 
         let transaction = builder

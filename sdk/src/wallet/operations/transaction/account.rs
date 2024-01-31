@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use super::options::BlockOptions;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
@@ -36,8 +37,7 @@ where
 
         self.sign_and_submit_transaction(
             self.prepare_implicit_account_transition(output_id, key_source).await?,
-            issuer_id,
-            None,
+            BlockOptions::from(issuer_id),
         )
         .await
     }
@@ -101,20 +101,26 @@ where
 
         drop(wallet_data);
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-        let issuance = self.client().get_issuance().await?;
+        let id = self.client().get_issuance().await?.latest_commitment.id();
 
         let transaction_options = TransactionOptions {
             context_inputs: Some(vec![
                 // TODO Remove in https://github.com/iotaledger/iota-sdk/pull/1872
-                CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
+                CommitmentContextInput::new(id).into(),
                 BlockIssuanceCreditContextInput::new(account_id).into(),
             ]),
             custom_inputs: Some(vec![*output_id]),
             ..Default::default()
         };
 
-        self.prepare_transaction(vec![account], transaction_options.clone())
-            .await
+        self.prepare_transaction(
+            vec![account],
+            BlockOptions {
+                issuer_id: Some(account_id),
+                latest_slot_commitment_id: Some(id),
+                transaction_options: Some(transaction_options),
+            },
+        )
+        .await
     }
 }

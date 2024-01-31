@@ -56,9 +56,8 @@ where
     // pub async fn get_participation_overview(
     //     &self,
     //     event_ids: Option<Vec<ParticipationEventId>>,
-    // ) -> Result<ParticipationOverview> {
-    //     log::debug!("[get_participation_overview]");
-    //     // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
+    // ) -> Result<ParticipationOverview> { log::debug!("[get_participation_overview]"); // TODO: Could use the address endpoint
+    //   in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
     // let mut spent_cached_outputs = self.storage_manager().get_cached_participation_output_status().await?;
     // let restored_spent_cached_outputs_len = spent_cached_outputs.len();
@@ -244,11 +243,9 @@ where
     // pub(crate) async fn remove_ended_participation_events(
     //     &self,
     //     participations: &mut Participations,
-    // ) -> crate::wallet::Result<()> {
-    //     log::debug!("[remove_ended_participation_events]");
-    //     // TODO change to one of the new timestamps, which ones ?
-    //     let latest_milestone_index = 0;
-    //     // let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
+    // ) -> crate::wallet::Result<()> { log::debug!("[remove_ended_participation_events]"); // TODO change to one of the
+    //   new timestamps, which ones ? let latest_milestone_index = 0; // let latest_milestone_index =
+    //   self.client().get_info().await?.node_info.status.latest_milestone.index;
 
     // let events = self.storage_manager().get_participation_events().await?;
 

@@ -3,6 +3,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use super::options::BlockOptions;
 use crate::{
     client::secret::SecretManage,
     types::block::{
@@ -41,10 +42,11 @@ where
     pub async fn prepare_output(
         &self,
         params: OutputParams,
-        transaction_options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<Output> {
         log::debug!("[OUTPUT] prepare_output {params:?}");
-        let transaction_options = transaction_options.into();
+        let options = options.into();
+        let transaction_options = options.map(|o| o.transaction_options.unwrap_or_default());
 
         self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 

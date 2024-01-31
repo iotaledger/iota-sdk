@@ -12,7 +12,7 @@ use crate::{
         },
     },
     wallet::{
-        operations::transaction::TransactionOptions,
+        operations::transaction::{options::BlockOptions, TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Wallet,
     },
@@ -54,20 +54,19 @@ where
     pub async fn create_account_output(
         &self,
         params: Option<CreateAccountParams>,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::create_account_output()].
     pub async fn prepare_create_account_output(
         &self,
         params: Option<CreateAccountParams>,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
         let storage_score_params = self.client().get_storage_score_parameters().await?;

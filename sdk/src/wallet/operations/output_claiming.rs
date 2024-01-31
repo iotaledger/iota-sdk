@@ -214,9 +214,7 @@ where
             }
         })?;
 
-        let claim_tx = self
-            .sign_and_submit_transaction(prepared_transaction, None, None)
-            .await?;
+        let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
         log::debug!(
             "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",
@@ -418,17 +416,20 @@ where
 
         self.prepare_transaction(
             outputs_to_send,
-            Some(TransactionOptions {
-                custom_inputs: Some(
-                    outputs_to_claim
-                        .iter()
-                        .map(|o| o.output_id)
-                        // add additional inputs
-                        .chain(additional_inputs)
-                        .collect::<Vec<OutputId>>(),
-                ),
-                ..Default::default()
-            }),
+            Some(
+                TransactionOptions {
+                    custom_inputs: Some(
+                        outputs_to_claim
+                            .iter()
+                            .map(|o| o.output_id)
+                            // add additional inputs
+                            .chain(additional_inputs)
+                            .collect::<Vec<OutputId>>(),
+                    ),
+                    ..Default::default()
+                }
+                .into(),
+            ),
         )
         .await
     }

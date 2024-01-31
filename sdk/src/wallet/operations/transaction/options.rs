@@ -9,10 +9,49 @@ use crate::{
         address::Address,
         context_input::ContextInput,
         mana::ManaAllotment,
-        output::OutputId,
-        payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
+        output::{AccountId, OutputId},
+        payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload}, slot::SlotCommitmentId,
     },
 };
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockOptions {
+    #[serde(default)]
+    pub issuer_id: Option<AccountId>,
+    #[serde(default)]
+    pub latest_slot_commitment_id: Option<SlotCommitmentId>,
+    #[serde(default)]
+    pub transaction_options: Option<TransactionOptions>,
+}
+
+impl core::ops::Deref for BlockOptions {
+    type Target = Option<TransactionOptions>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.transaction_options
+    }
+}
+
+impl From<TransactionOptions> for BlockOptions {
+    fn from(transaction_options: TransactionOptions) -> Self {
+        Self {
+            issuer_id: None,
+            latest_slot_commitment_id: None,
+            transaction_options: Some(transaction_options),
+        }
+    }
+}
+
+impl From<AccountId> for BlockOptions {
+    fn from(account_id: AccountId) -> Self {
+        Self {
+            issuer_id: Some(account_id),
+            latest_slot_commitment_id: None,
+            transaction_options: None,
+        }
+    }
+}
 
 /// Options for transactions
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

@@ -16,7 +16,7 @@ use crate::{
     },
     utils::ConvertTo,
     wallet::{
-        operations::transaction::{TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{options::BlockOptions, TransactionOptions, TransactionWithMetadata},
         Wallet,
     },
 };
@@ -137,7 +137,7 @@ where
     pub async fn mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
         params: I,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
@@ -145,15 +145,14 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_mint_nfts(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::mint_nfts()].
     pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
         params: I,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,

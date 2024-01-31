@@ -11,6 +11,7 @@ mod prepare_transaction;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
+use self::options::BlockOptions;
 pub use self::options::{RemainderValueStrategy, TransactionOptions};
 use crate::{
     client::{
@@ -65,7 +66,7 @@ where
     pub async fn send_outputs(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let outputs = outputs.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
@@ -85,14 +86,14 @@ where
     pub async fn finish_transaction(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] finish_transaction");
         let options = options.into();
 
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction_data, None, options)
+        self.sign_and_submit_transaction(prepared_transaction_data, options)
             .await
     }
 
@@ -100,8 +101,7 @@ where
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        issuer_id: impl Into<Option<AccountId>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
@@ -114,7 +114,7 @@ where
             }
         };
 
-        self.submit_and_store_transaction(signed_transaction_data, issuer_id, options)
+        self.submit_and_store_transaction(signed_transaction_data, options)
             .await
     }
 
@@ -122,8 +122,7 @@ where
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,
-        issuer_id: impl Into<Option<AccountId>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
@@ -150,7 +149,10 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_signed_transaction(signed_transaction_data.payload.clone(), issuer_id)
+            .submit_signed_transaction(
+                signed_transaction_data.payload.clone(),
+                options.clone().and_then(|o| o.issuer_id),
+            )
             .await
         {
             Ok(block_id) => Some(block_id),
@@ -182,7 +184,7 @@ where
             timestamp: crate::client::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
-            note: options.and_then(|o| o.note),
+            note: options.and_then(|o| o.transaction_options.and_then(|o| o.note)),
             inputs,
         };
 

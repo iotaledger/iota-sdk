@@ -18,7 +18,7 @@ use crate::{
     utils::ConvertTo,
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
-        operations::transaction::{TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{options::BlockOptions, TransactionOptions, TransactionWithMetadata},
         Error, Result, Wallet,
     },
 };
@@ -103,7 +103,7 @@ where
     pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
@@ -111,15 +111,14 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_send_native_tokens(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::send_native_tokens()].
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,

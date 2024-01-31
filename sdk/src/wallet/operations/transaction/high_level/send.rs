@@ -17,7 +17,7 @@ use crate::{
     utils::{serde::string, ConvertTo},
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
-        operations::transaction::{TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{options::BlockOptions, TransactionOptions, TransactionWithMetadata},
         Error, Wallet,
     },
 };
@@ -87,7 +87,7 @@ where
         &self,
         amount: u64,
         address: impl ConvertTo<Bech32Address>,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let params = [SendParams::new(amount, address)?];
         self.send_with_params(params, options).await
@@ -113,7 +113,7 @@ where
     pub async fn send_with_params<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
@@ -121,15 +121,14 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_send(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::send()].
     pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,
@@ -188,7 +187,12 @@ where
                     .with_sufficient_storage_deposit(return_address, storage_score_params)?
                     .finish_output()?;
 
-                if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
+                // Needs double unwrap_or_default in case defaults are
+                if !options
+                    .as_ref()
+                    .and_then(|o| o.as_ref().map(|tx_o| tx_o.allow_micro_amount))
+                    .unwrap_or_default()
+                {
                     return Err(Error::InsufficientFunds {
                         available: amount,
                         required: output.amount(),

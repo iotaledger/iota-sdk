@@ -6,6 +6,7 @@ use std::collections::HashSet;
 use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
+use super::options::BlockOptions;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{input::INPUT_COUNT_RANGE, output::Output},
@@ -24,10 +25,15 @@ where
     pub async fn prepare_transaction(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
-        let options = options.into();
+        let block_options = options.into();
+        let options = block_options
+            .as_ref()
+            .map(|o| o.transaction_options.as_ref())
+            .unwrap_or_default();
+
         let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
@@ -79,7 +85,10 @@ where
             )
             .await?;
 
-        let prepared_transaction_data = match self.build_transaction(selected_transaction_data.clone(), options).await {
+        let prepared_transaction_data = match self
+            .build_transaction(selected_transaction_data.clone(), block_options)
+            .await
+        {
             Ok(res) => res,
             Err(err) => {
                 // unlock outputs so they are available for a new transaction

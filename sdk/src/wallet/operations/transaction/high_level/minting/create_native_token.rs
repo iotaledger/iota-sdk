@@ -17,7 +17,7 @@ use crate::{
         },
     },
     wallet::{
-        operations::transaction::TransactionOptions,
+        operations::transaction::{options::BlockOptions, TransactionOptions},
         types::{TransactionWithMetadata, TransactionWithMetadataDto},
         Wallet,
     },
@@ -112,12 +112,12 @@ where
     pub async fn create_native_token(
         &self,
         params: CreateNativeTokenParams,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<CreateNativeTokenTransaction> {
         let options = options.into();
         let prepared = self.prepare_create_native_token(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared.transaction, None, options)
+        self.sign_and_submit_transaction(prepared.transaction, options)
             .await
             .map(|transaction| CreateNativeTokenTransaction {
                 token_id: prepared.token_id,
@@ -129,7 +129,7 @@ where
     pub async fn prepare_create_native_token(
         &self,
         params: CreateNativeTokenParams,
-        options: impl Into<Option<TransactionOptions>> + Send,
+        options: impl Into<Option<BlockOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] create_native_token");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
