@@ -18,7 +18,7 @@ use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
-        address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
+        address::{Address, Bech32Address, Bech32AddressString, Ed25519Address, Hrp, ToBech32Ext},
         output::{AccountId, NftId},
         payload::TaggedDataPayload,
         Block, BlockId,
@@ -87,9 +87,9 @@ pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<()> {
 }
 
 /// Requests funds from a faucet
-pub async fn request_funds_from_faucet(url: &str, bech32_address: String) -> Result<String> {
+pub async fn request_funds_from_faucet(url: &str, bech32_address: impl Into<Bech32AddressString>) -> Result<String> {
     let mut map = HashMap::new();
-    map.insert("address", bech32_address.to_string());
+    map.insert("address", bech32_address.into().to_string());
 
     let client = reqwest::Client::new();
     let faucet_response = client

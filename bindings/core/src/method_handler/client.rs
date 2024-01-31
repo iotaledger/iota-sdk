@@ -314,11 +314,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .map(BlockDto::from)
                 .collect(),
         ),
-        ClientMethod::FindInputs { addresses, amount } => Response::Inputs(
-            client
-                .find_inputs(addresses.into_iter().map(|b| b.to_string()).collect(), amount)
-                .await?,
-        ),
+        ClientMethod::FindInputs { addresses, amount } => {
+            Response::Inputs(client.find_inputs(addresses, amount).await?)
+        }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
         }

@@ -310,6 +310,8 @@ impl NftOutputQueryParameters {
 
 #[cfg(test)]
 mod tests {
+    use core::str::FromStr;
+
     use super::*;
 
     #[test]
@@ -318,7 +320,10 @@ mod tests {
         assert_eq!(empty_basic_outputs_query_parameters.to_query_string(), None);
 
         let mut basic_outputs_query_parameters = BasicOutputQueryParameters::new()
-            .address("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string())
+            .address(
+                Bech32AddressString::from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
+                    .unwrap(),
+            )
             .cursor("".into());
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),
