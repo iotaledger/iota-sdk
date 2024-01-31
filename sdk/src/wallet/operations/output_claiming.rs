@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
@@ -9,9 +9,9 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{Address, Ed25519Address},
+        context_input::CommitmentContextInput,
         output::{
-            unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutput, BasicOutputBuilder, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
+            unlock_condition::AddressUnlockCondition, BasicOutput, NftOutputBuilder, Output, OutputId, UnlockCondition,
         },
         protocol::ProtocolParameters,
         slot::SlotIndex,
@@ -174,10 +174,13 @@ where
             if !wallet_data.locked_outputs.contains(output_id) {
                 if let Some(output) = wallet_data.outputs.get(output_id) {
                     if let Output::Basic(basic_output) = &output.output {
-                        if basic_output.unlock_conditions().len() == 1 {
-                            // Store outputs with [`AddressUnlockCondition`] alone, because they could be used as
-                            // additional input, if required
-                            basic_outputs.push(output_data.clone());
+                        if let [UnlockCondition::Address(a)] = basic_output.unlock_conditions().as_ref() {
+                            // Implicit accounts can't be used
+                            if !a.address().is_implicit_account_creation() {
+                                // Store outputs with [`AddressUnlockCondition`] alone, because they could be used as
+                                // additional input, if required
+                                basic_outputs.push(output_data.clone());
+                            }
                         }
                     }
                 }
@@ -236,9 +239,8 @@ where
     {
         log::debug!("[OUTPUT_CLAIMING] prepare_claim_outputs");
 
-        let mut possible_additional_inputs = self.get_basic_outputs_for_additional_inputs().await?;
+        let possible_additional_inputs = self.get_basic_outputs_for_additional_inputs().await?;
 
-        let slot_index = self.client().get_slot_index().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let wallet_data = self.data().await;
@@ -261,19 +263,11 @@ where
         let wallet_address = wallet_data.address.clone();
         drop(wallet_data);
 
-        let mut additional_inputs_used = HashSet::new();
-
         // Outputs with expiration and storage deposit return might require two outputs if there is a storage deposit
         // return unlock condition Maybe also more additional inputs are required for the storage deposit, if we
         // have to send the storage deposit back.
 
         let mut outputs_to_send = Vec::new();
-        // Keep track of the outputs to return, so we only create one output per address
-        let mut required_address_returns: HashMap<Address, u64> = HashMap::new();
-        // Amount we get with the storage deposit return amounts already subtracted
-        let mut available_amount = 0;
-        let mut required_amount_for_nfts = 0;
-        let mut new_native_tokens = NativeTokensBuilder::new();
 
         // There can be outputs with less amount than min required storage deposit, so we have to check that we
         // have enough amount to create a new basic output
@@ -285,21 +279,6 @@ where
 
         // check native tokens
         for output_data in &outputs_to_claim {
-            if let Some(native_token) = output_data.output.native_token() {
-                new_native_tokens.add_native_token(*native_token)?;
-            }
-            if let Some(sdr) = sdr_not_expired(&output_data.output, slot_index) {
-                // for own output subtract the return amount
-                available_amount += output_data.output.amount() - sdr.amount();
-
-                // Insert for return output
-                *required_address_returns
-                    .entry(sdr.return_address().clone())
-                    .or_default() += sdr.amount();
-            } else {
-                available_amount += output_data.output.amount();
-            }
-
             if let Output::Nft(nft_output) = &output_data.output {
                 // build new output with same amount, nft_id, immutable/feature blocks and native tokens, just
                 // updated address unlock conditions
@@ -320,101 +299,23 @@ where
                 };
 
                 // Add required amount for the new output
-                required_amount_for_nfts += nft_output.amount();
                 outputs_to_send.push(nft_output);
             }
         }
 
-        // TODO: rework native tokens
-        let option_native_token = if new_native_tokens.is_empty() {
+        let commitment_context_input_required = outputs_to_claim.iter().any(|o| {
+            o.output.unlock_conditions().map_or(false, |uc| {
+                uc.expiration().is_some() || uc.storage_deposit_return().is_some()
+            })
+        });
+        let context_inputs = if commitment_context_input_required {
+            Some(vec![CommitmentContextInput::new(
+                self.client().get_issuance().await?.latest_commitment.id(),
+            )
+            .into()])
+        } else {
             None
-        } else {
-            Some(new_native_tokens.clone().finish()?)
         };
-
-        // Check if the new amount is enough for the storage deposit, otherwise increase it with a minimal basic output
-        // amount
-        let mut required_amount = if !enough_amount_for_basic_output {
-            required_amount_for_nfts
-        } else {
-            required_amount_for_nfts
-                + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-                    .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-                    // .with_native_tokens(option_native_token.into_iter().flatten())
-                    .finish()?
-                    .amount()
-        };
-
-        let mut additional_inputs = Vec::new();
-        if available_amount < required_amount {
-            // Sort by amount so we use as little as possible
-            possible_additional_inputs.sort_by_key(|o| o.output.amount());
-
-            // add more inputs
-            for output_data in &possible_additional_inputs {
-                let option_native_token = if new_native_tokens.is_empty() {
-                    None
-                } else {
-                    Some(new_native_tokens.clone().finish()?)
-                };
-                // Recalculate every time, because new inputs can also add more native tokens, which would increase
-                // the required storage deposit
-                required_amount = required_amount_for_nfts
-                    + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-                        .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
-                        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-                        // .with_native_token(option_native_token)
-                        .finish()?
-                        .amount();
-
-                if available_amount < required_amount {
-                    if !additional_inputs_used.contains(&output_data.output_id) {
-                        if let Some(native_token) = output_data.output.native_token() {
-                            new_native_tokens.add_native_token(*native_token)?;
-                        }
-                        available_amount += output_data.output.amount();
-                        additional_inputs.push(output_data.output_id);
-                        additional_inputs_used.insert(output_data.output_id);
-                    }
-                } else {
-                    // Break if we have enough inputs
-                    break;
-                }
-            }
-        }
-
-        // If we still don't have enough amount we can't create the output
-        if available_amount < required_amount {
-            return Err(crate::wallet::Error::InsufficientFunds {
-                available: available_amount,
-                required: required_amount,
-            });
-        }
-
-        for (return_address, return_amount) in required_address_returns {
-            outputs_to_send.push(
-                BasicOutputBuilder::new_with_amount(return_amount)
-                    .add_unlock_condition(AddressUnlockCondition::new(return_address))
-                    .finish_output()?,
-            );
-        }
-
-        // Create output with claimed values
-        if available_amount - required_amount_for_nfts > 0 {
-            outputs_to_send.push(
-                BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
-                    .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-                    // .with_native_tokens(new_native_tokens.finish()?)
-                    .finish_output()?,
-            );
-        } else if !new_native_tokens.finish()?.is_empty() {
-            return Err(crate::client::api::input_selection::Error::InsufficientAmount {
-                found: available_amount,
-                required: required_amount_for_nfts,
-            })?;
-        }
 
         self.prepare_transaction(
             outputs_to_send,
@@ -424,26 +325,13 @@ where
                         .iter()
                         .map(|o| o.output_id)
                         // add additional inputs
-                        .chain(additional_inputs)
+                        .chain(possible_additional_inputs.iter().map(|o| o.output_id))
                         .collect::<Vec<OutputId>>(),
                 ),
+                context_inputs,
                 ..Default::default()
             }),
         )
         .await
     }
-}
-
-/// Get the `StorageDepositReturnUnlockCondition`, if not expired
-pub(crate) fn sdr_not_expired(output: &Output, slot_index: SlotIndex) -> Option<&StorageDepositReturnUnlockCondition> {
-    output.unlock_conditions().and_then(|unlock_conditions| {
-        unlock_conditions.storage_deposit_return().and_then(|sdr| {
-            let expired = unlock_conditions
-                .expiration()
-                .map_or(false, |expiration| slot_index >= expiration.slot_index());
-
-            // We only have to send the storage deposit return back if the output is not expired
-            (!expired).then_some(sdr)
-        })
-    })
 }
