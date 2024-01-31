@@ -45,7 +45,10 @@ async fn test_find_inputs() {
             .clone()
             .to_bech32(client.get_bech32_hrp().await.unwrap());
 
-        let input = client.find_inputs(vec![address.to_string()], 1_000_000).await.unwrap();
+        let input = client
+            .find_inputs(vec![address.to_bech32_address_string()], 1_000_000)
+            .await
+            .unwrap();
 
         // The ['setup_transaction_block'] generates one output with 1000000 tokens,
         // but there could be other transactions that also send tokens to the same address,

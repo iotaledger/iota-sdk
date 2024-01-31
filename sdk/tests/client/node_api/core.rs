@@ -127,7 +127,7 @@ async fn test_get_address_outputs() {
         .into_iter()
         .next()
         .unwrap()
-        .to_string();
+        .to_bech32_address_string();
 
     let output_ids_response = client
         .basic_output_ids(BasicOutputQueryParameters::new().address(address))

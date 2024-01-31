@@ -12,7 +12,10 @@
 //! cargo run --release --all-features --example get_outputs [ADDRESS] [NODE_URL]
 //! ```
 
-use iota_sdk::client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, Client, Result};
+use iota_sdk::{
+    client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, Client, Result},
+    types::block::address::Bech32Address,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,11 +31,12 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     // Take the address from command line argument or use a default one.
-    let address = std::env::args()
-        .nth(1)
-        .as_deref()
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")
-        .to_string();
+    let address = Bech32Address::try_from_str(
+        std::env::args()
+            .nth(1)
+            .as_deref()
+            .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy"),
+    )?;
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
