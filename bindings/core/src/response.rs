@@ -17,7 +17,7 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
-                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse,
+                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse,
                 RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
                 ValidatorResponse, ValidatorsResponse,
             },
@@ -108,9 +108,6 @@ pub enum Response {
     /// - [`GetInfo`](crate::method::ClientMethod::GetInfo)
     Info(NodeInfoWrapper),
     /// Response for:
-    /// - [`GetRoutes`](crate::method::ClientMethod::GetRoutes)
-    Routes(RoutesResponse),
-    /// Response for:
     /// - [`GetAccountCongestion`](crate::method::ClientMethod::GetAccountCongestion)
     Congestion(CongestionResponse),
     /// Response for:
@@ -162,7 +159,7 @@ pub enum Response {
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
-    OutputResponse(OutputResponse),
+    OutputWithMetadataResponse(OutputWithMetadataResponse),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
     OutputMetadata(OutputMetadata),
@@ -172,7 +169,7 @@ pub enum Response {
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
-    Outputs(Vec<OutputResponse>),
+    Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
     /// - [`AccountOutputId`](crate::method::ClientMethod::AccountOutputId)
     /// - [`AnchorOutputId`](crate::method::ClientMethod::AnchorOutputId)

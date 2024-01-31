@@ -6,7 +6,7 @@ use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{request_funds_from_faucet, Client},
     types::{
-        api::core::OutputResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             output::{
                 AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder,
@@ -183,7 +183,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
-        ClientMethod::GetRoutes => Response::Routes(client.get_routes().await?),
         ClientMethod::GetAccountCongestion { account_id } => {
             Response::Congestion(client.get_account_congestion(&account_id).await?)
         }
@@ -220,12 +219,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::BlockWithMetadata(client.get_block_with_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
-        ClientMethod::GetOutput { output_id } => Response::OutputResponse(client.get_output(&output_id).await?),
-        ClientMethod::GetOutputRaw { output_id } => Response::Raw(client.get_output_raw(&output_id).await?),
-        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(&output_ids).await?),
-        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
-            Response::Outputs(client.get_outputs_ignore_not_found(&output_ids).await?)
-        }
+        ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
+            client
+                .get_output_with_metadata(&output_id)
+                .await
+                .map(OutputWithMetadataResponse::from)?,
+        ),
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
@@ -289,6 +288,24 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
         }
         ClientMethod::NftOutputId { nft_id } => Response::OutputId(client.nft_output_id(nft_id).await?),
+        ClientMethod::GetOutputs { output_ids } => {
+            let outputs_response = client
+                .get_outputs_with_metadata(&output_ids)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
+        }
+        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
+            let outputs_response = client
+                .get_outputs_with_metadata_ignore_not_found(&output_ids)
+                .await?
+                .iter()
+                .map(OutputWithMetadataResponse::from)
+                .collect();
+            Response::Outputs(outputs_response)
+        }
         ClientMethod::FindBlocks { block_ids } => Response::Blocks(
             client
                 .find_blocks(&block_ids)

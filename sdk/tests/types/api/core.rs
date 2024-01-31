@@ -4,9 +4,9 @@
 use iota_sdk::types::{
     api::core::{
         BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
-        TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-        ValidatorsResponse,
+        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse, RoutesResponse,
+        SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
+        ValidatorResponse, ValidatorsResponse,
     },
     block::{
         output::{OutputMetadata, OutputWithMetadata},
@@ -85,7 +85,7 @@ fn responses() {
     // GET /api/core/v3/blocks/{blockId}/full
     json_response::<BlockWithMetadataResponse>("get-full-block-by-id-tagged-data-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}
-    json_response::<OutputResponse>("get-outputs-by-id-response-example.json").unwrap();
+    json_response::<OutputWithMetadataResponse>("get-outputs-by-id-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/metadata
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();

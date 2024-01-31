@@ -8,20 +8,23 @@ pub mod routes;
 use crate::{
     client::{node_api::error::Error as NodeApiError, Client, Error, Result},
     types::{
-        api::core::OutputResponse,
+        api::core::OutputWithMetadataResponse,
         block::output::{OutputId, OutputMetadata, OutputWithMetadata},
     },
 };
 
 impl Client {
     /// Requests outputs by their output ID in parallel.
-    pub async fn get_outputs(&self, output_ids: &[OutputId]) -> Result<Vec<OutputResponse>> {
+    pub async fn get_outputs(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadataResponse>> {
         futures::future::try_join_all(output_ids.iter().map(|id| self.get_output(id))).await
     }
 
     /// Requests outputs by their output ID in parallel, ignoring outputs not found.
     /// Useful to get data about spent outputs, that might not be pruned yet.
-    pub async fn get_outputs_ignore_not_found(&self, output_ids: &[OutputId]) -> Result<Vec<OutputResponse>> {
+    pub async fn get_outputs_ignore_not_found(
+        &self,
+        output_ids: &[OutputId],
+    ) -> Result<Vec<OutputWithMetadataResponse>> {
         futures::future::join_all(output_ids.iter().map(|id| self.get_output(id)))
             .await
             .into_iter()

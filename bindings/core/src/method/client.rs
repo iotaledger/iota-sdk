@@ -149,8 +149,6 @@ pub enum ClientMethod {
     },
     /// Returns the node information together with the url of the used node
     GetInfo,
-    /// Returns the available API route groups of the node.
-    GetRoutes,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
     #[serde(rename_all = "camelCase")]
@@ -230,25 +228,18 @@ pub enum ClientMethod {
         /// Block ID
         block_id: BlockId,
     },
-    /// Get output with its output ID proof.
+    /// Get output
     #[serde(rename_all = "camelCase")]
     GetOutput {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output raw
-    #[serde(rename_all = "camelCase")]
-    GetOutputRaw {
-        /// Output ID
-        output_id: OutputId,
-    },
-    /// Get output metadata.
     #[serde(rename_all = "camelCase")]
     GetOutputMetadata {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output with its metadata including the output ID proof.
+    /// Get output with its metadata
     #[serde(rename_all = "camelCase")]
     GetOutputWithMetadata {
         /// Output ID

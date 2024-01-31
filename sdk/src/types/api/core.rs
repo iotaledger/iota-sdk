@@ -459,12 +459,12 @@ pub struct BlockWithMetadataResponse {
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputResponse {
+pub struct OutputWithMetadataResponse {
     pub output: Output,
     pub output_id_proof: OutputIdProof,
 }
 
-impl From<&OutputWithMetadata> for OutputResponse {
+impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
             output: value.output().clone(),
@@ -473,7 +473,7 @@ impl From<&OutputWithMetadata> for OutputResponse {
     }
 }
 
-impl From<OutputWithMetadata> for OutputResponse {
+impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: OutputWithMetadata) -> Self {
         Self {
             output: value.output,
