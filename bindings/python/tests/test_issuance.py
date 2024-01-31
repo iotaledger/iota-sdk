@@ -1,5 +1,3 @@
-# from typing import get_args
-import pytest
 from iota_sdk import IssuanceBlockHeader
 
 

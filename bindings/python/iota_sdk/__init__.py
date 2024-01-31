@@ -47,7 +47,6 @@ from .types.payload import *
 from .types.send_params import *
 from .types.slot import *
 from .types.token_scheme import *
-from .types.transaction import *
 from .types.transaction_metadata import *
 from .types.transaction_with_metadata import *
 from .types.transaction_data import *
