@@ -400,6 +400,8 @@ impl InputSelection {
         self.init()?;
 
         let mut remainders = Vec::new();
+        // The catchall remainder which will accumulate amount, mana, and a single native token as needed
+        let mut catchall = None;
 
         // Loop until there are no more remainders
         loop {
@@ -418,27 +420,34 @@ impl InputSelection {
                 return Err(Error::InvalidInputCount(self.selected_inputs.len()));
             }
 
-            let (storage_deposit_returns, rem) = self.storage_deposit_returns_and_remainders()?;
+            let (storage_deposit_returns, rem, updated_catchall) =
+                self.storage_deposit_returns_and_remainders(&mut catchall)?;
 
-            if storage_deposit_returns.is_empty() && rem.is_empty() {
+            // If nothing was needed, just exit
+            if storage_deposit_returns.is_empty() && rem.is_empty() && !updated_catchall {
                 break;
             }
 
-            let mut new_outputs = storage_deposit_returns;
-            new_outputs.extend(rem.iter().map(|r| r.output.clone()));
+            self.outputs.extend(storage_deposit_returns);
+            self.outputs.extend(rem.iter().map(|r| r.output.clone()));
 
-            // Re-evaluate only the new output requirements
-            self.outputs_requirements(Some(&new_outputs));
-            // Need to re-evaluate amount differences since outputs have storage requirements
+            // Evaluate the new output requirements
+            self.outputs_requirements(catchall.as_ref().map(|c| &c.output));
+            // Need to re-evaluate amount + mana differences since outputs have storage requirements
             self.requirements.push(Requirement::Amount);
+            self.requirements.push(Requirement::Mana(0));
 
-            self.outputs.extend(new_outputs);
             remainders.extend(rem);
 
-            // Check again, because more outputs may have been added.
+            // Check again, because more outputs have been added.
             if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
+        }
+
+        if let Some(catchall) = catchall {
+            self.outputs.push(catchall.output.clone());
+            remainders.push(catchall);
         }
 
         self.validate_transitions()?;

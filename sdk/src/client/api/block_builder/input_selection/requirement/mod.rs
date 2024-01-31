@@ -64,11 +64,10 @@ impl InputSelection {
     }
 
     /// Gets requirements from outputs.
-    pub(crate) fn outputs_requirements(&mut self, outputs: Option<&[Output]>) {
+    pub(crate) fn outputs_requirements<'a>(&'a mut self, additional_outputs: impl IntoIterator<Item = &'a Output>) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
-        let outputs = outputs.unwrap_or(&self.outputs);
 
-        for output in outputs {
+        for output in self.outputs.iter().chain(additional_outputs) {
             let is_created = match output {
                 // Add an account requirement if the account output is transitioning and then required in the inputs.
                 Output::Account(account_output) => {
