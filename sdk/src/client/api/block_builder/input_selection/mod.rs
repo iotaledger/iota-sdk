@@ -105,7 +105,7 @@ impl InputSelection {
 
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial mana requirement.
-        self.requirements.push(Requirement::Mana(self.mana_allotments));
+        self.requirements.push(Requirement::Mana);
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
@@ -143,7 +143,7 @@ impl InputSelection {
 
         // Gets requirements from outputs.
         // TODO this may re-evaluate outputs added by inputs
-        self.outputs_requirements();
+        self.outputs_requirements(None);
 
         // Gets requirements from burn.
         self.burn_requirements()?;
@@ -239,11 +239,12 @@ impl InputSelection {
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
-            // Filter out non basic/account/foundry/nft outputs.
+            // Filter out non basic/account/foundry/nft/delegation outputs.
             if !input.output.is_basic()
                 && !input.output.is_account()
                 && !input.output.is_foundry()
                 && !input.output.is_nft()
+                && !input.output.is_delegation()
             {
                 return false;
             }
@@ -387,7 +388,12 @@ impl InputSelection {
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later.
-            if !(self.outputs.is_empty() && (self.burn.is_some() || self.mana_allotments != 0)) {
+            if !(self.outputs.is_empty()
+                && (self.burn.is_some()
+                    || self.mana_allotments != 0
+                    // TODO: ??? is this okay ???
+                    || self.available_inputs.iter().any(|o| o.output.is_delegation())))
+            {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
         }
