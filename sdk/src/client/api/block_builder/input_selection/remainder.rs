@@ -4,10 +4,7 @@
 use crypto::keys::bip44::Bip44;
 
 use super::{
-    requirement::{
-        amount::amount_sums,
-        native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
-    },
+    requirement::native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     Error, InputSelection,
 };
 use crate::{
@@ -74,10 +71,8 @@ impl InputSelection {
 
     pub(crate) fn storage_deposit_returns_and_remainders(
         &mut self,
-        catchall: &mut Option<RemainderData>,
-    ) -> Result<(Vec<Output>, Vec<RemainderData>, bool), Error> {
-        let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
-            amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
+    ) -> Result<(Vec<Output>, Vec<RemainderData>), Error> {
+        let (input_amount, output_amount, inputs_sdr, outputs_sdr) = self.amount_sums();
         let mut storage_deposit_returns = Vec::new();
 
         for (address, amount) in inputs_sdr {
@@ -126,7 +121,7 @@ impl InputSelection {
 
         if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
-            return Ok((storage_deposit_returns, Vec::new(), false));
+            return Ok((storage_deposit_returns, Vec::new()));
         }
 
         let amount_diff = input_amount
@@ -164,7 +159,7 @@ impl InputSelection {
                     _ => panic!("only account, nft can be automatically created and can hold mana"),
                 };
 
-                return Ok((storage_deposit_returns, Vec::new(), false));
+                return Ok((storage_deposit_returns, Vec::new()));
             }
         }
 
@@ -172,17 +167,16 @@ impl InputSelection {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        let (remainder_outputs, updated_catchall) = create_remainder_outputs(
+        let remainder_outputs = create_remainder_outputs(
             amount_diff,
             mana_diff,
             native_tokens_diff,
             remainder_address,
             chain,
             self.protocol_parameters.storage_score_parameters(),
-            catchall,
         )?;
 
-        Ok((storage_deposit_returns, remainder_outputs, updated_catchall))
+        Ok((storage_deposit_returns, remainder_outputs))
     }
 }
 
@@ -220,89 +214,44 @@ fn create_remainder_outputs(
     remainder_address: Address,
     remainder_address_chain: Option<Bip44>,
     storage_score_parameters: StorageScoreParameters,
-    catchall: &mut Option<RemainderData>,
-) -> Result<(Vec<RemainderData>, bool), Error> {
+) -> Result<Vec<RemainderData>, Error> {
     let mut remainder_outputs = Vec::new();
     let mut remaining_amount = amount_diff;
-    let mut updated_catchall = false;
+    let mut catchall_native_token = None;
 
+    // Start with the native tokens
     if let Some(native_tokens) = native_tokens_diff {
         for native_token in native_tokens.into_iter() {
-            if let Some(catchall_data) = catchall {
-                if catchall_data.output.native_token().is_some() {
-                    let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
-                        .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                        .with_native_token(native_token)
-                        .finish_output()?;
-                    remaining_amount = remaining_amount.saturating_sub(output.amount());
-                    remainder_outputs.push(output);
-                } else {
-                    let mut output = BasicOutputBuilder::from(catchall_data.output.as_basic())
-                        .with_minimum_amount(storage_score_parameters)
-                        .with_native_token(native_token)
-                        .finish_output()?;
-                    // If the amount has increased due to the native token, we remove it from the remaining amount
-                    if output.amount() >= catchall_data.output.amount() {
-                        remaining_amount =
-                            remaining_amount.saturating_sub(output.amount() - catchall_data.output.amount());
-                    } else {
-                        // Otherwise use the previous amount
-                        output = BasicOutputBuilder::from(output.as_basic())
-                            .with_amount(catchall_data.output.amount())
-                            .with_native_token(native_token)
-                            .finish_output()?;
-                    }
-                    catchall_data.output = output;
-                    updated_catchall = true;
-                }
-            } else {
+            // If we already picked one for the catchall, create a new remainder output with the min amount
+            if catchall_native_token.is_some() {
                 let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
                     .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
                     .with_native_token(native_token)
                     .finish_output()?;
                 remaining_amount = remaining_amount.saturating_sub(output.amount());
-                catchall.replace(RemainderData {
-                    output,
-                    chain: remainder_address_chain,
-                    address: remainder_address.clone(),
-                });
-                updated_catchall = true;
+                remainder_outputs.push(output);
+            // Otherwise save this one for the catchall
+            } else {
+                catchall_native_token.replace(native_token);
             }
         }
     }
-    if remaining_amount > 0 || mana_diff > 0 {
-        match catchall {
-            Some(catchall_data) => {
-                catchall_data.output = BasicOutputBuilder::from(catchall_data.output.as_basic())
-                    .with_amount(catchall_data.output.amount() + remaining_amount)
-                    .with_mana(catchall_data.output.mana() + mana_diff)
-                    .finish_output()?;
-            }
-            None => {
-                let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
-                    .with_amount(remaining_amount)
-                    .with_mana(mana_diff)
-                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                    .finish_output()?;
-                catchall.replace(RemainderData {
-                    output,
-                    chain: remainder_address_chain,
-                    address: remainder_address.clone(),
-                });
-            }
-        };
-        updated_catchall = true;
+    let mut catchall = BasicOutputBuilder::new_with_amount(remaining_amount)
+        .with_mana(mana_diff)
+        .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
+    if let Some(native_token) = catchall_native_token {
+        catchall = catchall.with_native_token(native_token);
     }
+    let catchall = catchall.finish_output()?;
+    catchall.verify_storage_deposit(storage_score_parameters)?;
+    remainder_outputs.push(catchall);
 
-    Ok((
-        remainder_outputs
-            .into_iter()
-            .map(|o| RemainderData {
-                output: o,
-                chain: remainder_address_chain,
-                address: remainder_address.clone(),
-            })
-            .collect(),
-        updated_catchall,
-    ))
+    Ok(remainder_outputs
+        .into_iter()
+        .map(|o| RemainderData {
+            output: o,
+            chain: remainder_address_chain,
+            address: remainder_address.clone(),
+        })
+        .collect())
 }

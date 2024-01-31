@@ -104,7 +104,7 @@ impl InputSelection {
 
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial mana requirement.
-        self.requirements.push(Requirement::Mana(self.mana_allotments));
+        self.requirements.push(Requirement::Mana);
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
@@ -399,56 +399,29 @@ impl InputSelection {
         // Creates the initial state, selected inputs and requirements, based on the provided outputs.
         self.init()?;
 
-        let mut remainders = Vec::new();
-        // The catchall remainder which will accumulate amount, mana, and a single native token as needed
-        let mut catchall = None;
+        // Process all the requirements until there are no more.
+        while let Some(requirement) = self.requirements.pop() {
+            // Fulfill the requirement.
+            let inputs = self.fulfill_requirement(requirement)?;
 
-        // Loop until there are no more remainders
-        loop {
-            // Process all the requirements until there are no more.
-            while let Some(requirement) = self.requirements.pop() {
-                // Fulfill the requirement.
-                let inputs = self.fulfill_requirement(requirement)?;
-
-                // Select suggested inputs.
-                for input in inputs {
-                    self.select_input(input)?;
-                }
-            }
-
-            if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
-                return Err(Error::InvalidInputCount(self.selected_inputs.len()));
-            }
-
-            let (storage_deposit_returns, rem, updated_catchall) =
-                self.storage_deposit_returns_and_remainders(&mut catchall)?;
-
-            // If nothing was needed, just exit
-            if storage_deposit_returns.is_empty() && rem.is_empty() && !updated_catchall {
-                break;
-            }
-
-            self.outputs.extend(storage_deposit_returns);
-            self.outputs.extend(rem.iter().map(|r| r.output.clone()));
-
-            // Evaluate the new output requirements
-            self.outputs_requirements(catchall.as_ref().map(|c| &c.output));
-            // Need to re-evaluate amount + mana differences since outputs have storage requirements
-            self.requirements.push(Requirement::Amount);
-            self.requirements.push(Requirement::Mana(0));
-            self.requirements.push(Requirement::NativeTokens);
-
-            remainders.extend(rem);
-
-            // Check again, because more outputs have been added.
-            if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-                return Err(Error::InvalidOutputCount(self.outputs.len()));
+            // Select suggested inputs.
+            for input in inputs {
+                self.select_input(input)?;
             }
         }
 
-        if let Some(catchall) = catchall {
-            self.outputs.push(catchall.output.clone());
-            remainders.push(catchall);
+        if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
+            return Err(Error::InvalidInputCount(self.selected_inputs.len()));
+        }
+
+        let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
+
+        self.outputs.extend(storage_deposit_returns);
+        self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
+
+        // Check again, because more outputs may have been added.
+        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
+            return Err(Error::InvalidOutputCount(self.outputs.len()));
         }
 
         self.validate_transitions()?;
