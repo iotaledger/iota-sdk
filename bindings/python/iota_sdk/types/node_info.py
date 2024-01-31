@@ -343,6 +343,7 @@ class NodeInfo:
     base_token: NodeInfoBaseToken
 
 
+# TODO: we should probably consider giving this a more useful name, e.g. NodeInfoWithUrl or smth.
 @json
 @dataclass
 class NodeInfoWrapper:

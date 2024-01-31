@@ -57,22 +57,16 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'url': url
         })
 
+    # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
     def get_info(self) -> NodeInfoWrapper:
-        """Returns general information about the node.
+        """Returns general information about the node together with its URL.
         GET /api/core/v3/info
         """
         return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
 
-    def get_routes(self) -> Routes:
-        """Returns the available API route groups of the node.
-        GET /api/routes
-        """
-        return Routes.from_dict(self._call_method('getRoutes'))
-
-    # FIXME: Remove or move? (not part of official IOTA 2.0 Core API)
     def get_node_info(self, url: str, auth=None) -> NodeInfo:
-        """Get node info.
-        GET /api/core/v3/info endpoint
+        """Returns general information about the node.
+        GET /api/core/v3/info
 
         Args:
             url: The node's url.
@@ -85,6 +79,12 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'url': url,
             'auth': auth
         }))
+
+    def get_routes(self) -> Routes:
+        """Returns the available API route groups of the node.
+        GET /api/routes
+        """
+        return Routes.from_dict(self._call_method('getRoutes'))
 
     def call_plugin_route(self, base_plugin_path: str, method: str,
                           endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
@@ -113,9 +113,9 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Checks if the account is ready to issue a block.
         GET /api/core/v3/accounts/{bech32Address}/congestion
         """
-        return self._call_method('getAccountCongestion', {
+        return Congestion.from_dict(self._call_method('getAccountCongestion', {
             'accountId': account_id
-        })
+        }))
 
     # Rewards routes.
 
@@ -129,10 +129,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
         is returned and decayed for.
         GET /api/core/v3/rewards/{outputId}
         """
-        return self._call_method('getOutputManaRewards', {
+        return ManaRewards.from_dict(self._call_method('getOutputManaRewards', {
             'outputId': output_id,
             'slotIndex': slot_index
-        })
+        }))
 
     # Committee routes.
 
@@ -141,9 +141,9 @@ class NodeCoreAPI(metaclass=ABCMeta):
         current committee members are returned.
         GET /api/core/v3/committee/?epochIndex
         """
-        return self._call_method('getCommittee', {
+        return Committee.from_dict(self._call_method('getCommittee', {
             'epochIndex': epoch_index
-        })
+        }))
 
     # Validators routes.
 
@@ -151,18 +151,18 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Returns information of all registered validators and if they are active.
         GET JSON to /api/core/v3/validators
         """
-        return self._call_method('getValidators', {
+        return Validators.from_dict(self._call_method('getValidators', {
             'pageSize': page_size,
             'cursor': cursor
-        })
+        }))
 
     def get_validator(self, account_id: HexStr) -> Validator:
         """Return information about a validator.
         GET /api/core/v3/validators/{bech32Address}
         """
-        return self._call_method('getValidator', {
+        return Validator.from_dict(self._call_method('getValidator', {
             'accountId': account_id
-        })
+        }))
 
     # Block routes.
 
@@ -170,7 +170,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Returns information that is ideal for attaching a block in the network.
         GET /api/core/v3/blocks/issuance
         """
-        return self._call_method('getIssuance')
+        return IssuanceBlockHeader.from_dict(self._call_method('getIssuance'))
 
     def post_block(self, block: Block) -> HexStr:
         """Returns the BlockId of the submitted block.
