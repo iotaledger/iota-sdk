@@ -135,6 +135,7 @@ where
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.payload,
+            signed_transaction_data.mana_rewards,
             self.client().get_protocol_parameters().await?,
         )?;
 

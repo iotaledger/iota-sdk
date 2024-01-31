@@ -29,6 +29,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction_payload: &SignedTransactionPayload,
+    mana_rewards: impl Into<Option<u64>>,
     protocol_parameters: ProtocolParameters,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
     let inputs = input_signing_data
@@ -40,6 +41,7 @@ pub fn verify_semantic(
         transaction_payload.transaction(),
         &inputs,
         Some(transaction_payload.unlocks()),
+        mana_rewards,
         protocol_parameters,
     );
 

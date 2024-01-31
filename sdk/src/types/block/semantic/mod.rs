@@ -31,6 +31,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
+    pub(crate) mana_rewards: Option<u64>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) input_chains: HashMap<ChainId, &'a Output>,
     pub(crate) output_amount: u64,
@@ -49,6 +50,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
+        mana_rewards: impl Into<Option<u64>>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
@@ -85,6 +87,7 @@ impl<'a> SemanticValidationContext<'a> {
             unlocks,
             input_amount: 0,
             input_mana: 0,
+            mana_rewards: mana_rewards.into(),
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
             output_amount: 0,
@@ -165,6 +168,9 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::ConsumedAmountOverflow)?;
 
+            if let Some(mana_rewards) = self.mana_rewards {
+                self.input_mana = mana_rewards
+            }
             self.input_mana = self
                 .input_mana
                 .checked_add(consumed_output.available_mana(
@@ -173,8 +179,6 @@ impl<'a> SemanticValidationContext<'a> {
                     self.transaction.creation_slot(),
                 )?)
                 .ok_or(Error::ConsumedManaOverflow)?;
-
-            // TODO: Add reward mana https://github.com/iotaledger/iota-sdk/issues/1310
 
             if let Some(consumed_native_token) = consumed_native_token {
                 let native_token_amount = self
@@ -281,7 +285,15 @@ impl<'a> SemanticValidationContext<'a> {
                         TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed,
                     ));
                 }
-            } else {
+            // If mana rewards were provided or none of the inputs can claim rewards
+            // then the mismatch should return an error. Otherwise the mismatch may
+            // still be acceptable.
+            } else if self.mana_rewards.is_some()
+                || !self
+                    .input_chains
+                    .iter()
+                    .any(|(chain_id, input)| input.can_claim_rewards(self.output_chains.get(chain_id).copied()))
+            {
                 return Ok(Some(TransactionFailureReason::InvalidManaAmount));
             }
         }

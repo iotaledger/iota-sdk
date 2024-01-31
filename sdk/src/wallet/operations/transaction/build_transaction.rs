@@ -23,7 +23,7 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Builds the transaction from the selected in and outputs.
+    /// Builds the transaction from the selected inputs and outputs.
     pub(crate) async fn build_transaction(
         &self,
         mut selected_transaction_data: Selected,
@@ -113,10 +113,46 @@ where
 
         validate_transaction_length(&transaction)?;
 
+        let mut mana_rewards = 0;
+        let transaction_id = transaction.id();
+        for input in &selected_transaction_data.inputs {
+            if match &input.output {
+                // Validator Rewards
+                Output::Account(account_input) => account_input.can_claim_rewards(
+                    transaction
+                        .outputs()
+                        .iter()
+                        .filter_map(|o| o.as_account_opt())
+                        .find(|account_output| {
+                            account_output.account_id() == &account_input.account_id_non_null(input.output_id())
+                        }),
+                ),
+                // Delegator Rewards
+                Output::Delegation(delegation_input) => delegation_input.can_claim_rewards(
+                    transaction
+                        .outputs()
+                        .iter()
+                        .filter_map(|o| o.as_delegation_opt())
+                        .find(|delegation_output| {
+                            delegation_output.delegation_id()
+                                == &delegation_input.delegation_id_non_null(input.output_id())
+                        }),
+                ),
+                _ => false,
+            } {
+                mana_rewards += self
+                    .client()
+                    .get_output_mana_rewards(input.output_id(), transaction_id.slot_index())
+                    .await?
+                    .rewards;
+            }
+        }
+
         let prepared_transaction_data = PreparedTransactionData {
             transaction,
             inputs_data: selected_transaction_data.inputs,
             remainders: selected_transaction_data.remainders,
+            mana_rewards: Some(mana_rewards),
         };
 
         log::debug!(
