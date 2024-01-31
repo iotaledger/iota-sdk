@@ -11,6 +11,7 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{Address, Bech32Address},
+        context_input::CommitmentContextInput,
         input::INPUT_COUNT_MAX,
         output::{MinimumOutputAmount, Output},
         slot::SlotIndex,
@@ -98,38 +99,25 @@ where
 
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
-        let max_inputs = self.get_max_inputs().await?;
+        let mut custom_inputs = Vec::new();
+        let mut commitment_context_input_required = false;
+        for output_data in outputs_to_consolidate {
+            custom_inputs.push(output_data.output_id);
 
-        // let mut total_amount = 0;
+            if output_data.output.unlock_conditions().map_or(false, |uc| {
+                uc.expiration().is_some() || uc.storage_deposit_return().is_some()
+            }) {
+                commitment_context_input_required = true;
+            }
+        }
 
-        // let mut custom_inputs = Vec::with_capacity(max_inputs.into());
-        // let mut total_native_tokens = NativeTokensBuilder::new();
-
-        // for output_data in outputs_to_consolidate.iter().take(max_inputs.into()) {
-        // if let Some(native_token) = output_data.output.native_token() {
-        //     total_native_tokens.add_native_token(*native_token)?;
-        // };
-        // total_amount += output_data.output.amount();
-
-        //     custom_inputs.push(output_data.output_id);
-        // }
-
-        let custom_inputs = outputs_to_consolidate
-            .iter()
-            .take(max_inputs.into())
-            .map(|o| o.output_id)
-            .collect();
-
-        // let consolidation_output = [BasicOutputBuilder::new_with_amount(total_amount)
-        //     .add_unlock_condition(AddressUnlockCondition::new(
-        //         params
-        //             .target_address
-        //             .map(|bech32| bech32.into_inner())
-        //             .unwrap_or_else(|| wallet_address.into_inner()),
-        //     ))
-        //     // TODO https://github.com/iotaledger/iota-sdk/issues/1632
-        //     // .with_native_tokens(total_native_tokens.finish()?)
-        //     .finish_output()?];
+        let context_inputs = if commitment_context_input_required {
+            Some(vec![
+                CommitmentContextInput::new(self.client().get_issuance().await?.latest_commitment.id()).into(),
+            ])
+        } else {
+            None
+        };
 
         let options = Some(TransactionOptions {
             custom_inputs: Some(custom_inputs),
@@ -139,6 +127,7 @@ where
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
+            context_inputs,
             ..Default::default()
         });
 
@@ -254,6 +243,9 @@ where
                 consolidation_threshold: output_threshold,
             });
         }
+
+        let max_inputs = self.get_max_inputs().await?;
+        outputs_to_consolidate.truncate(max_inputs.into());
 
         log::debug!(
             "outputs_to_consolidate: {:?}",
