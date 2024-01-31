@@ -436,6 +436,7 @@ impl InputSelection {
             // Need to re-evaluate amount + mana differences since outputs have storage requirements
             self.requirements.push(Requirement::Amount);
             self.requirements.push(Requirement::Mana(0));
+            self.requirements.push(Requirement::NativeTokens);
 
             remainders.extend(rem);
 
