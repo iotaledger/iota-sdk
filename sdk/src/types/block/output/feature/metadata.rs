@@ -72,7 +72,7 @@ impl MetadataFeature {
     #[inline(always)]
     pub fn new(data: impl IntoIterator<Item = (String, Vec<u8>)>) -> Result<Self, Error> {
         let mut builder = Self::build();
-        builder.extend(data.into_iter());
+        builder.extend(data);
         builder.finish()
     }
 

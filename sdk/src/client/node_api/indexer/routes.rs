@@ -22,7 +22,7 @@ use crate::{
 };
 
 impl ClientInner {
-    /// Get basic, alias, nft and foundry outputs filtered by the given parameters.
+    /// Get account, anchor, basic, delegation, nft and foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs

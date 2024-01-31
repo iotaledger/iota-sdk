@@ -10,6 +10,7 @@ import { BlockBody } from './block-body';
 import { BasicBlockBody } from './basic';
 import { ValidationBlockBody } from './validation';
 import { BlockBodyDiscriminator } from '.';
+import { ProtocolParameters, BlockId } from '../../..';
 
 /**
  * The block header.
@@ -117,6 +118,15 @@ class Block {
      */
     asValidation(): ValidationBlockBody {
         return this.body.asValidation();
+    }
+
+    /**
+     * Returns the block id.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    static id(block: Block, params: ProtocolParameters): BlockId {
+        // Implementation injected in lib/index.ts, as it uses bindings.
+        return null as unknown as BlockId;
     }
 }
 
