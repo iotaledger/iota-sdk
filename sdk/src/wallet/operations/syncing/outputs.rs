@@ -5,11 +5,14 @@ use instant::Instant;
 
 use crate::{
     client::{secret::SecretManage, Client, Error as ClientError},
-    types::block::{
-        core::{BasicBlockBody, BlockBody},
-        input::Input,
-        output::{OutputId, OutputWithMetadata},
-        payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
+    types::{
+        api::core::OutputWithMetadataResponse,
+        block::{
+            core::{BasicBlockBody, BlockBody},
+            input::Input,
+            output::{OutputId, OutputWithMetadata},
+            payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
+        },
     },
     wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet},
 };
@@ -134,8 +137,10 @@ where
                                             let inputs_with_meta =
                                                 get_inputs_for_transaction_payload(&client, transaction_payload)
                                                     .await?;
-                                            let inputs_response: Vec<OutputWithMetadata> =
-                                                inputs_with_meta.into_iter().map(OutputWithMetadata::from).collect();
+                                            let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
+                                                .into_iter()
+                                                .map(OutputWithMetadataResponse::from)
+                                                .collect();
 
                                             let transaction = build_transaction_from_payload_and_inputs(
                                                 transaction_id,

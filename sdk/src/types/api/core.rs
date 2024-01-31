@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputIdProof, OutputWithMetadata},
+        output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -456,29 +456,25 @@ pub struct BlockWithMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
-/// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputResponse {
+pub struct OutputWithMetadataResponse {
+    pub metadata: OutputMetadata,
     pub output: Output,
-    pub output_id_proof: OutputIdProof,
 }
 
-impl From<&OutputWithMetadata> for OutputResponse {
+impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
+            metadata: value.metadata,
             output: value.output().clone(),
-            output_id_proof: value.output_id_proof().clone(),
         }
     }
 }
 
-impl From<OutputWithMetadata> for OutputResponse {
+impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: OutputWithMetadata) -> Self {
-        Self {
-            output: value.output,
-            output_id_proof: value.output_id_proof,
-        }
+        Self::from(&value)
     }
 }
 

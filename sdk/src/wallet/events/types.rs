@@ -6,10 +6,12 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
     client::api::PreparedTransactionDataDto,
-    types::block::{
-        address::Bech32Address,
-        output::OutputWithMetadataResponse,
-        payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
+    types::{
+        api::core::OutputWithMetadataResponse,
+        block::{
+            address::Bech32Address,
+            payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
+        },
     },
     wallet::{
         types::{InclusionState, OutputData},

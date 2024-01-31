@@ -18,9 +18,12 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
         Error,
     },
-    types::block::{
-        output::{AccountId, Output, OutputWithMetadataResponse},
-        payload::signed_transaction::SignedTransactionPayload,
+    types::{
+        api::core::OutputWithMetadataResponse,
+        block::{
+            output::{AccountId, Output},
+            payload::signed_transaction::SignedTransactionPayload,
+        },
     },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},

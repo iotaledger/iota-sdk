@@ -18,8 +18,9 @@ pub use self::{
 use crate::{
     client::secret::types::InputSigningData,
     types::{
+        api::core::OutputWithMetadataResponse,
         block::{
-            output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadataResponse},
+            output::{Output, OutputId, OutputIdProof, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
