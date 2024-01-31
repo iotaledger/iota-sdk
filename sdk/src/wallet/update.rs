@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{OutputId, OutputMetadata, OutputWithMetadata},
+    types::block::output::{OutputId, OutputMetadata},
     wallet::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
