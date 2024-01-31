@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::options::BlockOptions;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
@@ -17,7 +16,7 @@ use crate::{
         },
     },
     wallet::{
-        operations::transaction::{TransactionOptions, TransactionWithMetadata},
+        operations::transaction::{BlockOptions, TransactionOptions, TransactionWithMetadata},
         Error, Result, Wallet,
     },
 };

@@ -34,10 +34,13 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
                 SendParams::new(micro_amount, wallet_0.address().await)?,
                 SendParams::new(micro_amount, wallet_0.address().await)?,
             ],
-            TransactionOptions {
-                allow_micro_amount: true,
-                ..Default::default()
-            },
+            Some(
+                TransactionOptions {
+                    allow_micro_amount: true,
+                    ..Default::default()
+                }
+                .into(),
+            ),
         )
         .await?;
 
@@ -91,10 +94,13 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
                 SendParams::new(amount, wallet_0.address().await)?,
                 SendParams::new(0, wallet_0.address().await)?,
             ],
-            TransactionOptions {
-                allow_micro_amount: true,
-                ..Default::default()
-            },
+            Some(
+                TransactionOptions {
+                    allow_micro_amount: true,
+                    ..Default::default()
+                }
+                .into(),
+            ),
         )
         .await?;
 
@@ -522,10 +528,13 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     let tx = wallet_0
         .send_with_params(
             [SendParams::new(micro_amount, wallet_1.address().await)?],
-            TransactionOptions {
-                allow_micro_amount: true,
-                ..Default::default()
-            },
+            Some(
+                TransactionOptions {
+                    allow_micro_amount: true,
+                    ..Default::default()
+                }
+                .into(),
+            ),
         )
         .await?;
 

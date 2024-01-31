@@ -5,7 +5,6 @@ use std::collections::HashSet;
 
 use instant::Instant;
 
-use super::options::BlockOptions;
 use crate::{
     client::{
         api::{input_selection::Selected, transaction::validate_transaction_length, PreparedTransactionData},
@@ -17,7 +16,7 @@ use crate::{
         output::Output,
         payload::signed_transaction::Transaction,
     },
-    wallet::Wallet,
+    wallet::{operations::transaction::BlockOptions, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>

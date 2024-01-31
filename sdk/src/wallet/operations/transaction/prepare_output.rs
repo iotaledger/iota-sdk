@@ -3,7 +3,6 @@
 
 use serde::{Deserialize, Serialize};
 
-use super::options::BlockOptions;
 use crate::{
     client::secret::SecretManage,
     types::block::{
@@ -22,7 +21,7 @@ use crate::{
     },
     utils::serde::string,
     wallet::{
-        operations::transaction::{RemainderValueStrategy, TransactionOptions},
+        operations::transaction::{BlockOptions, RemainderValueStrategy, TransactionOptions},
         types::OutputData,
         Wallet,
     },

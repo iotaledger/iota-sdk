@@ -6,11 +6,13 @@ use std::collections::HashSet;
 use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
-use super::options::BlockOptions;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{input::INPUT_COUNT_RANGE, output::Output},
-    wallet::{operations::transaction::RemainderValueStrategy, Wallet},
+    wallet::{
+        operations::transaction::{BlockOptions, RemainderValueStrategy},
+        Wallet,
+    },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
