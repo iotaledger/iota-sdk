@@ -1,41 +1,69 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { HexEncodedString } from '../../utils/hex-encoding';
+import { TransactionId } from '../..';
+import { BlockId } from '../../block/id';
+import { OutputId } from '../../block/output';
+import { SlotCommitmentId, SlotIndex } from '../../block/slot';
+
 /**
- * Details of an output.
+ * Metadata of an output.
  */
 export interface IOutputMetadataResponse {
     /**
-     * The block id the output was contained in.
+     * The ID of the output.
      */
-    blockId: HexEncodedString;
+    outputId: OutputId;
     /**
-     * The transaction id for the output.
+     * The ID of the block in which the output was included.
      */
-    transactionId: HexEncodedString;
+    blockId: BlockId;
     /**
-     * The index of the output within the corresponding transaction.
+     * Metadata of the output if it is included in the ledger.
      */
-    outputIndex: number;
+    included: IOutputInclusionMetadata;
     /**
-     * Tells if the output is spent in a confirmed transaction or not.
+     * Metadata of the output if it is marked as spent in the ledger.
      */
-    isSpent: boolean;
+    spent?: IOutputConsumptionMetadata;
     /**
-     * The current latest commitment id for which the request was made.
+     * Latest commitment ID of the node.
      */
-    latestCommitmentId: HexEncodedString;
+    latestCommitmentId: SlotCommitmentId;
+}
+
+/**
+ * Metadata of the output if it is included in the ledger.
+ */
+export interface IOutputInclusionMetadata {
     /**
-     * The commitment ID of the slot at which this output was spent.
+     * Slot in which the output was included.
      */
-    commitmentIdSpent?: HexEncodedString;
+    slot: SlotIndex;
     /**
-     * The transaction this output was spent with.
+     * Transaction ID that created the output.
      */
-    transactionIdSpent?: HexEncodedString;
+    transactionId: TransactionId;
     /**
-     * The commitment ID at which the output was included into the ledger.
+     * Commitment ID that includes the creation of the output.
      */
-    includedCommitmentId?: HexEncodedString;
+    commitmentId?: SlotCommitmentId;
+}
+
+/**
+ * Metadata of the output if it is marked as spent in the ledger.
+ */
+export interface IOutputConsumptionMetadata {
+    /**
+     * Slot in which the output was spent.
+     */
+    slot: SlotIndex;
+    /**
+     * Transaction ID that spent the output.
+     */
+    transactionId: TransactionId;
+    /**
+     * Commitment ID that includes the spending of the output.
+     */
+    commitmentId?: SlotCommitmentId;
 }

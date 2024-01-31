@@ -59,11 +59,9 @@ pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandl
 
 #[napi(js_name = "destroyWallet")]
 pub async fn destroy_wallet(wallet: External<WalletMethodHandler>) {
-    let mut wallet = wallet.as_ref().write().await;
-    if let Some(wallet) = &**wallet {
-        wallet.request_stop_background_syncing();
+    if let Some(wallet_inner) = wallet.write().await.take() {
+        wallet_inner.request_stop_background_syncing();
     }
-    **wallet = None;
 }
 
 #[napi(js_name = "callWalletMethod")]

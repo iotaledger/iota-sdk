@@ -32,8 +32,8 @@ pub struct PreparedTransactionData {
     pub transaction: Transaction,
     /// Required input information for signing. Inputs need to be ordered by address type
     pub inputs_data: Vec<InputSigningData>,
-    /// Optional remainder output information
-    pub remainder: Option<RemainderData>,
+    /// Remainder outputs information
+    pub remainders: Vec<RemainderData>,
 }
 
 /// PreparedTransactionData Dto
@@ -44,8 +44,9 @@ pub struct PreparedTransactionDataDto {
     pub transaction: TransactionDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
-    /// Optional remainder output information
-    pub remainder: Option<RemainderData>,
+    /// Remainder outputs information
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub remainders: Vec<RemainderData>,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
@@ -53,7 +54,7 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
         Self {
             transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.clone(),
-            remainder: value.remainder.clone(),
+            remainders: value.remainders.clone(),
         }
     }
 }
@@ -69,7 +70,7 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
             transaction: Transaction::try_from_dto_with_params_inner(dto.transaction, params)
                 .map_err(|_| Error::InvalidField("transaction"))?,
             inputs_data: dto.inputs_data,
-            remainder: dto.remainder,
+            remainders: dto.remainders,
         })
     }
 }

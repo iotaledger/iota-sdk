@@ -26,6 +26,7 @@ from .types.burn import *
 from .types.client_options import *
 from .types.common import *
 from .types.context_input import *
+from .types.decayed_mana import *
 from .types.event import *
 from .types.feature import *
 from .types.irc_27 import *
@@ -43,7 +44,6 @@ from .types.output_params import *
 from .types.payload import *
 from .types.send_params import *
 from .types.token_scheme import *
-from .types.transaction import *
 from .types.transaction_with_metadata import *
 from .types.transaction_data import *
 from .types.transaction_options import *

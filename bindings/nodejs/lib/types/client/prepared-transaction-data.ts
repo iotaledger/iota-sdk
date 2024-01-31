@@ -23,7 +23,7 @@ export class PreparedTransactionData {
     /**
      * Optional remainder output information
      */
-    remainder?: Remainder;
+    remainders?: Remainder[];
 }
 
 /**

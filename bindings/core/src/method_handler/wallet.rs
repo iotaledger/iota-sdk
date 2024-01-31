@@ -8,7 +8,7 @@ use iota_sdk::{
     client::api::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
-    types::TryFromDto,
+    types::{block::output::feature::BlockIssuerKeySource, TryFromDto},
     wallet::{types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
@@ -197,10 +197,14 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 let public_key = PublicKey::try_from_bytes(prefix_hex::decode(public_key_str)?)
                     .map_err(iota_sdk::wallet::Error::from)?;
                 wallet
-                    .prepare_implicit_account_transition(&output_id, Some(public_key))
+                    .prepare_implicit_account_transition(&output_id, public_key)
                     .await?
-            } else {
+            } else if let Some(bip_path) = bip_path {
                 wallet.prepare_implicit_account_transition(&output_id, bip_path).await?
+            } else {
+                wallet
+                    .prepare_implicit_account_transition(&output_id, BlockIssuerKeySource::ImplicitAccountAddress)
+                    .await?
             };
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }

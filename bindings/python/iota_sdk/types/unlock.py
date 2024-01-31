@@ -37,11 +37,11 @@ class UnlockType(IntEnum):
 class SignatureUnlock:
     """An unlock holding a signature unlocking one or more inputs.
     """
-    signature: Ed25519Signature
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Signature),
         init=False)
+    signature: Ed25519Signature
 
 
 @json
@@ -49,11 +49,11 @@ class SignatureUnlock:
 class ReferenceUnlock:
     """An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
     """
-    reference: int
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Reference),
         init=False)
+    reference: int
 
 
 @json
@@ -61,11 +61,11 @@ class ReferenceUnlock:
 class AccountUnlock:
     """An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
     """
-    reference: int
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Account),
         init=False)
+    reference: int
 
 
 @json
@@ -73,11 +73,11 @@ class AccountUnlock:
 class AnchorUnlock:
     """An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
     """
-    reference: int
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Anchor),
         init=False)
+    reference: int
 
 
 @json
@@ -85,8 +85,8 @@ class AnchorUnlock:
 class NftUnlock:
     """An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
     """
-    reference: int
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
+    reference: int
 
 
 # pylint: disable=missing-function-docstring,unused-argument
@@ -101,13 +101,13 @@ def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
 class MultiUnlock:
     """Unlocks a MultiAddress with a list of other unlocks.
     """
-    unlocks: List[Unlock] = field(metadata=config(
-        decoder=deserialize_unlocks
-    ))
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Multi),
         init=False)
+    unlocks: List[Unlock] = field(metadata=config(
+        decoder=deserialize_unlocks
+    ))
 
 
 @json
@@ -156,8 +156,9 @@ def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
         return EmptyUnlock.from_dict(d)
     raise Exception(f'invalid unlock type: {unlock_type}')
 
-
 # pylint: disable=function-redefined
+
+
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
