@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import shutil
-import pytest
 from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletOptions, Bip44
 
 
@@ -33,7 +32,6 @@ def test_address_generation_iota():
     shutil.rmtree(db_path, ignore_errors=True)
 
 
-@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
 def test_address_generation_shimmer():
     db_path = './test_address_generation_shimmer'
     shutil.rmtree(db_path, ignore_errors=True)
@@ -44,7 +42,7 @@ def test_address_generation_shimmer():
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
 
     bip_path = Bip44(
-        coin_type=CoinType.IOTA
+        coin_type=CoinType.SHIMMER
     )
     wallet_options = WalletOptions(
         None,
