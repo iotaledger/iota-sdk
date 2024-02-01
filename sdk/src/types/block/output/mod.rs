@@ -332,6 +332,21 @@ impl Output {
         }
     }
 
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        match self {
+            // Validator Rewards
+            Output::Account(account_input) => {
+                account_input.can_claim_rewards(next_state.and_then(Output::as_account_opt))
+            }
+            // Delegator Rewards
+            Output::Delegation(delegation_input) => {
+                delegation_input.can_claim_rewards(next_state.and_then(Output::as_delegation_opt))
+            }
+            _ => false,
+        }
+    }
+
     crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
     /// Returns the address that is required to unlock this [`Output`].

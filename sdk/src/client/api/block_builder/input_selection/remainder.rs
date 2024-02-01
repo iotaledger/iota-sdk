@@ -106,17 +106,7 @@ impl InputSelection {
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
-        let mut input_mana = self.mana_rewards;
-
-        for input in &self.selected_inputs {
-            input_mana += input.output.available_mana(
-                &self.protocol_parameters,
-                input.output_id().transaction_id().slot_index(),
-                self.slot_index,
-            )?;
-        }
-
-        let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
+        let (input_mana, output_mana) = self.mana_sums()?;
 
         if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");

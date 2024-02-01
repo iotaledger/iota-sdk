@@ -388,6 +388,12 @@ impl AccountOutput {
         self.features.block_issuer().is_some()
     }
 
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        // TODO: should destroying an account add rewards?
+        self.features().staking().is_some() && next_state.map_or(false, |o| o.features().staking().is_none())
+    }
+
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,

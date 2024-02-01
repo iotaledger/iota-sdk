@@ -327,6 +327,11 @@ impl DelegationOutput {
             .unwrap()
     }
 
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        next_state.is_none()
+    }
+
     /// Returns the chain ID of the [`DelegationOutput`].
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
