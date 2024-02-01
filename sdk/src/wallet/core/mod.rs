@@ -670,13 +670,9 @@ mod test {
             incoming_transaction,
         );
 
-        let wallet_data = WalletLedger {
-            bip_path: Some(Bip44::new(4218)),
-            address: crate::types::block::address::Bech32Address::from_str(
-                "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-            )
-            .unwrap(),
-            alias: Some("Alice".to_string()),
+        // TODO #1934 removed the data address/bip_path/alias from `WalletLedger`, so
+        // now for this test to be meaningful we should create some outputs instead.
+        let wallet_ledger = WalletLedger {
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
             unspent_outputs: HashMap::new(),
@@ -687,31 +683,23 @@ mod test {
             native_token_foundries: HashMap::new(),
         };
 
-        let deser_wallet_data = WalletLedger::try_from_dto(
+        let deser_wallet_ledger = WalletLedger::try_from_dto(
             serde_json::from_str::<WalletLedgerDto>(
-                &serde_json::to_string(&WalletLedgerDto::from(&wallet_data)).unwrap(),
+                &serde_json::to_string(&WalletLedgerDto::from(&wallet_ledger)).unwrap(),
             )
             .unwrap(),
         )
         .unwrap();
 
-        assert_eq!(wallet_data, deser_wallet_data);
+        assert_eq!(wallet_ledger, deser_wallet_ledger);
     }
 
     impl WalletLedger {
-        /// Returns a mock of this type with the following values:
-        /// index: 0, coin_type: 4218, alias: "Alice", address:
-        /// rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy, all other fields are set to their Rust
-        /// defaults.
+        // TODO #1934 removed the data address/bip_path/alias from `WalletLedger`, so
+        // now for this test to be meaningful we should create some outputs instead.
         #[cfg(feature = "storage")]
-        pub(crate) fn mock() -> Self {
+        pub(crate) fn non_empty_test_instance() -> Self {
             Self {
-                bip_path: Some(Bip44::new(4218)),
-                address: crate::types::block::address::Bech32Address::from_str(
-                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-                )
-                .unwrap(),
-                alias: Some("Alice".to_string()),
                 outputs: HashMap::new(),
                 locked_outputs: HashSet::new(),
                 unspent_outputs: HashMap::new(),

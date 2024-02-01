@@ -150,17 +150,21 @@ mod tests {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.load_wallet_ledger().await.unwrap().is_none());
 
-        let wallet_address = Bech32Address::new("rms".into(), Ed25519Address::null());
-        let wallet_bip_path = Bip44::new(SHIMMER_COIN_TYPE);
-        let wallet_alias = "savings";
-        let wallet_ledger = WalletLedger::mock();
+        let wallet_address = Bech32Address::new("rms".parse().unwrap(), Ed25519Address::null());
+        let wallet_bip_path = Some(Bip44::new(SHIMMER_COIN_TYPE));
+        let wallet_alias = Some("savings".to_string());
+        let wallet_ledger = WalletLedgerDto::from(&WalletLedger::non_empty_test_instance());
 
         storage_manager
-            .save_wallet(&wallet_address, &wallet_bip_path, wallet_alias, &wallet_ledger)
+            .save_wallet(
+                &wallet_address,
+                wallet_bip_path.as_ref(),
+                wallet_alias.as_ref(),
+                &wallet_ledger,
+            )
             .await
             .unwrap();
-        let wallet = storage_manager.load_wallet_ledger().await.unwrap();
-        assert!(matches!(wallet, Some(data) if data.alias == Some("Alice".to_string())));
+        assert!(storage_manager.load_wallet_ledger().await.unwrap().is_some());
     }
 
     #[tokio::test]

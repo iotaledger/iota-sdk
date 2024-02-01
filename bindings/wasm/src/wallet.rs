@@ -65,7 +65,7 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
 #[wasm_bindgen(js_name = callWalletMethod)]
 pub async fn call_wallet_method(method_handler: &WalletMethodHandler, method: String) -> Result<String, JsError> {
     let method = serde_json::from_str(&method).map_err(map_err)?;
-    match &*method_handler.0.read().await {
+    match &mut *method_handler.0.write().await {
         Some(wallet) => {
             let response = rust_call_wallet_method(wallet, method).await;
             let ser = serde_json::to_string(&response)?;
