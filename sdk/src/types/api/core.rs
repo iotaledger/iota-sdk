@@ -454,6 +454,8 @@ pub struct BlockWithMetadataResponse {
     pub metadata: BlockMetadataResponse,
 }
 
+// TODO: needs to be aligned with TIP-48.
+// https://github.com/iotaledger/iota-sdk/issues/1921
 /// Response of GET /api/core/v3/outputs/{output_id}.
 /// An output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
