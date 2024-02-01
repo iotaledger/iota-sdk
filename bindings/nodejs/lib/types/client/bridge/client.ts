@@ -73,7 +73,7 @@ export interface __GetAccountCongestionMethod__ {
     name: 'getAccountCongestion';
     data: {
         accountId: AccountId;
-        workScore?: number
+        workScore?: number;
     };
 }
 

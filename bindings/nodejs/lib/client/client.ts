@@ -123,13 +123,13 @@ export class Client {
      */
     async getAccountCongestion(
         accountId: AccountId,
-        workScore?: number
+        workScore?: number,
     ): Promise<CongestionResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getAccountCongestion',
             data: {
                 accountId,
-                workScore
+                workScore,
             },
         });
 
