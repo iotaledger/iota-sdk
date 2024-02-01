@@ -157,7 +157,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(FoundryOutputQueryParameters::new().account(address.clone()))
+                    .foundry_output_ids(FoundryOutputQueryParameters::new().account(address.to_bech32_address_string()))
                     .await?
                     .items))
             }
