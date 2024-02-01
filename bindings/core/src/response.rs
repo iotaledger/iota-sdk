@@ -24,7 +24,7 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{Address, Bech32Address, Hrp},
+            address::{Address, Bech32AddressString, Hrp},
             input::UtxoInput,
             output::{
                 AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId,
@@ -65,7 +65,7 @@ use crate::{error::Error, OmittedDebug};
 pub enum Response {
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
-    GeneratedEd25519Addresses(Vec<Bech32Address>),
+    GeneratedEd25519Addresses(Vec<Bech32AddressString>),
     /// Response for:
     /// - [`GenerateEvmAddresses`](crate::method::SecretManagerMethod::GenerateEvmAddresses)
     GeneratedEvmAddresses(Vec<String>),
@@ -250,7 +250,7 @@ pub enum Response {
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
     /// - [`ImplicitAccountCreationAddress`](crate::method::WalletMethod::ImplicitAccountCreationAddress)
-    Bech32Address(Bech32Address),
+    Bech32Address(Bech32AddressString),
     /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)
     Faucet(String),
     /// Response for:
@@ -297,7 +297,7 @@ pub enum Response {
     // wallet responses
     /// Response for:
     /// - [`GetAddress`](crate::method::WalletMethod::GetAddress)
-    Address(Bech32Address),
+    Address(Bech32AddressString),
     /// Response for:
     /// - [`ClientMethod::ComputeMinimumOutputAmount`](crate::method::ClientMethod::ComputeMinimumOutputAmount)
     /// - [`UtilsMethod::ComputeMinimumOutputAmount`](crate::method::UtilsMethod::ComputeMinimumOutputAmount)

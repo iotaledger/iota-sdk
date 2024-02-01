@@ -289,3 +289,15 @@ impl From<Bech32Address> for Bech32AddressString {
         Self(address.to_string())
     }
 }
+
+impl PartialEq<str> for Bech32AddressString {
+    fn eq(&self, other: &str) -> bool {
+        self.0.eq(other)
+    }
+}
+
+impl PartialEq<&str> for Bech32AddressString {
+    fn eq(&self, other: &&str) -> bool {
+        self.0.eq(other)
+    }
+}

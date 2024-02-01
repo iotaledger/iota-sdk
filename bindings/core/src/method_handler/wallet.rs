@@ -87,7 +87,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 None => *wallet.address().await.hrp(),
             };
 
-            Response::Bech32Address(address.to_bech32(bech32_hrp))
+            Response::Bech32Address(address.to_bech32(bech32_hrp).into())
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::SetStrongholdPassword { password } => {
@@ -148,7 +148,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         // }
         WalletMethod::GetAddress => {
             let address = wallet.address().await;
-            Response::Address(address)
+            Response::Address(address.into())
         }
         WalletMethod::GetBalance => Response::Balance(wallet.balance().await?),
         WalletMethod::GetFoundryOutput { token_id } => {
@@ -206,7 +206,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         // }
         WalletMethod::ImplicitAccountCreationAddress => {
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
-            Response::Bech32Address(implicit_account_creation_address)
+            Response::Bech32Address(implicit_account_creation_address.into())
         }
         WalletMethod::PrepareImplicitAccountTransition {
             output_id,

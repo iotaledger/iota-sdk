@@ -318,16 +318,16 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Inputs(client.find_inputs(addresses, amount).await?)
         }
         ClientMethod::HexToBech32 { hex, bech32_hrp } => {
-            Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
+            Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?.into())
         }
         ClientMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
-            Response::Bech32Address(client.account_id_to_bech32(account_id, bech32_hrp).await?)
+            Response::Bech32Address(client.account_id_to_bech32(account_id, bech32_hrp).await?.into())
         }
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
-            Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)
+            Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?.into())
         }
         ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
-            Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
+            Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?.into())
         }
         ClientMethod::ComputeMinimumOutputAmount { output } => {
             let storage_score_params = client.get_storage_score_parameters().await?;

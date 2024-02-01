@@ -42,7 +42,7 @@ where
                 .await
                 .map_err(iota_sdk::client::Error::from)?
                 .into_iter()
-                .map(|a| a.to_bech32(bech32_hrp))
+                .map(|a| a.to_bech32(bech32_hrp).into())
                 .collect();
             Response::GeneratedEd25519Addresses(addresses)
         }
