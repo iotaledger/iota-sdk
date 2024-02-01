@@ -51,8 +51,8 @@ where
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let wallet_data = self.ledger().await;
-        let implicit_account_data = wallet_data
+        let wallet_ledger = self.ledger().await;
+        let implicit_account_data = wallet_ledger
             .unspent_outputs
             .get(output_id)
             .ok_or(Error::ImplicitAccountNotFound)?;
@@ -99,7 +99,7 @@ where
             )?])
             .finish_output()?;
 
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1740
         let issuance = self.client().get_issuance().await?;

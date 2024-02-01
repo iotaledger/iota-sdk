@@ -106,7 +106,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     pub(crate) storage_manager: StorageManager,
 }
 
-/// Wallet data.
+/// Wallet ledger.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct WalletLedger {
     /// Outputs
@@ -516,7 +516,7 @@ impl<S: SecretManage> Drop for WalletInner<S> {
     }
 }
 
-/// Dto for the wallet data.
+/// Dto for the wallet ledger.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletLedgerDto {

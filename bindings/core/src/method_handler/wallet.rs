@@ -241,11 +241,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
                 .collect(),
         ),
         WalletMethod::Outputs { filter_options } => {
-            let wallet_data = wallet.ledger().await;
+            let wallet_ledger = wallet.ledger().await;
             Response::OutputsData(if let Some(filter) = filter_options {
-                wallet_data.filtered_outputs(filter).cloned().collect()
+                wallet_ledger.filtered_outputs(filter).cloned().collect()
             } else {
-                wallet_data.outputs().values().cloned().collect()
+                wallet_ledger.outputs().values().cloned().collect()
             })
         }
         WalletMethod::PendingTransactions => Response::Transactions(
@@ -424,11 +424,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
                 .collect(),
         ),
         WalletMethod::UnspentOutputs { filter_options } => {
-            let wallet_data = wallet.ledger().await;
+            let wallet_ledger = wallet.ledger().await;
             Response::OutputsData(if let Some(filter) = filter_options {
-                wallet_data.filtered_unspent_outputs(filter).cloned().collect()
+                wallet_ledger.filtered_unspent_outputs(filter).cloned().collect()
             } else {
-                wallet_data.unspent_outputs().values().cloned().collect()
+                wallet_ledger.unspent_outputs().values().cloned().collect()
             })
         }
     };

@@ -18,8 +18,9 @@ use crate::{
 };
 
 impl Wallet {
-    /// Backup the wallet data in a Stronghold file
-    /// stronghold_password must be the current one when Stronghold is used as SecretManager.
+    /// Backup the wallet in a Stronghold snapshot file.
+    ///
+    /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
     pub async fn backup_to_stronghold(
         &self,
         backup_path: PathBuf,
@@ -55,7 +56,8 @@ impl Wallet {
         Ok(())
     }
 
-    /// Restore a backup from a Stronghold file
+    /// Restore a backup from a Stronghold snapshot file.
+    ///
     /// Replaces client_options, bip_path, secret_manager and wallet. Returns an error if the wallet was already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
@@ -187,7 +189,7 @@ impl Wallet {
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet data to db
+            // also save wallet to db
             self.storage_manager()
                 .save_wallet(
                     self.address(),
@@ -346,7 +348,7 @@ impl Wallet<StrongholdSecretManager> {
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet data to db
+            // also save wallet to db
             self.storage_manager()
                 .save_wallet(
                     &self.address,

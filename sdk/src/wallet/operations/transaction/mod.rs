@@ -211,10 +211,10 @@ where
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut wallet_data = self.ledger_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
-            wallet_data.locked_outputs.remove(output_id);
+            wallet_ledger.locked_outputs.remove(output_id);
             log::debug!(
                 "[TRANSACTION] Unlocked output {} because of transaction error",
                 output_id

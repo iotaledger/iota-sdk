@@ -217,7 +217,7 @@ where
     /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible incoming transactions.
     pub(crate) async fn update_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
-        log::debug!("updating wallet data with new bech32 hrp: {}", bech32_hrp);
+        log::debug!("updating wallet with new bech32 hrp: {}", bech32_hrp);
 
         (&mut self.address).hrp = bech32_hrp;
 
@@ -229,7 +229,7 @@ where
                 WalletLedgerDto::from(&*wallet_ledger)
             };
 
-            log::debug!("[save] wallet data with updated bech32 hrp",);
+            log::debug!("[save] wallet with updated bech32 hrp",);
             self.storage_manager()
                 .save_wallet(
                     self.address(),

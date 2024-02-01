@@ -46,8 +46,8 @@ where
             }
         }
 
-        let mut wallet_data = self.ledger_mut().await;
-        wallet_data.native_token_foundries = foundries;
+        let mut wallet_ledger = self.ledger_mut().await;
+        wallet_ledger.native_token_foundries = foundries;
 
         Ok(())
     }

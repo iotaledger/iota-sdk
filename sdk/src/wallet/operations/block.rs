@@ -18,14 +18,14 @@ where
         issuer_id: impl Into<Option<AccountId>> + Send,
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
-        let wallet_data = self.ledger().await;
+        let wallet_ledger = self.ledger().await;
 
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = issuer_id
             .into()
-            .or_else(|| wallet_data.first_account_id())
+            .or_else(|| wallet_ledger.first_account_id())
             .ok_or(Error::AccountNotFound)?;
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         let block = self
             .client()

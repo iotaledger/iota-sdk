@@ -223,7 +223,7 @@ where
         }
 
         #[cfg(feature = "storage")]
-        let mut wallet_alias = storage_manager.load_wallet_alias().await?;
+        let wallet_alias = storage_manager.load_wallet_alias().await?;
 
         #[cfg(feature = "storage")]
         let mut wallet_ledger = storage_manager.load_wallet_ledger().await?;
@@ -235,8 +235,8 @@ where
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
         #[cfg(feature = "storage")]
-        if let Some(wallet_data) = &mut wallet_ledger {
-            unlock_unused_inputs(wallet_data)?;
+        if let Some(wallet_ledger) = &mut wallet_ledger {
+            unlock_unused_inputs(wallet_ledger)?;
         }
 
         // Create the node client.

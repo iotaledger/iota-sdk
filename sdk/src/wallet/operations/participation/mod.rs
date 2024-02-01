@@ -66,8 +66,8 @@ where
     //     "[get_participation_overview] restored_spent_cached_outputs_len: {}",
     //     restored_spent_cached_outputs_len
     // );
-    // let wallet_data = self.data().await;
-    // let participation_outputs = wallet_data.outputs().values().filter(|output_data| {
+    // let wallet_ledger = self.data().await;
+    // let participation_outputs = wallet_ledger.outputs().values().filter(|output_data| {
     //     is_valid_participation_output(&output_data.output)
     //         // Check that the metadata exists, because otherwise we aren't participating for anything
     //             && output_data.output.features().and_then(|f| f.metadata()).is_some()

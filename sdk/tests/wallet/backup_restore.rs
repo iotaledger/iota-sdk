@@ -269,7 +269,7 @@
 //     // Validate restored data
 
 //     // No wallet restored, because the coin type was different
-//     assert!(restore_wallet.get_wallet_data().await?.is_empty());
+//     assert!(restore_wallet.get_wallet_ledger().await?.is_empty());
 
 //     // Restored coin type is not used and it's still the same one
 //     let new_wallet = restore_wallet;
@@ -352,7 +352,7 @@
 //     // Validate restored data
 
 //     // The wallet is restored, because the coin type is the same
-//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     let restored_wallet = restore_wallet.get_wallet_ledger().await?;
 //     assert!(restored_wallet.is_some());
 
 //     // addresses are still there
@@ -431,7 +431,7 @@
 //     // Validate restored data
 
 //     // No wallet restored, because the coin type was different
-//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     let restored_wallet = restore_wallet.get_wallet_ledger().await?;
 //     assert_eq!(
 //         wallet.address().clone(),
 //         restored_wallet.address().clone(),
@@ -520,7 +520,7 @@
 //     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
 //     // No restored wallet because the bech32 hrp was different
-//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     let restored_wallet = restore_wallet.get_wallet_ledger().await?;
 //     assert!(restored_wallet.is_empty());
 
 //     // Restored coin type is used
