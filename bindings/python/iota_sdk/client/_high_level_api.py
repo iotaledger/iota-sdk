@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.common import CoinType, HexStr, json
-from iota_sdk.types.output import OutputResponse
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.output_metadata import OutputWithMetadata
 
 
 @json
@@ -80,8 +80,10 @@ class HighLevelAPI(metaclass=ABCMeta):
         no payload.
         """
 
+    # TODO: this should return `List[OutputResponse]`, not `List[OutputWithMetadata]`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_outputs(
-            self, output_ids: List[OutputId]) -> List[OutputResponse]:
+            self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
 
         Args:
@@ -93,10 +95,12 @@ class HighLevelAPI(metaclass=ABCMeta):
         outputs = self._call_method('getOutputs', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
-        return [OutputResponse.from_dict(o) for o in outputs]
+        return [OutputWithMetadata.from_dict(o) for o in outputs]
 
+    # TODO: this should return `List[OutputResponse]`, not `List[OutputWithMetadata]`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_outputs_ignore_errors(
-            self, output_ids: List[OutputId]) -> List[OutputResponse]:
+            self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Try to get OutputResponse from provided OutputIds.
         Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
 
@@ -109,7 +113,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         outputs = self._call_method('getOutputsIgnoreErrors', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
-        return [OutputResponse.from_dict(o) for o in outputs]
+        return [OutputWithMetadata.from_dict(o) for o in outputs]
 
     def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.

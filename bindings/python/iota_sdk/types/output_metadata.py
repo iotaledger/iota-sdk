@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, SlotIndex, json
-from iota_sdk.types.output import AccountOutput, AnchorOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_output
+from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.output_id_proof import OutputIdProof
 
 
 @json
@@ -39,12 +40,10 @@ class OutputWithMetadata:
         metadata: The `OutputMetadata` object that belongs to `output`.
         output: An `Output` object.
     """
-
+    output: Output = field(metadata=config(
+        decoder=deserialize_output
+    ))
     metadata: OutputMetadata
-    output: Union[BasicOutput, AccountOutput, AnchorOutput, FoundryOutput,
-                  NftOutput, DelegationOutput] = field(metadata=config(
-                      decoder=deserialize_output
-                  ))
 
     @classmethod
     def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
@@ -65,6 +64,38 @@ class OutputWithMetadata:
         d['output'] = self.output.as_dict()
 
         return d
+
+
+@json
+@dataclass
+class OutputResponse:
+    """Contains the generic Output with associated OutputIdProof.
+
+    Attributes:
+        output: One of the possible outputs.
+        output_id_proof: The associated Output ID proof.
+    """
+    output: Output = field(metadata=config(
+        decoder=deserialize_output
+    ))
+    output_id_proof: OutputIdProof
+
+
+@json
+@dataclass
+class OutputWithMetadataResponse:
+    """
+
+    Attributes:
+        output: One of the possible outputs.
+        output_id_proof: The associated Output ID proof.
+        output_metadata: The metadata of an output.
+    """
+    output: Output = field(metadata=config(
+        decoder=deserialize_output
+    ))
+    output_id_proof: OutputIdProof
+    output_metadata: OutputMetadata
 
 
 @json

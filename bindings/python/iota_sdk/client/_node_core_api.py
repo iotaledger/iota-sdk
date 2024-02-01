@@ -11,8 +11,7 @@ from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
 from iota_sdk.types.issuance import Congestion, IssuanceBlockHeader
 from iota_sdk.types.mana import ManaRewards
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper, Routes
-from iota_sdk.types.output import OutputResponse
-from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
+from iota_sdk.types.output_metadata import OutputMetadata, OutputWithMetadata, OutputWithMetadataResponse
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitment
 from iota_sdk.types.transaction_metadata import TransactionMetadata
@@ -58,12 +57,15 @@ class NodeCoreAPI(metaclass=ABCMeta):
         })
 
     # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_info(self) -> NodeInfoWrapper:
         """Returns general information about the node together with its URL.
         GET /api/core/v3/info
         """
         return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
 
+    # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_node_info(self, url: str, auth=None) -> NodeInfo:
         """Returns general information about the node.
         GET /api/core/v3/info
@@ -80,6 +82,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'auth': auth
         }))
 
+    # TODO: this should made be available
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_routes(self) -> Routes:
         """Returns the available API route groups of the node.
         GET /api/routes
@@ -243,8 +247,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # UTXO routes.
 
+    # TODO: this should return `OutputResponse`, not OutputWithMetadata
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputResponse:
+            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -253,10 +259,12 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputResponse.from_dict(self._call_method('getOutput', {
+        return OutputWithMetadataResponse.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
+    # TODO: this should be made available
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output_raw(
             self, output_id: Union[OutputId, HexStr]) -> List[int]:
         """Finds an output by its ID and returns it as raw bytes.
@@ -310,6 +318,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
+    # TODO: this should be made available
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_included_block_raw(self, transaction_id: HexStr) -> List[int]:
         """Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
         GET /api/core/v3/transactions/{transactionId}/included-block
@@ -347,97 +357,107 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Commitments routes.
 
-    def get_slot_commitment_by_id(
-            self, slot_commitment_id: HexStr) -> SlotCommitment:
+    def get_commitment(
+            self, commitment_id: HexStr) -> SlotCommitment:
         """Finds a slot commitment by its ID and returns it as object.
         GET /api/core/v3/commitments/{commitmentId}
 
         Returns:
             The corresponding slot commitment.
         """
-        return SlotCommitment.from_dict(self._call_method('getSlotCommitmentById', {
-            'slotCommitmentId': slot_commitment_id
+        return SlotCommitment.from_dict(self._call_method('getCommitment', {
+            'commitmentId': commitment_id
         }))
 
-    def get_slot_commitment_by_id_raw(
-            self, slot_commitment_id: HexStr) -> List[int]:
+    # TODO: this should be made available
+    # https://github.com/iotaledger/iota-sdk/issues/1921
+    def get_commitment_raw(
+            self, commitment_id: HexStr) -> List[int]:
         """Finds a slot commitment by its ID and returns it as raw bytes.
         GET /api/core/v3/commitments/{commitmentId}
 
         Returns:
             The raw bytes of the corresponding slot commitment.
         """
-        return self._call_method('getSlotCommitmentByIdRaw', {
-            'slotCommitmentId': slot_commitment_id
+        return self._call_method('getCommitmentRaw', {
+            'commitmentId': commitment_id
         })
 
-    def get_utxo_changes_by_slot_commitment_id(
-            self, slot_commitment_id: HexStr) -> UtxoChanges:
+    def get_utxo_changes(
+            self, commitment_id: HexStr) -> UtxoChanges:
         """Get all UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 
         Returns:
             The corresponding UTXO changes.
         """
-        return UtxoChanges.from_dict(self._call_method('getUtxoChangesBySlotCommitmentId', {
-            'slotCommitmentId': slot_commitment_id
+        return UtxoChanges.from_dict(self._call_method('getUtxoChanges', {
+            'commitmentId': commitment_id
         }))
 
-    def get_utxo_changes_full_by_slot_commitment_id(
-            self, slot_commitment_id: HexStr) -> UtxoChangesFull:
+    def get_utxo_changes_full(
+            self, commitment_id: HexStr) -> UtxoChangesFull:
         """Get all full UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
 
         Returns:
             The full UTXO changes.
         """
-        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullBySlotCommitmentId', {
-            'slotCommitmentId': slot_commitment_id
+        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFull', {
+            'commitmentId': commitment_id
         }))
 
+    # TODO: call method name needs to be changed to `getCommitmentBySlot`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_slot_commitment_by_slot(
-            self, slot_index: SlotIndex) -> SlotCommitment:
+            self, slot: SlotIndex) -> SlotCommitment:
         """Finds a slot commitment by slot index and returns it as object.
         GET /api/core/v3/commitments/by-slot/{slot}
 
         Returns:
             The corresponding slot commitment.
         """
-        return SlotCommitment.from_dict(self._call_method('getSlotCommitmentBySlot', {
-            'slotIndex': slot_index
+        return SlotCommitment.from_dict(self._call_method('getCommitmentByIndex', {
+            'slot': slot
         }))
 
+    # TODO: this should be made available
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_slot_commitment_by_slot_raw(
-            self, slot_index: SlotIndex) -> List[int]:
+            self, slot: SlotIndex) -> List[int]:
         """Finds a slot commitment by slot index and returns it as raw bytes.
         GET /api/core/v3/commitments/by-slot/{slot}
 
         Returns:
             The raw bytes of the corresponding slot commitment.
         """
-        return self._call_method('getSlotCommitmentBySlotRaw', {
-            'slotIndex': slot_index
+        return self._call_method('getCommitmentBySlotRaw', {
+            'slot': slot
         })
 
-    def get_utxo_changes_by_slot(self, slot_index: SlotIndex) -> UtxoChanges:
+    # TODO: call method name needs to be changed to `getUxoChangesBySlot`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
+    def get_utxo_changes_by_slot(self, slot: SlotIndex) -> UtxoChanges:
         """Get all UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 
         Returns:
             The corresponding UTXO changes.
         """
-        return UtxoChanges.from_dict(self._call_method('getUtxoChangesBySlot', {
-            'slotIndex': slot_index
+        return UtxoChanges.from_dict(self._call_method('getUtxoChangesByIndex', {
+            'slot': slot
         }))
 
+    # TODO: call method name needs to be changed to `getUxoChangesFullBySlot`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_utxo_changes_full_by_slot(
-            self, slot_index: SlotIndex) -> UtxoChangesFull:
+            self, slot: SlotIndex) -> UtxoChangesFull:
         """Get all full UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
 
         Returns:
             The full UTXO changes.
         """
-        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullBySlot', {
-            'slotIndex': slot_index
+        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullByIndex', {
+            'slot': slot
         }))

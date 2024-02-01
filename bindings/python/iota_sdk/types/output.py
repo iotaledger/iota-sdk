@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Dict, Optional, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
+from iota_sdk.types.common import HexStr, json, EpochIndex
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature, NativeTokenFeature
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
@@ -331,34 +331,3 @@ def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Output]:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
     return list(map(deserialize_output, dicts))
-
-
-@json
-@dataclass
-class OutputIdProof:
-    """The proof of the output identifier.
-
-    Attributes:
-        slot: The slot index of the output.
-        output_index: The index of the output within the corresponding transaction.
-        transaction_commitment: The commitment of the transaction that created the output. Hex-encoded with 0x prefix.
-        output_commitment_proof: The proof of the output commitment. Hex-encoded with 0x prefix.
-    """
-    slot: SlotIndex
-    output_index: int
-    transaction_commitment: str
-    # TODO: do we need the specific types that make up the proof?
-    output_commitment_proof: Dict[str, Any]
-
-
-@json
-@dataclass
-class OutputResponse:
-    """Contains the generic Output with associated OutputIdProof.
-
-    Attributes:
-        output: One of the possible outputs.
-        output_id_proof: The associated Output ID proof.
-    """
-    output: Output
-    output_id_proof: OutputIdProof
