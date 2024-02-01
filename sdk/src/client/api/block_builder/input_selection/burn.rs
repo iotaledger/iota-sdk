@@ -17,15 +17,15 @@ pub struct Burn {
     /// Accounts to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) accounts: HashSet<AccountId>,
+    /// Foundries to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) foundries: HashSet<FoundryId>,
     /// NFTs to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) nfts: HashSet<NftId>,
     /// Delegations to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) delegations: HashSet<DelegationId>,
-    /// Foundries to burn.
-    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
-    pub(crate) foundries: HashSet<FoundryId>,
     /// Amounts of native tokens to burn.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub(crate) native_tokens: BTreeMap<TokenId, U256>,
@@ -52,6 +52,23 @@ impl Burn {
     /// Returns the accounts to [`Burn`].
     pub fn accounts(&self) -> &HashSet<AccountId> {
         &self.accounts
+    }
+
+    /// Adds a foundry to [`Burn`].
+    pub fn add_foundry(mut self, foundry_id: FoundryId) -> Self {
+        self.foundries.insert(foundry_id);
+        self
+    }
+
+    /// Sets the foundries to [`Burn`].
+    pub fn set_foundries(mut self, foundries: HashSet<FoundryId>) -> Self {
+        self.foundries = foundries;
+        self
+    }
+
+    /// Returns the foundries to [`Burn`].
+    pub fn foundries(&self) -> &HashSet<FoundryId> {
+        &self.foundries
     }
 
     /// Adds an NFT to [`Burn`].
@@ -88,23 +105,6 @@ impl Burn {
         &self.delegations
     }
 
-    /// Adds a foundry to [`Burn`].
-    pub fn add_foundry(mut self, foundry_id: FoundryId) -> Self {
-        self.foundries.insert(foundry_id);
-        self
-    }
-
-    /// Sets the foundries to [`Burn`].
-    pub fn set_foundries(mut self, foundries: HashSet<FoundryId>) -> Self {
-        self.foundries = foundries;
-        self
-    }
-
-    /// Returns the foundries to [`Burn`].
-    pub fn foundries(&self) -> &HashSet<FoundryId> {
-        &self.foundries
-    }
-
     /// Adds an amount of native token to [`Burn`].
     pub fn add_native_token(mut self, token_id: TokenId, amount: impl Into<U256>) -> Self {
         self.native_tokens.insert(token_id, amount.into());
@@ -126,15 +126,15 @@ impl Burn {
     }
 }
 
-impl From<FoundryId> for Burn {
-    fn from(id: FoundryId) -> Self {
-        Self::new().add_foundry(id)
-    }
-}
-
 impl From<AccountId> for Burn {
     fn from(id: AccountId) -> Self {
         Self::new().add_account(id)
+    }
+}
+
+impl From<FoundryId> for Burn {
+    fn from(id: FoundryId) -> Self {
+        Self::new().add_foundry(id)
     }
 }
 
