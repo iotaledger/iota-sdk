@@ -14,7 +14,8 @@ def test_basic_block_tagged_data_payload():
     with open('../../sdk/tests/types/fixtures/basic_block_tagged_data_payload.json', "r", encoding="utf-8") as payload:
         basic_block_tagged_data_payload_json = json.load(payload)
     block = Block.from_dict(basic_block_tagged_data_payload_json['block'])
-    protocol_params = ProtocolParameters.from_dict(protocol_params_json['params'])
+    protocol_params = ProtocolParameters.from_dict(
+        protocol_params_json['params'])
     expected_id = basic_block_tagged_data_payload_json['id']
     assert block.id(protocol_params) == expected_id
 
@@ -24,7 +25,8 @@ def test_basic_block_transaction_payload():
     with open('../../sdk/tests/types/fixtures/basic_block_transaction_payload.json', "r", encoding="utf-8") as payload:
         basic_block_transaction_payload_json = json.load(payload)
     block = Block.from_dict(basic_block_transaction_payload_json['block'])
-    protocol_params = ProtocolParameters.from_dict(protocol_params_json['params'])
+    protocol_params = ProtocolParameters.from_dict(
+        protocol_params_json['params'])
     expected_id = basic_block_transaction_payload_json['id']
     assert block.id(protocol_params) == expected_id
 
@@ -34,6 +36,7 @@ def test_validation_block():
     with open('../../sdk/tests/types/fixtures/validation_block.json', "r", encoding="utf-8") as payload:
         validation_block_json = json.load(payload)
     block = Block.from_dict(validation_block_json['block'])
-    protocol_params = ProtocolParameters.from_dict(protocol_params_json['params'])
+    protocol_params = ProtocolParameters.from_dict(
+        protocol_params_json['params'])
     expected_id = validation_block_json['id']
     assert block.id(protocol_params) == expected_id
