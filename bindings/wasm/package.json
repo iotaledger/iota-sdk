@@ -35,12 +35,10 @@
     "dependencies": {
         "class-transformer": "^0.5.1",
         "node-fetch": "^2.6.7",
-        "qs": "^6.9.7",
-        "reflect-metadata": "^0.1.13",
-        "semver": "^7.5.2",
-        "text-encoding": "^0.7.0"
+        "reflect-metadata": "^0.1.13"
     },
     "devDependencies": {
+        "semver": "^7.5.2",
         "@types/jest": "^27.5.2",
         "@typescript-eslint/eslint-plugin": "^5.31.0",
         "@typescript-eslint/parser": "^5.31.0",
