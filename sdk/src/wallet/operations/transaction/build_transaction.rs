@@ -53,6 +53,20 @@ where
         let issuance = self.client().get_issuance().await?;
         let latest_slot_commitment_id = issuance.latest_commitment.id();
 
+        for input in selected_transaction_data
+            .inputs
+            .iter()
+            .map(|i| &i.output)
+            .filter_map(Output::as_delegation_opt)
+        {
+            // Destroyed delegations in delegating state need a context input
+            if input.delegation_id().is_null() {
+                if !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND) {
+                    context_inputs.insert(CommitmentContextInput::new(latest_slot_commitment_id).into());
+                }
+            }
+        }
+
         for output in selected_transaction_data
             .outputs
             .iter_mut()
