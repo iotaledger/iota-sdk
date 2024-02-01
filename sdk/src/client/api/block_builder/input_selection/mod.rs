@@ -238,14 +238,21 @@ impl InputSelection {
         self
     }
 
+    /// Sets the mana rewards for the given input.
+    pub fn add_mana_rewards(mut self, input: OutputId, mana_rewards: u64) -> Self {
+        self.mana_rewards.insert(input, mana_rewards);
+        self
+    }
+
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
-            // Filter out non basic/account/foundry/nft outputs.
+            // Filter out non basic/account/foundry/nft/delegation outputs.
             if !input.output.is_basic()
                 && !input.output.is_account()
                 && !input.output.is_foundry()
                 && !input.output.is_nft()
+                && !input.output.is_delegation()
             {
                 return false;
             }
