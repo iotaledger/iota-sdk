@@ -3,9 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::output::{
-        AddressUnlockCondition, BasicOutput, DelegationId, DelegationOutputBuilder, MinimumOutputAmount,
-    },
+    types::block::output::{AddressUnlockCondition, DelegationId, DelegationOutputBuilder, MinimumOutputAmount},
     wallet::{types::TransactionWithMetadata, Wallet},
 };
 
@@ -49,47 +47,45 @@ where
             .clone();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        let min_delegation_amount = delegation_output.minimum_amount(protocol_parameters.storage_score_parameters());
-
-        // TODO: Should we return an error if `reclaim_excess == true` and `can_reclaim == false`?
-        let can_reclaim = if reclaim_excess {
-            let min_basic_amount = BasicOutput::minimum_amount(
-                delegation_output.as_delegation().address(),
-                protocol_parameters.storage_score_parameters(),
-            );
-            delegation_output.amount() >= min_delegation_amount + min_basic_amount
-        } else {
-            false
-        };
-
-        let mut builder =
+        let builder =
             DelegationOutputBuilder::from(delegation_output.as_delegation()).with_delegation_id(delegation_id);
 
-        // In order to split the output, the amount must be at least twice the minimum for a delegation output
-        let can_split = delegation_output.amount() >= 2 * min_delegation_amount;
-
-        if can_split || can_reclaim {
-            builder = builder.with_minimum_amount(protocol_parameters.storage_score_parameters());
-        }
-
-        let output = builder.finish_output()?;
-
+        // If we're reclaiming the excess, just lower the amount to the min and allow ISA to create a remainder.
+        // Otherwise, we'll try to split the delegation.
         let mut outputs = Vec::new();
-
-        // If we can split and we aren't reclaiming, we will create a new delegation with those funds
-        if can_split && !reclaim_excess {
+        if reclaim_excess {
             outputs.push(
-                DelegationOutputBuilder::new_with_amount(
-                    delegation_output.amount() - output.amount(),
-                    DelegationId::null(),
-                    *output.as_delegation().validator_address(),
-                )
-                .add_unlock_condition(AddressUnlockCondition::new(output.as_delegation().address().clone()))
-                .finish_output()?,
+                builder
+                    .with_minimum_amount(protocol_parameters.storage_score_parameters())
+                    .finish_output()?,
             );
-        }
+        } else {
+            let min_delegation_amount =
+                delegation_output.minimum_amount(protocol_parameters.storage_score_parameters());
 
-        outputs.push(output);
+            // In order to split the output, the amount must be at least twice the minimum for a delegation output
+            if delegation_output.amount() >= 2 * min_delegation_amount {
+                outputs.push(
+                    builder
+                        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+                        .finish_output()?,
+                );
+
+                outputs.push(
+                    DelegationOutputBuilder::new_with_amount(
+                        delegation_output.amount() - min_delegation_amount,
+                        DelegationId::null(),
+                        *delegation_output.as_delegation().validator_address(),
+                    )
+                    .add_unlock_condition(AddressUnlockCondition::new(
+                        delegation_output.as_delegation().address().clone(),
+                    ))
+                    .finish_output()?,
+                );
+            } else {
+                outputs.push(builder.finish_output()?);
+            }
+        };
 
         self.prepare_transaction(outputs, None).await
     }

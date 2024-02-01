@@ -51,7 +51,7 @@ where
     /// ```ignore
     /// let params = CreateDelegationParams {
     ///     address: None,
-    ///     delegated_amount: 200,
+    ///     delegated_amount: 200_000,
     ///     validator_address: AccountAddress::from_str("0xe1d4bad757d5180811ab81f6c014bb2d66c152efe56cf7a467047625b0016868")?,
     /// };
     ///

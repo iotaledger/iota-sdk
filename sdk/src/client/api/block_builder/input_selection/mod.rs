@@ -247,13 +247,20 @@ impl InputSelection {
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
-            // Filter out non basic/account/foundry/nft/delegation outputs.
-            if !input.output.is_basic()
-                && !input.output.is_account()
-                && !input.output.is_foundry()
-                && !input.output.is_nft()
-                && !input.output.is_delegation()
+            // Filter out non basic/account/foundry/nft outputs.
+            if !(input.output.is_basic()
+                || input.output.is_account()
+                || input.output.is_foundry()
+                || input.output.is_nft())
             {
+                // Keep burned outputs
+                if let Some(burn) = &self.burn {
+                    if let Some(delegation) = input.output.as_delegation_opt() {
+                        return burn
+                            .delegations()
+                            .contains(&delegation.delegation_id_non_null(input.output_id()));
+                    }
+                }
                 return false;
             }
 
@@ -437,9 +444,16 @@ impl InputSelection {
 
         self.validate_transitions()?;
 
-        // Only keep mana rewards for selected inputs
-        self.mana_rewards
-            .retain(|id, _| self.selected_inputs.iter().find(|i| i.output_id() == id).is_some());
+        for output_id in self.mana_rewards.keys() {
+            if self
+                .selected_inputs
+                .iter()
+                .find(|i| output_id == i.output_id())
+                .is_none()
+            {
+                return Err(Error::ExtraManaRewards(*output_id));
+            }
+        }
 
         Ok(Selected {
             inputs: Self::sort_input_signing_data(

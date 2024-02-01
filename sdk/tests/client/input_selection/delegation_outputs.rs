@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{api::input_selection::InputSelection, secret::types::InputSigningData},
+    client::{
+        api::input_selection::{Burn, InputSelection},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
         output::{
@@ -57,6 +60,7 @@ fn remainder_needed_for_mana() {
         })
         .collect::<Vec<InputSigningData>>();
     let delegation_output_id = *inputs[0].output_id();
+    let delegation_id = DelegationId::from(&delegation_output_id);
 
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)
@@ -77,7 +81,7 @@ fn remainder_needed_for_mana() {
         SLOT_INDEX,
         protocol_parameters.clone(),
     )
-    .with_required_inputs([delegation_output_id])
+    .with_burn(Burn::from(delegation_id))
     .add_mana_rewards(delegation_output_id, mana_rewards)
     .select()
     .unwrap();

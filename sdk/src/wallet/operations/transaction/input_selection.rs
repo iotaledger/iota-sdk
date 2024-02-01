@@ -105,10 +105,13 @@ where
                     )));
                 }
                 if let Some(input) = wallet_data.outputs.get(output_id) {
-                    if input
-                        .output
-                        .can_claim_rewards(outputs.iter().find(|o| input.output.chain_id() == o.chain_id()))
-                    {
+                    if input.output.can_claim_rewards(outputs.iter().find(|o| {
+                        input
+                            .output
+                            .chain_id()
+                            .map(|chain_id| chain_id.or_from_output_id(output_id))
+                            == o.chain_id()
+                    })) {
                         mana_rewards.insert(
                             *output_id,
                             self.client()
@@ -160,10 +163,13 @@ where
                     )));
                 }
                 if let Some(input) = wallet_data.outputs.get(output_id) {
-                    if input
-                        .output
-                        .can_claim_rewards(outputs.iter().find(|o| input.output.chain_id() == o.chain_id()))
-                    {
+                    if input.output.can_claim_rewards(outputs.iter().find(|o| {
+                        input
+                            .output
+                            .chain_id()
+                            .map(|chain_id| chain_id.or_from_output_id(output_id))
+                            == o.chain_id()
+                    })) {
                         mana_rewards.insert(
                             *output_id,
                             self.client()
