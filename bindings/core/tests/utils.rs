@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::address::{Bech32Address, Hrp};
+use iota_sdk::types::block::address::{Bech32AddressString, Hrp};
 use iota_sdk_bindings_core::{call_utils_method, Response, Result, UtilsMethod};
 use pretty_assertions::assert_eq;
 
@@ -14,7 +14,7 @@ async fn utils() -> Result<()> {
     };
 
     let bech32_address =
-        Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
+        Bech32AddressString::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
     let method = UtilsMethod::Bech32ToHex {
         bech32: bech32_address.clone(),
     };

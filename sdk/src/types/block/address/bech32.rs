@@ -222,6 +222,12 @@ impl PartialEq<str> for Bech32Address {
     }
 }
 
+impl PartialEq<Bech32AddressString> for Bech32Address {
+    fn eq(&self, other: &Bech32AddressString) -> bool {
+        self.to_string().eq(&other.0)
+    }
+}
+
 impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
         value.borrow().inner.clone()
@@ -240,6 +246,10 @@ impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
 pub struct Bech32AddressString(String);
 
 impl Bech32AddressString {
+    pub fn try_from_str(address: impl AsRef<str>) -> Result<Self, Error> {
+        Self::from_str(address.as_ref())
+    }
+
     pub fn to_bech32_address(&self) -> Bech32Address {
         Bech32Address::try_from_str(&self.0).unwrap()
     }
