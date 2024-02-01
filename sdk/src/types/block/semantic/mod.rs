@@ -17,7 +17,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     context_input::CommitmentContextInput,
-    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
+    output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
@@ -108,13 +108,33 @@ impl<'a> SemanticValidationContext<'a> {
         let mut has_implicit_account_creation_address = false;
 
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
-            let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
-                Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
-                Output::Account(output) => (output.amount(), None, output.unlock_conditions()),
+            let (amount, consumed_native_token, unlock_conditions, features) = match consumed_output {
+                Output::Basic(output) => (
+                    output.amount(),
+                    output.native_token(),
+                    output.unlock_conditions(),
+                    Some(output.features()),
+                ),
+                Output::Account(output) => (
+                    output.amount(),
+                    None,
+                    output.unlock_conditions(),
+                    Some(output.features()),
+                ),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
-                Output::Nft(output) => (output.amount(), None, output.unlock_conditions()),
-                Output::Delegation(output) => (output.amount(), None, output.unlock_conditions()),
+                Output::Foundry(output) => (
+                    output.amount(),
+                    output.native_token(),
+                    output.unlock_conditions(),
+                    Some(output.features()),
+                ),
+                Output::Nft(output) => (
+                    output.amount(),
+                    None,
+                    output.unlock_conditions(),
+                    Some(output.features()),
+                ),
+                Output::Delegation(output) => (output.amount(), None, output.unlock_conditions(), None),
             };
 
             if unlock_conditions.addresses().any(Address::is_implicit_account_creation) {
@@ -133,7 +153,6 @@ impl<'a> SemanticValidationContext<'a> {
                         return Ok(Some(TransactionFailureReason::TimelockNotExpired));
                     }
                 } else {
-                    // Missing CommitmentContextInput
                     return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
                 }
             }
@@ -155,7 +174,12 @@ impl<'a> SemanticValidationContext<'a> {
                         }
                     }
                 } else {
-                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                }
+            }
+
+            if features.and_then(Features::block_issuer).is_some() {
+                if self.commitment_context_input.is_none() {
                     return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
                 }
             }
@@ -224,9 +248,17 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, None),
             };
 
-            if let Some(sender) = features.and_then(|f| f.sender()) {
-                if !self.unlocked_addresses.contains(sender.address()) {
-                    return Ok(Some(TransactionFailureReason::SenderNotUnlocked));
+            if let Some(features) = features {
+                if let Some(sender) = features.sender() {
+                    if !self.unlocked_addresses.contains(sender.address()) {
+                        return Ok(Some(TransactionFailureReason::SenderNotUnlocked));
+                    }
+                }
+
+                if let Some(_) = features.block_issuer() {
+                    if self.commitment_context_input.is_none() {
+                        return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                    }
                 }
             }
 
