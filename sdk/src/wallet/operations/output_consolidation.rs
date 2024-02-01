@@ -144,6 +144,11 @@ where
             let protocol_parameters = self.client().get_protocol_parameters().await?;
             let unlock_conditions = basic_output.unlock_conditions();
 
+            // Implicit account creation outputs shouldn't be consolidated.
+            if basic_output.address().is_implicit_account_creation() {
+                return Ok(false);
+            }
+
             let is_time_locked = unlock_conditions.is_timelocked(slot_index, protocol_parameters.min_committable_age());
             if is_time_locked {
                 // If the output is timelocked, then it cannot be consolidated.
