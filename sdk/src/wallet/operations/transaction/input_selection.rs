@@ -78,34 +78,40 @@ where
             mandatory_inputs.as_ref(),
         )?;
 
+        let mut mana_rewards = 0;
+
+        if let Some(burn) = burn {
+            for delegation_id in burn.delegations() {
+                if let Some(output) = wallet_data.unspent_delegation_output(delegation_id) {
+                    mana_rewards += self
+                        .client()
+                        .get_output_mana_rewards(&output.output_id, slot_index)
+                        .await?
+                        .rewards;
+                }
+            }
+        }
+
         // if custom inputs are provided we should only use them (validate if we have the outputs in this account and
         // that the amount is enough)
         if let Some(custom_inputs) = custom_inputs {
-            let mut mana_rewards = 0;
-
             // Check that no input got already locked
-            for input in &custom_inputs {
-                if wallet_data.locked_outputs.contains(input) {
+            for output_id in &custom_inputs {
+                if wallet_data.locked_outputs.contains(output_id) {
                     return Err(crate::wallet::Error::CustomInput(format!(
-                        "provided custom input {input} is already used in another transaction",
+                        "provided custom input {output_id} is already used in another transaction",
                     )));
                 }
-                // TODO: use can_claim_rewards from https://github.com/iotaledger/iota-sdk/pull/1906
-                if let Some(delegation) = wallet_data
-                    .outputs
-                    .get(input)
-                    .and_then(|o| o.output.as_delegation_opt())
-                {
-                    if outputs
-                        .iter()
-                        .find(|o| {
-                            o.as_delegation_opt().map_or(false, |o| {
-                                o.delegation_id() == &delegation.delegation_id_non_null(input)
-                            })
-                        })
-                        .is_none()
+                if let Some(input) = wallet_data.outputs.get(output_id) {
+                    if input
+                        .output
+                        .can_claim_rewards(outputs.iter().find(|o| input.output.chain_id() == o.chain_id()))
                     {
-                        mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
+                        mana_rewards += self
+                            .client()
+                            .get_output_mana_rewards(output_id, slot_index)
+                            .await?
+                            .rewards;
                     }
                 }
             }
@@ -142,31 +148,23 @@ where
 
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
-            let mut mana_rewards = 0;
-
             // Check that no input got already locked
-            for input in &mandatory_inputs {
-                if wallet_data.locked_outputs.contains(input) {
+            for output_id in &mandatory_inputs {
+                if wallet_data.locked_outputs.contains(output_id) {
                     return Err(crate::wallet::Error::CustomInput(format!(
-                        "provided custom input {input} is already used in another transaction",
+                        "provided custom input {output_id} is already used in another transaction",
                     )));
                 }
-                // TODO: use can_claim_rewards from https://github.com/iotaledger/iota-sdk/pull/1906
-                if let Some(delegation) = wallet_data
-                    .outputs
-                    .get(input)
-                    .and_then(|o| o.output.as_delegation_opt())
-                {
-                    if outputs
-                        .iter()
-                        .find(|o| {
-                            o.as_delegation_opt().map_or(false, |o| {
-                                o.delegation_id() == &delegation.delegation_id_non_null(input)
-                            })
-                        })
-                        .is_none()
+                if let Some(input) = wallet_data.outputs.get(output_id) {
+                    if input
+                        .output
+                        .can_claim_rewards(outputs.iter().find(|o| input.output.chain_id() == o.chain_id()))
                     {
-                        mana_rewards += self.client().get_output_mana_rewards(input, slot_index).await?.rewards;
+                        mana_rewards += self
+                            .client()
+                            .get_output_mana_rewards(output_id, slot_index)
+                            .await?
+                            .rewards;
                     }
                 }
             }
@@ -216,7 +214,8 @@ where
             slot_index,
             protocol_parameters.clone(),
         )
-        .with_forbidden_inputs(forbidden_inputs);
+        .with_forbidden_inputs(forbidden_inputs)
+        .with_mana_rewards(mana_rewards);
 
         if let Some(address) = remainder_address {
             input_selection = input_selection.with_remainder_address(address);
