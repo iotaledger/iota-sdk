@@ -19,7 +19,7 @@ use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletData, WalletInner},
+        core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletInner, WalletLedger},
         operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
@@ -208,20 +208,25 @@ where
         let address = self.address.as_ref().unwrap().clone();
 
         #[cfg(feature = "storage")]
-        let mut wallet_data = storage_manager.load_wallet_data().await?;
+        let mut wallet_address = storage_manager.load_wallet_address().await?;
+
+        #[cfg(feature = "storage")]
+        let mut wallet_bip_path = storage_manager.load_wallet_bip_path().await?;
 
         // The bip path must not change.
         #[cfg(feature = "storage")]
-        if let Some(wallet_data) = &wallet_data {
-            let new_bip_path = self.bip_path;
-            let old_bip_path = wallet_data.bip_path;
-            if new_bip_path != old_bip_path {
-                return Err(crate::wallet::Error::BipPathMismatch {
-                    new_bip_path,
-                    old_bip_path,
-                });
-            }
+        if wallet_bip_path.is_some() && self.bip_path != wallet_bip_path {
+            return Err(crate::wallet::Error::BipPathMismatch {
+                new_bip_path: self.bip_path,
+                old_bip_path: wallet_bip_path,
+            });
         }
+
+        #[cfg(feature = "storage")]
+        let mut wallet_alias = storage_manager.load_wallet_alias().await?;
+
+        #[cfg(feature = "storage")]
+        let mut wallet_ledger = storage_manager.load_wallet_ledger().await?;
 
         // Store the wallet builder (for convenience reasons)
         #[cfg(feature = "storage")]
@@ -230,7 +235,7 @@ where
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
         #[cfg(feature = "storage")]
-        if let Some(wallet_data) = &mut wallet_data {
+        if let Some(wallet_data) = &mut wallet_ledger {
             unlock_unused_inputs(wallet_data)?;
         }
 
@@ -260,12 +265,16 @@ where
             storage_manager,
         };
         #[cfg(feature = "storage")]
-        let wallet_data = wallet_data.unwrap_or_else(|| WalletData::new(self.bip_path, address, self.alias.clone()));
+        let wallet_ledger = wallet_ledger.unwrap_or_default();
         #[cfg(not(feature = "storage"))]
-        let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
+        let wallet_ledger = WalletLedger::default();
+
         let wallet = Wallet {
+            address,
+            bip_path: wallet_bip_path,
+            alias: wallet_alias,
             inner: Arc::new(wallet_inner),
-            data: Arc::new(RwLock::new(wallet_data)),
+            ledger: Arc::new(RwLock::new(wallet_ledger)),
         };
 
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
@@ -313,9 +322,9 @@ where
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
-            bip_path: wallet.bip_path().await,
-            address: Some(wallet.address().await),
-            alias: wallet.alias().await,
+            bip_path: wallet.bip_path(),
+            address: Some(wallet.address().clone()),
+            alias: wallet.alias(),
             client_options: Some(wallet.client_options().await),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),
@@ -326,17 +335,17 @@ where
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
 // transactions
 #[cfg(feature = "storage")]
-fn unlock_unused_inputs(wallet_data: &mut WalletData) -> crate::wallet::Result<()> {
+fn unlock_unused_inputs(wallet_ledger: &mut WalletLedger) -> crate::wallet::Result<()> {
     log::debug!("[unlock_unused_inputs]");
     let mut used_inputs = HashSet::new();
-    for transaction_id in &wallet_data.pending_transactions {
-        if let Some(tx) = wallet_data.transactions.get(transaction_id) {
+    for transaction_id in &wallet_ledger.pending_transactions {
+        if let Some(tx) = wallet_ledger.transactions.get(transaction_id) {
             for input in &tx.inputs {
                 used_inputs.insert(*input.metadata.output_id());
             }
         }
     }
-    wallet_data.locked_outputs.retain(|input| {
+    wallet_ledger.locked_outputs.retain(|input| {
         let used = used_inputs.contains(input);
         if !used {
             log::debug!("unlocking unused input {input}");

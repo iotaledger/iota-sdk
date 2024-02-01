@@ -8,7 +8,7 @@ use crate::{
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::{
-        core::WalletData,
+        core::WalletLedger,
         types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },
@@ -30,7 +30,7 @@ where
     /// be synced again
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
-        let wallet_data = self.data().await;
+        let wallet_data = self.ledger().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
         // (transaction_output.is_none())
@@ -240,7 +240,7 @@ fn updated_transaction_and_outputs(
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
-    wallet_data: &WalletData,
+    wallet_data: &WalletLedger,
     mut transaction: TransactionWithMetadata,
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,

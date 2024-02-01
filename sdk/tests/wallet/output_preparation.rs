@@ -782,7 +782,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     assert_eq!(balance.nfts().len(), 1);
 
     let nft_amount = wallet_1
-        .data()
+        .ledger()
         .await
         .unspent_outputs()
         .values()

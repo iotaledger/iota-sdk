@@ -18,7 +18,7 @@ where
         issuer_id: impl Into<Option<AccountId>> + Send,
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
-        let wallet_data = self.data().await;
+        let wallet_data = self.ledger().await;
 
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = issuer_id
@@ -33,7 +33,7 @@ where
             .await?
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,
-                self.bip_path().await.ok_or(Error::MissingBipPath)?,
+                self.bip_path().ok_or(Error::MissingBipPath)?,
             )
             .await?;
 

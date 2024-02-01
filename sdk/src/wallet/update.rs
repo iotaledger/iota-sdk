@@ -7,6 +7,7 @@ use crate::{
     client::secret::SecretManage,
     types::block::output::{OutputId, OutputMetadata},
     wallet::{
+        core::WalletLedgerDto,
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
     },
@@ -24,11 +25,26 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Set the alias for the wallet.
-    pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
-        let mut wallet_data = self.data_mut().await;
-        wallet_data.alias = Some(alias.to_string());
+    pub async fn set_alias(&mut self, alias: &str) -> crate::wallet::Result<()> {
+        self.alias = Some(alias.to_string());
+
         #[cfg(feature = "storage")]
-        self.storage_manager().save_wallet_data(&wallet_data).await?;
+        {
+            // TODO: change `save_wallet` signature to accept a `Wallet<S>`
+            let wallet_address = self.address();
+            let wallet_bip_path = self.bip_path();
+            let wallet_alias = self.alias();
+            let wallet_ledger = WalletLedgerDto::from(&*self.ledger().await);
+
+            self.storage_manager()
+                .save_wallet(
+                    wallet_address,
+                    wallet_bip_path.as_ref(),
+                    wallet_alias.as_ref(),
+                    &wallet_ledger,
+                )
+                .await?;
+        }
         Ok(())
     }
 
@@ -41,15 +57,15 @@ where
         log::debug!("[SYNC] Update wallet with new synced transactions");
 
         let network_id = self.client().get_network_id().await?;
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
         // Update spent outputs
         for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it
             if let Some(output_metadata_response) = output_metadata_response_opt {
                 if output_metadata_response.is_spent() {
-                    wallet_data.unspent_outputs.remove(&output_id);
-                    if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
+                    wallet_ledger.unspent_outputs.remove(&output_id);
+                    if let Some(output_data) = wallet_ledger.outputs.get_mut(&output_id) {
                         output_data.metadata = output_metadata_response;
                     }
                 } else {
@@ -58,14 +74,14 @@ where
                 }
             }
 
-            if let Some(output) = wallet_data.outputs.get(&output_id) {
+            if let Some(output) = wallet_ledger.outputs.get(&output_id) {
                 // Could also be outputs from other networks after we switched the node, so we check that first
                 if output.network_id == network_id {
                     log::debug!("[SYNC] Spent output {}", output_id);
-                    wallet_data.locked_outputs.remove(&output_id);
-                    wallet_data.unspent_outputs.remove(&output_id);
+                    wallet_ledger.locked_outputs.remove(&output_id);
+                    wallet_ledger.unspent_outputs.remove(&output_id);
                     // Update spent data fields
-                    if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
+                    if let Some(output_data) = wallet_ledger.outputs.get_mut(&output_id) {
                         // TODO https://github.com/iotaledger/iota-sdk/issues/1718
                         // output_data.metadata.set_spent(true);
                         output_data.is_spent = true;
@@ -84,14 +100,14 @@ where
         // Add new synced outputs
         for output_data in unspent_outputs {
             // Insert output, if it's unknown emit the NewOutputEvent
-            if wallet_data
+            if wallet_ledger
                 .outputs
                 .insert(output_data.output_id, output_data.clone())
                 .is_none()
             {
                 #[cfg(feature = "events")]
                 {
-                    let transaction = wallet_data
+                    let transaction = wallet_ledger
                         .incoming_transactions
                         .get(output_data.output_id.transaction_id());
                     self.emit(WalletEvent::NewOutput(Box::new(NewOutputEvent {
@@ -111,14 +127,21 @@ where
                 }
             };
             if !output_data.is_spent {
-                wallet_data.unspent_outputs.insert(output_data.output_id, output_data);
+                wallet_ledger.unspent_outputs.insert(output_data.output_id, output_data);
             }
         }
 
         #[cfg(feature = "storage")]
         {
             log::debug!("[SYNC] storing wallet with new synced data");
-            self.storage_manager().save_wallet_data(&wallet_data).await?;
+            self.storage_manager()
+                .save_wallet(
+                    self.address(),
+                    self.bip_path.as_ref(),
+                    self.alias().as_ref(),
+                    &WalletLedgerDto::from(&*wallet_ledger),
+                )
+                .await?;
         }
         Ok(())
     }
@@ -132,7 +155,7 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update wallet with new synced transactions");
 
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
 
         for transaction in updated_transactions {
             match transaction.inclusion_state {
@@ -179,24 +202,31 @@ where
         #[cfg(feature = "storage")]
         {
             log::debug!("[SYNC] storing wallet with new synced transactions");
-            self.storage_manager().save_wallet_data(&wallet_data).await?;
+            self.storage_manager().save_wallet(&wallet_data).await?;
         }
         Ok(())
     }
 
     /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible incoming transactions.
-    pub(crate) async fn update_bech32_hrp(&self) -> crate::wallet::Result<()> {
+    pub(crate) async fn update_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         log::debug!("updating wallet data with new bech32 hrp: {}", bech32_hrp);
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
-        wallet_data.address.hrp = bech32_hrp;
-        wallet_data.inaccessible_incoming_transactions.clear();
+        self.address.hrp = bech32_hrp;
+        wallet_ledger.inaccessible_incoming_transactions.clear();
 
         #[cfg(feature = "storage")]
         {
             log::debug!("[save] wallet data with updated bech32 hrp",);
-            self.storage_manager().save_wallet_data(&wallet_data).await?;
+            self.storage_manager()
+                .save_wallet(
+                    self.address(),
+                    self.bip_path.as_ref(),
+                    self.alias().as_ref(),
+                    &WalletLedgerDto::from(&*wallet_ledger),
+                )
+                .await?;
         }
 
         Ok(())

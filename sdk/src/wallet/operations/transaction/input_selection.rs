@@ -18,7 +18,7 @@ use crate::{
         slot::SlotIndex,
     },
     wallet::{
-        core::WalletData, operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData,
+        core::WalletLedger, operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData,
         Wallet,
     },
 };
@@ -45,7 +45,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
         // lock so the same inputs can't be selected in multiple transactions
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -70,6 +70,7 @@ where
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_outputs_signing_data = filter_inputs(
+            self.address(),
             &wallet_data,
             wallet_data.unspent_outputs.values(),
             slot_index,
@@ -93,7 +94,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(wallet_data.address.clone().into_inner()),
+                Some(self.address.clone().into_inner()),
                 slot_index,
                 protocol_parameters.clone(),
             )
@@ -133,7 +134,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(wallet_data.address.clone().into_inner()),
+                Some(self.address.clone().into_inner()),
                 slot_index,
                 protocol_parameters.clone(),
             )
@@ -170,7 +171,7 @@ where
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
             outputs,
-            Some(wallet_data.address.clone().into_inner()),
+            Some(self.address.clone().into_inner()),
             slot_index,
             protocol_parameters.clone(),
         )
@@ -205,7 +206,8 @@ where
 /// `claim_outputs` or providing their OutputId's in the custom_inputs
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
-    wallet_data: &WalletData,
+    wallet_address: &Address,
+    wallet_ledger: &WalletLedger,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
@@ -225,7 +227,7 @@ fn filter_inputs(
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
-                &wallet_data.address.inner,
+                wallet_address,
                 &output_data.output,
                 slot_index,
                 committable_age_range,
@@ -237,7 +239,9 @@ fn filter_inputs(
             }
         }
 
-        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index, committable_age_range)? {
+        if let Some(available_input) =
+            output_data.input_signing_data(wallet_ledger, slot_index, committable_age_range)?
+        {
             available_outputs_signing_data.push(available_input);
         }
     }

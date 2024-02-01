@@ -51,7 +51,7 @@ where
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let wallet_data = self.data().await;
+        let wallet_data = self.ledger().await;
         let implicit_account_data = wallet_data
             .unspent_outputs
             .get(output_id)

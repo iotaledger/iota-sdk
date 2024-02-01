@@ -138,7 +138,7 @@ where
         let options = options.into();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
-        let wallet_address = self.address().await;
+        let wallet_address = self.address();
 
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
 

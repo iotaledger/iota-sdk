@@ -31,7 +31,7 @@ async fn consolidation() -> Result<()> {
 
     let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.base_coin().available(), 10 * amount);
-    assert_eq!(wallet_1.data().await.unspent_outputs().len(), 10);
+    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 10);
 
     let tx = wallet_1
         .consolidate_outputs(ConsolidationParams::new().with_force(true))
@@ -44,7 +44,7 @@ async fn consolidation() -> Result<()> {
     // Balance still the same
     assert_eq!(balance.base_coin().available(), 10 * amount);
     // Only one unspent output
-    assert_eq!(wallet_1.data().await.unspent_outputs().len(), 1);
+    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 1);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;

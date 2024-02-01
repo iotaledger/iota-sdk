@@ -25,7 +25,7 @@ use crate::{
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
-    wallet::{core::WalletData, types::OutputData, Result, Wallet},
+    wallet::{core::WalletLedger, types::OutputData, Result, Wallet},
 };
 
 /// An object containing an account's entire participation overview.
@@ -218,7 +218,7 @@ where
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
     pub async fn get_voting_output(&self) -> Result<Option<OutputData>> {
-        self.data().await.get_voting_output()
+        self.ledger().await.get_voting_output()
     }
 
     // /// Gets client for an event.
@@ -271,7 +271,7 @@ where
     // }
 }
 
-impl WalletData {
+impl WalletLedger {
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.

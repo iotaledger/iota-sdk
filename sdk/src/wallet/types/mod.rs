@@ -28,7 +28,7 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::core::WalletData,
+    wallet::core::WalletLedger,
 };
 
 /// An output with metadata
@@ -52,7 +52,7 @@ pub struct OutputData {
 impl OutputData {
     pub fn input_signing_data(
         &self,
-        wallet_data: &WalletData,
+        wallet_data: &WalletLedger,
         slot_index: impl Into<SlotIndex>,
         committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {

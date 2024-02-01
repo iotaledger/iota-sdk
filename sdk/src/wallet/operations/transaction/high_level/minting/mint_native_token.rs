@@ -56,7 +56,7 @@ where
         log::debug!("[TRANSACTION] mint_native_token");
 
         let mint_amount = mint_amount.into();
-        let wallet_data = self.data().await;
+        let wallet_data = self.ledger().await;
         let existing_foundry_output = wallet_data.unspent_outputs.values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {
                 TokenId::new(*output.id()) == token_id

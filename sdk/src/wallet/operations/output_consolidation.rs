@@ -134,11 +134,11 @@ where
         // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
         let mut outputs_to_consolidate = Vec::new();
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
-        let wallet_address = wallet_data.address.clone();
+        let wallet_address = self.address.clone();
 
-        for (output_id, output_data) in &wallet_data.unspent_outputs {
+        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
             // #[cfg(feature = "participation")]
             // if let Some(ref voting_output) = voting_output {
             //     // Remove voting output from inputs, because we want to keep its features and not consolidate it.
@@ -147,7 +147,7 @@ where
             //     }
             // }
 
-            let is_locked_output = wallet_data.locked_outputs.contains(output_id);
+            let is_locked_output = wallet_ledger.locked_outputs.contains(output_id);
             let should_consolidate_output = self
                 .should_consolidate_output(output_data, slot_index, &wallet_address)
                 .await?;
@@ -156,7 +156,7 @@ where
             }
         }
 
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         #[allow(clippy::option_if_let_else)]
         let output_threshold = match params.output_threshold {

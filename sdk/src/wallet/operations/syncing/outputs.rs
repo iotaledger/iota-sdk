@@ -30,7 +30,7 @@ where
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
-        let wallet_data = self.data().await;
+        let wallet_data = self.ledger().await;
 
         Ok(outputs_with_meta
             .into_iter()
@@ -66,7 +66,7 @@ where
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
 
         for output_id in output_ids {
             match wallet_data.outputs.get_mut(&output_id) {
@@ -112,7 +112,7 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_incoming_transaction_data");
 
-        let wallet_data = self.data().await;
+        let wallet_data = self.ledger().await;
         transaction_ids.retain(|transaction_id| {
             !(wallet_data.transactions.contains_key(transaction_id)
                 || wallet_data.incoming_transactions.contains_key(transaction_id)
@@ -174,7 +174,7 @@ where
             .await?;
 
         // Update account with new transactions
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
         for (transaction_id, txn) in results.into_iter().flatten() {
             if let Some(transaction) = txn {
                 wallet_data.incoming_transactions.insert(transaction_id, transaction);

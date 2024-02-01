@@ -35,7 +35,7 @@ where
         log::debug!("[reissue_transaction_until_included]");
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let transaction = self.data().await.transactions.get(transaction_id).cloned();
+        let transaction = self.ledger().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
             if transaction.inclusion_state == InclusionState::Confirmed {
@@ -63,7 +63,7 @@ where
                     .await?
                     .sign_ed25519(
                         &*self.get_secret_manager().read().await,
-                        self.bip_path().await.ok_or(Error::MissingBipPath)?,
+                        self.bip_path().ok_or(Error::MissingBipPath)?,
                     )
                     .await?
                     .id(&protocol_parameters),
@@ -111,7 +111,7 @@ where
                             .await?
                             .sign_ed25519(
                                 &*self.get_secret_manager().read().await,
-                                self.bip_path().await.ok_or(Error::MissingBipPath)?,
+                                self.bip_path().ok_or(Error::MissingBipPath)?,
                             )
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_parameters));

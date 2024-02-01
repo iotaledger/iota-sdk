@@ -77,7 +77,7 @@ where
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
                 bech32_address.inner().clone()
             }
-            None => self.address().await.inner().clone(),
+            None => self.address().inner().clone(),
         };
 
         let mut account_output_builder =
@@ -107,7 +107,7 @@ where
     /// Gets an existing account output.
     pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
-        self.data()
+        self.ledger()
             .await
             .unspent_outputs
             .values()

@@ -243,7 +243,7 @@ where
                 )
             } else {
                 // Transition an existing NFT output
-                let unspent_nft_output = self.data().await.unspent_nft_output(nft_id).cloned();
+                let unspent_nft_output = self.ledger().await.unspent_nft_output(nft_id).cloned();
 
                 // Find nft output from the inputs
                 let mut first_output_builder = if let Some(nft_output_data) = &unspent_nft_output {
@@ -280,11 +280,11 @@ where
         Ok(if let Some(options) = &transaction_options {
             match &options.remainder_value_strategy {
                 // TODO is this correct? It was None before the accounts removal
-                RemainderValueStrategy::ReuseAddress => self.address().await.into_inner(),
+                RemainderValueStrategy::ReuseAddress => self.address().clone().into_inner(),
                 RemainderValueStrategy::CustomAddress(address) => address.clone(),
             }
         } else {
-            self.address().await.into_inner()
+            self.address().clone().into_inner()
         })
     }
 }

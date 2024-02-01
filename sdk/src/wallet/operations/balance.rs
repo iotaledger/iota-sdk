@@ -27,7 +27,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
 
-        let wallet_data = self.data().await.clone();
+        let wallet_ledger = self.ledger().await.clone();
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
 
@@ -36,20 +36,21 @@ where
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
-        let voting_output = wallet_data.get_voting_output()?;
+        let voting_output = wallet_ledger.get_voting_output()?;
 
-        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index, &protocol_parameters)?;
+        let claimable_outputs =
+            wallet_ledger.claimable_outputs(OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
         #[cfg(feature = "participation")]
         {
             if let Some(voting_output) = &voting_output {
-                if voting_output.output.as_basic().address() == wallet_data.address.inner() {
+                if voting_output.output.as_basic().address() == self.address.inner() {
                     balance.base_coin.voting_power = voting_output.output.amount();
                 }
             }
         }
 
-        for (output_id, output_data) in &wallet_data.unspent_outputs {
+        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
             // Check if output is from the network we're currently connected to
             if output_data.network_id != network_id {
                 continue;
@@ -72,7 +73,7 @@ where
 
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
-                    if !wallet_data.locked_outputs.contains(output_id) {
+                    if !wallet_ledger.locked_outputs.contains(output_id) {
                         total_storage_cost += storage_cost;
                     }
 
@@ -84,7 +85,7 @@ where
                     balance.base_coin.total += foundry.amount();
                     // Add storage deposit
                     balance.required_storage_deposit.foundry += storage_cost;
-                    if !wallet_data.locked_outputs.contains(output_id) {
+                    if !wallet_ledger.locked_outputs.contains(output_id) {
                         total_storage_cost += storage_cost;
                     }
 
@@ -100,7 +101,7 @@ where
                     balance.base_coin.total += delegation.amount();
                     // Add storage deposit
                     balance.required_storage_deposit.delegation += storage_cost;
-                    if !wallet_data.locked_outputs.contains(output_id) {
+                    if !wallet_ledger.locked_outputs.contains(output_id) {
                         total_storage_cost += storage_cost;
                     }
 
@@ -133,12 +134,12 @@ where
                         // Add storage deposit
                         if output.is_basic() {
                             balance.required_storage_deposit.basic += storage_cost;
-                            if output.native_token().is_some() && !wallet_data.locked_outputs.contains(output_id) {
+                            if output.native_token().is_some() && !wallet_ledger.locked_outputs.contains(output_id) {
                                 total_storage_cost += storage_cost;
                             }
                         } else if output.is_nft() {
                             balance.required_storage_deposit.nft += storage_cost;
-                            if !wallet_data.locked_outputs.contains(output_id) {
+                            if !wallet_ledger.locked_outputs.contains(output_id) {
                                 total_storage_cost += storage_cost;
                             }
                         }
@@ -164,7 +165,7 @@ where
                                 // We use the addresses with unspent outputs, because other addresses of
                                 // the account without unspent
                                 // outputs can't be related to this output
-                                wallet_data.address.inner(),
+                                self.address.inner(),
                                 output,
                                 slot_index,
                                 protocol_parameters.committable_age_range(),
@@ -180,7 +181,7 @@ where
                                     .map_or_else(
                                         || output.amount(),
                                         |sdr| {
-                                            if wallet_data.address.inner() == sdr.return_address() {
+                                            if self.address.inner() == sdr.return_address() {
                                                 // sending to ourself, we get the full amount
                                                 output.amount()
                                             } else {
@@ -211,13 +212,13 @@ where
                                     // Amount for basic outputs isn't added to total storage cost if there aren't native
                                     // tokens, since we can spend it without burning.
                                     if output.native_token().is_some()
-                                        && !wallet_data.locked_outputs.contains(output_id)
+                                        && !wallet_ledger.locked_outputs.contains(output_id)
                                     {
                                         total_storage_cost += storage_cost;
                                     }
                                 } else if output.is_nft() {
                                     balance.required_storage_deposit.nft += storage_cost;
-                                    if !wallet_data.locked_outputs.contains(output_id) {
+                                    if !wallet_ledger.locked_outputs.contains(output_id) {
                                         total_storage_cost += storage_cost;
                                     }
                                 }
@@ -251,18 +252,18 @@ where
         }
 
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
-        log::debug!("[BALANCE] locked outputs: {:#?}", wallet_data.locked_outputs);
+        log::debug!("[BALANCE] locked outputs: {:#?}", wallet_ledger.locked_outputs);
 
         let mut locked_amount = 0;
         let mut locked_mana = DecayedMana::default();
         let mut locked_native_tokens = NativeTokensBuilder::default();
 
-        for locked_output in &wallet_data.locked_outputs {
+        for locked_output in &wallet_ledger.locked_outputs {
             // Skip potentially_locked_outputs, as their amounts aren't added to the balance
             if balance.potentially_locked_outputs.contains_key(locked_output) {
                 continue;
             }
-            if let Some(output_data) = wallet_data.unspent_outputs.get(locked_output) {
+            if let Some(output_data) = wallet_ledger.unspent_outputs.get(locked_output) {
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
@@ -301,7 +302,7 @@ where
                 }
             });
 
-            let metadata = wallet_data
+            let metadata = wallet_ledger
                 .native_token_foundries
                 .get(&FoundryId::from(*native_token.token_id()))
                 .and_then(|foundry| foundry.immutable_features().metadata())

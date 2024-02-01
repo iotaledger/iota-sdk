@@ -227,7 +227,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
 pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
     let wallet = unlock_wallet(storage_path, snapshot_path, password.clone()).await?;
-    wallet.backup(backup_path.into(), password).await?;
+    wallet.backup_to_stronghold(backup_path.into(), password).await?;
 
     println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 
@@ -350,7 +350,9 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    wallet.restore_backup(backup_path.into(), password, None, None).await?;
+    wallet
+        .restore_from_stronghold_backup(backup_path.into(), password, None, None)
+        .await?;
 
     println_log_info!(
         "Wallet has been restored from the backup file \"{}\".",

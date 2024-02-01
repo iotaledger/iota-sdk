@@ -20,7 +20,7 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_and_store_foundry_outputs");
 
-        let mut foundries = self.data().await.native_token_foundries.clone();
+        let mut foundries = self.ledger().await.native_token_foundries.clone();
         let results =
             futures::future::try_join_all(foundry_ids.into_iter().filter(|f| !foundries.contains_key(f)).map(
                 |foundry_id| {
@@ -46,7 +46,7 @@ where
             }
         }
 
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
         wallet_data.native_token_foundries = foundries;
 
         Ok(())

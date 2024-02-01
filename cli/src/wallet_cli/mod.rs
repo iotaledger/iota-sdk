@@ -327,7 +327,7 @@ impl FromStr for OutputSelector {
 
 // `accounts` command
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_data = wallet.ledger().await;
     let accounts = wallet_data.accounts();
     let hrp = wallet.client().get_bech32_hrp().await?;
 
@@ -365,7 +365,7 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_data = wallet.ledger().await;
     let account_id = account_id
         .or_else(|| wallet_data.first_account_id())
         .ok_or(WalletError::AccountNotFound)?;
@@ -472,7 +472,7 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         .iter()
         .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
-        let wallet_data = wallet.data().await;
+        let wallet_data = wallet.ledger().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
         let output = &wallet_data.get_output(output_id).unwrap().output;
         let kind = match output {
@@ -521,7 +521,7 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // `congestion` command
 pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
     let account_id = {
-        let wallet_data = wallet.data().await;
+        let wallet_data = wallet.ledger().await;
         account_id
             .or_else(|| wallet_data.first_account_id())
             .ok_or(WalletError::AccountNotFound)?
@@ -678,7 +678,7 @@ pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: Out
 
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_data = wallet.ledger().await;
     let implicit_accounts = wallet_data.implicit_accounts();
     let hrp = wallet.client().get_bech32_hrp().await?;
 
@@ -796,7 +796,7 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `output` command
 pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata: bool) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_data = wallet.ledger().await;
     let output = match selector {
         OutputSelector::Id(id) => wallet_data.get_output(&id),
         OutputSelector::Index(index) => {
@@ -821,7 +821,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata:
 
 /// `outputs` command
 pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.data().await.outputs().values().cloned().collect(), "Outputs:")
+    print_outputs(wallet.ledger().await.outputs().values().cloned().collect(), "Outputs:")
 }
 
 // `send` command
@@ -935,7 +935,7 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `transaction` command
 pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_data = wallet.ledger().await;
     let transaction = match selector {
         TransactionSelector::Id(id) => wallet_data.get_transaction(&id),
         TransactionSelector::Index(index) => {
@@ -956,7 +956,7 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 
 /// `transactions` command
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_data = wallet.ledger().await;
     let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
     transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
@@ -981,7 +981,7 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     print_outputs(
-        wallet.data().await.unspent_outputs().values().cloned().collect(),
+        wallet.ledger().await.unspent_outputs().values().cloned().collect(),
         "Unspent outputs:",
     )
 }
@@ -1084,7 +1084,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let mut delegations = Vec::new();
     let mut anchors = Vec::new();
 
-    for output_data in wallet.data().await.unspent_outputs().values() {
+    for output_data in wallet.ledger().await.unspent_outputs().values() {
         let output_id = output_data.output_id;
         output_ids.push(output_id);
 

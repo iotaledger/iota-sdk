@@ -186,7 +186,7 @@ where
             inputs,
         };
 
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
 
         wallet_data.transactions.insert(transaction_id, transaction.clone());
         wallet_data.pending_transactions.insert(transaction_id);
@@ -195,7 +195,7 @@ where
         {
             // TODO: maybe better to use the wallet address as identifier now?
             log::debug!("[TRANSACTION] storing wallet");
-            self.storage_manager().save_wallet_data(&wallet_data).await?;
+            self.storage_manager().save_wallet(&wallet_data).await?;
         }
 
         Ok(transaction)
@@ -203,7 +203,7 @@ where
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_data = self.ledger_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
             wallet_data.locked_outputs.remove(output_id);
