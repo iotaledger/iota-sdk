@@ -269,7 +269,7 @@ impl<'de> serde::Deserialize<'de> for Bech32AddressString {
     {
         let address: String = serde::Deserialize::deserialize(deserializer)?;
 
-        Ok(Self::from_str(&address).map_err(|err| serde::de::Error::custom(format!("{err}")))?)
+        Self::from_str(&address).map_err(|err| serde::de::Error::custom(format!("{err}")))
     }
 }
 
