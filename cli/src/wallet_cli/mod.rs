@@ -888,7 +888,7 @@ pub async fn send_nft_command(
     address: impl ConvertTo<Bech32Address>,
     nft_id: NftId,
 ) -> Result<(), Error> {
-    let outputs = [SendNftParams::new(address.convert()?, &nft_id)?];
+    let outputs = [SendNftParams::new(address.convert()?, nft_id)?];
     let transaction = wallet.send_nft(outputs, None).await?;
 
     println_log_info!(
@@ -1358,7 +1358,11 @@ fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error>
                 i,
                 &output_data.output_id,
                 kind_str,
-                if output_data.is_spent { "Spent" } else { "Unspent" },
+                if output_data.metadata.is_spent() {
+                    "Spent"
+                } else {
+                    "Unspent"
+                },
             );
         }
     }

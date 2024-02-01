@@ -42,8 +42,6 @@ pub struct OutputData {
     pub output: Output,
     /// The output ID proof
     pub output_id_proof: OutputIdProof,
-    /// If an output is spent
-    pub is_spent: bool,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,

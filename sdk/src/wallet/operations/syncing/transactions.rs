@@ -92,7 +92,7 @@ where
             for input in transaction.payload.transaction().inputs() {
                 let Input::Utxo(input) = input;
                 if let Some(input) = wallet_data.outputs.get(input.output_id()) {
-                    if input.is_spent {
+                    if input.metadata.is_spent() {
                         input_got_spent = true;
                     }
                 }
