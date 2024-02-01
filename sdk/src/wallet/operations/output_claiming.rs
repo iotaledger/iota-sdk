@@ -92,10 +92,9 @@ impl WalletData {
                                 }
                             }
                             OutputsToClaim::NativeTokens => {
-                                // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-                                // if !output_data.output.native_tokens().map(|n| n.is_empty()).unwrap_or(true) {
-                                //     output_ids_to_claim.insert(output_data.output_id);
-                                // }
+                                if output_data.output.native_token().is_some() {
+                                    output_ids_to_claim.insert(output_data.output_id);
+                                }
                             }
                             OutputsToClaim::Nfts => {
                                 if output_data.output.is_nft() {
@@ -263,11 +262,7 @@ where
         let wallet_address = wallet_data.address.clone();
         drop(wallet_data);
 
-        // Outputs with expiration and storage deposit return might require two outputs if there is a storage deposit
-        // return unlock condition Maybe also more additional inputs are required for the storage deposit, if we
-        // have to send the storage deposit back.
-
-        let mut outputs_to_send = Vec::new();
+        let mut nft_outputs_to_send = Vec::new();
 
         // There can be outputs with less amount than min required storage deposit, so we have to check that we
         // have enough amount to create a new basic output
@@ -277,7 +272,6 @@ where
             .sum::<u64>()
             >= BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
-        // check native tokens
         for output_data in &outputs_to_claim {
             if let Output::Nft(nft_output) = &output_data.output {
                 // build new output with same amount, nft_id, immutable/feature blocks and native tokens, just
@@ -298,11 +292,11 @@ where
                         .finish_output()?
                 };
 
-                // Add required amount for the new output
-                outputs_to_send.push(nft_output);
+                nft_outputs_to_send.push(nft_output);
             }
         }
 
+        // CommitmentContextInput is required for inputs with expiration or storage_deposit_return unlock condition
         let commitment_context_input_required = outputs_to_claim.iter().any(|o| {
             o.output.unlock_conditions().map_or(false, |uc| {
                 uc.expiration().is_some() || uc.storage_deposit_return().is_some()
@@ -317,7 +311,8 @@ where
         };
 
         self.prepare_transaction(
-            outputs_to_send,
+            // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
+            nft_outputs_to_send,
             Some(TransactionOptions {
                 custom_inputs: Some(
                     outputs_to_claim
