@@ -96,7 +96,7 @@ where
     //                         entry.get_mut().push(output_data.output_id);
     //                     }
     //                 }
-    //                 if output_data.metadata.is_spent() {
+    //                 if output_data.is_spent() {
     //                     spent_outputs.insert(output_data.output_id);
     //                 }
     //             }

@@ -1358,11 +1358,7 @@ fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error>
                 i,
                 &output_data.output_id,
                 kind_str,
-                if output_data.metadata.is_spent() {
-                    "Spent"
-                } else {
-                    "Unspent"
-                },
+                if output_data.is_spent() { "Spent" } else { "Unspent" },
             );
         }
     }

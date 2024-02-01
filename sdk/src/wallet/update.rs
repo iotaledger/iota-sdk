@@ -69,7 +69,7 @@ where
                     wallet_data.unspent_outputs.remove(&output_id);
                     // Update spent data fields
                     if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
-                        if !output_data.metadata.is_spent() {
+                        if !output_data.is_spent() {
                             log::warn!(
                                 "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
                                 output_id
@@ -124,7 +124,7 @@ where
                     .await;
                 }
             };
-            if !output_data.metadata.is_spent() {
+            if !output_data.is_spent() {
                 wallet_data.unspent_outputs.insert(output_data.output_id, output_data);
             }
         }
@@ -175,7 +175,7 @@ where
 
         for output_to_unlock in &spent_output_ids {
             if let Some(output_data) = wallet_data.outputs.get_mut(output_to_unlock) {
-                if !output_data.metadata.is_spent() {
+                if !output_data.is_spent() {
                     log::warn!(
                         "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
                         output_data.output_id

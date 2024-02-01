@@ -48,6 +48,11 @@ pub struct OutputData {
 }
 
 impl OutputData {
+    /// Returns whether the [`OutputMetadata`] is spent or not.
+    pub fn is_spent(&self) -> bool {
+        self.metadata.is_spent()
+    }
+
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
