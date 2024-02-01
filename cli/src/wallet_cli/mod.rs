@@ -10,7 +10,7 @@ use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::{
-        address::{Bech32Address, ToBech32Ext},
+        address::{Bech32Address, Bech32AddressString, ToBech32Ext},
         mana::ManaAllotment,
         output::{
             feature::{BlockIssuerKeySource, MetadataFeature},
@@ -124,7 +124,7 @@ pub enum WalletCommand {
     /// Request funds from the faucet.
     Faucet {
         /// Address the faucet sends the funds to, defaults to the wallet address.
-        address: Option<String>,
+        address: Option<Bech32AddressString>,
         /// URL of the faucet, default to <http://localhost:8088/api/enqueue>.
         url: Option<String>,
     },
@@ -149,7 +149,7 @@ pub enum WalletCommand {
     /// IOTA NFT Standard - TIP27: <https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md>.
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: Option<String>,
+        address: Option<Bech32AddressString>,
         /// Immutable metadata key, e.g. --immutable-metadata-key data.
         #[arg(long, default_value = "data")]
         immutable_metadata_key: String,
@@ -173,10 +173,10 @@ pub enum WalletCommand {
         tag: Option<String>,
         /// Sender feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
-        sender: Option<String>,
+        sender: Option<Bech32AddressString>,
         /// Issuer feature to attach to the NFT, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         #[arg(long)]
-        issuer: Option<String>,
+        issuer: Option<Bech32AddressString>,
     },
     /// Melt an amount of native token.
     MeltNativeToken {
@@ -201,14 +201,14 @@ pub enum WalletCommand {
     /// Send an amount.
     Send {
         /// Address to send funds to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32AddressString,
         /// Amount to send, e.g. 1000000.
         amount: u64,
         /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
         /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
         /// default to the wallet address.
         #[arg(long)]
-        return_address: Option<String>,
+        return_address: Option<Bech32AddressString>,
         /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by
         /// the receiver already. The expiration will only be used if one is necessary given the provided
         /// amount. If an expiration is needed but not provided, it will default to one day.
@@ -223,7 +223,7 @@ pub enum WalletCommand {
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32AddressString,
         /// Token ID to be sent, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
         token_id: TokenId,
         /// Amount to send, e.g. 1000000.
@@ -236,7 +236,7 @@ pub enum WalletCommand {
     /// Send an NFT.
     SendNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
-        address: String,
+        address: Bech32AddressString,
         /// NFT ID to be sent, e.g. 0xecadf10e6545aa82da4df2dfd2a496b457c8850d2cab49b7464cb273d3dffb07.
         nft_id: NftId,
     },
@@ -640,15 +640,19 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 }
 
 // `faucet` command
-pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url: Option<String>) -> Result<(), Error> {
+pub async fn faucet_command(
+    wallet: &Wallet,
+    address: Option<Bech32AddressString>,
+    url: Option<String>,
+) -> Result<(), Error> {
     let address = if let Some(address) = address {
-        address
+        address.to_bech32_address()
     } else {
         wallet.address().await
     };
 
     let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
-    let response = request_funds_from_faucet(faucet_url, &address).await?;
+    let response = request_funds_from_faucet(faucet_url, address).await?;
 
     println_log_info!("{response}");
 
@@ -739,12 +743,12 @@ pub async fn mint_native_token_command(wallet: &Wallet, token_id: TokenId, amoun
 // `mint-nft` command
 pub async fn mint_nft_command(
     wallet: &Wallet,
-    address: Option<String>,
+    address: Option<Bech32AddressString>,
     metadata: Option<(String, Vec<u8>)>,
     immutable_metadata: Option<(String, Vec<u8>)>,
     tag: Option<String>,
-    sender: Option<String>,
-    issuer: Option<String>,
+    sender: Option<Bech32AddressString>,
+    issuer: Option<Bech32AddressString>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
         Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
@@ -753,10 +757,10 @@ pub async fn mint_nft_command(
     };
 
     let mut nft_options = MintNftParams::new()
-        .with_address(address)
+        .with_address(address.map(|a| a.to_bech32_address()))
         .with_tag(tag)
-        .with_sender(sender)
-        .with_issuer(issuer);
+        .with_sender(sender.map(|a| a.to_bech32_address()))
+        .with_issuer(issuer.map(|a| a.to_bech32_address()));
 
     if let Some(metadata) = metadata {
         nft_options = nft_options.with_metadata(MetadataFeature::new([metadata])?);
@@ -818,9 +822,9 @@ pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // `send` command
 pub async fn send_command(
     wallet: &Wallet,
-    address: String,
+    address: Bech32AddressString,
     amount: u64,
-    return_address: Option<String>,
+    return_address: Option<Bech32AddressString>,
     expiration: Option<SlotIndex>,
     allow_micro_amount: bool,
 ) -> Result<(), Error> {

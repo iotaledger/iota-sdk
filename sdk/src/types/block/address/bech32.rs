@@ -239,6 +239,18 @@ impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Bech32AddressString(String);
 
+impl Bech32AddressString {
+    pub fn to_bech32_address(&self) -> Bech32Address {
+        Bech32Address::try_from_str(&self.0).unwrap()
+    }
+}
+
+impl ConvertTo<Bech32Address> for Bech32AddressString {
+    fn convert(self) -> Result<Bech32Address, Error> {
+        Ok(self.to_bech32_address())
+    }
+}
+
 #[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for Bech32AddressString {
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
