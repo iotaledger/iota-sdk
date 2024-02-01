@@ -63,7 +63,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         .unwrap();
     println!(
         "{}",
-        request_funds_from_faucet(FAUCET_URL, addresses[0].to_string())
+        request_funds_from_faucet(FAUCET_URL, addresses[0].clone())
             .await
             .unwrap()
     );
