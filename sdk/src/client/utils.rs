@@ -61,6 +61,7 @@ pub fn generate_mnemonic() -> Result<Mnemonic> {
     let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
     entropy.zeroize();
+
     Ok(mnemonic)
 }
 
@@ -73,6 +74,7 @@ pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String
 pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
     // first we check if the mnemonic is valid to give meaningful errors
     verify_mnemonic(mnemonic.borrow())?;
+
     Ok(crypto::keys::bip39::mnemonic_to_seed(
         mnemonic.borrow(),
         &Passphrase::default(),
@@ -83,6 +85,7 @@ pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
 pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<()> {
     crypto::keys::bip39::wordlist::verify(mnemonic.borrow(), &crypto::keys::bip39::wordlist::ENGLISH)
         .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+
     Ok(())
 }
 
@@ -104,6 +107,7 @@ pub async fn request_funds_from_faucet(
         .text()
         .await
         .map_err(|err| Error::Node(err.into()))?;
+
     Ok(faucet_response)
 }
 
