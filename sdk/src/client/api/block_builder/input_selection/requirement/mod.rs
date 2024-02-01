@@ -174,6 +174,16 @@ impl InputSelection {
                 self.requirements.push(requirement);
             }
 
+            for foundry_id in &burn.foundries {
+                if self.outputs.iter().any(|output| is_foundry_with_id(output, foundry_id)) {
+                    return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
+                }
+
+                let requirement = Requirement::Foundry(*foundry_id);
+                log::debug!("Adding {requirement:?} from burn");
+                self.requirements.push(requirement);
+            }
+
             for nft_id in &burn.nfts {
                 if self
                     .outputs
@@ -198,16 +208,6 @@ impl InputSelection {
                 }
 
                 let requirement = Requirement::Delegation(*delegation_id);
-                log::debug!("Adding {requirement:?} from burn");
-                self.requirements.push(requirement);
-            }
-
-            for foundry_id in &burn.foundries {
-                if self.outputs.iter().any(|output| is_foundry_with_id(output, foundry_id)) {
-                    return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
-                }
-
-                let requirement = Requirement::Foundry(*foundry_id);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
             }
