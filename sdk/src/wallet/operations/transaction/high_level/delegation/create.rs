@@ -53,15 +53,13 @@ where
     ///     address: None,
     ///     delegated_amount: 200,
     ///     validator_address: AccountAddress::from_str("0xe1d4bad757d5180811ab81f6c014bb2d66c152efe56cf7a467047625b0016868")?,
-    ///     start_epoch: EpochIndex(20),
-    ///     end_epoch: EpochIndex(30),
     /// };
     ///
-    /// let transaction = delegation.create_delegation_output(params, None).await?;
+    /// let tx: CreateDelegationTransaction = delegation.create_delegation_output(params, None).await?;
     /// println!(
     ///     "Transaction sent: {}/transaction/{}",
     ///     std::env::var("EXPLORER_URL").unwrap(),
-    ///     transaction.transaction_id
+    ///     tx.transaction.transaction_id
     /// );
     /// ```
     pub async fn create_delegation_output(
