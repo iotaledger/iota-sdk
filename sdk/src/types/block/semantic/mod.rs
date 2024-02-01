@@ -16,6 +16,7 @@ pub use self::{
 };
 use crate::types::block::{
     address::Address,
+    context_input::CommitmentContextInput,
     output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
@@ -28,6 +29,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
+    pub(crate) commitment_context_input: Option<&'a CommitmentContextInput>,
     pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
@@ -77,11 +79,13 @@ impl<'a> SemanticValidationContext<'a> {
                 })
             })
             .collect();
+        let commitment_context_input = transaction.context_inputs().iter().find_map(|c| c.as_commitment_opt());
 
         Self {
             transaction,
             transaction_signing_hash: transaction.signing_hash(),
             inputs,
+            commitment_context_input,
             unlocks,
             input_amount: 0,
             input_mana: 0,
@@ -121,11 +125,7 @@ impl<'a> SemanticValidationContext<'a> {
                 }
             }
 
-            let commitment_slot_index = self
-                .transaction
-                .context_inputs()
-                .iter()
-                .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+            let commitment_slot_index = self.commitment_context_input.map(|c| c.slot_index());
 
             if let Some(timelock) = unlock_conditions.timelock() {
                 if let Some(commitment_slot_index) = commitment_slot_index {

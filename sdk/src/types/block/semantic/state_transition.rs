@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    context_input::CommitmentContextInput,
     output::{
         AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
         TokenScheme,
@@ -345,11 +344,8 @@ impl StateTransitionVerifier for DelegationOutput {
         }
 
         let slot_commitment_id = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find(|i| i.kind() == CommitmentContextInput::KIND)
-            .map(|s| s.as_commitment().slot_commitment_id())
+            .commitment_context_input
+            .map(|c| c.slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
         let past_bounded_slot_index = slot_commitment_id.past_bounded_slot(protocol_parameters.max_committable_age);
@@ -390,11 +386,8 @@ impl StateTransitionVerifier for DelegationOutput {
         let protocol_parameters = &context.protocol_parameters;
 
         let slot_commitment_id = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find(|i| i.kind() == CommitmentContextInput::KIND)
-            .map(|s| s.as_commitment().slot_commitment_id())
+            .commitment_context_input
+            .map(|c| c.slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
         let future_bounded_slot_index = slot_commitment_id.future_bounded_slot(protocol_parameters.min_committable_age);
