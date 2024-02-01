@@ -37,6 +37,7 @@ where
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = HashSet::new();
 
+        let mut commitment_context_input_required = false;
         for input in &selected_transaction_data.inputs {
             // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
             if let Output::Account(account) = &input.output {
@@ -45,6 +46,15 @@ where
                         account.account_id_non_null(input.output_id()),
                     )));
                 }
+            }
+
+            // Inputs with timelock or expiration unlock condition require a CommitmentContextInput
+            if input
+                .output
+                .unlock_conditions()
+                .map_or(false, |u| u.iter().any(|u| u.is_timelock() || u.is_expiration()))
+            {
+                commitment_context_input_required = true;
             }
 
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
@@ -75,9 +85,10 @@ where
         }
 
         // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
-        if context_inputs
+        if (context_inputs
             .iter()
             .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
+            || commitment_context_input_required)
             && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
         {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
