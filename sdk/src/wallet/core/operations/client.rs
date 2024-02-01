@@ -34,7 +34,7 @@ where
     crate::wallet::Error: From<S::Error>,
     WalletBuilder<S>: SaveLoadWallet,
 {
-    pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
+    pub async fn set_client_options(&mut self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,
             #[cfg(feature = "mqtt")]
@@ -81,7 +81,7 @@ where
     }
 
     /// Update the authentication for a node.
-    pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
+    pub async fn update_node_auth(&mut self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
         log::debug!("[update_node_auth]");
         let mut node_manager_builder = NodeManagerBuilder::from(&*self.client.node_manager.read().await);
 

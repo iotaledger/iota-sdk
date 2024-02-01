@@ -269,7 +269,7 @@ where
         #[cfg(not(feature = "storage"))]
         let wallet_ledger = WalletLedger::default();
 
-        let wallet = Wallet {
+        let mut wallet = Wallet {
             address,
             bip_path: wallet_bip_path,
             alias: wallet_alias,

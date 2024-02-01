@@ -66,7 +66,7 @@ async fn create_wallet() -> Result<Wallet> {
 }
 
 async fn print_address(wallet: &Wallet) -> Result<()> {
-    println!("Wallet address: {}", wallet.address().await);
+    println!("Wallet address: {}", wallet.address());
     Ok(())
 }
 

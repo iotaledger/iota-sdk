@@ -65,7 +65,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let recv_address = wallet.address().await;
+    let recv_address = wallet.address();
     println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.

@@ -25,7 +25,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     request_funds(&wallet).await?;
 
     let nft_options = [MintNftParams::new()
-        .with_address(wallet.address().await)
+        .with_address(wallet.address().clone())
         .with_metadata(MetadataFeature::new([("data".to_owned(), b"some nft metadata".to_vec())]).unwrap())
         .with_immutable_metadata(
             MetadataFeature::new([("data".to_owned(), b"some immutable nft metadata".to_vec())]).unwrap(),
@@ -70,9 +70,9 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let amount = 1_000_000;
     let outputs = [NftOutputBuilder::new_with_amount(amount, NftId::null())
         .with_unlock_conditions([
-            UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().await)),
+            UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address())),
             // immediately expired to account_1
-            UnlockCondition::Expiration(ExpirationUnlockCondition::new(wallet_1.address().await, 1)?),
+            UnlockCondition::Expiration(ExpirationUnlockCondition::new(wallet_1.address(), 1)?),
         ])
         .finish_output()?];
 

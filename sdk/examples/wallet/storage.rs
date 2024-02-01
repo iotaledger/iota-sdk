@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let bech32_address = wallet.address().await;
+    let bech32_address = wallet.address();
 
     println!("ADDRESS:\n{bech32_address}");
 
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
 }
 
 async fn sync_print_balance(wallet: &Wallet) -> Result<()> {
-    let alias = wallet.alias().await;
+    let alias = wallet.alias();
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
     println!("Wallet synced in: {:.2?}", now.elapsed());

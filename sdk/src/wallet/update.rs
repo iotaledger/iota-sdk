@@ -155,13 +155,13 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update wallet with new synced transactions");
 
-        let mut wallet_data = self.ledger_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
         for transaction in updated_transactions {
             match transaction.inclusion_state {
                 InclusionState::Confirmed | InclusionState::Conflicting | InclusionState::UnknownPruned => {
                     let transaction_id = transaction.payload.transaction().id();
-                    wallet_data.pending_transactions.remove(&transaction_id);
+                    wallet_ledger.pending_transactions.remove(&transaction_id);
                     log::debug!(
                         "[SYNC] inclusion_state of {transaction_id} changed to {:?}",
                         transaction.inclusion_state
@@ -177,22 +177,22 @@ where
                 }
                 _ => {}
             }
-            wallet_data
+            wallet_ledger
                 .transactions
                 .insert(transaction.payload.transaction().id(), transaction.clone());
         }
 
         for output_to_unlock in &spent_output_ids {
-            if let Some(output) = wallet_data.outputs.get_mut(output_to_unlock) {
+            if let Some(output) = wallet_ledger.outputs.get_mut(output_to_unlock) {
                 output.is_spent = true;
             }
-            wallet_data.locked_outputs.remove(output_to_unlock);
-            wallet_data.unspent_outputs.remove(output_to_unlock);
+            wallet_ledger.locked_outputs.remove(output_to_unlock);
+            wallet_ledger.unspent_outputs.remove(output_to_unlock);
             log::debug!("[SYNC] Unlocked spent output {}", output_to_unlock);
         }
 
         for output_to_unlock in &output_ids_to_unlock {
-            wallet_data.locked_outputs.remove(output_to_unlock);
+            wallet_ledger.locked_outputs.remove(output_to_unlock);
             log::debug!(
                 "[SYNC] Unlocked unspent output {} because of a conflicting transaction",
                 output_to_unlock
@@ -202,7 +202,14 @@ where
         #[cfg(feature = "storage")]
         {
             log::debug!("[SYNC] storing wallet with new synced transactions");
-            self.storage_manager().save_wallet(&wallet_data).await?;
+            self.storage_manager()
+                .save_wallet(
+                    self.address(),
+                    self.bip_path.as_ref(),
+                    self.alias().as_ref(),
+                    &WalletLedgerDto::from(&*wallet_ledger),
+                )
+                .await?;
         }
         Ok(())
     }
@@ -211,20 +218,24 @@ where
     pub(crate) async fn update_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         log::debug!("updating wallet data with new bech32 hrp: {}", bech32_hrp);
-        let mut wallet_ledger = self.ledger_mut().await;
 
-        self.address.hrp = bech32_hrp;
-        wallet_ledger.inaccessible_incoming_transactions.clear();
+        (&mut self.address).hrp = bech32_hrp;
 
         #[cfg(feature = "storage")]
         {
+            let wallet_ledger = {
+                let mut wallet_ledger = self.ledger_mut().await;
+                wallet_ledger.inaccessible_incoming_transactions.clear();
+                WalletLedgerDto::from(&*wallet_ledger)
+            };
+
             log::debug!("[save] wallet data with updated bech32 hrp",);
             self.storage_manager()
                 .save_wallet(
                     self.address(),
                     self.bip_path.as_ref(),
                     self.alias().as_ref(),
-                    &WalletLedgerDto::from(&*wallet_ledger),
+                    &wallet_ledger,
                 )
                 .await?;
         }

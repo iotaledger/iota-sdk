@@ -18,7 +18,7 @@ use iota_sdk::{
 use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
+pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
@@ -84,7 +84,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
-                None => *wallet.address().await.hrp(),
+                None => *wallet.address().hrp(),
             };
 
             Response::Bech32Address(address.to_bech32(bech32_hrp))
@@ -147,7 +147,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         //     Response::Ok
         // }
         WalletMethod::GetAddress => {
-            let address = wallet.address().await;
+            let address = wallet.address().clone();
             Response::Address(address)
         }
         WalletMethod::GetBalance => Response::Balance(wallet.balance().await?),

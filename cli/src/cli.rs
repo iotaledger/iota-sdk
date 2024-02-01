@@ -340,7 +340,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         builder = builder.with_secret_manager(secret_manager);
     }
 
-    let wallet = builder
+    let mut wallet = builder
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
@@ -364,7 +364,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
 
 pub async fn set_node_url_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
     let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+    let mut wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
 
     Ok(wallet)

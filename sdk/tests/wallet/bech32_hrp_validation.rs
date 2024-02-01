@@ -22,7 +22,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
         .send_with_params(
             [SendParams::new(
                 1_000_000,
-                Bech32Address::try_new("wronghrp", wallet.address().await)?,
+                Bech32Address::try_new("wronghrp", wallet.address())?,
             )?],
             None,
         )
@@ -56,7 +56,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let error = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: wallet.address().await.to_bech32_unchecked("wronghrp"),
+                recipient_address: wallet.address().to_bech32_unchecked("wronghrp"),
                 amount: 1_000_000,
                 assets: None,
                 features: None,

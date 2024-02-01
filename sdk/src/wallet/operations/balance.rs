@@ -39,7 +39,7 @@ where
         let voting_output = wallet_ledger.get_voting_output()?;
 
         let claimable_outputs =
-            wallet_ledger.claimable_outputs(OutputsToClaim::All, slot_index, &protocol_parameters)?;
+            wallet_ledger.claimable_outputs(self.address(), OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
         #[cfg(feature = "participation")]
         {

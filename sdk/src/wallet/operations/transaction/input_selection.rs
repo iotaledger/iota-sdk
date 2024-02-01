@@ -3,6 +3,8 @@
 
 use std::collections::{hash_map::Values, HashSet};
 
+use crypto::keys::bip44::Bip44;
+
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
@@ -11,7 +13,7 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
-        address::Address,
+        address::{Address, Bech32Address},
         mana::ManaAllotment,
         output::{Output, OutputId},
         protocol::CommittableAgeRange,
@@ -45,7 +47,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
         // lock so the same inputs can't be selected in multiple transactions
-        let mut wallet_data = self.ledger_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -54,7 +56,7 @@ where
         .await;
 
         #[allow(unused_mut)]
-        let mut forbidden_inputs = wallet_data.locked_outputs.clone();
+        let mut forbidden_inputs = wallet_ledger.locked_outputs.clone();
 
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
@@ -71,8 +73,8 @@ where
         // still locked.
         let available_outputs_signing_data = filter_inputs(
             self.address(),
-            &wallet_data,
-            wallet_data.unspent_outputs.values(),
+            self.bip_path(),
+            wallet_ledger.unspent_outputs.values(),
             slot_index,
             protocol_parameters.committable_age_range(),
             custom_inputs.as_ref(),
@@ -84,7 +86,7 @@ where
         if let Some(custom_inputs) = custom_inputs {
             // Check that no input got already locked
             for input in custom_inputs.iter() {
-                if wallet_data.locked_outputs.contains(input) {
+                if wallet_ledger.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -117,14 +119,14 @@ where
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                wallet_data.locked_outputs.insert(*output.output_id());
+                wallet_ledger.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
             // Check that no input got already locked
             for input in mandatory_inputs.iter() {
-                if wallet_data.locked_outputs.contains(input) {
+                if wallet_ledger.locked_outputs.contains(input) {
                     return Err(crate::wallet::Error::CustomInput(format!(
                         "provided custom input {input} is already used in another transaction",
                     )));
@@ -157,12 +159,12 @@ where
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                wallet_data.locked_outputs.insert(*output.output_id());
+                wallet_ledger.locked_outputs.insert(*output.output_id());
             }
 
             // lock outputs so they don't get used by another transaction
             for output in &selected_transaction_data.inputs {
-                wallet_data.locked_outputs.insert(*output.output_id());
+                wallet_ledger.locked_outputs.insert(*output.output_id());
             }
 
             return Ok(selected_transaction_data);
@@ -194,7 +196,7 @@ where
         // lock outputs so they don't get used by another transaction
         for output in &selected_transaction_data.inputs {
             log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            wallet_data.locked_outputs.insert(*output.output_id());
+            wallet_ledger.locked_outputs.insert(*output.output_id());
         }
 
         Ok(selected_transaction_data)
@@ -206,8 +208,8 @@ where
 /// `claim_outputs` or providing their OutputId's in the custom_inputs
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
-    wallet_address: &Address,
-    wallet_ledger: &WalletLedger,
+    wallet_address: &Bech32Address,
+    wallet_bip_path: Option<Bip44>,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
@@ -227,7 +229,7 @@ fn filter_inputs(
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
-                wallet_address,
+                wallet_address.inner(),
                 &output_data.output,
                 slot_index,
                 committable_age_range,
@@ -240,7 +242,7 @@ fn filter_inputs(
         }
 
         if let Some(available_input) =
-            output_data.input_signing_data(wallet_ledger, slot_index, committable_age_range)?
+            output_data.input_signing_data(wallet_address, wallet_bip_path, slot_index, committable_age_range)?
         {
             available_outputs_signing_data.push(available_input);
         }

@@ -193,7 +193,7 @@ impl Wallet {
                     self.address(),
                     self.bip_path.as_ref(),
                     self.alias.as_ref(),
-                    &*self.ledger().await,
+                    &WalletLedgerDto::from(&*self.ledger().await),
                 )
                 .await?;
         }

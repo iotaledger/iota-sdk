@@ -58,7 +58,7 @@ pub async fn call_client_method(client: &Client, method: ClientMethod) -> Respon
 }
 
 /// Call a wallet method.
-pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Response {
+pub async fn call_wallet_method(wallet: &mut Wallet, method: WalletMethod) -> Response {
     log::debug!("Wallet method: {method:?}");
     let result = convert_async_panics(|| async { call_wallet_method_internal(wallet, method).await }).await;
 

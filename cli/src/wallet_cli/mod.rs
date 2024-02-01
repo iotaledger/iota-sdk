@@ -641,7 +641,7 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
     let address = if let Some(address) = address {
         address
     } else {
-        wallet.address().await
+        wallet.address().clone()
     };
 
     let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
@@ -1062,7 +1062,7 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // }
 
 async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
-    let address = wallet.address().await;
+    let address = wallet.address();
 
     let mut log = format!(
         "Address:\n{:<9}{}\n{:<9}{:?}",
@@ -1121,7 +1121,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         }
     }
 
-    let bip_path = wallet.bip_path().await;
+    let bip_path = wallet.bip_path();
     log = format!("{log}\nBIP path: {bip_path:?}");
 
     log = format!(
@@ -1177,7 +1177,7 @@ pub async fn prompt_internal(
     wallet: &Wallet,
     rl: &mut Editor<WalletCommandHelper, MemHistory>,
 ) -> Result<PromptResponse, Error> {
-    let prompt = if let Some(alias) = wallet.alias().await {
+    let prompt = if let Some(alias) = wallet.alias() {
         format!("Wallet \"{alias}\": ")
     } else {
         String::from("Wallet: ")

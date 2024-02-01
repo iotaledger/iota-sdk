@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     wallet.sync(None).await?;
 
     // We send from the wallet address.
-    let sender_address = wallet.address().await;
+    let sender_address = wallet.address();
 
     // Set the stronghold password
     wallet

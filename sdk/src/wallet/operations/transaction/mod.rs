@@ -26,6 +26,7 @@ use crate::{
         },
     },
     wallet::{
+        core::WalletLedgerDto,
         types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },
@@ -186,16 +187,23 @@ where
             inputs,
         };
 
-        let mut wallet_data = self.ledger_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
-        wallet_data.transactions.insert(transaction_id, transaction.clone());
-        wallet_data.pending_transactions.insert(transaction_id);
+        wallet_ledger.transactions.insert(transaction_id, transaction.clone());
+        wallet_ledger.pending_transactions.insert(transaction_id);
 
         #[cfg(feature = "storage")]
         {
             // TODO: maybe better to use the wallet address as identifier now?
             log::debug!("[TRANSACTION] storing wallet");
-            self.storage_manager().save_wallet(&wallet_data).await?;
+            self.storage_manager()
+                .save_wallet(
+                    self.address(),
+                    self.bip_path().as_ref(),
+                    self.alias().as_ref(),
+                    &WalletLedgerDto::from(&*wallet_ledger),
+                )
+                .await?;
         }
 
         Ok(transaction)
