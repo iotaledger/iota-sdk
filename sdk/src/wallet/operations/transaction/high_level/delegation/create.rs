@@ -99,7 +99,7 @@ where
             DelegationId::null(),
             params.validator_address,
         )
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()?;
 
         let transaction = self.prepare_transaction([output], options).await?;
