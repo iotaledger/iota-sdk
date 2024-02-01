@@ -8,8 +8,8 @@ from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json, SlotIndex
 
 
-class NodeType(IntEnum):
-    """Output types.
+class TreeNodeType(IntEnum):
+    """Tree node types.
 
     Attributes:
         HashableNode (0): Denotes a HashableNode.
@@ -29,11 +29,11 @@ def deserialize_proof(d: Dict[str, Any]) -> OutputCommitmentProof:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
     node_type = d['type']
-    if node_type == NodeType.HashableNode:
+    if node_type == TreeNodeType.HashableNode:
         return HashableNode.from_dict(d)
-    if node_type == NodeType.LeafHash:
+    if node_type == TreeNodeType.LeafHash:
         return LeafHash.from_dict(d)
-    if node_type == NodeType.ValueHash:
+    if node_type == TreeNodeType.ValueHash:
         return ValueHash.from_dict(d)
     raise Exception(f'invalid node type: {node_type}')
 
@@ -44,7 +44,7 @@ class HashableNode:
     """Node contains the hashes of the left and right children of a node in the tree.
     """
     type: int = field(default_factory=lambda: int(
-        NodeType.HashableNode), init=False)
+        TreeNodeType.HashableNode), init=False)
     l: OutputCommitmentProof = field(metadata=config(
         decoder=deserialize_proof
     ))
@@ -59,7 +59,7 @@ class LeafHash:
     """Leaf Hash contains the hash of a leaf in the tree.
     """
     type: int = field(default_factory=lambda: int(
-        NodeType.LeafHash), init=False)
+        TreeNodeType.LeafHash), init=False)
     hash: HexStr
 
 
@@ -69,7 +69,7 @@ class ValueHash:
     """Value Hash contains the hash of the value for which the proof is being computed.
     """
     type: int = field(default_factory=lambda: int(
-        NodeType.ValueHash), init=False)
+        TreeNodeType.ValueHash), init=False)
     hash: HexStr
 
 
