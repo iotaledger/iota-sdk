@@ -155,6 +155,7 @@ pub enum ClientMethod {
     GetAccountCongestion {
         /// The Account ID of the account.
         account_id: AccountId,
+        work_score: Option<u32>,
     },
     /// Returns all the available Mana rewards of an account or delegation output in the returned range of epochs.
     #[serde(rename_all = "camelCase")]

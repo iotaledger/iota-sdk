@@ -83,7 +83,10 @@ pub enum WalletCommand {
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
     /// Checks if an account is ready to issue a block.
-    Congestion { account_id: Option<AccountId> },
+    Congestion {
+        account_id: Option<AccountId>,
+        work_score: Option<u32>,
+    },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new account output.
@@ -339,7 +342,7 @@ pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
         let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
-            .get_account_congestion(&account_id)
+            .get_account_congestion(&account_id, None)
             .await
             .map(|r| r.block_issuance_credits)
             .ok();
@@ -519,7 +522,11 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 }
 
 // `congestion` command
-pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
+pub async fn congestion_command(
+    wallet: &Wallet,
+    account_id: Option<AccountId>,
+    work_score: Option<u32>,
+) -> Result<(), Error> {
     let account_id = {
         let wallet_data = wallet.data().await;
         account_id
@@ -527,7 +534,7 @@ pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) 
             .ok_or(WalletError::AccountNotFound)?
     };
 
-    let congestion = wallet.client().get_account_congestion(&account_id).await?;
+    let congestion = wallet.client().get_account_congestion(&account_id, work_score).await?;
 
     println_log_info!("{congestion:#?}");
 
@@ -690,7 +697,7 @@ pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
         let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
-            .get_account_congestion(&account_id)
+            .get_account_congestion(&account_id, None)
             .await
             .map(|r| r.block_issuance_credits)
             .ok();
@@ -1220,7 +1227,9 @@ pub async fn prompt_internal(
                         WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
                         WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
-                        WalletCommand::Congestion { account_id } => congestion_command(wallet, account_id).await,
+                        WalletCommand::Congestion { account_id, work_score } => {
+                            congestion_command(wallet, account_id, work_score).await
+                        }
                         WalletCommand::Consolidate => consolidate_command(wallet).await,
                         WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
                         WalletCommand::CreateNativeToken {
