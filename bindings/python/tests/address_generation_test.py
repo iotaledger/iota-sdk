@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import shutil
-import pytest
 from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletOptions, Bip44
 
 
