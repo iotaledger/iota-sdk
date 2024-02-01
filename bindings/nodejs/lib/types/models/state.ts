@@ -6,6 +6,7 @@
  */
 export declare type BlockState =
     | 'pending'
+    | 'accepted'
     | 'confirmed'
     | 'finalized'
     | 'rejected'
