@@ -38,7 +38,7 @@ pub enum OutputsToClaim {
 impl WalletData {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
-    /// [`StorageDepositReturnUnlockCondition`] or
+    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) or
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
@@ -139,7 +139,7 @@ where
 {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
-    /// [`StorageDepositReturnUnlockCondition`] or
+    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) or
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
@@ -309,10 +309,9 @@ where
             })
         });
         let context_inputs = if commitment_context_input_required {
-            Some(vec![CommitmentContextInput::new(
-                self.client().get_issuance().await?.latest_commitment.id(),
-            )
-            .into()])
+            Some(vec![
+                CommitmentContextInput::new(self.client().get_issuance().await?.latest_commitment.id()).into(),
+            ])
         } else {
             None
         };
