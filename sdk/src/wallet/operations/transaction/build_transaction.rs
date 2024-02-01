@@ -11,7 +11,7 @@ use crate::{
         secret::SecretManage,
     },
     types::block::{
-        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput},
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput, RewardContextInput},
         input::{Input, UtxoInput},
         output::{DelegationOutputBuilder, Output},
         payload::signed_transaction::Transaction,
@@ -36,8 +36,12 @@ where
 
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = HashSet::new();
+        let mut mana_rewards = 0;
 
-        for input in &selected_transaction_data.inputs {
+        let issuance = self.client().get_issuance().await?;
+        let latest_slot_commitment_id = issuance.latest_commitment.id();
+
+        for (idx, input) in selected_transaction_data.inputs.iter().enumerate() {
             // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
             if let Output::Account(account) = &input.output {
                 if account.features().block_issuer().is_some() {
@@ -48,19 +52,10 @@ where
             }
 
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
-        }
 
-        let issuance = self.client().get_issuance().await?;
-        let latest_slot_commitment_id = issuance.latest_commitment.id();
-
-        for input in selected_transaction_data
-            .inputs
-            .iter()
-            .map(|i| &i.output)
-            .filter_map(Output::as_delegation_opt)
-        {
-            // Destroyed delegations in delegating state need a context input
-            if input.delegation_id().is_null() {
+            if let Some(reward) = selected_transaction_data.mana_rewards.get(input.output_id()) {
+                mana_rewards += *reward;
+                context_inputs.insert(ContextInput::from(RewardContextInput::new(idx as _)?));
                 if !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND) {
                     context_inputs.insert(CommitmentContextInput::new(latest_slot_commitment_id).into());
                 }

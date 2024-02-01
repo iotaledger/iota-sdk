@@ -10,7 +10,7 @@ pub(crate) mod requirement;
 pub(crate) mod transition;
 
 use core::ops::Deref;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use packable::PackableExt;
 
@@ -47,7 +47,7 @@ pub struct InputSelection {
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
     mana_allotments: u64,
-    mana_rewards: u64,
+    mana_rewards: HashMap<OutputId, u64>,
 }
 
 /// Result of the input selection algorithm.
@@ -59,6 +59,8 @@ pub struct Selected {
     pub outputs: Vec<Output>,
     /// Remainder outputs information.
     pub remainders: Vec<RemainderData>,
+    /// Mana rewards by input.
+    pub mana_rewards: HashMap<OutputId, u64>,
 }
 
 impl InputSelection {
@@ -196,7 +198,7 @@ impl InputSelection {
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
             mana_allotments: 0,
-            mana_rewards: 0,
+            mana_rewards: Default::default(),
         }
     }
 
@@ -231,7 +233,7 @@ impl InputSelection {
     }
 
     /// Sets the total mana rewards for required inputs.
-    pub fn with_mana_rewards(mut self, mana_rewards: u64) -> Self {
+    pub fn with_mana_rewards(mut self, mana_rewards: HashMap<OutputId, u64>) -> Self {
         self.mana_rewards = mana_rewards;
         self
     }
@@ -428,6 +430,10 @@ impl InputSelection {
 
         self.validate_transitions()?;
 
+        // Only keep mana rewards for selected inputs
+        self.mana_rewards
+            .retain(|id, _| self.selected_inputs.iter().find(|i| i.output_id() == id).is_some());
+
         Ok(Selected {
             inputs: Self::sort_input_signing_data(
                 self.selected_inputs,
@@ -436,6 +442,7 @@ impl InputSelection {
             )?,
             outputs: self.outputs,
             remainders,
+            mana_rewards: self.mana_rewards,
         })
     }
 

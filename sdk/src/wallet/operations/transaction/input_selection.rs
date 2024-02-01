@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::{hash_map::Values, HashSet};
+use std::collections::{hash_map::Values, HashMap, HashSet};
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
@@ -78,16 +78,18 @@ where
             mandatory_inputs.as_ref(),
         )?;
 
-        let mut mana_rewards = 0;
+        let mut mana_rewards = HashMap::new();
 
         if let Some(burn) = burn {
             for delegation_id in burn.delegations() {
                 if let Some(output) = wallet_data.unspent_delegation_output(delegation_id) {
-                    mana_rewards += self
-                        .client()
-                        .get_output_mana_rewards(&output.output_id, slot_index)
-                        .await?
-                        .rewards;
+                    mana_rewards.insert(
+                        output.output_id,
+                        self.client()
+                            .get_output_mana_rewards(&output.output_id, slot_index)
+                            .await?
+                            .rewards,
+                    );
                 }
             }
         }
@@ -107,11 +109,13 @@ where
                         .output
                         .can_claim_rewards(outputs.iter().find(|o| input.output.chain_id() == o.chain_id()))
                     {
-                        mana_rewards += self
-                            .client()
-                            .get_output_mana_rewards(output_id, slot_index)
-                            .await?
-                            .rewards;
+                        mana_rewards.insert(
+                            *output_id,
+                            self.client()
+                                .get_output_mana_rewards(output_id, slot_index)
+                                .await?
+                                .rewards,
+                        );
                     }
                 }
             }
@@ -160,11 +164,13 @@ where
                         .output
                         .can_claim_rewards(outputs.iter().find(|o| input.output.chain_id() == o.chain_id()))
                     {
-                        mana_rewards += self
-                            .client()
-                            .get_output_mana_rewards(output_id, slot_index)
-                            .await?
-                            .rewards;
+                        mana_rewards.insert(
+                            *output_id,
+                            self.client()
+                                .get_output_mana_rewards(output_id, slot_index)
+                                .await?
+                                .rewards,
+                        );
                     }
                 }
             }
