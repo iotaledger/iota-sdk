@@ -71,7 +71,7 @@ where
                     if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
                         if !output_data.metadata.is_spent() {
                             log::warn!(
-                                "[SYNC] Setting output as spent {} without having the OutputConsumptionMetadata",
+                                "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
                                 output_id
                             );
                             // Set 0 values because we don't have the actual metadata and also couldn't get it, probably
@@ -177,7 +177,7 @@ where
             if let Some(output_data) = wallet_data.outputs.get_mut(output_to_unlock) {
                 if !output_data.metadata.is_spent() {
                     log::warn!(
-                        "[SYNC] Setting output as spent {} without having the OutputConsumptionMetadata",
+                        "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
                         output_data.output_id
                     );
                     // Set 0 values because we don't have the actual metadata and also couldn't get it, probably because
