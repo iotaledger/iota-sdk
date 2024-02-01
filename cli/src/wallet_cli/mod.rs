@@ -878,7 +878,7 @@ pub async fn send_nft_command(
     address: impl ConvertTo<Bech32Address>,
     nft_id: NftId,
 ) -> Result<(), Error> {
-    let outputs = [SendNftParams::new(address.convert()?, &nft_id)?];
+    let outputs = [SendNftParams::new(address.convert()?, nft_id)?];
     let transaction = wallet.send_nft(outputs, None).await?;
 
     println_log_info!(
