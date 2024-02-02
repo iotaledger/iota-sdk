@@ -183,27 +183,21 @@ impl DelegationOutputBuilder {
         match self.delegated_amount {
             OutputBuilderAmount::Amount(amount) => {
                 output.delegated_amount = amount;
-                output.amount = if let Some(builder_amount) = self.amount {
-                    match builder_amount {
-                        OutputBuilderAmount::Amount(amount) => amount,
-                        OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
-                    }
-                } else {
-                    amount
-                };
+                output.amount = self.amount.map_or(amount, |builder_amount| match builder_amount {
+                    OutputBuilderAmount::Amount(amount) => amount,
+                    OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
+                });
             }
             OutputBuilderAmount::MinimumAmount(params) => {
                 let min = output.minimum_amount(params);
                 output.delegated_amount = min;
-                output.amount = if let Some(builder_amount) = self.amount {
+                output.amount = self.amount.map_or(min, |builder_amount| {
                     if let OutputBuilderAmount::Amount(amount) = builder_amount {
                         amount
                     } else {
                         min
                     }
-                } else {
-                    min
-                };
+                });
             }
         }
 
