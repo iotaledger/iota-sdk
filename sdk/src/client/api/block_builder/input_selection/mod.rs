@@ -487,7 +487,7 @@ impl InputSelection {
                     input_accounts.push(input);
                 }
                 Output::Foundry(foundry) => {
-                    input_chains_foundries.insert(foundry.chain_id(), &input.output);
+                    input_chains_foundries.insert(foundry.chain_id(), (input.output_id(), &input.output));
                     input_foundries.push(input);
                 }
                 Output::Nft(_) => {

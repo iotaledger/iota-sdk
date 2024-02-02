@@ -16,6 +16,7 @@ pub use self::{
 };
 use crate::types::block::{
     address::Address,
+    context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
     output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
@@ -32,12 +33,15 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
+    pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
+    pub(crate) commitment_context_input: Option<CommitmentContextInput>,
+    pub(crate) bic_context_input: Option<BlockIssuanceCreditContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
-    pub(crate) input_chains: HashMap<ChainId, &'a Output>,
+    pub(crate) input_chains: HashMap<ChainId, (&'a OutputId, &'a Output)>,
     pub(crate) output_amount: u64,
     pub(crate) output_mana: u64,
     pub(crate) output_native_tokens: BTreeMap<TokenId, U256>,
-    pub(crate) output_chains: HashMap<ChainId, &'a Output>,
+    pub(crate) output_chains: HashMap<ChainId, (OutputId, &'a Output)>,
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
@@ -58,11 +62,11 @@ impl<'a> SemanticValidationContext<'a> {
             .iter()
             .filter_map(|(output_id, input)| {
                 if input.is_implicit_account() {
-                    Some((ChainId::from(AccountId::from(*output_id)), *input))
+                    Some((ChainId::from(AccountId::from(*output_id)), (*output_id, *input)))
                 } else {
                     input
                         .chain_id()
-                        .map(|chain_id| (chain_id.or_from_output_id(output_id), *input))
+                        .map(|chain_id| (chain_id.or_from_output_id(output_id), (*output_id, *input)))
                 }
             })
             .collect();
@@ -72,10 +76,8 @@ impl<'a> SemanticValidationContext<'a> {
             .enumerate()
             .filter_map(|(index, output)| {
                 output.chain_id().map(|chain_id| {
-                    (
-                        chain_id.or_from_output_id(&OutputId::new(transaction_id, index as u16)),
-                        output,
-                    )
+                    let output_id = OutputId::new(transaction_id, index as u16);
+                    (chain_id.or_from_output_id(&output_id), (output_id, output))
                 })
             })
             .collect();
@@ -88,6 +90,9 @@ impl<'a> SemanticValidationContext<'a> {
             input_amount: 0,
             input_mana: 0,
             mana_rewards,
+            reward_context_inputs: Default::default(),
+            commitment_context_input: None,
+            bic_context_input: None,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
             output_amount: 0,
@@ -105,6 +110,33 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
         let mut has_implicit_account_creation_address = false;
+
+        self.commitment_context_input = self
+            .transaction
+            .context_inputs()
+            .iter()
+            .find_map(|c| c.as_commitment_opt())
+            .copied();
+
+        self.bic_context_input = self
+            .transaction
+            .context_inputs()
+            .iter()
+            .find_map(|c| c.as_block_issuance_credit_opt())
+            .copied();
+
+        for reward_context_input in self
+            .transaction
+            .context_inputs()
+            .iter()
+            .filter_map(|c| c.as_reward_opt())
+        {
+            if let Some(output_id) = self.inputs.get(reward_context_input.index() as usize).map(|v| v.0) {
+                self.reward_context_inputs.insert(*output_id, *reward_context_input);
+            } else {
+                return Ok(Some(TransactionFailureReason::InvalidRewardContextInput));
+            }
+        }
 
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
@@ -124,29 +156,7 @@ impl<'a> SemanticValidationContext<'a> {
                 }
             }
 
-            let commitment_slot_index = self
-                .transaction
-                .context_inputs()
-                .iter()
-                .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
-
-            // Claiming rewards requires both reward and commitment context inputs
-            if self.mana_rewards.get(*output_id).is_some() {
-                if !self
-                    .transaction
-                    .context_inputs()
-                    .iter()
-                    .filter_map(|c| c.as_reward_opt())
-                    .any(|r| r.index() == index as u16)
-                {
-                    // Missing reward context input
-                    return Ok(Some(TransactionFailureReason::InvalidRewardContextInput));
-                }
-                if commitment_slot_index.is_none() {
-                    // Missing commitment context input
-                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
-                }
-            }
+            let commitment_slot_index = self.commitment_context_input.map(|c| c.slot_index());
 
             if let Some(timelock) = unlock_conditions.timelock() {
                 if let Some(commitment_slot_index) = commitment_slot_index {
@@ -306,36 +316,8 @@ impl<'a> SemanticValidationContext<'a> {
                         TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed,
                     ));
                 }
-            // If mana rewards were provided or none of the inputs can claim rewards
-            // then the mismatch should return an error. Otherwise the mismatch may
-            // still be acceptable.
             } else {
-                // For all inputs that can claim rewards
-                // there must be a reward context input and no mana reward provided.
-                if !self
-                    .inputs
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, (output_id, input))| {
-                        if let Some(chain_id) = input.chain_id().map(|c| c.or_from_output_id(*output_id)) {
-                            let next_state = self.output_chains.get(&chain_id).copied();
-                            return input.can_claim_rewards(next_state);
-                        }
-                        false
-                    })
-                    .all(|(index, (output_id, _))| {
-                        self.mana_rewards.get(*output_id).is_none()
-                            && self
-                                .transaction
-                                .context_inputs()
-                                .iter()
-                                .filter_map(|c| c.as_reward_opt())
-                                .any(|r| r.index() == index as u16)
-                    })
-                {
-                    // Otherwise we have a mismatch
-                    return Ok(Some(TransactionFailureReason::InvalidManaAmount));
-                }
+                return Ok(Some(TransactionFailureReason::InvalidManaAmount));
             }
         }
 
@@ -364,8 +346,8 @@ impl<'a> SemanticValidationContext<'a> {
         // Validation of state transitions and destructions.
         for (chain_id, current_state) in self.input_chains.iter() {
             match self.verify_state_transition(
-                Some(current_state),
-                self.output_chains.get(chain_id).map(core::ops::Deref::deref),
+                Some(*current_state),
+                self.output_chains.get(chain_id).map(|(id, o)| (id, *o)),
             ) {
                 Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
                 Err(_) => {
@@ -378,7 +360,7 @@ impl<'a> SemanticValidationContext<'a> {
         // Validation of state creations.
         for (chain_id, next_state) in self.output_chains.iter() {
             if self.input_chains.get(chain_id).is_none() {
-                match self.verify_state_transition(None, Some(next_state)) {
+                match self.verify_state_transition(None, Some((&next_state.0, next_state.1))) {
                     Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
                     Err(_) => {
                         return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));

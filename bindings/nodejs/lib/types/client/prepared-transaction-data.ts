@@ -3,7 +3,7 @@
 
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
-import { Output, OutputDiscriminator } from '../block/output/output';
+import { Output, OutputDiscriminator, OutputId } from '../block/output/output';
 import { Transaction } from '../block/payload/signed_transaction';
 import { IOutputMetadataResponse } from '../models/api';
 import { Bip44 } from '../secret_manager';
@@ -24,6 +24,10 @@ export class PreparedTransactionData {
      * Optional remainder output information
      */
     remainders?: Remainder[];
+    /**
+     * Mana rewards by input.
+     */
+    manaRewards?: { [output_id: OutputId]: string };
 }
 
 /**
