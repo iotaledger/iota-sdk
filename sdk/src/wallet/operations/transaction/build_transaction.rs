@@ -63,6 +63,7 @@ where
             }
         }
 
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1937
         for output in selected_transaction_data
             .outputs
             .iter_mut()

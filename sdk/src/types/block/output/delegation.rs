@@ -45,6 +45,7 @@ impl DelegationId {
 #[derive(Clone)]
 #[must_use]
 pub struct DelegationOutputBuilder {
+    // TODO https://github.com/iotaledger/iota-sdk/issues/1938
     amount: Option<OutputBuilderAmount>,
     delegated_amount: OutputBuilderAmount,
     delegation_id: DelegationId,
