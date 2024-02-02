@@ -466,7 +466,7 @@ impl StateTransitionVerifier for DelegationOutput {
         if context.mana_rewards.get(output_id).is_some() && !context.reward_context_inputs.contains_key(output_id) {
             return Err(StateTransitionError::MissingRewardInput);
         }
-        if !context.commitment_context_input.is_none() {
+        if context.commitment_context_input.is_none() {
             return Err(StateTransitionError::MissingCommitmentContextInput);
         }
 
