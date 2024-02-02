@@ -1473,12 +1473,12 @@ fn multiple_remainders() {
             assert!(
                 is_remainder_or_return(
                     output,
-                    5_000_000 - nt_remainder_min_storage_deposit,
+                    nt_remainder_min_storage_deposit,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     Some((TOKEN_ID_1, 300))
                 ) || is_remainder_or_return(
                     output,
-                    nt_remainder_min_storage_deposit,
+                    5_000_000 - nt_remainder_min_storage_deposit,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     Some((TOKEN_ID_2, 100))
                 )

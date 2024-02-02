@@ -210,7 +210,7 @@ fn create_remainder_outputs(
 
     // Start with the native tokens
     if let Some(native_tokens) = native_tokens_diff {
-        for native_token in native_tokens.into_iter() {
+        for native_token in native_tokens.into_iter().rev() {
             // If we already picked one for the catchall, create a new remainder output with the min amount
             if catchall_native_token.is_some() {
                 let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)

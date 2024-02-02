@@ -1065,12 +1065,12 @@ fn burn_native_tokens() {
             &selected.outputs[0],
             nt_remainder_output_amount,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((TOKEN_ID_2, 70))
+            Some((TOKEN_ID_1, 80))
         ) && is_remainder_or_return(
             &selected.outputs[1],
             2_000_000 - nt_remainder_output_amount,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((TOKEN_ID_1, 80))
+            Some((TOKEN_ID_2, 70))
         )
     );
 }
