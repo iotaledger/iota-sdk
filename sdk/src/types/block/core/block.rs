@@ -17,7 +17,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlockBody, ValidationBlockBody},
     output::AccountId,
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
     BlockBody, Error,
@@ -112,8 +112,6 @@ impl BlockHeader {
         Blake2b256::digest(bytes).into()
     }
 }
-
-impl WorkScore for BlockHeader {}
 
 fn verify_protocol_version<const VERIFY: bool>(
     protocol_version: &u8,
@@ -262,12 +260,6 @@ impl Block {
     /// NOTE: Will panic if the block body is not a [`ValidationBlockBody`].
     pub fn as_validation(&self) -> &ValidationBlockBody {
         self.body.as_validation()
-    }
-}
-
-impl WorkScore for Block {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.header.work_score(params) + self.body.work_score(params) + self.signature.work_score(params)
     }
 }
 

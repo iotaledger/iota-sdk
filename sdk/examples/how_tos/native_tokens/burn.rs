@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will burn an existing native token, this will not increase the melted supply in the foundry,
@@ -50,9 +50,11 @@ async fn main() -> Result<()> {
         .map(|s| s.parse::<TokenId>().expect("invalid token id"))
         .unwrap_or_else(|| TokenId::from(*balance.foundries().first().unwrap()));
 
-    if let Some(native_token_balance) = balance.native_tokens().iter().find(|native_token| {
-        native_token.token_id() == &token_id && native_token.available() >= U256::from(MIN_AVAILABLE_AMOUNT)
-    }) {
+    if let Some(native_token_balance) = balance
+        .native_tokens()
+        .get(&token_id)
+        .filter(|native_token| native_token.available() >= U256::from(MIN_AVAILABLE_AMOUNT))
+    {
         println!("Balance before burning: {native_token_balance:#?}");
 
         // Set the stronghold password
@@ -76,11 +78,7 @@ async fn main() -> Result<()> {
         let balance = wallet.sync(None).await?;
 
         print!("Balance after burning: ");
-        if let Some(native_token_balance) = balance
-            .native_tokens()
-            .iter()
-            .find(|native_token| native_token.token_id() == native_token_balance.token_id())
-        {
+        if let Some(native_token_balance) = balance.native_tokens().get(&token_id) {
             println!("{native_token_balance:#?}");
         } else {
             println!("No remaining tokens");

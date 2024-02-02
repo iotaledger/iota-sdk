@@ -3,15 +3,15 @@
 
 use std::collections::HashMap;
 
-use super::{Error, InputSelection, Requirement};
+use super::{native_tokens::get_native_tokens, Error, InputSelection, Requirement};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{api::input_selection::remainder::required_remainder_amount, secret::types::InputSigningData},
     types::block::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
+            MinimumOutputAmount, NftOutputBuilder, Output, OutputId, StorageScoreParameters,
         },
         slot::SlotIndex,
     },
@@ -35,44 +35,42 @@ pub(crate) fn sdruc_not_expired(
     })
 }
 
-pub(crate) fn amount_sums(
-    selected_inputs: &[InputSigningData],
-    outputs: &[Output],
-    slot_index: SlotIndex,
-) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
-    let mut inputs_sum = 0;
-    let mut outputs_sum = 0;
-    let mut inputs_sdr = HashMap::new();
-    let mut outputs_sdr = HashMap::new();
+impl InputSelection {
+    pub(crate) fn amount_sums(&self) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
+        let mut inputs_sum = 0;
+        let mut outputs_sum = 0;
+        let mut inputs_sdr = HashMap::new();
+        let mut outputs_sdr = HashMap::new();
 
-    for selected_input in selected_inputs {
-        inputs_sum += selected_input.output.amount();
+        for selected_input in &self.selected_inputs {
+            inputs_sum += selected_input.output.amount();
 
-        if let Some(sdruc) = sdruc_not_expired(&selected_input.output, slot_index) {
-            *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
-        }
-    }
-
-    for output in outputs {
-        outputs_sum += output.amount();
-
-        if let Output::Basic(output) = output {
-            if let Some(address) = output.simple_deposit_address() {
-                *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_index) {
+                *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
         }
-    }
 
-    // TODO explanation about that
-    for (sdr_address, input_sdr_amount) in &inputs_sdr {
-        let output_sdr_amount = outputs_sdr.get(sdr_address).unwrap_or(&0);
+        for output in &self.outputs {
+            outputs_sum += output.amount();
 
-        if input_sdr_amount > output_sdr_amount {
-            outputs_sum += input_sdr_amount - output_sdr_amount;
+            if let Output::Basic(output) = output {
+                if let Some(address) = output.simple_deposit_address() {
+                    *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+                }
+            }
         }
-    }
 
-    (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
+        // TODO explanation about that
+        for (sdr_address, input_sdr_amount) in &inputs_sdr {
+            let output_sdr_amount = outputs_sdr.get(sdr_address).unwrap_or(&0);
+
+            if input_sdr_amount > output_sdr_amount {
+                outputs_sum += input_sdr_amount - output_sdr_amount;
+            }
+        }
+
+        (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -84,17 +82,18 @@ struct AmountSelection {
     outputs_sdr: HashMap<Address, u64>,
     remainder_amount: u64,
     native_tokens_remainder: bool,
+    mana_remainder: bool,
     slot_index: SlotIndex,
+    storage_score_parameters: StorageScoreParameters,
 }
 
 impl AmountSelection {
     fn new(input_selection: &InputSelection) -> Result<Self, Error> {
-        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = amount_sums(
-            &input_selection.selected_inputs,
-            &input_selection.outputs,
-            input_selection.slot_index,
-        );
+        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = input_selection.amount_sums();
+
         let (remainder_amount, native_tokens_remainder) = input_selection.remainder_amount()?;
+
+        let (selected_mana, required_mana) = input_selection.mana_sums()?;
 
         Ok(Self {
             newly_selected_inputs: HashMap::new(),
@@ -104,7 +103,9 @@ impl AmountSelection {
             outputs_sdr,
             remainder_amount,
             native_tokens_remainder,
+            mana_remainder: selected_mana > required_mana,
             slot_index: input_selection.slot_index,
+            storage_score_parameters: input_selection.protocol_parameters.storage_score_parameters(),
         })
     }
 
@@ -120,14 +121,14 @@ impl AmountSelection {
             }
         } else if self.inputs_sum < self.outputs_sum {
             self.outputs_sum - self.inputs_sum
-        } else if self.native_tokens_remainder {
+        } else if self.native_tokens_remainder || self.mana_remainder {
             self.remainder_amount
         } else {
             0
         }
     }
 
-    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData>) -> bool {
+    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData>) -> Result<bool, Error> {
         for input in inputs {
             if self.newly_selected_inputs.contains_key(input.output_id()) {
                 continue;
@@ -153,12 +154,29 @@ impl AmountSelection {
             self.inputs_sum += input.output.amount();
             self.newly_selected_inputs.insert(*input.output_id(), input.clone());
 
+            if input.output.native_token().is_some() {
+                // Recalculate the remaining amount, as a new native token may require a new remainder output.
+                let (remainder_amount, native_tokens_remainder) = self.remainder_amount()?;
+                log::debug!(
+                    "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
+                );
+                self.remainder_amount = remainder_amount;
+                self.native_tokens_remainder = native_tokens_remainder;
+            }
+
             if self.missing_amount() == 0 {
-                return true;
+                return Ok(true);
             }
         }
 
-        false
+        Ok(false)
+    }
+
+    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
+        let input_native_tokens =
+            get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish()?;
+
+        required_remainder_amount(Some(input_native_tokens), self.storage_score_parameters)
     }
 
     fn into_newly_selected_inputs(self) -> Vec<InputSigningData> {
@@ -171,14 +189,14 @@ impl InputSelection {
         &self,
         base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
         amount_selection: &mut AmountSelection,
-    ) -> bool {
+    ) -> Result<bool, Error> {
         // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // No native token, unexpired SDRUC.
@@ -186,8 +204,8 @@ impl InputSelection {
             input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // Native token, expired SDRUC.
@@ -195,8 +213,8 @@ impl InputSelection {
             input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // Native token, unexpired SDRUC.
@@ -204,16 +222,16 @@ impl InputSelection {
             input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
-        if amount_selection.fulfil(inputs) {
-            return true;
+        if amount_selection.fulfil(inputs)? {
+            return Ok(true);
         }
 
         // Everything else.
-        if amount_selection.fulfil(base_inputs) {
-            return true;
+        if amount_selection.fulfil(base_inputs)? {
+            return Ok(true);
         }
 
-        false
+        Ok(false)
     }
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
@@ -299,7 +317,7 @@ impl InputSelection {
         self.available_inputs
             .sort_by(|left, right| left.output.amount().cmp(&right.output.amount()));
 
-        if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection) {
+        if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection)? {
             return Ok(r);
         }
 
@@ -313,7 +331,7 @@ impl InputSelection {
             self.available_inputs
                 .sort_by(|left, right| right.output.amount().cmp(&left.output.amount()));
 
-            if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection) {
+            if let Some(r) = self.fulfill_amount_requirement_inner(&mut amount_selection)? {
                 return Ok(r);
             }
         }
@@ -342,7 +360,7 @@ impl InputSelection {
     fn fulfill_amount_requirement_inner(
         &mut self,
         amount_selection: &mut AmountSelection,
-    ) -> Option<Vec<InputSigningData>> {
+    ) -> Result<Option<Vec<InputSigningData>>, Error> {
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {
             if let Output::Basic(output) = &input.output {
                 output
@@ -360,8 +378,8 @@ impl InputSelection {
             }
         });
 
-        if self.fulfil(basic_ed25519_inputs, amount_selection) {
-            return None;
+        if self.fulfil(basic_ed25519_inputs, amount_selection)? {
+            return Ok(None);
         }
 
         let basic_non_ed25519_inputs = self.available_inputs.iter().filter(|input| {
@@ -381,8 +399,8 @@ impl InputSelection {
             }
         });
 
-        if self.fulfil(basic_non_ed25519_inputs, amount_selection) {
-            return None;
+        if self.fulfil(basic_non_ed25519_inputs, amount_selection)? {
+            return Ok(None);
         }
 
         // Other kinds of outputs.
@@ -396,7 +414,7 @@ impl InputSelection {
             .peekable();
 
         if inputs.peek().is_some() {
-            amount_selection.fulfil(inputs);
+            amount_selection.fulfil(inputs)?;
 
             log::debug!(
                 "Outputs {:?} selected to fulfill the amount requirement",
@@ -411,12 +429,12 @@ impl InputSelection {
                 // TODO explanation of Amount
                 self.requirements.push(Requirement::Amount);
 
-                Some(amount_selection.clone().into_newly_selected_inputs())
+                Ok(Some(amount_selection.clone().into_newly_selected_inputs()))
             } else {
-                None
+                Ok(None)
             }
         } else {
-            None
+            Ok(None)
         }
     }
 }

@@ -1,16 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::{keys::bip44::Bip44, signatures::ed25519::PublicKey};
-use derive_more::From;
-
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{
-            feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+            feature::{
+                BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeySource, BlockIssuerKeys,
+                Ed25519PublicKeyHashBlockIssuerKey,
+            },
             unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutput, OutputId,
         },
@@ -30,7 +30,7 @@ where
     pub async fn implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
+        key_source: impl Into<BlockIssuerKeySource> + Send,
     ) -> Result<TransactionWithMetadata> {
         let issuer_id = AccountId::from(output_id);
 
@@ -46,32 +46,11 @@ where
     pub async fn prepare_implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
+        key_source: impl Into<BlockIssuerKeySource> + Send,
     ) -> Result<PreparedTransactionData>
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let key_source = match key_source.map(Into::into) {
-            Some(key_source) => key_source,
-            None => self.bip_path().await.ok_or(Error::MissingBipPath)?.into(),
-        };
-
-        let public_key = match key_source {
-            BlockIssuerKeySource::Key(public_key) => public_key,
-            BlockIssuerKeySource::Bip44Path(bip_path) => {
-                self.secret_manager
-                    .read()
-                    .await
-                    .generate_ed25519_public_keys(
-                        bip_path.coin_type,
-                        bip_path.account,
-                        bip_path.address_index..bip_path.address_index + 1,
-                        None,
-                    )
-                    .await?[0]
-            }
-        };
-
         let wallet_data = self.data().await;
         let implicit_account_data = wallet_data
             .unspent_outputs
@@ -82,6 +61,29 @@ where
         } else {
             return Err(Error::ImplicitAccountNotFound);
         };
+        let ed25519_address = *implicit_account
+            .address()
+            .as_implicit_account_creation()
+            .ed25519_address();
+
+        let block_issuer_key = BlockIssuerKey::from(match key_source.into() {
+            BlockIssuerKeySource::ImplicitAccountAddress => Ed25519PublicKeyHashBlockIssuerKey::new(*ed25519_address),
+            BlockIssuerKeySource::PublicKey(public_key) => {
+                Ed25519PublicKeyHashBlockIssuerKey::from_public_key(public_key)
+            }
+            BlockIssuerKeySource::Bip44Path(bip_path) => Ed25519PublicKeyHashBlockIssuerKey::from_public_key(
+                self.secret_manager
+                    .read()
+                    .await
+                    .generate_ed25519_public_keys(
+                        bip_path.coin_type,
+                        bip_path.account,
+                        bip_path.address_index..bip_path.address_index + 1,
+                        None,
+                    )
+                    .await?[0],
+            ),
+        });
 
         let account_id = AccountId::from(output_id);
         let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
@@ -90,15 +92,10 @@ where
                 implicit_account_data.output_id.transaction_id().slot_index(),
                 self.client().get_slot_index().await?,
             )?)
-            .with_unlock_conditions([AddressUnlockCondition::from(Address::from(
-                *implicit_account
-                    .address()
-                    .as_implicit_account_creation()
-                    .ed25519_address(),
-            ))])
+            .with_unlock_conditions([AddressUnlockCondition::from(Address::from(ed25519_address))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
+                BlockIssuerKeys::from_vec(vec![block_issuer_key])?,
             )?])
             .finish_output()?;
 
@@ -109,6 +106,7 @@ where
 
         let transaction_options = TransactionOptions {
             context_inputs: Some(vec![
+                // TODO Remove in https://github.com/iotaledger/iota-sdk/pull/1872
                 CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
                 BlockIssuanceCreditContextInput::new(account_id).into(),
             ]),
@@ -119,10 +117,4 @@ where
         self.prepare_transaction(vec![account], transaction_options.clone())
             .await
     }
-}
-
-#[derive(From)]
-pub enum BlockIssuerKeySource {
-    Key(PublicKey),
-    Bip44Path(Bip44),
 }

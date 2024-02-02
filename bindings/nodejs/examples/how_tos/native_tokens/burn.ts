@@ -31,28 +31,24 @@ async function run() {
         let balance = await wallet.sync();
 
         // Get a token with sufficient balance
-        const tokenId = balance.nativeTokens.find(
-            (t) => t.available >= MIN_AVAILABLE_AMOUNT,
-        )?.tokenId;
-
-        let token = balance.nativeTokens.find(
-            (nativeToken) =>
-                nativeToken.tokenId == tokenId &&
-                Number(nativeToken.available) >= MIN_AVAILABLE_AMOUNT,
+        const tokenId = Object.keys(balance.nativeTokens).find(
+            (t) => balance.nativeTokens[t].available >= MIN_AVAILABLE_AMOUNT,
         );
-        if (!token) {
+
+        if (!tokenId) {
             throw new Error(
-                `Native token '${tokenId}' doesn't exist or there's not at least '${Number(
+                `No native token with at least '${Number(
                     MIN_AVAILABLE_AMOUNT,
                 )}' tokens of it in the wallet`,
             );
         }
+        let token = balance.nativeTokens[tokenId];
 
         console.log(`Balance before burning: ${token.available}`);
 
         // Burn a native token
         const transaction = await wallet
-            .prepareBurnNativeToken(token.tokenId, BURN_AMOUNT)
+            .prepareBurnNativeToken(tokenId, BURN_AMOUNT)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
@@ -68,9 +64,7 @@ async function run() {
 
         balance = await wallet.sync();
 
-        token = balance.nativeTokens.find(
-            (nativeToken) => nativeToken.tokenId == tokenId,
-        );
+        token = balance.nativeTokens[tokenId];
         if (token) {
             console.log(`Balance after burning: ${token.available}`);
         } else {

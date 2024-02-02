@@ -37,7 +37,7 @@ impl StateMetadataFeature {
     #[inline(always)]
     pub fn new(data: impl IntoIterator<Item = (String, Vec<u8>)>) -> Result<Self, Error> {
         let mut builder = Self::build();
-        builder.extend(data.into_iter());
+        builder.extend(data);
         builder.finish()
     }
 
@@ -159,8 +159,7 @@ impl Packable for StateMetadataFeature {
         );
 
         verify_keys::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
-        verify_packed_len::<VERIFY>(unpacker.counter(), StateMetadataFeature::BYTE_LENGTH_RANGE)
-            .map_err(UnpackError::Packable)?;
+        verify_packed_len::<VERIFY>(unpacker.counter(), Self::BYTE_LENGTH_RANGE).map_err(UnpackError::Packable)?;
 
         Ok(res)
     }

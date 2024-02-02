@@ -94,6 +94,23 @@ class BlockFailureReason(IntEnum):
     PayloadInvalid = 12
     Invalid = 255
 
+    def __str__(self):
+        return {
+            1: "The block is too old to issue.",
+            2: "One of the block's parents is too old.",
+            3: "One of the block's parents does not exist.",
+            4: "One of the block's parents is invalid.",
+            5: "The block's issuer account could not be found.",
+            6: "The block's protocol version is invalid.",
+            7: "The mana cost could not be calculated.",
+            8: "The block's issuer account burned insufficient Mana for a block.",
+            9: "The account is invalid.",
+            10: "The block's signature is invalid.",
+            11: "The block is dropped due to congestion.",
+            12: "The block payload is invalid.",
+            255: "The block is invalid."
+        }[self.value]
+
 
 class TransactionFailureReason(Enum):
     """Represents the possible reasons for a conflicting transaction.

@@ -1,4 +1,4 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -50,3 +50,29 @@ class TransactionWithMetadata:
     inputs = List[OutputWithMetadata]
     note: Optional[str] = None
     block_id: Optional[HexStr] = None
+
+
+@json
+@dataclass
+class CreateNativeTokenTransaction:
+    """A transaction that created a native token.
+
+    Attributes:
+        token_id: The id of the created native token.
+        transaction: The transaction that created the native token.
+    """
+    token_id: HexStr
+    transaction: TransactionWithMetadata
+
+
+@json
+@dataclass
+class CreateDelegationTransaction:
+    """A transaction that created a delegation.
+
+    Attributes:
+        delegation_id: The id of the created delegation.
+        transaction: The transaction that created the delegation.
+    """
+    delegation_id: HexStr
+    transaction: TransactionWithMetadata

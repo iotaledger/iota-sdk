@@ -11,7 +11,7 @@ use rand::distributions::{Alphanumeric, DistString};
 
 use crate::types::block::{
     output::feature::{
-        BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey, Feature, FeatureFlags,
+        BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey, Feature, FeatureFlags,
         IssuerFeature, MetadataFeature, NativeTokenFeature, SenderFeature, StakingFeature, StateMetadataFeature,
         TagFeature,
     },
@@ -106,17 +106,16 @@ pub fn rand_tag_feature() -> TagFeature {
     TagFeature::new(bytes).unwrap()
 }
 
-/// Generates a valid random Ed25519 block issuer key.
-pub fn rand_ed25519_block_issuer_key() -> Ed25519BlockIssuerKey {
-    crypto::signatures::ed25519::SecretKey::generate()
-        .unwrap()
-        .public_key()
-        .into()
+/// Generates a valid random Ed25519 public key hash block issuer key.
+pub fn rand_ed25519_public_key_hash_block_issuer_key() -> Ed25519PublicKeyHashBlockIssuerKey {
+    Ed25519PublicKeyHashBlockIssuerKey::from_public_key(
+        crypto::signatures::ed25519::SecretKey::generate().unwrap().public_key(),
+    )
 }
 
 /// Generates a valid random block issuer key.
 pub fn rand_block_issuer_key() -> BlockIssuerKey {
-    rand_ed25519_block_issuer_key().into()
+    rand_ed25519_public_key_hash_block_issuer_key().into()
 }
 
 /// Generates a vector of random valid block issuer keys of a given length.

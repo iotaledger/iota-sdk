@@ -9,9 +9,9 @@ from iota_sdk.external import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.block.block import Block, UnsignedBlock
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import ProtocolParameters
+from iota_sdk.types.payload import SignedTransactionPayload
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
-from iota_sdk.types.payload import SignedTransactionPayload
 
 
 class LedgerNanoSecretManager(dict):

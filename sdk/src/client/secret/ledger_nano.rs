@@ -306,8 +306,10 @@ impl SecretManage for LedgerSecretManager {
         } else {
             // figure out the remainder output and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
-            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
-                Some(remainder) => {
+            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainders.as_slice() {
+                // Multiple remainder outputs would require blind signing since at least one would contain a native
+                // token, that's why matching a single one is enough.
+                [remainder] => {
                     if let Some(chain) = remainder.chain {
                         (
                             Some(&remainder.output),
@@ -320,7 +322,7 @@ impl SecretManage for LedgerSecretManager {
                         (None, LedgerBIP32Index::default())
                     }
                 }
-                None => (None, LedgerBIP32Index::default()),
+                _ => (None, LedgerBIP32Index::default()),
             };
 
             let mut remainder_index = 0u16;
@@ -540,14 +542,15 @@ fn merge_unlocks(
             // Time in which no address can unlock the output because of an expiration unlock condition
             .ok_or(Error::ExpirationDeadzone)?;
 
-        let required_address = if let Address::Restricted(restricted) = &required_address {
-            restricted.address()
-        } else {
-            &required_address
+        // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
+        let required_address = match required_address {
+            Address::ImplicitAccountCreation(implicit) => Address::Ed25519(*implicit.ed25519_address()),
+            Address::Restricted(restricted) => restricted.address().clone(),
+            _ => required_address,
         };
 
         // Check if we already added an [Unlock] for this address
-        match block_indexes.get(required_address) {
+        match block_indexes.get(&required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
@@ -574,7 +577,7 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature.is_valid(transaction_signing_hash.as_ref(), ed25519_address)?;
+                    ed25519_signature.is_valid(transaction_signing_hash.as_ref(), &ed25519_address)?;
                 }
 
                 merged_unlocks.push(unlock);
