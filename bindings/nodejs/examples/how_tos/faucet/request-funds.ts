@@ -13,7 +13,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/account_wallet/request-funds.ts
 
-// In this example we request funds to an account wallet.
+// In this example we request funds to the wallet's first account output address.
 async function run() {
     initLogger();
     for (const envVar of ['WALLET_DB_PATH', 'FAUCET_URL']) {
@@ -32,7 +32,7 @@ async function run() {
 
         const totalBaseTokenBalance = balance.baseCoin.total;
         console.log(
-            `Balance before requesting funds on account address: ${totalBaseTokenBalance}`,
+            `Balance before requesting funds to the wallet's first account output address: ${totalBaseTokenBalance}`,
         );
 
         const accountId = balance.accounts[0];
@@ -62,7 +62,7 @@ async function run() {
         const totalBaseTokenBalanceAfter = (await wallet.sync(syncOptions))
             .baseCoin.total;
         console.log(
-            `Balance after requesting funds on account address: ${totalBaseTokenBalanceAfter}`,
+            `Balance after requesting funds to the wallet's first account output address: ${totalBaseTokenBalanceAfter}`,
         );
     } catch (error) {
         console.error('Error: ', error);
