@@ -466,7 +466,7 @@ export class Utils {
         inputs: InputSigningData[],
         protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
-        manaRewards?: NumericString,
+        manaRewards?: { [outputId: OutputId]: NumericString },
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',

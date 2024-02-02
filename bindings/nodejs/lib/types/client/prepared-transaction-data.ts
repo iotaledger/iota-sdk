@@ -7,6 +7,7 @@ import { Output, OutputDiscriminator, OutputId } from '../block/output/output';
 import { Transaction } from '../block/payload/signed_transaction';
 import { IOutputMetadataResponse } from '../models/api';
 import { Bip44 } from '../secret_manager';
+import { NumericString } from '../utils';
 
 /**
  * Helper struct for offline signing.
@@ -27,7 +28,7 @@ export class PreparedTransactionData {
     /**
      * Mana rewards by input.
      */
-    manaRewards?: { [output_id: OutputId]: string };
+    manaRewards?: { [outputId: OutputId]: NumericString };
 }
 
 /**
