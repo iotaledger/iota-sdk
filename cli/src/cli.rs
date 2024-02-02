@@ -13,7 +13,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
-    wallet::{ClientOptions, Wallet},
+    wallet::{core::AddressProvider, ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
@@ -280,17 +280,18 @@ pub async fn init_command(
         None
     };
 
+    // TODO: expect
     let address = init_params
         .address
         .map(|addr| Bech32Address::from_str(&addr))
-        .transpose()?;
+        .transpose()?
+        .expect("todo");
 
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_bip_path(init_params.bip_path)
-        .with_address(address)
+        .with_address_provider((address, init_params.bip_path))
         .with_alias(alias)
         .finish()
         .await?)
@@ -345,7 +346,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         // Will be overwritten by the backup's value.
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

@@ -42,7 +42,7 @@
 //     let wallet = Wallet::builder()
 //         .with_secret_manager(SecretManager::Stronghold(stronghold))
 //         .with_client_options(client_options.clone())
-//         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+//         .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
 //         .with_storage_path("test-storage/backup_and_restore/1")
 //         .finish()
 //         .await?;
@@ -63,7 +63,7 @@
 //         .with_secret_manager(SecretManager::Stronghold(stronghold))
 //         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
 //         // Build with a different coin type, to check if it gets replaced by the one from the backup
-//         .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
+//         .with_address_provider(Bip44::new(IOTA_COIN_TYPE))
 //         .finish()
 //         .await?;
 

@@ -33,6 +33,7 @@ pub use self::{
     method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };
+use crate::iota_sdk::wallet::core::AddressProvider;
 
 pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error> {
     let output_config: LoggerOutputConfigBuilder = serde_json::from_str(&config).expect("invalid logger config");
@@ -89,10 +90,17 @@ impl WalletOptions {
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
-            .with_address(self.address)
             .with_alias(self.alias)
-            .with_bip_path(self.bip_path)
             .with_client_options(self.client_options);
+
+        if let Some(address) = self.address {
+            builder = builder.with_address_provider((address, self.bip_path));
+        } else if let Some(bip_path) = self.bip_path {
+            builder = builder.with_address_provider(bip_path);
+        } else {
+            // TODO: return error
+            todo!("return error")
+        };
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {

@@ -92,7 +92,7 @@ async fn changed_bip_path() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic.clone(),
         )?))
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
+        .with_address_provider(Bip44::new(IOTA_COIN_TYPE))
         .with_storage_path(storage_path)
         .finish()
         .await;
@@ -149,7 +149,7 @@ async fn iota_coin_type() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
+        .with_address_provider(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {

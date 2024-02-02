@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
         .with_storage_path("getting-started-db")
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
         .with_alias("Alice".to_string())
         .finish()
         .await?;

@@ -189,7 +189,7 @@ impl Wallet {
                 )
                 .with_client_options(self.client_options().await)
                 // TODO: expect
-                .with_address_provider(AddressProvider::SecretManager(self.bip_path().expect("todo")));
+                .with_address_provider(self.bip_path().expect("todo"));
 
             wallet_builder.save(self.storage_manager()).await?;
 
@@ -349,7 +349,7 @@ impl Wallet<StrongholdSecretManager> {
                 )
                 .with_client_options(self.client_options().await)
                 // TODO: expect
-                .with_address_provider(AddressProvider::SecretManager(self.bip_path().expect("todo")));
+                .with_address_provider(self.bip_path().expect("todo"));
 
             wallet_builder.save(self.storage_manager()).await?;
 

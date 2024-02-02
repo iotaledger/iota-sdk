@@ -16,7 +16,7 @@ use crypto::keys::{
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
-pub use self::builder::WalletBuilder;
+pub use self::builder::{AddressProvider, WalletBuilder};
 use self::operations::background_syncing::BackgroundSyncStatus;
 use super::types::{TransactionWithMetadata, TransactionWithMetadataDto};
 #[cfg(feature = "events")]
