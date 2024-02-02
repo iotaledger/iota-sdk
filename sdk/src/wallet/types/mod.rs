@@ -42,14 +42,17 @@ pub struct OutputData {
     pub output: Output,
     /// The output ID proof
     pub output_id_proof: OutputIdProof,
-    /// If an output is spent
-    pub is_spent: bool,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
 }
 
 impl OutputData {
+    /// Returns whether the [`OutputMetadata`] is spent or not.
+    pub fn is_spent(&self) -> bool {
+        self.metadata.is_spent()
+    }
+
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
