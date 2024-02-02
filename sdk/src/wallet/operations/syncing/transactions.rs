@@ -92,7 +92,7 @@ where
             for input in transaction.payload.transaction().inputs() {
                 let Input::Utxo(input) = input;
                 if let Some(input) = wallet_ledger.outputs.get(input.output_id()) {
-                    if input.is_spent {
+                    if input.metadata.is_spent() {
                         input_got_spent = true;
                     }
                 }
@@ -249,7 +249,7 @@ fn process_transaction_with_unknown_state(
     for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;
         if let Some(output_data) = wallet_ledger.outputs.get(input.output_id()) {
-            if !output_data.metadata.is_spent() {
+            if !output_data.is_spent() {
                 // unspent output needs to be made available again
                 output_ids_to_unlock.push(*input.output_id());
                 all_inputs_spent = false;

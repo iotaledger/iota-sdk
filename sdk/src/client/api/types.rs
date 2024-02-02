@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::bip44::Bip44;
@@ -72,6 +72,15 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
             inputs_data: dto.inputs_data,
             remainders: dto.remainders,
         })
+    }
+}
+
+impl Serialize for PreparedTransactionData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        PreparedTransactionDataDto::from(self).serialize(serializer)
     }
 }
 

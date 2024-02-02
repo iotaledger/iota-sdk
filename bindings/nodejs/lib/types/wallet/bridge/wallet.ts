@@ -20,6 +20,7 @@ import type {
     CreateNativeTokenParams,
     TransactionOptions,
     MintNftParams,
+    CreateDelegationParams,
 } from '../transaction-options';
 import type {
     ParticipationEventId,
@@ -28,6 +29,7 @@ import type {
 } from '../participation';
 import type { ConsolidationParams } from '../consolidation-params';
 import {
+    DelegationId,
     HexEncodedAmount,
     NumericString,
     Output,
@@ -172,6 +174,22 @@ export type __PrepareMeltNativeTokenMethod__ = {
         tokenId: TokenId;
         meltAmount: HexEncodedAmount;
         options?: TransactionOptions;
+    };
+};
+
+export type __PrepareCreateDelegationMethod__ = {
+    name: 'prepareCreateDelegation';
+    data: {
+        params: CreateDelegationParams;
+        options?: TransactionOptions;
+    };
+};
+
+export type __PrepareDelayDelegationClaimingMethod__ = {
+    name: 'prepareDelayDelegationClaiming';
+    data: {
+        delegationId: DelegationId;
+        reclaimExcess: boolean;
     };
 };
 

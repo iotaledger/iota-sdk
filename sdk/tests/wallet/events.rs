@@ -59,7 +59,6 @@ fn wallet_events_serde() {
                 hash: [0u8; 32],
             }),
         },
-        is_spent: false,
         network_id: 42,
         remainder: true,
     };
