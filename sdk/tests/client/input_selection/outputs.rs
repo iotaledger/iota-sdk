@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::str::FromStr;
+use std::{collections::HashSet, str::FromStr};
 
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
@@ -72,6 +72,47 @@ fn no_outputs() {
     .select();
 
     assert!(matches!(selected, Err(Error::InvalidOutputCount(0))));
+}
+
+#[test]
+fn no_outputs_but_required_input() {
+    let protocol_parameters = protocol_parameters();
+
+    let inputs = build_inputs(
+        [Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
+    let outputs = Vec::new();
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        protocol_parameters,
+    )
+    .with_required_inputs(HashSet::from([*inputs[0].output_id()]))
+    .select()
+    .unwrap();
+
+    assert_eq!(selected.inputs, inputs);
+    // Just a remainder
+    assert_eq!(selected.outputs.len(), 1);
+    assert!(is_remainder_or_return(
+        &selected.outputs[0],
+        1_000_000,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        None
+    ));
 }
 
 #[test]

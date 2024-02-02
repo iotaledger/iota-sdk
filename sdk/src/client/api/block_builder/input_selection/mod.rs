@@ -402,7 +402,8 @@ impl InputSelection {
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn or mana allotments are provided, outputs will be added later.
+            // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
+            // create remainder outputs.
             if !(self.outputs.is_empty()
                 && (self.burn.is_some() || self.mana_allotments != 0 || !self.required_inputs.is_empty()))
             {
