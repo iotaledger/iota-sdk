@@ -8,7 +8,7 @@ use iota_sdk::{
     client::{
         api::{transaction::validate_signed_transaction_payload_length, verify_semantic, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManageExt, SignTransaction},
+        secret::{PublicKeyOptions, SecretManageExt, SignTransaction},
         Result,
     },
     types::block::{
@@ -24,14 +24,14 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs,
+    build_inputs, build_outputs, random_mnemonic_secret_manager,
     Build::{Basic, Nft},
     NFT_ID_1,
 };
 
 #[tokio::test]
 async fn nft_reference_unlocks() -> Result<()> {
-    let secret_manager = MnemonicSecretManager::generate_random()?;
+    let secret_manager = random_mnemonic_secret_manager()?;
 
     let address_0 = Address::from(
         secret_manager

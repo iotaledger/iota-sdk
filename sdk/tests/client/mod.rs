@@ -18,7 +18,7 @@ mod signing;
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 
 use iota_sdk::{
-    client::secret::types::InputSigningData,
+    client::secret::{mnemonic::MnemonicSecretManager, types::InputSigningData},
     types::block::{
         address::{AccountAddress, Address},
         output::{
@@ -282,4 +282,8 @@ fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native
     } else {
         false
     }
+}
+
+pub fn random_mnemonic_secret_manager() -> Result<MnemonicSecretManager, iota_sdk::client::Error> {
+    MnemonicSecretManager::try_from_mnemonic(iota_sdk::client::Client::generate_mnemonic()?)
 }

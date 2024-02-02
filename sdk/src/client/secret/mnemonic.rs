@@ -206,11 +206,6 @@ impl MnemonicSecretManager {
         let seed = Seed::from_bytes(bytes.as_ref());
         Ok(Self(seed))
     }
-
-    /// Generate a random mnemonic to use for the secret manager.
-    pub fn generate_random() -> Result<Self, Error> {
-        Self::try_from_mnemonic(Client::generate_mnemonic()?)
-    }
 }
 
 impl SecretManagerConfig for MnemonicSecretManager {
