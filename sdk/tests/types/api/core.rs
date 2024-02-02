@@ -26,7 +26,7 @@ fn json_response<T>(path: &str) -> Result<T, serde_json::Error>
 where
     for<'a> T: Serialize + Deserialize<'a>,
 {
-    let file = std::fs::read_to_string(&format!("./tests/types/api/fixtures/{path}")).unwrap();
+    let file = std::fs::read_to_string(format!("./tests/types/api/fixtures/{path}")).unwrap();
     let value_des = serde_json::from_str::<serde_json::Value>(&file)?;
     let t = serde_json::from_value::<T>(value_des.clone())?;
     // let value_ser = serde_json::to_value(&t)?;
@@ -41,7 +41,7 @@ fn binary_response<T: PackableExt>(
     path: &str,
     visitor: &T::UnpackVisitor,
 ) -> Result<T, UnpackError<<T as Packable>::UnpackError, UnexpectedEOF>> {
-    let file = std::fs::read_to_string(&format!("./tests/types/api/fixtures/{path}")).unwrap();
+    let file = std::fs::read_to_string(format!("./tests/types/api/fixtures/{path}")).unwrap();
     let bytes = hex::decode(file).unwrap();
     let mut unpacker = SliceUnpacker::new(bytes.as_slice());
     let res = T::unpack::<_, true>(&mut unpacker, visitor);
