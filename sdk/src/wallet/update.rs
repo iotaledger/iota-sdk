@@ -5,7 +5,10 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{OutputId, OutputMetadata},
+    types::block::{
+        output::{OutputConsumptionMetadata, OutputId, OutputMetadata},
+        payload::signed_transaction::TransactionId,
+    },
     wallet::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
@@ -66,9 +69,20 @@ where
                     wallet_data.unspent_outputs.remove(&output_id);
                     // Update spent data fields
                     if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
-                        // TODO https://github.com/iotaledger/iota-sdk/issues/1718
-                        // output_data.metadata.set_spent(true);
-                        output_data.is_spent = true;
+                        if !output_data.is_spent() {
+                            log::warn!(
+                                "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
+                                output_id
+                            );
+                            // Set 0 values because we don't have the actual metadata and also couldn't get it, probably
+                            // because it got pruned.
+                            output_data.metadata.spent = Some(OutputConsumptionMetadata::new(
+                                0.into(),
+                                TransactionId::new([0u8; TransactionId::LENGTH]),
+                                None,
+                            ));
+                        }
+
                         #[cfg(feature = "events")]
                         {
                             self.emit(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
@@ -110,7 +124,7 @@ where
                     .await;
                 }
             };
-            if !output_data.is_spent {
+            if !output_data.is_spent() {
                 wallet_data.unspent_outputs.insert(output_data.output_id, output_data);
             }
         }
@@ -160,8 +174,20 @@ where
         }
 
         for output_to_unlock in &spent_output_ids {
-            if let Some(output) = wallet_data.outputs.get_mut(output_to_unlock) {
-                output.is_spent = true;
+            if let Some(output_data) = wallet_data.outputs.get_mut(output_to_unlock) {
+                if !output_data.is_spent() {
+                    log::warn!(
+                        "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
+                        output_data.output_id
+                    );
+                    // Set 0 values because we don't have the actual metadata and also couldn't get it, probably because
+                    // it got pruned.
+                    output_data.metadata.spent = Some(OutputConsumptionMetadata::new(
+                        0.into(),
+                        TransactionId::new([0u8; TransactionId::LENGTH]),
+                        None,
+                    ));
+                }
             }
             wallet_data.locked_outputs.remove(output_to_unlock);
             wallet_data.unspent_outputs.remove(output_to_unlock);

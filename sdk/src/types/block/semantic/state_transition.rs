@@ -352,25 +352,7 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let past_bounded_slot_index = slot_commitment_id.past_bounded_slot(protocol_parameters.max_committable_age);
-        let past_bounded_epoch_index = past_bounded_slot_index.to_epoch_index(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-        );
-
-        let registration_slot = (past_bounded_epoch_index + 1).registration_slot(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-            protocol_parameters.epoch_nearing_threshold,
-        );
-
-        let expected_start_epoch = if past_bounded_slot_index <= registration_slot {
-            past_bounded_epoch_index + 1
-        } else {
-            past_bounded_epoch_index + 2
-        };
-
-        if next_state.start_epoch() != expected_start_epoch {
+        if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
             // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
             return Err(StateTransitionError::TransactionFailure(
                 TransactionFailureReason::SemanticValidationFailed,
@@ -397,25 +379,7 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let future_bounded_slot_index = slot_commitment_id.future_bounded_slot(protocol_parameters.min_committable_age);
-        let future_bounded_epoch_index = future_bounded_slot_index.to_epoch_index(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-        );
-
-        let registration_slot = (future_bounded_epoch_index + 1).registration_slot(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-            protocol_parameters.epoch_nearing_threshold,
-        );
-
-        let expected_end_epoch = if future_bounded_slot_index <= registration_slot {
-            future_bounded_epoch_index
-        } else {
-            future_bounded_epoch_index + 1
-        };
-
-        if next_state.end_epoch() != expected_end_epoch {
+        if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 

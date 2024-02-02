@@ -1,10 +1,11 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 from dataclasses_json import config
+from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
@@ -81,6 +82,23 @@ class CreateNativeTokenParams():
     ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None
+
+
+@json
+@dataclass
+class CreateDelegationParams():
+    """Parameters for creating a delegation output.
+
+    Attributes:
+        delegated_amount: The amount to delegate.
+        validator_address: The Account Address of the validator to which this output will delegate.
+        address: Bech32 encoded address which will control the delegation. By default, the ed25519 wallet address will be used.
+    """
+    delegated_amount: int = field(metadata=config(
+        encoder=str
+    ))
+    validator_address: AccountAddress
+    address: Optional[str] = None
 
 
 @json

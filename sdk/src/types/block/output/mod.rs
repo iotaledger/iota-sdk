@@ -332,6 +332,7 @@ impl Output {
         }
     }
 
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
     pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
         match self {
             // Validator Rewards

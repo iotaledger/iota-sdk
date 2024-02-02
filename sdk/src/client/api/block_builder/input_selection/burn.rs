@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::output::{AccountId, FoundryId, NativeToken, NftId, TokenId};
+use crate::types::block::output::{AccountId, DelegationId, FoundryId, NativeToken, NftId, TokenId};
 
 /// A type to specify what needs to be burned during input selection.
 /// Nothing will be burned that has not been explicitly set with this struct.
@@ -17,12 +17,15 @@ pub struct Burn {
     /// Accounts to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) accounts: HashSet<AccountId>,
-    /// NFTs to burn.
-    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
-    pub(crate) nfts: HashSet<NftId>,
     /// Foundries to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) foundries: HashSet<FoundryId>,
+    /// NFTs to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) nfts: HashSet<NftId>,
+    /// Delegations to burn.
+    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) delegations: HashSet<DelegationId>,
     /// Amounts of native tokens to burn.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub(crate) native_tokens: BTreeMap<TokenId, U256>,
@@ -51,6 +54,23 @@ impl Burn {
         &self.accounts
     }
 
+    /// Adds a foundry to [`Burn`].
+    pub fn add_foundry(mut self, foundry_id: FoundryId) -> Self {
+        self.foundries.insert(foundry_id);
+        self
+    }
+
+    /// Sets the foundries to [`Burn`].
+    pub fn set_foundries(mut self, foundries: HashSet<FoundryId>) -> Self {
+        self.foundries = foundries;
+        self
+    }
+
+    /// Returns the foundries to [`Burn`].
+    pub fn foundries(&self) -> &HashSet<FoundryId> {
+        &self.foundries
+    }
+
     /// Adds an NFT to [`Burn`].
     pub fn add_nft(mut self, nft_id: NftId) -> Self {
         self.nfts.insert(nft_id);
@@ -68,21 +88,21 @@ impl Burn {
         &self.nfts
     }
 
-    /// Adds a foundry to [`Burn`].
-    pub fn add_foundry(mut self, foundry_id: FoundryId) -> Self {
-        self.foundries.insert(foundry_id);
+    /// Adds an delegation to [`Burn`].
+    pub fn add_delegation(mut self, delegation_id: DelegationId) -> Self {
+        self.delegations.insert(delegation_id);
         self
     }
 
-    /// Sets the foundries to [`Burn`].
-    pub fn set_foundries(mut self, foundries: HashSet<FoundryId>) -> Self {
-        self.foundries = foundries;
+    /// Sets the delegation to [`Burn`].
+    pub fn set_delegation(mut self, delegations: HashSet<DelegationId>) -> Self {
+        self.delegations = delegations;
         self
     }
 
-    /// Returns the foundries to [`Burn`].
-    pub fn foundries(&self) -> &HashSet<FoundryId> {
-        &self.foundries
+    /// Returns the delegation to [`Burn`].
+    pub fn delegations(&self) -> &HashSet<DelegationId> {
+        &self.delegations
     }
 
     /// Adds an amount of native token to [`Burn`].
@@ -106,21 +126,27 @@ impl Burn {
     }
 }
 
-impl From<FoundryId> for Burn {
-    fn from(id: FoundryId) -> Self {
-        Self::new().add_foundry(id)
-    }
-}
-
 impl From<AccountId> for Burn {
     fn from(id: AccountId) -> Self {
         Self::new().add_account(id)
     }
 }
 
+impl From<FoundryId> for Burn {
+    fn from(id: FoundryId) -> Self {
+        Self::new().add_foundry(id)
+    }
+}
+
 impl From<NftId> for Burn {
     fn from(id: NftId) -> Self {
         Self::new().add_nft(id)
+    }
+}
+
+impl From<DelegationId> for Burn {
+    fn from(id: DelegationId) -> Self {
+        Self::new().add_delegation(id)
     }
 }
 

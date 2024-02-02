@@ -1,12 +1,13 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Union
-from dacite import from_dict
+from typing import TYPE_CHECKING
+from dataclasses import dataclass
 
-from iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.transaction_with_metadata import CreateDelegationTransaction, CreateNativeTokenTransaction, TransactionWithMetadata
 from iota_sdk.types.transaction_data import PreparedTransactionData
 
 # Required to prevent circular import
@@ -14,33 +15,16 @@ if TYPE_CHECKING:
     from iota_sdk.wallet.wallet import Wallet
 
 
+@dataclass
 class PreparedTransaction:
     """A helper class for offline signing.
 
     Attributes:
         wallet: A wallet object used to continue building this transaction.
-        prepared_transaction_data_dto: A prepared transaction data object.
+        prepared_transaction_data: A prepared transaction data object.
     """
-
-    def __init__(
-        self,
-        wallet: Wallet,
-        prepared_transaction_data: Union[PreparedTransactionData, Dict]
-    ):
-        """Initialize `Self`.
-        """
-        self.wallet = wallet
-        self.prepared_transaction_data_dto = prepared_transaction_data
-
-    def prepared_transaction_data(self) -> PreparedTransactionData:
-        """The function returns the prepared transaction data.
-
-        Returns:
-            The method prepared_transaction_data() is returning an object of type PreparedTransaction
-        """
-        return self.prepared_transaction_data_dto if isinstance(
-            self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(
-            PreparedTransactionData, self.prepared_transaction_data_dto)
+    wallet: Wallet
+    prepared_transaction_data: PreparedTransactionData
 
     def send(self) -> TransactionWithMetadata:
         """Send a transaction. Internally just calls `sign_and_submit_transaction`.
@@ -55,7 +39,7 @@ class PreparedTransaction:
         the signed transaction.
         """
         return self.wallet.sign_transaction(
-            self.prepared_transaction_data())
+            self.prepared_transaction_data)
 
     def sign_and_submit_transaction(self) -> TransactionWithMetadata:
         """Sign and submit a transaction using prepared transaction data.
@@ -64,23 +48,106 @@ class PreparedTransaction:
             The transaction after it has been signed and submitted.
         """
         return self.wallet.sign_and_submit_transaction(
-            self.prepared_transaction_data())
+            self.prepared_transaction_data)
 
 
-class PreparedCreateTokenTransaction(PreparedTransaction):
+@dataclass
+class PreparedCreateTokenTransaction:
+    """A helper class for offline signing a create native token transaction.
 
-    """A prepared transaction for creating a native token.
-
-    Returns: The token id of the PreparedCreateTokenTransaction.
+    Attributes:
+        wallet: A wallet object used to continue building this transaction.
+        prepared_transaction_data: A prepared transaction data object.
     """
+    wallet: Wallet
+    prepared_transaction_data: PreparedCreateTokenTransactionData
 
-    def token_id(self):
-        """Get the native token id as a string.
-        """
-        return self.prepared_transaction_data_dto["tokenId"]
+    def send(self) -> CreateNativeTokenTransaction:
+        """Send a transaction. Internally just calls `sign_and_submit_transaction`.
 
-    def prepared_transaction_data(self):
-        """Returns the prepared transaction data.
+        Returns:
+            The transaction after it has been signed and submitted.
         """
-        return from_dict(PreparedTransactionData,
-                         self.prepared_transaction_data_dto["transaction"])
+        return self.sign_and_submit_transaction()
+
+    def sign(self):
+        """Sign a prepared transaction using the wallet's private key and returns
+        the signed transaction.
+        """
+        return self.wallet.sign_transaction(
+            self.prepared_transaction_data.transaction)
+
+    def sign_and_submit_transaction(self) -> CreateNativeTokenTransaction:
+        """Sign and submit a transaction using prepared transaction data.
+
+        Returns:
+            The transaction after it has been signed and submitted.
+        """
+        tx = self.wallet.sign_and_submit_transaction(
+            self.prepared_transaction_data.transaction)
+        CreateNativeTokenTransaction(
+            self.prepared_transaction_data.token_id, tx)
+
+
+@json
+@dataclass
+class PreparedCreateTokenTransactionData:
+    """Prepared transaction data for creating a native token.
+
+    Attributes:
+        token_id: The token id.
+        transaction: The transaction that will create the delegation.
+    """
+    token_id: HexStr
+    transaction: PreparedTransactionData
+
+
+@dataclass
+class PreparedCreateDelegationTransaction:
+    """A helper class for offline signing to create a delegation transaction.
+
+    Attributes:
+        wallet: A wallet object used to continue building this transaction.
+        prepared_transaction_data: A prepared transaction data object.
+    """
+    wallet: Wallet
+    prepared_transaction_data: PreparedCreateDelegationTransactionData
+
+    def send(self) -> CreateDelegationTransaction:
+        """Send a transaction. Internally just calls `sign_and_submit_transaction`.
+
+        Returns:
+            The transaction after it has been signed and submitted.
+        """
+        return self.sign_and_submit_transaction()
+
+    def sign(self):
+        """Sign a prepared transaction using the wallet's private key and returns
+        the signed transaction.
+        """
+        return self.wallet.sign_transaction(
+            self.prepared_transaction_data.transaction)
+
+    def sign_and_submit_transaction(self) -> CreateDelegationTransaction:
+        """Sign and submit a transaction using prepared transaction data.
+
+        Returns:
+            The transaction after it has been signed and submitted.
+        """
+        tx = self.wallet.sign_and_submit_transaction(
+            self.prepared_transaction_data.transaction)
+        CreateDelegationTransaction(
+            self.prepared_transaction_data.delegation_id, tx)
+
+
+@json
+@dataclass
+class PreparedCreateDelegationTransactionData:
+    """Prepared transaction data for creating a delegation.
+
+    Attributes:
+        delegation_id: The id of the delegation that will be created.
+        transaction: The transaction that will create the delegation.
+    """
+    delegation_id: HexStr
+    transaction: PreparedTransactionData
