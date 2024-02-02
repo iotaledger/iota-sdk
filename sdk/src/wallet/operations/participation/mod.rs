@@ -92,7 +92,7 @@ impl<T> Wallet<T> {
     //                         entry.get_mut().push(output_data.output_id);
     //                     }
     //                 }
-    //                 if output_data.is_spent {
+    //                 if output_data.is_spent() {
     //                     spent_outputs.insert(output_data.output_id);
     //                 }
     //             }

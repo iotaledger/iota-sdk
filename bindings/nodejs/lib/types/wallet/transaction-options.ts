@@ -1,10 +1,10 @@
-// Copyright 2021-2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountId, Bech32Address } from '../block';
+import { AccountAddress, AccountId, Bech32Address } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
-import { u256, HexEncodedString } from '../utils';
+import { u256, HexEncodedString, NumericString } from '../utils';
 import { Bip44Address } from './address';
 
 /** Options for creating a transaction. */
@@ -89,4 +89,14 @@ export interface AccountOutputParams {
     immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */
     metadata?: HexEncodedString;
+}
+
+/** Options for delegation output creation */
+export interface CreateDelegationParams {
+    /** Bech32 encoded address which will control the delegation. By default, the ed25519 wallet address will be used. */
+    address?: Bech32Address;
+    /** The amount to delegate. */
+    delegatedAmount: NumericString;
+    /** The Account Address of the validator to which this output will delegate. */
+    validatorAddress: AccountAddress;
 }

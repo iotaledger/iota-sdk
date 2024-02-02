@@ -20,6 +20,8 @@ pub enum Error {
     /// Can't burn and transition an output at the same time.
     #[error("can't burn and transition an output at the same time, chain ID: {0}")]
     BurnAndTransition(ChainId),
+    #[error("mana rewards provided without an associated burn or custom input, output ID: {0}")]
+    ExtraManaRewards(OutputId),
     /// Insufficient amount provided.
     #[error("insufficient amount: found {found}, required {required}")]
     InsufficientAmount {

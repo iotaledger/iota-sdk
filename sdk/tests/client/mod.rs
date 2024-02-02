@@ -249,7 +249,7 @@ where
     count(a) == count(b)
 }
 
-fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native_token: Option<(&str, u64)>) -> bool {
+fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native_token: Option<(String, u64)>) -> bool {
     if let Output::Basic(output) = output {
         if output.amount() != amount {
             return false;
@@ -269,7 +269,7 @@ fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native
         }
 
         if let Some((token_id, amount)) = native_token {
-            let native_token = NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap();
+            let native_token = NativeToken::new(TokenId::from_str(&token_id).unwrap(), amount).unwrap();
 
             if output.native_token().unwrap() != &native_token {
                 return false;

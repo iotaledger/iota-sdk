@@ -12,7 +12,7 @@ use crate::{
 pub(crate) mod melt_native_token;
 
 impl<S: SecretManage> Wallet<SecretData<S>> {
-    /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
+    /// A generic function that can be used to burn native tokens, nfts, delegations, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
@@ -30,8 +30,8 @@ impl<S: SecretManage> Wallet<SecretData<S>> {
 }
 
 impl<T> Wallet<T> {
-    /// A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and
-    /// accounts.
+    /// A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, delegations,
+    /// foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase
     /// the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's

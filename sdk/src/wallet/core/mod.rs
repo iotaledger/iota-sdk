@@ -580,6 +580,22 @@ impl From<&WalletData> for WalletDataDto {
     }
 }
 
+pub trait OptionalSecretManager<S> {
+    fn secret_manager_opt(&self) -> Option<&Arc<RwLock<S>>>;
+}
+
+impl<S> OptionalSecretManager<S> for Wallet<()> {
+    fn secret_manager_opt(&self) -> Option<&Arc<RwLock<S>>> {
+        None
+    }
+}
+
+impl<S: SecretManage> OptionalSecretManager<S> for Wallet<SecretData<S>> {
+    fn secret_manager_opt(&self) -> Option<&Arc<RwLock<S>>> {
+        Some(self.secret_manager())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use core::str::FromStr;
