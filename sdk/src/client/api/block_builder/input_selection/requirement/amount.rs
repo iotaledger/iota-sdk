@@ -35,44 +35,42 @@ pub(crate) fn sdruc_not_expired(
     })
 }
 
-pub(crate) fn amount_sums(
-    selected_inputs: &[InputSigningData],
-    outputs: &[Output],
-    slot_index: SlotIndex,
-) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
-    let mut inputs_sum = 0;
-    let mut outputs_sum = 0;
-    let mut inputs_sdr = HashMap::new();
-    let mut outputs_sdr = HashMap::new();
+impl InputSelection {
+    pub(crate) fn amount_sums(&self) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
+        let mut inputs_sum = 0;
+        let mut outputs_sum = 0;
+        let mut inputs_sdr = HashMap::new();
+        let mut outputs_sdr = HashMap::new();
 
-    for selected_input in selected_inputs {
-        inputs_sum += selected_input.output.amount();
+        for selected_input in &self.selected_inputs {
+            inputs_sum += selected_input.output.amount();
 
-        if let Some(sdruc) = sdruc_not_expired(&selected_input.output, slot_index) {
-            *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
-        }
-    }
-
-    for output in outputs {
-        outputs_sum += output.amount();
-
-        if let Output::Basic(output) = output {
-            if let Some(address) = output.simple_deposit_address() {
-                *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_index) {
+                *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
         }
-    }
 
-    // TODO explanation about that
-    for (sdr_address, input_sdr_amount) in &inputs_sdr {
-        let output_sdr_amount = outputs_sdr.get(sdr_address).unwrap_or(&0);
+        for output in &self.outputs {
+            outputs_sum += output.amount();
 
-        if input_sdr_amount > output_sdr_amount {
-            outputs_sum += input_sdr_amount - output_sdr_amount;
+            if let Output::Basic(output) = output {
+                if let Some(address) = output.simple_deposit_address() {
+                    *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+                }
+            }
         }
-    }
 
-    (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
+        // TODO explanation about that
+        for (sdr_address, input_sdr_amount) in &inputs_sdr {
+            let output_sdr_amount = outputs_sdr.get(sdr_address).unwrap_or(&0);
+
+            if input_sdr_amount > output_sdr_amount {
+                outputs_sum += input_sdr_amount - output_sdr_amount;
+            }
+        }
+
+        (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -84,18 +82,18 @@ struct AmountSelection {
     outputs_sdr: HashMap<Address, u64>,
     remainder_amount: u64,
     native_tokens_remainder: bool,
+    mana_remainder: bool,
     slot_index: SlotIndex,
     storage_score_parameters: StorageScoreParameters,
 }
 
 impl AmountSelection {
     fn new(input_selection: &InputSelection) -> Result<Self, Error> {
-        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = amount_sums(
-            &input_selection.selected_inputs,
-            &input_selection.outputs,
-            input_selection.slot_index,
-        );
+        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = input_selection.amount_sums();
+
         let (remainder_amount, native_tokens_remainder) = input_selection.remainder_amount()?;
+
+        let (selected_mana, required_mana) = input_selection.mana_sums()?;
 
         Ok(Self {
             newly_selected_inputs: HashMap::new(),
@@ -105,6 +103,7 @@ impl AmountSelection {
             outputs_sdr,
             remainder_amount,
             native_tokens_remainder,
+            mana_remainder: selected_mana > required_mana,
             slot_index: input_selection.slot_index,
             storage_score_parameters: input_selection.protocol_parameters.storage_score_parameters(),
         })
@@ -122,7 +121,7 @@ impl AmountSelection {
             }
         } else if self.inputs_sum < self.outputs_sum {
             self.outputs_sum - self.inputs_sum
-        } else if self.native_tokens_remainder {
+        } else if self.native_tokens_remainder || self.mana_remainder {
             self.remainder_amount
         } else {
             0

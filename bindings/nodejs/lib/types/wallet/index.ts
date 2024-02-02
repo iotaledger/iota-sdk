@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './wallet';
@@ -13,5 +13,5 @@ export * from './prepared-transaction';
 export * from './signed-transaction-data';
 export * from './transaction';
 export * from './transaction-options';
-export * from './prepared-create-token-transaction-data';
+export * from './create-delegation-transaction';
 export * from './consolidation-params';
