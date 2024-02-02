@@ -197,12 +197,14 @@ where
         // native token.
         outputs_to_consolidate.retain(|output_data| {
             output_data.output.native_token().as_ref().map_or(true, |nt| {
+                // `<=` because outputs in genesis snapshot can have a lower amount than min amount.
                 if output_data.output.amount() <= output_data.output.minimum_amount(storage_score_parameters) {
                     // If there is only a single output with this native token, then it shouldn't be consolidated,
                     // because no amount will be made available, since we need to create a remainder output with the
                     // native token again.
-                    // Safe to unwrap, we added it in the loop before
-                    native_token_inputs.get(nt.token_id()).unwrap().len() > 1
+                    native_token_inputs
+                        .get(nt.token_id())
+                        .map_or_else(|| false, |ids| ids.len() > 1)
                 } else {
                     true
                 }
