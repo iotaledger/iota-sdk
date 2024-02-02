@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(not(target_family = "wasm"))]
@@ -9,7 +9,7 @@ use derivative::Derivative;
 use iota_sdk::client::secret::LedgerNanoStatus;
 use iota_sdk::{
     client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{PreparedTransactionData, SignedTransactionDataDto},
         node_manager::node::Node,
         NetworkInfo, NodeInfoWrapper,
     },
@@ -41,7 +41,7 @@ use iota_sdk::{
     utils::serde::string,
     wallet::{
         types::{Balance, OutputData, TransactionWithMetadataDto},
-        PreparedCreateNativeTokenTransactionDto,
+        PreparedCreateDelegationTransaction, PreparedCreateNativeTokenTransaction,
     },
 };
 use serde::Serialize;
@@ -334,10 +334,13 @@ pub enum Response {
     /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
     /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
-    PreparedTransaction(PreparedTransactionDataDto),
+    PreparedTransaction(PreparedTransactionData),
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::WalletMethod::PrepareCreateNativeToken),
-    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto),
+    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransaction),
+    /// Response for:
+    /// - [`PrepareCreateDelegation`](crate::method::WalletMethod::PrepareCreateDelegation),
+    PreparedCreateDelegationTransaction(PreparedCreateDelegationTransaction),
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::WalletMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::WalletMethod::GetTransaction),

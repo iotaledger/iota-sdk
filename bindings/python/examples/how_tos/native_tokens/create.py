@@ -55,7 +55,7 @@ block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-print(f'Created token: {prepared_transaction.token_id()}')
+print(f'Created token: {transaction.token_id}')
 
 # Ensure the wallet is synced after creating the native token.
 wallet.sync()

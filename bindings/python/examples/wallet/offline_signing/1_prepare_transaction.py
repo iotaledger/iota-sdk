@@ -1,4 +1,4 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 # In this example we will get inputs and prepare a transaction.
@@ -52,7 +52,7 @@ wallet.sync()
 prepared_transaction = wallet.prepare_send(params)
 
 json_data = json.dumps(
-    prepared_transaction.prepared_transaction_data().to_dict(),
+    prepared_transaction.prepared_transaction_data.to_dict(),
     indent=4)
 print(f"example.prepared_transaction.json:\n{json_data}")
 f = open(PREPARED_TRANSACTION_FILE_PATH, "w", encoding="utf-8")
