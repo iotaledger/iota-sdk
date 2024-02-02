@@ -447,12 +447,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         for output_id in self.mana_rewards.keys() {
-            if self
-                .selected_inputs
-                .iter()
-                .find(|i| output_id == i.output_id())
-                .is_none()
-            {
+            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
                 return Err(Error::ExtraManaRewards(*output_id));
             }
         }
