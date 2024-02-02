@@ -53,6 +53,15 @@ where
                 }
             }
 
+            // Inputs with timelock or expiration unlock condition require a CommitmentContextInput
+            if input
+                .output
+                .unlock_conditions()
+                .map_or(false, |u| u.iter().any(|u| u.is_timelock() || u.is_expiration()))
+            {
+                needs_commitment_context = true;
+            }
+
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
 
             if let Some(reward) = selected_transaction_data.mana_rewards.get(input.output_id()) {
