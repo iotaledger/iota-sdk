@@ -222,7 +222,9 @@ export interface __VerifyTransactionSemantic__ {
     data: {
         transaction: SignedTransactionPayload;
         inputs: InputSigningData[];
+        protocolParameters: ProtocolParameters;
         unlocks?: Unlock[];
+        manaRewards?: { [outputId: OutputId]: NumericString };
     };
 }
 

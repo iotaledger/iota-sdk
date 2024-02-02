@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    context_input::CommitmentContextInput,
     output::{
         AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
-        TokenScheme,
+        OutputId, TokenScheme,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
     semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -27,6 +26,7 @@ pub enum StateTransitionError {
     IssuerNotUnlocked,
     MissingAccountForFoundry,
     MissingCommitmentContextInput,
+    MissingRewardInput,
     MutatedFieldWithoutRights,
     MutatedImmutableField,
     NonDelayedClaimingTransition,
@@ -51,59 +51,90 @@ impl From<TransactionFailureReason> for StateTransitionError {
 ///
 pub trait StateTransitionVerifier {
     ///
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError>;
-
-    ///
-    fn transition(
-        current_state: &Self,
+    fn creation(
+        output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError>;
 
     ///
-    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError>;
+    fn transition(
+        current_output_id: &OutputId,
+        current_state: &Self,
+        next_output_id: &OutputId,
+        next_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError>;
+
+    ///
+    fn destruction(
+        output_id: &OutputId,
+        current_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError>;
 }
 
 impl SemanticValidationContext<'_> {
     ///
     pub fn verify_state_transition(
         &self,
-        current_state: Option<&Output>,
-        next_state: Option<&Output>,
+        current_state: Option<(&OutputId, &Output)>,
+        next_state: Option<(&OutputId, &Output)>,
     ) -> Result<(), StateTransitionError> {
         match (current_state, next_state) {
             // Creations.
-            (None, Some(Output::Account(next_state))) => AccountOutput::creation(next_state, self),
-            (None, Some(Output::Foundry(next_state))) => FoundryOutput::creation(next_state, self),
-            (None, Some(Output::Nft(next_state))) => NftOutput::creation(next_state, self),
-            (None, Some(Output::Delegation(next_state))) => DelegationOutput::creation(next_state, self),
+            (None, Some((output_id, Output::Account(next_state)))) => {
+                AccountOutput::creation(output_id, next_state, self)
+            }
+            (None, Some((output_id, Output::Foundry(next_state)))) => {
+                FoundryOutput::creation(output_id, next_state, self)
+            }
+            (None, Some((output_id, Output::Nft(next_state)))) => NftOutput::creation(output_id, next_state, self),
+            (None, Some((output_id, Output::Delegation(next_state)))) => {
+                DelegationOutput::creation(output_id, next_state, self)
+            }
 
             // Transitions.
-            (Some(Output::Basic(current_state)), Some(Output::Account(next_state))) => {
+            (
+                Some((_current_output_id, Output::Basic(current_state))),
+                Some((_next_output_id, Output::Account(next_state))),
+            ) => {
                 if current_state.is_implicit_account() {
                     BasicOutput::implicit_account_transition(current_state, next_state, self)
                 } else {
                     Err(StateTransitionError::UnsupportedStateTransition)
                 }
             }
-            (Some(Output::Account(current_state)), Some(Output::Account(next_state))) => {
-                AccountOutput::transition(current_state, next_state, self)
-            }
-            (Some(Output::Foundry(current_state)), Some(Output::Foundry(next_state))) => {
-                FoundryOutput::transition(current_state, next_state, self)
-            }
-            (Some(Output::Nft(current_state)), Some(Output::Nft(next_state))) => {
-                NftOutput::transition(current_state, next_state, self)
-            }
-            (Some(Output::Delegation(current_state)), Some(Output::Delegation(next_state))) => {
-                DelegationOutput::transition(current_state, next_state, self)
-            }
+            (
+                Some((current_output_id, Output::Account(current_state))),
+                Some((next_output_id, Output::Account(next_state))),
+            ) => AccountOutput::transition(current_output_id, current_state, next_output_id, next_state, self),
+            (
+                Some((current_output_id, Output::Foundry(current_state))),
+                Some((next_output_id, Output::Foundry(next_state))),
+            ) => FoundryOutput::transition(current_output_id, current_state, next_output_id, next_state, self),
+            (
+                Some((current_output_id, Output::Nft(current_state))),
+                Some((next_output_id, Output::Nft(next_state))),
+            ) => NftOutput::transition(current_output_id, current_state, next_output_id, next_state, self),
+            (
+                Some((current_output_id, Output::Delegation(current_state))),
+                Some((next_output_id, Output::Delegation(next_state))),
+            ) => DelegationOutput::transition(current_output_id, current_state, next_output_id, next_state, self),
 
             // Destructions.
-            (Some(Output::Account(current_state)), None) => AccountOutput::destruction(current_state, self),
-            (Some(Output::Foundry(current_state)), None) => FoundryOutput::destruction(current_state, self),
-            (Some(Output::Nft(current_state)), None) => NftOutput::destruction(current_state, self),
-            (Some(Output::Delegation(current_state)), None) => DelegationOutput::destruction(current_state, self),
+            (Some((output_id, Output::Account(current_state))), None) => {
+                AccountOutput::destruction(output_id, current_state, self)
+            }
+            (Some((output_id, Output::Foundry(current_state))), None) => {
+                FoundryOutput::destruction(output_id, current_state, self)
+            }
+            (Some((output_id, Output::Nft(current_state))), None) => {
+                NftOutput::destruction(output_id, current_state, self)
+            }
+            (Some((output_id, Output::Delegation(current_state))), None) => {
+                DelegationOutput::destruction(output_id, current_state, self)
+            }
 
             // Unsupported.
             _ => Err(StateTransitionError::UnsupportedStateTransition),
@@ -141,7 +172,11 @@ impl BasicOutput {
 }
 
 impl StateTransitionVerifier for AccountOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(
+        _output_id: &OutputId,
+        next_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !next_state.account_id().is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -156,7 +191,9 @@ impl StateTransitionVerifier for AccountOutput {
     }
 
     fn transition(
+        _current_output_id: &OutputId,
         current_state: &Self,
+        _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
@@ -168,7 +205,11 @@ impl StateTransitionVerifier for AccountOutput {
         )
     }
 
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _output_id: &OutputId,
+        _current_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
@@ -180,7 +221,11 @@ impl StateTransitionVerifier for AccountOutput {
 }
 
 impl StateTransitionVerifier for AnchorOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(
+        _output_id: &OutputId,
+        next_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !next_state.anchor_id().is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -195,7 +240,9 @@ impl StateTransitionVerifier for AnchorOutput {
     }
 
     fn transition(
+        _current_output_id: &OutputId,
         current_state: &Self,
+        _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
@@ -207,7 +254,11 @@ impl StateTransitionVerifier for AnchorOutput {
         )
     }
 
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _output_id: &OutputId,
+        _current_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .capabilities()
@@ -220,10 +271,14 @@ impl StateTransitionVerifier for AnchorOutput {
 }
 
 impl StateTransitionVerifier for FoundryOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(
+        _output_id: &OutputId,
+        next_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
-        if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
+        if let (Some((_, Output::Account(input_account))), Some((_, Output::Account(output_account)))) = (
             context.input_chains.get(&account_chain_id),
             context.output_chains.get(&account_chain_id),
         ) {
@@ -253,7 +308,9 @@ impl StateTransitionVerifier for FoundryOutput {
     }
 
     fn transition(
+        _current_output_id: &OutputId,
         current_state: &Self,
+        _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
@@ -266,7 +323,11 @@ impl StateTransitionVerifier for FoundryOutput {
         )
     }
 
-    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _output_id: &OutputId,
+        current_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
@@ -295,7 +356,11 @@ impl StateTransitionVerifier for FoundryOutput {
 }
 
 impl StateTransitionVerifier for NftOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(
+        _output_id: &OutputId,
+        next_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !next_state.nft_id().is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -310,14 +375,20 @@ impl StateTransitionVerifier for NftOutput {
     }
 
     fn transition(
+        _current_output_id: &OutputId,
         current_state: &Self,
+        _next_output_id: &OutputId,
         next_state: &Self,
         _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _output_id: &OutputId,
+        _current_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
@@ -329,7 +400,11 @@ impl StateTransitionVerifier for NftOutput {
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(
+        _output_id: &OutputId,
+        next_state: &Self,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         let protocol_parameters = &context.protocol_parameters;
 
         if !next_state.delegation_id().is_null() {
@@ -345,32 +420,11 @@ impl StateTransitionVerifier for DelegationOutput {
         }
 
         let slot_commitment_id = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find(|i| i.kind() == CommitmentContextInput::KIND)
-            .map(|s| s.as_commitment().slot_commitment_id())
+            .commitment_context_input
+            .map(|c| c.slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let past_bounded_slot_index = slot_commitment_id.past_bounded_slot(protocol_parameters.max_committable_age);
-        let past_bounded_epoch_index = past_bounded_slot_index.to_epoch_index(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-        );
-
-        let registration_slot = (past_bounded_epoch_index + 1).registration_slot(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-            protocol_parameters.epoch_nearing_threshold,
-        );
-
-        let expected_start_epoch = if past_bounded_slot_index <= registration_slot {
-            past_bounded_epoch_index + 1
-        } else {
-            past_bounded_epoch_index + 2
-        };
-
-        if next_state.start_epoch() != expected_start_epoch {
+        if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
             // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
             return Err(StateTransitionError::TransactionFailure(
                 TransactionFailureReason::SemanticValidationFailed,
@@ -381,7 +435,9 @@ impl StateTransitionVerifier for DelegationOutput {
     }
 
     fn transition(
+        _current_output_id: &OutputId,
         current_state: &Self,
+        _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
@@ -390,32 +446,11 @@ impl StateTransitionVerifier for DelegationOutput {
         let protocol_parameters = &context.protocol_parameters;
 
         let slot_commitment_id = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find(|i| i.kind() == CommitmentContextInput::KIND)
-            .map(|s| s.as_commitment().slot_commitment_id())
+            .commitment_context_input
+            .map(|c| c.slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let future_bounded_slot_index = slot_commitment_id.future_bounded_slot(protocol_parameters.min_committable_age);
-        let future_bounded_epoch_index = future_bounded_slot_index.to_epoch_index(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-        );
-
-        let registration_slot = (future_bounded_epoch_index + 1).registration_slot(
-            protocol_parameters.genesis_slot,
-            protocol_parameters.slots_per_epoch_exponent,
-            protocol_parameters.epoch_nearing_threshold,
-        );
-
-        let expected_end_epoch = if future_bounded_slot_index <= registration_slot {
-            future_bounded_epoch_index
-        } else {
-            future_bounded_epoch_index + 1
-        };
-
-        if next_state.end_epoch() != expected_end_epoch {
+        if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 
@@ -423,10 +458,18 @@ impl StateTransitionVerifier for DelegationOutput {
     }
 
     fn destruction(
+        output_id: &OutputId,
         _current_state: &Self,
-        _context: &SemanticValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        // TODO handle mana rewards
+        // If a mana reward was provided but no reward context input exists
+        if context.mana_rewards.get(output_id).is_some() && !context.reward_context_inputs.contains_key(output_id) {
+            return Err(StateTransitionError::MissingRewardInput);
+        }
+        if context.commitment_context_input.is_none() {
+            return Err(StateTransitionError::MissingCommitmentContextInput);
+        }
+
         Ok(())
     }
 }

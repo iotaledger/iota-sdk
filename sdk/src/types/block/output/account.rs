@@ -388,11 +388,16 @@ impl AccountOutput {
         self.features.block_issuer().is_some()
     }
 
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        self.features().staking().is_some() && next_state.map_or(true, |o| o.features().staking().is_none())
+    }
+
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_chains: &HashMap<ChainId, &Output>,
+        input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
         outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {

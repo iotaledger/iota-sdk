@@ -509,6 +509,7 @@ dependencies = [
  "prefix-hex",
  "rustyline",
  "serde_json",
+ "strum",
  "thiserror",
  "tokio",
  "winapi",

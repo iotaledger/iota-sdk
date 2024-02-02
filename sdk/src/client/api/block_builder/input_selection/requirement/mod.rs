@@ -3,6 +3,7 @@
 
 pub(crate) mod account;
 pub(crate) mod amount;
+pub(crate) mod delegation;
 pub(crate) mod ed25519;
 pub(crate) mod foundry;
 pub(crate) mod issuer;
@@ -11,13 +12,16 @@ pub(crate) mod native_tokens;
 pub(crate) mod nft;
 pub(crate) mod sender;
 
-use self::{account::is_account_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null};
+use self::{
+    account::is_account_with_id_non_null, delegation::is_delegation_with_id_non_null, foundry::is_foundry_with_id,
+    nft::is_nft_with_id_non_null,
+};
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
         address::Address,
-        output::{AccountId, ChainId, Features, FoundryId, NftId, Output},
+        output::{AccountId, ChainId, DelegationId, Features, FoundryId, NftId, Output},
     },
 };
 
@@ -36,6 +40,8 @@ pub enum Requirement {
     Account(AccountId),
     /// Nft requirement.
     Nft(NftId),
+    /// Delegation requirement.
+    Delegation(DelegationId),
     /// Native tokens requirement.
     NativeTokens,
     /// Amount requirement.
@@ -57,6 +63,7 @@ impl InputSelection {
             Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
             Requirement::Account(account_id) => self.fulfill_account_requirement(account_id),
             Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
+            Requirement::Delegation(delegation_id) => self.fulfill_delegation_requirement(delegation_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
             Requirement::Mana => self.fulfill_mana_requirement(),
@@ -64,10 +71,10 @@ impl InputSelection {
     }
 
     /// Gets requirements from outputs.
-    pub(crate) fn outputs_requirements<'a>(&'a mut self, additional_outputs: impl IntoIterator<Item = &'a Output>) {
+    pub(crate) fn outputs_requirements<'a>(&'a mut self) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
 
-        for output in self.outputs.iter().chain(additional_outputs) {
+        for output in &self.outputs {
             let is_created = match output {
                 // Add an account requirement if the account output is transitioning and then required in the inputs.
                 Output::Account(account_output) => {
@@ -117,6 +124,17 @@ impl InputSelection {
 
                     is_created
                 }
+                Output::Delegation(delegation_output) => {
+                    let is_created = delegation_output.delegation_id().is_null();
+
+                    if !is_created {
+                        let requirement = Requirement::Delegation(*delegation_output.delegation_id());
+                        log::debug!("Adding {requirement:?} from output");
+                        self.requirements.push(requirement);
+                    }
+
+                    is_created
+                }
                 _ => false,
             };
 
@@ -155,6 +173,16 @@ impl InputSelection {
                 self.requirements.push(requirement);
             }
 
+            for foundry_id in &burn.foundries {
+                if self.outputs.iter().any(|output| is_foundry_with_id(output, foundry_id)) {
+                    return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
+                }
+
+                let requirement = Requirement::Foundry(*foundry_id);
+                log::debug!("Adding {requirement:?} from burn");
+                self.requirements.push(requirement);
+            }
+
             for nft_id in &burn.nfts {
                 if self
                     .outputs
@@ -169,12 +197,16 @@ impl InputSelection {
                 self.requirements.push(requirement);
             }
 
-            for foundry_id in &burn.foundries {
-                if self.outputs.iter().any(|output| is_foundry_with_id(output, foundry_id)) {
-                    return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
+            for delegation_id in &burn.delegations {
+                if self
+                    .outputs
+                    .iter()
+                    .any(|output| is_delegation_with_id_non_null(output, delegation_id))
+                {
+                    return Err(Error::BurnAndTransition(ChainId::from(*delegation_id)));
                 }
 
-                let requirement = Requirement::Foundry(*foundry_id);
+                let requirement = Requirement::Delegation(*delegation_id);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
             }

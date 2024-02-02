@@ -33,12 +33,12 @@ impl InputSelection {
         let mut selected_mana = 0;
 
         for input in &self.selected_inputs {
+            selected_mana += self.mana_rewards.get(input.output_id()).copied().unwrap_or_default();
             selected_mana += input.output.available_mana(
                 &self.protocol_parameters,
                 input.output_id().transaction_id().slot_index(),
                 self.slot_index,
             )?;
-            // TODO rewards https://github.com/iotaledger/iota-sdk/issues/1310
         }
         Ok((selected_mana, required_mana))
     }
