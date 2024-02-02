@@ -32,17 +32,19 @@ class BlockState(Enum):
     """Describes the state of a block.
 
     Attributes:
-        Pending: Stored but not confirmed.
-        Confirmed: Confirmed with the first level of knowledge.
-        Finalized: Included and can no longer be reverted.
+        Pending: Stored but not accepted/confirmed.
+        Accepted: Valid block referenced by some validators.
+        Confirmed: Valid block referenced by more than 2/3 of the validators.
+        Finalized: Accepted/confirmed block and the slot was finalized, can no longer be reverted.
         Rejected: Rejected by the node, and user should reissue payload if it contains one.
         Failed: Not successfully issued due to failure reason.
     """
     Pending = 0
-    Confirmed = 1
-    Finalized = 2
-    Rejected = 3
-    Failed = 4
+    Accepted = 1
+    Confirmed = 2
+    Finalized = 3
+    Rejected = 4
+    Failed = 5
 
 
 class TransactionState(Enum):
