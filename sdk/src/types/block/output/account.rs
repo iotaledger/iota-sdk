@@ -397,7 +397,7 @@ impl AccountOutput {
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_chains: &HashMap<ChainId, &Output>,
+        input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
         outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
