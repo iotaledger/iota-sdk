@@ -339,13 +339,13 @@ pub struct SubmitBlockResponse {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BlockState {
-    /// Stored but not confirmed.
+    /// Stored but not accepted/confirmed.
     Pending,
-    /// TODO
+    /// Valid block referenced by some validators.
     Accepted,
-    /// Confirmed with the first level of knowledge.
+    /// Valid block referenced by more than 2/3 of the validators.
     Confirmed,
-    /// Included and can no longer be reverted.
+    /// Accepted/confirmed block and the slot was finalized, can no longer be reverted.
     Finalized,
     /// Rejected by the node, and user should reissue payload if it contains one.
     Rejected,

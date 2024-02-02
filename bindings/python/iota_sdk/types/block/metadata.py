@@ -32,10 +32,10 @@ class BlockState(Enum):
     """Describes the state of a block.
 
     Attributes:
-        Pending: Stored but not confirmed.
-        Accepted: TODO
-        Confirmed: Confirmed with the first level of knowledge.
-        Finalized: Included and can no longer be reverted.
+        Pending: Stored but not accepted/confirmed.
+        Accepted: Valid block referenced by some validators.
+        Confirmed: Valid block referenced by more than 2/3 of the validators.
+        Finalized: Accepted/confirmed block and the slot was finalized, can no longer be reverted.
         Rejected: Rejected by the node, and user should reissue payload if it contains one.
         Failed: Not successfully issued due to failure reason.
     """
