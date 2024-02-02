@@ -11,7 +11,6 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{Address, Bech32Address},
-        context_input::CommitmentContextInput,
         input::INPUT_COUNT_MAX,
         output::{MinimumOutputAmount, Output},
         slot::SlotIndex,
@@ -98,35 +97,14 @@ where
 
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
-        let mut custom_inputs = Vec::new();
-        let mut commitment_context_input_required = false;
-        for output_data in outputs_to_consolidate {
-            custom_inputs.push(output_data.output_id);
-
-            if output_data.output.unlock_conditions().map_or(false, |uc| {
-                uc.expiration().is_some() || uc.storage_deposit_return().is_some()
-            }) {
-                commitment_context_input_required = true;
-            }
-        }
-
-        let context_inputs = if commitment_context_input_required {
-            Some(vec![
-                CommitmentContextInput::new(self.client().get_issuance().await?.latest_commitment.id()).into(),
-            ])
-        } else {
-            None
-        };
-
         let options = Some(TransactionOptions {
-            custom_inputs: Some(custom_inputs),
+            custom_inputs: Some(outputs_to_consolidate.into_iter().map(|o| o.output_id).collect()),
             remainder_value_strategy: RemainderValueStrategy::CustomAddress(
                 params
                     .target_address
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
-            context_inputs,
             ..Default::default()
         });
 
