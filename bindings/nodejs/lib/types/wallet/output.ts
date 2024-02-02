@@ -26,8 +26,6 @@ export class OutputData {
         discriminator: OutputDiscriminator,
     })
     output!: Output;
-    /** If an output is spent */
-    isSpent!: boolean;
     /** Associated account address */
     @Type(() => Address, {
         discriminator: AddressDiscriminator,

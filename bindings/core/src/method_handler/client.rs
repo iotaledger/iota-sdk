@@ -183,8 +183,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
-        ClientMethod::GetAccountCongestion { account_id } => {
-            Response::Congestion(client.get_account_congestion(&account_id).await?)
+        ClientMethod::GetAccountCongestion { account_id, work_score } => {
+            Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)
         }
         ClientMethod::GetRewards { output_id, slot_index } => {
             Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
