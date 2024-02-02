@@ -9,7 +9,6 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{Address, Ed25519Address},
-        context_input::CommitmentContextInput,
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutput, NftOutputBuilder, Output, OutputId, UnlockCondition,
         },
