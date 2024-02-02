@@ -13,7 +13,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/create-wallet.ts
+// yarn run-example ./how_tos/wallet/create-wallet.ts
 
 // This example creates a new database and wallet.
 async function run() {

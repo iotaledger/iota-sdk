@@ -7,7 +7,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/list-accounts.ts
+// yarn run-example ./how_tos/wallet/list-accounts.ts
 
 // This example lists all account outputs in the wallet.
 async function run() {
