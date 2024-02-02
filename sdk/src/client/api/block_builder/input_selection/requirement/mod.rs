@@ -71,7 +71,7 @@ impl InputSelection {
     }
 
     /// Gets requirements from outputs.
-    pub(crate) fn outputs_requirements<'a>(&'a mut self) {
+    pub(crate) fn outputs_requirements(&mut self) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
 
         for output in &self.outputs {
