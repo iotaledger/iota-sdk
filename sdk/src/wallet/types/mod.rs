@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// Address types used in the wallet
@@ -172,6 +172,15 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
             note: dto.note,
             inputs: dto.inputs,
         })
+    }
+}
+
+impl Serialize for TransactionWithMetadata {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        TransactionWithMetadataDto::from(self).serialize(serializer)
     }
 }
 
