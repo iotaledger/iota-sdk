@@ -89,7 +89,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
-        mana_rewards: None,
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager

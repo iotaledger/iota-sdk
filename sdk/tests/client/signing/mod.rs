@@ -235,7 +235,7 @@ async fn all_combined() -> Result<()> {
         transaction,
         inputs_data: selected.inputs,
         remainders: Vec::new(),
-        mana_rewards: None,
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager

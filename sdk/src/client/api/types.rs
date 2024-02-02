@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeMap;
+
 use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +11,7 @@ use crate::{
     types::{
         block::{
             address::Address,
-            output::Output,
+            output::{Output, OutputId},
             payload::{
                 signed_transaction::{
                     dto::{SignedTransactionPayloadDto, TransactionDto},
@@ -22,7 +24,7 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::{bip44::option_bip44, option_string},
+    utils::serde::{bip44::option_bip44, mana_rewards},
 };
 
 /// Helper struct for offline signing
@@ -35,7 +37,7 @@ pub struct PreparedTransactionData {
     /// Remainder outputs information
     pub remainders: Vec<RemainderData>,
     /// Mana rewards
-    pub mana_rewards: Option<u64>,
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 /// PreparedTransactionData Dto
@@ -50,8 +52,8 @@ pub struct PreparedTransactionDataDto {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub remainders: Vec<RemainderData>,
     /// Mana rewards
-    #[serde(default, skip_serializing_if = "Option::is_none", with = "option_string")]
-    pub mana_rewards: Option<u64>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", with = "mana_rewards")]
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
@@ -60,7 +62,7 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
             transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.clone(),
             remainders: value.remainders.clone(),
-            mana_rewards: value.mana_rewards,
+            mana_rewards: value.mana_rewards.clone(),
         }
     }
 }
@@ -99,7 +101,7 @@ pub struct SignedTransactionData {
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
     /// Mana rewards
-    pub mana_rewards: Option<u64>,
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 /// SignedTransactionData Dto
@@ -111,8 +113,8 @@ pub struct SignedTransactionDataDto {
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
     /// Mana rewards
-    #[serde(default, skip_serializing_if = "Option::is_none", with = "option_string")]
-    pub mana_rewards: Option<u64>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", with = "mana_rewards")]
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 impl From<&SignedTransactionData> for SignedTransactionDataDto {
@@ -120,7 +122,7 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
         Self {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.clone(),
-            mana_rewards: value.mana_rewards,
+            mana_rewards: value.mana_rewards.clone(),
         }
     }
 }

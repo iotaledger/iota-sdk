@@ -31,7 +31,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
-    pub(crate) mana_rewards: Option<u64>,
+    pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) input_chains: HashMap<ChainId, &'a Output>,
     pub(crate) output_amount: u64,
@@ -50,7 +50,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
-        mana_rewards: impl Into<Option<u64>>,
+        mana_rewards: BTreeMap<OutputId, u64>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
@@ -87,7 +87,7 @@ impl<'a> SemanticValidationContext<'a> {
             unlocks,
             input_amount: 0,
             input_mana: 0,
-            mana_rewards: mana_rewards.into(),
+            mana_rewards,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
             output_amount: 0,
@@ -105,10 +105,6 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
         let mut has_implicit_account_creation_address = false;
-
-        if let Some(mana_rewards) = self.mana_rewards {
-            self.input_mana = mana_rewards
-        }
 
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
@@ -133,6 +129,24 @@ impl<'a> SemanticValidationContext<'a> {
                 .context_inputs()
                 .iter()
                 .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+
+            // Claiming rewards requires both reward and commitment context inputs
+            if self.mana_rewards.get(*output_id).is_some() {
+                if !self
+                    .transaction
+                    .context_inputs()
+                    .iter()
+                    .filter_map(|c| c.as_reward_opt())
+                    .any(|r| r.index() == index as u16)
+                {
+                    // Missing reward context input
+                    return Ok(Some(TransactionFailureReason::InvalidRewardContextInput));
+                }
+                if commitment_slot_index.is_none() {
+                    // Missing commitment context input
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                }
+            }
 
             if let Some(timelock) = unlock_conditions.timelock() {
                 if let Some(commitment_slot_index) = commitment_slot_index {
@@ -180,6 +194,12 @@ impl<'a> SemanticValidationContext<'a> {
                     self.transaction.creation_slot(),
                 )?)
                 .ok_or(Error::ConsumedManaOverflow)?;
+
+            if let Some(mana_rewards) = self.mana_rewards.get(*output_id) {
+                self.input_mana
+                    .checked_add(*mana_rewards)
+                    .ok_or(Error::ConsumedManaOverflow)?;
+            }
 
             if let Some(consumed_native_token) = consumed_native_token {
                 let native_token_amount = self
@@ -289,13 +309,33 @@ impl<'a> SemanticValidationContext<'a> {
             // If mana rewards were provided or none of the inputs can claim rewards
             // then the mismatch should return an error. Otherwise the mismatch may
             // still be acceptable.
-            } else if self.mana_rewards.is_some()
-                || !self
-                    .input_chains
+            } else {
+                // For all inputs that can claim rewards
+                // there must be a reward context input and no mana reward provided.
+                if !self
+                    .inputs
                     .iter()
-                    .any(|(chain_id, input)| input.can_claim_rewards(self.output_chains.get(chain_id).copied()))
-            {
-                return Ok(Some(TransactionFailureReason::InvalidManaAmount));
+                    .enumerate()
+                    .filter(|(_, (output_id, input))| {
+                        if let Some(chain_id) = input.chain_id().map(|c| c.or_from_output_id(*output_id)) {
+                            let next_state = self.output_chains.get(&chain_id).copied();
+                            return input.can_claim_rewards(next_state);
+                        }
+                        false
+                    })
+                    .all(|(index, (output_id, _))| {
+                        self.mana_rewards.get(*output_id).is_none()
+                            && self
+                                .transaction
+                                .context_inputs()
+                                .iter()
+                                .filter_map(|c| c.as_reward_opt())
+                                .any(|r| r.index() == index as u16)
+                    })
+                {
+                    // Otherwise we have a mismatch
+                    return Ok(Some(TransactionFailureReason::InvalidManaAmount));
+                }
             }
         }
 
