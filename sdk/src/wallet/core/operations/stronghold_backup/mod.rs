@@ -14,7 +14,10 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{core::WalletLedgerDto, Wallet},
+    wallet::{
+        core::{builder::AddressProvider, WalletLedgerDto},
+        Wallet,
+    },
 };
 
 impl Wallet {
@@ -185,7 +188,8 @@ impl Wallet {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.bip_path);
+                // TODO: expect
+                .with_address_provider(AddressProvider::SecretManager(self.bip_path().expect("todo")));
 
             wallet_builder.save(self.storage_manager()).await?;
 
@@ -344,7 +348,8 @@ impl Wallet<StrongholdSecretManager> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.bip_path);
+                // TODO: expect
+                .with_address_provider(AddressProvider::SecretManager(self.bip_path().expect("todo")));
 
             wallet_builder.save(self.storage_manager()).await?;
 
