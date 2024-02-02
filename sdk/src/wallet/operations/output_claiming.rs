@@ -296,20 +296,6 @@ where
             }
         }
 
-        // CommitmentContextInput is required for inputs with expiration or storage_deposit_return unlock condition
-        let commitment_context_input_required = outputs_to_claim.iter().any(|o| {
-            o.output.unlock_conditions().map_or(false, |uc| {
-                uc.expiration().is_some() || uc.storage_deposit_return().is_some()
-            })
-        });
-        let context_inputs = if commitment_context_input_required {
-            Some(vec![
-                CommitmentContextInput::new(self.client().get_issuance().await?.latest_commitment.id()).into(),
-            ])
-        } else {
-            None
-        };
-
         self.prepare_transaction(
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
@@ -322,7 +308,6 @@ where
                         .chain(possible_additional_inputs.iter().map(|o| o.output_id))
                         .collect::<Vec<OutputId>>(),
                 ),
-                context_inputs,
                 ..Default::default()
             }),
         )
