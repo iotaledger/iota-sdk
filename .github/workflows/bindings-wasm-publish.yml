@@ -57,7 +57,8 @@ jobs:
       - name: Upload package to Github release
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Token expires Jan 25, 2025
+          token: ${{ secrets.GH_RELEASE_PUBLISH_PAT }}
           body: "https://github.com/iotaledger/iota-sdk/blob/develop/bindings/wasm/CHANGELOG.md \n https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md"
           files: bindings/wasm/*.tgz
           tag_name: ${{ steps.prepare_release.outputs.tag_name }}
