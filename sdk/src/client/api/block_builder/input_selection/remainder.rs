@@ -210,18 +210,22 @@ fn create_remainder_outputs(
 
     // Start with the native tokens
     if let Some(native_tokens) = native_tokens_diff {
-        for native_token in native_tokens.into_iter().rev() {
-            // If we already picked one for the catchall, create a new remainder output with the min amount
-            if catchall_native_token.is_some() {
+        if let Some((last, nts)) = native_tokens.split_last() {
+            // Save this one for the catchall
+            catchall_native_token.replace(*last);
+            // Create remainder outputs with min amount
+            for native_token in nts {
                 let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
                     .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                    .with_native_token(native_token)
+                    .with_native_token(*native_token)
                     .finish_output()?;
+                log::debug!(
+                    "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
+                    output.amount(),
+                    output.mana()
+                );
                 remaining_amount = remaining_amount.saturating_sub(output.amount());
                 remainder_outputs.push(output);
-            // Otherwise save this one for the catchall
-            } else {
-                catchall_native_token.replace(native_token);
             }
         }
     }
@@ -233,6 +237,12 @@ fn create_remainder_outputs(
     }
     let catchall = catchall.finish_output()?;
     catchall.verify_storage_deposit(storage_score_parameters)?;
+    log::debug!(
+        "Created remainder output of amount {}, mana {} and native token {:?} for {remainder_address:?}",
+        catchall.amount(),
+        catchall.mana(),
+        catchall.native_token(),
+    );
     remainder_outputs.push(catchall);
 
     Ok(remainder_outputs
