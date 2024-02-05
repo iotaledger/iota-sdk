@@ -334,6 +334,7 @@ async fn all_combined() -> Result<()> {
         transaction,
         inputs_data: selected.inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
@@ -424,7 +425,12 @@ async fn all_combined() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

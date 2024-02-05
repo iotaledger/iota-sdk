@@ -339,15 +339,17 @@ pub struct SubmitBlockResponse {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BlockState {
-    // Stored but not confirmed.
+    /// Stored but not accepted/confirmed.
     Pending,
-    // Confirmed with the first level of knowledge.
+    /// Valid block referenced by some validators.
+    Accepted,
+    /// Valid block referenced by more than 2/3 of the validators.
     Confirmed,
-    // Included and can no longer be reverted.
+    /// Accepted/confirmed block and the slot was finalized, can no longer be reverted.
     Finalized,
-    // Rejected by the node, and user should reissue payload if it contains one.
+    /// Rejected by the node, and user should reissue payload if it contains one.
     Rejected,
-    // Not successfully issued due to failure reason.
+    /// Not successfully issued due to failure reason.
     Failed,
 }
 
@@ -355,15 +357,15 @@ pub enum BlockState {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionState {
-    // Not included yet.
+    /// Not included yet.
     Pending,
-    // Included.
+    /// Included.
     Accepted,
-    // Included and its included block is confirmed.
+    /// Included and its included block is confirmed.
     Confirmed,
-    // Included, its included block is finalized and cannot be reverted anymore.
+    /// Included, its included block is finalized and cannot be reverted anymore.
     Finalized,
-    // The block is not successfully issued due to failure reason.
+    /// The block is not successfully issued due to failure reason.
     Failed,
 }
 

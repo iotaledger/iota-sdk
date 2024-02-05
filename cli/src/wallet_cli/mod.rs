@@ -472,15 +472,10 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
 
 /// `claimable-outputs` command
 pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    let balance = wallet.balance().await?;
-    for output_id in balance
-        .potentially_locked_outputs()
-        .iter()
-        .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
-    {
+    for output_id in wallet.claimable_outputs(OutputsToClaim::All).await? {
         let wallet_data = wallet.data().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output = &wallet_data.get_output(output_id).unwrap().output;
+        let output = &wallet_data.get_output(&output_id).unwrap().output;
         let kind = match output {
             Output::Nft(_) => "Nft",
             Output::Basic(_) => "Basic",
@@ -488,15 +483,10 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-        // if let Some(native_tokens) = output.native_tokens() {
-        //     if !native_tokens.is_empty() {
-        //         println_log_info!("  - native token amount:");
-        //         native_tokens.iter().for_each(|token| {
-        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
-        //         });
-        //     }
-        // }
+        if let Some(native_token) = output.native_token() {
+            println_log_info!("  - native token amount:");
+            println_log_info!("    + {} {}", native_token.amount(), native_token.token_id());
+        }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions

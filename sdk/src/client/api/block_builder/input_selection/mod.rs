@@ -448,12 +448,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         for output_id in self.mana_rewards.keys() {
-            if self
-                .selected_inputs
-                .iter()
-                .find(|i| output_id == i.output_id())
-                .is_none()
-            {
+            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
                 return Err(Error::ExtraManaRewards(*output_id));
             }
         }
@@ -492,7 +487,7 @@ impl InputSelection {
                     input_accounts.push(input);
                 }
                 Output::Foundry(foundry) => {
-                    input_chains_foundries.insert(foundry.chain_id(), &input.output);
+                    input_chains_foundries.insert(foundry.chain_id(), (input.output_id(), &input.output));
                     input_foundries.push(input);
                 }
                 Output::Nft(_) => {
