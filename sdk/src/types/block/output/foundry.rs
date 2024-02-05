@@ -413,7 +413,8 @@ impl FoundryOutput {
             || current_state.serial_number != next_state.serial_number
             || current_state.immutable_features != next_state.immutable_features
         {
-            return Err(TransactionFailureReason::MutatedImmutableField);
+            // TODO not all features?
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
         let token_id = next_state.token_id();
@@ -423,13 +424,15 @@ impl FoundryOutput {
         let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
 
         if current_token_scheme.maximum_supply() != next_token_scheme.maximum_supply() {
-            return Err(TransactionFailureReason::MutatedImmutableField);
+            // TODO not all features?
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
         if current_token_scheme.minted_tokens() > next_token_scheme.minted_tokens()
             || current_token_scheme.melted_tokens() > next_token_scheme.melted_tokens()
         {
-            return Err(TransactionFailureReason::NonMonotonicallyIncreasingNativeTokens);
+            // TODO?
+            return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
         match input_tokens.cmp(&output_tokens) {

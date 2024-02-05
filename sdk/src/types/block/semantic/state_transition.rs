@@ -64,7 +64,7 @@ impl SemanticValidationContext<'_> {
                 if current_state.is_implicit_account() {
                     BasicOutput::implicit_account_transition(current_state, next_state, self)
                 } else {
-                    Err(TransactionFailureReason::UnsupportedStateTransition)
+                    Err(TransactionFailureReason::SemanticValidationFailed)
                 }
             }
             (
@@ -89,7 +89,7 @@ impl SemanticValidationContext<'_> {
                 if current_state.is_implicit_account() {
                     Err(TransactionFailureReason::ImplicitAccountDestructionDisallowed)
                 } else {
-                    Err(TransactionFailureReason::UnsupportedStateTransition)
+                    Err(TransactionFailureReason::SemanticValidationFailed)
                 }
             }
             (Some((output_id, Output::Account(current_state))), None) => {
@@ -106,7 +106,7 @@ impl SemanticValidationContext<'_> {
             }
 
             // Unsupported.
-            _ => Err(TransactionFailureReason::UnsupportedStateTransition),
+            _ => Err(TransactionFailureReason::SemanticValidationFailed),
         }
     }
 }
@@ -377,27 +377,25 @@ impl StateTransitionVerifier for DelegationOutput {
         let protocol_parameters = &context.protocol_parameters;
 
         if !next_state.delegation_id().is_null() {
-            return Err(TransactionFailureReason::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
         if next_state.amount() != next_state.delegated_amount() {
-            return Err(TransactionFailureReason::InvalidDelegatedAmount);
+            return Err(TransactionFailureReason::DelegationAmountMismatch);
         }
 
         if next_state.end_epoch() != 0 {
-            return Err(TransactionFailureReason::NonZeroDelegationEndEpoch);
+            return Err(TransactionFailureReason::DelegationEndEpochNotZero);
         }
 
         let slot_commitment_id = context
             .commitment_context_input
             .map(|c| c.slot_commitment_id())
-            .ok_or(TransactionFailureReason::MissingCommitmentContextInput)?;
+            .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
             // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
-            return Err(TransactionFailureReason::TransactionFailure(
-                TransactionFailureReason::SemanticValidationFailed,
-            ));
+            return Err(TransactionFailureReason::DelegationStartEpochInvalid);
         }
 
         Ok(())
@@ -417,10 +415,10 @@ impl StateTransitionVerifier for DelegationOutput {
         let slot_commitment_id = context
             .commitment_context_input
             .map(|c| c.slot_commitment_id())
-            .ok_or(TransactionFailureReason::MissingCommitmentContextInput)?;
+            .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
-            return Err(TransactionFailureReason::NonDelayedClaimingTransition);
+            return Err(TransactionFailureReason::DelegationEndEpochInvalid);
         }
 
         Ok(())
@@ -433,11 +431,11 @@ impl StateTransitionVerifier for DelegationOutput {
     ) -> Result<(), TransactionFailureReason> {
         // If a mana reward was provided but no reward context input exists
         if context.mana_rewards.get(output_id).is_some() && !context.reward_context_inputs.contains_key(output_id) {
-            return Err(TransactionFailureReason::MissingRewardInput);
+            return Err(TransactionFailureReason::DelegationRewardInputMissing);
         }
 
         if context.commitment_context_input.is_none() {
-            return Err(TransactionFailureReason::MissingCommitmentContextInput);
+            return Err(TransactionFailureReason::DelegationCommitmentInputMissing);
         }
 
         Ok(())
