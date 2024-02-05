@@ -16,7 +16,7 @@ pub use self::{
 };
 use crate::types::block::{
     address::Address,
-    context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
+    context_input::{CommitmentContextInput, RewardContextInput},
     output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
@@ -34,7 +34,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) input_mana: u64,
     pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
     pub(crate) commitment_context_input: Option<CommitmentContextInput>,
-    pub(crate) bic_context_input: Option<BlockIssuanceCreditContextInput>,
+    pub(crate) bic_context_inputs: HashSet<AccountId>,
     pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) input_chains: HashMap<ChainId, (&'a OutputId, &'a Output)>,
@@ -91,7 +91,7 @@ impl<'a> SemanticValidationContext<'a> {
             input_mana: 0,
             mana_rewards,
             commitment_context_input: None,
-            bic_context_input: None,
+            bic_context_inputs: Default::default(),
             reward_context_inputs: Default::default(),
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
@@ -118,12 +118,12 @@ impl<'a> SemanticValidationContext<'a> {
             .find_map(|c| c.as_commitment_opt())
             .copied();
 
-        self.bic_context_input = self
+        self.bic_context_inputs = self
             .transaction
             .context_inputs()
             .iter()
-            .find_map(|c| c.as_block_issuance_credit_opt())
-            .copied();
+            .filter_map(|c| c.as_block_issuance_credit_opt().map(|bic| *bic.account_id()))
+            .collect();
 
         for reward_context_input in self
             .transaction
