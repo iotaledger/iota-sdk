@@ -118,7 +118,8 @@ impl BasicOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if next_state.account_id().is_null() {
-            return Err(TransactionFailureReason::ZeroCreatedId);
+            // TODO SemanticValidationFailed
+            return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
         if let Some(_block_issuer) = next_state.features().block_issuer() {
@@ -127,12 +128,13 @@ impl BasicOutput {
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
         } else {
-            return Err(TransactionFailureReason::InvalidBlockIssuerTransition);
+            // TODO
+            return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
             }
         }
 
@@ -147,7 +149,7 @@ impl StateTransitionVerifier for AccountOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if !next_state.account_id().is_null() {
-            return Err(TransactionFailureReason::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
@@ -254,10 +256,10 @@ impl StateTransitionVerifier for FoundryOutput {
             if input_account.foundry_counter() >= next_state.serial_number()
                 || next_state.serial_number() > output_account.foundry_counter()
             {
-                return Err(TransactionFailureReason::InconsistentFoundrySerialNumber);
+                return Err(TransactionFailureReason::FoundrySerialInvalid);
             }
         } else {
-            return Err(TransactionFailureReason::MissingAccountForFoundry);
+            return Err(TransactionFailureReason::FoundryTransitionWithoutAccount);
         }
 
         let token_id = next_state.token_id();
@@ -266,11 +268,13 @@ impl StateTransitionVerifier for FoundryOutput {
 
         // No native tokens should be referenced prior to the foundry creation.
         if context.input_native_tokens.contains_key(&token_id) {
-            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryCreation);
+            // TODO
+            return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
         if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
-            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryCreation);
+            // TODO
+            return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
         Ok(())
@@ -310,14 +314,16 @@ impl StateTransitionVerifier for FoundryOutput {
 
         // No native tokens should be referenced after the foundry destruction.
         if context.output_native_tokens.contains_key(&token_id) {
-            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryDestruction);
+            // TODO
+            return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
         // This can't underflow as it is known that minted_tokens >= melted_tokens (syntactic rule).
         let minted_melted_diff = current_token_scheme.minted_tokens() - current_token_scheme.melted_tokens();
 
         if minted_melted_diff != input_tokens {
-            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryDestruction);
+            // TODO
+            return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
         Ok(())
