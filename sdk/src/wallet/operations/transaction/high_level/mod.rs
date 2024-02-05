@@ -9,3 +9,4 @@ pub(crate) mod minting;
 pub(crate) mod send;
 pub(crate) mod send_native_tokens;
 pub(crate) mod send_nft;
+pub(crate) mod staking;

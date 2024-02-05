@@ -14,7 +14,7 @@ where
 {
     pub(crate) async fn submit_basic_block(
         &self,
-        payload: Option<Payload>,
+        payload: impl Into<Option<Payload>> + Send,
         issuer_id: impl Into<Option<AccountId>> + Send,
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");

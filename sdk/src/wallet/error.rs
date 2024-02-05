@@ -127,6 +127,8 @@ pub enum Error {
     /// Account not found.
     #[error("account not found")]
     AccountNotFound,
+    #[error("staking failed: {0}")]
+    StakingFailed(String),
 }
 
 impl Error {
