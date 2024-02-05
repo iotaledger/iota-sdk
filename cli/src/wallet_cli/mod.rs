@@ -10,21 +10,22 @@ use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::{
-        address::{Bech32Address, ToBech32Ext},
+        address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
         output::{
             feature::{BlockIssuerKeySource, MetadataFeature},
             unlock_condition::AddressUnlockCondition,
-            AccountId, BasicOutputBuilder, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId,
-            TokenId,
+            AccountId, BasicOutputBuilder, DelegationId, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output,
+            OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
-        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams, Error as WalletError,
+        MintNftParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
+        TransactionOptions, Wallet,
     },
     U256,
 };
@@ -93,6 +94,15 @@ pub enum WalletCommand {
     Consolidate,
     /// Create a new account output.
     CreateAccountOutput,
+    /// Create a delegation.
+    CreateDelegation {
+        /// The amount to delegate.
+        delegated_amount: u64,
+        /// The account ID of the validator.
+        validator_account_id: AccountId,
+        /// The address that will control the delegation. Defaults to the wallet address.
+        address: Option<Bech32Address>,
+    },
     /// Create a native token.
     CreateNativeToken {
         /// Circulating supply of the native token to be minted, e.g. 100.
@@ -111,10 +121,23 @@ pub enum WalletCommand {
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
+    /// Delay the claiming of a delegation.
+    DelayDelegationClaiming {
+        /// ID of the delegation to be delayed.
+        delegation_id: DelegationId,
+        /// Whether excess amount above the minimum storage requirement should be reclaimed.
+        /// Otherwise the excess will be transferred into a new delegation.
+        reclaim_excess: bool,
+    },
     /// Destroy an account output.
     DestroyAccount {
         /// Account ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
         account_id: AccountId,
+    },
+    /// Destroy a delegation.
+    DestroyDelegation {
+        /// ID of the delegation to be destroyed.
+        delegation_id: DelegationId,
     },
     /// Destroy a foundry.
     DestroyFoundry {
@@ -566,6 +589,36 @@ pub async fn create_account_output_command(wallet: &Wallet) -> Result<(), Error>
     Ok(())
 }
 
+// `create-delegation` command
+pub async fn create_delegation_command(
+    wallet: &Wallet,
+    address: Option<Bech32Address>,
+    delegated_amount: u64,
+    validator_account_id: AccountId,
+) -> Result<(), Error> {
+    println_log_info!("Creating delegation output.");
+
+    let transaction = wallet
+        .create_delegation_output(
+            CreateDelegationParams {
+                address,
+                delegated_amount,
+                validator_address: AccountAddress::new(validator_account_id),
+            },
+            None,
+        )
+        .await?;
+
+    println_log_info!(
+        "Delegation creation transaction sent:\n{:?}\n{:?}\n{:?}",
+        transaction.transaction.transaction_id,
+        transaction.transaction.block_id,
+        transaction.delegation_id
+    );
+
+    Ok(())
+}
+
 // `create-native-token` command
 pub async fn create_native_token_command(
     wallet: &Wallet,
@@ -606,6 +659,25 @@ pub async fn create_native_token_command(
     Ok(())
 }
 
+// `delay-delegation-claiming` command
+pub async fn delay_delegation_claiming_command(
+    wallet: &Wallet,
+    delegation_id: DelegationId,
+    reclaim_excess: bool,
+) -> Result<(), Error> {
+    println_log_info!("Delaying delegation claiming.");
+
+    let transaction = wallet.delay_delegation_claiming(delegation_id, reclaim_excess).await?;
+
+    println_log_info!(
+        "Delay delegation claiming transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `destroy-account` command
 pub async fn destroy_account_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
     println_log_info!("Destroying account {account_id}.");
@@ -614,6 +686,21 @@ pub async fn destroy_account_command(wallet: &Wallet, account_id: AccountId) -> 
 
     println_log_info!(
         "Destroying account transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `destroy-delegation` command
+pub async fn destroy_delegation_command(wallet: &Wallet, delegation_id: DelegationId) -> Result<(), Error> {
+    println_log_info!("Destroying delegation {delegation_id}.");
+
+    let transaction = wallet.burn(delegation_id, None).await?;
+
+    println_log_info!(
+        "Destroying delegation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
@@ -1204,6 +1291,11 @@ pub async fn prompt_internal(
                         }
                         WalletCommand::Consolidate => consolidate_command(wallet).await,
                         WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
+                        WalletCommand::CreateDelegation {
+                            address,
+                            delegated_amount,
+                            validator_account_id,
+                        } => create_delegation_command(wallet, address, delegated_amount, validator_account_id).await,
                         WalletCommand::CreateNativeToken {
                             circulating_supply,
                             maximum_supply,
@@ -1222,8 +1314,15 @@ pub async fn prompt_internal(
                             )
                             .await
                         }
+                        WalletCommand::DelayDelegationClaiming {
+                            delegation_id,
+                            reclaim_excess,
+                        } => delay_delegation_claiming_command(wallet, delegation_id, reclaim_excess).await,
                         WalletCommand::DestroyAccount { account_id } => {
                             destroy_account_command(wallet, account_id).await
+                        }
+                        WalletCommand::DestroyDelegation { delegation_id } => {
+                            destroy_delegation_command(wallet, delegation_id).await
                         }
                         WalletCommand::DestroyFoundry { foundry_id } => {
                             destroy_foundry_command(wallet, foundry_id).await
