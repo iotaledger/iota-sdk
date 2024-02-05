@@ -179,6 +179,7 @@ where
                     &mut output_ids_to_unlock,
                 )?;
             } else {
+                // Reissue if there was no block id yet, because then we also didn't burn any mana
                 log::debug!("[SYNC] reissue transaction {}", transaction.transaction_id);
                 let reissued_block = self
                     .submit_signed_transaction(transaction.payload.clone(), None)
