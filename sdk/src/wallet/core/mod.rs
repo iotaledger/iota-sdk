@@ -48,7 +48,7 @@ pub struct Wallet<T = ()> {
 #[derive(Debug)]
 pub struct SecretData<S: SecretManage> {
     /// The public key generation options.
-    pub(crate) public_key_options: S::GenerationOptions,
+    pub(crate) public_key_options: Arc<RwLock<S::GenerationOptions>>,
     /// The signing options for transactions and blocks.
     pub(crate) signing_options: S::SigningOptions,
     pub(crate) secret_manager: Arc<RwLock<S>>,
@@ -453,8 +453,8 @@ impl<S: SecretManage> Wallet<SecretData<S>> {
         &self.secret_data.secret_manager
     }
 
-    pub fn public_key_options(&self) -> &S::GenerationOptions {
-        &self.secret_data.public_key_options
+    pub async fn public_key_options(&self) -> S::GenerationOptions {
+        self.secret_data.public_key_options.read().await.clone()
     }
 
     pub fn signing_options(&self) -> &S::SigningOptions {

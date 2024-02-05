@@ -99,22 +99,27 @@ impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
         let (loaded_client_options, loaded_secret_manager_config, loaded_wallet_data, loaded_secret_data) =
             read_wallet_data_from_stronghold_snapshot::<S>(&new_stronghold).await?;
 
-        let loaded_pub_key_opts = loaded_secret_data.as_ref().map(|data| &data.public_key_options);
+        let loaded_pub_key_opts = loaded_secret_data.map(|data| {
+            std::sync::Arc::into_inner(data.public_key_options)
+                .unwrap()
+                .into_inner()
+        });
 
         // If the bip path is not matching the current one, we may ignore the backup
-        let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
-            if ignore {
-                // TODO: #1279 okay that if both are none we always load the backup values?
-                loaded_pub_key_opts.is_some_and(|opts| self.public_key_options() != opts)
+        let ignore_backup_values = if matches!(ignore_if_bip_path_mismatch, Some(ignore) if ignore) {
+            // TODO: #1279 okay that if both are none we always load the backup values?
+            if let Some(opts) = &loaded_pub_key_opts {
+                &self.public_key_options().await != opts
             } else {
                 false
             }
-        });
+        } else {
+            false
+        };
 
         if !ignore_backup_values {
             if let Some(opts) = loaded_pub_key_opts {
-                // TODO
-                // self.secret_data.public_key_options = opts.clone();
+                *self.secret_data.public_key_options.write().await = opts;
             }
         }
 
@@ -181,7 +186,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_public_key_options(self.public_key_options().clone())
+                .with_public_key_options(self.public_key_options().await.clone())
                 .with_signing_options(self.signing_options().clone());
 
             wallet_builder.save(self.storage_manager()).await?;

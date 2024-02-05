@@ -105,6 +105,15 @@ impl From<Bip44> for PublicKeyOptions {
     }
 }
 
+impl From<PublicKeyOptions> for Bip44 {
+    fn from(value: PublicKeyOptions) -> Self {
+        Bip44::new(value.coin_type)
+            .with_account(value.account_index)
+            .with_change(value.internal as _)
+            .with_address_index(value.address_index)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct MultiKeyOptions {

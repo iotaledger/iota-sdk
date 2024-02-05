@@ -446,10 +446,11 @@ where
             inner: Arc::new(wallet_inner),
             data: Arc::new(RwLock::new(wallet_data)),
             secret_data: SecretData {
-                public_key_options: self
-                    .secret_data
-                    .public_key_options
-                    .ok_or(crate::wallet::Error::MissingParameter("public_key_options"))?,
+                public_key_options: Arc::new(RwLock::new(
+                    self.secret_data
+                        .public_key_options
+                        .ok_or(crate::wallet::Error::MissingParameter("public_key_options"))?,
+                )),
                 signing_options: self
                     .secret_data
                     .signing_options
@@ -531,7 +532,7 @@ mod builder_from {
 
         async fn from(&self) -> Self::Builder {
             Self::Builder {
-                public_key_options: Some(self.public_key_options.clone()),
+                public_key_options: Some(self.public_key_options.read().await.clone()),
                 signing_options: Some(self.signing_options.clone()),
                 secret_manager: Some(self.secret_manager.clone()),
             }
