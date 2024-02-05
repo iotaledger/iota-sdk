@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashMap;
+
 use primitive_types::U256;
 
 use crate::{
@@ -49,6 +51,8 @@ where
             }
         }
 
+        let mut mana_rewards = HashMap::new();
+
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             // Check if output is from the network we're currently connected to
             if output_data.network_id != network_id {
@@ -69,6 +73,9 @@ where
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
+                        mana_rewards.insert(output_id, response.rewards);
+                    }
 
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
@@ -129,6 +136,9 @@ where
                             output_id.transaction_id().slot_index(),
                             slot_index,
                         )?;
+                        if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
+                            mana_rewards.insert(output_id, response.rewards);
+                        }
 
                         // Add storage deposit
                         if output.is_basic() {
@@ -204,6 +214,10 @@ where
                                     output_id.transaction_id().slot_index(),
                                     slot_index,
                                 )?;
+                                if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await
+                                {
+                                    mana_rewards.insert(output_id, response.rewards);
+                                }
 
                                 // Add storage deposit
                                 if output.is_basic() {
@@ -271,6 +285,7 @@ where
                         output_data.output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
+                    mana_rewards.remove(&output_data.output_id);
 
                     if let Some(native_token) = output_data.output.native_token() {
                         locked_native_tokens.add_native_token(*native_token)?;
@@ -333,6 +348,7 @@ where
             potential: balance.mana.total.potential.saturating_sub(locked_mana.potential),
             stored: balance.mana.total.stored.saturating_sub(locked_mana.stored),
         };
+        balance.mana.rewards = mana_rewards.values().sum();
 
         Ok(balance)
     }
