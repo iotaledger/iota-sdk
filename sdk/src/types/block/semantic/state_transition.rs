@@ -152,7 +152,7 @@ impl StateTransitionVerifier for AccountOutput {
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
             }
         }
 
@@ -183,7 +183,7 @@ impl StateTransitionVerifier for AccountOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
         {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesAccountDestructionNotAllowed)?;
         }
         Ok(())
     }
@@ -196,12 +196,12 @@ impl StateTransitionVerifier for AnchorOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if !next_state.anchor_id().is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
             }
         }
 
@@ -233,7 +233,7 @@ impl StateTransitionVerifier for AnchorOutput {
             .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
         {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesAnchorDestructionNotAllowed)?;
         }
         Ok(())
     }
@@ -301,7 +301,7 @@ impl StateTransitionVerifier for FoundryOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
         {
-            return Err(TransactionFailureReason::TransactionCapabilityFoundryDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesFoundryDestructionNotAllowed)?;
         }
 
         let token_id = current_state.token_id();
@@ -331,12 +331,12 @@ impl StateTransitionVerifier for NftOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if !next_state.nft_id().is_null() {
-            return Err(TransactionFailureReason::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
             }
         }
 
@@ -362,7 +362,7 @@ impl StateTransitionVerifier for NftOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
         {
-            return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesNftDestructionNotAllowed)?;
         }
         Ok(())
     }
