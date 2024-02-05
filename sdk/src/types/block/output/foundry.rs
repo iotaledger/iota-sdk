@@ -445,11 +445,11 @@ impl FoundryOutput {
                 let token_diff = output_tokens - input_tokens;
 
                 if minted_diff != token_diff {
-                    return Err(TransactionFailureReason::InconsistentNativeTokensMint);
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
                 }
 
                 if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens() {
-                    return Err(TransactionFailureReason::InconsistentNativeTokensMint);
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
                 }
             }
             Ordering::Equal => {
@@ -458,7 +458,7 @@ impl FoundryOutput {
                 if current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
                     || current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
                 {
-                    return Err(TransactionFailureReason::InconsistentNativeTokensTransition);
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
                 }
             }
             Ordering::Greater => {
@@ -467,7 +467,7 @@ impl FoundryOutput {
                 if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
                     && current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
                 {
-                    return Err(TransactionFailureReason::InconsistentNativeTokensMeltBurn);
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
                 }
 
                 // This can't underflow as it is known that current_melted_tokens <= next_melted_tokens.
@@ -476,13 +476,13 @@ impl FoundryOutput {
                 let token_diff = input_tokens - output_tokens;
 
                 if melted_diff > token_diff {
-                    return Err(TransactionFailureReason::InconsistentNativeTokensMeltBurn);
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
                 }
 
                 let burned_diff = token_diff - melted_diff;
 
                 if !burned_diff.is_zero() && !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
-                    return Err(TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed)?;
+                    return Err(TransactionFailureReason::CapabilitiesNativeTokenBurningNotAllowed)?;
                 }
             }
         }

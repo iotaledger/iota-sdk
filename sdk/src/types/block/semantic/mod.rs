@@ -10,10 +10,7 @@ use alloc::collections::BTreeMap;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
-pub use self::{
-    error::TransactionFailureReason,
-    state_transition::{StateTransitionError, StateTransitionVerifier},
-};
+pub use self::{error::TransactionFailureReason, state_transition::StateTransitionVerifier};
 use crate::types::block::{
     address::Address,
     context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
@@ -348,10 +345,7 @@ impl<'a> SemanticValidationContext<'a> {
                 Some(*current_state),
                 self.output_chains.get(chain_id).map(|(id, o)| (id, *o)),
             ) {
-                Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
-                Err(_) => {
-                    return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
-                }
+                Err(e) => return Ok(Some(e)),
                 _ => {}
             }
         }
@@ -360,10 +354,7 @@ impl<'a> SemanticValidationContext<'a> {
         for (chain_id, next_state) in self.output_chains.iter() {
             if self.input_chains.get(chain_id).is_none() {
                 match self.verify_state_transition(None, Some((&next_state.0, next_state.1))) {
-                    Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
-                    Err(_) => {
-                        return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
-                    }
+                    Err(e) => return Ok(Some(e)),
                     _ => {}
                 }
             }
