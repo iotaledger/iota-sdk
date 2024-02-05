@@ -11,51 +11,13 @@ use crate::types::block::{
 };
 
 ///
-#[allow(missing_docs)]
-#[derive(Debug, Eq, PartialEq)]
-pub enum StateTransitionError {
-    InconsistentCreatedFoundriesCount,
-    InconsistentFoundrySerialNumber,
-    InconsistentNativeTokensFoundryCreation,
-    InconsistentNativeTokensFoundryDestruction,
-    InconsistentNativeTokensMint,
-    InconsistentNativeTokensTransition,
-    InconsistentNativeTokensMeltBurn,
-    InvalidDelegatedAmount,
-    InvalidBlockIssuerTransition,
-    IssuerNotUnlocked,
-    MissingAccountForFoundry,
-    MissingCommitmentContextInput,
-    MissingRewardInput,
-    MutatedFieldWithoutRights,
-    MutatedImmutableField,
-    NonDelayedClaimingTransition,
-    NonMonotonicallyIncreasingNativeTokens,
-    NonZeroCreatedId,
-    NonZeroCreatedFoundryCounter,
-    NonZeroCreatedStateIndex,
-    NonZeroDelegationEndEpoch,
-    UnsortedCreatedFoundries,
-    UnsupportedStateIndexOperation { current_state: u32, next_state: u32 },
-    UnsupportedStateTransition,
-    TransactionFailure(TransactionFailureReason),
-    ZeroCreatedId,
-}
-
-impl From<TransactionFailureReason> for StateTransitionError {
-    fn from(error: TransactionFailureReason) -> Self {
-        Self::TransactionFailure(error)
-    }
-}
-
-///
 pub trait StateTransitionVerifier {
     ///
     fn creation(
         output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError>;
+    ) -> Result<(), TransactionFailureReason>;
 
     ///
     fn transition(
@@ -64,14 +26,14 @@ pub trait StateTransitionVerifier {
         next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError>;
+    ) -> Result<(), TransactionFailureReason>;
 
     ///
     fn destruction(
         output_id: &OutputId,
         current_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError>;
+    ) -> Result<(), TransactionFailureReason>;
 }
 
 impl SemanticValidationContext<'_> {
@@ -80,7 +42,7 @@ impl SemanticValidationContext<'_> {
         &self,
         current_state: Option<(&OutputId, &Output)>,
         next_state: Option<(&OutputId, &Output)>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         match (current_state, next_state) {
             // Creations.
             (None, Some((output_id, Output::Account(next_state)))) => {
@@ -102,7 +64,7 @@ impl SemanticValidationContext<'_> {
                 if current_state.is_implicit_account() {
                     BasicOutput::implicit_account_transition(current_state, next_state, self)
                 } else {
-                    Err(StateTransitionError::UnsupportedStateTransition)
+                    Err(TransactionFailureReason::UnsupportedStateTransition)
                 }
             }
             (
@@ -125,9 +87,9 @@ impl SemanticValidationContext<'_> {
             // Destructions.
             (Some((_output_id, Output::Basic(current_state))), None) => {
                 if current_state.is_implicit_account() {
-                    Err(StateTransitionError::ImplicitAccountDestructionDisallowed)
+                    Err(TransactionFailureReason::ImplicitAccountDestructionDisallowed)
                 } else {
-                    Err(StateTransitionError::UnsupportedStateTransition)
+                    Err(TransactionFailureReason::UnsupportedStateTransition)
                 }
             }
             (Some((output_id, Output::Account(current_state))), None) => {
@@ -144,7 +106,7 @@ impl SemanticValidationContext<'_> {
             }
 
             // Unsupported.
-            _ => Err(StateTransitionError::UnsupportedStateTransition),
+            _ => Err(TransactionFailureReason::UnsupportedStateTransition),
         }
     }
 }
@@ -154,9 +116,9 @@ impl BasicOutput {
         _current_state: &Self,
         next_state: &AccountOutput,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if next_state.account_id().is_null() {
-            return Err(StateTransitionError::ZeroCreatedId);
+            return Err(TransactionFailureReason::ZeroCreatedId);
         }
 
         if let Some(_block_issuer) = next_state.features().block_issuer() {
@@ -165,12 +127,12 @@ impl BasicOutput {
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
         } else {
-            return Err(StateTransitionError::InvalidBlockIssuerTransition);
+            return Err(TransactionFailureReason::InvalidBlockIssuerTransition);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerNotUnlocked);
             }
         }
 
@@ -183,14 +145,14 @@ impl StateTransitionVerifier for AccountOutput {
         _output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !next_state.account_id().is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NonZeroCreatedId);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerNotUnlocked);
             }
         }
 
@@ -203,7 +165,7 @@ impl StateTransitionVerifier for AccountOutput {
         _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         Self::transition_inner(
             current_state,
             next_state,
@@ -216,7 +178,7 @@ impl StateTransitionVerifier for AccountOutput {
         _output_id: &OutputId,
         _current_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
@@ -232,7 +194,7 @@ impl StateTransitionVerifier for AnchorOutput {
         _output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !next_state.anchor_id().is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -252,7 +214,7 @@ impl StateTransitionVerifier for AnchorOutput {
         _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         Self::transition_inner(
             current_state,
             next_state,
@@ -265,7 +227,7 @@ impl StateTransitionVerifier for AnchorOutput {
         _output_id: &OutputId,
         _current_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !context
             .transaction
             .capabilities()
@@ -282,7 +244,7 @@ impl StateTransitionVerifier for FoundryOutput {
         _output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
         if let (Some((_, Output::Account(input_account))), Some((_, Output::Account(output_account)))) = (
@@ -292,10 +254,10 @@ impl StateTransitionVerifier for FoundryOutput {
             if input_account.foundry_counter() >= next_state.serial_number()
                 || next_state.serial_number() > output_account.foundry_counter()
             {
-                return Err(StateTransitionError::InconsistentFoundrySerialNumber);
+                return Err(TransactionFailureReason::InconsistentFoundrySerialNumber);
             }
         } else {
-            return Err(StateTransitionError::MissingAccountForFoundry);
+            return Err(TransactionFailureReason::MissingAccountForFoundry);
         }
 
         let token_id = next_state.token_id();
@@ -304,11 +266,11 @@ impl StateTransitionVerifier for FoundryOutput {
 
         // No native tokens should be referenced prior to the foundry creation.
         if context.input_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
+            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryCreation);
         }
 
         if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
+            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryCreation);
         }
 
         Ok(())
@@ -320,7 +282,7 @@ impl StateTransitionVerifier for FoundryOutput {
         _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         Self::transition_inner(
             current_state,
             next_state,
@@ -334,7 +296,7 @@ impl StateTransitionVerifier for FoundryOutput {
         _output_id: &OutputId,
         current_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
@@ -348,14 +310,14 @@ impl StateTransitionVerifier for FoundryOutput {
 
         // No native tokens should be referenced after the foundry destruction.
         if context.output_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryDestruction);
+            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryDestruction);
         }
 
         // This can't underflow as it is known that minted_tokens >= melted_tokens (syntactic rule).
         let minted_melted_diff = current_token_scheme.minted_tokens() - current_token_scheme.melted_tokens();
 
         if minted_melted_diff != input_tokens {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryDestruction);
+            return Err(TransactionFailureReason::InconsistentNativeTokensFoundryDestruction);
         }
 
         Ok(())
@@ -367,14 +329,14 @@ impl StateTransitionVerifier for NftOutput {
         _output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !next_state.nft_id().is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NonZeroCreatedId);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
+                return Err(TransactionFailureReason::IssuerNotUnlocked);
             }
         }
 
@@ -387,7 +349,7 @@ impl StateTransitionVerifier for NftOutput {
         _next_output_id: &OutputId,
         next_state: &Self,
         _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         Self::transition_inner(current_state, next_state)
     }
 
@@ -395,7 +357,7 @@ impl StateTransitionVerifier for NftOutput {
         _output_id: &OutputId,
         _current_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
@@ -411,29 +373,29 @@ impl StateTransitionVerifier for DelegationOutput {
         _output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         let protocol_parameters = &context.protocol_parameters;
 
         if !next_state.delegation_id().is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
+            return Err(TransactionFailureReason::NonZeroCreatedId);
         }
 
         if next_state.amount() != next_state.delegated_amount() {
-            return Err(StateTransitionError::InvalidDelegatedAmount);
+            return Err(TransactionFailureReason::InvalidDelegatedAmount);
         }
 
         if next_state.end_epoch() != 0 {
-            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
+            return Err(TransactionFailureReason::NonZeroDelegationEndEpoch);
         }
 
         let slot_commitment_id = context
             .commitment_context_input
             .map(|c| c.slot_commitment_id())
-            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+            .ok_or(TransactionFailureReason::MissingCommitmentContextInput)?;
 
         if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
             // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
-            return Err(StateTransitionError::TransactionFailure(
+            return Err(TransactionFailureReason::TransactionFailure(
                 TransactionFailureReason::SemanticValidationFailed,
             ));
         }
@@ -447,7 +409,7 @@ impl StateTransitionVerifier for DelegationOutput {
         _next_output_id: &OutputId,
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         Self::transition_inner(current_state, next_state)?;
 
         let protocol_parameters = &context.protocol_parameters;
@@ -455,10 +417,10 @@ impl StateTransitionVerifier for DelegationOutput {
         let slot_commitment_id = context
             .commitment_context_input
             .map(|c| c.slot_commitment_id())
-            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+            .ok_or(TransactionFailureReason::MissingCommitmentContextInput)?;
 
         if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
-            return Err(StateTransitionError::NonDelayedClaimingTransition);
+            return Err(TransactionFailureReason::NonDelayedClaimingTransition);
         }
 
         Ok(())
@@ -468,13 +430,14 @@ impl StateTransitionVerifier for DelegationOutput {
         output_id: &OutputId,
         _current_state: &Self,
         context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         // If a mana reward was provided but no reward context input exists
         if context.mana_rewards.get(output_id).is_some() && !context.reward_context_inputs.contains_key(output_id) {
-            return Err(StateTransitionError::MissingRewardInput);
+            return Err(TransactionFailureReason::MissingRewardInput);
         }
+
         if context.commitment_context_input.is_none() {
-            return Err(StateTransitionError::MissingCommitmentContextInput);
+            return Err(TransactionFailureReason::MissingCommitmentContextInput);
         }
 
         Ok(())

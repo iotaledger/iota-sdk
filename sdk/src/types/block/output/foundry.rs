@@ -23,7 +23,7 @@ use crate::types::block::{
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{StateTransitionError, TransactionFailureReason},
+    semantic::TransactionFailureReason,
     Error,
 };
 
@@ -408,12 +408,12 @@ impl FoundryOutput {
         input_native_tokens: &BTreeMap<TokenId, U256>,
         output_native_tokens: &BTreeMap<TokenId, U256>,
         capabilities: &TransactionCapabilities,
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if current_state.account_address() != next_state.account_address()
             || current_state.serial_number != next_state.serial_number
             || current_state.immutable_features != next_state.immutable_features
         {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::MutatedImmutableField);
         }
 
         let token_id = next_state.token_id();
@@ -423,13 +423,13 @@ impl FoundryOutput {
         let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
 
         if current_token_scheme.maximum_supply() != next_token_scheme.maximum_supply() {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::MutatedImmutableField);
         }
 
         if current_token_scheme.minted_tokens() > next_token_scheme.minted_tokens()
             || current_token_scheme.melted_tokens() > next_token_scheme.melted_tokens()
         {
-            return Err(StateTransitionError::NonMonotonicallyIncreasingNativeTokens);
+            return Err(TransactionFailureReason::NonMonotonicallyIncreasingNativeTokens);
         }
 
         match input_tokens.cmp(&output_tokens) {
@@ -442,11 +442,11 @@ impl FoundryOutput {
                 let token_diff = output_tokens - input_tokens;
 
                 if minted_diff != token_diff {
-                    return Err(StateTransitionError::InconsistentNativeTokensMint);
+                    return Err(TransactionFailureReason::InconsistentNativeTokensMint);
                 }
 
                 if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens() {
-                    return Err(StateTransitionError::InconsistentNativeTokensMint);
+                    return Err(TransactionFailureReason::InconsistentNativeTokensMint);
                 }
             }
             Ordering::Equal => {
@@ -455,7 +455,7 @@ impl FoundryOutput {
                 if current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
                     || current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
                 {
-                    return Err(StateTransitionError::InconsistentNativeTokensTransition);
+                    return Err(TransactionFailureReason::InconsistentNativeTokensTransition);
                 }
             }
             Ordering::Greater => {
@@ -464,7 +464,7 @@ impl FoundryOutput {
                 if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
                     && current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
                 {
-                    return Err(StateTransitionError::InconsistentNativeTokensMeltBurn);
+                    return Err(TransactionFailureReason::InconsistentNativeTokensMeltBurn);
                 }
 
                 // This can't underflow as it is known that current_melted_tokens <= next_melted_tokens.
@@ -473,7 +473,7 @@ impl FoundryOutput {
                 let token_diff = input_tokens - output_tokens;
 
                 if melted_diff > token_diff {
-                    return Err(StateTransitionError::InconsistentNativeTokensMeltBurn);
+                    return Err(TransactionFailureReason::InconsistentNativeTokensMeltBurn);
                 }
 
                 let burned_diff = token_diff - melted_diff;
