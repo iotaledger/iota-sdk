@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+/// The module for announcing candidacy.
+pub(crate) mod announce_candidacy;
 /// The module to get the wallet's balance
 pub(crate) mod balance;
 /// The module for blocks

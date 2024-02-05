@@ -12,7 +12,7 @@ use crate::{
 /// Parameters for beginning a staking period.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct BeginStakingParameters {
+pub struct BeginStakingParams {
     /// The account id which will become a validator. Will default to the first account in the wallet.
     pub account_id: Option<AccountId>,
     /// The amount of tokens to stake.
@@ -30,7 +30,7 @@ where
 {
     pub async fn begin_staking(
         &self,
-        params: BeginStakingParameters,
+        params: BeginStakingParams,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
@@ -42,7 +42,7 @@ where
     /// Prepares the transaction for [Wallet::begin_staking()].
     pub async fn prepare_begin_staking(
         &self,
-        params: BeginStakingParameters,
+        params: BeginStakingParams,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_begin_staking");

@@ -100,3 +100,15 @@ export interface CreateDelegationParams {
     /** The Account Address of the validator to which this output will delegate. */
     validatorAddress: AccountAddress;
 }
+
+/** Options for beginning staking. */
+export interface BeginStakingParams {
+    /** The account id which will become a validator. Will default to the first account in the wallet. */
+    accountId?: Bech32Address;
+    /** The amount of tokens to stake. */
+    stakedAmount: NumericString;
+    /** The fixed cost of the validator, which it receives as part of its Mana rewards. */
+    fixedCost: NumericString;
+    /** The staking period (in epochs). Will default to the staking unbonding period. */
+    stakingPeriod?: number;
+}

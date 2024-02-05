@@ -15,17 +15,14 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub async fn end_staking(&self, account_id: Option<AccountId>) -> crate::wallet::Result<TransactionWithMetadata> {
+    pub async fn end_staking(&self, account_id: AccountId) -> crate::wallet::Result<TransactionWithMetadata> {
         let prepared = self.prepare_end_staking(account_id).await?;
 
         self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::end_staking()].
-    pub async fn prepare_end_staking(
-        &self,
-        account_id: Option<AccountId>,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    pub async fn prepare_end_staking(&self, account_id: AccountId) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_end_staking");
 
         let (account_id, account_output_data) = self

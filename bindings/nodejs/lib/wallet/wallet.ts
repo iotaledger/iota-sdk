@@ -29,6 +29,7 @@ import {
     PreparedCreateNativeTokenTransactionData,
     ConsolidationParams,
     CreateDelegationTransaction,
+    BeginStakingParams,
 } from '../types/wallet';
 import { Client, INode, Burn, PreparedTransactionData } from '../client';
 import {
@@ -47,6 +48,7 @@ import {
     NumericString,
     Bech32Address,
     DelegationId,
+    BlockId,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
@@ -1313,6 +1315,147 @@ export class Wallet {
             plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
+    }
+
+    /**
+     * Begin staking.
+     *
+     * @param params The options for begging a staking.
+     * @param transactionOptions Additional transaction options or custom inputs.
+     * @returns The created transaction.
+     */
+    async beginStaking(
+        params: BeginStakingParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<TransactionWithMetadata> {
+        return await (
+            await this.prepareBeginStaking(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Prepare a transaction to begin staking.
+     *
+     * @param params The options for beginning staking.
+     * @param transactionOptions Additional transaction options or custom inputs.
+     * @returns The prepared transaction.
+     */
+    async prepareBeginStaking(
+        params: BeginStakingParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareBeginStaking',
+            data: {
+                params,
+                options: transactionOptions,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * Extend staking period.
+     *
+     * @param accountId The ID of the staking account.
+     * @param additionalEpochs The number of epochs to add to the staking period.
+     * @returns The created transaction.
+     */
+    async extendStaking(
+        accountId: AccountId,
+        additionalEpochs: number,
+    ): Promise<TransactionWithMetadata> {
+        return await (
+            await this.prepareExtendStaking(accountId, additionalEpochs)
+        ).send();
+    }
+
+    /**
+     * Prepare a transaction to extend a staking period.
+     *
+     * @param accountId The ID of the staking account.
+     * @param additionalEpochs The number of epochs to add to the staking period.
+     * @returns The prepared transaction.
+     */
+    async prepareExtendStaking(
+        accountId: AccountId,
+        additionalEpochs: number,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareExtendStaking',
+            data: {
+                accountId,
+                additionalEpochs,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * End staking and claim rewards.
+     *
+     * @param accountId The ID of the staking account.
+     * @returns The created transaction.
+     */
+    async endStaking(accountId: AccountId): Promise<TransactionWithMetadata> {
+        return await (await this.prepareEndStaking(accountId)).send();
+    }
+
+    /**
+     * Prepare a transaction to end staking and claim rewards.
+     *
+     * @param accountId The ID of the staking account.
+     * @returns The prepared transaction.
+     */
+    async prepareEndStaking(
+        accountId: AccountId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareEndStaking',
+            data: {
+                accountId,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * Announce a staking account's candidacy for the staking period.
+     *
+     * @param accountId The ID of the account to announce candidacy.
+     * @returns The submitted block ID.
+     */
+    async announceCandidacy(accountId?: AccountId): Promise<BlockId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'announceCandidacy',
+            data: {
+                accountId,
+            },
+        });
+
+        const parsed = JSON.parse(response) as Response<BlockId>;
+        return parsed.payload;
     }
 
     /**
