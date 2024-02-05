@@ -134,7 +134,7 @@ impl<'a> SemanticValidationContext<'a> {
             if let Some(output_id) = self.inputs.get(reward_context_input.index() as usize).map(|v| v.0) {
                 self.reward_context_inputs.insert(*output_id, *reward_context_input);
             } else {
-                return Ok(Some(TransactionFailureReason::InvalidRewardContextInput));
+                return Ok(Some(TransactionFailureReason::RewardInputReferenceInvalid));
             }
         }
 
@@ -150,7 +150,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if unlock_conditions.addresses().any(Address::is_implicit_account_creation) {
                 if has_implicit_account_creation_address {
-                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                    return Ok(Some(TransactionFailureReason::MultipleImplicitAccountCreationAddresses));
                 } else {
                     has_implicit_account_creation_address = true;
                 }
@@ -164,8 +164,7 @@ impl<'a> SemanticValidationContext<'a> {
                         return Ok(Some(TransactionFailureReason::TimelockNotExpired));
                     }
                 } else {
-                    // Missing CommitmentContextInput
-                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                    return Ok(Some(TransactionFailureReason::TimelockCommitmentInputMissing));
                 }
             }
 
@@ -186,8 +185,7 @@ impl<'a> SemanticValidationContext<'a> {
                         }
                     }
                 } else {
-                    // Missing CommitmentContextInput
-                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                    return Ok(Some(TransactionFailureReason::ExpirationCommitmentInputMissing));
                 }
             }
 
@@ -224,7 +222,8 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(unlocks) = self.unlocks {
                 if unlocks.len() != self.inputs.len() {
-                    return Ok(Some(TransactionFailureReason::InvalidInputUnlock));
+                    // TODO
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
                 if let Err(conflict) = self.output_unlock(consumed_output, output_id, &unlocks[index]) {
@@ -261,7 +260,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(sender) = features.and_then(|f| f.sender()) {
                 if !self.unlocked_addresses.contains(sender.address()) {
-                    return Ok(Some(TransactionFailureReason::SenderNotUnlocked));
+                    return Ok(Some(TransactionFailureReason::SenderFeatureNotUnlocked));
                 }
             }
 
@@ -289,6 +288,7 @@ impl<'a> SemanticValidationContext<'a> {
 
                 *native_token_amount = native_token_amount
                     .checked_add(created_native_token.amount())
+                    // TODO should be a tx failure reason ?
                     .ok_or(Error::CreatedNativeTokensAmountOverflow)?;
             }
         }
@@ -297,27 +297,25 @@ impl<'a> SemanticValidationContext<'a> {
         for (return_address, return_amount) in self.storage_deposit_returns.iter() {
             if let Some(deposit_amount) = self.simple_deposits.get(return_address) {
                 if deposit_amount < return_amount {
-                    return Ok(Some(TransactionFailureReason::StorageDepositReturnUnfulfilled));
+                    return Ok(Some(TransactionFailureReason::ReturnAmountNotFulFilled));
                 }
             } else {
-                return Ok(Some(TransactionFailureReason::StorageDepositReturnUnfulfilled));
+                return Ok(Some(TransactionFailureReason::ReturnAmountNotFulFilled));
             }
         }
 
         // Validation of amounts.
         if self.input_amount != self.output_amount {
-            return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
+            return Ok(Some(TransactionFailureReason::InputOutputBaseTokenMismatch));
         }
 
         if self.input_mana != self.output_mana {
             if self.input_mana > self.output_mana {
                 if !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
-                    return Ok(Some(
-                        TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed,
-                    ));
+                    return Ok(Some(TransactionFailureReason::CapabilitiesManaBurningNotAllowed));
                 }
             } else {
-                return Ok(Some(TransactionFailureReason::InvalidManaAmount));
+                return Ok(Some(TransactionFailureReason::InputOutputManaMismatch));
             }
         }
 
@@ -333,14 +331,15 @@ impl<'a> SemanticValidationContext<'a> {
                     .output_chains
                     .contains_key(&ChainId::from(FoundryId::from(*token_id)))
             {
-                return Ok(Some(TransactionFailureReason::InvalidNativeTokens));
+                return Ok(Some(TransactionFailureReason::NativeTokenSumUnbalanced));
             }
 
             native_token_ids.insert(token_id);
         }
 
         if native_token_ids.len() > NativeTokens::COUNT_MAX as usize {
-            return Ok(Some(TransactionFailureReason::InvalidNativeTokens));
+            // TODO
+            return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
         }
 
         // Validation of state transitions and destructions.
