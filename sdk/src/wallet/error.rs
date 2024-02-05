@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::fmt::Debug;
@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use crypto::keys::bip44::Bip44;
 use serde::{ser::Serializer, Serialize};
 
-use crate::types::block::{address::Bech32Address, payload::signed_transaction::TransactionId};
+use crate::types::block::{address::Bech32Address, output::DelegationId, payload::signed_transaction::TransactionId};
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error, strum::AsRefStr)]
@@ -37,6 +37,8 @@ pub enum Error {
     /// Custom input error
     #[error("custom input error {0}")]
     CustomInput(String),
+    #[error("no delegation output found with id {0}")]
+    MissingDelegation(DelegationId),
     /// Insufficient funds to send transaction.
     #[error("address owns insufficient funds: {required} base unit required, but {available} base unit available")]
     InsufficientFunds { available: u64, required: u64 },

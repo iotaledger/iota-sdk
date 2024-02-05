@@ -100,7 +100,7 @@ pub struct OutputMetadata {
     included: OutputInclusionMetadata,
     // Metadata of the output if it is marked as spent in the ledger.
     #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
-    spent: Option<OutputConsumptionMetadata>,
+    pub(crate) spent: Option<OutputConsumptionMetadata>,
     /// Latest commitment ID of the node.
     latest_commitment_id: SlotCommitmentId,
 }

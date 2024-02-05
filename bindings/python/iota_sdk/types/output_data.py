@@ -20,7 +20,6 @@ class OutputData():
         output_id: With the output data corresponding output ID.
         metadata: With the output corresponding metadata.
         output: The output object itself.
-        is_spent: Whether the output is spent.
         address: The address associated with the output.
         network_id: The network ID the output belongs to.
         remainder: Whether the output represents a remainder amount.
@@ -29,7 +28,6 @@ class OutputData():
     output_id: HexStr
     metadata: OutputMetadata
     output: Output
-    is_spent: bool
     address: Address
     network_id: str
     remainder: bool

@@ -1,5 +1,7 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
+use alloc::collections::BTreeMap;
 
 use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
@@ -9,7 +11,7 @@ use crate::{
     types::{
         block::{
             address::Address,
-            output::Output,
+            output::{Output, OutputId},
             payload::{
                 signed_transaction::{
                     dto::{SignedTransactionPayloadDto, TransactionDto},
@@ -22,7 +24,7 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::bip44::option_bip44,
+    utils::serde::{bip44::option_bip44, mana_rewards},
 };
 
 /// Helper struct for offline signing
@@ -34,6 +36,8 @@ pub struct PreparedTransactionData {
     pub inputs_data: Vec<InputSigningData>,
     /// Remainder outputs information
     pub remainders: Vec<RemainderData>,
+    /// Mana rewards
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 /// PreparedTransactionData Dto
@@ -47,6 +51,9 @@ pub struct PreparedTransactionDataDto {
     /// Remainder outputs information
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub remainders: Vec<RemainderData>,
+    /// Mana rewards
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", with = "mana_rewards")]
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
@@ -55,6 +62,7 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
             transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.clone(),
             remainders: value.remainders.clone(),
+            mana_rewards: value.mana_rewards.clone(),
         }
     }
 }
@@ -71,7 +79,17 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
                 .map_err(|_| Error::InvalidField("transaction"))?,
             inputs_data: dto.inputs_data,
             remainders: dto.remainders,
+            mana_rewards: dto.mana_rewards,
         })
+    }
+}
+
+impl Serialize for PreparedTransactionData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        PreparedTransactionDataDto::from(self).serialize(serializer)
     }
 }
 
@@ -82,6 +100,8 @@ pub struct SignedTransactionData {
     pub payload: SignedTransactionPayload,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
+    /// Mana rewards
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 /// SignedTransactionData Dto
@@ -92,6 +112,9 @@ pub struct SignedTransactionDataDto {
     pub payload: SignedTransactionPayloadDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
+    /// Mana rewards
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty", with = "mana_rewards")]
+    pub mana_rewards: BTreeMap<OutputId, u64>,
 }
 
 impl From<&SignedTransactionData> for SignedTransactionDataDto {
@@ -99,6 +122,7 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
         Self {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.clone(),
+            mana_rewards: value.mana_rewards.clone(),
         }
     }
 }
@@ -114,6 +138,7 @@ impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
             payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
             inputs_data: dto.inputs_data,
+            mana_rewards: dto.mana_rewards,
         })
     }
 }

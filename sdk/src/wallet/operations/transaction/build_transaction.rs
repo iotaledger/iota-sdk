@@ -11,9 +11,9 @@ use crate::{
         secret::SecretManage,
     },
     types::block::{
-        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput},
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput, RewardContextInput},
         input::{Input, UtxoInput},
-        output::Output,
+        output::{DelegationOutputBuilder, Output},
         payload::signed_transaction::Transaction,
     },
     wallet::{operations::transaction::TransactionOptions, Wallet},
@@ -23,10 +23,10 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Builds the transaction from the selected in and outputs.
+    /// Builds the transaction from the selected inputs and outputs.
     pub(crate) async fn build_transaction(
         &self,
-        selected_transaction_data: Selected,
+        mut selected_transaction_data: Selected,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] build_transaction");
@@ -37,7 +37,12 @@ where
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = HashSet::new();
 
-        for input in &selected_transaction_data.inputs {
+        let issuance = self.client().get_issuance().await?;
+        let latest_slot_commitment_id = issuance.latest_commitment.id();
+
+        let mut needs_commitment_context = false;
+
+        for (idx, input) in selected_transaction_data.inputs.iter().enumerate() {
             // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
             if let Output::Account(account) = &input.output {
                 if account.features().block_issuer().is_some() {
@@ -47,7 +52,40 @@ where
                 }
             }
 
+            // Inputs with timelock or expiration unlock condition require a CommitmentContextInput
+            if input
+                .output
+                .unlock_conditions()
+                .map_or(false, |u| u.iter().any(|u| u.is_timelock() || u.is_expiration()))
+            {
+                needs_commitment_context = true;
+            }
+
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+
+            if selected_transaction_data.mana_rewards.get(input.output_id()).is_some() {
+                context_inputs.insert(ContextInput::from(RewardContextInput::new(idx as _)?));
+                needs_commitment_context = true;
+            }
+        }
+
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1937
+        for output in selected_transaction_data
+            .outputs
+            .iter_mut()
+            .filter(|o| o.is_delegation())
+        {
+            // Created delegations have their start epoch set, and delayed delegations have their end set
+            if output.as_delegation().delegation_id().is_null() {
+                *output = DelegationOutputBuilder::from(output.as_delegation())
+                    .with_start_epoch(protocol_parameters.delegation_start_epoch(latest_slot_commitment_id))
+                    .finish_output()?;
+            } else {
+                *output = DelegationOutputBuilder::from(output.as_delegation())
+                    .with_end_epoch(protocol_parameters.delegation_end_epoch(latest_slot_commitment_id))
+                    .finish_output()?;
+            }
+            needs_commitment_context = true;
         }
 
         // Build transaction
@@ -78,11 +116,14 @@ where
         if context_inputs
             .iter()
             .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
-            && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND)
         {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-            let issuance = self.client().get_issuance().await?;
-            context_inputs.insert(CommitmentContextInput::new(issuance.latest_commitment.id()).into());
+            needs_commitment_context = true;
+        }
+
+        if needs_commitment_context && !context_inputs.iter().any(|c| c.kind() == CommitmentContextInput::KIND) {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1740
+            context_inputs.insert(CommitmentContextInput::new(latest_slot_commitment_id).into());
         }
 
         let transaction = builder
@@ -95,6 +136,7 @@ where
             transaction,
             inputs_data: selected_transaction_data.inputs,
             remainders: selected_transaction_data.remainders,
+            mana_rewards: selected_transaction_data.mana_rewards.into_iter().collect(),
         };
 
         log::debug!(
