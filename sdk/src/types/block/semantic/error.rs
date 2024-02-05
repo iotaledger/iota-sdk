@@ -81,74 +81,78 @@ pub enum TransactionFailureReason {
     SemanticValidationFailed = 255,
 }
 
-// impl fmt::Display for TransactionFailureReason {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         match self {
-//             Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent."),
-//             Self::ConflictingWithAnotherTx => write!(
-//                 f,
-//                 "The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason."
-//             ),
-//             Self::InvalidReferencedUtxo => write!(f, "The referenced UTXO is invalid."),
-//             Self::InvalidTransaction => write!(f, "The transaction is invalid."),
-//             Self::SumInputsOutputsAmountMismatch => {
-//                 write!(f, "The sum of the inputs and output base token amount does not match.")
-//             }
-//             Self::InvalidUnlockBlockSignature => write!(f, "The unlock block signature is invalid."),
-//             Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired."),
-//             Self::InvalidNativeTokens => write!(f, "The given native tokens are invalid."),
-//             Self::StorageDepositReturnUnfulfilled => write!(
-//                 f,
-//                 "The return amount in a transaction is not fulfilled by the output side."
-//             ),
-//             Self::InvalidInputUnlock => write!(f, "An input unlock was invalid."),
-//             Self::SenderNotUnlocked => write!(
-//                 f,
-//                 "The output contains a Sender with an ident (address) which is not unlocked."
-//             ),
-//             Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid."),
-//             Self::InvalidTransactionIssuingTime => {
-//                 write!(f, "The referenced input is created after transaction issuing time.")
-//             }
-//             Self::InvalidManaAmount => write!(f, "The mana amount is invalid."),
-//             Self::InvalidBlockIssuanceCreditsAmount => write!(f, "The Block Issuance Credits amount is invalid."),
-//             Self::InvalidRewardContextInput => write!(f, "Reward Context Input is invalid."),
-//             Self::InvalidCommitmentContextInput => write!(f, "Commitment Context Input is invalid."),
-//             Self::MissingStakingFeature => write!(
-//                 f,
-//                 "Staking Feature is not provided in account output when claiming rewards."
-//             ),
-//             Self::FailedToClaimStakingReward => write!(f, "Failed to claim staking reward."),
-//             Self::FailedToClaimDelegationReward => write!(f, "Failed to claim delegation reward."),
-//             Self::TransactionCapabilityNativeTokenBurningNotAllowed => write!(
-//                 f,
-//                 "Burning of native tokens is not allowed in the transaction capabilities."
-//             ),
-//             Self::TransactionCapabilityManaBurningNotAllowed => {
-//                 write!(f, "Burning of mana is not allowed in the transaction capabilities.")
-//             }
-//             Self::TransactionCapabilityAccountDestructionNotAllowed => write!(
-//                 f,
-//                 "Destruction of accounts is not allowed in the transaction capabilities."
-//             ),
-//             Self::TransactionCapabilityAnchorDestructionNotAllowed => write!(
-//                 f,
-//                 "Destruction of anchors is not allowed in the transaction capabilities."
-//             ),
-//             Self::TransactionCapabilityFoundryDestructionNotAllowed => write!(
-//                 f,
-//                 "Destruction of foundries is not allowed in the transaction capabilities."
-//             ),
-//             Self::TransactionCapabilityNftDestructionNotAllowed => {
-//                 write!(f, "Destruction of nfts is not allowed in the transaction capabilities.")
-//             }
-//             Self::SemanticValidationFailed => write!(
-//                 f,
-//                 "The semantic validation failed for a reason not covered by the previous variants."
-//             ),
-//         }
-//     }
-// }
+impl fmt::Display for TransactionFailureReason {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::None => write!(f, "."),
+            Self::TypeInvalid => write!(f, "."),
+            Self::Conflicting => write!(f, "."),
+            Self::InputAlreadySpent => write!(f, "."),
+            Self::InputCreationAfterTxCreation => write!(f, "."),
+            Self::UnlockSignatureInvalid => write!(f, "."),
+            Self::CommitmentInputMissing => write!(f, "."),
+            Self::CommitmentInputReferenceInvalid => write!(f, "."),
+            Self::BicInputReferenceInvalid => write!(f, "."),
+            Self::RewardInputReferenceInvalid => write!(f, "."),
+            Self::StakingRewardCalculationFailure => write!(f, "."),
+            Self::DelegationRewardCalculationFailure => write!(f, "."),
+            Self::InputOutputBaseTokenMismatch => write!(f, "."),
+            Self::ManaOverflow => write!(f, "."),
+            Self::InputOutputManaMismatch => write!(f, "."),
+            Self::ManaDecayCreationIndexExceedsTargetIndex => write!(f, "."),
+            Self::NativeTokenAmountLessThanZero => write!(f, "."),
+            Self::NativeTokenSumExceedsUint256 => write!(f, "."),
+            Self::NativeTokenSumUnbalanced => write!(f, "."),
+            Self::MultiAddressLengthUnlockLengthMismatch => write!(f, "."),
+            Self::MultiAddressUnlockThresholdNotReached => write!(f, "."),
+            Self::NestedMultiUnlock => write!(f, "."),
+            Self::SenderFeatureNotUnlocked => write!(f, "."),
+            Self::IssuerFeatureNotUnlocked => write!(f, "."),
+            Self::StakingRewardInputMissing => write!(f, "."),
+            Self::StakingBlockIssuerFeatureMissing => write!(f, "."),
+            Self::StakingCommitmentInputMissing => write!(f, "."),
+            Self::StakingRewardClaimingInvalid => write!(f, "."),
+            Self::StakingFeatureRemovedBeforeUnbonding => write!(f, "."),
+            Self::StakingFeatureModifiedBeforeUnbonding => write!(f, "."),
+            Self::StakingStartEpochInvalid => write!(f, "."),
+            Self::StakingEndEpochTooEarly => write!(f, "."),
+            Self::BlockIssuerCommitmentInputMissing => write!(f, "."),
+            Self::BlockIssuanceCreditInputMissing => write!(f, "."),
+            Self::BlockIssuerNotExpired => write!(f, "."),
+            Self::BlockIssuerExpiryTooEarly => write!(f, "."),
+            Self::ManaMovedOffBlockIssuerAccount => write!(f, "."),
+            Self::AccountLocked => write!(f, "."),
+            Self::TimelockCommitmentInputMissing => write!(f, "."),
+            Self::TimelockNotExpired => write!(f, "."),
+            Self::ExpirationCommitmentInputMissing => write!(f, "."),
+            Self::ExpirationNotUnlockable => write!(f, "."),
+            Self::ReturnAmountNotFulFilled => write!(f, "."),
+            Self::NewChainOutputHasNonZeroedId => write!(f, "."),
+            Self::ChainOutputImmutableFeaturesChanged => write!(f, "."),
+            Self::ImplicitAccountDestructionDisallowed => write!(f, "."),
+            Self::MultipleImplicitAccountCreationAddresses => write!(f, "."),
+            Self::AccountInvalidFoundryCounter => write!(f, "."),
+            Self::FoundryTransitionWithoutAccount => write!(f, "."),
+            Self::FoundrySerialInvalid => write!(f, "."),
+            Self::DelegationCommitmentInputMissing => write!(f, "."),
+            Self::DelegationRewardInputMissing => write!(f, "."),
+            Self::DelegationRewardsClaimingInvalid => write!(f, "."),
+            Self::DelegationOutputTransitionedTwice => write!(f, "."),
+            Self::DelegationModified => write!(f, "."),
+            Self::DelegationStartEpochInvalid => write!(f, "."),
+            Self::DelegationAmountMismatch => write!(f, "."),
+            Self::DelegationEndEpochNotZero => write!(f, "."),
+            Self::DelegationEndEpochInvalid => write!(f, "."),
+            Self::CapabilitiesNativeTokenBurningNotAllowed => write!(f, "."),
+            Self::CapabilitiesManaBurningNotAllowed => write!(f, "."),
+            Self::CapabilitiesAccountDestructionNotAllowed => write!(f, "."),
+            Self::CapabilitiesAnchorDestructionNotAllowed => write!(f, "."),
+            Self::CapabilitiesFoundryDestructionNotAllowed => write!(f, "."),
+            Self::CapabilitiesNftDestructionNotAllowed => write!(f, "."),
+            Self::SemanticValidationFailed => write!(f, "."),
+        }
+    }
+}
 
 impl TryFrom<u8> for TransactionFailureReason {
     type Error = Error;
