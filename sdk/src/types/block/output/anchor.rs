@@ -433,7 +433,7 @@ impl AnchorOutput {
         let next_state = context.output_chains.get(&ChainId::from(anchor_id));
 
         match next_state {
-            Some(Output::Anchor(next_state)) => {
+            Some((_, Output::Anchor(next_state))) => {
                 if self.state_index() == next_state.state_index() {
                     context.address_unlock(self.governor_address(), unlock)?;
                 } else {
@@ -455,7 +455,7 @@ impl AnchorOutput {
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        _input_chains: &HashMap<ChainId, &Output>,
+        _input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
         _outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {

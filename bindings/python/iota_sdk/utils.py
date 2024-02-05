@@ -220,13 +220,14 @@ class Utils():
 
     @staticmethod
     def verify_transaction_semantic(
-            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None, mana_rewards: Optional[dict[OutputId, int]] = None) -> str:
         """Verifies the semantic of a transaction.
         """
         return _call_method('verifyTransactionSemantic', {
             'transaction': transaction,
             'inputs': inputs,
             'unlocks': unlocks,
+            'manaRewards': mana_rewards,
             'protocolParameters': protocol_parameters,
         })
 

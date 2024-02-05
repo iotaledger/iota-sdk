@@ -89,11 +89,16 @@ impl ClientInner {
 
     /// Checks if the account is ready to issue a block.
     /// GET /api/core/v3/accounts/{bech32Address}/congestion
-    pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
+    pub async fn get_account_congestion(
+        &self,
+        account_id: &AccountId,
+        work_score: impl Into<Option<u32>> + Send,
+    ) -> Result<CongestionResponse> {
         let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
         let path = &format!("api/core/v3/accounts/{bech32_address}/congestion");
+        let query = query_tuples_to_query_string([work_score.into().map(|i| ("workScore", i.to_string()))]);
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, query.as_deref(), false, false).await
     }
 
     // Rewards routes.
@@ -111,7 +116,6 @@ impl ClientInner {
         slot_index: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
-
         let query = query_tuples_to_query_string([slot_index.into().map(|i| ("slotIndex", i.to_string()))]);
 
         self.get_request(path, query.as_deref(), false, false).await
@@ -124,7 +128,6 @@ impl ClientInner {
     /// GET /api/core/v3/committee/?epochIndex
     pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>> + Send) -> Result<CommitteeResponse> {
         const PATH: &str = "api/core/v3/committee";
-
         let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
 
         self.get_request(PATH, query.as_deref(), false, false).await
@@ -140,7 +143,6 @@ impl ClientInner {
         cursor: impl Into<Option<String>> + Send,
     ) -> Result<ValidatorsResponse> {
         const PATH: &str = "api/core/v3/validators";
-
         let query = query_tuples_to_query_string([
             page_size.into().map(|i| ("pageSize", i.to_string())),
             cursor.into().map(|i| ("cursor", i)),

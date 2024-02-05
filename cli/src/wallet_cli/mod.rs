@@ -85,7 +85,10 @@ pub enum WalletCommand {
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
     /// Checks if an account is ready to issue a block.
-    Congestion { account_id: Option<AccountId> },
+    Congestion {
+        account_id: Option<AccountId>,
+        work_score: Option<u32>,
+    },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new account output.
@@ -350,7 +353,7 @@ pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
         let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
-            .get_account_congestion(&account_id)
+            .get_account_congestion(&account_id, None)
             .await
             .map(|r| r.block_issuance_credits)
             .ok();
@@ -469,15 +472,10 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
 
 /// `claimable-outputs` command
 pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    let balance = wallet.balance().await?;
-    for output_id in balance
-        .potentially_locked_outputs()
-        .iter()
-        .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
-    {
+    for output_id in wallet.claimable_outputs(OutputsToClaim::All).await? {
         let wallet_data = wallet.data().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output = &wallet_data.get_output(output_id).unwrap().output;
+        let output = &wallet_data.get_output(&output_id).unwrap().output;
         let kind = match output {
             Output::Nft(_) => "Nft",
             Output::Basic(_) => "Basic",
@@ -485,15 +483,10 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-        // if let Some(native_tokens) = output.native_tokens() {
-        //     if !native_tokens.is_empty() {
-        //         println_log_info!("  - native token amount:");
-        //         native_tokens.iter().for_each(|token| {
-        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
-        //         });
-        //     }
-        // }
+        if let Some(native_token) = output.native_token() {
+            println_log_info!("  - native token amount:");
+            println_log_info!("    + {} {}", native_token.amount(), native_token.token_id());
+        }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions
@@ -522,7 +515,11 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 }
 
 // `congestion` command
-pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
+pub async fn congestion_command(
+    wallet: &Wallet,
+    account_id: Option<AccountId>,
+    work_score: Option<u32>,
+) -> Result<(), Error> {
     let account_id = {
         let wallet_data = wallet.data().await;
         account_id
@@ -530,7 +527,7 @@ pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) 
             .ok_or(WalletError::AccountNotFound)?
     };
 
-    let congestion = wallet.client().get_account_congestion(&account_id).await?;
+    let congestion = wallet.client().get_account_congestion(&account_id, work_score).await?;
 
     println_log_info!("{congestion:#?}");
 
@@ -697,7 +694,7 @@ pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
         let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
-            .get_account_congestion(&account_id)
+            .get_account_congestion(&account_id, None)
             .await
             .map(|r| r.block_issuance_credits)
             .ok();
@@ -1206,7 +1203,9 @@ pub async fn prompt_internal(
                         WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
                         WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
-                        WalletCommand::Congestion { account_id } => congestion_command(wallet, account_id).await,
+                        WalletCommand::Congestion { account_id, work_score } => {
+                            congestion_command(wallet, account_id, work_score).await
+                        }
                         WalletCommand::Consolidate => consolidate_command(wallet).await,
                         WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
                         WalletCommand::CreateNativeToken {

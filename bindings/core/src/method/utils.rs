@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::BTreeMap;
+
 use derivative::Derivative;
 use iota_sdk::{
     client::secret::types::InputSigningData,
@@ -17,7 +19,7 @@ use iota_sdk::{
         unlock::Unlock,
         BlockDto,
     },
-    utils::serde::string,
+    utils::serde::{mana_rewards, string},
 };
 use serde::{Deserialize, Serialize};
 
@@ -128,6 +130,8 @@ pub enum UtilsMethod {
         transaction: TransactionDto,
         inputs: Vec<InputSigningData>,
         unlocks: Option<Vec<Unlock>>,
+        #[serde(default, with = "mana_rewards")]
+        mana_rewards: BTreeMap<OutputId, u64>,
         protocol_parameters: ProtocolParameters,
     },
     /// Applies mana decay to the given mana.

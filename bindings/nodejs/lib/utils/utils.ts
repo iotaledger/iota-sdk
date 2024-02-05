@@ -20,6 +20,7 @@ import {
     InputSigningData,
     Unlock,
     DecayedMana,
+    NumericString,
 } from '../types';
 import {
     AccountId,
@@ -454,21 +455,27 @@ export class Utils {
      *
      * @param transaction The transaction payload.
      * @param inputs The inputs data.
+     * @param protocolParameters The protocol parameters.
      * @param unlocks The unlocks.
+     * @param manaRewards The total mana rewards claimed in the transaction.
      *
      * @returns The conflict reason.
      */
     static verifyTransactionSemantic(
         transaction: SignedTransactionPayload,
         inputs: InputSigningData[],
+        protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
+        manaRewards?: { [outputId: OutputId]: NumericString },
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
                 transaction,
                 inputs,
+                protocolParameters,
                 unlocks,
+                manaRewards,
             },
         });
         return conflictReason;
