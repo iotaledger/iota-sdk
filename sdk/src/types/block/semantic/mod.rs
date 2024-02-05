@@ -18,7 +18,7 @@ use crate::types::block::{
     address::Address,
     context_input::{CommitmentContextInput, RewardContextInput},
     output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
     Error,
@@ -27,6 +27,7 @@ use crate::types::block::{
 ///
 pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
+    pub(crate) transaction_id: TransactionId,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
     pub(crate) unlocks: Option<&'a [Unlock]>,
@@ -84,6 +85,7 @@ impl<'a> SemanticValidationContext<'a> {
 
         Self {
             transaction,
+            transaction_id,
             transaction_signing_hash: transaction.signing_hash(),
             inputs,
             unlocks,
@@ -108,9 +110,6 @@ impl<'a> SemanticValidationContext<'a> {
 
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
-        // Validation of inputs.
-        let mut has_implicit_account_creation_address = false;
-
         self.commitment_context_input = self
             .transaction
             .context_inputs()
@@ -138,6 +137,10 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
+        // Validation of inputs.
+
+        let mut has_implicit_account_creation_address = false;
+
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
@@ -145,6 +148,13 @@ impl<'a> SemanticValidationContext<'a> {
                     if output.features().block_issuer().is_some() {
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                        }
+                        if !self
+                            .bic_context_inputs
+                            .contains(&output.account_id_non_null(&output_id))
+                        {
+                            // TODO probably not the correct error
+                            return Ok(Some(TransactionFailureReason::InvalidBlockIssuanceCreditsAmount));
                         }
                     }
 
@@ -240,7 +250,7 @@ impl<'a> SemanticValidationContext<'a> {
         }
 
         // Validation of outputs.
-        for created_output in self.transaction.outputs() {
+        for (index, created_output) in self.transaction.outputs().iter().enumerate() {
             let (amount, mana, created_native_token, features) = match created_output {
                 Output::Basic(output) => {
                     if let Some(address) = output.simple_deposit_address() {
@@ -262,6 +272,14 @@ impl<'a> SemanticValidationContext<'a> {
                     if output.features().block_issuer().is_some() {
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                        }
+                        let output_id = OutputId::new(self.transaction_id, index as u16);
+                        if !self
+                            .bic_context_inputs
+                            .contains(&output.account_id_non_null(&output_id))
+                        {
+                            // TODO probably not the correct error
+                            return Ok(Some(TransactionFailureReason::InvalidBlockIssuanceCreditsAmount));
                         }
                     }
 
