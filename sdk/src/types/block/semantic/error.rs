@@ -85,71 +85,149 @@ impl fmt::Display for TransactionFailureReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::None => write!(f, "."),
-            Self::TypeInvalid => write!(f, "."),
-            Self::Conflicting => write!(f, "."),
-            Self::InputAlreadySpent => write!(f, "."),
-            Self::InputCreationAfterTxCreation => write!(f, "."),
-            Self::UnlockSignatureInvalid => write!(f, "."),
-            Self::CommitmentInputMissing => write!(f, "."),
-            Self::CommitmentInputReferenceInvalid => write!(f, "."),
-            Self::BicInputReferenceInvalid => write!(f, "."),
-            Self::RewardInputReferenceInvalid => write!(f, "."),
-            Self::StakingRewardCalculationFailure => write!(f, "."),
-            Self::DelegationRewardCalculationFailure => write!(f, "."),
-            Self::InputOutputBaseTokenMismatch => write!(f, "."),
-            Self::ManaOverflow => write!(f, "."),
-            Self::InputOutputManaMismatch => write!(f, "."),
-            Self::ManaDecayCreationIndexExceedsTargetIndex => write!(f, "."),
-            Self::NativeTokenAmountLessThanZero => write!(f, "."),
-            Self::NativeTokenSumExceedsUint256 => write!(f, "."),
-            Self::NativeTokenSumUnbalanced => write!(f, "."),
-            Self::MultiAddressLengthUnlockLengthMismatch => write!(f, "."),
-            Self::MultiAddressUnlockThresholdNotReached => write!(f, "."),
-            Self::NestedMultiUnlock => write!(f, "."),
-            Self::SenderFeatureNotUnlocked => write!(f, "."),
-            Self::IssuerFeatureNotUnlocked => write!(f, "."),
-            Self::StakingRewardInputMissing => write!(f, "."),
-            Self::StakingBlockIssuerFeatureMissing => write!(f, "."),
-            Self::StakingCommitmentInputMissing => write!(f, "."),
-            Self::StakingRewardClaimingInvalid => write!(f, "."),
-            Self::StakingFeatureRemovedBeforeUnbonding => write!(f, "."),
-            Self::StakingFeatureModifiedBeforeUnbonding => write!(f, "."),
-            Self::StakingStartEpochInvalid => write!(f, "."),
-            Self::StakingEndEpochTooEarly => write!(f, "."),
-            Self::BlockIssuerCommitmentInputMissing => write!(f, "."),
-            Self::BlockIssuanceCreditInputMissing => write!(f, "."),
-            Self::BlockIssuerNotExpired => write!(f, "."),
-            Self::BlockIssuerExpiryTooEarly => write!(f, "."),
-            Self::ManaMovedOffBlockIssuerAccount => write!(f, "."),
-            Self::AccountLocked => write!(f, "."),
-            Self::TimelockCommitmentInputMissing => write!(f, "."),
-            Self::TimelockNotExpired => write!(f, "."),
-            Self::ExpirationCommitmentInputMissing => write!(f, "."),
-            Self::ExpirationNotUnlockable => write!(f, "."),
-            Self::ReturnAmountNotFulFilled => write!(f, "."),
-            Self::NewChainOutputHasNonZeroedId => write!(f, "."),
-            Self::ChainOutputImmutableFeaturesChanged => write!(f, "."),
-            Self::ImplicitAccountDestructionDisallowed => write!(f, "."),
-            Self::MultipleImplicitAccountCreationAddresses => write!(f, "."),
-            Self::AccountInvalidFoundryCounter => write!(f, "."),
-            Self::FoundryTransitionWithoutAccount => write!(f, "."),
-            Self::FoundrySerialInvalid => write!(f, "."),
-            Self::DelegationCommitmentInputMissing => write!(f, "."),
-            Self::DelegationRewardInputMissing => write!(f, "."),
-            Self::DelegationRewardsClaimingInvalid => write!(f, "."),
-            Self::DelegationOutputTransitionedTwice => write!(f, "."),
-            Self::DelegationModified => write!(f, "."),
-            Self::DelegationStartEpochInvalid => write!(f, "."),
-            Self::DelegationAmountMismatch => write!(f, "."),
-            Self::DelegationEndEpochNotZero => write!(f, "."),
-            Self::DelegationEndEpochInvalid => write!(f, "."),
-            Self::CapabilitiesNativeTokenBurningNotAllowed => write!(f, "."),
-            Self::CapabilitiesManaBurningNotAllowed => write!(f, "."),
-            Self::CapabilitiesAccountDestructionNotAllowed => write!(f, "."),
-            Self::CapabilitiesAnchorDestructionNotAllowed => write!(f, "."),
-            Self::CapabilitiesFoundryDestructionNotAllowed => write!(f, "."),
-            Self::CapabilitiesNftDestructionNotAllowed => write!(f, "."),
-            Self::SemanticValidationFailed => write!(f, "."),
+            Self::TypeInvalid => write!(f, "transaction type is invalid."),
+            Self::Conflicting => write!(f, "transaction is conflicting."),
+            Self::InputAlreadySpent => write!(f, "input already spent."),
+            Self::InputCreationAfterTxCreation => write!(f, "input creation slot after tx creation slot."),
+            Self::UnlockSignatureInvalid => write!(f, "signature in unlock is invalid."),
+            // TODO syntactic ?
+            Self::CommitmentInputMissing => write!(f, "commitment input required with reward or BIC input."),
+            Self::CommitmentInputReferenceInvalid => {
+                write!(f, "commitment input references an invalid or non-existent commitment.")
+            }
+            Self::BicInputReferenceInvalid => write!(f, "BIC input reference cannot be loaded."),
+            Self::RewardInputReferenceInvalid => write!(
+                f,
+                "reward input does not reference a staking account or a delegation output."
+            ),
+            Self::StakingRewardCalculationFailure => write!(
+                f,
+                "staking rewards could not be calculated due to storage issues or overflow."
+            ),
+            Self::DelegationRewardCalculationFailure => write!(
+                f,
+                "delegation rewards could not be calculated due to storage issues or overflow."
+            ),
+            Self::InputOutputBaseTokenMismatch => write!(
+                f,
+                "inputs and outputs do not spend/deposit the same amount of base tokens."
+            ),
+            Self::ManaOverflow => write!(f, "under- or overflow in Mana calculations."),
+            Self::InputOutputManaMismatch => write!(f, "inputs and outputs do not contain the same amount of Mana."),
+            Self::ManaDecayCreationIndexExceedsTargetIndex => write!(
+                f,
+                "mana decay creation slot/epoch index exceeds target slot/epoch index."
+            ),
+            Self::NativeTokenAmountLessThanZero => write!(f, "native token amount must be greater than zero."),
+            Self::NativeTokenSumExceedsUint256 => write!(f, "native token sum exceeds max value of a uint256."),
+            Self::NativeTokenSumUnbalanced => write!(f, "native token sums are unbalanced."),
+            Self::MultiAddressLengthUnlockLengthMismatch => {
+                write!(f, "multi address length and multi unlock length do not match.")
+            }
+            Self::MultiAddressUnlockThresholdNotReached => write!(f, "multi address unlock threshold not reached."),
+            // TODO
+            Self::NestedMultiUnlock => write!(f, "multi unlocks can't be nested."),
+            Self::SenderFeatureNotUnlocked => write!(f, "sender feature is not unlocked."),
+            Self::IssuerFeatureNotUnlocked => write!(f, "issuer feature is not unlocked."),
+            Self::StakingRewardInputMissing => {
+                write!(f, "staking feature removal or resetting requires a reward input.")
+            }
+            Self::StakingBlockIssuerFeatureMissing => {
+                write!(f, "block issuer feature missing for account with staking feature.")
+            }
+            Self::StakingCommitmentInputMissing => write!(f, "staking feature validation requires a commitment input."),
+            Self::StakingRewardClaimingInvalid => {
+                write!(f, "staking feature must be removed or reset in order to claim rewards.")
+            }
+            Self::StakingFeatureRemovedBeforeUnbonding => {
+                write!(f, "staking feature can only be removed after the unbonding period.")
+            }
+            Self::StakingFeatureModifiedBeforeUnbonding => write!(
+                f,
+                "staking start epoch, fixed cost and staked amount cannot be modified while bonded."
+            ),
+            Self::StakingStartEpochInvalid => write!(f, "staking start epoch must be the epoch of the transaction."),
+            Self::StakingEndEpochTooEarly => write!(
+                f,
+                "staking end epoch must be set to the transaction epoch plus the unbonding period."
+            ),
+            Self::BlockIssuerCommitmentInputMissing => write!(f, "commitment input missing for block issuer feature."),
+            Self::BlockIssuanceCreditInputMissing => write!(
+                f,
+                "block issuance credit input missing for account with block issuer feature."
+            ),
+            Self::BlockIssuerNotExpired => write!(f, "block issuer feature has not expired."),
+            Self::BlockIssuerExpiryTooEarly => write!(f, "block issuer feature expiry set too early."),
+            Self::ManaMovedOffBlockIssuerAccount => write!(
+                f,
+                "mana cannot be moved off block issuer accounts except with manalocks."
+            ),
+            Self::AccountLocked => write!(f, "account is locked due to negative block issuance credits."),
+            Self::TimelockCommitmentInputMissing => write!(
+                f,
+                "transaction's containing a timelock condition require a commitment input."
+            ),
+            Self::TimelockNotExpired => write!(f, "timelock not expired."),
+            Self::ExpirationCommitmentInputMissing => write!(
+                f,
+                "transaction's containing an expiration condition require a commitment input."
+            ),
+            Self::ExpirationNotUnlockable => write!(f, "expiration unlock condition cannot be unlocked."),
+            Self::ReturnAmountNotFulFilled => write!(f, "return amount not fulfilled."),
+            Self::NewChainOutputHasNonZeroedId => write!(f, "new chain output has non-zeroed ID."),
+            Self::ChainOutputImmutableFeaturesChanged => {
+                write!(f, "immutable features in chain output modified during transition.")
+            }
+            Self::ImplicitAccountDestructionDisallowed => {
+                write!(f, "cannot destroy implicit account; must be transitioned to account.")
+            }
+            Self::MultipleImplicitAccountCreationAddresses => {
+                write!(f, "multiple implicit account creation addresses on the input side.")
+            }
+            Self::AccountInvalidFoundryCounter => write!(
+                f,
+                "foundry counter in account decreased or did not increase by the number of new foundries."
+            ),
+            Self::FoundryTransitionWithoutAccount => write!(
+                f,
+                "foundry output transitioned without accompanying account on input or output side."
+            ),
+            Self::FoundrySerialInvalid => write!(f, "foundry output serial number is invalid."),
+            Self::DelegationCommitmentInputMissing => {
+                write!(f, "delegation output validation requires a commitment input.")
+            }
+            Self::DelegationRewardInputMissing => {
+                write!(f, "delegation output cannot be destroyed without a reward input.")
+            }
+            Self::DelegationRewardsClaimingInvalid => write!(f, "invalid delegation mana rewards claiming."),
+            Self::DelegationOutputTransitionedTwice => {
+                write!(f, "delegation output attempted to be transitioned twice.")
+            }
+            Self::DelegationModified => write!(f, "delegated amount, validator ID and start epoch cannot be modified."),
+            Self::DelegationStartEpochInvalid => write!(f, "invalid start epoch."),
+            Self::DelegationAmountMismatch => write!(f, "delegated amount does not match amount."),
+            Self::DelegationEndEpochNotZero => write!(f, "end epoch must be set to zero at output genesis."),
+            Self::DelegationEndEpochInvalid => write!(f, "delegation end epoch does not match current epoch."),
+            Self::CapabilitiesNativeTokenBurningNotAllowed => write!(
+                f,
+                "native token burning is not allowed by the transaction capabilities."
+            ),
+            Self::CapabilitiesManaBurningNotAllowed => {
+                write!(f, "mana burning is not allowed by the transaction capabilities.")
+            }
+            Self::CapabilitiesAccountDestructionNotAllowed => {
+                write!(f, "account destruction is not allowed by the transaction capabilities.")
+            }
+            Self::CapabilitiesAnchorDestructionNotAllowed => {
+                write!(f, "anchor destruction is not allowed by the transaction capabilities.")
+            }
+            Self::CapabilitiesFoundryDestructionNotAllowed => {
+                write!(f, "foundry destruction is not allowed by the transaction capabilities.")
+            }
+            Self::CapabilitiesNftDestructionNotAllowed => {
+                write!(f, "NFT destruction is not allowed by the transaction capabilities.")
+            }
+            Self::SemanticValidationFailed => write!(f, "semantic validation failed."),
         }
     }
 }
