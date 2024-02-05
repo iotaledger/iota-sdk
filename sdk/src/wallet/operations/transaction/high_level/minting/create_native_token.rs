@@ -1,14 +1,11 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
-        secret::SecretManage,
-    },
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::AccountAddress,
         output::{
@@ -16,11 +13,7 @@ use crate::{
             AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
-    wallet::{
-        operations::transaction::TransactionOptions,
-        types::{TransactionWithMetadata, TransactionWithMetadataDto},
-        Wallet,
-    },
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
 
 /// Address and foundry data for `create_native_token()`
@@ -39,51 +32,19 @@ pub struct CreateNativeTokenParams {
 }
 
 /// The result of a transaction to create a native token
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: TransactionWithMetadata,
 }
 
-/// Dto for NativeTokenTransaction
+/// The result of preparing a transaction to create a native token
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CreateNativeTokenTransactionDto {
-    pub token_id: TokenId,
-    pub transaction: TransactionWithMetadataDto,
-}
-
-impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
-    fn from(value: &CreateNativeTokenTransaction) -> Self {
-        Self {
-            token_id: value.token_id,
-            transaction: TransactionWithMetadataDto::from(&value.transaction),
-        }
-    }
-}
-
-/// The result of preparing a transaction to create a native token
-#[derive(Debug)]
 pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
     pub transaction: PreparedTransactionData,
-}
-
-/// Dto for PreparedNativeTokenTransaction
-#[derive(Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PreparedCreateNativeTokenTransactionDto {
-    pub token_id: TokenId,
-    pub transaction: PreparedTransactionDataDto,
-}
-
-impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTransactionDto {
-    fn from(value: &PreparedCreateNativeTokenTransaction) -> Self {
-        Self {
-            token_id: value.token_id,
-            transaction: PreparedTransactionDataDto::from(&value.transaction),
-        }
-    }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -132,17 +93,23 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] create_native_token");
-        let storage_score_params = self.client().get_storage_score_parameters().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let storage_score_params = protocol_parameters.storage_score_parameters();
 
-        let (account_id, account_output) = self
+        let (account_id, account_output_data) = self
             .get_account_output(params.account_id)
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
-        if let Output::Account(account_output) = &account_output.output {
-            // Create the new account output with the same feature blocks, just updated foundry_counter.
+        if let Output::Account(account_output) = &account_output_data.output {
+            // Create the new account output with the same features, just updated mana and foundry_counter.
             let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
+                .with_mana(account_output_data.output.available_mana(
+                    &protocol_parameters,
+                    account_output_data.output_id.transaction_id().slot_index(),
+                    self.client().get_slot_index().await?,
+                )?)
                 .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens

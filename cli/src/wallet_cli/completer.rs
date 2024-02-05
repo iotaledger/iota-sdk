@@ -7,52 +7,9 @@ use colored::Colorize;
 use rustyline::{
     completion::Completer, highlight::Highlighter, hint::HistoryHinter, Completer, Context, Helper, Hinter, Validator,
 };
+use strum::VariantNames;
 
-const WALLET_COMMANDS: &[&str] = &[
-    "accounts",
-    "address",
-    "allot-mana",
-    "balance",
-    "burn-native-token",
-    "burn-nft",
-    "claim",
-    "claimable-outputs",
-    "clear",
-    "congestion",
-    "consolidate",
-    "create-alias-output",
-    "create-native-token",
-    "destroy-alias",
-    "destroy-foundry",
-    "exit",
-    "faucet",
-    "implicit-account-creation-address",
-    "implicit-account-transition",
-    "implicit-accounts",
-    "melt-native-token",
-    "mint-native-token",
-    "mint-nft",
-    "node-info",
-    "output",
-    "outputs",
-    "send",
-    "send-native-token",
-    "send-nft",
-    "sync",
-    "transaction",
-    "transactions",
-    "tx",
-    "txs",
-    "unspent-outputs",
-    "vote",
-    "stop-participating",
-    "participation-overview",
-    "voting-power",
-    "increase-voting-power",
-    "decrease-voting-power",
-    "voting-output",
-    "help",
-];
+use crate::wallet_cli::WalletCommand;
 
 #[derive(Default)]
 pub struct WalletCommandCompleter;
@@ -68,7 +25,7 @@ impl Completer for WalletCommandCompleter {
     ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
         Ok((
             0,
-            WALLET_COMMANDS
+            WalletCommand::VARIANTS
                 .iter()
                 .filter_map(|cmd| cmd.starts_with(input).then_some(*cmd))
                 .collect(),

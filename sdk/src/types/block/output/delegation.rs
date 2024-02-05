@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
@@ -45,8 +45,9 @@ impl DelegationId {
 #[derive(Clone)]
 #[must_use]
 pub struct DelegationOutputBuilder {
-    amount: OutputBuilderAmount,
-    delegated_amount: u64,
+    // TODO https://github.com/iotaledger/iota-sdk/issues/1938
+    amount: Option<OutputBuilderAmount>,
+    delegated_amount: OutputBuilderAmount,
     delegation_id: DelegationId,
     validator_address: AccountAddress,
     start_epoch: EpochIndex,
@@ -56,44 +57,32 @@ pub struct DelegationOutputBuilder {
 
 impl DelegationOutputBuilder {
     /// Creates a [`DelegationOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(
-        amount: u64,
-        delegated_amount: u64,
-        delegation_id: DelegationId,
-        validator_address: AccountAddress,
-    ) -> Self {
-        Self::new(
-            OutputBuilderAmount::Amount(amount),
-            delegated_amount,
-            delegation_id,
-            validator_address,
-        )
+    /// Will set the delegated amount field to match.
+    pub fn new_with_amount(amount: u64, delegation_id: DelegationId, validator_address: AccountAddress) -> Self {
+        Self::new(OutputBuilderAmount::Amount(amount), delegation_id, validator_address)
     }
 
     /// Creates a [`DelegationOutputBuilder`] with provided storage score parameters.
-    /// The amount will be set to the minimum required amount of the resulting output.
+    /// The amount and delegated amount will be set to the minimum required amount of the resulting output.
     pub fn new_with_minimum_amount(
         params: StorageScoreParameters,
-        delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
         Self::new(
             OutputBuilderAmount::MinimumAmount(params),
-            delegated_amount,
             delegation_id,
             validator_address,
         )
     }
 
     fn new(
-        amount: OutputBuilderAmount,
-        delegated_amount: u64,
+        delegated_amount: OutputBuilderAmount,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
         Self {
-            amount,
+            amount: None,
             delegated_amount,
             delegation_id,
             validator_address,
@@ -105,13 +94,17 @@ impl DelegationOutputBuilder {
 
     /// Sets the amount to the provided value.
     pub fn with_amount(mut self, amount: u64) -> Self {
-        self.amount = OutputBuilderAmount::Amount(amount);
+        self.amount = Some(OutputBuilderAmount::Amount(amount));
         self
     }
 
     /// Sets the amount to the minimum required amount.
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
-        self.amount = OutputBuilderAmount::MinimumAmount(params);
+        if matches!(self.delegated_amount, OutputBuilderAmount::MinimumAmount(_)) {
+            self.amount = None;
+        } else {
+            self.amount = Some(OutputBuilderAmount::MinimumAmount(params));
+        }
         self
     }
 
@@ -179,7 +172,7 @@ impl DelegationOutputBuilder {
 
         let mut output = DelegationOutput {
             amount: 0,
-            delegated_amount: self.delegated_amount,
+            delegated_amount: 0,
             delegation_id: self.delegation_id,
             validator_address,
             start_epoch: self.start_epoch,
@@ -187,10 +180,24 @@ impl DelegationOutputBuilder {
             unlock_conditions,
         };
 
-        output.amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
-        };
+        match self.delegated_amount {
+            OutputBuilderAmount::Amount(amount) => {
+                output.delegated_amount = amount;
+                output.amount = self.amount.map_or(amount, |builder_amount| match builder_amount {
+                    OutputBuilderAmount::Amount(amount) => amount,
+                    OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
+                });
+            }
+            OutputBuilderAmount::MinimumAmount(params) => {
+                let min = output.minimum_amount(params);
+                output.delegated_amount = min;
+                output.amount = if let Some(OutputBuilderAmount::Amount(amount)) = self.amount {
+                    amount
+                } else {
+                    min
+                };
+            }
+        }
 
         Ok(output)
     }
@@ -204,8 +211,8 @@ impl DelegationOutputBuilder {
 impl From<&DelegationOutput> for DelegationOutputBuilder {
     fn from(output: &DelegationOutput) -> Self {
         Self {
-            amount: OutputBuilderAmount::Amount(output.amount),
-            delegated_amount: output.delegated_amount,
+            amount: Some(OutputBuilderAmount::Amount(output.amount)),
+            delegated_amount: OutputBuilderAmount::Amount(output.delegated_amount),
             delegation_id: output.delegation_id,
             validator_address: *output.validator_address.as_account(),
             start_epoch: output.start_epoch,
@@ -248,22 +255,20 @@ impl DelegationOutput {
     /// Creates a new [`DelegationOutputBuilder`] with a provided amount.
     pub fn build_with_amount(
         amount: u64,
-        delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_address)
+        DelegationOutputBuilder::new_with_amount(amount, delegation_id, validator_address)
     }
 
     /// Creates a new [`DelegationOutputBuilder`] with provided storage score parameters.
     /// The amount will be set to the minimum required amount.
     pub fn build_with_minimum_amount(
         params: StorageScoreParameters,
-        delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_minimum_amount(params, delegated_amount, delegation_id, validator_address)
+        DelegationOutputBuilder::new_with_minimum_amount(params, delegation_id, validator_address)
     }
 
     /// Returns the amount of the [`DelegationOutput`].
@@ -313,6 +318,11 @@ impl DelegationOutput {
             .address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
+    }
+
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        next_state.is_none()
     }
 
     /// Returns the chain ID of the [`DelegationOutput`].
@@ -452,11 +462,11 @@ mod dto {
 
         fn try_from(dto: DelegationOutputDto) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(
-                dto.amount,
                 dto.delegated_amount,
                 dto.delegation_id,
                 dto.validator_address,
             )
+            .with_amount(dto.amount)
             .with_start_epoch(dto.start_epoch)
             .with_end_epoch(dto.end_epoch);
 

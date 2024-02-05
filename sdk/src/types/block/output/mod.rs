@@ -319,7 +319,7 @@ impl Output {
             Self::Anchor(output) => Some(output.chain_id()),
             Self::Foundry(output) => Some(output.chain_id()),
             Self::Nft(output) => Some(output.chain_id()),
-            Self::Delegation(_) => None,
+            Self::Delegation(output) => Some(output.chain_id()),
         }
     }
 
@@ -329,6 +329,19 @@ impl Output {
             output.is_implicit_account()
         } else {
             false
+        }
+    }
+
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        match self {
+            // Validator Rewards
+            Self::Account(account_input) => account_input.can_claim_rewards(next_state.and_then(Self::as_account_opt)),
+            // Delegator Rewards
+            Self::Delegation(delegation_input) => {
+                delegation_input.can_claim_rewards(next_state.and_then(Self::as_delegation_opt))
+            }
+            _ => false,
         }
     }
 

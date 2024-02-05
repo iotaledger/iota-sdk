@@ -4,6 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, List
+from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.address import Address
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_metadata import OutputMetadata
@@ -50,11 +51,13 @@ class PreparedTransactionData:
     Attributes:
         transaction: The transaction.
         inputs_data: Data about the inputs which is required for signing.
-        remainder: Data about a remainder.
+        remainders: Data about remainder outputs.
+        mana_rewards: Mana rewards by input.
     """
     transaction: Transaction
     inputs_data: List[InputSigningData]
-    remainder: Optional[RemainderData] = None
+    remainders: Optional[List[RemainderData]] = None
+    mana_rewards: Optional[dict[OutputId, int]] = None
 
 
 @json
@@ -65,6 +68,8 @@ class SignedTransactionData:
     Attributes:
         payload: The transaction payload.
         inputs_data: Data about the inputs consumed in the transaction.
+        mana_rewards: Mana rewards by input.
     """
     payload: SignedTransactionPayload
     inputs_data: List[InputSigningData]
+    mana_rewards: Optional[dict[OutputId, int]] = None

@@ -80,7 +80,8 @@ async fn single_ed25519_unlock() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -94,7 +95,12 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -181,7 +187,8 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -207,7 +214,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -293,7 +305,8 @@ async fn two_signature_unlocks() -> Result<()> {
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
-        remainder: None,
+        remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -308,7 +321,12 @@ async fn two_signature_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

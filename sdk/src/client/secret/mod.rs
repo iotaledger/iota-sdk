@@ -567,14 +567,15 @@ where
             .required_address(slot_index, protocol_parameters.committable_age_range())?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        let required_address = if let Address::Restricted(restricted) = &required_address {
-            restricted.address()
-        } else {
-            &required_address
+        // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
+        let required_address = match required_address {
+            Address::ImplicitAccountCreation(implicit) => Address::Ed25519(*implicit.ed25519_address()),
+            Address::Restricted(restricted) => restricted.address().clone(),
+            _ => required_address,
         };
 
         // Check if we already added an [Unlock] for this address
-        match block_indexes.get(required_address) {
+        match block_indexes.get(&required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
@@ -642,13 +643,14 @@ where
     let PreparedTransactionData {
         transaction,
         inputs_data,
+        mana_rewards,
         ..
     } = prepared_transaction_data;
     let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, protocol_parameters.clone())?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone())?;
 
     if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

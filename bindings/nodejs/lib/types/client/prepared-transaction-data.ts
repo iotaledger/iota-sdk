@@ -3,10 +3,11 @@
 
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
-import { Output, OutputDiscriminator } from '../block/output/output';
+import { Output, OutputDiscriminator, OutputId } from '../block/output/output';
 import { Transaction } from '../block/payload/signed_transaction';
 import { IOutputMetadataResponse } from '../models/api';
 import { Bip44 } from '../secret_manager';
+import { NumericString } from '../utils';
 
 /**
  * Helper struct for offline signing.
@@ -23,7 +24,11 @@ export class PreparedTransactionData {
     /**
      * Optional remainder output information
      */
-    remainder?: Remainder;
+    remainders?: Remainder[];
+    /**
+     * Mana rewards by input.
+     */
+    manaRewards?: { [outputId: OutputId]: NumericString };
 }
 
 /**

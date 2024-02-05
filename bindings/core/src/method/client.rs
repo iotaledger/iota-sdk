@@ -155,6 +155,8 @@ pub enum ClientMethod {
     GetAccountCongestion {
         /// The Account ID of the account.
         account_id: AccountId,
+        /// Work score to check readiness for, max work score is assumed if not provided.
+        work_score: Option<u32>,
     },
     /// Returns all the available Mana rewards of an account or delegation output in the returned range of epochs.
     #[serde(rename_all = "camelCase")]
@@ -301,7 +303,7 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Node indexer API
     //////////////////////////////////////////////////////////////////////
-    /// Fetch alias/basic/NFT/foundry output IDs
+    /// Fetch account/anchor/basic/delegation/NFT/foundry output IDs
     #[serde(rename_all = "camelCase")]
     OutputIds {
         /// Query parameters for output requests

@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "stronghold")]
@@ -22,13 +22,13 @@ use iota_sdk::{
     },
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{Output, OutputId, TokenId},
+        output::{DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
     wallet::{
-        ClientOptions, ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-        OutputParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
-        TransactionOptions,
+        ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams, CreateNativeTokenParams,
+        FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams,
+        SyncOptions, TransactionOptions,
     },
     U256,
 };
@@ -215,7 +215,7 @@ pub enum WalletMethod {
     /// Returns all pending transactions of the wallet.
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
-    /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
+    /// A generic function that can be used to burn native tokens, nfts, delegations, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not
     /// increase the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output.
@@ -317,6 +317,20 @@ pub enum WalletMethod {
     PrepareSendNft {
         params: Vec<SendNftParams>,
         options: Option<TransactionOptions>,
+    },
+    /// Prepare to create a delegation.
+    /// Expected response:
+    /// [`PreparedCreateDelegationTransaction`](crate::Response::PreparedCreateDelegationTransaction)
+    PrepareCreateDelegation {
+        params: CreateDelegationParams,
+        options: Option<TransactionOptions>,
+    },
+    /// Prepare to delay a delegation's claiming.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareDelayDelegationClaiming {
+        delegation_id: DelegationId,
+        reclaim_excess: bool,
     },
     // /// Stop participating for an event.
     // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)

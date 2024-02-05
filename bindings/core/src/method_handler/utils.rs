@@ -110,6 +110,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             transaction,
             inputs,
             unlocks,
+            mana_rewards,
             protocol_parameters,
         } => {
             let transaction = Transaction::try_from_dto(transaction)?;
@@ -118,8 +119,13 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 .map(|input| (input.output_id(), &input.output))
                 .collect::<Vec<(&OutputId, &Output)>>();
 
-            let context =
-                SemanticValidationContext::new(&transaction, &inputs, unlocks.as_deref(), protocol_parameters);
+            let context = SemanticValidationContext::new(
+                &transaction,
+                &inputs,
+                unlocks.as_deref(),
+                mana_rewards,
+                protocol_parameters,
+            );
 
             Response::TransactionFailureReason(context.validate()?)
         }
