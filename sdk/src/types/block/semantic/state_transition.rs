@@ -123,6 +123,13 @@ impl SemanticValidationContext<'_> {
             ) => DelegationOutput::transition(current_output_id, current_state, next_output_id, next_state, self),
 
             // Destructions.
+            (Some((_output_id, Output::Basic(current_state))), None) => {
+                if current_state.is_implicit_account() {
+                    Err(StateTransitionError::ImplicitAccountDestructionDisallowed)
+                } else {
+                    Err(StateTransitionError::UnsupportedStateTransition)
+                }
+            }
             (Some((output_id, Output::Account(current_state))), None) => {
                 AccountOutput::destruction(output_id, current_state, self)
             }
