@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
+pub(crate) mod allotment;
 pub(crate) mod amount;
+pub(crate) mod context_inputs;
 pub(crate) mod delegation;
 pub(crate) mod ed25519;
 pub(crate) mod foundry;
@@ -48,6 +50,10 @@ pub enum Requirement {
     Amount,
     /// Mana requirement.
     Mana,
+    /// Mana allotment requirement.
+    Allotment,
+    /// Context inputs requirement.
+    ContextInputs,
 }
 
 impl InputSelection {
@@ -67,6 +73,8 @@ impl InputSelection {
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
             Requirement::Mana => self.fulfill_mana_requirement(),
+            Requirement::Allotment => self.fulfill_allotment_requirement(),
+            Requirement::ContextInputs => self.fulfill_context_inputs_requirement(),
         }
     }
 

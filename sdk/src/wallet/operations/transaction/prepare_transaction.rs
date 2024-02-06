@@ -8,7 +8,10 @@ use packable::bounded::TryIntoBoundedU16Error;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{input::INPUT_COUNT_RANGE, output::Output},
+    types::block::{
+        input::INPUT_COUNT_RANGE,
+        output::{AccountId, Output},
+    },
     wallet::{
         operations::transaction::{RemainderValueStrategy, TransactionOptions},
         Wallet,
@@ -24,6 +27,7 @@ where
     pub async fn prepare_transaction(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
+        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
@@ -62,6 +66,8 @@ where
                 RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
             });
 
+        let issuer_id = issuer_id.into();
+
         let selected_transaction_data = self
             .select_inputs(
                 outputs,
@@ -75,11 +81,17 @@ where
                     .map(|inputs| HashSet::from_iter(inputs.clone())),
                 remainder_address,
                 options.as_ref().and_then(|options| options.burn.as_ref()),
+                options.as_ref().and_then(|options| options.context_inputs.clone()),
+                issuer_id,
                 options.as_ref().and_then(|options| options.mana_allotments.clone()),
+                options.as_ref().and_then(|options| options.tagged_data_payload.clone()),
             )
             .await?;
 
-        let prepared_transaction_data = match self.build_transaction(selected_transaction_data.clone(), options).await {
+        let prepared_transaction_data = match self
+            .build_transaction(selected_transaction_data.clone(), issuer_id, options)
+            .await
+        {
             Ok(res) => res,
             Err(err) => {
                 // unlock outputs so they are available for a new transaction

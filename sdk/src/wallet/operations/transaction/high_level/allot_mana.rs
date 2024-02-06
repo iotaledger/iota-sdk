@@ -53,6 +53,6 @@ where
             }
         }
 
-        self.prepare_transaction([], options).await
+        self.prepare_transaction([], None, options).await
     }
 }

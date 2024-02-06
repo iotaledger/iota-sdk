@@ -90,7 +90,7 @@ where
         log::debug!("[TRANSACTION] finish_transaction");
         let options = options.into();
 
-        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
+        let prepared_transaction_data = self.prepare_transaction(outputs, None, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction_data, None, options)
             .await

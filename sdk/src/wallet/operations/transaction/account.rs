@@ -114,7 +114,7 @@ where
             ..Default::default()
         };
 
-        self.prepare_transaction(vec![account], transaction_options.clone())
+        self.prepare_transaction(vec![account], account_id, transaction_options.clone())
             .await
     }
 }

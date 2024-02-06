@@ -5,14 +5,18 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
-    types::block::{address::Address, output::TokenId, protocol::protocol_parameters},
+    types::block::{
+        address::Address,
+        output::{AccountId, TokenId},
+        protocol::protocol_parameters,
+    },
 };
 use pretty_assertions::assert_eq;
 use primitive_types::U256;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0,
-    SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
+    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq, Build::Basic, ACCOUNT_ID_0,
+    BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
 };
 
 #[test]
@@ -57,9 +61,11 @@ fn two_native_tokens_one_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -124,9 +130,11 @@ fn two_native_tokens_both_needed_plus_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -199,9 +207,11 @@ fn three_inputs_two_needed_plus_remainder() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -274,9 +284,11 @@ fn three_inputs_two_needed_no_remainder() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -316,9 +328,11 @@ fn insufficient_native_tokens_one_input() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -384,9 +398,11 @@ fn insufficient_native_tokens_three_inputs() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -442,9 +458,11 @@ fn burn_and_send_at_the_same_time() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .with_burn(
@@ -490,9 +508,11 @@ fn burn_one_input_no_output() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        Vec::new(),
+        None,
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 50))
@@ -551,9 +571,11 @@ fn multiple_native_tokens() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -594,9 +616,11 @@ fn insufficient_native_tokens() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -640,9 +664,11 @@ fn insufficient_native_tokens_2() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -686,9 +712,11 @@ fn insufficient_amount_for_remainder() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -732,9 +760,11 @@ fn single_output_native_token_no_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -774,9 +804,11 @@ fn single_output_native_token_remainder_1() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -823,9 +855,11 @@ fn single_output_native_token_remainder_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -884,9 +918,11 @@ fn two_basic_outputs_1() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -946,9 +982,11 @@ fn two_basic_outputs_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1008,9 +1046,11 @@ fn two_basic_outputs_3() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1070,9 +1110,11 @@ fn two_basic_outputs_4() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1132,9 +1174,11 @@ fn two_basic_outputs_5() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1194,9 +1238,11 @@ fn two_basic_outputs_6() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1255,9 +1301,11 @@ fn two_basic_outputs_7() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1316,9 +1364,11 @@ fn two_basic_outputs_8() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -1374,9 +1424,11 @@ fn two_basic_outputs_native_tokens_not_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -1456,9 +1508,11 @@ fn multiple_remainders() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()

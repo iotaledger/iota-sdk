@@ -208,6 +208,6 @@ where
             outputs.push(nft_builder.finish_output()?);
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_transaction(outputs, None, options).await
     }
 }

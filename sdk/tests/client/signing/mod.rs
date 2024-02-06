@@ -25,7 +25,7 @@ use iota_sdk::{
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
-        slot::{SlotCommitmentId, SlotIndex},
+        slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -72,6 +72,7 @@ async fn all_combined() -> Result<()> {
     let nft_4 = Address::Nft(NftAddress::new(nft_id_4));
 
     let slot_index = SlotIndex::from(90);
+    let slot_commitment_id = SlotCommitmentHash::null().into_slot_commitment_id(slot_index);
 
     let inputs = build_inputs(
         [
@@ -208,9 +209,11 @@ async fn all_combined() -> Result<()> {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],
-        slot_index,
+        slot_commitment_id,
+        account_id_1,
         protocol_parameters.clone(),
     )
     .select()

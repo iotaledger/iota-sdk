@@ -79,7 +79,7 @@ where
                     .finish_output()?,
             ];
             // Input selection will detect that we're melting native tokens and add the required inputs if available
-            self.prepare_transaction(outputs, options).await
+            self.prepare_transaction(outputs, None, options).await
         } else {
             unreachable!("We checked if it's an account output before")
         }

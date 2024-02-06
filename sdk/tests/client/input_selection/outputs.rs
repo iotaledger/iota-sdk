@@ -12,7 +12,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
-    ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, SLOT_INDEX,
+    ACCOUNT_ID_0, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -33,9 +33,11 @@ fn no_inputs() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -64,9 +66,11 @@ fn no_outputs() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -95,9 +99,11 @@ fn no_outputs_but_required_input() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .with_required_inputs(HashSet::from([*inputs[0].output_id()]))
@@ -135,9 +141,11 @@ fn no_outputs_but_burn() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        account_id_2,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
@@ -182,7 +190,16 @@ fn no_address_provided() {
         None,
     )]);
 
-    let selected = InputSelection::new(inputs, outputs, [], SLOT_INDEX, protocol_parameters).select();
+    let selected = InputSelection::new(
+        inputs,
+        Vec::new(),
+        outputs,
+        None,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        protocol_parameters,
+    )
+    .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
 }
@@ -217,9 +234,11 @@ fn no_matching_address_provided() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -269,9 +288,11 @@ fn two_addresses_one_missing() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -327,12 +348,14 @@ fn two_addresses() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()

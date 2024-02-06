@@ -144,7 +144,7 @@ where
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
             ];
 
-            self.prepare_transaction(outputs, options)
+            self.prepare_transaction(outputs, None, options)
                 .await
                 .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {

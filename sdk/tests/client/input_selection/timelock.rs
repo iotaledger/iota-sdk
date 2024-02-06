@@ -1,14 +1,22 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::str::FromStr;
+
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{address::Address, protocol::protocol_parameters, slot::SlotIndex},
+    types::block::{
+        address::Address,
+        output::AccountId,
+        protocol::protocol_parameters,
+        slot::{SlotCommitmentHash, SlotIndex},
+    },
 };
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    build_inputs, build_outputs, unsorted_eq, Build::Basic, ACCOUNT_ID_0, BECH32_ADDRESS_ED25519_0,
+    BECH32_ADDRESS_ED25519_1,
 };
 
 #[test]
@@ -41,9 +49,11 @@ fn one_output_timelock_not_expired() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -81,9 +91,11 @@ fn timelock_equal_timestamp() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -135,9 +147,11 @@ fn two_outputs_one_timelock_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -190,9 +204,11 @@ fn two_outputs_one_timelocked_one_missing() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -233,9 +249,11 @@ fn one_output_timelock_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()

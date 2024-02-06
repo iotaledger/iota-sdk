@@ -27,7 +27,10 @@ impl InputSelection {
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
                 let required_address = input
                     .output
-                    .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
+                    .required_address(
+                        self.slot_commitment_id.slot_index(),
+                        self.protocol_parameters.committable_age_range(),
+                    )?
                     .expect("expiration unlockable outputs already filtered out");
 
                 if &required_address == remainder_address {
@@ -40,7 +43,10 @@ impl InputSelection {
         for input in &self.selected_inputs {
             let required_address = input
                 .output
-                .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
+                .required_address(
+                    self.slot_commitment_id.slot_index(),
+                    self.protocol_parameters.committable_age_range(),
+                )?
                 .expect("expiration unlockable outputs already filtered out");
 
             if required_address.is_ed25519_backed() {

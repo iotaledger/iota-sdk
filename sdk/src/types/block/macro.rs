@@ -119,6 +119,13 @@ macro_rules! impl_id {
                             slot_index: slot_index.into().to_le_bytes(),
                         }
                     }
+
+                    pub const fn [<const_into_ $id_name:snake>](self, slot_index: $crate::types::block::slot::SlotIndex) -> $id_name {
+                        $id_name {
+                            hash: self,
+                            slot_index: slot_index.0.to_le_bytes(),
+                        }
+                    }
                 }
             }
 

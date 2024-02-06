@@ -45,7 +45,7 @@ impl InputSelection {
         for selected_input in &self.selected_inputs {
             inputs_sum += selected_input.output.amount();
 
-            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_index) {
+            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_commitment_id.slot_index()) {
                 *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
         }
@@ -104,7 +104,7 @@ impl AmountSelection {
             remainder_amount,
             native_tokens_remainder,
             mana_remainder: selected_mana > required_mana,
-            slot_index: input_selection.slot_index,
+            slot_index: input_selection.slot_commitment_id.slot_index(),
             storage_score_parameters: input_selection.protocol_parameters.storage_score_parameters(),
         })
     }
@@ -192,7 +192,8 @@ impl InputSelection {
     ) -> Result<bool, Error> {
         // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_none()
+            input.output.native_token().is_none()
+                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_none()
         });
 
         if amount_selection.fulfil(inputs)? {
@@ -201,7 +202,8 @@ impl InputSelection {
 
         // No native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_some()
+            input.output.native_token().is_none()
+                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_some()
         });
 
         if amount_selection.fulfil(inputs)? {
@@ -210,7 +212,8 @@ impl InputSelection {
 
         // Native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_none()
+            input.output.native_token().is_some()
+                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_none()
         });
 
         if amount_selection.fulfil(inputs)? {
@@ -219,7 +222,8 @@ impl InputSelection {
 
         // Native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_some()
+            input.output.native_token().is_some()
+                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_some()
         });
 
         if amount_selection.fulfil(inputs)? {
@@ -367,7 +371,7 @@ impl InputSelection {
                     .unlock_conditions()
                     .locked_address(
                         output.address(),
-                        self.slot_index,
+                        self.slot_commitment_id.slot_index(),
                         self.protocol_parameters.committable_age_range(),
                     )
                     .expect("slot index was provided")
@@ -388,7 +392,7 @@ impl InputSelection {
                     .unlock_conditions()
                     .locked_address(
                         output.address(),
-                        self.slot_index,
+                        self.slot_commitment_id.slot_index(),
                         self.protocol_parameters.committable_age_range(),
                     )
                     .expect("slot index was provided")

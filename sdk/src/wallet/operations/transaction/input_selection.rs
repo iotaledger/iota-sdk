@@ -12,8 +12,10 @@ use crate::{
     },
     types::block::{
         address::Address,
+        context_input::ContextInput,
         mana::ManaAllotment,
-        output::{Output, OutputId},
+        output::{AccountId, Output, OutputId},
+        payload::TaggedDataPayload,
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
@@ -36,16 +38,22 @@ where
         mandatory_inputs: Option<HashSet<OutputId>>,
         remainder_address: Option<Address>,
         burn: Option<&Burn>,
+        context_inputs: Option<Vec<ContextInput>>,
+        issuer_id: Option<AccountId>,
         mana_allotments: Option<Vec<ManaAllotment>>,
+        payload: Option<TaggedDataPayload>,
     ) -> crate::wallet::Result<Selected> {
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let slot_index = self.client().get_slot_index().await?;
+        let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         // lock so the same inputs can't be selected in multiple transactions
         let mut wallet_data = self.data_mut().await;
+        let issuer_id = issuer_id
+            .or_else(|| wallet_data.first_account_id())
+            .ok_or(crate::wallet::Error::AccountNotFound)?;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -72,7 +80,7 @@ where
         let available_outputs_signing_data = filter_inputs(
             &wallet_data,
             wallet_data.unspent_outputs.values(),
-            slot_index,
+            slot_commitment_id.slot_index(),
             protocol_parameters.committable_age_range(),
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
@@ -86,7 +94,7 @@ where
                     mana_rewards.insert(
                         output.output_id,
                         self.client()
-                            .get_output_mana_rewards(&output.output_id, slot_index)
+                            .get_output_mana_rewards(&output.output_id, slot_commitment_id.slot_index())
                             .await?
                             .rewards,
                     );
@@ -115,7 +123,7 @@ where
                         mana_rewards.insert(
                             *output_id,
                             self.client()
-                                .get_output_mana_rewards(output_id, slot_index)
+                                .get_output_mana_rewards(output_id, slot_commitment_id.slot_index())
                                 .await?
                                 .rewards,
                         );
@@ -125,14 +133,17 @@ where
 
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
+                context_inputs.into_iter().flatten(),
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
-                slot_index,
+                slot_commitment_id,
+                issuer_id,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
             .with_forbidden_inputs(forbidden_inputs)
-            .with_mana_rewards(mana_rewards);
+            .with_mana_rewards(mana_rewards)
+            .with_payload(payload);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -143,7 +154,7 @@ where
             }
 
             if let Some(mana_allotments) = mana_allotments {
-                input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
+                input_selection = input_selection.with_mana_allotments(mana_allotments);
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -173,7 +184,7 @@ where
                         mana_rewards.insert(
                             *output_id,
                             self.client()
-                                .get_output_mana_rewards(output_id, slot_index)
+                                .get_output_mana_rewards(output_id, slot_commitment_id.slot_index())
                                 .await?
                                 .rewards,
                         );
@@ -183,14 +194,17 @@ where
 
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
+                context_inputs.into_iter().flatten(),
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
-                slot_index,
+                slot_commitment_id,
+                issuer_id,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
             .with_forbidden_inputs(forbidden_inputs)
-            .with_mana_rewards(mana_rewards);
+            .with_mana_rewards(mana_rewards)
+            .with_payload(payload);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -201,7 +215,7 @@ where
             }
 
             if let Some(mana_allotments) = mana_allotments {
-                input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
+                input_selection = input_selection.with_mana_allotments(mana_allotments);
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -221,13 +235,16 @@ where
 
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
+            context_inputs.into_iter().flatten(),
             outputs,
             Some(wallet_data.address.clone().into_inner()),
-            slot_index,
+            slot_commitment_id,
+            issuer_id,
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs)
-        .with_mana_rewards(mana_rewards);
+        .with_mana_rewards(mana_rewards)
+        .with_payload(payload);
 
         if let Some(address) = remainder_address {
             input_selection = input_selection.with_remainder_address(address);
@@ -238,7 +255,7 @@ where
         }
 
         if let Some(mana_allotments) = mana_allotments {
-            input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
+            input_selection = input_selection.with_mana_allotments(mana_allotments);
         }
 
         let selected_transaction_data = input_selection.select()?;

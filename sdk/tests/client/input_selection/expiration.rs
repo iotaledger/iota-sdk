@@ -9,7 +9,7 @@ use iota_sdk::{
         address::Address,
         output::{AccountId, NftId},
         protocol::protocol_parameters,
-        slot::SlotIndex,
+        slot::{SlotCommitmentHash, SlotIndex},
     },
 };
 use pretty_assertions::assert_eq;
@@ -17,7 +17,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
-    ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_ED25519_2, NFT_ID_1,
 };
 
@@ -51,9 +51,11 @@ fn one_output_expiration_not_expired() {
 
     let selected = InputSelection::new(
         inputs,
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select();
@@ -91,9 +93,11 @@ fn expiration_equal_timestamp() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -133,9 +137,11 @@ fn one_output_expiration_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -187,9 +193,11 @@ fn two_outputs_one_expiration_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -242,9 +250,11 @@ fn two_outputs_one_unexpired_one_missing() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -307,9 +317,11 @@ fn two_outputs_two_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap()],
-        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -362,12 +374,14 @@ fn two_outputs_two_expired_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
-        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -407,9 +421,11 @@ fn expiration_expired_with_sdr() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -449,9 +465,11 @@ fn expiration_expired_with_sdr_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -491,9 +509,11 @@ fn expiration_expired_with_sdr_and_timelock() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -533,9 +553,11 @@ fn expiration_expired_with_sdr_and_timelock_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -617,12 +639,14 @@ fn sender_in_expiration() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -663,12 +687,14 @@ fn sender_in_expiration_already_selected() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -709,12 +735,14 @@ fn remainder_in_expiration() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -765,9 +793,11 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -819,9 +849,11 @@ fn expiration_expired_only_account_addresses() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -862,9 +894,11 @@ fn one_nft_output_expiration_unexpired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()
@@ -905,9 +939,11 @@ fn one_nft_output_expiration_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters,
     )
     .select()

@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::str::FromStr;
+
 use iota_sdk::{
     client::{
         api::input_selection::{Burn, InputSelection},
@@ -9,8 +11,8 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, DelegationId, DelegationOutputBuilder,
-            OutputId,
+            unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, DelegationId,
+            DelegationOutputBuilder, OutputId,
         },
         protocol::protocol_parameters,
         rand::{
@@ -22,7 +24,7 @@ use iota_sdk::{
 };
 use pretty_assertions::assert_eq;
 
-use crate::client::{BECH32_ADDRESS_ED25519_0, SLOT_INDEX};
+use crate::client::{ACCOUNT_ID_0, BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX};
 
 #[test]
 fn remainder_needed_for_mana() {
@@ -76,9 +78,11 @@ fn remainder_needed_for_mana() {
 
     let selected = InputSelection::new(
         inputs.clone(),
+        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
         protocol_parameters.clone(),
     )
     .with_burn(Burn::from(delegation_id))

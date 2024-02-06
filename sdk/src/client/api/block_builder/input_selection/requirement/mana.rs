@@ -29,7 +29,8 @@ impl InputSelection {
     }
 
     pub(crate) fn mana_sums(&self) -> Result<(u64, u64), Error> {
-        let required_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
+        let required_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>()
+            + self.mana_allotments.iter().map(|a| a.mana()).sum::<u64>();
         let mut selected_mana = 0;
 
         for input in &self.selected_inputs {
@@ -37,7 +38,7 @@ impl InputSelection {
             selected_mana += input.output.available_mana(
                 &self.protocol_parameters,
                 input.output_id().transaction_id().slot_index(),
-                self.slot_index,
+                self.slot_commitment_id.slot_index(),
             )?;
         }
         Ok((selected_mana, required_mana))

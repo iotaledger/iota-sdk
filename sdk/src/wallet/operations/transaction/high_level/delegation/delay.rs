@@ -87,6 +87,6 @@ where
             }
         };
 
-        self.prepare_transaction(outputs, None).await
+        self.prepare_transaction(outputs, None, None).await
     }
 }
