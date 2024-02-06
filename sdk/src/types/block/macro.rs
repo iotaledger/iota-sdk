@@ -377,7 +377,7 @@ macro_rules! impl_deserialize_untagged {
                             $(
                             [<$name $type>]::KIND => {
                                 Self::from([<$name $type>]::deserialize(value).map_err(|e| {
-                                    serde::de::Error::custom(format!(core::concat!("cannot deserialize ", core::stringify!($name), core::stringify!($type), ": {}"), e))
+                                    serde::de::Error::custom(alloc::format!(core::concat!("cannot deserialize ", core::stringify!($name), core::stringify!($type), ": {}"), e))
                                 })?)
                             }
                             )+
