@@ -84,7 +84,7 @@ pub enum TransactionFailureReason {
 impl fmt::Display for TransactionFailureReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::None => write!(f, "."),
+            Self::None => write!(f, "none."),
             Self::TypeInvalid => write!(f, "transaction type is invalid."),
             Self::Conflicting => write!(f, "transaction is conflicting."),
             Self::InputAlreadySpent => write!(f, "input already spent."),
