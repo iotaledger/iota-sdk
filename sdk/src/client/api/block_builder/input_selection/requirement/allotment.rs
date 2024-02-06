@@ -38,7 +38,7 @@ impl InputSelection {
             .iter_mut()
             .any(|allotment| allotment.account_id() == &self.issuer_id)
         {
-            self.mana_allotments.push(ManaAllotment::new(self.issuer_id, 0)?);
+            self.mana_allotments.push(ManaAllotment::new(self.issuer_id, 1)?);
         }
 
         let transaction = builder
