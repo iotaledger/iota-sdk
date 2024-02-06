@@ -167,7 +167,6 @@ impl Topic {
                 // Commitment topics.
                 r"^commitments/latest$",
                 r"^commitments/finalized$",
-                r"^commitments$",
                 // Block topics.
                 r"^blocks$",
                 r"^blocks/validation$",
