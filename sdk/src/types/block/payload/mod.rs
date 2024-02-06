@@ -18,7 +18,7 @@ use packable::{
     Packable, PackableExt,
 };
 
-pub(crate) use self::signed_transaction::{ContextInputCount, InputCount, OutputCount};
+pub(crate) use self::signed_transaction::{InputCount, OutputCount};
 pub use self::{
     candidacy_announcement::CandidacyAnnouncementPayload, signed_transaction::SignedTransactionPayload,
     tagged_data::TaggedDataPayload,
