@@ -264,7 +264,7 @@ pub mod mana_rewards {
 
     pub fn serialize<S: serde::Serializer>(mana_rewards: &BTreeMap<OutputId, u64>, s: S) -> Result<S::Ok, S::Error> {
         let map = mana_rewards
-            .into_iter()
+            .iter()
             .map(|(k, v)| (k, v.to_string()))
             .collect::<BTreeMap<_, _>>();
         map.serialize(s)
@@ -273,7 +273,7 @@ pub mod mana_rewards {
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<BTreeMap<OutputId, u64>, D::Error> {
         BTreeMap::<OutputId, String>::deserialize(d)?
             .into_iter()
-            .map(|(k, v)| Ok((k, v.parse().map_err(|e| serde::de::Error::custom(e))?)))
+            .map(|(k, v)| Ok((k, v.parse().map_err(serde::de::Error::custom)?)))
             .collect::<Result<BTreeMap<_, u64>, _>>()
     }
 }

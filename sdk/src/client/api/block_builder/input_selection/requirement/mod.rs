@@ -73,9 +73,8 @@ impl InputSelection {
     /// Gets requirements from outputs.
     pub(crate) fn outputs_requirements(&mut self) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
-        let outputs = self.outputs.iter();
 
-        for output in outputs {
+        for output in &self.outputs {
             let is_created = match output {
                 // Add an account requirement if the account output is transitioning and then required in the inputs.
                 Output::Account(account_output) => {
