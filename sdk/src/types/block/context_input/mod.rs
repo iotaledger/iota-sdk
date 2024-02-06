@@ -5,9 +5,12 @@ mod block_issuance_credit;
 mod commitment;
 mod reward;
 
-use core::ops::RangeInclusive;
+use alloc::{boxed::Box, vec::Vec};
+use core::{cmp::Ordering, ops::RangeInclusive};
 
-use derive_more::{Display, From};
+use derive_more::{Deref, Display, From};
+use iterator_sorted::is_unique_sorted_by;
+use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub(crate) use self::reward::RewardContextInputIndex;
 pub use self::{
@@ -73,6 +76,90 @@ impl core::fmt::Debug for ContextInput {
             Self::Reward(input) => input.fmt(f),
         }
     }
+}
+
+pub(crate) type ContextInputCount =
+    BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
+#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
+pub struct ContextInputs(
+    #[packable(verify_with = verify_context_inputs_packable)] BoxedSlicePrefix<ContextInput, ContextInputCount>,
+);
+
+impl TryFrom<Vec<ContextInput>> for ContextInputs {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(features: Vec<ContextInput>) -> Result<Self, Self::Error> {
+        Self::from_vec(features)
+    }
+}
+
+impl IntoIterator for ContextInputs {
+    type Item = ContextInput;
+    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Vec::from(Into::<Box<[ContextInput]>>::into(self.0)).into_iter()
+    }
+}
+
+impl ContextInputs {
+    /// Creates a new [`ContextInputs`] from a vec.
+    pub fn from_vec(features: Vec<ContextInput>) -> Result<Self, Error> {
+        let mut context_inputs =
+            BoxedSlicePrefix::<ContextInput, ContextInputCount>::try_from(features.into_boxed_slice())
+                .map_err(Error::InvalidContextInputCount)?;
+
+        context_inputs.sort_by(context_inputs_cmp);
+        // Sort is obviously fine now but uniqueness still needs to be checked.
+        verify_context_inputs(&context_inputs)?;
+
+        Ok(Self(context_inputs))
+    }
+
+    /// Gets a reference to a [`CommitmentContextInput`], if any.
+    pub fn commitment(&self) -> Option<&CommitmentContextInput> {
+        self.0.iter().find_map(|c| c.as_commitment_opt())
+    }
+
+    /// Returns an iterator over [`BlockIssuanceCreditContextInput`], if any.
+    pub fn block_issuance_credits(&self) -> impl Iterator<Item = &BlockIssuanceCreditContextInput> {
+        self.iter().filter_map(|c| c.as_block_issuance_credit_opt())
+    }
+
+    /// Returns an iterator over [`RewardContextInput`], if any.
+    pub fn rewards(&self) -> impl Iterator<Item = &RewardContextInput> {
+        self.iter().filter_map(|c| c.as_reward_opt())
+    }
+}
+
+fn verify_context_inputs_packable<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
+    if VERIFY {
+        verify_context_inputs(context_inputs)?;
+    }
+    Ok(())
+}
+
+fn context_inputs_cmp(a: &ContextInput, b: &ContextInput) -> Ordering {
+    a.kind().cmp(&b.kind()).then_with(|| match (a, b) {
+        (ContextInput::Commitment(_), ContextInput::Commitment(_)) => Ordering::Equal,
+        (ContextInput::BlockIssuanceCredit(a), ContextInput::BlockIssuanceCredit(b)) => {
+            a.account_id().cmp(b.account_id())
+        }
+        (ContextInput::Reward(a), ContextInput::Reward(b)) => a.index().cmp(&b.index()),
+        // No need to evaluate all combinations as `then_with` is only called on Equal.
+        _ => unreachable!(),
+    })
+}
+
+fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
+    if !is_unique_sorted_by(context_inputs.iter(), |a, b| context_inputs_cmp(a, b)) {
+        return Err(Error::ContextInputsNotUniqueSorted);
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]

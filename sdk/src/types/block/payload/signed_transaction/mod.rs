@@ -8,7 +8,7 @@ mod transaction_id;
 
 use packable::{Packable, PackableExt};
 
-pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
+pub(crate) use self::transaction::{InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
     transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},

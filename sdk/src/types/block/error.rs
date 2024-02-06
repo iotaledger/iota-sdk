@@ -15,7 +15,7 @@ use primitive_types::U256;
 use super::slot::EpochIndex;
 use crate::types::block::{
     address::{AddressCapabilityFlag, WeightedAddressCount},
-    context_input::RewardContextInputIndex,
+    context_input::{ContextInputCount, RewardContextInputIndex},
     input::UtxoInput,
     mana::ManaAllotmentCount,
     output::{
@@ -26,7 +26,7 @@ use crate::types::block::{
     },
     payload::{
         tagged_data::{TagLength, TaggedDataLength},
-        ContextInputCount, InputCount, OutputCount,
+        InputCount, OutputCount,
     },
     protocol::ProtocolParametersHash,
     unlock::{UnlockCount, UnlockIndex, UnlocksCount},
