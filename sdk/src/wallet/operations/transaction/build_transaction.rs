@@ -10,8 +10,6 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
-        mana::ManaAllotment,
-        output::AccountId,
         payload::signed_transaction::Transaction,
     },
     wallet::{operations::transaction::TransactionOptions, Wallet},
@@ -24,8 +22,7 @@ where
     /// Builds the transaction from the selected inputs and outputs.
     pub(crate) async fn build_transaction(
         &self,
-        mut selected_transaction_data: Selected,
-        issuer_id: impl Into<Option<AccountId>> + Send,
+        selected_transaction_data: Selected,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] build_transaction");
@@ -37,31 +34,6 @@ where
 
         for input in &selected_transaction_data.inputs {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
-        }
-
-        let first_account_id = self.data.read().await.first_account_id();
-        let issuer_id = issuer_id
-            .into()
-            .or(first_account_id)
-            .ok_or(crate::wallet::Error::AccountNotFound)?;
-        let rmc = self
-            .client()
-            .get_account_congestion(&issuer_id, None)
-            .await?
-            .reference_mana_cost;
-        let allotment_mana = selected_transaction_data.block_work_score as u64 * rmc;
-
-        // Add the required allotment to the issuing allotment if it exists, or create a new one
-        if let Some(allotment) = selected_transaction_data
-            .mana_allotments
-            .iter_mut()
-            .find(|allotment| allotment.account_id() == &issuer_id)
-        {
-            allotment.mana += allotment_mana;
-        } else {
-            selected_transaction_data
-                .mana_allotments
-                .push(ManaAllotment::new(issuer_id, allotment_mana)?);
         }
 
         // Build transaction

@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, RMC, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -59,6 +59,7 @@ fn missing_input_account_for_foundry() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_2,
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -150,6 +151,7 @@ fn minted_native_tokens_in_new_remainder() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_2,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -224,6 +226,7 @@ fn minted_native_tokens_in_provided_output() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_2,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -294,6 +297,7 @@ fn melt_native_tokens() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -350,6 +354,7 @@ fn destroy_foundry_with_account_state_transition() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_2,
+        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
@@ -404,6 +409,7 @@ fn destroy_foundry_with_account_burn() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_2,
+        RMC,
         protocol_parameters,
     )
     .with_burn(
@@ -482,6 +488,7 @@ fn prefer_basic_to_foundry() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -547,6 +554,7 @@ fn simple_foundry_transition_basic_not_needed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -627,6 +635,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -775,6 +784,7 @@ fn mint_and_burn_at_the_same_time() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
@@ -845,6 +855,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -903,6 +914,7 @@ fn create_native_token_but_burn_account() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -967,6 +979,7 @@ fn melted_tokens_not_provided() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1022,6 +1035,7 @@ fn burned_tokens_not_provided() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
@@ -1078,6 +1092,7 @@ fn foundry_in_outputs_and_required() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_2,
+        RMC,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
@@ -1151,6 +1166,7 @@ fn melt_and_burn_native_tokens() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id,
+        RMC,
         protocol_parameters,
     )
     // Burn 456 native tokens

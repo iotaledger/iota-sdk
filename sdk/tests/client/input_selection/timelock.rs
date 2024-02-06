@@ -16,7 +16,7 @@ use pretty_assertions::assert_eq;
 
 use crate::client::{
     build_inputs, build_outputs, unsorted_eq, Build::Basic, ACCOUNT_ID_0, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1,
+    BECH32_ADDRESS_ED25519_1, RMC,
 };
 
 #[test]
@@ -54,6 +54,7 @@ fn one_output_timelock_not_expired() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SlotCommitmentHash::null().into_slot_commitment_id(100),
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -96,6 +97,7 @@ fn timelock_equal_timestamp() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SlotCommitmentHash::null().into_slot_commitment_id(200),
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -152,6 +154,7 @@ fn two_outputs_one_timelock_expired() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SlotCommitmentHash::null().into_slot_commitment_id(100),
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -209,6 +212,7 @@ fn two_outputs_one_timelocked_one_missing() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SlotCommitmentHash::null().into_slot_commitment_id(100),
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -254,6 +258,7 @@ fn one_output_timelock_expired() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SlotCommitmentHash::null().into_slot_commitment_id(100),
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()

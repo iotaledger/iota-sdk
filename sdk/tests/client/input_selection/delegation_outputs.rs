@@ -24,7 +24,7 @@ use iota_sdk::{
 };
 use pretty_assertions::assert_eq;
 
-use crate::client::{ACCOUNT_ID_0, BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX};
+use crate::client::{ACCOUNT_ID_0, BECH32_ADDRESS_ED25519_0, RMC, SLOT_COMMITMENT_ID, SLOT_INDEX};
 
 #[test]
 fn remainder_needed_for_mana() {
@@ -83,6 +83,7 @@ fn remainder_needed_for_mana() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters.clone(),
     )
     .with_burn(Burn::from(delegation_id))

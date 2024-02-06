@@ -17,8 +17,8 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1, SLOT_COMMITMENT_ID,
-    SLOT_INDEX,
+    BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1, RMC,
+    SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -56,6 +56,7 @@ fn input_amount_equal_output_amount() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -100,6 +101,7 @@ fn input_amount_lower_than_output_amount() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -160,6 +162,7 @@ fn input_amount_lower_than_output_amount_2() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -208,6 +211,7 @@ fn input_amount_greater_than_output_amount() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -265,6 +269,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .with_remainder_address(remainder_address)
@@ -334,6 +339,7 @@ fn two_same_inputs_one_needed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -403,6 +409,7 @@ fn two_inputs_one_needed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -459,6 +466,7 @@ fn two_inputs_one_needed_reversed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -515,6 +523,7 @@ fn two_inputs_both_needed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -571,6 +580,7 @@ fn two_inputs_remainder() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -715,6 +725,7 @@ fn ed25519_sender() {
         ],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -767,6 +778,7 @@ fn missing_ed25519_sender() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -853,6 +865,7 @@ fn account_sender() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -914,6 +927,7 @@ fn account_sender_zero_id() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -964,6 +978,7 @@ fn missing_account_sender() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1052,6 +1067,7 @@ fn nft_sender() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1120,6 +1136,7 @@ fn nft_sender_zero_id() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1170,6 +1187,7 @@ fn missing_nft_sender() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1215,6 +1233,7 @@ fn simple_remainder() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1350,6 +1369,7 @@ fn one_provided_one_needed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1394,6 +1414,7 @@ fn insufficient_amount() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1454,6 +1475,7 @@ fn two_inputs_remainder_2() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1522,6 +1544,7 @@ fn two_inputs_remainder_3() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1620,6 +1643,7 @@ fn sender_already_selected() {
         ],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -1668,6 +1692,7 @@ fn single_mandatory_input() {
         ],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -1717,6 +1742,7 @@ fn too_many_inputs() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1782,6 +1808,7 @@ fn more_than_max_inputs_only_one_needed() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -1831,6 +1858,7 @@ fn too_many_outputs() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1882,6 +1910,7 @@ fn too_many_outputs_with_remainder() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select();
@@ -1963,6 +1992,7 @@ fn restricted_ed25519() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -2014,6 +2044,7 @@ fn restricted_nft() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -2063,6 +2094,7 @@ fn restricted_account() {
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
         account_id_1,
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -2155,6 +2187,7 @@ fn restricted_ed25519_sender() {
         ],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()
@@ -2247,6 +2280,7 @@ fn multi_address_sender_already_fulfilled() {
         ],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id(), *inputs[1].output_id(), *inputs[2].output_id()])
@@ -2314,6 +2348,7 @@ fn ed25519_backed_available_address() {
         [restricted_address],
         SLOT_COMMITMENT_ID,
         AccountId::from_str(ACCOUNT_ID_0).unwrap(),
+        RMC,
         protocol_parameters,
     )
     .select()

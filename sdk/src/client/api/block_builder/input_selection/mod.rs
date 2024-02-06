@@ -50,7 +50,7 @@ pub struct InputSelection {
     automatically_transitioned: HashSet<ChainId>,
     issuer_id: AccountId,
     mana_allotments: Vec<ManaAllotment>,
-    block_work_score: u32,
+    reference_mana_cost: u64,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
     protocol_parameters: ProtocolParameters,
@@ -71,8 +71,6 @@ pub struct Selected {
     pub context_inputs: HashSet<ContextInput>,
     /// Mana allotments.
     pub mana_allotments: Vec<ManaAllotment>,
-    /// The projected block work score given the selected data.
-    pub block_work_score: u32,
 }
 
 impl InputSelection {
@@ -84,6 +82,7 @@ impl InputSelection {
         addresses: impl IntoIterator<Item = Address>,
         slot_commitment_id: SlotCommitmentId,
         issuer_id: AccountId,
+        reference_mana_cost: u64,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let available_inputs = available_inputs.into_iter().collect::<Vec<_>>();
@@ -124,7 +123,7 @@ impl InputSelection {
             automatically_transitioned: HashSet::new(),
             issuer_id,
             mana_allotments: Vec::new(),
-            block_work_score: 0,
+            reference_mana_cost,
             mana_rewards: Default::default(),
             payload: None,
         }
@@ -133,8 +132,8 @@ impl InputSelection {
     fn init(&mut self) -> Result<(), Error> {
         // Add initial requirements
         self.requirements.extend([
-            Requirement::Mana,
             Requirement::Allotment,
+            Requirement::Mana,
             Requirement::ContextInputs,
             Requirement::Amount,
             Requirement::NativeTokens,
@@ -246,7 +245,6 @@ impl InputSelection {
             mana_rewards: self.mana_rewards,
             context_inputs: self.context_inputs,
             mana_allotments: self.mana_allotments,
-            block_work_score: self.block_work_score,
         })
     }
 

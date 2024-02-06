@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use super::{Error, InputSelection};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{api::input_selection::Requirement, secret::types::InputSigningData},
     types::block::{
         address::Address,
         input::{Input, UtxoInput},
@@ -48,8 +48,21 @@ impl InputSelection {
 
         let signed_transaction = SignedTransactionPayload::new(transaction, self.transaction_unlocks()?)?;
 
-        self.block_work_score = self.protocol_parameters.work_score(&signed_transaction)
+        let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
             + self.protocol_parameters.work_score_parameters().block();
+        let allotment_mana = block_work_score as u64 * self.reference_mana_cost;
+
+        // Add the required allotment to the issuing allotment
+        if let Some(allotment) = self
+            .mana_allotments
+            .iter_mut()
+            .find(|allotment| allotment.account_id() == &self.issuer_id)
+        {
+            if allotment.mana < allotment_mana {
+                allotment.mana = allotment_mana;
+                self.requirements.extend([Requirement::Allotment, Requirement::Mana]);
+            }
+        }
 
         Ok(Vec::new())
     }

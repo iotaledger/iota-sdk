@@ -34,7 +34,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs,
     Build::{Account, Basic, Nft},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4, RMC,
 };
 
 #[tokio::test]
@@ -214,6 +214,7 @@ async fn all_combined() -> Result<()> {
         [ed25519_0, ed25519_1, ed25519_2],
         slot_commitment_id,
         account_id_1,
+        RMC,
         protocol_parameters.clone(),
     )
     .select()
