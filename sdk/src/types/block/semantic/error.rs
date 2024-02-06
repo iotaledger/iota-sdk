@@ -19,6 +19,7 @@ pub enum TransactionFailureReason {
     InputAlreadySpent = 3,
     InputCreationAfterTxCreation = 4,
     UnlockSignatureInvalid = 5,
+    // TODO syntactic? https://github.com/iotaledger/iota-sdk/issues/1954
     CommitmentInputMissing = 6,
     CommitmentInputReferenceInvalid = 7,
     BicInputReferenceInvalid = 8,
@@ -34,6 +35,7 @@ pub enum TransactionFailureReason {
     NativeTokenSumUnbalanced = 18,
     MultiAddressLengthUnlockLengthMismatch = 19,
     MultiAddressUnlockThresholdNotReached = 20,
+    // TODO remove? https://github.com/iotaledger/iota-sdk/issues/1954
     NestedMultiUnlock = 21,
     SenderFeatureNotUnlocked = 22,
     IssuerFeatureNotUnlocked = 23,
@@ -90,7 +92,6 @@ impl fmt::Display for TransactionFailureReason {
             Self::InputAlreadySpent => write!(f, "input already spent."),
             Self::InputCreationAfterTxCreation => write!(f, "input creation slot after tx creation slot."),
             Self::UnlockSignatureInvalid => write!(f, "signature in unlock is invalid."),
-            // TODO syntactic ?
             Self::CommitmentInputMissing => write!(f, "commitment input required with reward or BIC input."),
             Self::CommitmentInputReferenceInvalid => {
                 write!(f, "commitment input references an invalid or non-existent commitment.")
@@ -125,7 +126,6 @@ impl fmt::Display for TransactionFailureReason {
                 write!(f, "multi address length and multi unlock length do not match.")
             }
             Self::MultiAddressUnlockThresholdNotReached => write!(f, "multi address unlock threshold not reached."),
-            // TODO
             Self::NestedMultiUnlock => write!(f, "multi unlocks can't be nested."),
             Self::SenderFeatureNotUnlocked => write!(f, "sender feature is not unlocked."),
             Self::IssuerFeatureNotUnlocked => write!(f, "issuer feature is not unlocked."),
