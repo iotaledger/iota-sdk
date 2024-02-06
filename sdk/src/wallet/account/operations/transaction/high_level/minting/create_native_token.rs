@@ -92,7 +92,7 @@ where
     /// Creates a new foundry output with minted native tokens.
     ///
     /// Calls [Account::prepare_transaction()](crate::wallet::Account::prepare_transaction) internally, the options may
-    /// define the remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
+    /// define the remainder value strategy or custom inputs.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
     ///     alias_id: None,
