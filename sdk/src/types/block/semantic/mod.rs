@@ -341,21 +341,19 @@ impl<'a> SemanticValidationContext<'a> {
 
         // Validation of state transitions and destructions.
         for (chain_id, current_state) in self.input_chains.iter() {
-            match self.verify_state_transition(
+            if let Err(e) = self.verify_state_transition(
                 Some(*current_state),
                 self.output_chains.get(chain_id).map(|(id, o)| (id, *o)),
             ) {
-                Err(e) => return Ok(Some(e)),
-                _ => {}
+                return Ok(Some(e));
             }
         }
 
         // Validation of state creations.
         for (chain_id, next_state) in self.output_chains.iter() {
             if self.input_chains.get(chain_id).is_none() {
-                match self.verify_state_transition(None, Some((&next_state.0, next_state.1))) {
-                    Err(e) => return Ok(Some(e)),
-                    _ => {}
+                if let Err(e) = self.verify_state_transition(None, Some((&next_state.0, next_state.1))) {
+                    return Ok(Some(e));
                 }
             }
         }
