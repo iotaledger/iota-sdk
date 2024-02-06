@@ -39,15 +39,15 @@ impl SemanticValidationContext<'_> {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Account(account_output)) = self.inputs[unlock.index() as usize] {
                     if &account_output.account_id_non_null(output_id) != account_address.account_id() {
-                        // TODO
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
                         return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                     if !self.unlocked_addresses.contains(address) {
-                        // TODO
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
                         return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                 } else {
-                    // TODO
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1954
                     return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
@@ -55,15 +55,15 @@ impl SemanticValidationContext<'_> {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Nft(nft_output)) = self.inputs[unlock.index() as usize] {
                     if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
-                        // TODO
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
                         return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                     if !self.unlocked_addresses.contains(address) {
-                        // TODO
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
                         return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                 } else {
-                    // TODO
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1954
                     return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
@@ -95,7 +95,7 @@ impl SemanticValidationContext<'_> {
             (Address::Restricted(restricted_address), _) => {
                 return self.address_unlock(restricted_address.address(), unlock);
             }
-            // TODO
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             _ => return Err(TransactionFailureReason::SemanticValidationFailed),
         }
 
@@ -122,10 +122,8 @@ impl SemanticValidationContext<'_> {
                         slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
-                    // TODO
-                    .map_err(|_| TransactionFailureReason::SemanticValidationFailed)?
-                    // because of expiration the input can't be unlocked at this time
-                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+                    .map_err(|_| TransactionFailureReason::ExpirationCommitmentInputMissing)?
+                    .ok_or(TransactionFailureReason::ExpirationNotUnlockable)?;
 
                 self.address_unlock(locked_address, unlock)?;
             }
@@ -158,10 +156,8 @@ impl SemanticValidationContext<'_> {
                         slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
-                    // TODO
-                    .map_err(|_| TransactionFailureReason::SemanticValidationFailed)?
-                    // because of expiration the input can't be unlocked at this time
-                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+                    .map_err(|_| TransactionFailureReason::ExpirationCommitmentInputMissing)?
+                    .ok_or(TransactionFailureReason::ExpirationNotUnlockable)?;
 
                 self.address_unlock(locked_address, unlock)?;
 
