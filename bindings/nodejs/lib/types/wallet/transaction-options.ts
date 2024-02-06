@@ -4,7 +4,7 @@
 import { AccountAddress, AccountId, Bech32Address } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
-import { u256, HexEncodedString, NumericString } from '../utils';
+import { u256, HexEncodedString, NumericString, u64 } from '../utils';
 import { Bip44Address } from './address';
 
 /** Options for creating a transaction. */
@@ -106,7 +106,7 @@ export interface BeginStakingParams {
     /** The account id which will become a validator. */
     accountId: AccountId;
     /** The amount of tokens to stake. */
-    stakedAmount: NumericString;
+    stakedAmount: u64;
     /** The fixed cost of the validator, which it receives as part of its Mana rewards. */
     fixedCost: NumericString;
     /** The staking period (in epochs). Will default to the staking unbonding period. */
