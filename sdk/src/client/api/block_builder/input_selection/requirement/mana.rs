@@ -23,6 +23,12 @@ impl InputSelection {
                     break;
                 }
             }
+            if selected_mana < required_mana {
+                return Err(Error::InsufficientMana {
+                    found: selected_mana,
+                    required: required_mana,
+                });
+            }
 
             Ok(inputs)
         }

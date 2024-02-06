@@ -30,6 +30,14 @@ pub enum Error {
         /// The required amount.
         required: u64,
     },
+    /// Insufficient mana provided.
+    #[error("insufficient mana: found {found}, required {required}")]
+    InsufficientMana {
+        /// The amount found.
+        found: u64,
+        /// The required amount.
+        required: u64,
+    },
     /// Insufficient native token amount provided.
     #[error("insufficient native token amount: found {found}, required {required}")]
     InsufficientNativeTokenAmount {
