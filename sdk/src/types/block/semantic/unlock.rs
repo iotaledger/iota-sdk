@@ -15,7 +15,6 @@ impl SemanticValidationContext<'_> {
         match (address, unlock) {
             (Address::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
                 if self.unlocked_addresses.contains(address) {
-                    // TODO
                     return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
 
@@ -33,7 +32,6 @@ impl SemanticValidationContext<'_> {
             (Address::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !self.unlocked_addresses.contains(address) {
-                    // TODO
                     return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
@@ -69,7 +67,6 @@ impl SemanticValidationContext<'_> {
                     return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
-            // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Address::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
             (Address::ImplicitAccountCreation(implicit_account_creation_address), _) => {
                 return self.address_unlock(
