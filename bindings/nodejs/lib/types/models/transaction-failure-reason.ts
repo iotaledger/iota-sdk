@@ -79,131 +79,131 @@ export enum TransactionFailureReason {
 export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [key in TransactionFailureReason]: string;
 } = {
-    [TransactionFailureReason.None]: 'none.',
-    [TransactionFailureReason.TypeInvalid]: 'transaction type is invalid.',
-    [TransactionFailureReason.Conflicting]: 'transaction is conflicting.',
-    [TransactionFailureReason.InputAlreadySpent]: 'input already spent.',
+    [TransactionFailureReason.None]: 'None.',
+    [TransactionFailureReason.TypeInvalid]: 'Transaction type is invalid.',
+    [TransactionFailureReason.Conflicting]: 'Transaction is conflicting.',
+    [TransactionFailureReason.InputAlreadySpent]: 'Input already spent.',
     [TransactionFailureReason.InputCreationAfterTxCreation]:
-        'input creation slot after tx creation slot.',
+        'Input creation slot after tx creation slot.',
     [TransactionFailureReason.UnlockSignatureInvalid]:
-        'signature in unlock is invalid.',
+        'Signature in unlock is invalid.',
     [TransactionFailureReason.CommitmentInputMissing]:
-        'commitment input required with reward or BIC input.',
+        'Commitment input required with reward or BIC input.',
     [TransactionFailureReason.CommitmentInputReferenceInvalid]:
-        'commitment input references an invalid or non-existent commitment.',
+        'Commitment input references an invalid or non-existent commitment.',
     [TransactionFailureReason.BicInputReferenceInvalid]:
         'BIC input reference cannot be loaded.',
     [TransactionFailureReason.RewardInputReferenceInvalid]:
-        'reward input does not reference a staking account or a delegation output.',
+        'Reward input does not reference a staking account or a delegation output.',
     [TransactionFailureReason.StakingRewardCalculationFailure]:
-        'staking rewards could not be calculated due to storage issues or overflow.',
+        'Staking rewards could not be calculated due to storage issues or overflow.',
     [TransactionFailureReason.DelegationRewardCalculationFailure]:
-        'delegation rewards could not be calculated due to storage issues or overflow.',
+        'Delegation rewards could not be calculated due to storage issues or overflow.',
     [TransactionFailureReason.InputOutputBaseTokenMismatch]:
-        'inputs and outputs do not spend/deposit the same amount of base tokens.',
+        'Inputs and outputs do not spend/deposit the same amount of base tokens.',
     [TransactionFailureReason.ManaOverflow]:
-        'under- or overflow in Mana calculations.',
+        'Under- or overflow in Mana calculations.',
     [TransactionFailureReason.InputOutputManaMismatch]:
-        'inputs and outputs do not contain the same amount of Mana.',
+        'Inputs and outputs do not contain the same amount of Mana.',
     [TransactionFailureReason.ManaDecayCreationIndexExceedsTargetIndex]:
-        'mana decay creation slot/epoch index exceeds target slot/epoch index.',
+        'Mana decay creation slot/epoch index exceeds target slot/epoch index.',
     [TransactionFailureReason.NativeTokenAmountLessThanZero]:
-        'native token amount must be greater than zero.',
+        'Native token amount must be greater than zero.',
     [TransactionFailureReason.NativeTokenSumExceedsUint256]:
-        'native token sum exceeds max value of a uint256.',
+        'Native token sum exceeds max value of a uint256.',
     [TransactionFailureReason.NativeTokenSumUnbalanced]:
-        'native token sums are unbalanced.',
+        'Native token sums are unbalanced.',
     [TransactionFailureReason.MultiAddressLengthUnlockLengthMismatch]:
-        'multi address length and multi unlock length do not match.',
+        'Multi address length and multi unlock length do not match.',
     [TransactionFailureReason.MultiAddressUnlockThresholdNotReached]:
-        'multi address unlock threshold not reached.',
+        'Multi address unlock threshold not reached.',
     [TransactionFailureReason.NestedMultiUnlock]:
-        "multi unlocks can't be nested.",
+        "Multi unlocks can't be nested.",
     [TransactionFailureReason.SenderFeatureNotUnlocked]:
-        'sender feature is not unlocked.',
+        'Sender feature is not unlocked.',
     [TransactionFailureReason.IssuerFeatureNotUnlocked]:
-        'issuer feature is not unlocked.',
+        'Issuer feature is not unlocked.',
     [TransactionFailureReason.StakingRewardInputMissing]:
-        'staking feature removal or resetting requires a reward input.',
+        'Staking feature removal or resetting requires a reward input.',
     [TransactionFailureReason.StakingBlockIssuerFeatureMissing]:
-        'block issuer feature missing for account with staking feature.',
+        'Block issuer feature missing for account with staking feature.',
     [TransactionFailureReason.StakingCommitmentInputMissing]:
-        'staking feature validation requires a commitment input.',
+        'Staking feature validation requires a commitment input.',
     [TransactionFailureReason.StakingRewardClaimingInvalid]:
-        'staking feature must be removed or reset in order to claim rewards.',
+        'Staking feature must be removed or reset in order to claim rewards.',
     [TransactionFailureReason.StakingFeatureRemovedBeforeUnbonding]:
-        'staking feature can only be removed after the unbonding period.',
+        'Staking feature can only be removed after the unbonding period.',
     [TransactionFailureReason.StakingFeatureModifiedBeforeUnbonding]:
-        'staking start epoch, fixed cost and staked amount cannot be modified while bonded.',
+        'Staking start epoch, fixed cost and staked amount cannot be modified while bonded.',
     [TransactionFailureReason.StakingStartEpochInvalid]:
-        'staking start epoch must be the epoch of the transaction.',
+        'Staking start epoch must be the epoch of the transaction.',
     [TransactionFailureReason.StakingEndEpochTooEarly]:
-        'staking end epoch must be set to the transaction epoch plus the unbonding period.',
+        'Staking end epoch must be set to the transaction epoch plus the unbonding period.',
     [TransactionFailureReason.BlockIssuerCommitmentInputMissing]:
-        'commitment input missing for block issuer feature.',
+        'Commitment input missing for block issuer feature.',
     [TransactionFailureReason.BlockIssuanceCreditInputMissing]:
-        'block issuance credit input missing for account with block issuer feature.',
+        'Block issuance credit input missing for account with block issuer feature.',
     [TransactionFailureReason.BlockIssuerNotExpired]:
-        'block issuer feature has not expired.',
+        'Block issuer feature has not expired.',
     [TransactionFailureReason.BlockIssuerExpiryTooEarly]:
-        'block issuer feature expiry set too early.',
+        'Block issuer feature expiry set too early.',
     [TransactionFailureReason.ManaMovedOffBlockIssuerAccount]:
-        'mana cannot be moved off block issuer accounts except with manalocks.',
+        'Mana cannot be moved off block issuer accounts except with manalocks.',
     [TransactionFailureReason.AccountLocked]:
-        'account is locked due to negative block issuance credits.',
+        'Account is locked due to negative block issuance credits.',
     [TransactionFailureReason.TimelockCommitmentInputMissing]:
-        "transaction's containing a timelock condition require a commitment input.",
-    [TransactionFailureReason.TimelockNotExpired]: 'timelock not expired.',
+        "Transaction's containing a timelock condition require a commitment input.",
+    [TransactionFailureReason.TimelockNotExpired]: 'Timelock not expired.',
     [TransactionFailureReason.ExpirationCommitmentInputMissing]:
-        "transaction's containing an expiration condition require a commitment input.",
+        "Transaction's containing an expiration condition require a commitment input.",
     [TransactionFailureReason.ExpirationNotUnlockable]:
-        'expiration unlock condition cannot be unlocked.',
+        'Expiration unlock condition cannot be unlocked.',
     [TransactionFailureReason.ReturnAmountNotFulFilled]:
-        'return amount not fulfilled.',
+        'Return amount not fulfilled.',
     [TransactionFailureReason.NewChainOutputHasNonZeroedId]:
-        'new chain output has non-zeroed ID.',
+        'New chain output has non-zeroed ID.',
     [TransactionFailureReason.ChainOutputImmutableFeaturesChanged]:
-        'immutable features in chain output modified during transition.',
+        'Immutable features in chain output modified during transition.',
     [TransactionFailureReason.ImplicitAccountDestructionDisallowed]:
-        'cannot destroy implicit account; must be transitioned to account.',
+        'Cannot destroy implicit account; must be transitioned to account.',
     [TransactionFailureReason.MultipleImplicitAccountCreationAddresses]:
-        'multiple implicit account creation addresses on the input side.',
+        'Multiple implicit account creation addresses on the input side.',
     [TransactionFailureReason.AccountInvalidFoundryCounter]:
-        'foundry counter in account decreased or did not increase by the number of new foundries.',
+        'Foundry counter in account decreased or did not increase by the number of new foundries.',
     [TransactionFailureReason.FoundryTransitionWithoutAccount]:
-        'foundry output transitioned without accompanying account on input or output side.',
+        'Foundry output transitioned without accompanying account on input or output side.',
     [TransactionFailureReason.FoundrySerialInvalid]:
-        'foundry output serial number is invalid.',
+        'Foundry output serial number is invalid.',
     [TransactionFailureReason.DelegationCommitmentInputMissing]:
-        'delegation output validation requires a commitment input.',
+        'Delegation output validation requires a commitment input.',
     [TransactionFailureReason.DelegationRewardInputMissing]:
-        'delegation output cannot be destroyed without a reward input.',
+        'Delegation output cannot be destroyed without a reward input.',
     [TransactionFailureReason.DelegationRewardsClaimingInvalid]:
-        'invalid delegation mana rewards claiming.',
+        'Invalid delegation mana rewards claiming.',
     [TransactionFailureReason.DelegationOutputTransitionedTwice]:
-        'delegation output attempted to be transitioned twice.',
+        'Delegation output attempted to be transitioned twice.',
     [TransactionFailureReason.DelegationModified]:
-        'delegated amount, validator ID and start epoch cannot be modified.',
+        'Delegated amount, validator ID and start epoch cannot be modified.',
     [TransactionFailureReason.DelegationStartEpochInvalid]:
-        'invalid start epoch.',
+        'Invalid start epoch.',
     [TransactionFailureReason.DelegationAmountMismatch]:
-        'delegated amount does not match amount.',
+        'Delegated amount does not match amount.',
     [TransactionFailureReason.DelegationEndEpochNotZero]:
-        'end epoch must be set to zero at output genesis.',
+        'End epoch must be set to zero at output genesis.',
     [TransactionFailureReason.DelegationEndEpochInvalid]:
-        'delegation end epoch does not match current epoch.',
+        'Delegation end epoch does not match current epoch.',
     [TransactionFailureReason.CapabilitiesNativeTokenBurningNotAllowed]:
-        'native token burning is not allowed by the transaction capabilities.',
+        'Native token burning is not allowed by the transaction capabilities.',
     [TransactionFailureReason.CapabilitiesManaBurningNotAllowed]:
-        'mana burning is not allowed by the transaction capabilities.',
+        'Mana burning is not allowed by the transaction capabilities.',
     [TransactionFailureReason.CapabilitiesAccountDestructionNotAllowed]:
-        'account destruction is not allowed by the transaction capabilities.',
+        'Account destruction is not allowed by the transaction capabilities.',
     [TransactionFailureReason.CapabilitiesAnchorDestructionNotAllowed]:
-        'anchor destruction is not allowed by the transaction capabilities.',
+        'Anchor destruction is not allowed by the transaction capabilities.',
     [TransactionFailureReason.CapabilitiesFoundryDestructionNotAllowed]:
-        'foundry destruction is not allowed by the transaction capabilities.',
+        'Foundry destruction is not allowed by the transaction capabilities.',
     [TransactionFailureReason.CapabilitiesNftDestructionNotAllowed]:
         'NFT destruction is not allowed by the transaction capabilities.',
     [TransactionFailureReason.SemanticValidationFailed]:
-        'semantic validation failed.',
+        'Semantic validation failed.',
 };
