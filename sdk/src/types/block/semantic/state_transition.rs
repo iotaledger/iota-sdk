@@ -118,7 +118,7 @@ impl BasicOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if next_state.account_id().is_null() {
-            // TODO SemanticValidationFailed
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
@@ -128,7 +128,7 @@ impl BasicOutput {
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
         } else {
-            // TODO
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
@@ -268,12 +268,10 @@ impl StateTransitionVerifier for FoundryOutput {
 
         // No native tokens should be referenced prior to the foundry creation.
         if context.input_native_tokens.contains_key(&token_id) {
-            // TODO
             return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
         if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
-            // TODO
             return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
@@ -314,7 +312,6 @@ impl StateTransitionVerifier for FoundryOutput {
 
         // No native tokens should be referenced after the foundry destruction.
         if context.output_native_tokens.contains_key(&token_id) {
-            // TODO
             return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
@@ -322,7 +319,6 @@ impl StateTransitionVerifier for FoundryOutput {
         let minted_melted_diff = current_token_scheme.minted_tokens() - current_token_scheme.melted_tokens();
 
         if minted_melted_diff != input_tokens {
-            // TODO
             return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
         }
 
@@ -400,7 +396,6 @@ impl StateTransitionVerifier for DelegationOutput {
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
-            // TODO: specific tx failure reason https://github.com/iotaledger/iota-core/issues/679
             return Err(TransactionFailureReason::DelegationStartEpochInvalid);
         }
 
@@ -435,8 +430,7 @@ impl StateTransitionVerifier for DelegationOutput {
         _current_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        // If a mana reward was provided but no reward context input exists
-        if context.mana_rewards.get(output_id).is_some() && !context.reward_context_inputs.contains_key(output_id) {
+        if !context.mana_rewards.contains_key(output_id) || !context.reward_context_inputs.contains_key(output_id) {
             return Err(TransactionFailureReason::DelegationRewardInputMissing);
         }
 
