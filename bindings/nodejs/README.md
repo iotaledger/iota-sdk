@@ -8,7 +8,6 @@
     - [Windows](#windows)
   - [Getting Started](#getting-started)
     - [Installation Using a Package Manager](#installation-using-a-package-manager)
-      - [Yarn](#yarn)
     - [Install the Binding from Source](#install-the-binding-from-source)
       - [Build nodejs bindings](#build-nodejs-bindings)
   - [Client Usage](#client-usage)
@@ -188,7 +187,7 @@ This is mainly just used to create the API docs in the [Wiki](https://github.com
 
 - `package.json`
 
-  The npm [manifest file](https://docs.npmjs.com/cli/v7/configuring-npm/package-json), which informs the `npm` command.
+  The npm [manifest file](https://docs.npmjs.com/cli/v7/configuring-npm/package-json), which informs the `yarn` command.
 
 - `src/`
 
