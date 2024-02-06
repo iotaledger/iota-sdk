@@ -411,6 +411,7 @@ impl NftOutput {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
+
         Ok(())
     }
 }
