@@ -91,8 +91,8 @@ where
 {
     /// Creates a new foundry output with minted native tokens.
     ///
-    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally, the options may define the
-    /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
+    /// Calls [Account::prepare_transaction()](crate::wallet::Account::prepare_transaction) internally, the options may
+    /// define the remainder value strategy or custom inputs.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
     ///     alias_id: None,
@@ -101,7 +101,7 @@ where
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account.create_native_token(params, None,).await?;
+    /// let tx = account.create_native_token(params, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

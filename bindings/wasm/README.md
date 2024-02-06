@@ -19,7 +19,7 @@ environments.**
 | Rocksdb      |         ❌        |          ✔️            |
 | Stronghold   |         ❌        |          ✔️            |
 
-* The Node.js bindings only need to be compiled during `npm install` if a pre-compiled binary is not available for your
+* The Node.js bindings only need to be compiled during `yarn install` if a pre-compiled binary is not available for your
   platform.
 
 ## Requirements
@@ -31,15 +31,7 @@ environments.**
 
 ### Installing Using a Package Manager
 
-To install the library from your package manager of choice, you only need to run the following:
-
-#### npm
-
-```bash
-npm i @iota/sdk-wasm
-```
-
-#### yarn
+To install the library with yarn, you only need to run the following:
 
 ```bash
 yarn add @iota/sdk-wasm
@@ -57,7 +49,7 @@ A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupj
 1. Install `rollup-plugin-copy`:
 
     ```bash
-    npm install rollup-plugin-copy --save-dev
+    yarn add rollup-plugin-copy --save-dev
     ```
 
 2. Add the plugin to your `rollup.config.js`:
@@ -83,7 +75,7 @@ A bundler such as [webpack](https://webpack.js.org/) or [rollup](https://rollupj
 1. Install `copy-webpack-plugin`:
 
     ```bash
-    npm install copy-webpack-plugin --save-dev
+    yarn add copy-webpack-plugin --save-dev
     ```
 
 2. Add the plugin to your `webpack.config.js`:

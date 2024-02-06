@@ -46,13 +46,13 @@ jobs:
         shell: sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: yarn publish --access public
 
       - name: Prepare Github release
         id: prepare_release
         run: |
           yarn pack
-          echo "tag_name=iota-sdk-wasm-v$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_OUTPUT"
+          echo "tag_name=iota-sdk-wasm-v$(cat package.json | jq -r '.version')" >> "$GITHUB_OUTPUT"
 
       - name: Upload package to Github release
         uses: softprops/action-gh-release@v1
