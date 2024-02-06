@@ -126,15 +126,19 @@ impl ContextInputs {
             .map(ContextInput::as_commitment)
     }
 
-    // /// Gets a reference to a [`BlockIssuerFeature`], if any.
-    // pub fn block_issuance_credit(&self) -> Option<&BlockIssuerFeature> {
-    //     self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
-    // }
+    /// Returns an iterator over [`BlockIssuanceCreditContextInput`], if any.
+    pub fn block_issuance_credits(&self) -> impl Iterator<Item = &BlockIssuanceCreditContextInput> {
+        self.iter()
+            .filter(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
+            .map(|c| c.as_block_issuance_credit())
+    }
 
-    // /// Gets a reference to a [`StakingFeature`], if any.
-    // pub fn reward(&self) -> Option<&StakingFeature> {
-    //     self.get(StakingFeature::KIND).map(Feature::as_staking)
-    // }
+    /// Returns an iterator over [`RewardContextInput`], if any.
+    pub fn rewards(&self) -> impl Iterator<Item = &RewardContextInput> {
+        self.iter()
+            .filter(|c| c.kind() == RewardContextInput::KIND)
+            .map(|c| c.as_reward())
+    }
 }
 
 fn verify_context_inputs_packable<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
