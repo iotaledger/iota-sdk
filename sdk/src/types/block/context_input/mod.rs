@@ -95,14 +95,14 @@ impl TryFrom<Vec<ContextInput>> for ContextInputs {
     }
 }
 
-// impl IntoIterator for Features {
-//     type Item = Feature;
-//     type IntoIter = alloc::vec::IntoIter<Self::Item>;
+impl IntoIterator for ContextInputs {
+    type Item = ContextInput;
+    type IntoIter = alloc::vec::IntoIter<Self::Item>;
 
-//     fn into_iter(self) -> Self::IntoIter {
-//         Vec::from(Into::<Box<[Feature]>>::into(self.0)).into_iter()
-//     }
-// }
+    fn into_iter(self) -> Self::IntoIter {
+        Vec::from(Into::<Box<[ContextInput]>>::into(self.0)).into_iter()
+    }
+}
 
 impl ContextInputs {
     /// Creates a new [`ContextInputs`] from a vec.
@@ -118,83 +118,21 @@ impl ContextInputs {
         Ok(Self(context_inputs))
     }
 
-    //     /// Gets a reference to a [`Feature`] from a feature kind, if any.
-    //     #[inline(always)]
-    //     pub fn get(&self, key: u8) -> Option<&Feature> {
-    //         self.0
-    //             .binary_search_by_key(&key, Feature::kind)
-    //             // PANIC: indexation is fine since the index has been found.
-    //             .map(|index| &self.0[index])
-    //             .ok()
-    //     }
+    /// Gets a reference to a [`CommitmentContextInput`], if any.
+    pub fn commitment(&self) -> Option<&CommitmentContextInput> {
+        self.get(CommitmentContextInput::KIND as usize)
+            .map(ContextInput::as_commitment)
+    }
 
-    //     /// Gets a reference to a [`SenderFeature`], if any.
-    //     pub fn sender(&self) -> Option<&SenderFeature> {
-    //         self.get(SenderFeature::KIND).map(Feature::as_sender)
-    //     }
-
-    //     /// Gets a reference to a [`IssuerFeature`], if any.
-    //     pub fn issuer(&self) -> Option<&IssuerFeature> {
-    //         self.get(IssuerFeature::KIND).map(Feature::as_issuer)
-    //     }
-
-    //     /// Gets a reference to a [`MetadataFeature`], if any.
-    //     pub fn metadata(&self) -> Option<&MetadataFeature> {
-    //         self.get(MetadataFeature::KIND).map(Feature::as_metadata)
-    //     }
-
-    //     /// Gets a reference to a [`StateMetadataFeature`], if any.
-    //     pub fn state_metadata(&self) -> Option<&StateMetadataFeature> {
-    //         self.get(StateMetadataFeature::KIND).map(Feature::as_state_metadata)
-    //     }
-
-    //     /// Gets a reference to a [`TagFeature`], if any.
-    //     pub fn tag(&self) -> Option<&TagFeature> {
-    //         self.get(TagFeature::KIND).map(Feature::as_tag)
-    //     }
-
-    //     /// Gets a reference to a [`NativeTokenFeature`], if any.
-    //     pub fn native_token(&self) -> Option<&NativeTokenFeature> {
-    //         self.get(NativeTokenFeature::KIND).map(Feature::as_native_token)
-    //     }
-
-    //     /// Gets a reference to a [`BlockIssuerFeature`], if any.
-    //     pub fn block_issuer(&self) -> Option<&BlockIssuerFeature> {
-    //         self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
-    //     }
-
-    //     /// Gets a reference to a [`StakingFeature`], if any.
-    //     pub fn staking(&self) -> Option<&StakingFeature> {
-    //         self.get(StakingFeature::KIND).map(Feature::as_staking)
-    //     }
+    // /// Gets a reference to a [`BlockIssuerFeature`], if any.
+    // pub fn block_issuance_credit(&self) -> Option<&BlockIssuerFeature> {
+    //     self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
     // }
 
-    // impl StorageScore for Features {
-    //     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-    //         self.iter().map(|f| f.storage_score(params)).sum::<u64>()
-    //     }
+    // /// Gets a reference to a [`StakingFeature`], if any.
+    // pub fn reward(&self) -> Option<&StakingFeature> {
+    //     self.get(StakingFeature::KIND).map(Feature::as_staking)
     // }
-
-    // #[inline]
-    // fn verify_unique_sorted<const VERIFY: bool>(features: &[Feature]) -> Result<(), Error> {
-    //     if VERIFY && !is_unique_sorted(features.iter().map(Feature::kind)) {
-    //         Err(Error::FeaturesNotUniqueSorted)
-    //     } else {
-    //         Ok(())
-    //     }
-    // }
-
-    // pub(crate) fn verify_allowed_features(features: &Features, allowed_features: FeatureFlags) -> Result<(), Error> {
-    //     for (index, feature) in features.iter().enumerate() {
-    //         if !allowed_features.contains(feature.flag()) {
-    //             return Err(Error::UnallowedFeature {
-    //                 index,
-    //                 kind: feature.kind(),
-    //             });
-    //         }
-    //     }
-
-    //     Ok(())
 }
 
 fn verify_context_inputs_packable<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
