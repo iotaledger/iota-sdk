@@ -437,8 +437,7 @@ impl AccountOutput {
             created_foundries_count += 1;
 
             if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                // TODO
-                return Err(TransactionFailureReason::SemanticValidationFailed);
+                return Err(TransactionFailureReason::FoundrySerialInvalid);
             }
         }
 
