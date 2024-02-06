@@ -620,12 +620,15 @@ class Wallet():
         ))
         return PreparedCreateDelegationTransaction(self, prepared)
 
-    def delay_delegation_claiming(self, delegation_id: HexStr, reclaim_excess: bool) -> TransactionWithMetadata:
+    def delay_delegation_claiming(
+            self, delegation_id: HexStr, reclaim_excess: bool) -> TransactionWithMetadata:
         """Delay a delegation's claiming.
         """
-        return self.prepare_delay_delegation_claiming(delegation_id, reclaim_excess).send()
+        return self.prepare_delay_delegation_claiming(
+            delegation_id, reclaim_excess).send()
 
-    def prepare_delay_delegation_claiming(self, delegation_id: HexStr, reclaim_excess: bool) -> PreparedTransaction:
+    def prepare_delay_delegation_claiming(
+            self, delegation_id: HexStr, reclaim_excess: bool) -> PreparedTransaction:
         """Prepare to delay a delegation's claiming.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(

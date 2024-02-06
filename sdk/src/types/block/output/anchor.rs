@@ -22,7 +22,7 @@ use crate::types::block::{
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
+    semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
 };
@@ -457,9 +457,9 @@ impl AnchorOutput {
         next_state: &Self,
         _input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
         _outputs: &[Output],
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if current_state.immutable_features != next_state.immutable_features {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
         if next_state.state_index == current_state.state_index + 1 {
@@ -468,7 +468,8 @@ impl AnchorOutput {
                 || current_state.governor_address() != next_state.governor_address()
                 || current_state.features.metadata() != next_state.features.metadata()
             {
-                return Err(StateTransitionError::MutatedFieldWithoutRights);
+                // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                return Err(TransactionFailureReason::SemanticValidationFailed);
             }
         } else if next_state.state_index == current_state.state_index {
             // Governance transition.
@@ -476,13 +477,12 @@ impl AnchorOutput {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1650
             // || current_state.state_metadata != next_state.state_metadata
             {
-                return Err(StateTransitionError::MutatedFieldWithoutRights);
+                // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                return Err(TransactionFailureReason::SemanticValidationFailed);
             }
         } else {
-            return Err(StateTransitionError::UnsupportedStateIndexOperation {
-                current_state: current_state.state_index,
-                next_state: next_state.state_index,
-            });
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+            return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
         Ok(())
