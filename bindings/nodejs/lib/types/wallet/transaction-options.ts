@@ -103,8 +103,8 @@ export interface CreateDelegationParams {
 
 /** Options for beginning staking. */
 export interface BeginStakingParams {
-    /** The account id which will become a validator. Will default to the first account in the wallet. */
-    accountId?: Bech32Address;
+    /** The account id which will become a validator. */
+    accountId: Bech32Address;
     /** The amount of tokens to stake. */
     stakedAmount: NumericString;
     /** The fixed cost of the validator, which it receives as part of its Mana rewards. */

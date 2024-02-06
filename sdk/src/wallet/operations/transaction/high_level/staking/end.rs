@@ -26,8 +26,10 @@ where
         log::debug!("[TRANSACTION] prepare_end_staking");
 
         let (account_id, account_output_data) = self
-            .get_account_output(account_id)
+            .data()
             .await
+            .unspent_account_output(&account_id)
+            .map(|data| (account_id.or_from_output_id(&data.output_id), data.clone()))
             .ok_or_else(|| crate::wallet::Error::AccountNotFound)?;
 
         let staking_feature = account_output_data

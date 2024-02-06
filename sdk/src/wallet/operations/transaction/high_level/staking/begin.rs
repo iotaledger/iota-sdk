@@ -13,8 +13,8 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BeginStakingParams {
-    /// The account id which will become a validator. Will default to the first account in the wallet.
-    pub account_id: Option<AccountId>,
+    /// The account id which will become a validator.
+    pub account_id: AccountId,
     /// The amount of tokens to stake.
     pub staked_amount: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
@@ -48,8 +48,10 @@ where
         log::debug!("[TRANSACTION] prepare_begin_staking");
 
         let (account_id, account_output_data) = self
-            .get_account_output(params.account_id)
+            .data()
             .await
+            .unspent_account_output(&params.account_id)
+            .map(|data| (params.account_id.or_from_output_id(&data.output_id), data.clone()))
             .ok_or_else(|| crate::wallet::Error::AccountNotFound)?;
 
         if account_output_data
