@@ -107,7 +107,7 @@ export interface SyncOptions {
     /// Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
     /// pruned.
     syncIncomingTransactions?: boolean;
-    /** Checks pending transactions and reissues them if necessary. Default: true. */
+    /** Checks pending transactions. Default: true. */
     syncPendingTransactions?: boolean;
     /** Specifies what outputs should be synced for the ed25519 address from the wallet. */
     wallet?: WalletSyncOptions;
