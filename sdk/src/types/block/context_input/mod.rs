@@ -120,7 +120,9 @@ impl ContextInputs {
 
     /// Gets a reference to a [`CommitmentContextInput`], if any.
     pub fn commitment(&self) -> Option<&CommitmentContextInput> {
-        self.get(CommitmentContextInput::KIND as usize)
+        self.0
+            .iter()
+            .find(|c| c.kind() == CommitmentContextInput::KIND)
             .map(ContextInput::as_commitment)
     }
 

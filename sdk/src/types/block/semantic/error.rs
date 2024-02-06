@@ -236,6 +236,6 @@ impl TryFrom<u8> for TransactionFailureReason {
     type Error = Error;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
-        TransactionFailureReason::from_repr(c).ok_or(Self::Error::InvalidTransactionFailureReason(c))
+        Self::from_repr(c).ok_or(Self::Error::InvalidTransactionFailureReason(c))
     }
 }
