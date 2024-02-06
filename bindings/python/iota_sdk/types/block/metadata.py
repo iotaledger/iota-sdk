@@ -115,7 +115,7 @@ class BlockFailureReason(IntEnum):
 
 
 class TransactionFailureReason(Enum):
-    """Represents the possible reasons for a conflicting transaction.
+    """Represents the possible reasons for a failing transaction.
     """
     Null = 0,
     TypeInvalid = 1,
