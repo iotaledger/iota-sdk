@@ -246,7 +246,7 @@ impl Transaction {
     }
 
     /// Returns the context inputs of a [`Transaction`].
-    pub fn context_inputs(&self) -> &[ContextInput] {
+    pub fn context_inputs(&self) -> &ContextInputs {
         &self.context_inputs
     }
 

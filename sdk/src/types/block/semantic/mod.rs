@@ -108,12 +108,7 @@ impl<'a> SemanticValidationContext<'a> {
         // Validation of inputs.
         let mut has_implicit_account_creation_address = false;
 
-        self.commitment_context_input = self
-            .transaction
-            .context_inputs()
-            .iter()
-            .find_map(|c| c.as_commitment_opt())
-            .copied();
+        self.commitment_context_input = self.transaction.context_inputs().commitment().copied();
 
         self.bic_context_input = self
             .transaction
@@ -122,12 +117,7 @@ impl<'a> SemanticValidationContext<'a> {
             .find_map(|c| c.as_block_issuance_credit_opt())
             .copied();
 
-        for reward_context_input in self
-            .transaction
-            .context_inputs()
-            .iter()
-            .filter_map(|c| c.as_reward_opt())
-        {
+        for reward_context_input in self.transaction.context_inputs().rewards() {
             if let Some(output_id) = self.inputs.get(reward_context_input.index() as usize).map(|v| v.0) {
                 self.reward_context_inputs.insert(*output_id, *reward_context_input);
             } else {
