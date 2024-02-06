@@ -413,7 +413,7 @@ impl FoundryOutput {
             || current_state.serial_number != next_state.serial_number
             || current_state.immutable_features != next_state.immutable_features
         {
-            // TODO not all features?
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
@@ -424,14 +424,14 @@ impl FoundryOutput {
         let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
 
         if current_token_scheme.maximum_supply() != next_token_scheme.maximum_supply() {
-            // TODO not all features?
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
         if current_token_scheme.minted_tokens() > next_token_scheme.minted_tokens()
             || current_token_scheme.melted_tokens() > next_token_scheme.melted_tokens()
         {
-            // TODO?
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             return Err(TransactionFailureReason::SemanticValidationFailed);
         }
 
