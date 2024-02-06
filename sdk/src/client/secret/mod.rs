@@ -556,8 +556,8 @@ where
     let slot_index = prepared_transaction_data
         .transaction
         .context_inputs()
-        .iter()
-        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+        .commitment()
+        .map(|c| c.slot_index());
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
