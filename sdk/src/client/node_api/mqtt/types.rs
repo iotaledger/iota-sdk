@@ -177,14 +177,14 @@ impl Topic {
                 r"^blocks/basic/transaction/tagged-data$",
                 r"^blocks/basic/transaction/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
                 // Transaction topics.
-                r"^transactions/0x([a-f0-9]{64})(\d{8})/included-block$",
-                r"^transaction-metadata/0x([a-f0-9]{64})(\d{8})$",
+                r"^transactions/0x([a-f0-9]{72})/included-block$",
+                r"^transaction-metadata/0x([a-f0-9]{72})$",
                 // Block metadata topics.
-                r"^block-metadata/0x([a-f0-9]{64})(\d{8})$",
+                r"^block-metadata/0x([a-f0-9]{72})$",
                 r"^block-metadata/accepted$",
                 r"^block-metadata/confirmed$",
                 // Output topics.
-                r"^outputs/0x([a-f0-9]{64})(\d{12})$",
+                r"^outputs/0x([a-f0-9]{76})$",
                 r"^outputs/account/0x([a-f0-9]{64})$",
                 r"^outputs/anchor/0x([a-f0-9]{64})$",
                 r"^outputs/foundry/0x([a-f0-9]{76})$",
