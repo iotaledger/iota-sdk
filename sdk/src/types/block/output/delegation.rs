@@ -333,8 +333,7 @@ impl DelegationOutput {
 
     // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), TransactionFailureReason> {
-        #[allow(clippy::nonminimal_bool)]
-        if !(current_state.delegation_id.is_null() && !next_state.delegation_id.is_null()) {
+        if !current_state.delegation_id.is_null() || next_state.delegation_id.is_null() {
             return Err(TransactionFailureReason::DelegationOutputTransitionedTwice);
         }
 
@@ -342,7 +341,7 @@ impl DelegationOutput {
             || current_state.start_epoch != next_state.start_epoch
             || current_state.validator_address != next_state.validator_address
         {
-            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
+            return Err(TransactionFailureReason::DelegationModified);
         }
 
         Ok(())
