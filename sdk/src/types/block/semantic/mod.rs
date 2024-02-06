@@ -167,19 +167,22 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(expiration) = unlock_conditions.expiration() {
                 if let Some(commitment_slot_index) = commitment_slot_index {
-                    if expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age_range())
-                        == Some(false)
+                    match expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age_range())
                     {
-                        if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
-                            let amount = self
-                                .storage_deposit_returns
-                                .entry(storage_deposit_return.return_address().clone())
-                                .or_default();
+                        Some(false) => {
+                            if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
+                                let amount = self
+                                    .storage_deposit_returns
+                                    .entry(storage_deposit_return.return_address().clone())
+                                    .or_default();
 
-                            *amount = amount
-                                .checked_add(storage_deposit_return.amount())
-                                .ok_or(Error::StorageDepositReturnOverflow)?;
+                                *amount = amount
+                                    .checked_add(storage_deposit_return.amount())
+                                    .ok_or(Error::StorageDepositReturnOverflow)?;
+                            }
                         }
+                        None => return Ok(Some(TransactionFailureReason::ExpirationNotUnlockable)),
+                        _ => {}
                     }
                 } else {
                     return Ok(Some(TransactionFailureReason::ExpirationCommitmentInputMissing));
@@ -219,7 +222,6 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(unlocks) = self.unlocks {
                 if unlocks.len() != self.inputs.len() {
-                    // TODO
                     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
@@ -335,7 +337,7 @@ impl<'a> SemanticValidationContext<'a> {
         }
 
         if native_token_ids.len() > NativeTokens::COUNT_MAX as usize {
-            // TODO
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
         }
 
