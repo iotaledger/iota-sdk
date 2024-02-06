@@ -69,10 +69,12 @@ where
 
         for output_id in output_ids {
             match wallet_data.outputs.get_mut(&output_id) {
-                // set unspent
+                // set unspent if not already
                 Some(output_data) => {
-                    log::warn!("Removing spent output metadata for {output_id}, because it's still unspent");
-                    output_data.metadata.spent = None;
+                    if output_data.is_spent() {
+                        log::warn!("Removing spent output metadata for {output_id}, because it's still unspent");
+                        output_data.metadata.spent = None;
+                    }
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),

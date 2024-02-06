@@ -71,7 +71,7 @@ class SyncOptions():
         Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained
         if it has been pruned.
     sync_pending_transactions :
-        Checks pending transactions and reissues them if necessary.
+        Checks pending transactions.
     account :
         Specifies what outputs should be synced for the address of an account output.
     wallet :
