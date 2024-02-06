@@ -33,8 +33,6 @@ environments.**
 
 To install the library with yarn, you only need to run the following:
 
-#### yarn
-
 ```bash
 yarn add @iota/sdk-wasm
 ```

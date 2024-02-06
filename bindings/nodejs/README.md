@@ -45,8 +45,6 @@ an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
 To install the library with yarn, you only need to run the following:
 
-#### Yarn:
-
 ```sh
 yarn add @iota/sdk
 ```

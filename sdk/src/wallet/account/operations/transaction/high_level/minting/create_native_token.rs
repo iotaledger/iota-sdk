@@ -101,7 +101,7 @@ where
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account.create_native_token(params, None,).await?;
+    /// let tx = account.create_native_token(params, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
