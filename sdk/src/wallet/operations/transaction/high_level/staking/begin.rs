@@ -47,11 +47,12 @@ where
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_begin_staking");
 
-        let (account_id, account_output_data) = self
+        let account_id = params.account_id;
+        let account_output_data = self
             .data()
             .await
-            .unspent_account_output(&params.account_id)
-            .map(|data| (params.account_id.or_from_output_id(&data.output_id), data.clone()))
+            .unspent_account_output(&account_id)
+            .cloned()
             .ok_or_else(|| crate::wallet::Error::AccountNotFound)?;
 
         if account_output_data
