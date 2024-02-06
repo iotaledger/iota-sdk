@@ -50,17 +50,23 @@ impl InputSelection {
 
         let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
             + self.protocol_parameters.work_score_parameters().block();
-        let allotment_mana = block_work_score as u64 * self.reference_mana_cost;
+        let required_allotment_mana = block_work_score as u64 * self.reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
-        if let Some(allotment) = self
+        // Unwrap: safe because we set it above
+        let allotment = self
             .mana_allotments
             .iter_mut()
             .find(|allotment| allotment.account_id() == &self.issuer_id)
-        {
-            if allotment.mana < allotment_mana {
-                allotment.mana = allotment_mana;
-                self.requirements.extend([Requirement::Allotment, Requirement::Mana]);
+            .unwrap();
+        if allotment.mana < required_allotment_mana {
+            allotment.mana = required_allotment_mana;
+            let additional_inputs = self.fulfill_mana_requirement()?;
+            // If we needed more inputs to cover the additional allotment mana
+            // then re-add this requirement so we try again
+            if !additional_inputs.is_empty() {
+                self.requirements.push(Requirement::Allotment);
+                return Ok(additional_inputs);
             }
         }
 
