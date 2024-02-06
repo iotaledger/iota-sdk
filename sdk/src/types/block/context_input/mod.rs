@@ -120,24 +120,17 @@ impl ContextInputs {
 
     /// Gets a reference to a [`CommitmentContextInput`], if any.
     pub fn commitment(&self) -> Option<&CommitmentContextInput> {
-        self.0
-            .iter()
-            .find(|c| c.kind() == CommitmentContextInput::KIND)
-            .map(ContextInput::as_commitment)
+        self.0.iter().find_map(|c| c.as_commitment_opt())
     }
 
     /// Returns an iterator over [`BlockIssuanceCreditContextInput`], if any.
     pub fn block_issuance_credits(&self) -> impl Iterator<Item = &BlockIssuanceCreditContextInput> {
-        self.iter()
-            .filter(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
-            .map(|c| c.as_block_issuance_credit())
+        self.iter().filter_map(|c| c.as_block_issuance_credit_opt())
     }
 
     /// Returns an iterator over [`RewardContextInput`], if any.
     pub fn rewards(&self) -> impl Iterator<Item = &RewardContextInput> {
-        self.iter()
-            .filter(|c| c.kind() == RewardContextInput::KIND)
-            .map(|c| c.as_reward())
+        self.iter().filter_map(|c| c.as_reward_opt())
     }
 }
 
