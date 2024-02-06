@@ -7,7 +7,7 @@ use crate::types::block::Error;
 
 /// Describes the reason of a transaction failure.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable, strum::FromRepr)]
 #[cfg_attr(feature = "serde", derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTransactionFailureReason)]
@@ -236,74 +236,6 @@ impl TryFrom<u8> for TransactionFailureReason {
     type Error = Error;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
-        Ok(match c {
-            0 => Self::None,
-            1 => Self::TypeInvalid,
-            2 => Self::Conflicting,
-            3 => Self::InputAlreadySpent,
-            4 => Self::InputCreationAfterTxCreation,
-            5 => Self::UnlockSignatureInvalid,
-            6 => Self::CommitmentInputMissing,
-            7 => Self::CommitmentInputReferenceInvalid,
-            8 => Self::BicInputReferenceInvalid,
-            9 => Self::RewardInputReferenceInvalid,
-            10 => Self::StakingRewardCalculationFailure,
-            11 => Self::DelegationRewardCalculationFailure,
-            12 => Self::InputOutputBaseTokenMismatch,
-            13 => Self::ManaOverflow,
-            14 => Self::InputOutputManaMismatch,
-            15 => Self::ManaDecayCreationIndexExceedsTargetIndex,
-            16 => Self::NativeTokenAmountLessThanZero,
-            17 => Self::NativeTokenSumExceedsUint256,
-            18 => Self::NativeTokenSumUnbalanced,
-            19 => Self::MultiAddressLengthUnlockLengthMismatch,
-            20 => Self::MultiAddressUnlockThresholdNotReached,
-            21 => Self::NestedMultiUnlock,
-            22 => Self::SenderFeatureNotUnlocked,
-            23 => Self::IssuerFeatureNotUnlocked,
-            24 => Self::StakingRewardInputMissing,
-            25 => Self::StakingBlockIssuerFeatureMissing,
-            26 => Self::StakingCommitmentInputMissing,
-            27 => Self::StakingRewardClaimingInvalid,
-            28 => Self::StakingFeatureRemovedBeforeUnbonding,
-            29 => Self::StakingFeatureModifiedBeforeUnbonding,
-            30 => Self::StakingStartEpochInvalid,
-            31 => Self::StakingEndEpochTooEarly,
-            32 => Self::BlockIssuerCommitmentInputMissing,
-            33 => Self::BlockIssuanceCreditInputMissing,
-            34 => Self::BlockIssuerNotExpired,
-            35 => Self::BlockIssuerExpiryTooEarly,
-            36 => Self::ManaMovedOffBlockIssuerAccount,
-            37 => Self::AccountLocked,
-            38 => Self::TimelockCommitmentInputMissing,
-            39 => Self::TimelockNotExpired,
-            40 => Self::ExpirationCommitmentInputMissing,
-            41 => Self::ExpirationNotUnlockable,
-            42 => Self::ReturnAmountNotFulFilled,
-            43 => Self::NewChainOutputHasNonZeroedId,
-            44 => Self::ChainOutputImmutableFeaturesChanged,
-            45 => Self::ImplicitAccountDestructionDisallowed,
-            46 => Self::MultipleImplicitAccountCreationAddresses,
-            47 => Self::AccountInvalidFoundryCounter,
-            48 => Self::FoundryTransitionWithoutAccount,
-            49 => Self::FoundrySerialInvalid,
-            50 => Self::DelegationCommitmentInputMissing,
-            51 => Self::DelegationRewardInputMissing,
-            52 => Self::DelegationRewardsClaimingInvalid,
-            53 => Self::DelegationOutputTransitionedTwice,
-            54 => Self::DelegationModified,
-            55 => Self::DelegationStartEpochInvalid,
-            56 => Self::DelegationAmountMismatch,
-            57 => Self::DelegationEndEpochNotZero,
-            58 => Self::DelegationEndEpochInvalid,
-            59 => Self::CapabilitiesNativeTokenBurningNotAllowed,
-            60 => Self::CapabilitiesManaBurningNotAllowed,
-            61 => Self::CapabilitiesAccountDestructionNotAllowed,
-            62 => Self::CapabilitiesAnchorDestructionNotAllowed,
-            63 => Self::CapabilitiesFoundryDestructionNotAllowed,
-            64 => Self::CapabilitiesNftDestructionNotAllowed,
-            255 => Self::SemanticValidationFailed,
-            x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
-        })
+        TransactionFailureReason::from_repr(c).ok_or(Self::Error::InvalidTransactionFailureReason(c))
     }
 }
