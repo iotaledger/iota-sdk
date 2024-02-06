@@ -5,6 +5,7 @@ mod block_issuance_credit;
 mod commitment;
 mod reward;
 
+use alloc::{boxed::Box, vec::Vec};
 use core::{cmp::Ordering, ops::RangeInclusive};
 
 use derive_more::{Deref, Display, From};
