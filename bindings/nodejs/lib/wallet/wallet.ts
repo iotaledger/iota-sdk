@@ -1320,7 +1320,7 @@ export class Wallet {
     /**
      * Begin staking.
      *
-     * @param params The options for begging a staking.
+     * @param params The options for beginning staking.
      * @param transactionOptions Additional transaction options.
      * @returns The created transaction.
      */
