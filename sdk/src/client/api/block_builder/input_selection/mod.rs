@@ -48,12 +48,18 @@ pub struct InputSelection {
     slot_commitment_id: SlotCommitmentId,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
-    issuer_id: AccountId,
+    auto_mana_allotment: Option<AutoManaAllotment>,
     mana_allotments: Vec<ManaAllotment>,
-    reference_mana_cost: u64,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
     protocol_parameters: ProtocolParameters,
+}
+
+/// Account and RMC for automatic mana allotment
+#[derive(Copy, Clone, Debug)]
+pub struct AutoManaAllotment {
+    issuer_id: AccountId,
+    reference_mana_cost: u64,
 }
 
 /// Result of the input selection algorithm.
@@ -81,8 +87,6 @@ impl InputSelection {
         outputs: impl IntoIterator<Item = Output>,
         addresses: impl IntoIterator<Item = Address>,
         slot_commitment_id: SlotCommitmentId,
-        issuer_id: AccountId,
-        reference_mana_cost: u64,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let available_inputs = available_inputs.into_iter().collect::<Vec<_>>();
@@ -121,18 +125,20 @@ impl InputSelection {
             slot_commitment_id,
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
-            issuer_id,
+            auto_mana_allotment: None,
             mana_allotments: Vec::new(),
-            reference_mana_cost,
             mana_rewards: Default::default(),
             payload: None,
         }
     }
 
     fn init(&mut self) -> Result<(), Error> {
+        // Automatic mana allotment must be done last, if needed
+        if self.auto_mana_allotment.is_some() {
+            self.requirements.push(Requirement::Allotment);
+        }
         // Add initial requirements
         self.requirements.extend([
-            Requirement::Allotment,
             Requirement::Mana,
             Requirement::ContextInputs,
             Requirement::Amount,
@@ -315,6 +321,14 @@ impl InputSelection {
     /// Add a transaction data payload.
     pub fn with_payload(mut self, payload: impl Into<Option<TaggedDataPayload>>) -> Self {
         self.payload = payload.into();
+        self
+    }
+
+    pub fn with_auto_mana_allotment(mut self, account_id: AccountId, reference_mana_cost: u64) -> Self {
+        self.auto_mana_allotment.replace(AutoManaAllotment {
+            issuer_id: account_id,
+            reference_mana_cost,
+        });
         self
     }
 

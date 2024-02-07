@@ -49,15 +49,16 @@ where
         let voting_output = self.get_voting_output().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
-        let first_account_id = self.data().await.first_account_id();
-        let issuer_id = issuer_id
-            .or(first_account_id)
-            .ok_or(crate::wallet::Error::AccountNotFound)?;
-        let reference_mana_cost = self
-            .client()
-            .get_account_congestion(&issuer_id, None)
-            .await?
-            .reference_mana_cost;
+        let reference_mana_cost = if let Some(issuer_id) = issuer_id {
+            Some(
+                self.client()
+                    .get_account_congestion(&issuer_id, None)
+                    .await?
+                    .reference_mana_cost,
+            )
+        } else {
+            None
+        };
         // lock so the same inputs can't be selected in multiple transactions
         let mut wallet_data = self.data_mut().await;
 
@@ -143,8 +144,6 @@ where
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
                 slot_commitment_id,
-                issuer_id,
-                reference_mana_cost,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
@@ -162,6 +161,10 @@ where
 
             if let Some(mana_allotments) = mana_allotments {
                 input_selection = input_selection.with_mana_allotments(mana_allotments);
+            }
+
+            if let (Some(account_id), Some(reference_mana_cost)) = (issuer_id, reference_mana_cost) {
+                input_selection = input_selection.with_auto_mana_allotment(account_id, reference_mana_cost);
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -205,8 +208,6 @@ where
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
                 slot_commitment_id,
-                issuer_id,
-                reference_mana_cost,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
@@ -224,6 +225,10 @@ where
 
             if let Some(mana_allotments) = mana_allotments {
                 input_selection = input_selection.with_mana_allotments(mana_allotments);
+            }
+
+            if let (Some(account_id), Some(reference_mana_cost)) = (issuer_id, reference_mana_cost) {
+                input_selection = input_selection.with_auto_mana_allotment(account_id, reference_mana_cost);
             }
 
             let selected_transaction_data = input_selection.select()?;
@@ -247,8 +252,6 @@ where
             outputs,
             Some(wallet_data.address.clone().into_inner()),
             slot_commitment_id,
-            issuer_id,
-            reference_mana_cost,
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs)
@@ -265,6 +268,10 @@ where
 
         if let Some(mana_allotments) = mana_allotments {
             input_selection = input_selection.with_mana_allotments(mana_allotments);
+        }
+
+        if let (Some(account_id), Some(reference_mana_cost)) = (issuer_id, reference_mana_cost) {
+            input_selection = input_selection.with_auto_mana_allotment(account_id, reference_mana_cost);
         }
 
         let selected_transaction_data = input_selection.select()?;

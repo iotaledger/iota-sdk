@@ -17,7 +17,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, RMC, SLOT_COMMITMENT_ID, SLOT_INDEX,
+    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -51,8 +51,6 @@ fn input_account_eq_output_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -94,8 +92,6 @@ fn transition_account_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -272,8 +268,6 @@ fn create_account() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_0,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -325,8 +319,6 @@ fn burn_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
@@ -415,8 +407,6 @@ fn missing_input_for_account_output() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -471,8 +461,6 @@ fn missing_input_for_account_output_2() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -516,8 +504,6 @@ fn missing_input_for_account_output_but_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_0,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -574,8 +560,6 @@ fn account_in_output_and_sender() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -616,8 +600,6 @@ fn missing_ed25519_sender() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -661,8 +643,6 @@ fn missing_ed25519_issuer_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_0,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -704,8 +684,6 @@ fn missing_ed25519_issuer_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -744,8 +722,6 @@ fn missing_account_sender() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -789,8 +765,6 @@ fn missing_account_issuer_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_0,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -832,8 +806,6 @@ fn missing_account_issuer_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -872,8 +844,6 @@ fn missing_nft_sender() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -917,8 +887,6 @@ fn missing_nft_issuer_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_0,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -960,8 +928,6 @@ fn missing_nft_issuer_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -1012,8 +978,6 @@ fn increase_account_amount() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1066,8 +1030,6 @@ fn decrease_account_amount() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1134,8 +1096,6 @@ fn prefer_basic_to_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1191,8 +1151,6 @@ fn take_amount_from_account_to_fund_basic() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1262,8 +1220,6 @@ fn account_burn_should_validate_account_sender() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -1331,8 +1287,6 @@ fn account_burn_should_validate_account_address() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -1388,8 +1342,6 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_0,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1458,8 +1410,6 @@ fn two_accounts_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1523,8 +1473,6 @@ fn state_controller_sender_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -1578,8 +1526,6 @@ fn state_controller_sender_required_already_selected() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -1621,8 +1567,6 @@ fn state_transition_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -1664,8 +1608,6 @@ fn remainder_address_in_state_controller() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()

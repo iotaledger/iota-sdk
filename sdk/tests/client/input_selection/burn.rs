@@ -19,7 +19,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry, Nft},
-    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, RMC,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2,
     SLOT_COMMITMENT_ID, SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
 };
 
@@ -68,8 +68,6 @@ fn burn_account_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -126,8 +124,6 @@ fn burn_account_present_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -188,8 +184,6 @@ fn burn_account_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id))
@@ -236,8 +230,6 @@ fn burn_account_absent() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -303,8 +295,6 @@ fn burn_accounts_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_accounts(HashSet::from([account_id_1, account_id_2])))
@@ -370,8 +360,6 @@ fn burn_account_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -430,8 +418,6 @@ fn burn_nft_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -490,8 +476,6 @@ fn burn_nft_present_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -550,8 +534,6 @@ fn burn_nft_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id))
@@ -598,8 +580,6 @@ fn burn_nft_absent() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -669,8 +649,6 @@ fn burn_nfts_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_nfts(HashSet::from([nft_id_1, nft_id_2])))
@@ -740,8 +718,6 @@ fn burn_nft_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -805,8 +781,6 @@ fn burn_foundry_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[0].output.as_foundry().id()))
@@ -902,8 +876,6 @@ fn burn_foundry_absent() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
@@ -964,8 +936,6 @@ fn burn_foundries_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_foundries(HashSet::from([
@@ -1048,8 +1018,6 @@ fn burn_foundry_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
@@ -1097,8 +1065,6 @@ fn burn_native_tokens() {
         None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_native_tokens(HashMap::from([
@@ -1178,8 +1144,6 @@ fn burn_foundry_and_its_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .with_burn(

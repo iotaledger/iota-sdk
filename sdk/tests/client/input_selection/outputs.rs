@@ -12,8 +12,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
-    ACCOUNT_ID_0, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, RMC, SLOT_COMMITMENT_ID,
-    SLOT_INDEX,
+    ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -38,8 +37,6 @@ fn no_inputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -72,8 +69,6 @@ fn no_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -106,8 +101,6 @@ fn no_outputs_but_required_input() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .with_required_inputs(HashSet::from([*inputs[0].output_id()]))
@@ -149,8 +142,6 @@ fn no_outputs_but_burn() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_2,
-        RMC,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
@@ -201,8 +192,6 @@ fn no_address_provided() {
         outputs,
         None,
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -244,8 +233,6 @@ fn no_matching_address_provided() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -299,8 +286,6 @@ fn two_addresses_one_missing() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -363,8 +348,6 @@ fn two_addresses() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()

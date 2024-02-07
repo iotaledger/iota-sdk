@@ -12,8 +12,8 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
-    ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_ED25519_2, RMC, SLOT_COMMITMENT_ID, SLOT_INDEX,
+    ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    BECH32_ADDRESS_ED25519_2, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -50,8 +50,6 @@ fn sdruc_output_not_provided_no_remainder() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -118,8 +116,6 @@ fn sdruc_output_provided_no_remainder() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -163,8 +159,6 @@ fn sdruc_output_provided_remainder() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -231,8 +225,6 @@ fn two_sdrucs_to_the_same_address_both_needed() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -299,8 +291,6 @@ fn two_sdrucs_to_the_same_address_one_needed() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -368,8 +358,6 @@ fn two_sdrucs_to_different_addresses_both_needed() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -442,8 +430,6 @@ fn two_sdrucs_to_different_addresses_one_needed() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -499,8 +485,6 @@ fn insufficient_amount_because_of_sdruc() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select();
@@ -563,8 +547,6 @@ fn useless_sdruc_required_for_sender_feature() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
         SLOT_COMMITMENT_ID,
-        AccountId::from_str(ACCOUNT_ID_0).unwrap(),
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -630,8 +612,6 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()
@@ -707,8 +687,6 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_COMMITMENT_ID,
-        account_id_1,
-        RMC,
         protocol_parameters,
     )
     .select()

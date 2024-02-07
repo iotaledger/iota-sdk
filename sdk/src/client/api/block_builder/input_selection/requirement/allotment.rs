@@ -5,7 +5,10 @@ use std::collections::HashMap;
 
 use super::{Error, InputSelection};
 use crate::{
-    client::{api::input_selection::Requirement, secret::types::InputSigningData},
+    client::{
+        api::input_selection::{AutoManaAllotment, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
         input::{Input, UtxoInput},
@@ -20,6 +23,13 @@ use crate::{
 
 impl InputSelection {
     pub(crate) fn fulfill_allotment_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+        let AutoManaAllotment {
+            issuer_id,
+            reference_mana_cost,
+        } = self
+            .auto_mana_allotment
+            .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
+
         let mut inputs = Vec::new();
         for input in &self.selected_inputs {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
@@ -36,9 +46,9 @@ impl InputSelection {
         if !self
             .mana_allotments
             .iter_mut()
-            .any(|allotment| allotment.account_id() == &self.issuer_id)
+            .any(|allotment| allotment.account_id() == &issuer_id)
         {
-            self.mana_allotments.push(ManaAllotment::new(self.issuer_id, 1)?);
+            self.mana_allotments.push(ManaAllotment::new(issuer_id, 1)?);
         }
 
         let transaction = builder
@@ -50,14 +60,14 @@ impl InputSelection {
 
         let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
             + self.protocol_parameters.work_score_parameters().block();
-        let required_allotment_mana = block_work_score as u64 * self.reference_mana_cost;
+        let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
         // Unwrap: safe because we set it above
         let allotment = self
             .mana_allotments
             .iter_mut()
-            .find(|allotment| allotment.account_id() == &self.issuer_id)
+            .find(|allotment| allotment.account_id() == &issuer_id)
             .unwrap();
         if allotment.mana < required_allotment_mana {
             allotment.mana = required_allotment_mana;
