@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC", "EXPLORER_URL", "FAUCET_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let num_simultaneous_txs = NUM_SIMULTANEOUS_TXS.min(num_cpus::get());

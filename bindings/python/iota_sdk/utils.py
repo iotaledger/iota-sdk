@@ -272,6 +272,25 @@ class Utils():
         return DecayedMana(int(decayed_mana["stored"]), int(
             decayed_mana["potential"]))
 
+    @staticmethod
+    def verify_transaction_syntax(
+            transaction: SignedTransactionPayload, protocol_parameters: ProtocolParameters):
+        """Verifies the syntax of a transaction.
+        """
+        _call_method('verifyTransactionSyntax', {
+            'transaction': transaction.as_dict(),
+            'protocolParameters': protocol_parameters.as_dict(),
+        })
+
+    @staticmethod
+    def block_bytes(
+            block: Block) -> bytes:
+        """Returns the serialized bytes of a block.
+        """
+        return bytes(_call_method('blockBytes', {
+            'block': block.as_dict(),
+        }))
+
 
 class UtilsError(Exception):
     """A utils error."""

@@ -548,7 +548,7 @@ fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Account(account_address) = unlock_condition.address() {
-            if account_address.account_id() == account_id {
+            if !account_id.is_null() && account_address.account_id() == account_id {
                 return Err(Error::SelfDepositAccount(*account_id));
             }
         }

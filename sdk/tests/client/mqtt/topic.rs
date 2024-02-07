@@ -5,19 +5,30 @@ use iota_sdk::client::mqtt::{Error, Topic};
 
 #[test]
 fn valid_topics() {
+    assert!(Topic::new("commitments/latest").is_ok());
+    assert!(Topic::new("commitments/finalized").is_ok());
     assert!(Topic::new("blocks").is_ok());
-    assert!(Topic::new("blocks/transaction").is_ok());
-    assert!(Topic::new("blocks/transaction/tagged-data").is_ok());
-    assert!(Topic::new("blocks/transaction/tagged-data/0x0123456789abcdef").is_ok());
-    assert!(Topic::new("blocks/tagged-data").is_ok());
-    assert!(Topic::new("blocks/tagged-data/0x0123456789abcdef").is_ok());
-    assert!(Topic::new("block-metadata/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c4").is_ok());
-    assert!(Topic::new("block-metadata/accepted").is_ok());
+    assert!(Topic::new("blocks/validation").is_ok());
+    assert!(Topic::new("blocks/basic").is_ok());
+    assert!(Topic::new("blocks/basic/tagged-data").is_ok());
+    assert!(Topic::new("blocks/basic/tagged-data/0x0123456789abcdef").is_ok());
+    assert!(Topic::new("blocks/basic/transaction").is_ok());
+    assert!(Topic::new("blocks/basic/transaction/tagged-data").is_ok());
+    assert!(Topic::new("blocks/basic/transaction/tagged-data/0x0123456789abcdef").is_ok());
     assert!(
-        Topic::new("transactions/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c4/included-block")
-            .is_ok()
+        Topic::new("block-metadata/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c400000000").is_ok()
     );
-    assert!(Topic::new("outputs/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c40000").is_ok());
+    assert!(Topic::new("block-metadata/accepted").is_ok());
+    assert!(Topic::new("block-metadata/confirmed").is_ok());
+    assert!(
+        Topic::new(
+            "transactions/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c400000000/included-block"
+        )
+        .is_ok()
+    );
+    assert!(
+        Topic::new("outputs/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c4000000000000").is_ok()
+    );
     assert!(Topic::new("outputs/account/0xb21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151").is_ok());
     assert!(Topic::new("outputs/nft/0x38500750eb788bfb89b4589634a82b0cee9c6a9724bafde505ffa1bb875ab0b5").is_ok());
     assert!(
@@ -37,42 +48,42 @@ fn valid_topics() {
 fn invalid_topics() {
     // Empty.
     assert!(matches!(
-        Topic::new("blocks/transaction/tagged-data/0x"),
+        Topic::new("blocks/basic/transaction/tagged-data/0x"),
         Err(Error::InvalidTopic(_))
     ));
     assert!(matches!(
-        Topic::new("blocks/tagged-data/0x"),
+        Topic::new("blocks/basic/tagged-data/0x"),
         Err(Error::InvalidTopic(_))
     ));
     // Uneven.
     assert!(matches!(
-        Topic::new("blocks/transaction/tagged-data/0x0123456789abcde"),
+        Topic::new("blocks/basic/transaction/tagged-data/0x0123456789abcde"),
         Err(Error::InvalidTopic(_))
     ));
     assert!(matches!(
-        Topic::new("blocks/tagged-data/0x0123456789abcde"),
+        Topic::new("blocks/basic/tagged-data/0x0123456789abcde"),
         Err(Error::InvalidTopic(_))
     ));
     // Too large.
     assert!(matches!(
         Topic::new(
-            "blocks/transaction/tagged-data/0xb21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151b21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151ff"
+            "blocks/basic/transaction/tagged-data/0xb21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151b21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151ff"
         ),
         Err(Error::InvalidTopic(_))
     ));
     assert!(matches!(
         Topic::new(
-            "blocks/tagged-data/0xb21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151b21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151ff"
+            "blocks/basic/tagged-data/0xb21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151b21517992e96865d5fd90b403fe05fe25c6d4acfb6cdd6e7c9bbfb4266d05151ff"
         ),
         Err(Error::InvalidTopic(_))
     ));
     // Invalid chars.
     assert!(matches!(
-        Topic::new("blocks/transaction/tagged-data/0x012345@789abcde"),
+        Topic::new("blocks/basic/transaction/tagged-data/0x012345@789abcde"),
         Err(Error::InvalidTopic(_))
     ));
     assert!(matches!(
-        Topic::new("blocks/tagged-data/0x012345@789abcde"),
+        Topic::new("blocks/basic/tagged-data/0x012345@789abcde"),
         Err(Error::InvalidTopic(_))
     ));
 }
