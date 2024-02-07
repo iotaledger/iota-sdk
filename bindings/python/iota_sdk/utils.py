@@ -17,7 +17,6 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.unlock import Unlock
 from iota_sdk.types.transaction_data import InputSigningData
 from iota_sdk.external import call_utils_method
-from iota_sdk.types.node_info import NodeInfoProtocol
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -275,7 +274,7 @@ class Utils():
 
     @staticmethod
     def verify_transaction_syntax(
-            transaction: SignedTransactionPayload, protocol_parameters: NodeInfoProtocol):
+            transaction: SignedTransactionPayload, protocol_parameters: ProtocolParameters):
         """Verifies the syntax of a transaction.
         """
         _call_method('verifyTransactionSyntax', {
