@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../block/slot';
-import { INativeToken } from '../models';
+import { NativeToken } from '../models';
 import { u64 } from '../utils';
 import { HexEncodedString } from '../utils/hex-encoding';
 
@@ -39,7 +39,7 @@ export interface Features {
     /** An Issuer feature to include. */
     issuer?: string;
     /** Native Token to include. */
-    nativeToken?: INativeToken;
+    nativeToken?: NativeToken;
 }
 
 /** Time unlocks to include in the output. */
