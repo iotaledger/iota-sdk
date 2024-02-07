@@ -8,7 +8,7 @@ from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.committee import Committee, Validator, Validators
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
-from iota_sdk.types.issuance import Congestion, IssuanceBlockHeader
+from iota_sdk.types.issuance import CongestionResponse, IssuanceBlockHeaderResponse
 from iota_sdk.types.mana import ManaRewards
 from iota_sdk.types.node_info import NodeInfoResponse, NodeInfoResponseWithUrl, RoutesResponse
 from iota_sdk.types.output_metadata import OutputMetadata, OutputWithMetadata, OutputWithMetadataResponse
@@ -113,11 +113,11 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Accounts routes.
 
-    def get_account_congestion(self, account_id: HexStr) -> Congestion:
+    def get_account_congestion(self, account_id: HexStr) -> CongestionResponse:
         """Checks if the account is ready to issue a block.
         GET /api/core/v3/accounts/{bech32Address}/congestion
         """
-        return Congestion.from_dict(self._call_method('getAccountCongestion', {
+        return CongestionResponse.from_dict(self._call_method('getAccountCongestion', {
             'accountId': account_id
         }))
 
@@ -170,11 +170,11 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Block routes.
 
-    def get_issuance(self) -> IssuanceBlockHeader:
+    def get_issuance(self) -> IssuanceBlockHeaderResponse:
         """Returns information that is ideal for attaching a block in the network.
         GET /api/core/v3/blocks/issuance
         """
-        return IssuanceBlockHeader.from_dict(self._call_method('getIssuance'))
+        return IssuanceBlockHeaderResponse.from_dict(self._call_method('getIssuance'))
 
     def post_block(self, block: Block) -> HexStr:
         """Returns the BlockId of the submitted block.

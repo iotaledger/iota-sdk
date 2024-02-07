@@ -10,7 +10,7 @@ from iota_sdk.types.slot import SlotCommitment
 
 @json
 @dataclass
-class IssuanceBlockHeader:
+class IssuanceBlockHeaderResponse:
     """Information that is used to attach a block in the network.
     Response of GET /api/core/v3/blocks/issuance
 
@@ -34,7 +34,7 @@ class IssuanceBlockHeader:
 
 @json
 @dataclass
-class Congestion:
+class CongestionResponse:
     """Provides the cost and readiness to issue estimates.
     Response of GET /api/core/v3/accounts/{accountId}/congestion.
 
