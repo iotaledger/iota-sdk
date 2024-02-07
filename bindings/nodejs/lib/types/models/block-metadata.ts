@@ -4,8 +4,7 @@
 import type { HexEncodedString } from '../utils/hex-encoding';
 import { BlockState, TransactionState } from './state';
 import { BlockFailureReason } from './block-failure-reason';
-import { Block } from '../block';
-import { TransactionId } from '../wallet';
+import { Block, TransactionId } from '../block';
 import { TransactionFailureReason } from './transaction-failure-reason';
 
 /**

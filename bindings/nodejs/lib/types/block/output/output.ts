@@ -9,13 +9,35 @@ import { Feature, FeatureDiscriminator, NativeTokenFeature } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, NumericString, u64 } from '../../utils';
+import { NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
-import { AccountId, NftId, AnchorId, DelegationId } from '../id';
+import {
+    AccountId,
+    NftId,
+    AnchorId,
+    DelegationId,
+    IdWithSlotIndex,
+} from '../id';
 import { EpochIndex } from '../../block/slot';
 import { INativeToken } from '../../models/native-token';
 
-export type OutputId = HexEncodedString;
+export class OutputId extends IdWithSlotIndex {
+    outputIndex(): number {
+        const numberString = this.id.toString().slice(-4);
+        const chunks = [];
+        for (
+            let i = 0, charsLength = numberString.length;
+            i < charsLength;
+            i += 2
+        ) {
+            chunks.push(numberString.substring(i, i + 2));
+        }
+        const separated = chunks.map((n) => parseInt(n, 16));
+        const buf = Uint8Array.from(separated).buffer;
+        const view = new DataView(buf);
+        return view.getUint16(0, true);
+    }
+}
 
 /**
  * All of the output types.
