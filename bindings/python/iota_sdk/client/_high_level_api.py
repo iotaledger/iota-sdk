@@ -25,7 +25,7 @@ class Range:
 
 @json
 @dataclass
-class GenerateAddressOptions():
+class GenerateAddressOptions:
     """Options for generating an address.
 
     Attributes:
@@ -38,7 +38,7 @@ class GenerateAddressOptions():
 
 @json
 @dataclass
-class GenerateAddressesOptions():
+class GenerateAddressesOptions:
     """Options for generating addresses.
 
     Attributes:

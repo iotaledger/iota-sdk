@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 # pylint: disable=too-many-public-methods
 
 
-class Utils():
+class Utils:
     """Utility functions.
     """
 
