@@ -1,10 +1,6 @@
 # Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from dataclasses import dataclass
-from iota_sdk.types.common import json
-
-
 class IdWithSlotIndex(str):
     """Represents an hex encoded ID that contains a slot index at the end.
 
