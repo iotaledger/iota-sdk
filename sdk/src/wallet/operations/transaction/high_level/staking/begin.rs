@@ -5,7 +5,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
+    types::block::{
+        output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
+        slot::EpochIndex,
+    },
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -77,20 +80,15 @@ where
         }
 
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
-        let past_bounded_epoch =
-            protocol_parameters.epoch_index_of(protocol_parameters.past_bounded_slot(slot_commitment_id));
-        let end_epoch = past_bounded_epoch
-            + params
-                .staking_period
-                .unwrap_or(protocol_parameters.staking_unbonding_period());
+        let start_epoch = protocol_parameters.epoch_index_of(protocol_parameters.past_bounded_slot(slot_commitment_id));
 
         let output = AccountOutputBuilder::from(account_output_data.output.as_account())
             .with_account_id(account_id)
             .add_feature(StakingFeature::new(
                 params.staked_amount,
                 params.fixed_cost,
-                past_bounded_epoch,
-                end_epoch,
+                start_epoch,
+                EpochIndex(u32::MAX),
             ))
             .finish_output()?;
 
