@@ -19,6 +19,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.5 - 2024-MM-DD
+
+### Added
+
+- `Display` for `SecretManager`;
+- `StrongholdAdapter::snapshot_path` getter method;
+
+### Fixed
+
+- Prefer permanodes for `Client::{get_utxo_changes_by_id(), get_utxo_changes_by_index()}` routes;
+
+## 1.1.4 - 2024-01-22
+
+### Added
+
+- `Ed25519Signature` methods `new_from_bytes`, `public_key_bytes`, `from_bytes`, `try_verify`;
+- `Block::hash_without_nonce()` method;
+
+### Deprecated
+
+- `Ed25519Signature` methods `public_key`, `try_from_bytes`, `verify`;
+
+### Fixed
+
+- `Ed25519Signature` type no longer requires validated public key bytes to construct;
+- `SelfControlledAliasOutput` and `SelfDepositNft` conditions;
+- Input selection for > max native tokens;
+
 ## 1.1.3 - 2023-12-07
 
 ### Added

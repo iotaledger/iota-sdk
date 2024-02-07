@@ -11,7 +11,7 @@ use iota_sdk::{
             output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
             semantic::SemanticValidationContext,
-            Block,
+            Block, Error,
         },
         TryFromDto,
     },
@@ -87,7 +87,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.verify(&message))
+            Response::Bool(signature.try_verify(&message).map_err(Error::from)?)
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,
@@ -95,7 +95,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             message,
         } => {
             use crypto::signatures::secp256k1_ecdsa;
-            use iota_sdk::types::block::Error;
             let public_key = prefix_hex::decode(public_key)?;
             let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
             let signature = prefix_hex::decode(signature)?;
@@ -151,6 +150,17 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             slot_index_target,
             protocol_parameters,
         } => Response::DecayedMana(output.decayed_mana(&protocol_parameters, slot_index_created, slot_index_target)?),
+        UtilsMethod::VerifyTransactionSyntax {
+            transaction,
+            protocol_parameters,
+        } => {
+            Transaction::try_from_dto_with_params(transaction, &protocol_parameters)?;
+            Response::Ok
+        }
+        UtilsMethod::BlockBytes { block } => {
+            let block = Block::try_from_dto(block)?;
+            Response::Raw(block.pack_to_vec())
+        }
     };
 
     Ok(response)

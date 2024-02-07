@@ -1,4 +1,4 @@
-// Copyright 2020-2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::signature::Ed25519Signature;
@@ -17,7 +17,7 @@ fn kind() {
 fn packed_len() {
     let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let sig = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let sig = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
 
     assert_eq!(sig.packed_len(), 32 + 64);
     assert_eq!(sig.pack_to_vec().len(), 32 + 64);
@@ -27,7 +27,7 @@ fn packed_len() {
 fn pack_unpack_valid() {
     let pub_key_bytes: [u8; 32] = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes: [u8; 64] = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let sig = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let sig = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_packed = sig.pack_to_vec();
 
     assert_eq!(sig, PackableExt::unpack_verified(sig_packed.as_slice(), &()).unwrap());
