@@ -337,7 +337,7 @@ class NodeInfoBaseToken:
 
 @json
 @dataclass
-class NodeInfo:
+class NodeInfoResponse:
     """General information about the node.
     GET /api/core/v3/info.
 
@@ -357,10 +357,9 @@ class NodeInfo:
     base_token: NodeInfoBaseToken
 
 
-# TODO: we should probably consider giving this a more useful name, e.g. NodeInfoWithUrl or smth.
 @json
 @dataclass
-class NodeInfoWrapper:
+class NodeInfoResponseWithUrl:
     """General information about the node and its URL.
     GET /api/core/v3/info.
 
@@ -368,13 +367,13 @@ class NodeInfoWrapper:
         node_info: A NodeInfo object.
         url: The URL of the node.
     """
-    node_info: NodeInfo
+    node_info: NodeInfoResponse
     url: str
 
 
 @json
 @dataclass
-class Routes:
+class RoutesResponse:
     """API route groups of the node.
     GET /api/routes.
 

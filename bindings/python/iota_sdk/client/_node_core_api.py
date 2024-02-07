@@ -10,7 +10,7 @@ from iota_sdk.types.committee import Committee, Validator, Validators
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
 from iota_sdk.types.issuance import Congestion, IssuanceBlockHeader
 from iota_sdk.types.mana import ManaRewards
-from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper, Routes
+from iota_sdk.types.node_info import NodeInfoResponse, NodeInfoResponseWithUrl, RoutesResponse
 from iota_sdk.types.output_metadata import OutputMetadata, OutputWithMetadata, OutputWithMetadataResponse
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitment
@@ -58,15 +58,15 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_info(self) -> NodeInfoWrapper:
+    def get_info(self) -> NodeInfoResponseWithUrl:
         """Returns general information about the node together with its URL.
         GET /api/core/v3/info
         """
-        return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
+        return NodeInfoResponseWithUrl.from_dict(self._call_method('getInfo'))
 
     # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_node_info(self, url: str, auth=None) -> NodeInfo:
+    def get_node_info(self, url: str, auth=None) -> NodeInfoResponse:
         """Returns general information about the node.
         GET /api/core/v3/info
 
@@ -77,18 +77,18 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The node info.
         """
-        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
+        return NodeInfoResponse.from_dict(self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
         }))
 
     # TODO: this should made be available
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_routes(self) -> Routes:
+    def get_routes(self) -> RoutesResponse:
         """Returns the available API route groups of the node.
         GET /api/routes
         """
-        return Routes.from_dict(self._call_method('getRoutes'))
+        return RoutesResponse.from_dict(self._call_method('getRoutes'))
 
     def call_plugin_route(self, base_plugin_path: str, method: str,
                           endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
