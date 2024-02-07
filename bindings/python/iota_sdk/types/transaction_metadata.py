@@ -167,7 +167,7 @@ class TransactionFailureReason(Enum):
 
 @json
 @dataclass
-class TransactionMetadata:
+class TransactionMetadataResponse:
     """Response of a GET transaction metadata REST API call.
 
     Attributes:

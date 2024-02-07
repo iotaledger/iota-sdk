@@ -7,12 +7,12 @@ from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.block.block import Block
-from iota_sdk.types.transaction_metadata import TransactionMetadata
+from iota_sdk.types.transaction_metadata import TransactionMetadataResponse
 
 
 @json
 @dataclass
-class BlockMetadata:
+class BlockMetadataResponse:
     """The metadata of a block.
     Response of GET /api/core/v3/blocks/{blockId}/metadata.
 
@@ -25,7 +25,7 @@ class BlockMetadata:
     block_id: HexStr
     block_state: BlockState
     block_failure_reason: Optional[BlockFailureReason] = None
-    transaction_metadata: Optional[TransactionMetadata] = None
+    transaction_metadata: Optional[TransactionMetadataResponse] = None
 
 
 class BlockState(Enum):
@@ -99,7 +99,7 @@ class BlockFailureReason(IntEnum):
 
 @json
 @dataclass
-class BlockWithMetadata:
+class BlockWithMetadataResponse:
     """A block and its metadata.
     Response of GET /api/core/v3/blocks/{blockId}/full.
 
@@ -108,4 +108,4 @@ class BlockWithMetadata:
         metadata: The block metadata.
     """
     block: Block
-    metadata: BlockMetadata
+    metadata: BlockMetadataResponse

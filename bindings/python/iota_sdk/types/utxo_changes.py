@@ -11,7 +11,7 @@ from iota_sdk.types.output import Output
 
 @json
 @dataclass
-class UtxoChanges():
+class UtxoChangesResponse():
     """All UTXO changes that happened at a specific slot.
     Response of
     - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
@@ -42,7 +42,7 @@ class OutputWithId():
 
 @json
 @dataclass
-class UtxoChangesFull():
+class UtxoChangesFullResponse():
     """All full UTXO changes that happened at a specific slot.
     Response of
     - GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full

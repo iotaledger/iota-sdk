@@ -15,6 +15,7 @@ from iota_sdk.types.output_id_proof import OutputIdProof
 @dataclass
 class OutputMetadata:
     """Metadata about an output.
+    Response of GET /api/core/v3/outputs/{output_id}/metadata.
 
     Attributes:
         output_id: The ID of the output.
@@ -34,7 +35,6 @@ class OutputMetadata:
 @dataclass
 class OutputWithMetadata:
     """An output and its metadata.
-    Response of GET /api/core/v3/outputs/{output_id}.
 
     Attributes:
         metadata: The `OutputMetadata` object that belongs to `output`.
@@ -69,7 +69,8 @@ class OutputWithMetadata:
 @json
 @dataclass
 class OutputResponse:
-    """Contains the generic Output with associated OutputIdProof.
+    """An output with its output id proof.
+    Response of GET /api/core/v3/outputs/{output_id}.
 
     Attributes:
         output: One of the possible outputs.
@@ -84,7 +85,8 @@ class OutputResponse:
 @json
 @dataclass
 class OutputWithMetadataResponse:
-    """
+    """An output with its output id proof and its metadata.
+    Response of GET /api/core/v3/outputs/{output_id}/full.
 
     Attributes:
         output: One of the possible outputs.

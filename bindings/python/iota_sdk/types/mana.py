@@ -24,7 +24,7 @@ class ManaAllotment:
 
 @json
 @dataclass
-class ManaRewards:
+class ManaRewardsResponse:
     """The mana rewards of an account or delegation output.
     Response of GET /api/core/v3/rewards/{outputId}.
 

@@ -5,17 +5,17 @@ from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.block.block import Block
-from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
+from iota_sdk.types.block.metadata import BlockMetadataResponse, BlockWithMetadataResponse
 from iota_sdk.types.committee import CommitteeResponse, ValidatorResponse, ValidatorsResponse
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
 from iota_sdk.types.issuance import CongestionResponse, IssuanceBlockHeaderResponse
-from iota_sdk.types.mana import ManaRewards
-from iota_sdk.types.node_info import NodeInfoResponse, NodeInfoResponseWithUrl, RoutesResponse
-from iota_sdk.types.output_metadata import OutputMetadata, OutputWithMetadata, OutputWithMetadataResponse
+from iota_sdk.types.mana import ManaRewardsResponse
+from iota_sdk.types.node_info import InfoResponse, NodeInfoWrapper, RoutesResponse
+from iota_sdk.types.output_metadata import OutputMetadata, OutputWithMetadataResponse
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitment
-from iota_sdk.types.transaction_metadata import TransactionMetadata
-from iota_sdk.types.utxo_changes import UtxoChanges, UtxoChangesFull
+from iota_sdk.types.transaction_metadata import TransactionMetadataResponse
+from iota_sdk.types.utxo_changes import UtxoChangesResponse, UtxoChangesFullResponse
 
 
 class NodeCoreAPI(metaclass=ABCMeta):
@@ -58,15 +58,15 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_info(self) -> NodeInfoResponseWithUrl:
+    def get_info(self) -> NodeInfoWrapper:
         """Returns general information about the node together with its URL.
         GET /api/core/v3/info
         """
-        return NodeInfoResponseWithUrl.from_dict(self._call_method('getInfo'))
+        return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
 
     # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_node_info(self, url: str, auth=None) -> NodeInfoResponse:
+    def get_node_info(self, url: str, auth=None) -> InfoResponse:
         """Returns general information about the node.
         GET /api/core/v3/info
 
@@ -77,7 +77,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The node info.
         """
-        return NodeInfoResponse.from_dict(self._call_method('getNodeInfo', {
+        return InfoResponse.from_dict(self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
         }))
@@ -124,7 +124,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # Rewards routes.
 
     def get_output_mana_rewards(
-            self, output_id: HexStr, slot_index: SlotIndex) -> ManaRewards:
+            self, output_id: HexStr, slot_index: SlotIndex) -> ManaRewardsResponse:
         """Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
         provided in the response.
         Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
@@ -133,7 +133,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         is returned and decayed for.
         GET /api/core/v3/rewards/{outputId}
         """
-        return ManaRewards.from_dict(self._call_method('getOutputManaRewards', {
+        return ManaRewardsResponse.from_dict(self._call_method('getOutputManaRewards', {
             'outputId': output_id,
             'slotIndex': slot_index
         }))
@@ -223,34 +223,34 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         })
 
-    def get_block_metadata(self, block_id: HexStr) -> BlockMetadata:
+    def get_block_metadata(self, block_id: HexStr) -> BlockMetadataResponse:
         """Returns the metadata of a block.
         GET /api/core/v3/blocks/{blockId}/metadata
 
         Returns:
             The corresponding block metadata.
         """
-        return BlockMetadata.from_dict(self._call_method('getBlockMetadata', {
+        return BlockMetadataResponse.from_dict(self._call_method('getBlockMetadata', {
             'blockId': block_id
         }))
 
-    def get_block_with_metadata(self, block_id: HexStr) -> BlockWithMetadata:
+    def get_block_with_metadata(self, block_id: HexStr) -> BlockWithMetadataResponse:
         """Returns a block with its metadata.
         GET /api/core/v2/blocks/{blockId}/full
 
         Returns:
             The corresponding block with it metadata.
         """
-        return BlockWithMetadata.from_dict(self._call_method('getBlockWithMetadata', {
+        return BlockWithMetadataResponse.from_dict(self._call_method('getBlockWithMetadata', {
             'blockId': block_id
         }))
 
     # UTXO routes.
 
-    # TODO: this should return `OutputResponse`, not OutputWithMetadata
+    # TODO: this should return `OutputResponse`, not OutputWithMetadataResponse
     # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
+            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadataResponse:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -294,7 +294,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def get_output_with_metadata(
-            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
+            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadataResponse:
         """Finds an output with its metadata by output ID.
         GET /api/core/v3/outputs/{outputId}/full
 
@@ -303,7 +303,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputWithMetadata.from_dict(self._call_method('getOutputWithMetadata', {
+        return OutputWithMetadataResponse.from_dict(self._call_method('getOutputWithMetadata', {
             'outputId': output_id_str
         }))
 
@@ -332,26 +332,26 @@ class NodeCoreAPI(metaclass=ABCMeta):
         })
 
     def get_included_block_metadata(
-            self, transaction_id: HexStr) -> BlockMetadata:
+            self, transaction_id: HexStr) -> BlockMetadataResponse:
         """Returns the metadata of the earliest block containing the tx that was confirmed.
         GET /api/core/v3/transactions/{transactionId}/included-block/metadata
 
         Returns:
             The metadata of the included block.
         """
-        return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
+        return BlockMetadataResponse.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
         }))
 
     def get_transaction_metadata(
-            self, transaction_id: HexStr) -> TransactionMetadata:
+            self, transaction_id: HexStr) -> TransactionMetadataResponse:
         """Finds the metadata of a transaction.
         GET /api/core/v3/transactions/{transactionId}/metadata
 
         Returns:
             The transaction metadata.
         """
-        return TransactionMetadata.from_dict(self._call_method('getTransactionMetadata', {
+        return TransactionMetadataResponse.from_dict(self._call_method('getTransactionMetadata', {
             'transactionId': transaction_id
         }))
 
@@ -384,26 +384,26 @@ class NodeCoreAPI(metaclass=ABCMeta):
         })
 
     def get_utxo_changes(
-            self, commitment_id: HexStr) -> UtxoChanges:
+            self, commitment_id: HexStr) -> UtxoChangesResponse:
         """Get all UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 
         Returns:
             The corresponding UTXO changes.
         """
-        return UtxoChanges.from_dict(self._call_method('getUtxoChanges', {
+        return UtxoChangesResponse.from_dict(self._call_method('getUtxoChanges', {
             'commitmentId': commitment_id
         }))
 
     def get_utxo_changes_full(
-            self, commitment_id: HexStr) -> UtxoChangesFull:
+            self, commitment_id: HexStr) -> UtxoChangesFullResponse:
         """Get all full UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
 
         Returns:
             The full UTXO changes.
         """
-        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFull', {
+        return UtxoChangesFullResponse.from_dict(self._call_method('getUtxoChangesFull', {
             'commitmentId': commitment_id
         }))
 
@@ -437,27 +437,27 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # TODO: call method name needs to be changed to `getUxoChangesBySlot`
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_utxo_changes_by_slot(self, slot: SlotIndex) -> UtxoChanges:
+    def get_utxo_changes_by_slot(self, slot: SlotIndex) -> UtxoChangesResponse:
         """Get all UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 
         Returns:
             The corresponding UTXO changes.
         """
-        return UtxoChanges.from_dict(self._call_method('getUtxoChangesByIndex', {
+        return UtxoChangesResponse.from_dict(self._call_method('getUtxoChangesByIndex', {
             'slot': slot
         }))
 
     # TODO: call method name needs to be changed to `getUxoChangesFullBySlot`
     # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_utxo_changes_full_by_slot(
-            self, slot: SlotIndex) -> UtxoChangesFull:
+            self, slot: SlotIndex) -> UtxoChangesFullResponse:
         """Get all full UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
 
         Returns:
             The full UTXO changes.
         """
-        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullByIndex', {
+        return UtxoChangesFullResponse.from_dict(self._call_method('getUtxoChangesFullByIndex', {
             'slot': slot
         }))

@@ -335,9 +335,10 @@ class NodeInfoBaseToken:
     subunit: Optional[str] = None
 
 
+# TODO: rename sdk-wide to `NodeInfoResponse`?
 @json
 @dataclass
-class NodeInfoResponse:
+class InfoResponse:
     """General information about the node.
     GET /api/core/v3/info.
 
@@ -357,9 +358,10 @@ class NodeInfoResponse:
     base_token: NodeInfoBaseToken
 
 
+# TODO: rename sdk-wide to `NodeInfoResponseWithUrl`?
 @json
 @dataclass
-class NodeInfoResponseWithUrl:
+class NodeInfoWrapper:
     """General information about the node and its URL.
     GET /api/core/v3/info.
 
@@ -367,7 +369,7 @@ class NodeInfoResponseWithUrl:
         node_info: A NodeInfo object.
         url: The URL of the node.
     """
-    node_info: NodeInfoResponse
+    node_info: InfoResponse
     url: str
 
 
