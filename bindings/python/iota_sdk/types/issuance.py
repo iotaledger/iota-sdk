@@ -16,11 +16,11 @@ class IssuanceBlockHeader:
 
     Attributes:
         strong_parents: Blocks that are strongly directly approved.
-        weak_parents: Blocks that are weakly directly approved.
-        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
         latest_parent_block_issuing_time: Latest issuing time of the returned parents.
         latest_finalized_slot: The slot index of the latest finalized slot.
         latest_commitment: The latest slot commitment.
+        weak_parents: Blocks that are weakly directly approved.
+        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
     """
     strong_parents: List[HexStr]
     latest_parent_block_issuing_time: int = field(metadata=config(
