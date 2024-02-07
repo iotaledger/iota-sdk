@@ -41,7 +41,7 @@ jobs:
         run: yarn build
 
       - name: Update Cargo.toml with git
-        run:  sed -i 's#path = "../core"#git = "https://github.com/iotaledger/iota-sdk", rev = "'$GITHUB_SHA'"#g' Cargo.toml
+        run: sed -i 's#path = "../core"#git = "https://github.com/iotaledger/iota-sdk", rev = "'$GITHUB_SHA'"#g' Cargo.toml
 
       - name: Print Cargo.toml
         run: cat Cargo.toml
@@ -50,7 +50,7 @@ jobs:
         shell: sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: yarn publish --access public
 
   nodejs-binding-prebuild:
     runs-on: ${{ matrix.os }}
@@ -225,7 +225,7 @@ jobs:
         id: prepare_release
         shell: bash
         run: |
-          echo "tag_name=iota-sdk-nodejs-v$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_OUTPUT"
+          echo "tag_name=iota-sdk-nodejs-v$(cat package.json | jq -r '.version')" >> "$GITHUB_OUTPUT"
         working-directory: bindings/nodejs
 
       - name: Sign and notarize index.node binary (macOS arm64)
@@ -235,7 +235,7 @@ jobs:
           AC_PASSWORD: ${{ secrets.ASC_PASSWORD }}
         working-directory: bindings/nodejs
         run: |
-          TAR_NAME=sdk-v$(npm pkg get version --workspaces=false | tr -d \")-napi-v6-darwin-arm64.tar.gz
+          TAR_NAME=sdk-v$(cat package.json | jq -r '.version')-napi-v6-darwin-arm64.tar.gz
 
           # unpack to only get the index.node
           tar -xvf prebuilds/@iota/$TAR_NAME
@@ -253,7 +253,8 @@ jobs:
       - name: Upload prebuild to Github release
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Token expires Jan 25, 2025
+          token: ${{ secrets.GH_RELEASE_PUBLISH_PAT }}
           body: https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md
           files: bindings/nodejs/prebuilds/@iota/*
           tag_name: ${{ steps.prepare_release.outputs.tag_name }}
