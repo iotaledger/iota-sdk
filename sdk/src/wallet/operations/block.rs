@@ -64,7 +64,7 @@ where
         if congestion.ready {
             self.submit_basic_block(payload, issuer_id).await
         } else {
-            Err(crate::wallet::Error::InsufficientBIC {
+            Err(crate::wallet::Error::InsufficientBic {
                 available: congestion.block_issuance_credits,
                 required: work_score as u64 * congestion.reference_mana_cost,
             })
