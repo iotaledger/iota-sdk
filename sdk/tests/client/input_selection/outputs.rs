@@ -186,15 +186,7 @@ fn no_address_provided() {
         None,
     )]);
 
-    let selected = InputSelection::new(
-        inputs,
-        Vec::new(),
-        outputs,
-        None,
-        SLOT_COMMITMENT_ID,
-        protocol_parameters,
-    )
-    .select();
+    let selected = InputSelection::new(inputs, None, outputs, None, SLOT_COMMITMENT_ID, protocol_parameters).select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
 }

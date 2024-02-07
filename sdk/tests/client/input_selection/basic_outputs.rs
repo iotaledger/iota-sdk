@@ -847,8 +847,12 @@ fn account_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.iter().any(|input| input.output.is_account()
-        && *input.output.as_account().account_id() == AccountId::from_str(ACCOUNT_ID_0).unwrap()));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
+    );
     // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -1997,7 +2001,7 @@ fn restricted_nft() {
 fn restricted_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
-    let account_address = Address::from(AccountId::from_str(ACCOUNT_ID_0).unwrap());
+    let account_address = Address::from(account_id_1);
     let restricted = Address::from(RestrictedAddress::new(account_address.clone()).unwrap());
 
     let inputs = build_inputs(
