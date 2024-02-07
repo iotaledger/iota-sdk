@@ -1487,6 +1487,73 @@ fn multiple_remainders() {
     });
 }
 
+// #[test]
+// fn higher_nts_count_but_below_max_native_tokens() {
+//     let protocol_parameters = protocol_parameters();
+
+//     let mut input_native_tokens_0 = Vec::new();
+//     for _ in 0..10 {
+//         input_native_tokens_0.push((TokenId::from(rand_bytes_array()).to_string(), 10));
+//     }
+//     let mut input_native_tokens_1 = Vec::new();
+//     for _ in 0..64 {
+//         input_native_tokens_1.push((TokenId::from(rand_bytes_array()).to_string(), 10));
+//     }
+
+//     let inputs = build_inputs([
+//         Basic(
+//             3_000_000,
+//             BECH32_ADDRESS_ED25519_0,
+//             Some(input_native_tokens_0.iter().map(|(t, a)| (t.as_str(), *a)).collect()),
+//             None,
+//             None,
+//             None,
+//             None,
+//             None,
+//         ),
+//         Basic(
+//             10_000_000,
+//             BECH32_ADDRESS_ED25519_0,
+//             Some(input_native_tokens_1.iter().map(|(t, a)| (t.as_str(), *a)).collect()),
+//             None,
+//             None,
+//             None,
+//             None,
+//             None,
+//         ),
+//     ]);
+//     let outputs = build_outputs([Basic(
+//         5_000_000,
+//         BECH32_ADDRESS_ED25519_0,
+//         None,
+//         None,
+//         None,
+//         None,
+//         None,
+//         None,
+//     )]);
+
+//     let selected = InputSelection::new(
+//         inputs.clone(),
+//         outputs.clone(),
+//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         protocol_parameters,
+//     )
+//     .select()
+//     .unwrap();
+
+//     assert_eq!(selected.inputs.len(), 1);
+//     assert!(selected.inputs.contains(&inputs[1]));
+//     assert_eq!(selected.outputs.len(), 2);
+//     assert!(selected.outputs.contains(&outputs[0]));
+//     assert!(is_remainder_or_return(
+//         &selected.outputs[1],
+//         5_000_000,
+//         BECH32_ADDRESS_ED25519_0,
+//         Some(input_native_tokens_1.iter().map(|(t, a)| (t.as_str(), *a)).collect()),
+//     ));
+// }
+
 // T27: :wavy_dash:
 // inputs: [basic{ amount: 1_000_000, native_tokens: [{‘a’: 100}] }, basic{ amount: 1_000_000, native_tokens: [{‘a’:
 // 200}] }] }] outputs: [basic{ amount: 500_000, native_tokens: [{‘a’: 150}] }]
