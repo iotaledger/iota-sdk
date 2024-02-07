@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
         "NODE_URL",
         "WALLET_DB_PATH",
     ] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Setup Stronghold secret_manager

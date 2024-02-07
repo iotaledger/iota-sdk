@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "1.1.3"
+version = "1.1.4"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -21,7 +21,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 bech32 = { version = "0.10.0-beta", default-features = false, features = [
     "alloc",
 ] }
-bitflags = { version = "2.4.0", default-features = false }
+bitflags = { version = "2.4.2", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [
     "from",
     "from_str",
@@ -39,7 +39,7 @@ hashbrown = { version = "0.14.3", default-features = false, features = [
     "inline-more",
 ] }
 hex = { version = "0.4.3", default-features = false }
-iota-crypto = { version = "0.23.0", default-features = false, features = [
+iota-crypto = { version = "0.23.1", default-features = false, features = [
     "blake2b",
     "ed25519",
     "bip44",
@@ -54,8 +54,8 @@ prefix-hex = { version = "0.7.1", default-features = false, features = [
     "primitive-types",
 ] }
 primitive-types = { version = "0.12.2", default-features = false }
-serde = { version = "1.0.195", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.111", default-features = false, features = [
+serde = { version = "1.0.196", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.113", default-features = false, features = [
     "alloc",
 ] }
 strum = { version = "0.26.1", default-features = false, features = ["derive"] }
@@ -76,7 +76,7 @@ once_cell = { version = "1.19.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [
     "min_const_gen",
 ], optional = true }
-regex = { version = "1.10.2", default-features = false, features = [
+regex = { version = "1.10.3", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
 reqwest = { version = "0.11.23", default-features = false, features = [
@@ -124,7 +124,7 @@ tokio = { version = "1.35.1", default-features = false, features = [
     "time",
     "sync",
 ], optional = true }
-wasm-bindgen-futures = { version = "0.4.39", default-features = false, optional = true }
+wasm-bindgen-futures = { version = "0.4.40", default-features = false, optional = true }
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = ["rand"] }
@@ -672,3 +672,8 @@ required-features = ["wallet", "storage"]
 name = "migrate_stronghold_snapshot_v2_to_v3"
 path = "examples/wallet/migrate_stronghold_snapshot_v2_to_v3.rs"
 required-features = ["stronghold"]
+
+# Allowed only for examples, denied again in lib.rs
+[lints.clippy]
+expect_fun_call = "allow"
+single_element_loop = "allow"

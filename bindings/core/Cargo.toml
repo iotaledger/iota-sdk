@@ -18,7 +18,7 @@ backtrace = { version = "0.3.69", default-features = false, features = ["std"] }
 derivative = { version = "2.2.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 futures = { version = "0.3.30", default-features = false }
-iota-crypto = { version = "0.23.0", default-features = false, features = [
+iota-crypto = { version = "0.23.1", default-features = false, features = [
     "slip10",
     "bip44",
 ] }
@@ -26,8 +26,8 @@ log = { version = "0.4.20", default-features = false }
 packable = { version = "0.10.1", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false }
 primitive-types = { version = "0.12.2", default-features = false }
-serde = { version = "1.0.195", default-features = false }
-serde_json = { version = "1.0.111", default-features = false }
+serde = { version = "1.0.196", default-features = false }
+serde_json = { version = "1.0.113", default-features = false }
 strum = { version = "0.25.0", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.56", default-features = false }
 tokio = { version = "1.35.1", default-features = false }
