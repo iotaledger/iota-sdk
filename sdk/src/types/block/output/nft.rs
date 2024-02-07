@@ -577,12 +577,12 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::nft::dto::NftOutputDto, protocol::protocol_parameters, rand::output::rand_nft_output,
+        output::nft::dto::NftOutputDto, protocol::iota_mainnet_v3_protocol_parameters, rand::output::rand_nft_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
         let nft_output = rand_nft_output(protocol_parameters.token_supply());
         let dto = NftOutputDto::from(&nft_output);
         let output = Output::Nft(NftOutput::try_from(dto).unwrap());

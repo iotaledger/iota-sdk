@@ -16,33 +16,19 @@ use crate::types::block::{slot::EpochIndex, Error};
 #[getset(get_copy = "pub")]
 pub struct RewardsParameters {
     /// Used for shift operation during calculation of profit margin.
-    profit_margin_exponent: u8,
+    pub(crate) profit_margin_exponent: u8,
     /// The length of the bootstrapping phase in epochs.
-    bootstrapping_duration: EpochIndex,
+    pub(crate) bootstrapping_duration: u32,
     /// The coefficient used for calculation of initial rewards.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    mana_share_coefficient: u64,
+    pub(crate) mana_share_coefficient: u64,
     /// The exponent used for calculation of the initial reward.
-    decay_balancing_constant_exponent: u8,
+    pub(crate) decay_balancing_constant_exponent: u8,
     /// An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    decay_balancing_constant: u64,
+    pub(crate) decay_balancing_constant: u64,
     /// The exponent used for shifting operation during the pool rewards calculations.
-    pool_coefficient_exponent: u8,
+    pub(crate) pool_coefficient_exponent: u8,
     // The number of epochs for which rewards are retained.
-    retention_period: u16,
-}
-
-impl Default for RewardsParameters {
-    fn default() -> Self {
-        Self {
-            profit_margin_exponent: 8,
-            bootstrapping_duration: EpochIndex(1079),
-            mana_share_coefficient: 2,
-            decay_balancing_constant_exponent: 8,
-            decay_balancing_constant: 1,
-            pool_coefficient_exponent: 11,
-            retention_period: 384,
-        }
-    }
+    pub(crate) retention_period: u16,
 }

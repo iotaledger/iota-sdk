@@ -5,7 +5,7 @@ use std::{collections::HashSet, str::FromStr};
 
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
-    types::block::{address::Address, output::AccountId, protocol::protocol_parameters},
+    types::block::{address::Address, output::AccountId, protocol::iota_mainnet_v3_protocol_parameters},
 };
 use pretty_assertions::assert_eq;
 
@@ -17,7 +17,7 @@ use crate::client::{
 
 #[test]
 fn no_inputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = Vec::new();
     let outputs = build_outputs([Basic(
@@ -45,7 +45,7 @@ fn no_inputs() {
 
 #[test]
 fn no_outputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = build_inputs(
         [Basic(
@@ -76,7 +76,7 @@ fn no_outputs() {
 
 #[test]
 fn no_outputs_but_required_input() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = build_inputs(
         [Basic(
@@ -117,7 +117,7 @@ fn no_outputs_but_required_input() {
 
 #[test]
 fn no_outputs_but_burn() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -156,7 +156,7 @@ fn no_outputs_but_burn() {
 
 #[test]
 fn no_address_provided() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = build_inputs(
         [Basic(
@@ -189,7 +189,7 @@ fn no_address_provided() {
 
 #[test]
 fn no_matching_address_provided() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = build_inputs(
         [Basic(
@@ -229,7 +229,7 @@ fn no_matching_address_provided() {
 
 #[test]
 fn two_addresses_one_missing() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = build_inputs(
         [
@@ -287,7 +287,7 @@ fn two_addresses_one_missing() {
 
 #[test]
 fn two_addresses() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
 
     let inputs = build_inputs(
         [

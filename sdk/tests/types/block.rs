@@ -5,7 +5,7 @@ use iota_sdk::types::{
     block::{
         helper::network_name_to_id,
         payload::Payload,
-        protocol::{protocol_parameters, ProtocolParameters},
+        protocol::{iota_mainnet_v3_protocol_parameters, ProtocolParameters},
         rand::{
             block::{rand_basic_block_body_builder_with_strong_parents, rand_block, rand_block_with_block_body},
             parents::rand_strong_parents,
@@ -92,7 +92,7 @@ use pretty_assertions::assert_eq;
 // Validate that a `unpack` ∘ `pack` round-trip results in the original block.
 #[test]
 fn pack_unpack_valid() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let block = rand_block(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
@@ -105,7 +105,7 @@ fn pack_unpack_valid() {
 
 #[test]
 fn getters() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 

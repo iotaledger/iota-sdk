@@ -11,16 +11,13 @@ use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 
 pub use self::work_score::{WorkScore, WorkScoreParameters};
-use crate::{
-    types::block::{
-        address::Hrp,
-        helper::network_name_to_id,
-        mana::{ManaParameters, RewardsParameters},
-        output::StorageScoreParameters,
-        slot::{EpochIndex, SlotCommitmentId, SlotIndex},
-        Error, PROTOCOL_VERSION,
-    },
-    utils::ConvertTo,
+use crate::types::block::{
+    address::Hrp,
+    helper::network_name_to_id,
+    mana::{ManaParameters, RewardsParameters},
+    output::StorageScoreParameters,
+    slot::{EpochIndex, SlotCommitmentId, SlotIndex},
+    Error, PROTOCOL_VERSION,
 };
 
 /// Defines the parameters of the protocol at a particular version.
@@ -103,65 +100,7 @@ impl Borrow<()> for ProtocolParameters {
     }
 }
 
-impl Default for ProtocolParameters {
-    fn default() -> Self {
-        Self {
-            kind: 0,
-            version: PROTOCOL_VERSION,
-            // Unwrap: Known to be valid
-            network_name: String::from("iota-core-testnet").try_into().unwrap(),
-            bech32_hrp: Hrp::from_str_unchecked("smr"),
-            storage_score_parameters: Default::default(),
-            work_score_parameters: Default::default(),
-            token_supply: 1_813_620_509_061_365,
-            genesis_slot: 0,
-            genesis_unix_timestamp: 1582328545,
-            slot_duration_in_seconds: 10,
-            epoch_nearing_threshold: 20,
-            slots_per_epoch_exponent: Default::default(),
-            mana_parameters: Default::default(),
-            staking_unbonding_period: 10,
-            validation_blocks_per_slot: 10,
-            punishment_epochs: 9,
-            liveness_threshold_lower_bound: 15,
-            liveness_threshold_upper_bound: 30,
-            min_committable_age: 10,
-            max_committable_age: 20,
-            congestion_control_parameters: Default::default(),
-            version_signaling_parameters: Default::default(),
-            rewards_parameters: Default::default(),
-            target_committee_size: 32,
-            chain_switching_threshold: 3,
-        }
-    }
-}
-
 impl ProtocolParameters {
-    /// Creates a new [`ProtocolParameters`].
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        version: u8,
-        network_name: impl Into<String>,
-        bech32_hrp: impl ConvertTo<Hrp>,
-        storage_score_parameters: StorageScoreParameters,
-        token_supply: u64,
-        genesis_unix_timestamp: u64,
-        slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: u32,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            version,
-            network_name: <StringPrefix<u8>>::try_from(network_name.into()).map_err(Error::InvalidStringPrefix)?,
-            bech32_hrp: bech32_hrp.convert()?,
-            storage_score_parameters,
-            token_supply,
-            genesis_unix_timestamp,
-            slot_duration_in_seconds,
-            epoch_nearing_threshold,
-            ..Default::default()
-        })
-    }
-
     /// Returns the network name of the [`ProtocolParameters`].
     pub fn network_name(&self) -> &str {
         &self.network_name
@@ -319,6 +258,43 @@ impl ProtocolParameters {
             future_bounded_epoch_index + 1
         }
     }
+
+    pub(crate) fn init(mut self) -> Self {
+        self.derive_mana_decay_factors();
+        self.derive_mana_decay_factors_epochs_sum();
+        self.derive_bootstrapping_duration();
+        self
+    }
+
+    pub(crate) fn derive_mana_decay_factors(&mut self) {
+        self.mana_parameters.decay_factors = {
+            let epochs_in_table = (u16::MAX as usize).min(self.epochs_per_year().floor() as usize);
+            let decay_per_epoch = self.decay_per_epoch();
+            (1..=epochs_in_table)
+                .map(|epoch| {
+                    (decay_per_epoch.powi(epoch as _) * 2f64.powi(self.mana_parameters().decay_factors_exponent() as _))
+                        .floor() as u32
+                })
+                .collect::<Box<[_]>>()
+        }
+        .try_into()
+        .unwrap();
+    }
+
+    pub(crate) fn derive_mana_decay_factors_epochs_sum(&mut self) {
+        self.mana_parameters.decay_factor_epochs_sum = {
+            let delta = self.epochs_per_year().recip();
+            let annual_decay_factor = self.mana_parameters().annual_decay_factor();
+            (annual_decay_factor.powf(delta) / (1.0 - annual_decay_factor.powf(delta))
+                * (2f64.powi(self.mana_parameters().decay_factor_epochs_sum_exponent() as _)))
+            .floor() as _
+        };
+    }
+
+    pub(crate) fn derive_bootstrapping_duration(&mut self) {
+        self.rewards_parameters.bootstrapping_duration =
+            (self.epochs_per_year() / -self.mana_parameters().annual_decay_factor().ln()).floor() as _;
+    }
 }
 
 /// Defines the age in which a block can be issued.
@@ -343,38 +319,23 @@ pub struct CommittableAgeRange {
 pub struct CongestionControlParameters {
     /// Minimum value of the reference Mana cost.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    min_reference_mana_cost: u64,
+    pub(crate) min_reference_mana_cost: u64,
     /// Increase step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    increase: u64,
+    pub(crate) increase: u64,
     /// Decrease step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    decrease: u64,
+    pub(crate) decrease: u64,
     /// Threshold for increasing the RMC.
-    increase_threshold: u32,
+    pub(crate) increase_threshold: u32,
     /// Threshold for decreasing the RMC.
-    decrease_threshold: u32,
+    pub(crate) decrease_threshold: u32,
     /// Rate at which the scheduler runs (in workscore units per second).
-    scheduler_rate: u32,
+    pub(crate) scheduler_rate: u32,
     /// Maximum size of the buffer in the scheduler.
-    max_buffer_size: u32,
+    pub(crate) max_buffer_size: u32,
     /// Maximum number of blocks in the validation buffer.
-    max_validation_buffer_size: u32,
-}
-
-impl Default for CongestionControlParameters {
-    fn default() -> Self {
-        Self {
-            min_reference_mana_cost: 500,
-            increase: 500,
-            decrease: 500,
-            increase_threshold: 800000,
-            decrease_threshold: 500000,
-            scheduler_rate: 100000,
-            max_buffer_size: 3276800,
-            max_validation_buffer_size: 100,
-        }
-    }
+    pub(crate) max_validation_buffer_size: u32,
 }
 
 /// Defines the parameters used to signal a protocol parameters upgrade.
@@ -389,37 +350,92 @@ impl Default for CongestionControlParameters {
 pub struct VersionSignalingParameters {
     /// The size of the window in epochs that is used to find which version of protocol parameters was
     /// most signaled, from `current_epoch - window_size` to `current_epoch`.
-    window_size: u8,
+    pub(crate) window_size: u8,
     /// The number of supporters required for a version to win within a `window_size`.
-    window_target_ratio: u8,
+    pub(crate) window_target_ratio: u8,
     /// The offset in epochs required to activate the new version of protocol parameters.
-    activation_offset: u8,
-}
-
-impl Default for VersionSignalingParameters {
-    fn default() -> Self {
-        Self {
-            window_size: 7,
-            window_target_ratio: 5,
-            activation_offset: 7,
-        }
-    }
+    pub(crate) activation_offset: u8,
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.
 #[cfg(any(feature = "test", feature = "rand"))]
-pub fn protocol_parameters() -> ProtocolParameters {
-    ProtocolParameters::new(
-        2,
-        "testnet",
-        "rms",
-        crate::types::block::output::StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
-        1_813_620_509_061_365,
-        1582328545,
-        10,
-        20,
-    )
-    .unwrap()
+pub fn iota_mainnet_v3_protocol_parameters() -> ProtocolParameters {
+    ProtocolParameters {
+        kind: 0,
+        version: PROTOCOL_VERSION,
+        network_name: String::from("testnet").try_into().unwrap(),
+        bech32_hrp: Hrp::from_str_unchecked("rms"),
+        storage_score_parameters: StorageScoreParameters {
+            storage_cost: 100,
+            factor_data: 1,
+            offset_output_overhead: 10,
+            offset_ed25519_block_issuer_key: 100,
+            offset_staking_feature: 100,
+            offset_delegation: 100,
+        },
+        work_score_parameters: WorkScoreParameters {
+            data_byte: 1,
+            block: 1500,
+            input: 10,
+            context_input: 20,
+            output: 20,
+            native_token: 20,
+            staking: 5000,
+            block_issuer: 1000,
+            allotment: 1000,
+            signature_ed25519: 1000,
+        },
+        token_supply: 1_813_620_509_061_365,
+        genesis_slot: 0,
+        genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
+        slot_duration_in_seconds: 10,
+        epoch_nearing_threshold: 60,
+        slots_per_epoch_exponent: 13,
+        mana_parameters: ManaParameters {
+            bits_count: 63,
+            generation_rate: 1,
+            generation_rate_exponent: 17,
+            decay_factors: Default::default(),
+            decay_factors_exponent: 32,
+            decay_factor_epochs_sum: Default::default(),
+            decay_factor_epochs_sum_exponent: 21,
+            annual_decay_factor_percentage: 70,
+        },
+        staking_unbonding_period: 10,
+        validation_blocks_per_slot: 10,
+        punishment_epochs: 10,
+        liveness_threshold_lower_bound: 15,
+        liveness_threshold_upper_bound: 30,
+        min_committable_age: 10,
+        max_committable_age: 20,
+        congestion_control_parameters: CongestionControlParameters {
+            min_reference_mana_cost: 1,
+            increase: 10,
+            decrease: 10,
+            increase_threshold: 800000,
+            decrease_threshold: 500000,
+            scheduler_rate: 100000,
+            max_buffer_size: 1000,
+            max_validation_buffer_size: 100,
+        },
+        version_signaling_parameters: VersionSignalingParameters {
+            window_size: 7,
+            window_target_ratio: 5,
+            activation_offset: 7,
+        },
+        rewards_parameters: RewardsParameters {
+            profit_margin_exponent: 8,
+            bootstrapping_duration: Default::default(),
+            mana_share_coefficient: 2,
+            decay_balancing_constant_exponent: 8,
+            decay_balancing_constant: 1,
+            pool_coefficient_exponent: 11,
+            retention_period: 384,
+        },
+        target_committee_size: 32,
+        chain_switching_threshold: 3,
+    }
+    .init()
 }
 
 crate::impl_id!(

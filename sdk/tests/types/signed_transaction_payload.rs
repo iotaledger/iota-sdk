@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
-    protocol::protocol_parameters,
+    protocol::iota_mainnet_v3_protocol_parameters,
     rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -28,7 +28,7 @@ fn kind() {
 // Validate that attempting to construct a `SignedTransactionPayload` with too few unlocks is an error.
 #[test]
 fn builder_too_few_unlocks() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -65,7 +65,7 @@ fn builder_too_few_unlocks() {
 // Validate that attempting to construct a `SignedTransactionPayload` with too many unlocks is an error.
 #[test]
 fn builder_too_many_unlocks() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     // Construct a transaction with one input and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -104,7 +104,7 @@ fn builder_too_many_unlocks() {
 #[test]
 fn pack_unpack_valid() {
     // Construct a transaction with two inputs and one output.
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -144,7 +144,7 @@ fn pack_unpack_valid() {
 
 #[test]
 fn getters() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));

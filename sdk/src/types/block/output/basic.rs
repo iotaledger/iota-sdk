@@ -472,7 +472,7 @@ mod tests {
     use super::*;
     use crate::types::block::{
         output::{basic::dto::BasicOutputDto, FoundryId, SimpleTokenScheme, TokenId},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_v3_protocol_parameters,
         rand::{
             address::rand_account_address,
             output::{
@@ -483,7 +483,7 @@ mod tests {
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
         let basic_output = rand_basic_output(protocol_parameters.token_supply());
         let dto = BasicOutputDto::from(&basic_output);
         let output = Output::Basic(BasicOutput::try_from(dto).unwrap());

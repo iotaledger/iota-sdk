@@ -15,7 +15,7 @@ use iota_sdk::{
     types::block::{
         input::{Input, UtxoInput},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_v3_protocol_parameters,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -38,7 +38,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -123,7 +123,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -251,7 +251,7 @@ async fn two_signature_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
