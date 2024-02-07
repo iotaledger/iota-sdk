@@ -13,7 +13,7 @@ use crate::{
             node::{Node, NodeAuth, NodeDto},
         },
         secret::SecretManage,
-        Client, ClientBuilder,
+        Client, ClientBuilder, NetworkInfo,
     },
     wallet::{Wallet, WalletBuilder},
 };
@@ -60,10 +60,17 @@ where
         }
 
         if change_in_node_manager {
-            // Update the protocol of the network_info to not have the default data, which can be wrong
-            // Ignore errors, because there might be no node at all and then it should still not error
+            // Update the network info, which can be empty
             if let Ok(info) = self.client.get_info().await {
-                network_info.protocol_parameters = info.node_info.latest_protocol_parameters().parameters.clone();
+                if let Some(network_info) = network_info.as_mut() {
+                    network_info.protocol_parameters = info.node_info.latest_protocol_parameters().parameters.clone();
+                    network_info.tangle_time = info.node_info.status.relative_accepted_tangle_time;
+                } else {
+                    network_info.replace(NetworkInfo {
+                        protocol_parameters: info.node_info.latest_protocol_parameters().parameters.clone(),
+                        tangle_time: info.node_info.status.relative_accepted_tangle_time,
+                    });
+                }
             }
             *self.client.network_info.write().await = network_info;
 

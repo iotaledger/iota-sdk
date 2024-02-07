@@ -133,18 +133,18 @@ impl Packable for OptionalPayload {
         }
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let len = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()? as usize;
+        let len = u32::unpack_inner(unpacker, visitor).coerce()? as usize;
 
         if len > 0 {
             unpacker.ensure_bytes(len)?;
 
             let start_opt = unpacker.read_bytes();
 
-            let payload = Payload::unpack::<_, VERIFY>(unpacker, visitor)?;
+            let payload = Payload::unpack(unpacker, visitor)?;
 
             let actual_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start

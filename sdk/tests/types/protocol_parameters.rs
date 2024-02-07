@@ -15,6 +15,9 @@ fn serde_packable_hash() {
     let params_bytes = params.pack_to_vec();
 
     assert_eq!(prefix_hex::encode(&params_bytes), json["bytes"]);
-    assert_eq!(params, ProtocolParameters::unpack_verified(params_bytes, &()).unwrap());
+    assert_eq!(
+        params,
+        ProtocolParameters::unpack_bytes_verified(params_bytes, &()).unwrap()
+    );
     assert_eq!(params.hash().to_string(), json["hash"]);
 }

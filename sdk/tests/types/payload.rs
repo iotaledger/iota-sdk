@@ -61,7 +61,7 @@ fn transaction() {
     assert!(matches!(payload, Payload::SignedTransaction(_)));
     assert_eq!(
         payload,
-        PackableExt::unpack_verified(packed.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed.as_slice(), &protocol_parameters).unwrap()
     );
 }
 

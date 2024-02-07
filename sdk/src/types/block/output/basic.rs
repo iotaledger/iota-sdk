@@ -188,7 +188,7 @@ impl BasicOutputBuilder {
     pub fn finish(self) -> Result<BasicOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
-        verify_unlock_conditions::<true>(&unlock_conditions)?;
+        verify_unlock_conditions(&unlock_conditions)?;
 
         let features = Features::from_set(self.features)?;
 
@@ -198,7 +198,7 @@ impl BasicOutputBuilder {
             features.native_token(),
             self.mana,
         )?;
-        verify_features::<true>(&features)?;
+        verify_features(&features)?;
 
         let mut output = BasicOutput {
             amount: 0,
@@ -368,38 +368,30 @@ impl WorkScore for BasicOutput {
 
 impl MinimumOutputAmount for BasicOutput {}
 
-fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
-    if VERIFY {
-        if unlock_conditions.address().is_none() {
-            Err(Error::MissingAddressUnlockCondition)
-        } else {
-            verify_allowed_unlock_conditions(unlock_conditions, BasicOutput::ALLOWED_UNLOCK_CONDITIONS)
-        }
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
+    if unlock_conditions.address().is_none() {
+        Err(Error::MissingAddressUnlockCondition)
     } else {
-        Ok(())
+        verify_allowed_unlock_conditions(unlock_conditions, BasicOutput::ALLOWED_UNLOCK_CONDITIONS)
     }
 }
 
-fn verify_unlock_conditions_packable<const VERIFY: bool>(
+fn verify_unlock_conditions_packable(
     unlock_conditions: &UnlockConditions,
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
-    verify_unlock_conditions::<VERIFY>(unlock_conditions)
+    verify_unlock_conditions(unlock_conditions)
 }
 
-fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), Error> {
-    if VERIFY {
-        verify_allowed_features(features, BasicOutput::ALLOWED_FEATURES)
-    } else {
-        Ok(())
-    }
+fn verify_features(features: &Features) -> Result<(), Error> {
+    verify_allowed_features(features, BasicOutput::ALLOWED_FEATURES)
 }
 
-fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
-    verify_features::<VERIFY>(features)
+fn verify_features_packable(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
+    verify_features(features)
 }
 
-fn verify_basic_output<const VERIFY: bool>(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), Error> {
+fn verify_basic_output(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), Error> {
     verify_restricted_addresses(
         output.unlock_conditions(),
         BasicOutput::KIND,

@@ -37,7 +37,7 @@ pub struct ClientBuilder {
     pub broker_options: BrokerOptions,
     /// Data related to the used network
     #[serde(flatten, default)]
-    pub network_info: NetworkInfo,
+    pub network_info: Option<NetworkInfo>,
     /// Timeout for API requests
     #[serde(default = "default_api_timeout")]
     pub api_timeout: Duration,
@@ -62,7 +62,7 @@ impl Default for ClientBuilder {
             node_manager_builder: crate::client::node_manager::NodeManager::builder(),
             #[cfg(feature = "mqtt")]
             broker_options: Default::default(),
-            network_info: NetworkInfo::default(),
+            network_info: None,
             api_timeout: DEFAULT_API_TIMEOUT,
             #[cfg(not(target_family = "wasm"))]
             max_parallel_api_requests: super::constants::MAX_PARALLEL_API_REQUESTS,
@@ -279,11 +279,10 @@ impl ClientBuilder {
 
 /// Struct containing network related information
 // TODO do we really want a default?
-#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
     /// Protocol parameters.
-    #[serde(default)]
     pub protocol_parameters: ProtocolParameters,
     /// The current tangle time.
     #[serde(skip)]

@@ -529,30 +529,30 @@ impl Packable for FoundryOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let serial_number = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let token_scheme = TokenScheme::unpack::<_, VERIFY>(unpacker, &())?;
+        let serial_number = u32::unpack_inner(unpacker, visitor).coerce()?;
+        let token_scheme = TokenScheme::unpack_inner(unpacker, visitor)?;
 
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let features = Features::unpack_inner(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
                 .map_err(UnpackError::Packable)?;
         }

@@ -46,7 +46,7 @@ impl core::ops::Deref for Client {
 pub struct ClientInner {
     /// Node manager
     pub(crate) node_manager: RwLock<NodeManager>,
-    pub(crate) network_info: RwLock<NetworkInfo>,
+    pub(crate) network_info: RwLock<Option<NetworkInfo>>,
     /// HTTP request timeout.
     pub(crate) api_timeout: RwLock<Duration>,
     #[cfg(feature = "mqtt")]
@@ -107,24 +107,45 @@ impl ClientInner {
         // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
+            self.fetch_network_info().await?
+        }
+
+        #[cfg(not(target_family = "wasm"))]
+        Ok(if let Some(info) = &*self.network_info.read().await {
+            info.clone()
+        } else {
+            self.fetch_network_info().await?
+        })
+    }
+
+    pub(crate) async fn fetch_network_info(&self) -> Result<NetworkInfo> {
+        #[cfg(target_family = "wasm")]
+        {
             let current_time = crate::client::unix_timestamp_now().as_secs() as u32;
             if let Some(last_sync) = *self.last_sync.lock().await {
                 if current_time < last_sync {
                     return Ok(self.network_info.read().await.clone());
                 }
             }
-            let info = self.get_info().await?.node_info;
-            let mut client_network_info = self.network_info.write().await;
-            client_network_info.protocol_parameters = info
-                .protocol_parameters_by_version(PROTOCOL_VERSION)
-                .expect("missing v3 protocol parameters")
-                .parameters
-                .clone();
+        }
+        let info = self.get_info().await?.node_info;
+        let protocol_parameters = info
+            .protocol_parameters_by_version(crate::types::block::PROTOCOL_VERSION)
+            .expect("missing v3 protocol parameters")
+            .parameters
+            .clone();
+        let network_info = NetworkInfo {
+            protocol_parameters,
+            tangle_time: info.status.relative_accepted_tangle_time,
+        };
+        let mut client_network_info = self.network_info.write().await;
+        client_network_info.replace(network_info.clone());
 
+        #[cfg(target_family = "wasm")]
+        {
             *self.last_sync.lock().await = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
         }
-
-        Ok(self.network_info.read().await.clone())
+        Ok(network_info)
     }
 
     /// Gets the protocol parameters of the node we're connecting to.

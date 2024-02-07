@@ -32,7 +32,7 @@ pub struct ManaAllotment {
 
 impl ManaAllotment {
     pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
-        verify_mana::<true>(&mana)?;
+        verify_mana(&mana)?;
 
         Ok(Self { account_id, mana })
     }
@@ -64,8 +64,8 @@ impl WorkScore for ManaAllotment {
     }
 }
 
-fn verify_mana<const VERIFY: bool>(mana: &u64) -> Result<(), Error> {
-    if VERIFY && *mana == 0 {
+fn verify_mana(mana: &u64) -> Result<(), Error> {
+    if *mana == 0 {
         return Err(Error::InvalidManaValue(*mana));
     }
 
@@ -121,14 +121,9 @@ impl ManaAllotments {
     }
 }
 
-fn verify_mana_allotments<const VERIFY: bool>(
-    allotments: &[ManaAllotment],
-    protocol_params: &ProtocolParameters,
-) -> Result<(), Error> {
-    if VERIFY {
-        verify_mana_allotments_unique_sorted(allotments)?;
-        verify_mana_allotments_sum(allotments, protocol_params)?;
-    }
+fn verify_mana_allotments(allotments: &[ManaAllotment], protocol_params: &ProtocolParameters) -> Result<(), Error> {
+    verify_mana_allotments_unique_sorted(allotments)?;
+    verify_mana_allotments_sum(allotments, protocol_params)?;
 
     Ok(())
 }

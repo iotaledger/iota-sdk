@@ -46,7 +46,7 @@ fn serde_roundtrip() {
 #[test]
 fn unpack_invalid_order() {
     assert!(matches!(
-        MetadataFeature::unpack_verified([3, 1, 99, 0, 0, 1, 98, 0, 0, 1, 97, 0, 0], &()),
+        MetadataFeature::unpack_bytes_verified([3, 1, 99, 0, 0, 1, 98, 0, 0, 1, 97, 0, 0], &()),
         Err(UnpackError::Packable(Error::InvalidMetadataFeature(error_msg))) if &error_msg == "unordered map"
     ));
 }
@@ -54,7 +54,7 @@ fn unpack_invalid_order() {
 #[test]
 fn unpack_invalid_length() {
     assert!(matches!(
-        MetadataFeature::unpack_verified([vec![1, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()),
+        MetadataFeature::unpack_bytes_verified([vec![1, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()),
         Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "Out of bounds byte length: 8197"
     ));
 }

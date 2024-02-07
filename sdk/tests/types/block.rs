@@ -5,7 +5,7 @@ use iota_sdk::types::{
     block::{
         helper::network_name_to_id,
         payload::Payload,
-        protocol::{iota_mainnet_v3_protocol_parameters, ProtocolParameters},
+        protocol::iota_mainnet_v3_protocol_parameters,
         rand::{
             block::{rand_basic_block_body_builder_with_strong_parents, rand_block, rand_block_with_block_body},
             parents::rand_strong_parents,
@@ -99,7 +99,7 @@ fn pack_unpack_valid() {
     assert_eq!(packed_block.len(), block.packed_len());
     assert_eq!(
         block,
-        PackableExt::unpack_verified(packed_block.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed_block.as_slice(), &protocol_parameters).unwrap()
     );
 }
 
@@ -122,7 +122,7 @@ fn getters() {
 
 #[test]
 fn dto_mismatch_version() {
-    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
     let issuing_time = protocol_parameters.genesis_unix_timestamp()
@@ -166,7 +166,7 @@ fn dto_mismatch_version() {
 
 #[test]
 fn dto_mismatch_network_id() {
-    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
     let issuing_time = protocol_parameters.genesis_unix_timestamp()

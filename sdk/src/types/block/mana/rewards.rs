@@ -4,7 +4,7 @@
 use getset::CopyGetters;
 use packable::Packable;
 
-use crate::types::block::{slot::EpochIndex, Error};
+use crate::types::block::Error;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(

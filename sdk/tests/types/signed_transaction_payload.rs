@@ -138,7 +138,7 @@ fn pack_unpack_valid() {
     assert_eq!(packed_tx_payload.len(), tx_payload.packed_len());
     assert_eq!(
         tx_payload,
-        PackableExt::unpack_verified(packed_tx_payload.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed_tx_payload.as_slice(), &protocol_parameters).unwrap()
     );
 }
 

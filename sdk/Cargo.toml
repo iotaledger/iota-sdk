@@ -46,7 +46,7 @@ iota-crypto = { version = "0.23.1", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.2.0", default-features = false }
-packable = { version = "0.10.1", default-features = false, features = [
+packable = { git = "https://github.com/DaughterOfMars/common-rs.git", branch = "feat/remove-visitor-default-bound", default-features = false, features = [
     "primitive-types",
 ] }
 paste = { version = "1.0.14", default-features = false }

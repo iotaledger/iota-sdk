@@ -44,9 +44,9 @@ fn binary_response<T: PackableExt>(
     let file = std::fs::read_to_string(format!("./tests/types/api/fixtures/{path}")).unwrap();
     let bytes = hex::decode(file).unwrap();
     let mut unpacker = SliceUnpacker::new(bytes.as_slice());
-    let res = T::unpack::<_, true>(&mut unpacker, visitor);
+    let res = T::unpack_verified(&mut unpacker, visitor);
 
-    assert!(u8::unpack::<_, true>(&mut unpacker, &()).is_err());
+    assert!(u8::unpack_verified(&mut unpacker, &()).is_err());
 
     res
 }

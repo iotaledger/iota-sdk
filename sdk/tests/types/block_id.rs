@@ -53,7 +53,7 @@ fn pack_unpack_valid() {
     assert_eq!(packed_block_id.len(), block_id.packed_len());
     assert_eq!(
         block_id,
-        PackableExt::unpack_verified(packed_block_id.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_block_id.as_slice(), &()).unwrap()
     );
 }
 
@@ -90,7 +90,7 @@ fn basic_block_tagged_data_payload_id() {
     let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
-    assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
+    assert_eq!(block, Block::unpack_bytes_unverified(block_bytes).unwrap());
     assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
     assert_eq!(block_work_score, json["workScore"]);
 }
@@ -108,7 +108,7 @@ fn basic_block_transaction_payload_id() {
     let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
-    assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
+    assert_eq!(block, Block::unpack_bytes_unverified(block_bytes).unwrap());
     assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
     assert_eq!(block_work_score, json["workScore"]);
 }
@@ -124,6 +124,6 @@ fn validation_block_id() {
     let block_bytes = block.pack_to_vec();
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
-    assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
+    assert_eq!(block, Block::unpack_bytes_unverified(block_bytes).unwrap());
     assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
 }

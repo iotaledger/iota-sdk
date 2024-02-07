@@ -487,39 +487,39 @@ impl Packable for AccountOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let mana = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let account_id = AccountId::unpack_inner(unpacker, visitor).coerce()?;
 
-        let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let foundry_counter = u32::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_index_counter(&account_id, foundry_counter).map_err(UnpackError::Packable)?;
         }
 
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions, &account_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let features = Features::unpack_inner(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
                 .map_err(UnpackError::Packable)?;
         }

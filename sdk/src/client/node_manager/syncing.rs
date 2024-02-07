@@ -10,7 +10,7 @@ use {
 };
 
 use super::{Node, NodeManager};
-use crate::client::{Client, ClientInner, Error, Result};
+use crate::client::{Client, ClientInner, Error, NetworkInfo, Result};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
@@ -110,14 +110,21 @@ impl ClientInner {
         if let Some(nodes) = network_nodes.get(most_nodes.0) {
             if let Some((info, _node_url)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
-
-                network_info.tangle_time = info.status.relative_accepted_tangle_time;
                 // Unwrap: We should always have parameters for this version. If we don't we can't recover.
-                network_info.protocol_parameters = info
+                let protocol_parameters = info
                     .protocol_parameters_by_version(PROTOCOL_VERSION)
                     .expect("missing v3 protocol parameters")
                     .parameters
                     .clone();
+                if let Some(network_info) = network_info.as_mut() {
+                    network_info.tangle_time = info.status.relative_accepted_tangle_time;
+                    network_info.protocol_parameters = protocol_parameters;
+                } else {
+                    network_info.replace(NetworkInfo {
+                        protocol_parameters,
+                        tangle_time: info.status.relative_accepted_tangle_time,
+                    });
+                }
             }
 
             for (info, node_url) in nodes {

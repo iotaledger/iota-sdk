@@ -284,6 +284,8 @@ where
             .as_ref()
             .unwrap()
             .network_info
+            .as_ref()
+            .ok_or(crate::wallet::Error::MissingParameter("protocol_parameters"))?
             .protocol_parameters
             .bech32_hrp;
         let bip_path = self.bip_path.as_ref().unwrap();

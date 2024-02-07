@@ -220,10 +220,8 @@ mod test {
 
     #[test]
     fn mana_decay_no_factors() {
-        let mana_parameters = ManaParameters {
-            decay_factors: Box::<[_]>::default().try_into().unwrap(),
-            ..Default::default()
-        };
+        let mut mana_parameters = params().mana_parameters().clone();
+        mana_parameters.decay_factors = Box::<[_]>::default().try_into().unwrap();
         assert_eq!(mana_parameters.decay(100, 100), 100);
     }
 

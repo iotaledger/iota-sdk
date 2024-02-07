@@ -30,5 +30,8 @@ fn pack_unpack_valid() {
     let sig = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_packed = sig.pack_to_vec();
 
-    assert_eq!(sig, PackableExt::unpack_verified(sig_packed.as_slice(), &()).unwrap());
+    assert_eq!(
+        sig,
+        PackableExt::unpack_bytes_verified(sig_packed.as_slice(), &()).unwrap()
+    );
 }

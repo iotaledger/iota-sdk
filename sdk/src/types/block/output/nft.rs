@@ -453,32 +453,32 @@ impl Packable for NftOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let mana = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let nft_id = NftId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let nft_id = NftId::unpack_inner(unpacker, visitor).coerce()?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions, &nft_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let features = Features::unpack_inner(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor)?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
                 .map_err(UnpackError::Packable)?;
         }

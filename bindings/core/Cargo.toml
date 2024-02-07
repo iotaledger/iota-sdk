@@ -23,7 +23,9 @@ iota-crypto = { version = "0.23.1", default-features = false, features = [
     "bip44",
 ] }
 log = { version = "0.4.20", default-features = false }
-packable = { version = "0.10.1", default-features = false }
+packable = { git = "https://github.com/DaughterOfMars/common-rs.git", branch = "feat/remove-visitor-default-bound", default-features = false, features = [
+    "primitive-types",
+] }
 prefix-hex = { version = "0.7.1", default-features = false }
 primitive-types = { version = "0.12.2", default-features = false }
 serde = { version = "1.0.196", default-features = false }
