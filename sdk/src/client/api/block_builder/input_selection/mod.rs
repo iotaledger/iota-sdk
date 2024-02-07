@@ -402,8 +402,11 @@ impl InputSelection {
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn or mana allotments are provided, outputs will be added later.
-            if !(self.outputs.is_empty() && (self.burn.is_some() || self.mana_allotments != 0)) {
+            // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
+            // create remainder outputs.
+            if !(self.outputs.is_empty()
+                && (self.burn.is_some() || self.mana_allotments != 0 || !self.required_inputs.is_empty()))
+            {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
         }
@@ -445,12 +448,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         for output_id in self.mana_rewards.keys() {
-            if self
-                .selected_inputs
-                .iter()
-                .find(|i| output_id == i.output_id())
-                .is_none()
-            {
+            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
                 return Err(Error::ExtraManaRewards(*output_id));
             }
         }
@@ -489,7 +487,7 @@ impl InputSelection {
                     input_accounts.push(input);
                 }
                 Output::Foundry(foundry) => {
-                    input_chains_foundries.insert(foundry.chain_id(), &input.output);
+                    input_chains_foundries.insert(foundry.chain_id(), (input.output_id(), &input.output));
                     input_foundries.push(input);
                 }
                 Output::Nft(_) => {

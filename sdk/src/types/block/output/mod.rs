@@ -336,12 +336,10 @@ impl Output {
     pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
         match self {
             // Validator Rewards
-            Output::Account(account_input) => {
-                account_input.can_claim_rewards(next_state.and_then(Output::as_account_opt))
-            }
+            Self::Account(account_input) => account_input.can_claim_rewards(next_state.and_then(Self::as_account_opt)),
             // Delegator Rewards
-            Output::Delegation(delegation_input) => {
-                delegation_input.can_claim_rewards(next_state.and_then(Output::as_delegation_opt))
+            Self::Delegation(delegation_input) => {
+                delegation_input.can_claim_rewards(next_state.and_then(Self::as_delegation_opt))
             }
             _ => false,
         }

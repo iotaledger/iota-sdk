@@ -220,13 +220,14 @@ class Utils():
 
     @staticmethod
     def verify_transaction_semantic(
-            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None, mana_rewards: Optional[dict[OutputId, int]] = None) -> str:
         """Verifies the semantic of a transaction.
         """
         return _call_method('verifyTransactionSemantic', {
             'transaction': transaction,
             'inputs': inputs,
             'unlocks': unlocks,
+            'manaRewards': mana_rewards,
             'protocolParameters': protocol_parameters,
         })
 
@@ -270,6 +271,25 @@ class Utils():
 
         return DecayedMana(int(decayed_mana["stored"]), int(
             decayed_mana["potential"]))
+
+    @staticmethod
+    def verify_transaction_syntax(
+            transaction: SignedTransactionPayload, protocol_parameters: ProtocolParameters):
+        """Verifies the syntax of a transaction.
+        """
+        _call_method('verifyTransactionSyntax', {
+            'transaction': transaction.as_dict(),
+            'protocolParameters': protocol_parameters.as_dict(),
+        })
+
+    @staticmethod
+    def block_bytes(
+            block: Block) -> bytes:
+        """Returns the serialized bytes of a block.
+        """
+        return bytes(_call_method('blockBytes', {
+            'block': block.as_dict(),
+        }))
 
 
 class UtilsError(Exception):

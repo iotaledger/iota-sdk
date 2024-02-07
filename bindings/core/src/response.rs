@@ -156,6 +156,7 @@ pub enum Response {
     BlockWithMetadata(BlockWithMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
+    /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
@@ -288,6 +289,7 @@ pub enum Response {
     /// - [`StartBackgroundSync`](crate::method::WalletMethod::StartBackgroundSync),
     /// - [`StoreMnemonic`](crate::method::WalletMethod::StoreMnemonic),
     /// - [`StopBackgroundSync`](crate::method::WalletMethod::StopBackgroundSync),
+    /// - [`VerifyTransactionSyntax`](crate::method::UtilsMethod::VerifyTransactionSyntax),
     Ok,
     /// Response for any method that returns an error.
     Error(Error),

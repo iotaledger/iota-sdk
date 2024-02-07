@@ -39,8 +39,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  format:
     name: Python PEP8 format
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }} and Pip Cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: bindings/python/requirements-dev.txt
+
+      - name: Install Dependencies for Python Binding Format
+        run: |
+          python3 -m pip install --upgrade setuptools pip wheel
+          python3 -m pip install tox-gh-actions
+
+      - name: Run tox format check
+        working-directory: bindings/python
+        run: tox -e format
+
+  lint:
+    name: Python lint
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -63,13 +91,25 @@ jobs:
           python3 -m pip install --upgrade setuptools pip wheel
           python3 -m pip install tox-gh-actions
 
-      - name: Run tox format check
+      - name: Install required packages (Ubuntu)
+        run: |
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+
+      - name: Run linter for iota_sdk
         working-directory: bindings/python
-        run: tox -e format
+        run: tox -e lint-sdk
+
+      - name: Run linter for examples
+        working-directory: bindings/python
+        run: tox -e lint-examples
+
+      - name: Run linter for tests
+        working-directory: bindings/python
+        run: tox -e lint-tests
 
   test:
-    name: Linter & Tests
-    needs: lint
+    name: Tests
+    needs: format
     if: ${{ ! github.event.schedule }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -110,21 +150,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Run linter for iota_sdk
-        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
-        working-directory: bindings/python
-        run: tox -e lint-sdk
-
-      - name: Run linter for examples
-        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
-        working-directory: bindings/python
-        run: tox -e lint-examples
-
-      - name: Run linter for tests
-        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
-        working-directory: bindings/python
-        run: tox -e lint-tests
 
       - name: Run tests
         working-directory: bindings/python

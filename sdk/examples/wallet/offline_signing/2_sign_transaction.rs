@@ -30,9 +30,8 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    #[allow(clippy::single_element_loop)]
     for var in ["STRONGHOLD_PASSWORD"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Setup Stronghold secret_manager
@@ -58,6 +57,7 @@ async fn main() -> Result<()> {
     let signed_transaction_data = SignedTransactionData {
         payload: signed_transaction,
         inputs_data: prepared_transaction_data.inputs_data,
+        mana_rewards: prepared_transaction_data.mana_rewards,
     };
 
     println!("Signed transaction.");

@@ -24,20 +24,20 @@ iota-sdk-bindings-core = { path = "../core", default-features = false, features 
 ] }
 
 console_error_panic_hook = { version = "0.1.7", default-features = false }
-js-sys = { version = "0.3.66", default-features = false, features = [] }
+js-sys = { version = "0.3.67", default-features = false, features = [] }
 log = { version = "0.4.20", default-features = false }
-serde_json = { version = "1.0.111", default-features = false }
+serde_json = { version = "1.0.113", default-features = false }
 tokio = { version = "1.35.1", default-features = false, features = ["sync"] }
-wasm-bindgen = { version = "0.2.89", default-features = false, features = [
+wasm-bindgen = { version = "0.2.90", default-features = false, features = [
     "spans",
     "std",
     "serde-serialize",
 ] }
-wasm-bindgen-futures = { version = "0.4.39", default-features = false }
+wasm-bindgen-futures = { version = "0.4.40", default-features = false }
 wasm-logger = { version = "0.2.0", default-features = false }
 
 [target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies]
-getrandom = { version = "0.2.11", default-features = false, features = ["js"] }
+getrandom = { version = "0.2.12", default-features = false, features = ["js"] }
 instant = { version = "0.1.12", default-features = false, features = [
     "wasm-bindgen",
 ] }

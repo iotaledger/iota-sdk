@@ -7,9 +7,9 @@ Command line interface application for the [IOTA sdk wallet](https://github.com/
 After downloading the CLI, initialize the signer for the wallet. On Mac and Linux you will first need to `chmod +x ./wallet`.
 
 ```
-./wallet init --node http://node.url:port --mnemonic MNEMONIC
+./wallet init --node-url http://node.url:port --mnemonic MNEMONIC
 // Example:
-./wallet init --node "http://localhost:8050" --mnemonic "giant dynamic museum toddler six deny defense ostrich bomb access mercy
+./wallet init --node-url "http://localhost:8050" --mnemonic "giant dynamic museum toddler six deny defense ostrich bomb access mercy
 blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally"
 ```
 

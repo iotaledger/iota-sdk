@@ -38,6 +38,7 @@ async fn main() -> Result<()> {
     client
         .subscribe(
             [
+                Topic::new("commitments/latest")?,
                 Topic::new("blocks")?,
                 Topic::new(format!("outputs/unlock/address/{address}"))?,
             ],
@@ -59,7 +60,7 @@ async fn main() -> Result<()> {
             _ = rx.recv() => {
                 event_count += 1;
                 if event_count == num_events {
-                    client.unsubscribe([Topic::new("commitment-info/latest")?]).await?;
+                    client.unsubscribe([Topic::new("commitments/latest")?]).await?;
                     client.unsubscribe([Topic::new("blocks")?]).await?;
                     client.unsubscribe([Topic::new(format!("outputs/unlock/address/{address}"))?]).await?;
                     break;
