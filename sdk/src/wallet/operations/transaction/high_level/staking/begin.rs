@@ -88,7 +88,10 @@ where
                 params.staked_amount,
                 params.fixed_cost,
                 start_epoch,
-                EpochIndex(u32::MAX),
+                params
+                    .staking_period
+                    .map(|period| start_epoch + period)
+                    .unwrap_or(EpochIndex(u32::MAX)),
             ))
             .finish_output()?;
 
