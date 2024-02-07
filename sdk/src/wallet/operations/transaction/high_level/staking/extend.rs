@@ -60,7 +60,7 @@ where
 
         // Just extend the end epoch if it's still possible
         if future_bounded_epoch <= staking_feature.end_epoch() {
-            output_builder = output_builder.add_feature(StakingFeature::new(
+            output_builder = output_builder.replace_feature(StakingFeature::new(
                 staking_feature.staked_amount(),
                 staking_feature.fixed_cost(),
                 staking_feature.start_epoch(),
@@ -77,7 +77,7 @@ where
             let past_bounded_epoch =
                 protocol_parameters.epoch_index_of(protocol_parameters.past_bounded_slot(slot_commitment_id));
             let end_epoch = past_bounded_epoch + additional_epochs;
-            output_builder = output_builder.add_feature(StakingFeature::new(
+            output_builder = output_builder.replace_feature(StakingFeature::new(
                 staking_feature.staked_amount(),
                 staking_feature.fixed_cost(),
                 past_bounded_epoch,
