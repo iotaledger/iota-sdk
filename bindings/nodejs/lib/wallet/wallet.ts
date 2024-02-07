@@ -1446,7 +1446,7 @@ export class Wallet {
      * @param accountId The ID of the account to announce candidacy.
      * @returns The submitted block ID.
      */
-    async announceCandidacy(accountId?: AccountId): Promise<BlockId> {
+    async announceCandidacy(accountId: AccountId): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'announceCandidacy',
             data: {

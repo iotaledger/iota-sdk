@@ -47,7 +47,7 @@ export type __AccountsMethod__ = {
 export type __AnnounceCandidacyMethod__ = {
     name: 'announceCandidacy';
     data: {
-        accountId?: AccountId;
+        accountId: AccountId;
     };
 };
 

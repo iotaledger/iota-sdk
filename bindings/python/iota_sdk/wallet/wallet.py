@@ -688,7 +688,7 @@ class Wallet():
         ))
         return PreparedTransaction(self, prepared)
 
-    def announce_candidacy(self, account_id: Optional[HexStr] = None) -> HexStr:
+    def announce_candidacy(self, account_id: HexStr) -> HexStr:
         """Announce a staking account's candidacy for the staking period.
         """
         self._call_method(

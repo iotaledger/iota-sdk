@@ -17,10 +17,7 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Announce a staking account's candidacy for the staking period.
-    pub async fn announce_candidacy(
-        &self,
-        account_id: impl Into<Option<AccountId>> + Send,
-    ) -> crate::wallet::Result<BlockId> {
+    pub async fn announce_candidacy(&self, account_id: AccountId) -> crate::wallet::Result<BlockId> {
         self.submit_basic_block(Payload::CandidacyAnnouncement(CandidacyAnnouncementPayload), account_id)
             .await
     }
