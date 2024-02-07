@@ -96,6 +96,12 @@ class StorageScoreParameters:
         encoder=str
     ))
 
+    def as_dict(self):
+        """Converts this object to a dict.
+        """
+        res = {k: v for k, v in self.__dict__.items() if v is not None}
+        return res
+
 
 @json
 @dataclass
@@ -124,6 +130,14 @@ class WorkScoreParameters:
     block_issuer: int
     allotment: int
     signature_ed25519: int
+
+    def as_dict(self):
+        """Converts this object to a dict.
+        """
+        res = {k: v for k, v in self.__dict__.items() if v is not None}
+        if res["rentStructure"]:
+            res["rentStructure"] = res["rentStructure"].as_dict()
+        return res
 
 
 @json

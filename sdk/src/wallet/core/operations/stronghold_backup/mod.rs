@@ -18,8 +18,8 @@ use crate::{
 };
 
 impl Wallet {
-    /// Backup the wallet data in a Stronghold file
-    /// stronghold_password must be the current one when Stronghold is used as SecretManager.
+    /// Backup the wallet data in a Stronghold file.
+    /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(
         &self,
         backup_path: PathBuf,
@@ -127,7 +127,7 @@ impl Wallet {
         if let Some(mut read_secret_manager) = read_secret_manager {
             // We have to replace the snapshot path with the current one, when building stronghold
             if let SecretManagerDto::Stronghold(stronghold_dto) = &mut read_secret_manager {
-                stronghold_dto.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
+                stronghold_dto.snapshot_path = new_snapshot_path.display().to_string();
             }
 
             let restored_secret_manager = SecretManager::from_config(&read_secret_manager)
