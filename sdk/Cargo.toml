@@ -324,16 +324,16 @@ name = "send_native_tokens"
 path = "examples/how_tos/native_tokens/send.rs"
 required-features = ["rocksdb", "stronghold"]
 
-# Account wallet example
+# Account Output Examples
 
 [[example]]
-name = "account_wallet_request_funds"
-path = "examples/how_tos/account_wallet/request_funds.rs"
+name = "account_output_request_funds"
+path = "examples/how_tos/account_output/request_funds.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
-name = "account_wallet_transaction"
-path = "examples/how_tos/account_wallet/transaction.rs"
+name = "account_output_send_amount"
+path = "examples/how_tos/account_output/send_amount.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]

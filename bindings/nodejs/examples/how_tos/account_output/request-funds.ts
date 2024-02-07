@@ -11,7 +11,7 @@ import { Utils, Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/account_wallet/request-funds.ts
+// yarn run-example ./how_tos/account_output/request-funds.ts
 
 // In this example we request funds to the wallet's first account output address.
 async function run() {

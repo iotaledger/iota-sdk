@@ -5,7 +5,7 @@
 //!
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example account_wallet_request_funds`
+//! `cargo run --release --all-features --example account_output_request_funds`
 
 use iota_sdk::{
     client::request_funds_from_faucet,
