@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
-from iota_sdk.types.committee import Committee, Validator, Validators
+from iota_sdk.types.committee import CommitteeResponse, ValidatorResponse, ValidatorsResponse
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
 from iota_sdk.types.issuance import CongestionResponse, IssuanceBlockHeaderResponse
 from iota_sdk.types.mana import ManaRewards
@@ -140,31 +140,31 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Committee routes.
 
-    def get_committee(self, epoch_index: EpochIndex) -> Committee:
+    def get_committee(self, epoch_index: EpochIndex) -> CommitteeResponse:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
         current committee members are returned.
         GET /api/core/v3/committee/?epochIndex
         """
-        return Committee.from_dict(self._call_method('getCommittee', {
+        return CommitteeResponse.from_dict(self._call_method('getCommittee', {
             'epochIndex': epoch_index
         }))
 
     # Validators routes.
 
-    def get_validators(self, page_size, cursor) -> Validators:
+    def get_validators(self, page_size, cursor) -> ValidatorsResponse:
         """Returns information of all registered validators and if they are active.
         GET JSON to /api/core/v3/validators
         """
-        return Validators.from_dict(self._call_method('getValidators', {
+        return ValidatorsResponse.from_dict(self._call_method('getValidators', {
             'pageSize': page_size,
             'cursor': cursor
         }))
 
-    def get_validator(self, account_id: HexStr) -> Validator:
+    def get_validator(self, account_id: HexStr) -> ValidatorResponse:
         """Return information about a validator.
         GET /api/core/v3/validators/{bech32Address}
         """
-        return Validator.from_dict(self._call_method('getValidator', {
+        return ValidatorResponse.from_dict(self._call_method('getValidator', {
             'accountId': account_id
         }))
 

@@ -32,7 +32,7 @@ class CommitteeMember:
 
 @json
 @dataclass
-class Committee:
+class CommitteeResponse:
     """The validator information of the committee.
     Response of GET /api/core/v3/committee
 
@@ -54,8 +54,9 @@ class Committee:
 
 @json
 @dataclass
-class Validator:
+class ValidatorResponse:
     """Information of a validator.
+    Response of GET /api/core/v3/validators/{bech32Address}
 
     Attributes:
         address: Account address of the validator.
@@ -85,16 +86,16 @@ class Validator:
 
 @json
 @dataclass
-class Validators:
+class ValidatorsResponse:
     """A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
     (are eligible for committee selection).
-    Response of GET /api/core/v3/blocks/validators.
+    Response of GET /api/core/v3/validators
 
     Attributes:
         stakers: List of registered validators ready for the next epoch.
         page_size: The number of validators returned per one API request with pagination.
         cursor: The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the last page.
     """
-    stakers: List[Validator]
+    stakers: List[ValidatorResponse]
     page_size: int
     cursor: Optional[str] = None
