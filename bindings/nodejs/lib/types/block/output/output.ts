@@ -161,10 +161,6 @@ abstract class CommonOutput extends Output {
         }
         return undefined;
     }
-
-    getUnlockConditions(): UnlockCondition[] {
-        return this.unlockConditions;
-    }
 }
 
 /**
