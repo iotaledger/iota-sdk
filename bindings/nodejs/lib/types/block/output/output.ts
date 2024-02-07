@@ -23,7 +23,7 @@ import { INativeToken } from '../../models/native-token';
 
 export class OutputId extends IdWithSlotIndex {
     outputIndex(): number {
-        const numberString = this.id.toString().slice(-4);
+        const numberString = this.slice(-4);
         const chunks = [];
         for (
             let i = 0, charsLength = numberString.length;

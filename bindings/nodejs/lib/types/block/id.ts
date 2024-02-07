@@ -7,22 +7,9 @@ import { SlotIndex } from './slot';
 /**
  * Base class for IDs with a hex encoded slot index at the end.
  */
-export class IdWithSlotIndex {
-    id: string;
-    constructor(id: string) {
-        this.id = id;
-    }
-    inspect() {
-        return this.id;
-    }
-    toString() {
-        return this.id;
-    }
-    toJSON() {
-        return this.id;
-    }
+export class IdWithSlotIndex extends String {
     slotIndex(): SlotIndex {
-        const numberString = this.id.toString().slice(66, 74);
+        const numberString = super.slice(66, 74);
         const chunks = [];
         for (
             let i = 0, charsLength = numberString.length;
