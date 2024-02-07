@@ -17,6 +17,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.unlock import Unlock
 from iota_sdk.types.transaction_data import InputSigningData
 from iota_sdk.external import call_utils_method
+from iota_sdk.types.node_info import NodeInfoProtocol
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -271,6 +272,25 @@ class Utils():
 
         return DecayedMana(int(decayed_mana["stored"]), int(
             decayed_mana["potential"]))
+
+    @staticmethod
+    def verify_transaction_syntax(
+            transaction: SignedTransactionPayload, protocol_parameters: NodeInfoProtocol):
+        """Verifies the syntax of a transaction.
+        """
+        _call_method('verifyTransactionSyntax', {
+            'transaction': transaction.as_dict(),
+            'protocolParameters': protocol_parameters.as_dict(),
+        })
+
+    @staticmethod
+    def block_bytes(
+            block: Block) -> bytes:
+        """Returns the serialized bytes of a block.
+        """
+        return bytes(_call_method('blockBytes', {
+            'block': block.as_dict(),
+        }))
 
 
 class UtilsError(Exception):
