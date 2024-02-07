@@ -10,6 +10,7 @@ from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.decayed_mana import DecayedMana
+from iota_sdk.types.ids import BlockId, TransactionId
 from iota_sdk.types.payload import Transaction, SignedTransactionPayload
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output import Output
@@ -145,7 +146,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
+    def compute_output_id(transaction_id: TransactionId, index: int) -> OutputId:
         """Compute the output id from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {
@@ -165,21 +166,21 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: Block, params: ProtocolParameters) -> HexStr:
+    def block_id(block: Block, params: ProtocolParameters) -> BlockId:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
-        return _call_method('blockId', {
+        return BlockId(_call_method('blockId', {
             'block': block,
             'protocolParameters': params,
-        })
+        }))
 
     @staticmethod
-    def transaction_id(payload: SignedTransactionPayload) -> HexStr:
+    def transaction_id(payload: SignedTransactionPayload) -> TransactionId:
         """ Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
         """
-        return _call_method('transactionId', {
+        return TransactionId(_call_method('transactionId', {
             'payload': payload
-        })
+        }))
 
     @staticmethod
     def protocol_parameters_hash(params: ProtocolParameters) -> HexStr:

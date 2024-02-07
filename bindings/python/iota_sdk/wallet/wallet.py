@@ -15,6 +15,7 @@ from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.types.filter_options import FilterOptions
+from iota_sdk.types.ids import BlockId, TransactionId
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
@@ -424,7 +425,7 @@ class Wallet():
         )
 
     def get_transaction(
-            self, transaction_id: HexStr) -> TransactionWithMetadata:
+            self, transaction_id: TransactionId) -> TransactionWithMetadata:
         """Get transaction.
         """
         return TransactionWithMetadata.from_dict(self._call_method(
@@ -655,17 +656,17 @@ class Wallet():
         return PreparedTransaction(self, prepared)
 
     def reissue_transaction_until_included(
-            self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
+            self, transaction_id: TransactionId, interval=None, max_attempts=None) -> BlockId:
         """Reissues a transaction sent from the wallet for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
-        return self._call_method(
+        return BlockId(self._call_method(
             'reissueTransactionUntilIncluded', {
                 'transactionId': transaction_id,
                 'interval': interval,
                 'maxAttempts': max_attempts
             }
-        )
+        ))
 
     def send(self, amount: int, address: str,
              options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:

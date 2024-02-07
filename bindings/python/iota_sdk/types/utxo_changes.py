@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import List
-
 from dataclasses import dataclass
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import json
+from iota_sdk.types.output_id import OutputId
 
 
 @json
@@ -14,5 +14,5 @@ class UtxoChanges():
     Returns all UTXO changes that happened at a specific milestone.
     """
     index: int
-    created_outputs: List[HexStr]
-    consumed_outputs: List[HexStr]
+    created_outputs: List[OutputId]
+    consumed_outputs: List[OutputId]
