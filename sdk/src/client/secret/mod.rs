@@ -22,7 +22,7 @@ pub mod types;
 
 #[cfg(feature = "stronghold")]
 use std::time::Duration;
-use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
+use std::{collections::HashMap, fmt, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
@@ -139,7 +139,7 @@ pub trait SecretManage: Send + Sync {
 }
 
 pub trait SecretManagerConfig: SecretManage {
-    type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
+    type Config: Serialize + DeserializeOwned + fmt::Debug + Send + Sync;
 
     fn to_config(&self) -> Option<Self::Config>;
 
@@ -202,8 +202,8 @@ impl From<PrivateKeySecretManager> for SecretManager {
     }
 }
 
-impl Debug for SecretManager {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for SecretManager {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(_) => f.debug_tuple("Stronghold").field(&"...").finish(),
@@ -213,6 +213,27 @@ impl Debug for SecretManager {
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(_) => f.debug_tuple("PrivateKey").field(&"...").finish(),
             Self::Placeholder => f.debug_struct("Placeholder").finish(),
+        }
+    }
+}
+
+impl fmt::Display for SecretManager {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(_) => write!(f, "Stronghold"),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(l) => {
+                if l.is_simulator {
+                    write!(f, "LedgerNano Simulator")
+                } else {
+                    write!(f, "LedgerNano")
+                }
+            }
+            Self::Mnemonic(_) => write!(f, "Mnemonic"),
+            #[cfg(feature = "private_key_secret_manager")]
+            Self::PrivateKey(_) => write!(f, "PrivateKey"),
+            Self::Placeholder => write!(f, "Placeholder"),
         }
     }
 }

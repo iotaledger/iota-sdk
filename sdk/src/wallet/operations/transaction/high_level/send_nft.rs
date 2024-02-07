@@ -47,13 +47,10 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Sends native tokens in basic outputs with a
-    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and an
-    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so that
-    /// the storage deposit is returned to the sender and the sender gets access to the output again after a
-    /// predefined time (default 1 day).
-    /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy. Note that custom
-    /// inputs will be replaced with the required nft inputs and addresses need to be bech32-encoded.
+    /// Sends an NFT to the provided address.
+    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally. The
+    /// options may define the remainder value strategy. Note that custom inputs will be replaced with the required
+    /// nft inputs and addresses need to be bech32-encoded.
     /// ```ignore
     /// let params = [SendNftParams::new(
     ///     "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",

@@ -8,7 +8,7 @@ use std::str::FromStr;
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use iota_sdk::{
-    client::request_funds_from_faucet,
+    client::{request_funds_from_faucet, secret::SecretManager},
     types::block::{
         address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
@@ -34,7 +34,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 use self::completer::WalletCommandHelper;
 use crate::{
     error::Error,
-    helper::{bytes_from_hex_or_file, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -1239,6 +1239,17 @@ pub enum PromptResponse {
     Done,
 }
 
+async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
+    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+        && !wallet.is_stronghold_password_available().await?
+    {
+        let password = get_password("Stronghold password", false)?;
+        wallet.set_stronghold_password(password).await?;
+    }
+
+    Ok(())
+}
+
 pub async fn prompt_internal(
     wallet: &Wallet,
     rl: &mut Editor<WalletCommandHelper, MemHistory>,
@@ -1277,25 +1288,42 @@ pub async fn prompt_internal(
                         WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
                         WalletCommand::AllotMana { mana, account_id } => {
+                            ensure_password(wallet).await?;
                             allot_mana_command(wallet, mana, account_id).await
                         }
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             burn_native_token_command(wallet, token_id, amount).await
                         }
-                        WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
-                        WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
+                        WalletCommand::BurnNft { nft_id } => {
+                            ensure_password(wallet).await?;
+                            burn_nft_command(wallet, nft_id).await
+                        }
+                        WalletCommand::Claim { output_id } => {
+                            ensure_password(wallet).await?;
+                            claim_command(wallet, output_id).await
+                        }
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
                         WalletCommand::Congestion { account_id, work_score } => {
                             congestion_command(wallet, account_id, work_score).await
                         }
-                        WalletCommand::Consolidate => consolidate_command(wallet).await,
-                        WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
+                        WalletCommand::Consolidate => {
+                            ensure_password(wallet).await?;
+                            consolidate_command(wallet).await
+                        }
+                        WalletCommand::CreateAccountOutput => {
+                            ensure_password(wallet).await?;
+                            create_account_output_command(wallet).await
+                        }
                         WalletCommand::CreateDelegation {
                             address,
                             delegated_amount,
                             validator_account_id,
-                        } => create_delegation_command(wallet, address, delegated_amount, validator_account_id).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            create_delegation_command(wallet, address, delegated_amount, validator_account_id).await
+                        }
                         WalletCommand::CreateNativeToken {
                             circulating_supply,
                             maximum_supply,
@@ -1303,6 +1331,7 @@ pub async fn prompt_internal(
                             foundry_metadata_hex,
                             foundry_metadata_file,
                         } => {
+                            ensure_password(wallet).await?;
                             create_native_token_command(
                                 wallet,
                                 circulating_supply,
@@ -1317,14 +1346,20 @@ pub async fn prompt_internal(
                         WalletCommand::DelayDelegationClaiming {
                             delegation_id,
                             reclaim_excess,
-                        } => delay_delegation_claiming_command(wallet, delegation_id, reclaim_excess).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            delay_delegation_claiming_command(wallet, delegation_id, reclaim_excess).await
+                        }
                         WalletCommand::DestroyAccount { account_id } => {
+                            ensure_password(wallet).await?;
                             destroy_account_command(wallet, account_id).await
                         }
                         WalletCommand::DestroyDelegation { delegation_id } => {
+                            ensure_password(wallet).await?;
                             destroy_delegation_command(wallet, delegation_id).await
                         }
                         WalletCommand::DestroyFoundry { foundry_id } => {
+                            ensure_password(wallet).await?;
                             destroy_foundry_command(wallet, foundry_id).await
                         }
                         WalletCommand::Exit => {
@@ -1335,13 +1370,16 @@ pub async fn prompt_internal(
                             implicit_account_creation_address_command(wallet).await
                         }
                         WalletCommand::ImplicitAccountTransition { output_id } => {
+                            ensure_password(wallet).await?;
                             implicit_account_transition_command(wallet, output_id).await
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             melt_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             mint_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNft {
@@ -1356,6 +1394,7 @@ pub async fn prompt_internal(
                             sender,
                             issuer,
                         } => {
+                            ensure_password(wallet).await?;
                             mint_nft_command(
                                 wallet,
                                 address,
@@ -1383,6 +1422,7 @@ pub async fn prompt_internal(
                             expiration,
                             allow_micro_amount,
                         } => {
+                            ensure_password(wallet).await?;
                             let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
                                 true
                             } else {
@@ -1395,8 +1435,14 @@ pub async fn prompt_internal(
                             token_id,
                             amount,
                             gift_storage_deposit,
-                        } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
-                        WalletCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await
+                        }
+                        WalletCommand::SendNft { address, nft_id } => {
+                            ensure_password(wallet).await?;
+                            send_nft_command(wallet, address, nft_id).await
+                        }
                         WalletCommand::Sync => sync_command(wallet).await,
                         WalletCommand::Transaction { selector } => transaction_command(wallet, selector).await,
                         WalletCommand::Transactions { show_details } => {
