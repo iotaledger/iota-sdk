@@ -556,8 +556,8 @@ where
     let slot_index = prepared_transaction_data
         .transaction
         .context_inputs()
-        .iter()
-        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+        .commitment()
+        .map(|c| c.slot_index());
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
@@ -643,13 +643,14 @@ where
     let PreparedTransactionData {
         transaction,
         inputs_data,
+        mana_rewards,
         ..
     } = prepared_transaction_data;
     let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, protocol_parameters.clone())?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone())?;
 
     if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
