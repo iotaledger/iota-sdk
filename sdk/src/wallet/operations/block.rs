@@ -31,7 +31,7 @@ where
             let protocol_parameters = self.client().get_protocol_parameters().await?;
             let work_score = protocol_parameters.work_score(unsigned_block.body.as_basic());
             let congestion = self.client().get_account_congestion(&issuer_id, work_score).await?;
-            if !congestion.ready {
+            if (congestion.reference_mana_cost * work_score as u64) as i128 > congestion.block_issuance_credits {
                 return Err(crate::wallet::Error::InsufficientBic {
                     available: congestion.block_issuance_credits,
                     required: work_score as u64 * congestion.reference_mana_cost,
