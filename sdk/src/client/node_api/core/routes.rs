@@ -333,7 +333,7 @@ impl ClientInner {
     ) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes");
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, None, false, true).await
     }
 
     /// Get all full UTXO changes of a given slot by slot commitment ID.
@@ -368,7 +368,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes");
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, None, false, true).await
     }
 
     /// Get all full UTXO changes of a given slot by its index.
