@@ -30,11 +30,11 @@ class UtxoChangesResponse():
 @json
 @dataclass
 class OutputWithId():
-    """An Output and its ID.
+    """An Output with its ID.
 
     Arguments:
-        output_id: OutputId,
         output: Output,
+        output_id: OutputId,
     """
     output_id: OutputId
     output: Output

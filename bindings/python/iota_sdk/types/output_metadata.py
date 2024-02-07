@@ -34,7 +34,7 @@ class OutputMetadata:
 @json
 @dataclass
 class OutputWithMetadata:
-    """An output and its metadata.
+    """An output with its metadata.
 
     Attributes:
         metadata: The `OutputMetadata` object that belongs to `output`.

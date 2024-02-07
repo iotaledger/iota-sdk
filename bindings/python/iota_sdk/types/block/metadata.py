@@ -100,7 +100,7 @@ class BlockFailureReason(IntEnum):
 @json
 @dataclass
 class BlockWithMetadataResponse:
-    """A block and its metadata.
+    """A block with its metadata.
     Response of GET /api/core/v3/blocks/{blockId}/full.
 
     Attributes:
