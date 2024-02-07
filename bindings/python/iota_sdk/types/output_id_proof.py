@@ -87,7 +87,7 @@ class OutputIdProof:
     """
     slot: SlotIndex
     output_index: int
-    transaction_commitment: str
+    transaction_commitment: HexStr
     output_commitment_proof: OutputCommitmentProof
 
 
