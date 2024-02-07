@@ -1,6 +1,7 @@
 # Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
 from enum import IntEnum
 from typing import Any, Dict, TypeAlias, Union
 from dataclasses import dataclass, field
@@ -73,9 +74,6 @@ class ValueHash:
     hash: HexStr
 
 
-OutputCommitmentProof: TypeAlias = Union[HashableNode, LeafHash, ValueHash]
-
-
 @json
 @dataclass
 class OutputIdProof:
@@ -91,3 +89,6 @@ class OutputIdProof:
     output_index: int
     transaction_commitment: str
     output_commitment_proof: OutputCommitmentProof
+
+
+OutputCommitmentProof: TypeAlias = Union[HashableNode, LeafHash, ValueHash]
