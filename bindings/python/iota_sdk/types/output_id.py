@@ -25,7 +25,7 @@ class OutputId(dict):
             raise ValueError('transaction_id must start with 0x')
         # Validate that it has only valid hex characters
         int(transaction_id[2:], 16)
-        output_index_hex = (output_index).to_bytes(4, "little").hex()
+        output_index_hex = (output_index).to_bytes(2, "little").hex()
         self.output_id = transaction_id + output_index_hex
         self.transaction_id = TransactionId(transaction_id)
         self.output_index = output_index
