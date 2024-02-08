@@ -689,14 +689,14 @@ class Wallet():
         ))
         return PreparedTransaction(self, prepared)
 
-    def announce_candidacy(self, account_id: HexStr) -> HexStr:
+    def announce_candidacy(self, account_id: HexStr) -> BlockId:
         """Announce a staking account's candidacy for the staking period.
         """
-        self._call_method(
+        return BlockId(self._call_method(
             'announceCandidacy', {
                 'accountId': account_id,
             }
-        )
+        ))
 
     def send_transaction(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:

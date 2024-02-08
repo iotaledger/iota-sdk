@@ -66,7 +66,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return from_dict(NodeInfoWrapper, self._call_method('getInfo'))
 
-    def get_tips(self) -> List[HexStr]:
+    def get_tips(self) -> List[BlockId]:
         """Request tips from the node.
         """
         return self._call_method('getTips')
