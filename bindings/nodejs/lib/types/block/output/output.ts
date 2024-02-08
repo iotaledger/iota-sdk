@@ -19,7 +19,7 @@ import {
     IdWithSlotIndex,
 } from '../id';
 import { EpochIndex } from '../../block/slot';
-import { INativeToken } from '../../models/native-token';
+import { NativeToken } from '../../models/native-token';
 
 export class OutputId extends IdWithSlotIndex {
     outputIndex(): number {
@@ -149,7 +149,7 @@ abstract class CommonOutput extends Output {
     /**
      * The native token held by the output.
      */
-    getNativeToken(): INativeToken | undefined {
+    getNativeToken(): NativeToken | undefined {
         if (!this.features) {
             return undefined;
         }
