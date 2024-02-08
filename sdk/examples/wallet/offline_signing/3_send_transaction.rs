@@ -70,10 +70,8 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> 
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
-    // Wait for transaction to get included
-    let block_id = wallet
-        .reissue_transaction_until_included(transaction_id, None, None)
-        .await?;
+    // Wait for transaction to get accepted
+    let block_id = wallet.await_transaction_acceptance(transaction_id, None, None).await?;
     println!(
         "Block included: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),

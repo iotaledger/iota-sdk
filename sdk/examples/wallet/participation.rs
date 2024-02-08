@@ -137,7 +137,7 @@ async fn main() -> Result<()> {
 
     println!("Waiting for `increase voting power` transaction to be included...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -162,7 +162,7 @@ async fn main() -> Result<()> {
 
     println!("Waiting for `decrease voting power` transaction to be included...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -187,7 +187,7 @@ async fn main() -> Result<()> {
 
     println!("Waiting for `vote` transaction to be included...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -214,7 +214,7 @@ async fn main() -> Result<()> {
 
     println!("Waiting for `stop participating` transaction to be included...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -238,7 +238,7 @@ async fn main() -> Result<()> {
 
     println!("Waiting for `decrease voting power` transaction to be included...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",

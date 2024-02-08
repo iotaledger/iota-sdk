@@ -7,7 +7,7 @@ use crate::{
         Error as ClientError,
     },
     types::{
-        api::core::{BlockState, TransactionState},
+        api::core::TransactionState,
         block::{
             payload::{signed_transaction::TransactionId, Payload},
             BlockId,
@@ -16,48 +16,68 @@ use crate::{
     wallet::{types::InclusionState, Error, Wallet},
 };
 
-const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
-const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
+const DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL: u64 = 1;
+const DEFAULT_AWAIT_TX_ACCEPTANCE_MAX_AMOUNT: u64 = 80;
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
     Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Reissues a transaction sent from the account for a provided transaction id until it's
-    /// included (referenced by a milestone). Returns the included block id.
-    pub async fn reissue_transaction_until_included(
+    /// Checks the transaction state for a provided transaction id until it's accepted. Returns the block id that
+    /// contains this transaction.
+    pub async fn await_transaction_acceptance(
         &self,
         transaction_id: &TransactionId,
         interval: Option<u64>,
         max_attempts: Option<u64>,
     ) -> crate::wallet::Result<BlockId> {
-        log::debug!("[reissue_transaction_until_included]");
+        log::debug!("[await_transaction_acceptance]");
 
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let transaction = self.data().await.transactions.get(transaction_id).cloned();
+        let transaction = self
+            .data()
+            .await
+            .transactions
+            .get(transaction_id)
+            .cloned()
+            .ok_or_else(|| Error::TransactionNotFound(*transaction_id))?;
 
-        if let Some(transaction) = transaction {
-            if transaction.inclusion_state == InclusionState::Confirmed {
-                return transaction.block_id.ok_or(Error::MissingParameter("block id"));
-            }
+        if transaction.inclusion_state == InclusionState::Accepted
+            || transaction.inclusion_state == InclusionState::Confirmed
+            || transaction.inclusion_state == InclusionState::Finalized
+        {
+            return transaction.block_id.ok_or(Error::MissingParameter("block id"));
+        }
 
-            if transaction.inclusion_state == InclusionState::Conflicting
-                || transaction.inclusion_state == InclusionState::UnknownPruned
-            {
-                return Err(ClientError::TangleInclusion(format!(
-                    "transaction id: {} inclusion state: {:?}",
-                    transaction_id, transaction.inclusion_state
-                ))
-                .into());
-            }
+        if transaction.inclusion_state == InclusionState::Conflicting
+            || transaction.inclusion_state == InclusionState::UnknownPruned
+        {
+            return Err(ClientError::TangleInclusion(format!(
+                "transaction id: {} inclusion state: {:?}",
+                transaction_id, transaction.inclusion_state
+            ))
+            .into());
+        }
 
-            let first_block_id = match transaction.block_id {
-                Some(block_id) => block_id,
-                None => self
-                    .client()
+        let block_id = match transaction.block_id {
+            Some(block_id) => block_id,
+            None => {
+                let wallet_data = self.data().await;
+                let issuer_id = transaction
+                    .payload
+                    .transaction()
+                    .allotments()
+                    .first()
+                    .map(|a| *a.account_id())
+                    .or_else(|| wallet_data.first_account_id())
+                    .ok_or(Error::AccountNotFound)?;
+                drop(wallet_data);
+
+                let protocol_parameters = self.client().get_protocol_parameters().await?;
+
+                self.client()
                     .build_basic_block(
-                        todo!("issuer id"),
+                        issuer_id,
                         Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                     )
                     .await?
@@ -66,76 +86,43 @@ where
                         self.bip_path().await.ok_or(Error::MissingBipPath)?,
                     )
                     .await?
-                    .id(&protocol_parameters),
-            };
-
-            // Attachments of the Block to check inclusion state
-            // TODO: remove when todos in `finish_basic_block_builder()` are removed
-            #[allow(unused_mut)]
-            let mut block_ids = vec![first_block_id];
-            for _ in 0..max_attempts.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT) {
-                let duration =
-                    std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL));
-
-                #[cfg(target_family = "wasm")]
-                gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
-
-                #[cfg(not(target_family = "wasm"))]
-                tokio::time::sleep(duration).await;
-
-                // Check inclusion state for each attachment
-                let block_ids_len = block_ids.len();
-                let mut failed = false;
-                for (index, block_id) in block_ids.clone().iter().enumerate() {
-                    let block_metadata = self.client().get_block_metadata(block_id).await?;
-                    if let Some(transaction_state) = block_metadata.transaction_metadata.map(|m| m.transaction_state) {
-                        match transaction_state {
-                            // TODO: find out what to do with TransactionState::Confirmed
-                            TransactionState::Finalized => return Ok(*block_id),
-                            // only set it as failed here and don't return, because another reissued block could
-                            // have the included transaction
-                            // TODO: check if the comment above is still correct with IOTA 2.0
-                            TransactionState::Failed => failed = true,
-                            // TODO: what to do when confirmed?
-                            _ => {}
-                        };
-                    }
-                    // Only reissue latest attachment of the block
-                    if index == block_ids_len - 1 && block_metadata.block_state == BlockState::Rejected {
-                        let reissued_block = self
-                            .client()
-                            .build_basic_block(
-                                todo!("issuer id"),
-                                Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
-                            )
-                            .await?
-                            .sign_ed25519(
-                                &*self.get_secret_manager().read().await,
-                                self.bip_path().await.ok_or(Error::MissingBipPath)?,
-                            )
-                            .await?;
-                        block_ids.push(reissued_block.id(&protocol_parameters));
-                    }
-                }
-                // After we checked all our reissued blocks, check if the transaction got reissued in another block
-                // and confirmed
-                // TODO: can this still be the case? Is the TransactionState per transaction or per attachment in a
-                // block?
-                if failed {
-                    let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
-                        if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
-                            // If no block was found with this transaction id, then it can't get included
-                            ClientError::TangleInclusion(first_block_id.to_string())
-                        } else {
-                            e
-                        }
-                    })?;
-                    return Ok(included_block.id(&protocol_parameters));
-                }
+                    .id(&protocol_parameters)
             }
-            Err(ClientError::TangleInclusion(first_block_id.to_string()).into())
-        } else {
-            Err(Error::TransactionNotFound(*transaction_id))
+        };
+
+        let duration = std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL));
+        for _ in 0..max_attempts.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_MAX_AMOUNT) {
+            #[cfg(target_family = "wasm")]
+            gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
+
+            #[cfg(not(target_family = "wasm"))]
+            tokio::time::sleep(duration).await;
+
+            let mut failed = false;
+            let block_metadata = self.client().get_block_metadata(&block_id).await?;
+            if let Some(transaction_state) = block_metadata.transaction_metadata.map(|m| m.transaction_state) {
+                match transaction_state {
+                    TransactionState::Accepted | TransactionState::Confirmed | TransactionState::Finalized => {
+                        return Ok(block_id);
+                    }
+                    TransactionState::Failed => failed = true,
+                    TransactionState::Pending => {}
+                };
+            }
+            // Check if the transaction got reissued in another block and confirmed there
+            if failed {
+                let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
+                    if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
+                        // If no block was found with this transaction id, then it can't get included
+                        ClientError::TangleInclusion(block_id.to_string())
+                    } else {
+                        e
+                    }
+                })?;
+                let protocol_parameters = self.client().get_protocol_parameters().await?;
+                return Ok(included_block.id(&protocol_parameters));
+            }
         }
+        Err(ClientError::TangleInclusion(block_id.to_string()).into())
     }
 }

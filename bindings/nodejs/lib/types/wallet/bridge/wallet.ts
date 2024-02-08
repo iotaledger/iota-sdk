@@ -372,8 +372,8 @@ export type __RegisterParticipationEventsMethod__ = {
     };
 };
 
-export type __ReissueTransactionUntilIncludedMethod__ = {
-    name: 'reissueTransactionUntilIncluded';
+export type __awaitTransactionAcceptanceMethod__ = {
+    name: 'awaitTransactionAcceptance';
     data: {
         transactionId: TransactionId;
         interval?: number;

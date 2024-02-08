@@ -717,10 +717,10 @@ class Wallet():
         ))
         return PreparedTransaction(self, prepared)
 
-    def reissue_transaction_until_included(
+    def await_transaction_acceptance(
             self, transaction_id: TransactionId, interval=None, max_attempts=None) -> BlockId:
-        """Reissues a transaction sent from the wallet for a provided transaction id until it's
-        included (referenced by a milestone). Returns the included block id.
+        """Checks the transaction state for a provided transaction id until it's accepted. Returns the block id that
+        contains this transaction.
         """
         return BlockId(self._call_method(
             'reissueTransactionUntilIncluded', {

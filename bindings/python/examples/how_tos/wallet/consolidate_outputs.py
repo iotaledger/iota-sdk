@@ -50,7 +50,7 @@ transaction = wallet.consolidate_outputs(ConsolidationParams(force=True))
 print('Transaction sent: ', transaction.transaction_id)
 
 # Wait for the consolidation transaction to get confirmed
-block_id = wallet.reissue_transaction_until_included(
+block_id = wallet.await_transaction_acceptance(
     transaction.transaction_id)
 
 print(

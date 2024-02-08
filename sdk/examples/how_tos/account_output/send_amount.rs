@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         )
         .await?;
     wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
 
     println!(

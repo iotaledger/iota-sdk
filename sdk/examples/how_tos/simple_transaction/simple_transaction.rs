@@ -43,9 +43,9 @@ async fn main() -> Result<()> {
     println!("Trying to send '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
     let transaction = wallet.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
 
-    // Wait for transaction to get included
+    // Wait for transaction to get accepted
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
 
     println!(

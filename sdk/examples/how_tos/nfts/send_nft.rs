@@ -51,9 +51,9 @@ async fn main() -> Result<()> {
         let transaction = wallet.send_nft(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get included
+        // Wait for transaction to get accepted
         let block_id = wallet
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+            .await_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
 
         println!(
