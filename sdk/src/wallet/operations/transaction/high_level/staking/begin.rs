@@ -16,7 +16,7 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BeginStakingParams {
-    /// The account id which will become a validator.
+    /// The account id which will begin staking.
     pub account_id: AccountId,
     /// The amount of tokens to stake.
     pub staked_amount: u64,

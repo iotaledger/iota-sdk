@@ -7,6 +7,7 @@ import {
     Bech32Address,
     ContextInput,
     ManaAllotment,
+    OutputId,
 } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
@@ -22,7 +23,7 @@ export interface TransactionOptions {
     /** Transaction context inputs to include. */
     contextInputs?: ContextInput[];
     /** Inputs that must be used for the transaction. */
-    mandatoryInputs?: string[];
+    mandatoryInputs?: OutputId[];
     /** Specifies what needs to be burned during input selection. */
     burn?: Burn;
     /** Optional note, that is only stored locally. */
