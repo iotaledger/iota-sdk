@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::BTreeMap;
+
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
@@ -1100,11 +1102,14 @@ async fn destroy_null_id() -> Result<()> {
         ])
         .finish_with_params(&protocol_parameters)?;
 
+    let mut mana_rewards = BTreeMap::default();
+    mana_rewards.insert(*inputs[0].output_id(), 0);
+
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
-        mana_rewards: Default::default(),
+        mana_rewards,
     };
 
     let unlocks = secret_manager
