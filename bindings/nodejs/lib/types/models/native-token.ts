@@ -9,7 +9,7 @@ import { hexToBigInt } from '../utils/hex-encoding';
 /**
  * Native token.
  */
-export class INativeToken {
+export class NativeToken {
     /**
      * Identifier of the native token.
      */
