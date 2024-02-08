@@ -35,7 +35,7 @@ async function run() {
             if (
                 basicOutput.unlockConditions.length === 1 &&
                 basicOutput.unlockConditions[0] instanceof
-                AddressUnlockCondition &&
+                    AddressUnlockCondition &&
                 hexEncodedwalletAddress.includes(
                     (
                         basicOutput
@@ -48,7 +48,7 @@ async function run() {
 
             console.log(
                 'The output has only an address unlock condition and the address is from the wallet: ' +
-                controlledByWallet,
+                    controlledByWallet,
             );
         }
     } catch (error) {

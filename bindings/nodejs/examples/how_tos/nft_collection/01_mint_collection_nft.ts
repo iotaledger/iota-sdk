@@ -73,7 +73,8 @@ async function run() {
             );
 
             console.log(
-                `Minting ${chunk.length} NFTs... (${i + chunk.length
+                `Minting ${chunk.length} NFTs... (${
+                    i + chunk.length
                 }/${NFT_COLLECTION_SIZE})`,
             );
             const transaction = await wallet.mintNfts(chunk);
