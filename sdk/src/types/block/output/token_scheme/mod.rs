@@ -13,7 +13,7 @@ use crate::types::block::{
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeKind)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum TokenScheme {
     ///
     #[packable(tag = SimpleTokenScheme::KIND)]
@@ -46,3 +46,6 @@ impl WorkScore for TokenScheme {
         }
     }
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(TokenScheme: Simple);

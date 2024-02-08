@@ -4,7 +4,7 @@
 import {
     UnlockCondition,
     Feature,
-    INativeToken,
+    NativeToken,
     NumericString,
     u64,
 } from '../..';
@@ -20,7 +20,7 @@ export interface BasicOutputBuilderParams {
     /**
      * The native tokens to be held by the output.
      */
-    nativeTokens?: INativeToken[];
+    nativeTokens?: NativeToken[];
     /**
      * The unlock conditions for the output.
      */

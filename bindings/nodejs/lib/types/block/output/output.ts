@@ -13,7 +13,7 @@ import { HexEncodedString, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { AccountId, NftId, AnchorId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
-import { INativeToken } from '../../models/native-token';
+import { NativeToken } from '../../models/native-token';
 
 export type OutputId = HexEncodedString;
 
@@ -127,7 +127,7 @@ abstract class CommonOutput extends Output {
     /**
      * The native token held by the output.
      */
-    getNativeToken(): INativeToken | undefined {
+    getNativeToken(): NativeToken | undefined {
         if (!this.features) {
             return undefined;
         }
