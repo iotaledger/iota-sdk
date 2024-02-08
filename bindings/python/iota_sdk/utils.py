@@ -10,13 +10,13 @@ from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.decayed_mana import DecayedMana
-from iota_sdk.types.ids import BlockId, TransactionId
+from iota_sdk.types.block.block import BlockId
 from iota_sdk.types.payload import Transaction, SignedTransactionPayload
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.unlock import Unlock
-from iota_sdk.types.transaction_data import InputSigningData
+from iota_sdk.types.transaction_data import InputSigningData, TransactionId
 from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import

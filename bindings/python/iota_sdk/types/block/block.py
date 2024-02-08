@@ -9,6 +9,7 @@ from iota_sdk.utils import Utils
 from iota_sdk.types.common import HexStr, IdWithSlotIndex, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Signature
+from iota_sdk.types.slot import SlotCommitmentId
 from iota_sdk.types.block.body.basic import BasicBlockBody
 from iota_sdk.types.block.body.validation import ValidationBlockBody
 from iota_sdk.types.block.body.type import BlockBodyType
