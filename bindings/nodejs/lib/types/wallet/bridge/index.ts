@@ -1,4 +1,5 @@
 import type {
+    __AnnounceCandidacyMethod__,
     __PrepareBurnMethod__,
     __PrepareClaimOutputsMethod__,
     __ClaimOutputsMethod__,
@@ -27,6 +28,9 @@ import type {
     __PrepareSendMethod__,
     __PrepareCreateDelegationMethod__,
     __PrepareDelayDelegationClaimingMethod__,
+    __PrepareBeginStakingMethod__,
+    __PrepareExtendStakingMethod__,
+    __PrepareEndStakingMethod__,
     __PrepareTransactionMethod__,
     __RegisterParticipationEventsMethod__,
     __ReissueTransactionUntilIncludedMethod__,
@@ -71,6 +75,7 @@ import type {
 } from './wallet';
 
 export type __WalletMethod__ =
+    | __AnnounceCandidacyMethod__
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
     | __PrepareClaimOutputsMethod__
@@ -104,6 +109,9 @@ export type __WalletMethod__ =
     | __PrepareSendMethod__
     | __PrepareCreateDelegationMethod__
     | __PrepareDelayDelegationClaimingMethod__
+    | __PrepareBeginStakingMethod__
+    | __PrepareExtendStakingMethod__
+    | __PrepareEndStakingMethod__
     | __PrepareTransactionMethod__
     | __RegisterParticipationEventsMethod__
     | __ReissueTransactionUntilIncludedMethod__

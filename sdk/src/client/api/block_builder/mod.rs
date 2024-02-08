@@ -16,7 +16,11 @@ use crate::{
 };
 
 impl ClientInner {
-    pub async fn build_basic_block(&self, issuer_id: AccountId, payload: Option<Payload>) -> Result<UnsignedBlock> {
+    pub async fn build_basic_block(
+        &self,
+        issuer_id: AccountId,
+        payload: impl Into<Option<Payload>> + Send,
+    ) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
 
         let issuing_time = {
@@ -65,7 +69,7 @@ impl ClientInner {
             )
             .with_weak_parents(issuance.weak_parents()?)
             .with_shallow_like_parents(issuance.shallow_like_parents()?)
-            .with_payload(payload)
+            .with_payload(payload.into())
             .finish_block_body()?,
         ))
     }

@@ -16,7 +16,7 @@ use crate::{
         address::Hrp,
         helper::network_name_to_id,
         mana::{ManaParameters, RewardsParameters},
-        output::StorageScoreParameters,
+        output::{StorageScore, StorageScoreParameters},
         slot::{EpochIndex, SlotCommitmentId, SlotIndex},
         Error, PROTOCOL_VERSION,
     },
@@ -318,6 +318,16 @@ impl ProtocolParameters {
         } else {
             future_bounded_epoch_index + 1
         }
+    }
+
+    /// Get the storage score of a value.
+    pub fn storage_score(&self, value: &impl StorageScore) -> u64 {
+        value.storage_score(self.storage_score_parameters())
+    }
+
+    /// Get the work score of a value.
+    pub fn work_score(&self, value: &impl WorkScore) -> u32 {
+        value.work_score(self.work_score_parameters())
     }
 }
 
