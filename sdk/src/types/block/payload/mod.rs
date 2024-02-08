@@ -175,12 +175,43 @@ pub mod dto {
     use crate::types::{block::Error, TryFromDto};
 
     /// Describes all the different payload types.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
     #[serde(untagged)]
     pub enum PayloadDto {
         TaggedData(Box<TaggedDataPayload>),
         SignedTransaction(Box<SignedTransactionPayloadDto>),
         CandidacyAnnouncement,
+    }
+
+    impl<'de> Deserialize<'de> for PayloadDto {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let value = serde_json::Value::deserialize(d)?;
+            Ok(
+                match value
+                    .get("type")
+                    .and_then(serde_json::Value::as_u64)
+                    .ok_or_else(|| serde::de::Error::custom(core::concat!("invalid PayloadDto type")))?
+                    as u8
+                {
+                    TaggedDataPayload::KIND => Self::from(TaggedDataPayload::deserialize(value).map_err(|e| {
+                        serde::de::Error::custom(alloc::format!(
+                            core::concat!("cannot deserialize TaggedDataPayload: {}"),
+                            e
+                        ))
+                    })?),
+                    SignedTransactionPayload::KIND => {
+                        Self::from(SignedTransactionPayloadDto::deserialize(value).map_err(|e| {
+                            serde::de::Error::custom(alloc::format!(
+                                core::concat!("cannot deserialize SignedTransactionPayload: {}"),
+                                e
+                            ))
+                        })?)
+                    }
+                    CandidacyAnnouncementPayload::KIND => Self::CandidacyAnnouncement,
+                    _ => return Err(serde::de::Error::custom(core::concat!("invalid PayloadDto type"))),
+                },
+            )
+        }
     }
 
     impl From<TaggedDataPayload> for PayloadDto {
