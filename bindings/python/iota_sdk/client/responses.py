@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from dataclasses_json import config
 
 from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.block.metadata import BlockFailureReason, BlockState
 from iota_sdk.types.committee import CommitteeMember
 from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
@@ -338,7 +339,7 @@ class BlockMetadataResponse:
         block_failure_reason: The optional block failure reason.
         transaction_metadata: The optional metadata of a given transaction.
     """
-    block_id: SlotCommitmentId
+    block_id: BlockId
     block_state: BlockState
     block_failure_reason: Optional[BlockFailureReason] = None
     transaction_metadata: Optional[TransactionMetadataResponse] = None
