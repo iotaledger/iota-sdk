@@ -5,7 +5,8 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import json
+from iota_sdk.types.transaction_id import TransactionId
 
 
 class InputType(IntEnum):
@@ -31,7 +32,7 @@ class UtxoInput:
         default_factory=lambda: int(
             InputType.Utxo),
         init=False)
-    transaction_id: HexStr
+    transaction_id: TransactionId
     transaction_output_index: int
 
 

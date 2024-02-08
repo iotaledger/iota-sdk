@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
 from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.slot import SlotCommitmentId
 
 
 class ContextInputType(IntEnum):
@@ -29,7 +30,7 @@ class CommitmentContextInput:
         default_factory=lambda: int(
             ContextInputType.Commitment),
         init=False)
-    commitment_id: HexStr
+    commitment_id: SlotCommitmentId
 
 
 @json

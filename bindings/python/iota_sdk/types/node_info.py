@@ -5,7 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
 from dataclasses_json import config
-from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
+from iota_sdk.types.common import EpochIndex, json, SlotIndex
+from iota_sdk.types.slot import SlotCommitmentId
 
 
 @json
@@ -38,7 +39,7 @@ class NodeInfoStatus:
     relative_confirmed_tangle_time: int = field(metadata=config(
         encoder=str
     ))
-    latest_commitment_id: HexStr
+    latest_commitment_id: SlotCommitmentId
     latest_finalized_slot: SlotIndex
     latest_accepted_block_slot: SlotIndex
     latest_confirmed_block_slot: SlotIndex
