@@ -6,7 +6,8 @@ from enum import Enum, IntEnum
 from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.common import json
-from iota_sdk.types.block.block import Block, BlockId
+from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.id import BlockId
 
 
 @json

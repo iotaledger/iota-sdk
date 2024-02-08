@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import Dict, Optional, Union
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.block.block import BlockId
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import SlotIndex, json
 from iota_sdk.types.output import AccountOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitmentId
-from iota_sdk.types.transaction_data import TransactionId
+from iota_sdk.types.transaction_id import TransactionId
 
 
 @json

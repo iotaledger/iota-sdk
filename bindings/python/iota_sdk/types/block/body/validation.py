@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
-from iota_sdk.types.block.block import BlockId
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.block.body.type import BlockBodyType
 from iota_sdk.types.common import HexStr, json
 

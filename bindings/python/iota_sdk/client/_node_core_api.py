@@ -5,13 +5,14 @@ from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
-from iota_sdk.types.block.block import Block, BlockId
+from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.transaction_data import TransactionId
+from iota_sdk.types.transaction_id import TransactionId
 
 
 class NodeCoreAPI(metaclass=ABCMeta):

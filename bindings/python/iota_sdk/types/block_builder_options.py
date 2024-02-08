@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, AddressAndAmount, json
 from iota_sdk.client._high_level_api import Range
-from iota_sdk.types.block.block import BlockId
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.output import Output
 from iota_sdk.types.input import UtxoInput
