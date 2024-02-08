@@ -1,11 +1,11 @@
-// Copyright 2020-2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use core::{fmt, ops::Deref};
 
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    signatures::ed25519::{PublicKey, Signature},
+    signatures::ed25519::{PublicKey, PublicKeyBytes, Signature},
 };
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -23,7 +23,7 @@ use crate::types::block::{
 /// An Ed25519 signature.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
-    public_key: PublicKey,
+    public_key: PublicKeyBytes,
     signature: Signature,
 }
 
@@ -35,24 +35,44 @@ impl Ed25519Signature {
     /// Length of an ED25519 signature.
     pub const SIGNATURE_LENGTH: usize = Signature::LENGTH;
 
-    /// Creates a new [`Ed25519Signature`].
+    /// Creates a new [`Ed25519Signature`] from a validated public key and signature.
     pub fn new(public_key: PublicKey, signature: Signature) -> Self {
+        Self {
+            public_key: public_key.to_bytes().into(),
+            signature,
+        }
+    }
+
+    /// Creates a new [`Ed25519Signature`] from public key bytes and signature.
+    pub fn new_from_bytes(public_key: PublicKeyBytes, signature: Signature) -> Self {
         Self { public_key, signature }
     }
 
     /// Creates a new [`Ed25519Signature`] from bytes.
+    #[deprecated(since = "1.1.4", note = "use Ed25519Signature::from_bytes instead")]
     pub fn try_from_bytes(
         public_key: [u8; Self::PUBLIC_KEY_LENGTH],
         signature: [u8; Self::SIGNATURE_LENGTH],
     ) -> Result<Self, Error> {
-        Ok(Self::new(
-            PublicKey::try_from_bytes(public_key)?,
-            Signature::from_bytes(signature),
-        ))
+        Ok(Self::from_bytes(public_key, signature))
+    }
+
+    /// Creates a new [`Ed25519Signature`] from bytes.
+    pub fn from_bytes(public_key: [u8; Self::PUBLIC_KEY_LENGTH], signature: [u8; Self::SIGNATURE_LENGTH]) -> Self {
+        Self {
+            public_key: PublicKeyBytes::from_bytes(public_key),
+            signature: Signature::from_bytes(signature),
+        }
     }
 
     /// Returns the public key of an [`Ed25519Signature`].
+    #[deprecated(since = "1.1.4", note = "use Ed25519Signature::public_key_bytes instead")]
     pub fn public_key(&self) -> &PublicKey {
+        panic!("deprecated method: use Ed25519Signature::public_key_bytes instead")
+    }
+
+    /// Returns the unvalidated public key bytes of an [`Ed25519Signature`].
+    pub fn public_key_bytes(&self) -> &PublicKeyBytes {
         &self.public_key
     }
 
@@ -61,7 +81,14 @@ impl Ed25519Signature {
         &self.signature
     }
 
+    /// Verify a message using the signature.
+    #[deprecated(since = "1.1.4", note = "use Ed25519Signature::try_verify instead")]
     pub fn verify(&self, message: &[u8]) -> bool {
+        self.public_key.verify(&self.signature, message).unwrap_or_default()
+    }
+
+    /// Verify a message using the signature.
+    pub fn try_verify(&self, message: &[u8]) -> Result<bool, crypto::Error> {
         self.public_key.verify(&self.signature, message)
     }
 
@@ -76,7 +103,7 @@ impl Ed25519Signature {
             });
         }
 
-        if !self.verify(message) {
+        if !self.try_verify(message)? {
             return Err(Error::InvalidSignature);
         }
 
@@ -132,7 +159,7 @@ impl Packable for Ed25519Signature {
         let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
         let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
-        Self::try_from_bytes(public_key, signature).map_err(UnpackError::Packable)
+        Ok(Self::from_bytes(public_key, signature))
     }
 }
 
@@ -169,10 +196,10 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
-            Self::try_from_bytes(
+            Ok(Self::from_bytes(
                 prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
-            )
+            ))
         }
     }
 

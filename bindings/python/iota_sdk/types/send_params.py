@@ -103,6 +103,23 @@ class CreateDelegationParams():
 
 @json
 @dataclass
+class BeginStakingParams():
+    """Parameters for beginning staking.
+
+    Attributes:
+        account_id: The account id which will become a validator.
+        staked_amount: The amount of tokens to stake.
+        fixed_cost: The fixed cost of the validator, which it receives as part of its Mana rewards.
+        staking_period: The staking period (in epochs). Will default to the staking unbonding period.
+    """
+    account_id: HexStr
+    staked_amount: int
+    fixed_cost: int
+    staking_period: Optional[int] = None
+
+
+@json
+@dataclass
 class MintNftParams():
     """Parameters for minting NFTs.
 

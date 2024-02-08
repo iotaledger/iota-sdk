@@ -3,17 +3,20 @@
 
 import { u256 } from '../utils';
 import type { HexEncodedString } from '../utils/hex-encoding';
+import { Transform } from 'class-transformer';
+import { hexToBigInt } from '../utils/hex-encoding';
 
 /**
  * Native token.
  */
-export interface INativeToken {
+export class NativeToken {
     /**
      * Identifier of the native token.
      */
-    id: HexEncodedString;
+    id!: HexEncodedString;
     /**
      * Amount of native tokens of the given Token ID.
      */
-    amount: u256;
+    @Transform((value) => hexToBigInt(value.value))
+    amount!: u256;
 }

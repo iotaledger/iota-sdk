@@ -36,7 +36,7 @@ use crate::types::block::{
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(tag_type = u8, with_error = Error::InvalidUnlockConditionKind)]
@@ -440,6 +440,17 @@ pub(crate) fn verify_restricted_addresses(
     }
     Ok(())
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(UnlockCondition:
+    Address,
+    StorageDepositReturn,
+    Timelock,
+    Expiration,
+    StateControllerAddress,
+    GovernorAddress,
+    ImmutableAccountAddress,
+);
 
 #[cfg(test)]
 mod test {
