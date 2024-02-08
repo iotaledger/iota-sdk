@@ -21,6 +21,7 @@ import type {
     TransactionOptions,
     MintNftParams,
     CreateDelegationParams,
+    BeginStakingParams,
 } from '../transaction-options';
 import type {
     ParticipationEventId,
@@ -29,6 +30,7 @@ import type {
 } from '../participation';
 import type { ConsolidationParams } from '../consolidation-params';
 import {
+    AccountId,
     DelegationId,
     HexEncodedAmount,
     NumericString,
@@ -40,6 +42,13 @@ import {
 
 export type __AccountsMethod__ = {
     name: 'accounts';
+};
+
+export type __AnnounceCandidacyMethod__ = {
+    name: 'announceCandidacy';
+    data: {
+        accountId: AccountId;
+    };
 };
 
 export type __BackupMethod__ = {
@@ -190,6 +199,29 @@ export type __PrepareDelayDelegationClaimingMethod__ = {
     data: {
         delegationId: DelegationId;
         reclaimExcess: boolean;
+    };
+};
+
+export type __PrepareBeginStakingMethod__ = {
+    name: 'prepareBeginStaking';
+    data: {
+        params: BeginStakingParams;
+        options?: TransactionOptions;
+    };
+};
+
+export type __PrepareExtendStakingMethod__ = {
+    name: 'prepareExtendStaking';
+    data: {
+        accountId: AccountId;
+        additionalEpochs: number;
+    };
+};
+
+export type __PrepareEndStakingMethod__ = {
+    name: 'prepareEndStaking';
+    data: {
+        accountId: AccountId;
     };
 };
 

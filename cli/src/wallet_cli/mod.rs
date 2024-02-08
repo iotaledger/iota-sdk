@@ -402,11 +402,12 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
-    let account_id = account_id
-        .or_else(|| wallet_data.first_account_id())
-        .ok_or(WalletError::AccountNotFound)?;
-    drop(wallet_data);
+    let account_id = {
+        let wallet_data = wallet.data().await;
+        account_id
+            .or_else(|| wallet_data.first_account_id())
+            .ok_or(WalletError::AccountNotFound)?
+    };
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
 

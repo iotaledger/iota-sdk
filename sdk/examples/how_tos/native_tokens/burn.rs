@@ -6,7 +6,7 @@
 //! output that minted it.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! You may provide a TOKEN_ID that is available in the wallet. You can check this by running the
 //! `get_balance` example. You can create a new native token by running the `create_native_token` example.
