@@ -20,6 +20,7 @@ from .types.block.body.basic import *
 from .types.block.body.type import *
 from .types.block.body.validation import *
 from .types.block.metadata import *
+from .types.block.id import *
 from .types.block_builder_options import *
 from .types.block_issuer_key import *
 from .types.burn import *
@@ -43,10 +44,12 @@ from .types.output_metadata import *
 from .types.output_params import *
 from .types.payload import *
 from .types.send_params import *
+from .types.slot import *
 from .types.token_scheme import *
-from .types.transaction_with_metadata import *
 from .types.transaction_data import *
+from .types.transaction_id import *
 from .types.transaction_options import *
+from .types.transaction_with_metadata import *
 from .types.unlock import *
 from .types.unlock_condition import *
 from .types.utxo_changes import *

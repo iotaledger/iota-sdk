@@ -11,6 +11,7 @@ from iota_sdk.wallet.common import _call_wallet_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedCreateDelegationTransaction, PreparedCreateDelegationTransactionData, PreparedCreateTokenTransactionData, PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.balance import Balance
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.client_options import ClientOptions
@@ -21,6 +22,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
+from iota_sdk.types.transaction_id import TransactionId
 from iota_sdk.types.send_params import BeginStakingParams, CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.transaction_with_metadata import CreateDelegationTransaction, CreateNativeTokenTransaction, TransactionWithMetadata
@@ -424,7 +426,7 @@ class Wallet():
         )
 
     def get_transaction(
-            self, transaction_id: HexStr) -> TransactionWithMetadata:
+            self, transaction_id: TransactionId) -> TransactionWithMetadata:
         """Get transaction.
         """
         return TransactionWithMetadata.from_dict(self._call_method(
@@ -688,14 +690,14 @@ class Wallet():
         ))
         return PreparedTransaction(self, prepared)
 
-    def announce_candidacy(self, account_id: HexStr) -> HexStr:
+    def announce_candidacy(self, account_id: HexStr) -> BlockId:
         """Announce a staking account's candidacy for the staking period.
         """
-        self._call_method(
+        return BlockId(self._call_method(
             'announceCandidacy', {
                 'accountId': account_id,
             }
-        )
+        ))
 
     def send_transaction(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
@@ -716,17 +718,17 @@ class Wallet():
         return PreparedTransaction(self, prepared)
 
     def reissue_transaction_until_included(
-            self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
+            self, transaction_id: TransactionId, interval=None, max_attempts=None) -> BlockId:
         """Reissues a transaction sent from the wallet for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
-        return self._call_method(
+        return BlockId(self._call_method(
             'reissueTransactionUntilIncluded', {
                 'transactionId': transaction_id,
                 'interval': interval,
                 'maxAttempts': max_attempts
             }
-        )
+        ))
 
     def send(self, amount: int, address: str,
              options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
