@@ -69,7 +69,7 @@ where
         options.custom_inputs = Some(vec![account_output_data.output_id]);
         options.context_inputs = Some(vec![ContextInput::from(RewardContextInput::new(0)?)]);
 
-        let transaction = self.prepare_transaction([output], options).await?;
+        let transaction = self.prepare_transaction([output], None, options).await?;
 
         Ok(transaction)
     }
