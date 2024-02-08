@@ -223,32 +223,32 @@ path = "examples/how_tos/sign_and_verify_ed25519/verify_ed25519_signature.rs"
 
 [[example]]
 name = "create_mnemonic"
-path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
+path = "examples/how_tos/wallet/create_mnemonic.rs"
 required-features = ["client"]
 
 [[example]]
 name = "create_wallet"
-path = "examples/how_tos/accounts_and_addresses/create_wallet.rs"
+path = "examples/how_tos/wallet/create_wallet.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "check_balance"
-path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
+path = "examples/how_tos/wallet/check_balance.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "list_transactions"
-path = "examples/how_tos/accounts_and_addresses/list_transactions.rs"
+path = "examples/how_tos/wallet/list_transactions.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "list_outputs"
-path = "examples/how_tos/accounts_and_addresses/list_outputs.rs"
+path = "examples/how_tos/wallet/list_outputs.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "consolidate_outputs"
-path = "examples/how_tos/accounts_and_addresses/consolidate_outputs.rs"
+path = "examples/how_tos/wallet/consolidate_outputs.rs"
 required-features = ["wallet", "stronghold"]
 
 # Simple Transaction Examples
@@ -324,31 +324,31 @@ name = "send_native_tokens"
 path = "examples/how_tos/native_tokens/send.rs"
 required-features = ["rocksdb", "stronghold"]
 
-# Account wallet example
+# Account Output Examples
 
 [[example]]
-name = "account_wallet_request_funds"
-path = "examples/how_tos/account_wallet/request_funds.rs"
+name = "account_output_request_funds"
+path = "examples/how_tos/account_output/request_funds.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
-name = "account_wallet_transaction"
-path = "examples/how_tos/account_wallet/transaction.rs"
+name = "account_output_send_amount"
+path = "examples/how_tos/account_output/send_amount.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "create_account_output"
-path = "examples/how_tos/account/create.rs"
+path = "examples/how_tos/account_output/create.rs"
 required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "destroy_account_output"
-path = "examples/how_tos/account/destroy.rs"
+path = "examples/how_tos/account_output/destroy.rs"
 required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "implicit_account_creation"
-path = "examples/how_tos/account/implicit_account_creation.rs"
+path = "examples/how_tos/account_output/implicit_account_creation.rs"
 required-features = ["wallet", "storage"]
 
 # Outputs

@@ -4,7 +4,7 @@
 //! In this example we will mint the issuer NFT for the NFT collection.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! Make sure that the wallet already has some funds by running the
 //! `./how_tos/simple_transaction/request_funds.rs` example!

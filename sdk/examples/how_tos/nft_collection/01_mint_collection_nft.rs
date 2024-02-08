@@ -4,7 +4,7 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example.
+//! running the `./how_tos/wallet/create_wallet.rs` example.
 //!
 //! You have to provide the ISSUER_NFT_ID that was created by first running the
 //! `mint_issuer_nft` example!
