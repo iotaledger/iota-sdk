@@ -11,17 +11,14 @@ import { Feature, FeatureDiscriminator, NativeTokenFeature } from './feature';
 import { plainToInstance, Type } from 'class-transformer';
 import { NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
-import {
-    AccountId,
-    NftId,
-    AnchorId,
-    DelegationId,
-    IdWithSlotIndex,
-} from '../id';
+import { AccountId, NftId, AnchorId, DelegationId, TransactionId } from '../id';
 import { EpochIndex } from '../../block/slot';
 import { NativeToken } from '../../models/native-token';
 
-export class OutputId extends IdWithSlotIndex {
+export class OutputId extends String {
+    transactionId(): TransactionId {
+        return new TransactionId(this.slice(74));
+    }
     outputIndex(): number {
         const numberString = this.slice(-4);
         const chunks = [];

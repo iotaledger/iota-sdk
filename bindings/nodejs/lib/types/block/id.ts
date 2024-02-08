@@ -9,7 +9,7 @@ import { SlotIndex } from './slot';
  */
 export class IdWithSlotIndex extends String {
     slotIndex(): SlotIndex {
-        const numberString = super.slice(66, 74);
+        const numberString = super.slice(-8);
         const chunks = [];
         for (
             let i = 0, charsLength = numberString.length;
