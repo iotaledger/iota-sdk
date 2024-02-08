@@ -105,8 +105,12 @@ where
     }
 
     /// Gets an existing account output.
-    pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
+    pub(crate) async fn get_account_output(
+        &self,
+        account_id: impl Into<Option<AccountId>> + Send,
+    ) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
+        let account_id = account_id.into();
         self.data()
             .await
             .unspent_outputs

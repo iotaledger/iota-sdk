@@ -7,9 +7,9 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/list-accounts.ts
+// yarn run-example ./how_tos/wallet/check-balance.ts
 
-// This example lists all account outputs in the wallet.
+// This example syncs the account and prints the balance.
 async function run() {
     initLogger();
     for (const envVar of ['WALLET_DB_PATH']) {
@@ -22,9 +22,13 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const accounts = await wallet.accounts();
+        // Sync new outputs from the node.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _syncBalance = await wallet.sync();
 
-        for (const account of accounts) console.log(account);
+        // After syncing the balance can also be computed with the local data
+        const balance = await wallet.getBalance();
+        console.log('Balance', balance);
     } catch (error) {
         console.error('Error: ', error);
     }
