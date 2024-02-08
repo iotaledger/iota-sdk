@@ -9,9 +9,11 @@ from iota_sdk.utils import Utils
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Signature
+from iota_sdk.types.slot import SlotCommitmentId
 from iota_sdk.types.block.body.basic import BasicBlockBody
 from iota_sdk.types.block.body.validation import ValidationBlockBody
 from iota_sdk.types.block.body.type import BlockBodyType
+from iota_sdk.types.block.id import BlockId
 
 
 @json
@@ -34,7 +36,7 @@ class BlockHeader:
     issuing_time: int = field(metadata=config(
         encoder=str
     ))
-    slot_commitment_id: HexStr
+    slot_commitment_id: SlotCommitmentId
     latest_finalized_slot: SlotIndex
     issuer_id: HexStr
 
@@ -85,7 +87,7 @@ class Block:
     ))
     signature: Signature
 
-    def id(self, params: ProtocolParameters) -> HexStr:
+    def id(self, params: ProtocolParameters) -> BlockId:
         """Returns the block ID as a hexadecimal string.
         """
         return Utils.block_id(self, params)
