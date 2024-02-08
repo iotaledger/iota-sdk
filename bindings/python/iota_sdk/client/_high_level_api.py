@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.block.block import Block
-from iota_sdk.types.common import CoinType, HexStr, json
+from iota_sdk.types.block.id import BlockId
+from iota_sdk.types.common import CoinType, json
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output_metadata import OutputWithMetadata
 
@@ -116,7 +117,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         })
         return [OutputWithMetadata.from_dict(o) for o in outputs]
 
-    def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
+    def find_blocks(self, block_ids: List[BlockId]) -> List[Block]:
         """Find all blocks by provided block IDs.
 
         Args:

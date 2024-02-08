@@ -3,6 +3,31 @@
 
 from __future__ import annotations
 from enum import Enum, IntEnum
+from dataclasses import dataclass
+from typing import Optional
+
+from iota_sdk.types.common import json
+from iota_sdk.types.block.id import BlockId
+from iota_sdk.types.transaction_metadata import TransactionFailureReason, TransactionState
+
+
+@json
+@dataclass
+class BlockMetadata:
+    """Represents the metadata of a block.
+    Response of GET /api/core/v3/blocks/{blockId}/metadata.
+
+    Attributes:
+        block_state: The block state.
+        transaction_state: The transaction state.
+        block_failure_reason: The block failure reason.
+        transaction_failure_reason: The transaction failure reason.
+    """
+    block_id: BlockId
+    block_state: BlockState
+    transaction_state: Optional[TransactionState] = None
+    block_failure_reason: Optional[BlockFailureReason] = None
+    transaction_failure_reason: Optional[TransactionFailureReason] = None
 
 
 class BlockState(Enum):

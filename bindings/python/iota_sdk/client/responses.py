@@ -14,7 +14,8 @@ from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId, OutputWithId
 from iota_sdk.types.output_id_proof import OutputIdProof
 from iota_sdk.types.output_metadata import OutputMetadata
-from iota_sdk.types.slot import SlotCommitment
+from iota_sdk.types.slot import SlotCommitment, SlotCommitmentId
+from iota_sdk.types.transaction_id import TransactionId
 from iota_sdk.types.transaction_metadata import TransactionFailureReason, TransactionState
 
 
@@ -284,7 +285,7 @@ class TransactionMetadataResponse:
         transaction_state: If 'pending', the transaction is not included yet. If 'accepted', the transaction is included. If 'confirmed' means transaction is included and its included block is confirmed. If 'finalized' means transaction is included, its included block is finalized and cannot be reverted anymore. If 'failed' means transaction is issued but failed due to the transaction failure reason.
         transaction_failure_reason: The optional transaction failure reason.
     """
-    transaction_id: HexStr
+    transaction_id: TransactionId
     transaction_state: TransactionState
     transaction_failure_reason: Optional[TransactionFailureReason] = None
 
@@ -302,7 +303,7 @@ class UtxoChangesResponse:
         created_outputs: The created outputs of the given slot.
         consumed_outputs: The consumed outputs of the given slot.
     """
-    commitment_id: HexStr
+    commitment_id: SlotCommitmentId
     created_outputs: List[OutputId]
     consumed_outputs: List[OutputId]
 
@@ -320,7 +321,7 @@ class UtxoChangesFullResponse:
         created_outputs: The created outputs of the given slot.
         consumed_outputs: The consumed outputs of the given slot.
     """
-    commitment_id: HexStr
+    commitment_id: SlotCommitmentId
     created_outputs: List[OutputWithId]
     consumed_outputs: List[OutputWithId]
 
@@ -337,7 +338,7 @@ class BlockMetadataResponse:
         block_failure_reason: The optional block failure reason.
         transaction_metadata: The optional metadata of a given transaction.
     """
-    block_id: HexStr
+    block_id: SlotCommitmentId
     block_state: BlockState
     block_failure_reason: Optional[BlockFailureReason] = None
     transaction_metadata: Optional[TransactionMetadataResponse] = None

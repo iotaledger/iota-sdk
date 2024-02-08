@@ -4,12 +4,14 @@
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 
-from iota_sdk.types.block.block import Block
 from iota_sdk.client.responses import NodeInfoWrapper, InfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
-from iota_sdk.types.output_metadata import OutputMetadata
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.slot import SlotCommitment
+from iota_sdk.types.output_metadata import OutputMetadata
+from iota_sdk.types.slot import SlotCommitment, SlotCommitmentId
+from iota_sdk.types.transaction_id import TransactionId
 
 
 class NodeCoreAPI(metaclass=ABCMeta):
@@ -82,7 +84,109 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Returns the available API route groups of the node.
         GET /api/routes
         """
-        return RoutesResponse.from_dict(self._call_method('getRoutes'))
+
+    # def get_tips(self) -> List[BlockId]:
+    #     """Request tips from the node.
+    #     """
+    #     return self._call_method('getTips')
+
+    # def post_block(self, block: Block) -> BlockId:
+    #     """Post a block.
+
+    #     Args:
+    #         block: The block to post.
+
+    #     Returns:
+    #         The block id of the posted block.
+    #     """
+    #     return BlockId(self._call_method('postBlock', {
+    #         'block': block
+    #     }))
+
+    # def get_block(self, block_id: BlockId) -> Block:
+    #     """Get the block corresponding to the given block id.
+    #     """
+    #     return Block.from_dict(self._call_method('getBlock', {
+    #         'blockId': block_id
+    #     }))
+
+    # def get_block_metadata(self, block_id: BlockId) -> BlockMetadata:
+    #     """Get the block metadata corresponding to the given block id.
+    #     """
+    #     return BlockMetadata.from_dict(self._call_method('getBlockMetadata', {
+    #         'blockId': block_id
+    #     }))
+
+    # def get_block_with_metadata(self, block_id: BlockId) -> BlockWithMetadata:
+    #     """Get a block with its metadata corresponding to the given block id.
+    #     """
+    #     return BlockWithMetadata.from_dict(self._call_method('getBlockWithMetadata', {
+    #         'blockId': block_id
+    #     }))
+
+    # def get_block_raw(self, block_id: BlockId) -> List[int]:
+    #     """Get the raw bytes of the block corresponding to the given block id.
+    #     """
+    #     return self._call_method('getBlockRaw', {
+    #         'blockId': block_id
+    #     })
+
+    # def post_block_raw(self, block_bytes: List[int]) -> BlockId:
+    #     """Post a block as raw bytes.
+
+    #     Returns:
+    #         The corresponding block id of the block.
+    #     """
+    #     return BlockId(self._call_method('postBlockRaw', {
+    #         'blockBytes': block_bytes
+    #     }))
+
+    # def get_output(
+    #         self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
+    #     """Get the output corresponding to the given output id.
+
+    #     Returns:
+    #         The output itself with its metadata.
+    #     """
+    #     output_id_str = output_id.output_id if isinstance(
+    #         output_id, OutputId) else output_id
+    #     return OutputWithMetadata.from_dict(self._call_method('getOutput', {
+    #         'outputId': output_id_str
+    #     }))
+
+    # def get_output_metadata(
+    #         self, output_id: Union[OutputId, HexStr]) -> OutputMetadata:
+    #     """Get the output metadata corresponding to the given output id.
+
+    #     Returns:
+    #         The output metadata.
+    #     """
+    #     output_id_str = output_id.output_id if isinstance(
+    #         output_id, OutputId) else output_id
+    #     return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
+    #         'outputId': output_id_str
+    #     }))
+
+    # def get_included_block(self, transaction_id: TransactionId) -> Block:
+    #     """Returns the included block of the given transaction.
+
+    #     Returns:
+    #         The included block.
+    #     """
+    #     return Block.from_dict(self._call_method('getIncludedBlock', {
+    #         'transactionId': transaction_id
+    #     }))
+
+    # def get_included_block_metadata(
+    #         self, transaction_id: TransactionId) -> BlockMetadata:
+    #     """Returns the metadata of the included block of the given transaction.
+
+    #     Returns:
+    #         The metadata of the included block.
+    #     """
+    #     return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
+    #         'transactionId': transaction_id
+    #     }))
 
     def call_plugin_route(self, base_plugin_path: str, method: str,
                           endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
@@ -118,7 +222,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # Rewards routes.
 
     def get_output_mana_rewards(
-            self, output_id: HexStr, slot_index: SlotIndex) -> ManaRewardsResponse:
+            self, output_id: OutputId, slot_index: SlotIndex) -> ManaRewardsResponse:
         """Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
         provided in the response.
         Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
@@ -170,7 +274,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return IssuanceBlockHeaderResponse.from_dict(self._call_method('getIssuance'))
 
-    def post_block(self, block: Block) -> HexStr:
+    def post_block(self, block: Block) -> BlockId:
         """Returns the BlockId of the submitted block.
         POST JSON to /api/core/v3/blocks
 
@@ -184,7 +288,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block
         })
 
-    def post_block_raw(self, block: Block) -> HexStr:
+    def post_block_raw(self, block: Block) -> BlockId:
         """Returns the BlockId of the submitted block.
         POST /api/core/v3/blocks
 
@@ -195,7 +299,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block
         })
 
-    def get_block(self, block_id: HexStr) -> Block:
+    def get_block(self, block_id: BlockId) -> Block:
         """Finds a block by its ID and returns it as object.
         GET /api/core/v3/blocks/{blockId}
 
@@ -206,7 +310,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         }))
 
-    def get_block_raw(self, block_id: HexStr) -> List[int]:
+    def get_block_raw(self, block_id: BlockId) -> List[int]:
         """Finds a block by its ID and returns it as raw bytes.
         GET /api/core/v3/blocks/{blockId}
 
@@ -217,7 +321,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         })
 
-    def get_block_metadata(self, block_id: HexStr) -> BlockMetadataResponse:
+    def get_block_metadata(self, block_id: BlockId) -> BlockMetadataResponse:
         """Returns the metadata of a block.
         GET /api/core/v3/blocks/{blockId}/metadata
 
@@ -228,7 +332,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         }))
 
-    def get_block_with_metadata(self, block_id: HexStr) -> BlockWithMetadataResponse:
+    def get_block_with_metadata(self, block_id: BlockId) -> BlockWithMetadataResponse:
         """Returns a block with its metadata.
         GET /api/core/v2/blocks/{blockId}/full
 
@@ -301,7 +405,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'outputId': output_id_str
         }))
 
-    def get_included_block(self, transaction_id: HexStr) -> Block:
+    def get_included_block(self, transaction_id: TransactionId) -> Block:
         """Returns the earliest confirmed block containing the transaction with the given ID.
         GET /api/core/v3/transactions/{transactionId}/included-block
 
@@ -314,7 +418,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # TODO: this should be made available
     # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_included_block_raw(self, transaction_id: HexStr) -> List[int]:
+    def get_included_block_raw(self, transaction_id: TransactionId) -> List[int]:
         """Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
         GET /api/core/v3/transactions/{transactionId}/included-block
 
@@ -326,7 +430,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         })
 
     def get_included_block_metadata(
-            self, transaction_id: HexStr) -> BlockMetadataResponse:
+            self, transaction_id: TransactionId) -> BlockMetadataResponse:
         """Returns the metadata of the earliest block containing the tx that was confirmed.
         GET /api/core/v3/transactions/{transactionId}/included-block/metadata
 
@@ -338,7 +442,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def get_transaction_metadata(
-            self, transaction_id: HexStr) -> TransactionMetadataResponse:
+            self, transaction_id: TransactionId) -> TransactionMetadataResponse:
         """Finds the metadata of a transaction.
         GET /api/core/v3/transactions/{transactionId}/metadata
 
@@ -352,7 +456,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # Commitments routes.
 
     def get_commitment(
-            self, commitment_id: HexStr) -> SlotCommitment:
+            self, commitment_id: SlotCommitmentId) -> SlotCommitment:
         """Finds a slot commitment by its ID and returns it as object.
         GET /api/core/v3/commitments/{commitmentId}
 
@@ -366,7 +470,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # TODO: this should be made available
     # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_commitment_raw(
-            self, commitment_id: HexStr) -> List[int]:
+            self, commitment_id: SlotCommitmentId) -> List[int]:
         """Finds a slot commitment by its ID and returns it as raw bytes.
         GET /api/core/v3/commitments/{commitmentId}
 
@@ -378,7 +482,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         })
 
     def get_utxo_changes(
-            self, commitment_id: HexStr) -> UtxoChangesResponse:
+            self, commitment_id: SlotCommitmentId) -> UtxoChangesResponse:
         """Get all UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 
@@ -390,7 +494,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def get_utxo_changes_full(
-            self, commitment_id: HexStr) -> UtxoChangesFullResponse:
+            self, commitment_id: SlotCommitmentId) -> UtxoChangesFullResponse:
         """Get all full UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
 
