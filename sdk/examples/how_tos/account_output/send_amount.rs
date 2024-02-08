@@ -4,7 +4,7 @@
 //! In this example we use an account as wallet.
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example account_wallet_transaction`
+//! `cargo run --release --all-features --example account_output_send_amount`
 
 use iota_sdk::{
     client::node_api::indexer::query_parameters::BasicOutputQueryParameters,
@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let sync_options = SyncOptions {

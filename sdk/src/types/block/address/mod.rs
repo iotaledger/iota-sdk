@@ -38,7 +38,7 @@ use crate::{
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Address {
     /// An Ed25519 address.
     #[packable(tag = Ed25519Address::KIND)]
@@ -183,3 +183,6 @@ impl<T: Into<Address>> ToBech32Ext for T {
         Bech32Address::new(hrp.convert_unchecked(), self)
     }
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);

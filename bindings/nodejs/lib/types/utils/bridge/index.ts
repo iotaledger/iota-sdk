@@ -29,6 +29,8 @@ import type {
     __ManaWithDecay__,
     __GenerateManaWithDecay__,
     __OutputManaWithDecay__,
+    __VerifyTransactionSyntax__,
+    __BlockBytes__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -61,4 +63,6 @@ export type __UtilsMethods__ =
     | __VerifyTransactionSemantic__
     | __ManaWithDecay__
     | __GenerateManaWithDecay__
-    | __OutputManaWithDecay__;
+    | __OutputManaWithDecay__
+    | __VerifyTransactionSyntax__
+    | __BlockBytes__;

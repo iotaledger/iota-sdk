@@ -7,9 +7,9 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/list-transactions.ts
+// yarn run-example ./how_tos/wallet/list-outputs.ts
 
-// This example lists all transactions in the wallet.
+// This example lists all outputs in the wallet.
 async function run() {
     initLogger();
     for (const envVar of ['WALLET_DB_PATH']) {
@@ -21,18 +21,18 @@ async function run() {
         const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
-        await wallet.sync({ syncIncomingTransactions: true });
 
-        const transactions = await wallet.transactions();
-        console.log('Sent transactions:');
-        for (const transaction of transactions)
-            console.log(transaction.transactionId);
+        await wallet.sync();
 
-        const incomingTransactions = await wallet.incomingTransactions();
-        console.log('Incoming transactions:');
-        for (const transaction of incomingTransactions) {
-            console.log(transaction.transactionId);
-        }
+        const outputs = await wallet.outputs();
+
+        console.log('Output ids:');
+        for (const output of outputs) console.log(output.outputId);
+
+        const unspentOutputs = await wallet.unspentOutputs();
+
+        console.log('Unspent output ids:');
+        for (const output of unspentOutputs) console.log(output.outputId);
     } catch (error) {
         console.error('Error: ', error);
     }

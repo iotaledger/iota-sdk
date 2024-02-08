@@ -67,11 +67,14 @@ where
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {
-            if let Some(secret_manager) = secret_manager.downcast::<LedgerSecretManager>() {
-                Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
+            let secret_manager = if let Some(secret_manager) = secret_manager.downcast::<LedgerSecretManager>() {
+                secret_manager
+            } else if let Some(SecretManager::LedgerNano(secret_manager)) = secret_manager.downcast::<SecretManager>() {
+                secret_manager
             } else {
                 return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            }
+            };
+            Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
         }
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,

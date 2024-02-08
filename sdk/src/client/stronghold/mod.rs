@@ -99,7 +99,7 @@ pub struct StrongholdAdapter {
     /// A handle to the timeout task.
     timeout_task: Arc<Mutex<Option<TaskHandle>>>,
 
-    /// The path to a Stronghold snapshot file.
+    /// The path to the corresponding Stronghold snapshot file.
     pub(crate) snapshot_path: PathBuf,
 }
 
@@ -230,6 +230,11 @@ impl StrongholdAdapterBuilder {
 }
 
 impl StrongholdAdapter {
+    /// Get the path to the corresponding Stronghold snapshot file.
+    pub fn snapshot_path(&self) -> &Path {
+        self.snapshot_path.as_path()
+    }
+
     /// Create a builder to construct a [StrongholdAdapter].
     pub fn builder() -> StrongholdAdapterBuilder {
         StrongholdAdapterBuilder::default()

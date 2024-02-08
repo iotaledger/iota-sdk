@@ -4,11 +4,11 @@
     "main": "dist/index.js",
     "private": true,
     "scripts": {
+        "preinstall": "cd ../ && yarn && yarn link && cd examples && yarn link @iota/sdk",
         "build": "tsc",
         "run-example": "ts-node"
     },
     "dependencies": {
-        "@iota/sdk": "file:..",
         "dotenv": "^16.0.0",
         "ts-node": "^10.9.1"
     },

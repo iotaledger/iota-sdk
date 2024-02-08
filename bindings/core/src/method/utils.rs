@@ -125,6 +125,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: Output },
     /// Verifies the semantic of a transaction.
+    /// Expected response: [`TransactionFailureReason`](crate::Response::TransactionFailureReason)
     #[serde(rename_all = "camelCase")]
     VerifyTransactionSemantic {
         transaction: TransactionDto,
@@ -160,5 +161,18 @@ pub enum UtilsMethod {
         slot_index_created: SlotIndex,
         slot_index_target: SlotIndex,
         protocol_parameters: ProtocolParameters,
+    },
+    /// Verifies the syntax of a transaction.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    #[serde(rename_all = "camelCase")]
+    VerifyTransactionSyntax {
+        transaction: TransactionDto,
+        protocol_parameters: ProtocolParameters,
+    },
+    /// Returns the serialized bytes of a block.
+    /// Expected response: [`Raw`](crate::Response::Raw)
+    BlockBytes {
+        /// Block
+        block: BlockDto,
     },
 }
