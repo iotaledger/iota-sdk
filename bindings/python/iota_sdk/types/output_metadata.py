@@ -8,7 +8,6 @@ from dataclasses_json import config
 from iota_sdk.types.common import HexStr, SlotIndex, json
 from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output_id_proof import OutputIdProof
 
 
 @json
@@ -64,40 +63,6 @@ class OutputWithMetadata:
         d['output'] = self.output.as_dict()
 
         return d
-
-
-@json
-@dataclass
-class OutputResponse:
-    """An output with its output id proof.
-    Response of GET /api/core/v3/outputs/{output_id}.
-
-    Attributes:
-        output: One of the possible outputs.
-        output_id_proof: The associated Output ID proof.
-    """
-    output: Output = field(metadata=config(
-        decoder=deserialize_output
-    ))
-    output_id_proof: OutputIdProof
-
-
-@json
-@dataclass
-class OutputWithMetadataResponse:
-    """An output with its output id proof and its metadata.
-    Response of GET /api/core/v3/outputs/{output_id}/full.
-
-    Attributes:
-        output: One of the possible outputs.
-        output_id_proof: The associated Output ID proof.
-        output_metadata: The metadata of an output.
-    """
-    output: Output = field(metadata=config(
-        decoder=deserialize_output
-    ))
-    output_id_proof: OutputIdProof
-    output_metadata: OutputMetadata
 
 
 @json

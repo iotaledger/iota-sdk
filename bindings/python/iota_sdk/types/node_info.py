@@ -305,19 +305,6 @@ class ProtocolParameters:
 
 @json
 @dataclass
-class ProtocolParametersResponse:
-    """Protocol Parameters with start epoch.
-
-    Attributes:
-        start_epoch: The start epoch of the set of protocol parameters.
-        parameters: The protocol parameters.
-    """
-    start_epoch: EpochIndex
-    parameters: ProtocolParameters
-
-
-@json
-@dataclass
 class NodeInfoBaseToken:
     """The base coin info.
 
@@ -333,53 +320,3 @@ class NodeInfoBaseToken:
     unit: str
     decimals: int
     subunit: Optional[str] = None
-
-
-# TODO: rename sdk-wide to `NodeInfoResponse`?
-@json
-@dataclass
-class InfoResponse:
-    """General information about the node.
-    GET /api/core/v3/info.
-
-    Attributes:
-        name: The name of the node (e.g. Hornet).
-        version: The semantic version of the node.
-        status: The status of the node.
-        metrics: Node metrics.
-        protocol_parameters: Supported protocol versions by the node.
-        base_token: Gives info about the base token the network uses.
-    """
-    name: str
-    version: str
-    status: NodeInfoStatus
-    metrics: NodeInfoMetrics
-    protocol_parameters: List[ProtocolParametersResponse]
-    base_token: NodeInfoBaseToken
-
-
-# TODO: rename sdk-wide to `NodeInfoResponseWithUrl`?
-@json
-@dataclass
-class NodeInfoWrapper:
-    """General information about the node and its URL.
-    GET /api/core/v3/info.
-
-    Attributes:
-        node_info: A NodeInfo object.
-        url: The URL of the node.
-    """
-    node_info: InfoResponse
-    url: str
-
-
-@json
-@dataclass
-class RoutesResponse:
-    """API route groups of the node.
-    GET /api/routes.
-
-    Attributes:
-        routes: The available API route groups of the node.
-    """
-    routes: List[str]

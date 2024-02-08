@@ -5,17 +5,11 @@ from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.block.block import Block
-from iota_sdk.types.block.metadata import BlockMetadataResponse, BlockWithMetadataResponse
-from iota_sdk.types.committee import CommitteeResponse, ValidatorResponse, ValidatorsResponse
+from iota_sdk.client.responses import NodeInfoWrapper, InfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
-from iota_sdk.types.issuance import CongestionResponse, IssuanceBlockHeaderResponse
-from iota_sdk.types.mana import ManaRewardsResponse
-from iota_sdk.types.node_info import InfoResponse, NodeInfoWrapper, RoutesResponse
-from iota_sdk.types.output_metadata import OutputMetadata, OutputWithMetadataResponse
+from iota_sdk.types.output_metadata import OutputMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitment
-from iota_sdk.types.transaction_metadata import TransactionMetadataResponse
-from iota_sdk.types.utxo_changes import UtxoChangesResponse, UtxoChangesFullResponse
 
 
 class NodeCoreAPI(metaclass=ABCMeta):

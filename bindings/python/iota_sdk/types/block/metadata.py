@@ -3,29 +3,6 @@
 
 from __future__ import annotations
 from enum import Enum, IntEnum
-from dataclasses import dataclass
-from typing import Optional
-from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.block.block import Block
-from iota_sdk.types.transaction_metadata import TransactionMetadataResponse
-
-
-@json
-@dataclass
-class BlockMetadataResponse:
-    """The metadata of a block.
-    Response of GET /api/core/v3/blocks/{blockId}/metadata.
-
-    Attributes:
-        block_id: The identifier of the block. Hex-encoded with 0x prefix.
-        block_state: If pending, the block is stored but not confirmed. If confirmed, the block is confirmed with the first level of knowledge. If finalized, the block is included and cannot be reverted anymore. If rejected, the block is rejected by the node, and user should reissue payload if it contains one. If failed, the block is not successfully issued due to failure reason.
-        block_failure_reason: The optional block failure reason.
-        transaction_metadata: The optional metadata of a given transaction.
-    """
-    block_id: HexStr
-    block_state: BlockState
-    block_failure_reason: Optional[BlockFailureReason] = None
-    transaction_metadata: Optional[TransactionMetadataResponse] = None
 
 
 class BlockState(Enum):
@@ -95,17 +72,3 @@ class BlockFailureReason(IntEnum):
             12: "The block payload is invalid.",
             255: "The block is invalid."
         }[self.value]
-
-
-@json
-@dataclass
-class BlockWithMetadataResponse:
-    """A block with its metadata.
-    Response of GET /api/core/v3/blocks/{blockId}/full.
-
-    Attributes:
-        block: The block.
-        metadata: The block metadata.
-    """
-    block: Block
-    metadata: BlockMetadataResponse
