@@ -195,7 +195,7 @@ pub mod dto {
                 {
                     TaggedDataPayload::KIND => Self::from(TaggedDataPayload::deserialize(value).map_err(|e| {
                         serde::de::Error::custom(alloc::format!(
-                            core::concat!("cannot deserializeTaggedDataPayload: {}"),
+                            core::concat!("cannot deserialize TaggedDataPayload: {}"),
                             e
                         ))
                     })?),
