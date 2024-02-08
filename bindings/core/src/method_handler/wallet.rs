@@ -336,6 +336,24 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .await?;
             Response::PreparedTransaction(data)
         }
+        WalletMethod::PrepareBeginStaking { params, options } => {
+            let data = wallet.prepare_begin_staking(params, options).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareExtendStaking {
+            account_id,
+            additional_epochs,
+        } => {
+            let data = wallet.prepare_extend_staking(account_id, additional_epochs).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareEndStaking { account_id } => {
+            let data = wallet.prepare_end_staking(account_id).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::AnnounceCandidacy { account_id } => {
+            Response::BlockId(wallet.announce_candidacy(account_id).await?)
+        }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareStopParticipating { event_id } => {
         //     let data = wallet.prepare_stop_participating(event_id).await?;
