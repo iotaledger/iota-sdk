@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
@@ -59,17 +59,17 @@ pub enum Requirement {
 impl InputSelection {
     /// Fulfills a requirement by selecting the appropriate available inputs.
     /// Returns the selected inputs and an optional new requirement.
-    pub(crate) fn fulfill_requirement(&mut self, requirement: Requirement) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_requirement(&mut self, requirement: &Requirement) -> Result<Vec<InputSigningData>, Error> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {
-            Requirement::Sender(address) => self.fulfill_sender_requirement(&address),
-            Requirement::Issuer(address) => self.fulfill_issuer_requirement(&address),
-            Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(&address),
-            Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
-            Requirement::Account(account_id) => self.fulfill_account_requirement(account_id),
-            Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
-            Requirement::Delegation(delegation_id) => self.fulfill_delegation_requirement(delegation_id),
+            Requirement::Sender(address) => self.fulfill_sender_requirement(address),
+            Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
+            Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
+            Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(*foundry_id),
+            Requirement::Account(account_id) => self.fulfill_account_requirement(*account_id),
+            Requirement::Nft(nft_id) => self.fulfill_nft_requirement(*nft_id),
+            Requirement::Delegation(delegation_id) => self.fulfill_delegation_requirement(*delegation_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
             Requirement::Mana => self.fulfill_mana_requirement(),

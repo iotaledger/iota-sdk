@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! Input selection for transactions
@@ -9,6 +9,7 @@ pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
+use alloc::collections::BTreeMap;
 use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
@@ -49,9 +50,10 @@ pub struct InputSelection {
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
     auto_mana_allotment: Option<AutoManaAllotment>,
-    mana_allotments: Vec<ManaAllotment>,
+    mana_allotments: BTreeMap<AccountId, u64>,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
+    allow_additional_input_selection: bool,
     protocol_parameters: ProtocolParameters,
 }
 
@@ -126,8 +128,9 @@ impl InputSelection {
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
             auto_mana_allotment: None,
-            mana_allotments: Vec::new(),
+            mana_allotments: Default::default(),
             mana_rewards: Default::default(),
+            allow_additional_input_selection: true,
             payload: None,
         }
     }
@@ -210,7 +213,11 @@ impl InputSelection {
         // Process all the requirements until there are no more.
         while let Some(requirement) = self.requirements.pop() {
             // Fulfill the requirement.
-            let inputs = self.fulfill_requirement(requirement)?;
+            let inputs = self.fulfill_requirement(&requirement)?;
+
+            if !self.allow_additional_input_selection && !inputs.is_empty() {
+                return Err(Error::AdditionalInputsRequired(requirement));
+            }
 
             // Select suggested inputs.
             for input in inputs {
@@ -250,7 +257,11 @@ impl InputSelection {
             remainders,
             mana_rewards: self.mana_rewards,
             context_inputs: self.context_inputs,
-            mana_allotments: self.mana_allotments,
+            mana_allotments: self
+                .mana_allotments
+                .into_iter()
+                .map(|(account_id, mana)| ManaAllotment::new(account_id, mana))
+                .collect::<Result<_, _>>()?,
         })
     }
 
@@ -277,14 +288,14 @@ impl InputSelection {
     }
 
     /// Sets the required inputs of an [`InputSelection`].
-    pub fn with_required_inputs(mut self, inputs: impl Into<HashSet<OutputId>>) -> Self {
-        self.required_inputs = inputs.into();
+    pub fn with_required_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
+        self.required_inputs = inputs.into_iter().collect();
         self
     }
 
     /// Sets the forbidden inputs of an [`InputSelection`].
-    pub fn with_forbidden_inputs(mut self, inputs: HashSet<OutputId>) -> Self {
-        self.forbidden_inputs = inputs;
+    pub fn with_forbidden_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
+        self.forbidden_inputs = inputs.into_iter().collect();
         self
     }
 
@@ -301,7 +312,7 @@ impl InputSelection {
     }
 
     /// Sets the mana allotments of an [`InputSelection`].
-    pub fn with_mana_allotments(mut self, mana_allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
+    pub fn with_mana_allotments(mut self, mana_allotments: impl IntoIterator<Item = (AccountId, u64)>) -> Self {
         self.mana_allotments = mana_allotments.into_iter().collect();
         self
     }
@@ -329,6 +340,11 @@ impl InputSelection {
             issuer_id: account_id,
             reference_mana_cost,
         });
+        self
+    }
+
+    pub fn disable_additional_input_selection(mut self) -> Self {
+        self.allow_additional_input_selection = false;
         self
     }
 

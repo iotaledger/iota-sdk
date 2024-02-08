@@ -37,22 +37,11 @@ where
         let mut options = options.into().unwrap_or_default();
 
         for allotment in allotments {
-            let allotment = allotment.into();
+            let ManaAllotment { account_id, mana } = allotment.into();
 
-            match options.mana_allotments.as_mut() {
-                Some(mana_allotments) => {
-                    match mana_allotments
-                        .iter_mut()
-                        .find(|a| a.account_id == allotment.account_id)
-                    {
-                        Some(mana_allotment) => mana_allotment.mana += allotment.mana,
-                        None => mana_allotments.push(allotment),
-                    }
-                }
-                None => options.mana_allotments = Some(vec![allotment]),
-            }
+            *options.mana_allotments.entry(account_id).or_default() += mana;
         }
 
-        self.prepare_transaction([], None, options).await
+        self.prepare_transaction([], options).await
     }
 }

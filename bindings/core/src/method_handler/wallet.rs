@@ -360,7 +360,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         //     Response::PreparedTransaction(data)
         // }
         WalletMethod::PrepareTransaction { outputs, options } => {
-            let data = wallet.prepare_transaction(outputs, None, options).await?;
+            let data = wallet.prepare_transaction(outputs, options).await?;
             Response::PreparedTransaction(data)
         }
         // #[cfg(feature = "participation")]

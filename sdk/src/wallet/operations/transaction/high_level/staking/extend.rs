@@ -83,13 +83,13 @@ where
                 past_bounded_epoch,
                 end_epoch,
             ));
-            options.custom_inputs = Some(vec![account_output_data.output_id]);
-            options.context_inputs = Some(vec![ContextInput::from(RewardContextInput::new(0)?)]);
+            options.mandatory_inputs = [account_output_data.output_id].into();
+            options.context_inputs = vec![ContextInput::from(RewardContextInput::new(0)?)];
         }
 
         let output = output_builder.finish_output()?;
 
-        let transaction = self.prepare_transaction([output], None, options).await?;
+        let transaction = self.prepare_transaction([output], options).await?;
 
         Ok(transaction)
     }

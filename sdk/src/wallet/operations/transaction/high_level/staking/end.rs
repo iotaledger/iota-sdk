@@ -65,11 +65,13 @@ where
             .with_features(features)
             .finish_output()?;
 
-        let mut options = TransactionOptions::default();
-        options.custom_inputs = Some(vec![account_output_data.output_id]);
-        options.context_inputs = Some(vec![ContextInput::from(RewardContextInput::new(0)?)]);
+        let options = TransactionOptions {
+            mandatory_inputs: [account_output_data.output_id].into(),
+            context_inputs: vec![ContextInput::from(RewardContextInput::new(0)?)],
+            ..Default::default()
+        };
 
-        let transaction = self.prepare_transaction([output], None, options).await?;
+        let transaction = self.prepare_transaction([output], options).await?;
 
         Ok(transaction)
     }

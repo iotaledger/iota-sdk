@@ -43,17 +43,15 @@ impl InputSelection {
             builder = builder.with_payload(payload.clone());
         }
 
-        if !self
-            .mana_allotments
-            .iter_mut()
-            .any(|allotment| allotment.account_id() == &issuer_id)
-        {
-            self.mana_allotments.push(ManaAllotment::new(issuer_id, 1)?);
-        }
+        self.mana_allotments.entry(issuer_id).or_default();
 
         let transaction = builder
             .with_context_inputs(self.context_inputs.clone())
-            .with_mana_allotments(self.mana_allotments.clone())
+            .with_mana_allotments(
+                self.mana_allotments
+                    .iter()
+                    .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
+            )
             .finish_with_params(&self.protocol_parameters)?;
 
         let signed_transaction = SignedTransactionPayload::new(transaction, self.transaction_unlocks()?)?;
@@ -63,14 +61,9 @@ impl InputSelection {
         let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
-        // Unwrap: safe because we set it above
-        let allotment = self
-            .mana_allotments
-            .iter_mut()
-            .find(|allotment| allotment.account_id() == &issuer_id)
-            .unwrap();
-        if allotment.mana < required_allotment_mana {
-            allotment.mana = required_allotment_mana;
+        let allotment = self.mana_allotments[&issuer_id];
+        if allotment < required_allotment_mana {
+            self.mana_allotments.insert(issuer_id, required_allotment_mana);
             let additional_inputs = self.fulfill_mana_requirement()?;
             // If we needed more inputs to cover the additional allotment mana
             // then re-add this requirement so we try again
@@ -128,10 +121,10 @@ impl InputSelection {
                     }
 
                     let block = SignatureUnlock::new(
-                        Ed25519Signature::try_from_bytes(
+                        Ed25519Signature::from_bytes(
                             [0; Ed25519Signature::PUBLIC_KEY_LENGTH],
                             [0; Ed25519Signature::SIGNATURE_LENGTH],
-                        )?
+                        )
                         .into(),
                     )
                     .into();

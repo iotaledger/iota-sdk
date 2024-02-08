@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
@@ -105,16 +105,18 @@ where
         let issuance = self.client().get_issuance().await?;
 
         let transaction_options = TransactionOptions {
-            context_inputs: Some(vec![
+            context_inputs: vec![
                 // TODO Remove in https://github.com/iotaledger/iota-sdk/pull/1872
                 CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
                 BlockIssuanceCreditContextInput::new(account_id).into(),
-            ]),
-            custom_inputs: Some(vec![*output_id]),
+            ],
+            mandatory_inputs: [*output_id].into(),
+            issuer_id: Some(account_id),
+            allow_additional_input_selection: false,
             ..Default::default()
         };
 
-        self.prepare_transaction(vec![account], account_id, transaction_options.clone())
+        self.prepare_transaction(vec![account], transaction_options.clone())
             .await
     }
 }

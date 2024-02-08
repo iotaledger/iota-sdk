@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
@@ -78,7 +78,7 @@ where
             output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
-        let prepared_transaction_data = self.prepare_transaction(outputs, None, options.clone()).await?;
+        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction_data, None, options)
             .await

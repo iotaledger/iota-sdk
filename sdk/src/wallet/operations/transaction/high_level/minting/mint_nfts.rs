@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use getset::Getters;
@@ -208,6 +208,6 @@ where
             outputs.push(nft_builder.finish_output()?);
         }
 
-        self.prepare_transaction(outputs, None, options).await
+        self.prepare_transaction(outputs, options).await
     }
 }

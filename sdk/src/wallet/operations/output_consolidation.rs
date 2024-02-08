@@ -1,4 +1,4 @@
-// Copyright 2021-2024 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::{HashMap, HashSet};
@@ -98,17 +98,18 @@ where
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
         let options = Some(TransactionOptions {
-            custom_inputs: Some(outputs_to_consolidate.into_iter().map(|o| o.output_id).collect()),
+            mandatory_inputs: outputs_to_consolidate.into_iter().map(|o| o.output_id).collect(),
             remainder_value_strategy: RemainderValueStrategy::CustomAddress(
                 params
                     .target_address
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
+            allow_additional_input_selection: false,
             ..Default::default()
         });
 
-        self.prepare_transaction([], None, options).await
+        self.prepare_transaction([], options).await
     }
 
     /// Determines whether an output should be consolidated or not.

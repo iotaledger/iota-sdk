@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::HashSet;
@@ -298,18 +298,16 @@ where
         self.prepare_transaction(
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
-            None,
-            Some(TransactionOptions {
-                custom_inputs: Some(
-                    outputs_to_claim
-                        .iter()
-                        .map(|o| o.output_id)
-                        // add additional inputs
-                        .chain(possible_additional_inputs.iter().map(|o| o.output_id))
-                        .collect::<Vec<OutputId>>(),
-                ),
+            TransactionOptions {
+                mandatory_inputs: outputs_to_claim
+                    .iter()
+                    .map(|o| o.output_id)
+                    // add additional inputs
+                    .chain(possible_additional_inputs.iter().map(|o| o.output_id))
+                    .collect(),
+                allow_additional_input_selection: false,
                 ..Default::default()
-            }),
+            },
         )
         .await
     }

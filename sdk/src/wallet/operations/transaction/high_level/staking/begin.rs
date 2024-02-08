@@ -95,7 +95,7 @@ where
             ))
             .finish_output()?;
 
-        let transaction = self.prepare_transaction([output], None, options).await?;
+        let transaction = self.prepare_transaction([output], options).await?;
 
         Ok(transaction)
     }

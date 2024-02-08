@@ -1,7 +1,13 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountAddress, AccountId, Bech32Address } from '../block';
+import {
+    AccountAddress,
+    AccountId,
+    Bech32Address,
+    ContextInput,
+    ManaAllotment,
+} from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
 import { u256, HexEncodedString, NumericString, u64 } from '../utils';
@@ -13,12 +19,8 @@ export interface TransactionOptions {
     remainderValueStrategy?: RemainderValueStrategy;
     /** An optional tagged data payload. */
     taggedDataPayload?: TaggedDataPayload;
-    /**
-     * Custom inputs that should be used for the transaction.
-     * If custom inputs are provided, only those are used.
-     * If also other additional inputs should be used, `mandatoryInputs` should be used instead.
-     */
-    customInputs?: string[];
+    /** Transaction context inputs to include. */
+    contextInputs?: ContextInput[];
     /** Inputs that must be used for the transaction. */
     mandatoryInputs?: string[];
     /** Specifies what needs to be burned during input selection. */
@@ -27,6 +29,14 @@ export interface TransactionOptions {
     note?: string;
     /** Whether to allow sending a micro amount. */
     allowMicroAmount?: boolean;
+    /** Whether to allow the selection of additional inputs for this transaction. */
+    allowAdditionalInputSelection?: boolean;
+    /** Transaction capabilities. */
+    capabilities?: HexEncodedString;
+    /** Mana allotments for the transaction. */
+    manaAllotments?: ManaAllotment[];
+    /** Optional block issuer to which the transaction will have required mana allotted. */
+    issuerId?: AccountId;
 }
 
 /** The possible remainder value strategies. */

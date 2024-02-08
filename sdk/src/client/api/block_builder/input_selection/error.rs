@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! Error handling for input selection.
@@ -14,6 +14,8 @@ use crate::types::block::output::{ChainId, OutputId, TokenId};
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
+    #[error("additional inputs required for {0:?}, but additional input selection is disabled")]
+    AdditionalInputsRequired(Requirement),
     /// Block error.
     #[error("{0}")]
     Block(#[from] crate::types::block::Error),

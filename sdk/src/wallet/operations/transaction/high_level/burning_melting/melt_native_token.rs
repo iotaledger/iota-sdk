@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
@@ -79,7 +79,7 @@ where
                     .finish_output()?,
             ];
             // Input selection will detect that we're melting native tokens and add the required inputs if available
-            self.prepare_transaction(outputs, None, options).await
+            self.prepare_transaction(outputs, options).await
         } else {
             unreachable!("We checked if it's an account output before")
         }

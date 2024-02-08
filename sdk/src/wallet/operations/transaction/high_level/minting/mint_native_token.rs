@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
@@ -129,6 +129,6 @@ where
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
 
-        self.prepare_transaction(outputs, None, options).await
+        self.prepare_transaction(outputs, options).await
     }
 }
