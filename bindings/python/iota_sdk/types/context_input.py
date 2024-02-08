@@ -5,12 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
-from iota_sdk.types.common import HexStr, IdWithSlotIndex, json
-
-
-class SlotCommitmentId(IdWithSlotIndex):
-    """Represents a slot commitment ID.
-    """
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.slot import SlotCommitmentId
 
 
 class ContextInputType(IntEnum):

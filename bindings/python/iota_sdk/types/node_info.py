@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 from dataclasses_json import config
 from iota_sdk.types.common import EpochIndex, json, SlotIndex
-from iota_sdk.types.context_input import SlotCommitmentId
+from iota_sdk.types.slot import SlotCommitmentId
 
 
 @json
