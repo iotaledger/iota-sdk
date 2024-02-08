@@ -133,7 +133,7 @@ impl OutputWithMetadata {
 
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
@@ -460,3 +460,6 @@ pub struct DecayedMana {
     #[cfg_attr(feature = "serde", serde(with = "string"))]
     pub(crate) potential: u64,
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(Output: Basic, Account, Anchor, Foundry, Nft, Delegation);
