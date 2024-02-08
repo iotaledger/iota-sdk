@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.decayed_mana import DecayedMana
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
+from iota_sdk.types.output_id import OutputId
 
 
 @json
@@ -118,4 +119,4 @@ class Balance:
     foundries: List[HexStr]
     nfts: List[HexStr]
     delegations: List[HexStr]
-    potentially_locked_outputs: dict[HexStr, bool]
+    potentially_locked_outputs: dict[OutputId, bool]

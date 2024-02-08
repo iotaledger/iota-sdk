@@ -5,8 +5,9 @@ from __future__ import annotations
 from enum import Enum, IntEnum
 from dataclasses import dataclass
 from typing import Optional
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import json
 from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.id import BlockId
 
 
 @json
@@ -21,7 +22,7 @@ class BlockMetadata:
         block_failure_reason: The block failure reason.
         transaction_failure_reason: The transaction failure reason.
     """
-    block_id: HexStr
+    block_id: BlockId
     block_state: BlockState
     transaction_state: Optional[TransactionState] = None
     block_failure_reason: Optional[BlockFailureReason] = None

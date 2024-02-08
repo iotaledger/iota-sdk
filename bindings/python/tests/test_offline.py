@@ -3,7 +3,7 @@
 
 import json
 import unittest
-from iota_sdk import Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
+from iota_sdk import Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata, TransactionId
 
 
 # Read the test vector
@@ -57,35 +57,36 @@ def test_sign_verify_ed25519():
 
 class TestTypes(unittest.TestCase):
     def test_output_id(self):
-        transaction_id = '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        transaction_id = TransactionId(
+            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000')
         output_index = 42
         output_id = OutputId(transaction_id, output_index)
         assert repr(
-            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000'
+            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
 
         new_output_id = OutputId.from_string(
-            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a0000000000')
+            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00')
         assert repr(
-            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a0000000000'
+            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
         assert new_output_id.transaction_id == transaction_id
         assert new_output_id.output_index == output_index
 
-        transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
             OutputId(transaction_id_missing_0x_prefix, output_index)
-        transaction_id__invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        transaction_id__invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
             OutputId(transaction_id__invalid_hex_prefix, output_index)
-        transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
+        transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
             OutputId(transaction_id_invalid_hex_char, output_index)
-        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
+        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_missing_0x_prefix)
-        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_char)
-        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
+        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_prefix)
 
