@@ -134,14 +134,13 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Account(output) => {
                     if output.features().block_issuer().is_some() {
                         if self.commitment_context_input.is_none() {
-                            return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                            return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
                         }
                         if !self
                             .bic_context_inputs
                             .contains(&output.account_id_non_null(&output_id))
                         {
-                            // TODO probably not the correct error
-                            return Ok(Some(TransactionFailureReason::InvalidBlockIssuanceCreditsAmount));
+                            return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
                         }
                     }
 
@@ -261,15 +260,14 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Account(output) => {
                     if output.features().block_issuer().is_some() {
                         if self.commitment_context_input.is_none() {
-                            return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                            return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
                         }
                         let output_id = OutputId::new(self.transaction_id, index as u16);
                         if !self
                             .bic_context_inputs
                             .contains(&output.account_id_non_null(&output_id))
                         {
-                            // TODO probably not the correct error
-                            return Ok(Some(TransactionFailureReason::InvalidBlockIssuanceCreditsAmount));
+                            return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
                         }
                     }
 
