@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { INode } from '../client';
-import type { OutputId } from '../block/output';
+import { HexEncodedString } from '../utils';
 
 /**
  * An object containing an account's entire participation overview.
@@ -16,7 +16,7 @@ export interface ParticipationOverview {
  */
 export interface Participations {
     [eventId: ParticipationEventId]: {
-        [outputId: OutputId]: TrackedParticipationOverview;
+        [outputId: HexEncodedString]: TrackedParticipationOverview;
     };
 }
 
