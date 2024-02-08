@@ -473,7 +473,7 @@ pub async fn begin_staking_command(
     fixed_cost: u64,
     staking_period: Option<u32>,
 ) -> Result<(), Error> {
-    println_log_info!("Beginning a staking for {account_id}.");
+    println_log_info!("Begin staking for {account_id}.");
 
     let transaction = wallet
         .begin_staking(
@@ -1395,6 +1395,7 @@ pub async fn prompt_internal(
                             allot_mana_command(wallet, mana, account_id).await
                         }
                         WalletCommand::AnnounceCandidacy { account_id } => {
+                            ensure_password(wallet).await?;
                             announce_candidacy_command(wallet, account_id).await
                         }
                         WalletCommand::Balance => balance_command(wallet).await,
@@ -1403,7 +1404,10 @@ pub async fn prompt_internal(
                             staked_amount,
                             fixed_cost,
                             staking_period,
-                        } => begin_staking_command(wallet, account_id, staked_amount, fixed_cost, staking_period).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            begin_staking_command(wallet, account_id, staked_amount, fixed_cost, staking_period).await
+                        }
                         WalletCommand::BurnNativeToken { token_id, amount } => {
                             ensure_password(wallet).await?;
                             burn_native_token_command(wallet, token_id, amount).await
@@ -1474,14 +1478,20 @@ pub async fn prompt_internal(
                             ensure_password(wallet).await?;
                             destroy_foundry_command(wallet, foundry_id).await
                         }
-                        WalletCommand::EndStaking { account_id } => end_staking_command(wallet, account_id).await,
+                        WalletCommand::EndStaking { account_id } => {
+                            ensure_password(wallet).await?;
+                            end_staking_command(wallet, account_id).await
+                        }
                         WalletCommand::Exit => {
                             return Ok(PromptResponse::Done);
                         }
                         WalletCommand::ExtendStaking {
                             account_id,
                             additional_epochs,
-                        } => extend_staking_command(wallet, account_id, additional_epochs).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            extend_staking_command(wallet, account_id, additional_epochs).await
+                        }
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
                             implicit_account_creation_address_command(wallet).await
