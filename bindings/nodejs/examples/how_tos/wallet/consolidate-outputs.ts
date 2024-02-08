@@ -7,7 +7,7 @@ import { CommonOutput, Utils, Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/consolidate-outputs.ts
+// yarn run-example ./how_tos/wallet/consolidate-outputs.ts
 
 // In this example we will consolidate basic outputs from an wallet with only an AddressUnlockCondition by sending
 // them to the same address again.

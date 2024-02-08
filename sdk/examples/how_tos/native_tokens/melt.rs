@@ -4,7 +4,7 @@
 //! In this example we will melt an existing native token with its foundry.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! You may provide a TOKEN_ID that is available in the wallet. The foundry
 //! output which minted it needs to be available as well. You can check this by
