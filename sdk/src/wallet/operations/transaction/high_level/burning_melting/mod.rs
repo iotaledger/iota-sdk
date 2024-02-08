@@ -22,7 +22,7 @@ impl Wallet {
         let options = options.into();
         let prepared = self.prepare_burn(burn, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared, None, options).await
+        self.sign_and_submit_transaction(prepared, options).await
     }
 
     /// A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, delegations,

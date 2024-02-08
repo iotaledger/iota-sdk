@@ -31,7 +31,7 @@ where
     pub(crate) async fn select_inputs(
         &self,
         outputs: Vec<Output>,
-        options: TransactionOptions,
+        mut options: TransactionOptions,
     ) -> crate::wallet::Result<Selected> {
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
@@ -39,6 +39,9 @@ where
         let voting_output = self.get_voting_output().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
+        if options.issuer_id.is_none() {
+            options.issuer_id = self.data().await.first_account_id();
+        }
         let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
             Some(
                 self.client()

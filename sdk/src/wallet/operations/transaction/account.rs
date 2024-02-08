@@ -36,8 +36,10 @@ where
 
         self.sign_and_submit_transaction(
             self.prepare_implicit_account_transition(output_id, key_source).await?,
-            issuer_id,
-            None,
+            TransactionOptions {
+                issuer_id: Some(issuer_id),
+                ..Default::default()
+            },
         )
         .await
     }

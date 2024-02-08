@@ -22,7 +22,7 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let prepared = self.prepare_extend_staking(account_id, additional_epochs).await?;
 
-        self.sign_and_submit_transaction(prepared, None, None).await
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Prepares the transaction for [Wallet::extend_staking()].

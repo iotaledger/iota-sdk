@@ -23,8 +23,7 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_allot_mana(allotments, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     pub async fn prepare_allot_mana(

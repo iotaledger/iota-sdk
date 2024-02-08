@@ -121,8 +121,7 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_send(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::send()].

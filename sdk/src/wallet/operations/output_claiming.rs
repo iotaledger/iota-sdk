@@ -215,9 +215,7 @@ where
             }
         })?;
 
-        let claim_tx = self
-            .sign_and_submit_transaction(prepared_transaction, None, None)
-            .await?;
+        let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
         log::debug!(
             "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",
