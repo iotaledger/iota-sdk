@@ -4,7 +4,7 @@
 //! In this example we check if an output has only an address unlock condition and that the address is from the wallet.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! ```sh
 //! cargo run --release --all-features --example check_unlock_conditions

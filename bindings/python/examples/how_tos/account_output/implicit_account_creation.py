@@ -13,6 +13,6 @@ if 'WALLET_DB_PATH' not in os.environ:
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Get the implicit account address
+# Get the implicit account address.
 address = wallet.implicit_account_creation_address()
-print(f'Fund the following address: {address}')
+print(f'{address}')

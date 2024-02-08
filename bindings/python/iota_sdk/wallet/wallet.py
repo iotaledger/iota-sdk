@@ -21,7 +21,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
-from iota_sdk.types.send_params import CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
+from iota_sdk.types.send_params import BeginStakingParams, CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.transaction_with_metadata import CreateDelegationTransaction, CreateNativeTokenTransaction, TransactionWithMetadata
 from iota_sdk.types.transaction_options import TransactionOptions
@@ -638,6 +638,64 @@ class Wallet():
             }
         ))
         return PreparedTransaction(self, prepared)
+
+    def begin_staking(self, params: BeginStakingParams,
+                      options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Begin staking.
+        """
+        return self.prepare_begin_staking(params, options).send()
+
+    def prepare_begin_staking(self, params: BeginStakingParams,
+                              options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Prepare to begin staking.
+        """
+        prepared = PreparedTransactionData.from_dict(self._call_method(
+            'prepareBeginStaking', {
+                'params': params,
+                'options': options
+            }
+        ))
+        return PreparedTransaction(self, prepared)
+
+    def extend_staking(self, account_id: HexStr, additional_epochs: int) -> TransactionWithMetadata:
+        """Extend staking by additional epochs.
+        """
+        return self.prepare_extend_staking(account_id, additional_epochs).send()
+
+    def prepare_extend_staking(self, account_id: HexStr, additional_epochs: int) -> PreparedTransaction:
+        """Prepare to extend staking by additional epochs.
+        """
+        prepared = PreparedTransactionData.from_dict(self._call_method(
+            'prepareExtendStaking', {
+                'accountId': account_id,
+                'additionalEpochs': additional_epochs
+            }
+        ))
+        return PreparedTransaction(self, prepared)
+
+    def end_staking(self, account_id: HexStr) -> TransactionWithMetadata:
+        """End staking and claim rewards.
+        """
+        return self.prepare_end_staking(account_id).send()
+
+    def prepare_end_staking(self, account_id: HexStr) -> PreparedTransaction:
+        """Prepare to end staking and claim rewards.
+        """
+        prepared = PreparedTransactionData.from_dict(self._call_method(
+            'prepareEndStaking', {
+                'accountId': account_id,
+            }
+        ))
+        return PreparedTransaction(self, prepared)
+
+    def announce_candidacy(self, account_id: HexStr) -> HexStr:
+        """Announce a staking account's candidacy for the staking period.
+        """
+        self._call_method(
+            'announceCandidacy', {
+                'accountId': account_id,
+            }
+        )
 
     def send_transaction(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:

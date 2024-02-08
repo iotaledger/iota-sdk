@@ -1,10 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we use an account as wallet.
+//! In this example we request funds to the wallet's first account output address.
+//!
 //! Rename `.env.example` to `.env` first.
 //!
-//! `cargo run --release --all-features --example account_wallet_request_funds`
+//! `cargo run --release --all-features --example account_output_request_funds`
 
 use iota_sdk::{
     client::request_funds_from_faucet,
@@ -33,7 +34,9 @@ async fn main() -> Result<()> {
     let balance = wallet.sync(None).await?;
 
     let total_base_token_balance = balance.base_coin().total();
-    println!("Balance before requesting funds on wallet address: {total_base_token_balance:#?}");
+    println!(
+        "Balance before requesting funds to the wallet's first account output address: {total_base_token_balance:#?}"
+    );
 
     let account_id = balance.accounts().first().unwrap();
     println!("Account Id: {account_id}");
@@ -54,7 +57,9 @@ async fn main() -> Result<()> {
         ..Default::default()
     };
     let total_base_token_balance = wallet.sync(Some(sync_options)).await?.base_coin().total();
-    println!("Balance after requesting funds on account address: {total_base_token_balance:#?}");
+    println!(
+        "Balance after requesting funds to the wallet's first account output address: {total_base_token_balance:#?}"
+    );
 
     Ok(())
 }

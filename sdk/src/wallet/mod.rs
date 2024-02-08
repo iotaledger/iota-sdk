@@ -64,6 +64,7 @@ pub use self::{
                 send::SendParams,
                 send_native_tokens::SendNativeTokenParams,
                 send_nft::SendNftParams,
+                staking::begin::BeginStakingParams,
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
             RemainderValueStrategy, TransactionOptions,
