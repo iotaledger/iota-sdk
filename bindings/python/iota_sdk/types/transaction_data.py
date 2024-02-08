@@ -10,7 +10,12 @@ from iota_sdk.types.output import Output
 from iota_sdk.types.output_metadata import OutputMetadata
 from iota_sdk.types.payload import Transaction, SignedTransactionPayload
 from iota_sdk.types.signature import Bip44
-from iota_sdk.types.common import json
+from iota_sdk.types.common import IdWithSlotIndex, json
+
+
+class TransactionId(IdWithSlotIndex):
+    """Represents a transaction ID.
+    """
 
 
 @json

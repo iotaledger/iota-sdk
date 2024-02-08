@@ -5,13 +5,13 @@ from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
-from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.block import Block, BlockId
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.ids import BlockId, TransactionId
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.transaction_data import TransactionId
 
 
 class NodeCoreAPI(metaclass=ABCMeta):
@@ -71,7 +71,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return self._call_method('getTips')
 
-    def post_block(self, block: Block) -> HexStr:
+    def post_block(self, block: Block) -> BlockId:
         """Post a block.
 
         Args:
@@ -80,9 +80,9 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The block id of the posted block.
         """
-        return self._call_method('postBlock', {
+        return BlockId(self._call_method('postBlock', {
             'block': block
-        })
+        }))
 
     def get_block(self, block_id: BlockId) -> Block:
         """Get the block corresponding to the given block id.
@@ -112,15 +112,15 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         })
 
-    def post_block_raw(self, block_bytes: List[int]) -> HexStr:
+    def post_block_raw(self, block_bytes: List[int]) -> BlockId:
         """Post a block as raw bytes.
 
         Returns:
             The corresponding block id of the block.
         """
-        return self._call_method('postBlockRaw', {
+        return BlockId(self._call_method('postBlockRaw', {
             'blockBytes': block_bytes
-        })
+        }))
 
     def get_output(
             self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:

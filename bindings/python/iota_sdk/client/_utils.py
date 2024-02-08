@@ -4,7 +4,7 @@
 from typing import Optional
 from abc import ABCMeta, abstractmethod
 
-from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.block import Block, BlockId
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output
 
@@ -88,9 +88,9 @@ class ClientUtils(metaclass=ABCMeta):
             }
         )
 
-    def block_id(self, block: Block) -> HexStr:
+    def block_id(self, block: Block) -> BlockId:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
-        return self._call_method('blockId', {
+        return BlockId(self._call_method('blockId', {
             'block': block,
-        })
+        }))

@@ -11,17 +11,17 @@ from iota_sdk.wallet.common import _call_wallet_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedCreateDelegationTransaction, PreparedCreateDelegationTransactionData, PreparedCreateTokenTransactionData, PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.balance import Balance
+from iota_sdk.types.block.block import BlockId
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.types.filter_options import FilterOptions
-from iota_sdk.types.ids import BlockId, TransactionId
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_params import OutputParams
-from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
+from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData, TransactionId
 from iota_sdk.types.send_params import CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.transaction_with_metadata import CreateDelegationTransaction, CreateNativeTokenTransaction, TransactionWithMetadata

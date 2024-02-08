@@ -5,10 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 from enum import Enum
+from iota_sdk.types.block.block import BlockId
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.ids import BlockId, TransactionId
 from iota_sdk.types.output_metadata import OutputWithMetadata
 from iota_sdk.types.payload import SignedTransactionPayload
+from iota_sdk.types.transaction_data import TransactionId
 
 
 class InclusionState(str, Enum):

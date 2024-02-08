@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from iota_sdk.types.common import json
-from iota_sdk.types.ids import TransactionId
+from iota_sdk.types.transaction_data import TransactionId
 
 
 class InputType(IntEnum):
