@@ -65,7 +65,7 @@ class RemainderValueStrategy(Enum):
 
 @json
 @dataclass
-class TransactionOptions():
+class TransactionOptions:
     """Transaction options.
 
     Attributes:

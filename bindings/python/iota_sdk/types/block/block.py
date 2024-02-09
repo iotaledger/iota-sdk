@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, TypeAlias, Union
 from dataclasses_json import config
+
 from iota_sdk.utils import Utils
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters

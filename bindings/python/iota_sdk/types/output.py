@@ -36,6 +36,7 @@ class OutputType(IntEnum):
 @dataclass
 class BasicOutput:
     """Describes a basic output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -73,6 +74,7 @@ class BasicOutput:
 @dataclass
 class AccountOutput:
     """Describes an account output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -123,6 +125,7 @@ class AccountOutput:
 @dataclass
 class AnchorOutput:
     """Describes an anchor output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -174,6 +177,7 @@ class AnchorOutput:
 @dataclass
 class FoundryOutput:
     """Describes a foundry output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -214,6 +218,7 @@ class FoundryOutput:
 @dataclass
 class NftOutput:
     """Describes an NFT output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -259,6 +264,7 @@ class NftOutput:
 @dataclass
 class DelegationOutput:
     """An output which delegates its contained IOTA coins as voting power to a validator.
+
     Attributes:
         amount: The amount of IOTA coins held by the output.
         delegated_amount: The amount of delegated IOTA coins.

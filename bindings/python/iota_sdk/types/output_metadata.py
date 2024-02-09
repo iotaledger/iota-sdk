@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import SlotIndex, json
-from iota_sdk.types.output import AccountOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_output
+from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitmentId
 from iota_sdk.types.transaction_id import TransactionId
@@ -17,6 +17,7 @@ from iota_sdk.types.transaction_id import TransactionId
 @dataclass
 class OutputMetadata:
     """Metadata about an output.
+    Response of GET /api/core/v3/outputs/{output_id}/metadata.
 
     Attributes:
         output_id: The ID of the output.
@@ -41,12 +42,10 @@ class OutputWithMetadata:
         metadata: The `OutputMetadata` object that belongs to `output`.
         output: An `Output` object.
     """
-
+    output: Output = field(metadata=config(
+        decoder=deserialize_output
+    ))
     metadata: OutputMetadata
-    output: Union[AccountOutput, FoundryOutput,
-                  NftOutput, BasicOutput, DelegationOutput] = field(metadata=config(
-                      decoder=deserialize_output
-                  ))
 
     @classmethod
     def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:

@@ -283,7 +283,7 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are directly referenced to adjust opinion.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
-    // Latest issuing time of the returned parents.
+    /// Latest issuing time of the returned parents.
     #[serde(with = "string")]
     pub latest_parent_block_issuing_time: u64,
     /// The slot index of the latest finalized slot.
@@ -456,20 +456,22 @@ pub struct BlockWithMetadataResponse {
     pub metadata: BlockMetadataResponse,
 }
 
+// TODO: needs to be aligned with TIP-48.
+// https://github.com/iotaledger/iota-sdk/issues/1921
 /// Response of GET /api/core/v3/outputs/{output_id}.
 /// An output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
-    pub metadata: OutputMetadata,
     pub output: Output,
+    pub metadata: OutputMetadata,
 }
 
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
-            metadata: value.metadata,
             output: value.output().clone(),
+            metadata: value.metadata,
         }
     }
 }
@@ -516,8 +518,8 @@ pub struct UtxoChangesFullResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithId {
-    pub output_id: OutputId,
     pub output: Output,
+    pub output_id: OutputId,
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].
