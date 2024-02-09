@@ -273,6 +273,6 @@ export interface __BlockBytes__ {
     };
 }
 
-export interface __IotaV3MainnetProtocolParameters__ {
-    name: 'iotaV3MainnetProtocolParameters';
+export interface __IotaMainnetV3ProtocolParameters__ {
+    name: 'iotaMainnetV3ProtocolParameters';
 }

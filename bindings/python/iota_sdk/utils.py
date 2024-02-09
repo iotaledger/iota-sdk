@@ -295,7 +295,7 @@ class Utils:
 
     @staticmethod
     def iota_mainnet_v3_protocol_parameters() -> ProtocolParameters:
-        return ProtocolParameters.from_dict(_call_method('iotaV3MainnetProtocolParameters'))
+        return ProtocolParameters.from_dict(_call_method('iotaMainnetV3ProtocolParameters'))
 
 
 class UtilsError(Exception):
