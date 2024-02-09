@@ -94,7 +94,7 @@ where
         let duration = std::time::Duration::from_millis(interval.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL));
         for _ in 0..max_attempts.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_MAX_AMOUNT) {
             #[cfg(target_family = "wasm")]
-            gloo_timers::future::TimeoutFuture::new(duration).await;
+            gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
 
             #[cfg(not(target_family = "wasm"))]
             tokio::time::sleep(duration).await;
