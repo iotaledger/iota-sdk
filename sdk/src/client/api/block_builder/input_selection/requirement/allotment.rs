@@ -30,6 +30,12 @@ impl InputSelection {
             .auto_mana_allotment
             .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
 
+        self.selected_inputs = Self::sort_input_signing_data(
+            std::mem::take(&mut self.selected_inputs),
+            self.slot_commitment_id.slot_index(),
+            self.protocol_parameters.committable_age_range(),
+        )?;
+
         let mut inputs = Vec::new();
         for input in &self.selected_inputs {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
@@ -77,7 +83,6 @@ impl InputSelection {
     }
 
     pub(crate) fn transaction_unlocks(&self) -> Result<Unlocks, Error> {
-        // let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
         let mut blocks = Vec::new();
         let mut block_indexes = HashMap::<Address, usize>::new();
 
