@@ -295,6 +295,8 @@ class Utils:
 
     @staticmethod
     def iota_mainnet_v3_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for IOTA mainnet V3.
+        """
         return ProtocolParameters.from_dict(_call_method('iotaMainnetV3ProtocolParameters'))
 
 
