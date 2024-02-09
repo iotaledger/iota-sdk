@@ -120,7 +120,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> 
     // Wait for transaction to get accepted
     let block_id = wallet.await_transaction_acceptance(transaction_id, None, None).await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

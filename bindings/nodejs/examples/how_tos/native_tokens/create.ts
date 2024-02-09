@@ -44,7 +44,7 @@ async function run() {
             );
 
             console.log(
-                `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+                `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
             );
 
             await wallet.sync();
@@ -77,7 +77,7 @@ async function run() {
         );
 
         console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         console.log(`Created token: ${prepared.tokenId()}`);

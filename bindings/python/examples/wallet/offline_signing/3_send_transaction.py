@@ -32,4 +32,4 @@ print(
     f'Transaction sent: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
 block_id = wallet.await_transaction_acceptance(
     transaction.transaction_id)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+print(f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')

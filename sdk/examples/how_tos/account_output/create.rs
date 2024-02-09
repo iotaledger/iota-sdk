@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

@@ -65,7 +65,7 @@ async function run() {
         );
 
         console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         // To send an NFT with expiration unlock condition prepareOutput() can be used like this:

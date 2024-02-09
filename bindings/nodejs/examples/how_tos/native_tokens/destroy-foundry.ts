@@ -45,7 +45,7 @@ async function run() {
             transaction.transactionId,
         );
         console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         balance = await wallet.sync();
