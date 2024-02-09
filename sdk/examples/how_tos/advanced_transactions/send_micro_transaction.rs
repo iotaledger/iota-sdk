@@ -4,7 +4,7 @@
 //! In this example we will send an amount below the minimum amount.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Get the wallet we generated with `create_wallet`.

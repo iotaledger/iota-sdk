@@ -201,48 +201,45 @@ fn create_remainder_outputs(
     storage_score_parameters: StorageScoreParameters,
 ) -> Result<Vec<RemainderData>, Error> {
     let mut remainder_outputs = Vec::new();
+    let mut remaining_amount = amount_diff;
+    let mut catchall_native_token = None;
 
+    // Start with the native tokens
     if let Some(native_tokens) = native_tokens_diff {
-        let native_tokens_len = native_tokens.len();
-        let mut remaining_amount = amount_diff;
-        // Create a remainder output with minimum amount for each native token and put remaining amount + mana in
-        // the last output.
-        for (n, native_token) in native_tokens.into_iter().enumerate() {
-            let remainder_builder = if n + 1 < native_tokens_len {
-                BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
-            } else {
-                // All remainder mana in the last remainder output which also gets all remaining amount.
-                BasicOutputBuilder::new_with_amount(remaining_amount).with_mana(mana_diff)
-            };
-
-            let remainder = remainder_builder
-                .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                .with_native_token(native_token)
-                .finish_output()?;
-
-            if n + 1 < native_tokens_len {
-                remaining_amount = remaining_amount.saturating_sub(remainder.amount());
-            } else {
-                // Only last output uses amount diff and needs to be validated
-                remainder.verify_storage_deposit(storage_score_parameters)?;
-            };
-            log::debug!(
-                "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
-                remainder.amount(),
-                remainder.mana()
-            );
-            remainder_outputs.push(remainder);
+        if let Some((last, nts)) = native_tokens.split_last() {
+            // Save this one for the catchall
+            catchall_native_token.replace(*last);
+            // Create remainder outputs with min amount
+            for native_token in nts {
+                let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
+                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                    .with_native_token(*native_token)
+                    .finish_output()?;
+                log::debug!(
+                    "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
+                    output.amount(),
+                    output.mana()
+                );
+                remaining_amount = remaining_amount.saturating_sub(output.amount());
+                remainder_outputs.push(output);
+            }
         }
-    } else {
-        // No native token, just put all amount and mana in a single output.
-        let remainder = BasicOutputBuilder::new_with_amount(amount_diff)
-            .with_mana(mana_diff)
-            .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-            .finish_output()?;
-        remainder.verify_storage_deposit(storage_score_parameters)?;
-        log::debug!("Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}");
-        remainder_outputs.push(remainder);
     }
+    let mut catchall = BasicOutputBuilder::new_with_amount(remaining_amount)
+        .with_mana(mana_diff)
+        .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
+    if let Some(native_token) = catchall_native_token {
+        catchall = catchall.with_native_token(native_token);
+    }
+    let catchall = catchall.finish_output()?;
+    catchall.verify_storage_deposit(storage_score_parameters)?;
+    log::debug!(
+        "Created remainder output of amount {}, mana {} and native token {:?} for {remainder_address:?}",
+        catchall.amount(),
+        catchall.mana(),
+        catchall.native_token(),
+    );
+    remainder_outputs.push(catchall);
 
     Ok(remainder_outputs
         .into_iter()

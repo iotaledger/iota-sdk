@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{collections::BTreeSet, vec::Vec};
-use core::cmp::Ordering;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
-use iterator_sorted::is_unique_sorted_by;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::{
     types::block::{
         capabilities::{Capabilities, CapabilityFlag},
-        context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
+        context_input::{ContextInput, ContextInputs},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
         output::{Output, OUTPUT_COUNT_RANGE},
@@ -128,7 +126,7 @@ impl TransactionBuilder {
 
     /// Finishes a [`TransactionBuilder`] into a [`Transaction`].
     pub fn finish_with_params<'a>(
-        mut self,
+        self,
         params: impl Into<Option<&'a ProtocolParameters>>,
     ) -> Result<Transaction, Error> {
         let params = params.into();
@@ -160,16 +158,6 @@ impl TransactionBuilder {
             })
             .ok_or(Error::InvalidField("creation slot"))?;
 
-        self.context_inputs.sort_by(context_inputs_cmp);
-
-        let context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount> = self
-            .context_inputs
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidContextInputCount)?;
-
-        verify_context_inputs(&context_inputs)?;
-
         let inputs: BoxedSlicePrefix<Input, InputCount> = self
             .inputs
             .into_boxed_slice()
@@ -199,7 +187,7 @@ impl TransactionBuilder {
         Ok(Transaction {
             network_id: self.network_id,
             creation_slot,
-            context_inputs,
+            context_inputs: ContextInputs::from_vec(self.context_inputs)?,
             inputs,
             allotments,
             capabilities: self.capabilities,
@@ -215,8 +203,6 @@ impl TransactionBuilder {
     }
 }
 
-pub(crate) type ContextInputCount =
-    BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
 pub(crate) type InputCount = BoundedU16<{ *INPUT_COUNT_RANGE.start() }, { *INPUT_COUNT_RANGE.end() }>;
 pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUTPUT_COUNT_RANGE.end() }>;
 
@@ -230,9 +216,7 @@ pub struct Transaction {
     network_id: u64,
     /// The slot index in which the transaction was created.
     creation_slot: SlotIndex,
-    #[packable(verify_with = verify_context_inputs_packable)]
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
-    context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount>,
+    context_inputs: ContextInputs,
     #[packable(verify_with = verify_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
     inputs: BoxedSlicePrefix<Input, InputCount>,
@@ -262,7 +246,7 @@ impl Transaction {
     }
 
     /// Returns the context inputs of a [`Transaction`].
-    pub fn context_inputs(&self) -> &[ContextInput] {
+    pub fn context_inputs(&self) -> &ContextInputs {
         &self.context_inputs
     }
 
@@ -354,36 +338,6 @@ fn verify_network_id<const VERIFY: bool>(network_id: &u64, visitor: &ProtocolPar
                 actual: *network_id,
             });
         }
-    }
-
-    Ok(())
-}
-
-fn verify_context_inputs_packable<const VERIFY: bool>(
-    context_inputs: &[ContextInput],
-    _visitor: &ProtocolParameters,
-) -> Result<(), Error> {
-    if VERIFY {
-        verify_context_inputs(context_inputs)?;
-    }
-    Ok(())
-}
-
-fn context_inputs_cmp(a: &ContextInput, b: &ContextInput) -> Ordering {
-    a.kind().cmp(&b.kind()).then_with(|| match (a, b) {
-        (ContextInput::Commitment(_), ContextInput::Commitment(_)) => Ordering::Equal,
-        (ContextInput::BlockIssuanceCredit(a), ContextInput::BlockIssuanceCredit(b)) => {
-            a.account_id().cmp(b.account_id())
-        }
-        (ContextInput::Reward(a), ContextInput::Reward(b)) => a.index().cmp(&b.index()),
-        // No need to evaluate all combinations as `then_with` is only called on Equal.
-        _ => unreachable!(),
-    })
-}
-
-fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
-    if !is_unique_sorted_by(context_inputs.iter(), |a, b| context_inputs_cmp(a, b)) {
-        return Err(Error::ContextInputsNotUniqueSorted);
     }
 
     Ok(())

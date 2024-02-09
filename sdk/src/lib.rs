@@ -11,6 +11,8 @@
     clippy::significant_drop_in_scrutinee,
     clippy::significant_drop_tightening
 )]
+// Allowed in Cargo.toml for examples
+#![deny(clippy::expect_fun_call, clippy::single_element_loop)]
 
 extern crate alloc;
 

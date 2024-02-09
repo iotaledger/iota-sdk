@@ -5,6 +5,7 @@
 use std::path::PathBuf;
 
 use derivative::Derivative;
+use iota_sdk::utils::serde::string;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 // #[cfg(feature = "participation")]
@@ -20,13 +21,13 @@ use iota_sdk::{
     },
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{DelegationId, Output, OutputId, TokenId},
+        output::{AccountId, DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
     wallet::{
-        ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams, CreateNativeTokenParams,
-        FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams,
-        SyncOptions, TransactionOptions,
+        BeginStakingParams, ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams,
+        CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendNativeTokenParams,
+        SendNftParams, SendParams, SyncOptions, TransactionOptions,
     },
     U256,
 };
@@ -222,6 +223,7 @@ pub enum WalletMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareBurn {
         burn: Burn,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Claim outputs.
@@ -235,6 +237,7 @@ pub enum WalletMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareCreateAccountOutput {
         params: Option<CreateAccountParams>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to create a native token.
@@ -242,6 +245,7 @@ pub enum WalletMethod {
     /// [`PreparedCreateNativeTokenTransaction`](crate::Response::PreparedCreateNativeTokenTransaction)
     PrepareCreateNativeToken {
         params: CreateNativeTokenParams,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     // /// Reduces a wallet's "voting power" by a given amount.
@@ -273,6 +277,7 @@ pub enum WalletMethod {
         token_id: TokenId,
         /// To be melted amount
         melt_amount: U256,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to mint additional native tokens.
@@ -283,12 +288,14 @@ pub enum WalletMethod {
         token_id: TokenId,
         /// To be minted amount
         mint_amount: U256,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to mint NFTs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareMintNfts {
         params: Vec<MintNftParams>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare an output.
@@ -296,24 +303,28 @@ pub enum WalletMethod {
     #[serde(rename_all = "camelCase")]
     PrepareOutput {
         params: Box<OutputParams>,
+        #[serde(default)]
         transaction_options: Option<TransactionOptions>,
     },
     /// Prepare to send base coins.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSend {
         params: Vec<SendParams>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNativeTokens {
         params: Vec<SendNativeTokenParams>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to Send nft.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNft {
         params: Vec<SendNftParams>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to create a delegation.
@@ -321,6 +332,7 @@ pub enum WalletMethod {
     /// [`PreparedCreateDelegationTransaction`](crate::Response::PreparedCreateDelegationTransaction)
     PrepareCreateDelegation {
         params: CreateDelegationParams,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Prepare to delay a delegation's claiming.
@@ -330,6 +342,28 @@ pub enum WalletMethod {
         delegation_id: DelegationId,
         reclaim_excess: bool,
     },
+    /// Prepare to begin staking.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    PrepareBeginStaking {
+        params: BeginStakingParams,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
+    /// Prepare to extend staking.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareExtendStaking {
+        account_id: AccountId,
+        additional_epochs: u32,
+    },
+    /// Prepare to end staking.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareEndStaking { account_id: AccountId },
+    /// Announce candidacy for an account.
+    /// Expected response: [`BlockId`](crate::Response::BlockId)
+    #[serde(rename_all = "camelCase")]
+    AnnounceCandidacy { account_id: AccountId },
     // /// Stop participating for an event.
     // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     // #[cfg(feature = "participation")]
@@ -340,6 +374,7 @@ pub enum WalletMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
         outputs: Vec<Output>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     // /// Vote for a participation event.
@@ -375,21 +410,24 @@ pub enum WalletMethod {
     /// Send base coins.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     Send {
-        #[serde(with = "iota_sdk::utils::serde::string")]
+        #[serde(with = "string")]
         amount: u64,
         address: Bech32Address,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Send base coins to multiple addresses, or with additional parameters.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendWithParams {
         params: Vec<SendParams>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {
         outputs: Vec<Output>,
+        #[serde(default)]
         options: Option<TransactionOptions>,
     },
     /// Set the alias of the wallet.

@@ -466,7 +466,7 @@ export class Utils {
         inputs: InputSigningData[],
         protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
-        manaRewards?: { [outputId: OutputId]: NumericString },
+        manaRewards?: { [outputId: HexEncodedString]: NumericString },
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
@@ -567,5 +567,41 @@ export class Utils {
             stored: BigInt(decayedMana.stored),
             potential: BigInt(decayedMana.potential),
         };
+    }
+
+    /**
+     * Verifies the syntax of a transaction.
+     *
+     * @param transaction The transaction payload.
+     * @param protocolParameters The protocol parameters used for the validation.
+     * @returns void.
+     */
+    static verifyTransactionSyntax(
+        transaction: SignedTransactionPayload,
+        protocolParameters: ProtocolParameters,
+    ): void {
+        return callUtilsMethod({
+            name: 'verifyTransactionSyntax',
+            data: {
+                transaction,
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
+     * Returns the serialized bytes of a block.
+     *
+     * @param block The block.
+     * @returns The block bytes.
+     */
+    static blockBytes(block: Block): Uint8Array {
+        const blockBytes = callUtilsMethod({
+            name: 'blockBytes',
+            data: {
+                block,
+            },
+        });
+        return new Uint8Array(blockBytes);
     }
 }

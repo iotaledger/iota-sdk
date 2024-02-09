@@ -50,8 +50,8 @@ pub struct PreparedCreateNativeTokenTransaction {
 impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Creates a new foundry output with minted native tokens.
     ///
-    /// Calls [Wallet::send_outputs()] internally, the options may define the remainder value strategy or custom inputs.
-    /// Note that addresses need to be bech32-encoded.
+    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally, the options may
+    /// define the remainder value strategy or custom inputs.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
     ///     account_id: None,
@@ -60,7 +60,7 @@ impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     ///     foundry_metadata: None
     /// };
     ///
-    /// let tx = account.create_native_token(params, None,).await?;
+    /// let tx = account.create_native_token(params, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);

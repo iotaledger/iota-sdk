@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::unix_timestamp_now,
     types::{
         api::core::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
@@ -15,15 +14,15 @@ use crate::{
 };
 
 // ignore outputs and transactions from other networks
-// check if outputs are unspent, rebroadcast, reissue...
+// check if outputs are unspent
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
 impl<T> Wallet<T> {
-    /// Sync transactions and reissue them if unconfirmed. Returns the transaction with updated metadata and spent
-    /// output ids that don't need to be locked anymore
+    /// Sync transactions. Returns the transaction with updated metadata and spent
+    /// output ids that don't need to be locked anymore.
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
-    /// be synced again
+    /// be synced again.
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
         let wallet_data = self.data().await;
@@ -43,7 +42,6 @@ impl<T> Wallet<T> {
         // Inputs from conflicting transactions that are unspent, but should be removed from the locked outputs so they
         // are available again
         let mut output_ids_to_unlock = Vec::new();
-        let mut transactions_to_reissue = Vec::new();
 
         for transaction_id in &wallet_data.pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
@@ -94,8 +92,8 @@ impl<T> Wallet<T> {
                 }
             }
 
-            if let Some(block_id) = transaction.block_id {
-                match self.client().get_block_metadata(&block_id).await {
+            if let Some(block_id) = &transaction.block_id {
+                match self.client().get_block_metadata(block_id).await {
                     Ok(metadata) => {
                         if let Some(tx_state) = metadata.transaction_metadata.map(|m| m.transaction_state) {
                             match tx_state {
@@ -147,27 +145,16 @@ impl<T> Wallet<T> {
                                 // Do nothing, just need to wait a bit more
                                 TransactionState::Pending => {}
                             }
-                        } else {
-                            // no need to reissue if one input got spent
-                            if input_got_spent {
-                                process_transaction_with_unknown_state(
-                                    &wallet_data,
-                                    transaction,
-                                    &mut updated_transactions,
-                                    &mut output_ids_to_unlock,
-                                )?;
-                            } else {
-                                let time_now = unix_timestamp_now().as_millis();
-                                // Reissue if older than 30 seconds
-                                if transaction.timestamp + 30000 < time_now {
-                                    // only reissue if inputs are still unspent
-                                    transactions_to_reissue.push(transaction);
-                                }
-                            }
+                        } else if input_got_spent {
+                            process_transaction_with_unknown_state(
+                                &wallet_data,
+                                transaction,
+                                &mut updated_transactions,
+                                &mut output_ids_to_unlock,
+                            )?;
                         }
                     }
                     Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
-                        // no need to reissue if one input got spent
                         if input_got_spent {
                             process_transaction_with_unknown_state(
                                 &wallet_data,
@@ -175,38 +162,20 @@ impl<T> Wallet<T> {
                                 &mut updated_transactions,
                                 &mut output_ids_to_unlock,
                             )?;
-                        } else {
-                            let time_now = unix_timestamp_now().as_millis();
-                            // Reissue if older than 30 seconds
-                            if transaction.timestamp + 30000 < time_now {
-                                // only reissue if inputs are still unspent
-                                transactions_to_reissue.push(transaction);
-                            }
                         }
                     }
                     Err(e) => return Err(e.into()),
                 }
-            } else {
-                // transaction wasn't submitted yet, so we have to send it again
-                // no need to reissue if one input got spent
-                if input_got_spent {
-                } else {
-                    // only reissue if inputs are still unspent
-                    transactions_to_reissue.push(transaction);
-                }
+            } else if input_got_spent {
+                process_transaction_with_unknown_state(
+                    &wallet_data,
+                    transaction,
+                    &mut updated_transactions,
+                    &mut output_ids_to_unlock,
+                )?;
             }
         }
         drop(wallet_data);
-
-        // TODO: this is a problem
-        // for mut transaction in transactions_to_reissue {
-        //     log::debug!("[SYNC] reissue transaction");
-        //     let reissued_block = self
-        //         .submit_signed_transaction(transaction.payload.clone(), None)
-        //         .await?;
-        //     transaction.block_id.replace(reissued_block);
-        //     updated_transactions.push(transaction);
-        // }
 
         // updates account with balances, output ids, outputs
         self.update_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)

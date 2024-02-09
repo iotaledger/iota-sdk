@@ -224,7 +224,7 @@ export interface __VerifyTransactionSemantic__ {
         inputs: InputSigningData[];
         protocolParameters: ProtocolParameters;
         unlocks?: Unlock[];
-        manaRewards?: { [outputId: OutputId]: NumericString };
+        manaRewards?: { [outputId: HexEncodedString]: NumericString };
     };
 }
 
@@ -255,5 +255,20 @@ export interface __OutputManaWithDecay__ {
         slotIndexCreated: number;
         slotIndexTarget: number;
         protocolParameters: ProtocolParameters;
+    };
+}
+
+export interface __VerifyTransactionSyntax__ {
+    name: 'verifyTransactionSyntax';
+    data: {
+        transaction: SignedTransactionPayload;
+        protocolParameters: ProtocolParameters;
+    };
+}
+
+export interface __BlockBytes__ {
+    name: 'blockBytes';
+    data: {
+        block: Block;
     };
 }

@@ -39,7 +39,7 @@ use crate::{
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct LedgerOptions<O> {
-    options: O,
+    pub options: O,
     ledger_nano_prompt: bool,
 }
 
@@ -183,7 +183,7 @@ impl Generate<ed25519::PublicKey> for LedgerSecretManager {
 
         let public_key = ed25519::PublicKey::try_from_bytes(
             ledger
-                .get_addresses(*ledger_nano_prompt, bip32, 0)
+                .get_public_keys(*ledger_nano_prompt, bip32, 0)
                 .map_err(Error::from)?[0],
         )?;
 
@@ -326,7 +326,7 @@ impl SignTransaction for LedgerSecretManager {
 
         let input_len = prepared_transaction.inputs_data.len();
 
-        for input in &prepared_transaction.inputs_data {
+        for _input in &prepared_transaction.inputs_data {
             // coin_type and account_index should be the same in each output
             if (coin_type.is_some() && coin_type != Some(chain.coin_type))
                 || (account_index.is_some() && account_index != Some(chain.account))
@@ -578,8 +578,8 @@ fn merge_unlocks(
     let slot_index = prepared_transaction_data
         .transaction
         .context_inputs()
-        .iter()
-        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+        .commitment()
+        .map(|c| c.slot_index());
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
 
     let mut merged_unlocks = Vec::new();

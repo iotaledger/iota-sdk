@@ -3,7 +3,6 @@
 
 use alloc::collections::BTreeMap;
 
-use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -24,7 +23,7 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::{bip44::option_bip44, mana_rewards},
+    utils::serde::mana_rewards,
 };
 
 /// Helper struct for offline signing

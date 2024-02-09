@@ -18,8 +18,8 @@ use crate::{
 };
 
 impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
-    /// Backup the wallet data in a Stronghold file
-    /// stronghold_password must be the current one when Stronghold is used as SecretManager.
+    /// Backup the wallet data in a Stronghold file.
+    /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(
         &self,
         backup_path: PathBuf,

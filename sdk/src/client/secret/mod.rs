@@ -219,8 +219,8 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
         let slot_index = prepared_transaction_data
             .transaction
             .context_inputs()
-            .iter()
-            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+            .commitment()
+            .map(|c| c.slot_index());
 
         // Assuming inputs_data is ordered by address type
         for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
@@ -357,7 +357,7 @@ pub trait SecretManageExt {
 impl<T> SecretManageExt for T {}
 
 pub trait SecretManagerConfig: SecretManage {
-    type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
+    type Config: Serialize + DeserializeOwned + core::fmt::Debug + Send + Sync;
 
     fn to_config(&self) -> Option<Self::Config>;
 
@@ -384,6 +384,8 @@ pub trait DowncastSecretManager {
     fn downcast_ref<T: 'static>(&self) -> Option<&T>;
 
     fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T>;
+
+    fn downcast<T: 'static>(self) -> Option<T>;
 
     #[cfg(feature = "stronghold")]
     fn as_stronghold(&self) -> crate::client::Result<&StrongholdAdapter> {
@@ -528,11 +530,16 @@ impl<S: 'static + Send + Sync> DowncastSecretManager for S {
     fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
         self.as_any_mut().downcast_mut::<T>()
     }
+
+    fn downcast<T: 'static>(self) -> Option<T> {
+        self.as_any_boxed().downcast::<T>().ok().map(|b| *b)
+    }
 }
 
 pub trait AsAny: Send + Sync {
     fn as_any(&self) -> &(dyn std::any::Any + Send + Sync);
     fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync);
+    fn as_any_boxed(self) -> Box<dyn std::any::Any + Send + Sync>;
 }
 
 impl<T: 'static + Send + Sync> AsAny for T {
@@ -541,6 +548,10 @@ impl<T: 'static + Send + Sync> AsAny for T {
     }
     fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync) {
         self
+    }
+
+    fn as_any_boxed(self) -> Box<dyn std::any::Any + Send + Sync> {
+        Box::new(self) as Box<dyn std::any::Any + Send + Sync>
     }
 }
 

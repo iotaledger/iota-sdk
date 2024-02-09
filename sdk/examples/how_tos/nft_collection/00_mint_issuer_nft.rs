@@ -4,7 +4,7 @@
 //! In this example we will mint the issuer NFT for the NFT collection.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! Make sure that the wallet already has some funds by running the
 //! `./how_tos/simple_transaction/request_funds.rs` example!
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let wallet = Wallet::builder()

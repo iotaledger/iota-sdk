@@ -71,7 +71,7 @@ class CoinType(IntEnum):
 
 @json
 @dataclass
-class Node():
+class Node:
     """Represents a node in the network.
 
         Attributes:
@@ -128,7 +128,7 @@ def hex_str_decoder(value: str) -> int:
 
 @json
 @dataclass
-class AddressAndAmount():
+class AddressAndAmount:
     """Parameters to send a certain amount of coins to an address.
 
      Attributes:
@@ -139,3 +139,18 @@ class AddressAndAmount():
         encoder=str
     ))
     address: str
+
+
+class IdWithSlotIndex(str):
+    """Represents an hex encoded ID that contains a slot index at the end.
+
+    Attributes:
+        id: The hex encoded ID with a slot index.
+
+    """
+
+    def slot_index(self):
+        """Returns the slot index of the ID.
+        """
+        return int.from_bytes(
+            bytes.fromhex(self[-8:]), 'little')

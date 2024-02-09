@@ -4,10 +4,12 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
+
 from iota_sdk.types.block.block import Block
-from iota_sdk.types.common import CoinType, HexStr, json
-from iota_sdk.types.output_metadata import OutputWithMetadata
+from iota_sdk.types.block.id import BlockId
+from iota_sdk.types.common import CoinType, json
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.output_metadata import OutputWithMetadata
 
 
 @json
@@ -25,7 +27,7 @@ class Range:
 
 @json
 @dataclass
-class GenerateAddressOptions():
+class GenerateAddressOptions:
     """Options for generating an address.
 
     Attributes:
@@ -38,7 +40,7 @@ class GenerateAddressOptions():
 
 @json
 @dataclass
-class GenerateAddressesOptions():
+class GenerateAddressesOptions:
     """Options for generating addresses.
 
     Attributes:
@@ -80,6 +82,8 @@ class HighLevelAPI(metaclass=ABCMeta):
         no payload.
         """
 
+    # TODO: this should return `List[OutputResponse]`, not `List[OutputWithMetadata]`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_outputs(
             self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Fetch OutputWithMetadata from provided OutputIds (requests are sent in parallel).
@@ -95,6 +99,8 @@ class HighLevelAPI(metaclass=ABCMeta):
         })
         return [OutputWithMetadata.from_dict(o) for o in outputs]
 
+    # TODO: this should return `List[OutputResponse]`, not `List[OutputWithMetadata]`
+    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_outputs_ignore_errors(
             self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
         """Try to get OutputWithMetadata from provided OutputIds.
@@ -111,7 +117,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         })
         return [OutputWithMetadata.from_dict(o) for o in outputs]
 
-    def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
+    def find_blocks(self, block_ids: List[BlockId]) -> List[Block]:
         """Find all blocks by provided block IDs.
 
         Args:

@@ -165,27 +165,31 @@ impl Topic {
         let valid_topics = lazy_static!(
             RegexSet::new([
                 // Commitment topics.
-                r"^commitment-info/latest$",
-                r"^commitment-info/finalized$",
-                r"^commitments$",
+                r"^commitments/latest$",
+                r"^commitments/finalized$",
                 // Block topics.
                 r"^blocks$",
-                r"^blocks/transaction$",
-                r"^blocks/transaction/tagged-data$",
-                r"^blocks/transaction/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
-                r"^blocks/tagged-data$",
-                r"^blocks/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
-                r"^block-metadata/0x([a-f0-9]{64})$",
+                r"^blocks/validation$",
+                r"^blocks/basic$",
+                r"^blocks/basic/tagged-data$",
+                r"^blocks/basic/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
+                r"^blocks/basic/transaction$",
+                r"^blocks/basic/transaction/tagged-data$",
+                r"^blocks/basic/transaction/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
+                // Transaction topics.
+                r"^transactions/0x([a-f0-9]{72})/included-block$",
+                r"^transaction-metadata/0x([a-f0-9]{72})$",
+                // Block metadata topics.
+                r"^block-metadata/0x([a-f0-9]{72})$",
                 r"^block-metadata/accepted$",
                 r"^block-metadata/confirmed$",
-                // Transaction topics.
-                r"^transactions/0x([a-f0-9]{64})/included-block$",
                 // Output topics.
-                r"^outputs/0x([a-f0-9]{64})(\d{4})$",
+                r"^outputs/0x([a-f0-9]{76})$",
                 r"^outputs/account/0x([a-f0-9]{64})$",
                 r"^outputs/anchor/0x([a-f0-9]{64})$",
-                r"^outputs/nft/0x([a-f0-9]{64})$",
                 r"^outputs/foundry/0x([a-f0-9]{76})$",
+                r"^outputs/nft/0x([a-f0-9]{64})$",
+                r"^outputs/delegation/0x([a-f0-9]{64})$",
                 r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-account)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",
             ]).expect("cannot build regex set") => RegexSet);
         valid_topics.is_match(&self.0)
