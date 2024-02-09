@@ -142,39 +142,40 @@ impl SecretManage for LedgerSecretManager {
         &self,
         // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
         // current ledger app only supports IOTA_COIN_TYPE, SHIMMER_COIN_TYPE and TESTNET_COIN_TYPE
-        _coin_type: u32,
-        _account_index: u32,
-        _address_indexes: Range<u32>,
-        _options: impl Into<Option<GenerateAddressOptions>> + Send,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        // need an update on the ledger C lib
-        todo!();
-        // let options = options.into().unwrap_or_default();
-        // let bip32_account = account_index.harden().into();
+        let options = options.into().unwrap_or_default();
+        let bip32_account = account_index.harden().into();
 
-        // let bip32 = LedgerBIP32Index {
-        //     bip32_index: address_indexes.start.harden().into(),
-        //     bip32_change: u32::from(options.internal).harden().into(),
-        // };
+        let bip32 = LedgerBIP32Index {
+            bip32_index: address_indexes.start.harden().into(),
+            bip32_change: u32::from(options.internal).harden().into(),
+        };
 
-        // // lock the mutex to prevent multiple simultaneous requests to a ledger
-        // let lock = self.mutex.lock().await;
+        // lock the mutex to prevent multiple simultaneous requests to a ledger
+        let lock = self.mutex.lock().await;
 
-        // // get ledger
-        // let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
-        // if ledger.is_debug_app() {
-        //     ledger
-        //         .set_non_interactive_mode(self.non_interactive)
-        //         .map_err(Error::from)?;
-        // }
+        // get ledger
+        let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        if ledger.is_debug_app() {
+            ledger
+                .set_non_interactive_mode(self.non_interactive)
+                .map_err(Error::from)?;
+        }
 
-        // let addresses = ledger
-        //     .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
-        //     .map_err(Error::from)?;
+        let public_keys = ledger
+            .get_public_keys(options.ledger_nano_prompt, bip32, address_indexes.len())
+            .map_err(Error::from)?;
 
-        // drop(lock);
+        drop(lock);
 
-        // Ok(addresses.into_iter().map(Ed25519Address::new).collect())
+        Ok(public_keys
+            .into_iter()
+            .map(ed25519::PublicKey::try_from_bytes)
+            .collect::<Result<Vec<_>, _>>()?)
     }
 
     async fn generate_evm_addresses(
