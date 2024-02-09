@@ -54,7 +54,7 @@ async fn sign_account_state_transition() -> Result<()> {
         [Account(
             1_000_000,
             account_id,
-            address.clone(),
+            address,
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
@@ -62,7 +62,7 @@ async fn sign_account_state_transition() -> Result<()> {
         Some(slot_index),
     );
 
-    let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None, None)]);
+    let outputs = build_outputs([Account(1_000_000, account_id, address, None, None, None)]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -131,13 +131,13 @@ async fn account_reference_unlocks() -> Result<()> {
             Account(
                 1_000_000,
                 account_id,
-                address.clone(),
+                address,
                 None,
                 None,
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
+            Basic(1_000_000, account_address, None, None, None, None, None, None),
+            Basic(1_000_000, account_address, None, None, None, None, None, None),
         ],
         Some(slot_index),
     );

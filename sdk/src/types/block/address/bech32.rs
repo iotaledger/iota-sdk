@@ -111,7 +111,7 @@ impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
 }
 
 /// An address and its network type.
-#[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
 pub struct Bech32Address {
     pub(crate) hrp: Hrp,
     #[as_ref]

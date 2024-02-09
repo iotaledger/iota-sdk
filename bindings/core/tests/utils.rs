@@ -15,9 +15,7 @@ async fn utils() -> Result<()> {
 
     let bech32_address =
         Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
-    let method = UtilsMethod::Bech32ToHex {
-        bech32: bech32_address.clone(),
-    };
+    let method = UtilsMethod::Bech32ToHex { bech32: bech32_address };
 
     let response = call_utils_method(method);
     match response {

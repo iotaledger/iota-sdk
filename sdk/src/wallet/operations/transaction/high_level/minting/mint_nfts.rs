@@ -177,7 +177,7 @@ where
                     self.client().bech32_hrp_matches(address.hrp()).await?;
                     address.inner().clone()
                 }
-                None => wallet_address.clone(),
+                None => wallet_address,
             };
 
             // NftId needs to be set to 0 for the creation

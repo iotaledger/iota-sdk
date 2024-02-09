@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+        .add_unlock_condition(AddressUnlockCondition::new(address));
     let foundry_output_builder = FoundryOutputBuilder::new_with_minimum_amount(storage_score_params, 1, token_scheme);
 
     let outputs = [
@@ -53,7 +53,7 @@ async fn main() -> Result<()> {
         // with storage deposit return unlock condition
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000)?)
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, 1000000)?)
             .finish_output()?,
         // with timeout unlock condition
         basic_output_builder
@@ -62,7 +62,7 @@ async fn main() -> Result<()> {
             .finish_output()?,
         // with expiration unlock condition
         basic_output_builder
-            .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
+            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output()?,
         // with immutable account unlock condition
         foundry_output_builder

@@ -55,7 +55,7 @@ impl InputSelection {
 
             if let Output::Basic(output) = output {
                 if let Some(address) = output.simple_deposit_address() {
-                    *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+                    *outputs_sdr.entry(*address).or_default() += output.amount();
                 }
             }
         }

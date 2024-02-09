@@ -93,7 +93,7 @@ where
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
-        let wallet_address = self.data().await.address.clone();
+        let wallet_address = self.data().await.address;
 
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
@@ -162,7 +162,7 @@ where
         let slot_index = self.client().get_slot_index().await?;
         let storage_score_parameters = self.client().get_protocol_parameters().await?.storage_score_parameters;
         let wallet_data = self.data().await;
-        let wallet_address = wallet_data.address.clone();
+        let wallet_address = wallet_data.address;
 
         let mut outputs_to_consolidate = Vec::new();
         let mut native_token_inputs = HashMap::new();

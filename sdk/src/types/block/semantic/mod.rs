@@ -226,7 +226,7 @@ impl<'a> SemanticValidationContext<'a> {
             let (amount, mana, created_native_token, features) = match created_output {
                 Output::Basic(output) => {
                     if let Some(address) = output.simple_deposit_address() {
-                        let amount = self.simple_deposits.entry(address.clone()).or_default();
+                        let amount = self.simple_deposits.entry(*address).or_default();
 
                         *amount = amount
                             .checked_add(output.amount())

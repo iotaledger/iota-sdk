@@ -258,7 +258,7 @@ where
             ));
         }
 
-        let wallet_address = wallet_data.address.clone();
+        let wallet_address = wallet_data.address;
         drop(wallet_data);
 
         let mut nft_outputs_to_send = Vec::new();
@@ -281,13 +281,13 @@ where
                     // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
+                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address)])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
+                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address)])
                         .finish_output()?
                 };
 

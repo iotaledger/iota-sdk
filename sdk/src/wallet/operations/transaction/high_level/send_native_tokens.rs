@@ -152,7 +152,7 @@ where
                     Ok::<_, Error>(addr)
                 })
                 .transpose()?
-                .unwrap_or_else(|| default_return_address.clone());
+                .unwrap_or_else(|| default_return_address);
 
             let native_token = NativeToken::new(native_token.0, native_token.1)?;
 
@@ -165,10 +165,7 @@ where
                 BasicOutputBuilder::new_with_amount(0)
                     .with_native_token(native_token)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        return_address.clone(),
-                        expiration_slot_index,
-                    )?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .with_sufficient_storage_deposit(return_address, storage_score_params)?
                     .finish_output()?,
             )

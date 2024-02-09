@@ -430,7 +430,7 @@ where
 
     /// Get the wallet address.
     pub async fn address(&self) -> Bech32Address {
-        self.data().await.address.clone()
+        self.data().await.address
     }
 
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
@@ -575,7 +575,7 @@ impl From<&WalletData> for WalletDataDto {
     fn from(value: &WalletData) -> Self {
         Self {
             bip_path: value.bip_path,
-            address: value.address.clone(),
+            address: value.address,
             alias: value.alias.clone(),
             outputs: value.outputs.clone(),
             locked_outputs: value.locked_outputs.clone(),

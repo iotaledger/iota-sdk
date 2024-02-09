@@ -63,8 +63,8 @@ async fn nft_reference_unlocks() -> Result<()> {
                 None,
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
+            Basic(1_000_000, nft_address, None, None, None, None, None, None),
+            Basic(1_000_000, nft_address, None, None, None, None, None, None),
         ],
         Some(slot_index),
     );

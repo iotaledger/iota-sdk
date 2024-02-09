@@ -190,9 +190,7 @@ where
 
         // May use a previously stored wallet address if it wasn't provided
         if self.address.is_none() {
-            self.address = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.address.clone());
+            self.address = loaded_wallet_builder.as_ref().and_then(|builder| builder.address);
         }
 
         // May create a default Ed25519 wallet address if there's a secret manager.

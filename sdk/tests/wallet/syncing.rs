@@ -57,13 +57,13 @@
 //     // Only one basic output without further unlock conditions
 //     let outputs = [
 //         BasicOutputBuilder::new_with_amount(1_000_000)
-//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address.clone())])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address)])
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(1_000_000)
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address)),
 //                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-//                     wallet_1_address.clone(),
+//                     wallet_1_address,
 //                     // Already expired
 //                     wallet_0.client().get_slot_index().await? - 5000,
 //                 )?),
@@ -71,9 +71,9 @@
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(1_000_000)
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address)),
 //                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-//                     wallet_1_address.clone(),
+//                     wallet_1_address,
 //                     // Not expired
 //                     wallet_0.client().get_slot_index().await? + 5000,
 //                 )?),
@@ -81,29 +81,29 @@
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(1_000_000)
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address)),
 //                 UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
-//                     wallet_1_address.clone(),
+//                     wallet_1_address,
 //                     1_000_000,
 //                     token_supply,
 //                 )?),
 //             ])
 //             .finish_output(token_supply)?,
 //         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address.clone())])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address)])
 //             .finish_output(token_supply)?,
 //         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address)),
 //                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-//                     wallet_1_address.clone(),
+//                     wallet_1_address,
 //                     wallet_0.client().get_slot_index().await? + 5000,
 //                 )?),
 //             ])
 //             .finish_output(token_supply)?,
 //         AccountOutputBuilder::new_with_amount(1_000_000, AccountId::null())
 //             .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(
-//                 wallet_1_address.clone(),
+//                 wallet_1_address,
 //             ))])
 //             .finish_output(token_supply)?,
 //     ];
@@ -160,7 +160,7 @@
 
 //     let outputs = [
 //         BasicOutputBuilder::new_with_amount(750_000)
-//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address.clone())])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address)])
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(250_000)
 //             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address)])

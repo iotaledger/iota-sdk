@@ -39,13 +39,13 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
     let nft_output_builder = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+        .add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = [
         // with sender feature
         nft_output_builder
             .clone()
-            .add_feature(SenderFeature::new(address.clone()))
+            .add_feature(SenderFeature::new(address))
             .finish_output()?,
         // with issuer feature
         nft_output_builder

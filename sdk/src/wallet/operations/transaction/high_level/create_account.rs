@@ -83,7 +83,7 @@ where
         let mut account_output_builder =
             AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
                 .with_foundry_counter(0)
-                .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+                .add_unlock_condition(AddressUnlockCondition::new(address));
 
         if let Some(CreateAccountParams {
             immutable_metadata,

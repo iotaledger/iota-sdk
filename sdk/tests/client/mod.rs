@@ -95,19 +95,18 @@ fn build_basic_output(
     expiration: Option<(Address, u32)>,
 ) -> Output {
     let mut builder =
-        BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+        BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address));
 
     if let Some((id, amount)) = native_token {
         builder = builder.with_native_token(NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap());
     }
 
     if let Some(sender) = sender {
-        builder = builder.add_feature(SenderFeature::new(sender.clone()));
+        builder = builder.add_feature(SenderFeature::new(sender));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder =
-            builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap());
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount).unwrap());
     }
 
     if let Some(timelock) = timelock {
@@ -115,7 +114,7 @@ fn build_basic_output(
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
+        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
     builder.finish_output().unwrap()
@@ -130,24 +129,23 @@ fn build_nft_output(
     sdruc: Option<(Address, u64)>,
     expiration: Option<(Address, u32)>,
 ) -> Output {
-    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+    let mut builder =
+        NftOutputBuilder::new_with_amount(amount, nft_id).add_unlock_condition(AddressUnlockCondition::new(address));
 
     if let Some(sender) = sender {
-        builder = builder.add_feature(SenderFeature::new(sender.clone()));
+        builder = builder.add_feature(SenderFeature::new(sender));
     }
 
     if let Some(issuer) = issuer {
-        builder = builder.add_immutable_feature(IssuerFeature::new(issuer.clone()));
+        builder = builder.add_immutable_feature(IssuerFeature::new(issuer));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder =
-            builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap());
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount).unwrap());
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
+        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
     builder.finish_output().unwrap()
@@ -161,14 +159,14 @@ fn build_account_output(
     issuer: Option<Address>,
 ) -> Output {
     let mut builder = AccountOutputBuilder::new_with_amount(amount, account_id)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+        .add_unlock_condition(AddressUnlockCondition::new(address));
 
     if let Some(sender) = sender {
-        builder = builder.add_feature(SenderFeature::new(sender.clone()));
+        builder = builder.add_feature(SenderFeature::new(sender));
     }
 
     if let Some(issuer) = issuer {
-        builder = builder.add_immutable_feature(IssuerFeature::new(issuer.clone()));
+        builder = builder.add_immutable_feature(IssuerFeature::new(issuer));
     }
 
     builder.finish_output().unwrap()

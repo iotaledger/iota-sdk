@@ -27,7 +27,7 @@ impl SemanticValidationContext<'_> {
                     return Err(TransactionFailureReason::UnlockSignatureInvalid);
                 }
 
-                self.unlocked_addresses.insert(address.clone());
+                self.unlocked_addresses.insert(*address);
             }
             (Address::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.

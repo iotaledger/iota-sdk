@@ -36,8 +36,8 @@ async fn main() -> Result<()> {
         .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
-    let basic_output_builder = BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+    let basic_output_builder =
+        BasicOutputBuilder::new_with_amount(1_000_000).add_unlock_condition(AddressUnlockCondition::new(address));
 
     let outputs = [
         // most simple output
@@ -50,12 +50,12 @@ async fn main() -> Result<()> {
         // with storage deposit return
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1_000_000)?)
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, 1_000_000)?)
             .finish_output()?,
         // with expiration
         basic_output_builder
             .clone()
-            .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
+            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
             .finish_output()?,
         // with timelock
         basic_output_builder

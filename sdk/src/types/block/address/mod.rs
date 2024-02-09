@@ -28,7 +28,7 @@ use crate::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]

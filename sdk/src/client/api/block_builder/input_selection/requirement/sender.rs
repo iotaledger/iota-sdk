@@ -14,7 +14,7 @@ impl InputSelection {
                 match self.fulfill_ed25519_requirement(address) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Ed25519(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(*address)))
                     }
                     Err(e) => Err(e),
                 }
@@ -26,7 +26,7 @@ impl InputSelection {
                 match self.fulfill_account_requirement(account_address.into_account_id()) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Account(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(*address)))
                     }
                     Err(e) => Err(e),
                 }
@@ -37,7 +37,7 @@ impl InputSelection {
                 match self.fulfill_nft_requirement(nft_address.into_nft_id()) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Nft(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(*address)))
                     }
                     Err(e) => Err(e),
                 }

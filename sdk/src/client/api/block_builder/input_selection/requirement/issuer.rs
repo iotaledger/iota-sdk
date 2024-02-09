@@ -13,7 +13,7 @@ impl InputSelection {
         match self.fulfill_sender_requirement(address) {
             Ok(res) => Ok(res),
             Err(Error::UnfulfillableRequirement(Requirement::Sender(_))) => {
-                Err(Error::UnfulfillableRequirement(Requirement::Issuer(address.clone())))
+                Err(Error::UnfulfillableRequirement(Requirement::Issuer(*address)))
             }
             Err(e) => Err(e),
         }

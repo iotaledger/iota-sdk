@@ -133,7 +133,7 @@ where
             if return_strategy == ReturnStrategy::Return {
                 second_output_builder =
                     second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                        remainder_address.clone(),
+                        remainder_address,
                         // Return minimum amount
                         min_amount_basic_output,
                     )?);
@@ -154,7 +154,7 @@ where
                     // Add the additional amount to the SDR
                     second_output_builder =
                         second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                            remainder_address.clone(),
+                            remainder_address,
                             // Return minimum amount
                             min_amount_basic_output + additional_required_amount,
                         )?);
@@ -281,7 +281,7 @@ where
             match &options.remainder_value_strategy {
                 // TODO is this correct? It was None before the accounts removal
                 RemainderValueStrategy::ReuseAddress => self.address().await.into_inner(),
-                RemainderValueStrategy::CustomAddress(address) => address.clone(),
+                RemainderValueStrategy::CustomAddress(address) => *address,
             }
         } else {
             self.address().await.into_inner()

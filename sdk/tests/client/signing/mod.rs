@@ -79,7 +79,7 @@ async fn all_combined() -> Result<()> {
             Account(
                 1_000_000,
                 account_id_2,
-                ed25519_0.clone(),
+                ed25519_0,
                 None,
                 None,
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
@@ -92,7 +92,7 @@ async fn all_combined() -> Result<()> {
             Basic(1_000_000, nft_4.clone(), None, None, None, None, None, None),
             Basic(
                 1_000_000,
-                ed25519_0.clone(),
+                ed25519_0,
                 None,
                 None,
                 None,
@@ -133,7 +133,7 @@ async fn all_combined() -> Result<()> {
             Nft(
                 1_000_000,
                 nft_id_1,
-                ed25519_0.clone(),
+                ed25519_0,
                 None,
                 None,
                 None,
@@ -144,7 +144,7 @@ async fn all_combined() -> Result<()> {
             // Expirations
             Basic(
                 2_000_000,
-                ed25519_0.clone(),
+                ed25519_0,
                 None,
                 None,
                 None,
@@ -152,24 +152,15 @@ async fn all_combined() -> Result<()> {
                 Some((account_1.clone(), 50)),
                 None,
             ),
+            Basic(2_000_000, ed25519_0, None, None, None, None, Some((nft_3, 50)), None),
             Basic(
                 2_000_000,
-                ed25519_0.clone(),
+                ed25519_0,
                 None,
                 None,
                 None,
                 None,
-                Some((nft_3.clone(), 50)),
-                None,
-            ),
-            Basic(
-                2_000_000,
-                ed25519_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                Some((nft_3.clone(), 150)),
+                Some((nft_3, 150)),
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
             Nft(
@@ -198,12 +189,12 @@ async fn all_combined() -> Result<()> {
 
     let outputs = build_outputs([
         Account(1_000_000, account_id_1, nft_1, None, None, None),
-        Account(1_000_000, account_id_2, ed25519_0.clone(), None, None, None),
-        Basic(10_000_000, ed25519_0.clone(), None, None, None, None, None, None),
-        Nft(1_000_000, nft_id_1, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_2, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_3, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_4, ed25519_0.clone(), None, None, None, None, None),
+        Account(1_000_000, account_id_2, ed25519_0, None, None, None),
+        Basic(10_000_000, ed25519_0, None, None, None, None, None, None),
+        Nft(1_000_000, nft_id_1, ed25519_0, None, None, None, None, None),
+        Nft(1_000_000, nft_id_2, ed25519_0, None, None, None, None, None),
+        Nft(1_000_000, nft_id_3, ed25519_0, None, None, None, None, None),
+        Nft(1_000_000, nft_id_4, ed25519_0, None, None, None, None, None),
     ]);
 
     let selected = InputSelection::new(

@@ -59,7 +59,7 @@ where
             .as_ref()
             .and_then(|options| match &options.remainder_value_strategy {
                 RemainderValueStrategy::ReuseAddress => None,
-                RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
+                RemainderValueStrategy::CustomAddress(address) => Some(*address),
             });
 
         let selected_transaction_data = self

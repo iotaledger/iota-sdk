@@ -126,7 +126,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(wallet_data.address.clone().into_inner()),
+                Some(wallet_data.address.into_inner()),
                 slot_index,
                 protocol_parameters.clone(),
             )
@@ -184,7 +184,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(wallet_data.address.clone().into_inner()),
+                Some(wallet_data.address.into_inner()),
                 slot_index,
                 protocol_parameters.clone(),
             )
@@ -222,7 +222,7 @@ where
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
             outputs,
-            Some(wallet_data.address.clone().into_inner()),
+            Some(wallet_data.address.into_inner()),
             slot_index,
             protocol_parameters.clone(),
         )

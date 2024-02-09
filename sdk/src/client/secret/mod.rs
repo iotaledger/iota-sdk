@@ -623,7 +623,7 @@ where
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
                 // the same address in their unlock condition
-                block_indexes.insert(required_address.clone(), current_block_index);
+                block_indexes.insert(required_address, current_block_index);
             }
         }
 

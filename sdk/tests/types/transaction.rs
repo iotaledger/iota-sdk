@@ -334,7 +334,7 @@ fn duplicate_output_nft() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()
         .unwrap();
     let nft_id = NftId::from_str(ED25519_ADDRESS_1).unwrap();
@@ -364,7 +364,7 @@ fn duplicate_output_nft_null() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()
         .unwrap();
     let nft_id = NftId::null();
@@ -391,12 +391,12 @@ fn duplicate_output_account() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()
         .unwrap();
     let account_id = AccountId::from_str(ED25519_ADDRESS_1).unwrap();
     let account = AccountOutput::build_with_amount(1_000_000, account_id)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()
         .unwrap();
 

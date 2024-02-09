@@ -164,7 +164,7 @@ where
                     Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or_else(|| default_return_address.clone());
+                .unwrap_or_else(|| default_return_address);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_amount(amount)
@@ -181,10 +181,7 @@ where
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let output = BasicOutputBuilder::from(&output)
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        return_address.clone(),
-                        expiration_slot_index,
-                    )?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .with_sufficient_storage_deposit(return_address, storage_score_params)?
                     .finish_output()?;
 

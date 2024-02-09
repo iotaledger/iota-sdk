@@ -31,10 +31,10 @@ impl InputSelection {
                     .expect("expiration unlockable outputs already filtered out");
 
                 if &required_address == remainder_address {
-                    return Ok(Some((remainder_address.clone(), input.chain)));
+                    return Ok(Some((*remainder_address, input.chain)));
                 }
             }
-            return Ok(Some((remainder_address.clone(), None)));
+            return Ok(Some((*remainder_address, None)));
         }
 
         for input in &self.selected_inputs {
@@ -81,7 +81,7 @@ impl InputSelection {
             if amount > output_sdr_amount {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)
-                    .with_unlock_conditions([AddressUnlockCondition::new(address.clone())])
+                    .with_unlock_conditions([AddressUnlockCondition::new(address)])
                     .finish_output()?;
 
                 // TODO verify_storage_deposit ?
@@ -216,7 +216,7 @@ fn create_remainder_outputs(
             // Create remainder outputs with min amount
             for native_token in nts {
                 let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
-                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address))
                     .with_native_token(*native_token)
                     .finish_output()?;
                 log::debug!(
@@ -231,7 +231,7 @@ fn create_remainder_outputs(
     }
     let mut catchall = BasicOutputBuilder::new_with_amount(remaining_amount)
         .with_mana(mana_diff)
-        .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
+        .add_unlock_condition(AddressUnlockCondition::new(remainder_address));
     if let Some(native_token) = catchall_native_token {
         catchall = catchall.with_native_token(native_token);
     }
@@ -250,7 +250,7 @@ fn create_remainder_outputs(
         .map(|o| RemainderData {
             output: o,
             chain: remainder_address_chain,
-            address: remainder_address.clone(),
+            address: remainder_address,
         })
         .collect())
 }

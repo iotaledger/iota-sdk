@@ -60,8 +60,8 @@ async fn main() -> Result<()> {
 
     // NftId needs to be null the first time
     let nft_output = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
-        .add_feature(SenderFeature::new(address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .add_feature(SenderFeature::new(address))
         .add_feature(
             MetadataFeature::build()
                 .with_key_value("mutable", MUTABLE_METADATA.as_bytes())

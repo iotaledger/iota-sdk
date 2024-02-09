@@ -71,7 +71,7 @@ impl InputSelection {
 
                 Ok(vec![input])
             }
-            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address.clone()))),
+            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(*address))),
         }
     }
 }

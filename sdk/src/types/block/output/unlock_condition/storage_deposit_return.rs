@@ -98,7 +98,7 @@ mod dto {
         fn from(value: &StorageDepositReturnUnlockCondition) -> Self {
             Self {
                 kind: StorageDepositReturnUnlockCondition::KIND,
-                return_address: value.return_address.clone(),
+                return_address: value.return_address,
                 amount: value.amount,
             }
         }

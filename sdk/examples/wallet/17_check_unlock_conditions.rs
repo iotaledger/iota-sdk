@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
     println!("Wallet address:\n{:#?}", wallet_address);
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
-        .add_unlock_condition(AddressUnlockCondition::new(wallet_address.clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
         .finish_output()?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output
