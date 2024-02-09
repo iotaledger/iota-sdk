@@ -1,7 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.common import HexStr
+from dataclasses import dataclass
+
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.output import Output
 from iota_sdk.types.transaction_id import TransactionId
 
 
@@ -57,3 +60,16 @@ class OutputId(dict):
 
     def __repr__(self):
         return self.output_id
+
+
+@json
+@dataclass
+class OutputWithId:
+    """An Output with its ID.
+
+    Arguments:
+        output: Output,
+        output_id: OutputId,
+    """
+    output: Output
+    output_id: OutputId
