@@ -68,6 +68,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let outputs = outputs.into();
+        let options = options.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
         let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -76,19 +77,6 @@ where
         for output in &outputs {
             output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
-
-        self.finish_transaction(outputs, options).await
-    }
-
-    /// Separated function from send, so syncing isn't called recursively with the consolidation function, which sends
-    /// transactions
-    pub async fn finish_transaction(
-        &self,
-        outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
-        log::debug!("[TRANSACTION] finish_transaction");
-        let options = options.into();
 
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 

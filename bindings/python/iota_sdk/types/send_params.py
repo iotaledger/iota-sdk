@@ -12,7 +12,7 @@ from iota_sdk.types.native_token import NativeToken
 
 @json
 @dataclass
-class SendParams():
+class SendParams:
     """Parameters for sending base coins.
 
     Attributes:
@@ -33,7 +33,7 @@ class SendParams():
 
 @json
 @dataclass
-class SendNativeTokenParams():
+class SendNativeTokenParams:
     """Parameters for sending a native token
 
     Attributes:
@@ -50,7 +50,7 @@ class SendNativeTokenParams():
 
 @json
 @dataclass
-class SendNftParams():
+class SendNftParams:
     """Parameters for sending NFTs.
 
     Attributes:
@@ -63,7 +63,7 @@ class SendNftParams():
 
 @json
 @dataclass
-class CreateNativeTokenParams():
+class CreateNativeTokenParams:
     """Parameters for creating native tokens.
 
     Attributes:
@@ -86,7 +86,7 @@ class CreateNativeTokenParams():
 
 @json
 @dataclass
-class CreateDelegationParams():
+class CreateDelegationParams:
     """Parameters for creating a delegation output.
 
     Attributes:
@@ -103,7 +103,24 @@ class CreateDelegationParams():
 
 @json
 @dataclass
-class MintNftParams():
+class BeginStakingParams:
+    """Parameters for beginning staking.
+
+    Attributes:
+        account_id: The account id which will become a validator.
+        staked_amount: The amount of tokens to stake.
+        fixed_cost: The fixed cost of the validator, which it receives as part of its Mana rewards.
+        staking_period: The staking period (in epochs). Will default to the staking unbonding period.
+    """
+    account_id: HexStr
+    staked_amount: int
+    fixed_cost: int
+    staking_period: Optional[int] = None
+
+
+@json
+@dataclass
+class MintNftParams:
     """Parameters for minting NFTs.
 
     Attributes:
@@ -124,7 +141,7 @@ class MintNftParams():
 
 @json
 @dataclass
-class CreateAccountOutputParams():
+class CreateAccountOutputParams:
     """Parameters for creating accounts.
 
     Attributes:

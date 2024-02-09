@@ -8,7 +8,7 @@ from iota_sdk.types.common import json
 
 @json
 @dataclass
-class WalletSyncOptions():
+class WalletSyncOptions:
     """Specifies what outputs should be synced for the ed25519 address from the wallet.
 
     Attributes:
@@ -24,7 +24,7 @@ class WalletSyncOptions():
 
 @json
 @dataclass
-class AccountSyncOptions():
+class AccountSyncOptions:
     """Specifies what outputs should be synced for the address of an account output.
 
     Attributes:
@@ -42,7 +42,7 @@ class AccountSyncOptions():
 
 @json
 @dataclass
-class NftSyncOptions():
+class NftSyncOptions:
     """Specifies what outputs should be synced for the address of an nft output.
 
     Attributes:
@@ -58,7 +58,7 @@ class NftSyncOptions():
 
 @json
 @dataclass
-class SyncOptions():
+class SyncOptions:
     """The synchronization options.
 
     **Attributes**

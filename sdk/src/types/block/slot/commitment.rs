@@ -19,7 +19,7 @@ use crate::types::block::{
     serde(rename_all = "camelCase")
 )]
 pub struct SlotCommitment {
-    // The version of the protocol running.
+    /// The protocol version.
     protocol_version: u8,
     /// The slot index of this commitment.
     /// It is calculated based on genesis timestamp and the duration of a slot.

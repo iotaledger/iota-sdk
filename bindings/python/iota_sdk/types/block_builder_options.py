@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, AddressAndAmount, json
 from iota_sdk.client._high_level_api import Range
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.output import Output
 from iota_sdk.types.input import UtxoInput
@@ -34,7 +35,7 @@ class BlockBuilderOptions:
     custom_remainder_address: Optional[str] = None
     tag: Optional[HexStr] = None
     data: Optional[HexStr] = None
-    strong_parents: Optional[List[HexStr]] = None
-    weak_parents: Optional[List[HexStr]] = None
-    shallow_like_parents: Optional[List[HexStr]] = None
+    strong_parents: Optional[List[BlockId]] = None
+    weak_parents: Optional[List[BlockId]] = None
+    shallow_like_parents: Optional[List[BlockId]] = None
     burn: Optional[Burn] = None

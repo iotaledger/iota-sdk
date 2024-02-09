@@ -48,7 +48,7 @@ use crate::types::block::{
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidFeatureKind)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Feature {
     /// A sender feature.
     #[packable(tag = SenderFeature::KIND)]
@@ -317,6 +317,18 @@ pub(crate) fn verify_allowed_features(features: &Features, allowed_features: Fea
 
     Ok(())
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(Feature:
+    Sender,
+    Issuer,
+    Metadata,
+    StateMetadata,
+    Tag,
+    NativeToken,
+    BlockIssuer,
+    Staking,
+);
 
 #[cfg(test)]
 mod test {

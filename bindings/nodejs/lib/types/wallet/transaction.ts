@@ -1,7 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { BlockId, TransactionId } from '../block';
 import { SignedTransactionPayload } from '../block/payload/signed_transaction';
 import { OutputResponse } from '../models/api';
 
@@ -23,13 +24,17 @@ export class TransactionWithMetadata {
     @Type(() => SignedTransactionPayload)
     payload!: SignedTransactionPayload;
     /** The block id in which the transaction payload was included */
-    blockId?: string;
+    @Type(() => BlockId)
+    @Transform(({ value }) => new BlockId(value), { toClassOnly: true })
+    blockId?: BlockId;
     /** The inclusion state of the transaction */
     inclusionState!: InclusionState;
     /** The creation time */
     timestamp!: string;
     /** The transaction id */
-    transactionId!: string;
+    @Type(() => TransactionId)
+    @Transform(({ value }) => new TransactionId(value), { toClassOnly: true })
+    transactionId!: TransactionId;
     /** The network id in which the transaction was sent */
     networkId!: string;
     /** If the transaction was created by the wallet or someone else */

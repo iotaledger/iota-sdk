@@ -1,4 +1,4 @@
-import { Utils } from '../node/lib';
+import { OutputId, Utils } from '../node/lib';
 
 describe('Utils methods', () => {
     it('generates and validates mnemonic', async () => {
@@ -50,7 +50,7 @@ describe('Utils methods', () => {
 
     it('hash output id', async () => {
         const outputId =
-            '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
+            new OutputId('0x0000000000000000000000000000000000000000000000000000000000000000000000000000');
 
         const accountId = Utils.computeAccountId(outputId);
 

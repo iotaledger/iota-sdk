@@ -32,7 +32,7 @@ pub const CONTEXT_INPUT_COUNT_RANGE: RangeInclusive<u16> = 0..=CONTEXT_INPUT_COU
 #[derive(Clone, Eq, Display, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidContextInputKind)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum ContextInput {
     /// A [`CommitmentContextInput`].
     #[packable(tag = CommitmentContextInput::KIND)]
@@ -77,6 +77,9 @@ impl core::fmt::Debug for ContextInput {
         }
     }
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
 
 pub(crate) type ContextInputCount =
     BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
