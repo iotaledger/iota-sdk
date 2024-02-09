@@ -33,7 +33,7 @@ pub use self::constants::*;
 pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, node: Option<&str>) -> Result<Wallet> {
     let client_options = ClientOptions::new()
         .with_node(node.unwrap_or(NODE_LOCAL))?
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters());
+        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone());
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or_else(|| Client::generate_mnemonic().unwrap()))?;
 

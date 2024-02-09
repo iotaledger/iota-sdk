@@ -49,7 +49,7 @@ async fn sign_account_state_transition() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let slot_index = SlotIndex::from(10);
 
@@ -125,7 +125,7 @@ async fn account_reference_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_address = Address::Account(AccountAddress::new(account_id));
     let slot_index = SlotIndex::from(10);

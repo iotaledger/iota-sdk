@@ -256,7 +256,7 @@ async fn address_generation() {
 #[tokio::test]
 async fn search_address() -> Result<()> {
     let client = Client::builder()
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters())
+        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone())
         .finish()
         .await
         .unwrap();

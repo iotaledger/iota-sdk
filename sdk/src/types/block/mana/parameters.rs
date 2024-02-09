@@ -213,9 +213,7 @@ mod test {
     // Tests from https://github.com/iotaledger/iota.go/blob/develop/mana_decay_provider_test.go
 
     fn params() -> &'static ProtocolParameters {
-        use once_cell::sync::Lazy;
-        static PARAMS: Lazy<ProtocolParameters> = Lazy::new(|| iota_mainnet_v3_protocol_parameters());
-        &PARAMS
+        iota_mainnet_v3_protocol_parameters()
     }
 
     #[test]

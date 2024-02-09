@@ -150,7 +150,7 @@ mod test {
 
     #[test]
     fn epoch_index_to_from_slot() {
-        let mut params = iota_mainnet_v3_protocol_parameters();
+        let mut params = iota_mainnet_v3_protocol_parameters().clone();
         params.slots_per_epoch_exponent = 10;
         let slot_index = SlotIndex(3000);
         let epoch_index =

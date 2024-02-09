@@ -41,7 +41,7 @@ fn transaction() {
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
@@ -61,7 +61,7 @@ fn transaction() {
     assert!(matches!(payload, Payload::SignedTransaction(_)));
     assert_eq!(
         payload,
-        PackableExt::unpack_bytes_verified(packed.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed.as_slice(), protocol_parameters).unwrap()
     );
 }
 

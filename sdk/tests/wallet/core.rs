@@ -143,7 +143,7 @@ async fn iota_coin_type() -> Result<()> {
 
     let client_options = ClientOptions::new()
         .with_node(NODE_LOCAL)?
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters());
+        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]

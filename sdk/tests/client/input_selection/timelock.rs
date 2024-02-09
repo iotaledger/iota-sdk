@@ -13,7 +13,7 @@ use crate::client::{
 
 #[test]
 fn one_output_timelock_not_expired() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(
@@ -53,7 +53,7 @@ fn one_output_timelock_not_expired() {
 
 #[test]
 fn timelock_equal_timestamp() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(
@@ -95,7 +95,7 @@ fn timelock_equal_timestamp() {
 
 #[test]
 fn two_outputs_one_timelock_expired() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -150,7 +150,7 @@ fn two_outputs_one_timelock_expired() {
 
 #[test]
 fn two_outputs_one_timelocked_one_missing() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -205,7 +205,7 @@ fn two_outputs_one_timelocked_one_missing() {
 
 #[test]
 fn one_output_timelock_expired() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(

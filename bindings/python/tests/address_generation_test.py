@@ -2,14 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import shutil
-from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletOptions, Bip44
+from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletOptions, Bip44, Utils
 
 
 def test_address_generation_iota():
     db_path = './test_address_generation_iota'
     shutil.rmtree(db_path, ignore_errors=True)
 
-    client_options = ClientOptions(nodes=[])
+    client_options = ClientOptions(
+        nodes=[], protocol_parameters=Utils.iota_mainnet_v3_protocol_parameters())
 
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
@@ -36,7 +37,8 @@ def test_address_generation_shimmer():
     db_path = './test_address_generation_shimmer'
     shutil.rmtree(db_path, ignore_errors=True)
 
-    client_options = ClientOptions(nodes=[])
+    client_options = ClientOptions(
+        nodes=[], protocol_parameters=Utils.iota_mainnet_v3_protocol_parameters())
 
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")

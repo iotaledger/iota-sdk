@@ -293,6 +293,10 @@ class Utils:
             'block': block.as_dict(),
         }))
 
+    @staticmethod
+    def iota_mainnet_v3_protocol_parameters() -> ProtocolParameters:
+        return ProtocolParameters.from_dict(_call_method('iotaV3MainnetProtocolParameters'))
+
 
 class UtilsError(Exception):
     """A utils error."""

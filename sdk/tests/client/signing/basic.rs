@@ -41,7 +41,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -127,7 +127,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -256,7 +256,7 @@ async fn two_signature_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(

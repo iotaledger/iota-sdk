@@ -99,7 +99,7 @@ fn pack_unpack_valid() {
     assert_eq!(packed_block.len(), block.packed_len());
     assert_eq!(
         block,
-        PackableExt::unpack_bytes_verified(packed_block.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed_block.as_slice(), protocol_parameters).unwrap()
     );
 }
 

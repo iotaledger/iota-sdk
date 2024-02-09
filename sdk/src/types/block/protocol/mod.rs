@@ -330,87 +330,92 @@ pub struct VersionSignalingParameters {
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.
-#[cfg(any(feature = "test", feature = "rand"))]
-pub fn iota_mainnet_v3_protocol_parameters() -> ProtocolParameters {
-    ProtocolParameters {
-        kind: 0,
-        version: super::PROTOCOL_VERSION,
-        network_name: String::from("testnet").try_into().unwrap(),
-        bech32_hrp: Hrp::from_str_unchecked("rms"),
-        storage_score_parameters: StorageScoreParameters {
-            storage_cost: 100,
-            factor_data: 1,
-            offset_output_overhead: 10,
-            offset_ed25519_block_issuer_key: 100,
-            offset_staking_feature: 100,
-            offset_delegation: 100,
-        },
-        work_score_parameters: WorkScoreParameters {
-            data_byte: 1,
-            block: 1500,
-            input: 10,
-            context_input: 20,
-            output: 20,
-            native_token: 20,
-            staking: 5000,
-            block_issuer: 1000,
-            allotment: 1000,
-            signature_ed25519: 1000,
-        },
-        token_supply: 1_813_620_509_061_365,
-        genesis_slot: 0,
-        genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
-        slot_duration_in_seconds: 10,
-        epoch_nearing_threshold: 60,
-        slots_per_epoch_exponent: 13,
-        mana_parameters: ManaParameters {
-            bits_count: 63,
-            generation_rate: 1,
-            generation_rate_exponent: 17,
-            decay_factors: Default::default(),
-            decay_factors_exponent: 32,
-            decay_factor_epochs_sum: Default::default(),
-            decay_factor_epochs_sum_exponent: 21,
-            annual_decay_factor_percentage: 70,
-        },
-        staking_unbonding_period: 10,
-        validation_blocks_per_slot: 10,
-        punishment_epochs: 10,
-        liveness_threshold_lower_bound: 15,
-        liveness_threshold_upper_bound: 30,
-        min_committable_age: 10,
-        max_committable_age: 20,
-        congestion_control_parameters: CongestionControlParameters {
-            min_reference_mana_cost: 1,
-            increase: 10,
-            decrease: 10,
-            increase_threshold: 800000,
-            decrease_threshold: 500000,
-            scheduler_rate: 100000,
-            max_buffer_size: 1000,
-            max_validation_buffer_size: 100,
-        },
-        version_signaling_parameters: VersionSignalingParameters {
-            window_size: 7,
-            window_target_ratio: 5,
-            activation_offset: 7,
-        },
-        rewards_parameters: RewardsParameters {
-            profit_margin_exponent: 8,
-            bootstrapping_duration: Default::default(),
-            mana_share_coefficient: 2,
-            decay_balancing_constant_exponent: 8,
-            decay_balancing_constant: 1,
-            pool_coefficient_exponent: 11,
-            retention_period: 384,
-        },
-        target_committee_size: 32,
-        chain_switching_threshold: 3,
-    }
-    .init()
+#[cfg(feature = "std")]
+pub fn iota_mainnet_v3_protocol_parameters() -> &'static ProtocolParameters {
+    use std::sync::OnceLock;
+
+    static PARAMS: OnceLock<ProtocolParameters> = OnceLock::new();
+    PARAMS.get_or_init(|| {
+        ProtocolParameters {
+            kind: 0,
+            version: super::PROTOCOL_VERSION,
+            network_name: String::from("testnet").try_into().unwrap(),
+            bech32_hrp: Hrp::from_str_unchecked("rms"),
+            storage_score_parameters: StorageScoreParameters {
+                storage_cost: 100,
+                factor_data: 1,
+                offset_output_overhead: 10,
+                offset_ed25519_block_issuer_key: 100,
+                offset_staking_feature: 100,
+                offset_delegation: 100,
+            },
+            work_score_parameters: WorkScoreParameters {
+                data_byte: 1,
+                block: 1500,
+                input: 10,
+                context_input: 20,
+                output: 20,
+                native_token: 20,
+                staking: 5000,
+                block_issuer: 1000,
+                allotment: 1000,
+                signature_ed25519: 1000,
+            },
+            token_supply: 1_813_620_509_061_365,
+            genesis_slot: 0,
+            genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
+            slot_duration_in_seconds: 10,
+            epoch_nearing_threshold: 60,
+            slots_per_epoch_exponent: 13,
+            mana_parameters: ManaParameters {
+                bits_count: 63,
+                generation_rate: 1,
+                generation_rate_exponent: 17,
+                decay_factors: Default::default(),
+                decay_factors_exponent: 32,
+                decay_factor_epochs_sum: Default::default(),
+                decay_factor_epochs_sum_exponent: 21,
+                annual_decay_factor_percentage: 70,
+            },
+            staking_unbonding_period: 10,
+            validation_blocks_per_slot: 10,
+            punishment_epochs: 10,
+            liveness_threshold_lower_bound: 15,
+            liveness_threshold_upper_bound: 30,
+            min_committable_age: 10,
+            max_committable_age: 20,
+            congestion_control_parameters: CongestionControlParameters {
+                min_reference_mana_cost: 1,
+                increase: 10,
+                decrease: 10,
+                increase_threshold: 800000,
+                decrease_threshold: 500000,
+                scheduler_rate: 100000,
+                max_buffer_size: 1000,
+                max_validation_buffer_size: 100,
+            },
+            version_signaling_parameters: VersionSignalingParameters {
+                window_size: 7,
+                window_target_ratio: 5,
+                activation_offset: 7,
+            },
+            rewards_parameters: RewardsParameters {
+                profit_margin_exponent: 8,
+                bootstrapping_duration: Default::default(),
+                mana_share_coefficient: 2,
+                decay_balancing_constant_exponent: 8,
+                decay_balancing_constant: 1,
+                pool_coefficient_exponent: 11,
+                retention_period: 384,
+            },
+            target_committee_size: 32,
+            chain_switching_threshold: 3,
+        }
+        .init()
+    })
 }
 
-#[cfg(any(feature = "test", feature = "rand"))]
+#[cfg(feature = "std")]
 impl ProtocolParameters {
     pub(crate) fn init(mut self) -> Self {
         self.derive_mana_decay_factors();

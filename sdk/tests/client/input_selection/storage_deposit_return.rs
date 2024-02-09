@@ -18,7 +18,7 @@ use crate::client::{
 
 #[test]
 fn sdruc_output_not_provided_no_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(
@@ -71,7 +71,7 @@ fn sdruc_output_not_provided_no_remainder() {
 
 #[test]
 fn sdruc_output_provided_no_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(
@@ -125,7 +125,7 @@ fn sdruc_output_provided_no_remainder() {
 
 #[test]
 fn sdruc_output_provided_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(
@@ -178,7 +178,7 @@ fn sdruc_output_provided_remainder() {
 
 #[test]
 fn two_sdrucs_to_the_same_address_both_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -243,7 +243,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
 
 #[test]
 fn two_sdrucs_to_the_same_address_one_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -309,7 +309,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
 
 #[test]
 fn two_sdrucs_to_different_addresses_both_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -384,7 +384,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
 
 #[test]
 fn two_sdrucs_to_different_addresses_one_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -450,7 +450,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
 
 #[test]
 fn insufficient_amount_because_of_sdruc() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [Basic(
@@ -496,7 +496,7 @@ fn insufficient_amount_because_of_sdruc() {
 
 #[test]
 fn useless_sdruc_required_for_sender_feature() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -564,7 +564,7 @@ fn useless_sdruc_required_for_sender_feature() {
 
 #[test]
 fn sdruc_required_non_ed25519_in_address_unlock() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -628,7 +628,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
 
 #[test]
 fn useless_sdruc_non_ed25519_in_address_unlock() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(

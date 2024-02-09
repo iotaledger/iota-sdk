@@ -50,8 +50,8 @@ fn build_valid() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
@@ -75,8 +75,8 @@ fn build_valid_with_payload() {
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
@@ -99,8 +99,8 @@ fn build_valid_add_inputs_outputs() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
@@ -123,8 +123,8 @@ fn build_invalid_payload_kind() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1.clone(), input2.clone()])
         .add_output(output.clone())
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
@@ -141,8 +141,8 @@ fn build_invalid_payload_kind() {
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .with_payload(tx_payload)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(transaction, Err(Error::InvalidPayloadKind(1))));
 }
@@ -161,8 +161,8 @@ fn build_invalid_input_count_low() {
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -187,8 +187,8 @@ fn build_invalid_input_count_high() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 129])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -204,8 +204,8 @@ fn build_invalid_output_count_low() {
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -230,8 +230,8 @@ fn build_invalid_output_count_high() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs(vec![output; 129])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -256,8 +256,8 @@ fn build_invalid_duplicate_utxo() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(transaction, Err(Error::DuplicateUtxo(_))));
 }
@@ -291,8 +291,8 @@ fn build_invalid_accumulated_output() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs([output1, output2])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(transaction, Err(Error::InvalidTransactionAmountSum(_))));
 }
@@ -317,8 +317,8 @@ fn getters() {
         .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     assert_eq!(transaction.outputs(), outputs.as_slice());
@@ -346,8 +346,8 @@ fn duplicate_output_nft() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -376,8 +376,8 @@ fn duplicate_output_nft_null() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
@@ -403,8 +403,8 @@ fn duplicate_output_account() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, account.clone(), account])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -439,8 +439,8 @@ fn duplicate_output_foundry() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, foundry.clone(), foundry])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -465,8 +465,8 @@ fn transactions_capabilities() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters)
         .unwrap();
     let mut capabilities = transaction.capabilities().clone();
 

@@ -31,6 +31,7 @@ import type {
     __OutputManaWithDecay__,
     __VerifyTransactionSyntax__,
     __BlockBytes__,
+    __IotaV3MainnetProtocolParameters__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -65,4 +66,5 @@ export type __UtilsMethods__ =
     | __GenerateManaWithDecay__
     | __OutputManaWithDecay__
     | __VerifyTransactionSyntax__
-    | __BlockBytes__;
+    | __BlockBytes__
+    | __IotaV3MainnetProtocolParameters__;

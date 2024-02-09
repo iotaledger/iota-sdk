@@ -604,4 +604,11 @@ export class Utils {
         });
         return new Uint8Array(blockBytes);
     }
+
+    static iotaV3MainnetProtocolParameters(): ProtocolParameters {
+        const params = callUtilsMethod({
+            name: 'iotaV3MainnetProtocolParameters',
+        });
+        return params;
+    }
 }

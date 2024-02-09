@@ -45,7 +45,9 @@ async fn create_wallet() -> Result<()> {
             ClientBuilder::new()
                 .from_json(client_options)
                 .unwrap()
-                .with_protocol_parameters(iota_sdk::types::block::protocol::iota_mainnet_v3_protocol_parameters()),
+                .with_protocol_parameters(
+                    iota_sdk::types::block::protocol::iota_mainnet_v3_protocol_parameters().clone(),
+                ),
         )
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
@@ -88,7 +90,9 @@ async fn client_from_wallet() -> Result<()> {
             ClientBuilder::new()
                 .from_json(client_options)
                 .unwrap()
-                .with_protocol_parameters(iota_sdk::types::block::protocol::iota_mainnet_v3_protocol_parameters()),
+                .with_protocol_parameters(
+                    iota_sdk::types::block::protocol::iota_mainnet_v3_protocol_parameters().clone(),
+                ),
         )
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
