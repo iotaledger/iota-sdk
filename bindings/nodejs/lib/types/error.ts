@@ -44,7 +44,7 @@ export type ClientErrorName =
     | 'secretManagerMismatch'
     | 'healthyNodePoolEmpty'
     | 'taggedData'
-    | 'TransactionAcceptance'
+    | 'transactionAcceptance'
     | 'taskJoin'
     | 'timeNotSynced'
     | 'transactionSemantic'

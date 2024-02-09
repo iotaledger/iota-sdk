@@ -113,8 +113,8 @@ pub enum Error {
     /// Error when building tagged_data blocks
     #[error("error when building tagged_data block: {0}")]
     TaggedData(String),
-    /// The transaction could not get accepted
-    #[error("transaction ID `{0}` couldn't get accepted")]
+    /// The transaction could not be accepted
+    #[error("transaction ID `{0}` couldn't be accepted")]
     TransactionAcceptance(String),
     #[cfg(not(target_family = "wasm"))]
     /// Tokio task join error
