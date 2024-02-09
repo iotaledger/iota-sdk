@@ -64,7 +64,7 @@ where
                 staking_feature.staked_amount(),
                 staking_feature.fixed_cost(),
                 staking_feature.start_epoch(),
-                staking_feature.end_epoch() + additional_epochs,
+                staking_feature.end_epoch().saturating_add(additional_epochs),
             ));
         // Otherwise, we'll have to claim the rewards
         } else {
@@ -76,7 +76,7 @@ where
             }
             let past_bounded_epoch =
                 protocol_parameters.epoch_index_of(protocol_parameters.past_bounded_slot(slot_commitment_id));
-            let end_epoch = past_bounded_epoch + additional_epochs;
+            let end_epoch = past_bounded_epoch.saturating_add(additional_epochs);
             output_builder = output_builder.replace_feature(StakingFeature::new(
                 staking_feature.staked_amount(),
                 staking_feature.fixed_cost(),

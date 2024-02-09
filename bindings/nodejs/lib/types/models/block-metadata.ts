@@ -1,11 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { HexEncodedString } from '../utils/hex-encoding';
 import { BlockState, TransactionState } from './state';
 import { BlockFailureReason } from './block-failure-reason';
-import { Block } from '../block';
-import { TransactionId } from '../wallet';
+import { Block, BlockId, TransactionId } from '../block';
 import { TransactionFailureReason } from './transaction-failure-reason';
 
 /**
@@ -15,7 +13,7 @@ export interface IBlockMetadata {
     /**
      * The block id.
      */
-    blockId: HexEncodedString;
+    blockId: BlockId;
     /**
      * The block state.
      */

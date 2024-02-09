@@ -224,7 +224,7 @@ export interface __VerifyTransactionSemantic__ {
         inputs: InputSigningData[];
         protocolParameters: ProtocolParameters;
         unlocks?: Unlock[];
-        manaRewards?: { [outputId: OutputId]: NumericString };
+        manaRewards?: { [outputId: HexEncodedString]: NumericString };
     };
 }
 
