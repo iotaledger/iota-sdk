@@ -92,7 +92,7 @@ class HighLevelAPI(metaclass=ABCMeta):
             output_ids: A list of output ids.
 
         Returns:
-            A list of corresponding `OutputResponse` objects.
+            A list of corresponding `OutputWithMetadata` objects.
         """
         outputs = self._call_method('getOutputs', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
