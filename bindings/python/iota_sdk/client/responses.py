@@ -125,14 +125,14 @@ class IssuanceBlockHeaderResponse:
         weak_parents: Blocks that are weakly directly approved.
         shallow_like_parents: Blocks that are directly referenced to adjust opinion.
     """
-    strong_parents: List[HexStr]
+    strong_parents: List[BlockId]
     latest_parent_block_issuing_time: int = field(metadata=config(
         encoder=str
     ))
     latest_finalized_slot: SlotIndex
     latest_commitment: SlotCommitment
-    weak_parents: Optional[List[HexStr]] = None
-    shallow_like_parents: Optional[List[HexStr]] = None
+    weak_parents: Optional[List[BlockId]] = None
+    shallow_like_parents: Optional[List[BlockId]] = None
 
 
 @json
