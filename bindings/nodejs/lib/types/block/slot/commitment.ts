@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { u64 } from '../..';
+import { IdWithSlotIndex } from '../id';
 
 /**
  * Timeline is divided into slots, and each slot has a corresponding slot index.
@@ -21,7 +22,7 @@ type EpochIndex = number;
 /**
  * Identifier of a slot commitment
  */
-type SlotCommitmentId = string;
+class SlotCommitmentId extends IdWithSlotIndex {}
 
 /**
  * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.

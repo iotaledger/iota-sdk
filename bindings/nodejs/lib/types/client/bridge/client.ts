@@ -17,6 +17,7 @@ import type {
     OutputId,
     Payload,
     SlotIndex,
+    SlotCommitmentId,
 } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
@@ -223,21 +224,21 @@ export interface __GetTransactionMetadataMethod__ {
 export interface __GetCommitmentMethod__ {
     name: 'getCommitment';
     data: {
-        commitmentId: HexEncodedString;
+        commitmentId: SlotCommitmentId;
     };
 }
 
 export interface __GetUtxoChangesMethod__ {
     name: 'getUtxoChanges';
     data: {
-        commitmentId: HexEncodedString;
+        commitmentId: SlotCommitmentId;
     };
 }
 
 export interface __GetUtxoChangesFullMethod__ {
     name: 'getUtxoChangesFull';
     data: {
-        commitmentId: HexEncodedString;
+        commitmentId: SlotCommitmentId;
     };
 }
 
