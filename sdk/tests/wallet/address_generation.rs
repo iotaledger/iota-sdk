@@ -14,10 +14,9 @@ use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Error as ClientError,
     },
-    types::block::address::ToBech32Ext,
-    wallet::{ClientOptions, Error, Result, Wallet},
+    types::block::{address::ToBech32Ext, protocol::iota_mainnet_v3_protocol_parameters},
+    wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
 
@@ -28,7 +27,9 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
     let storage_path = "test-storage/wallet_address_generation_mnemonic";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+    let client_options = ClientOptions::new()
+        .with_node(NODE_LOCAL)?
+        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
@@ -69,7 +70,9 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
         .store_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_string()))
         .await?;
 
-    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+    let client_options = ClientOptions::new()
+        .with_node(NODE_LOCAL)?
+        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters());
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))

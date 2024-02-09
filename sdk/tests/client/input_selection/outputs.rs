@@ -10,7 +10,7 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, SLOT_INDEX,
 };
@@ -107,12 +107,12 @@ fn no_outputs_but_required_input() {
     assert_eq!(selected.inputs, inputs);
     // Just a remainder
     assert_eq!(selected.outputs.len(), 1);
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.outputs[0],
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None
-    ));
+        None,
+    );
 }
 
 #[test]
@@ -146,12 +146,12 @@ fn no_outputs_but_burn() {
 
     assert_eq!(selected.inputs, inputs);
     assert_eq!(selected.outputs.len(), 1);
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.outputs[0],
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None
-    ));
+        None,
+    );
 }
 
 #[test]

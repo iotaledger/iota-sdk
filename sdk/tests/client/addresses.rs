@@ -13,7 +13,10 @@ use iota_sdk::{
         secret::{GenerateAddressOptions, SecretManager},
         Client, Result,
     },
-    types::block::address::{Address, Hrp},
+    types::block::{
+        address::{Address, Hrp},
+        protocol::iota_mainnet_v3_protocol_parameters,
+    },
 };
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
@@ -252,7 +255,11 @@ async fn address_generation() {
 
 #[tokio::test]
 async fn search_address() -> Result<()> {
-    let client = Client::builder().finish().await.unwrap();
+    let client = Client::builder()
+        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters())
+        .finish()
+        .await
+        .unwrap();
 
     let secret_manager = SecretManager::try_from_mnemonic(generate_mnemonic()?)?;
 

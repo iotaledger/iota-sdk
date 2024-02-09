@@ -18,7 +18,10 @@ use iota_sdk::{
         address::{AccountAddress, Address},
         input::{Input, UtxoInput},
         output::AccountId,
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilityFlag},
+            SignedTransactionPayload,
+        },
         protocol::iota_mainnet_v3_protocol_parameters,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
@@ -73,6 +76,7 @@ async fn sign_account_state_transition() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -156,6 +160,7 @@ async fn account_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {

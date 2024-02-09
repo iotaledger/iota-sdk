@@ -17,7 +17,9 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs,
+    input_selection::native_tokens::nt_remainder_min_storage_deposit,
+    unsorted_eq,
     Build::{Account, Basic, Foundry, Nft},
     ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, SLOT_INDEX,
     TOKEN_ID_1, TOKEN_ID_2,
@@ -782,12 +784,12 @@ fn burn_foundry_present() {
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_basic() {
-                assert!(is_remainder_or_return(
+                assert_remainder_or_return(
                     output,
                     1_500_000,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     None,
-                ));
+                );
             } else if output.is_account() {
                 assert_eq!(output.amount(), 1_000_000);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
@@ -1043,6 +1045,8 @@ fn burn_native_tokens() {
         Some(SLOT_INDEX),
     );
 
+    let nt_remainder_output_amount = nt_remainder_min_storage_deposit(&protocol_parameters);
+
     let selected = InputSelection::new(
         inputs.clone(),
         Vec::new(),
@@ -1059,19 +1063,18 @@ fn burn_native_tokens() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    let nt_remainder_output_amount = 106000;
-    assert!(
-        is_remainder_or_return(
-            &selected.outputs[0],
-            nt_remainder_output_amount,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((TOKEN_ID_1, 80))
-        ) && is_remainder_or_return(
-            &selected.outputs[1],
-            2_000_000 - nt_remainder_output_amount,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((TOKEN_ID_2, 70))
-        )
+
+    assert_remainder_or_return(
+        &selected.outputs[0],
+        nt_remainder_output_amount,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        Some((TOKEN_ID_1, 80)),
+    );
+    assert_remainder_or_return(
+        &selected.outputs[1],
+        2_000_000 - nt_remainder_output_amount,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        Some((TOKEN_ID_2, 70)),
     );
 }
 
@@ -1144,12 +1147,12 @@ fn burn_foundry_and_its_account() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_500_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            );
         }
     });
 }

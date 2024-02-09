@@ -18,7 +18,10 @@ use iota_sdk::{
         address::{Address, NftAddress},
         input::{Input, UtxoInput},
         output::NftId,
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilityFlag},
+            SignedTransactionPayload,
+        },
         protocol::iota_mainnet_v3_protocol_parameters,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
@@ -83,6 +86,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {

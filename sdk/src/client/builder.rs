@@ -35,9 +35,9 @@ pub struct ClientBuilder {
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
     #[serde(flatten)]
     pub broker_options: BrokerOptions,
-    /// Data related to the used network
-    #[serde(flatten, default)]
-    pub network_info: Option<NetworkInfo>,
+    /// Protocol parameters
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub protocol_parameters: Option<ProtocolParameters>,
     /// Timeout for API requests
     #[serde(default = "default_api_timeout")]
     pub api_timeout: Duration,
@@ -62,7 +62,7 @@ impl Default for ClientBuilder {
             node_manager_builder: crate::client::node_manager::NodeManager::builder(),
             #[cfg(feature = "mqtt")]
             broker_options: Default::default(),
-            network_info: None,
+            protocol_parameters: None,
             api_timeout: DEFAULT_API_TIMEOUT,
             #[cfg(not(target_family = "wasm"))]
             max_parallel_api_requests: super::constants::MAX_PARALLEL_API_REQUESTS,
@@ -186,6 +186,12 @@ impl ClientBuilder {
         self
     }
 
+    /// Set the protocol parameters.
+    pub fn with_protocol_parameters(mut self, protocol_parameters: ProtocolParameters) -> Self {
+        self.protocol_parameters.replace(protocol_parameters);
+        self
+    }
+
     /// Build the Client instance.
     #[cfg(not(target_family = "wasm"))]
     pub async fn finish(self) -> Result<Client> {
@@ -206,7 +212,10 @@ impl ClientBuilder {
 
         let client_inner = Arc::new(ClientInner {
             node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
-            network_info: RwLock::new(self.network_info),
+            network_info: RwLock::new(self.protocol_parameters.map(|protocol_parameters| NetworkInfo {
+                protocol_parameters,
+                tangle_time: None,
+            })),
             api_timeout: RwLock::new(self.api_timeout),
             #[cfg(feature = "mqtt")]
             mqtt: super::MqttInner {
@@ -269,7 +278,12 @@ impl ClientBuilder {
             node_manager_builder: NodeManagerBuilder::from(&*client.node_manager.read().await),
             #[cfg(feature = "mqtt")]
             broker_options: *client.mqtt.broker_options.read().await,
-            network_info: client.network_info.read().await.clone(),
+            protocol_parameters: client
+                .network_info
+                .read()
+                .await
+                .as_ref()
+                .map(|info| info.protocol_parameters.clone()),
             api_timeout: client.get_timeout().await,
             #[cfg(not(target_family = "wasm"))]
             max_parallel_api_requests: client.request_pool.size().await,

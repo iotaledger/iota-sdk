@@ -2137,8 +2137,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "packable"
-version = "0.10.1"
-source = "git+https://github.com/DaughterOfMars/common-rs.git?branch=feat/remove-visitor-default-bound#8c25efd27539559aab69901da1163455dcbafbd1"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01fc964b1de9aff3b0a0e5c68048d342ca247da967b96b96489617f1bd51cc3d"
 dependencies = [
  "autocfg",
  "hashbrown",
@@ -2149,8 +2150,9 @@ dependencies = [
 
 [[package]]
 name = "packable-derive"
-version = "0.9.0"
-source = "git+https://github.com/DaughterOfMars/common-rs.git?branch=feat/remove-visitor-default-bound#8c25efd27539559aab69901da1163455dcbafbd1"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0698d973173b50fb1949f7e2e9516544dc1149610262c30b3e9d8ddace1a462e"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",

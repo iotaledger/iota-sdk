@@ -21,7 +21,7 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Account, Basic, Foundry},
     ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_INDEX,
 };
@@ -407,12 +407,12 @@ fn destroy_foundry_with_account_burn() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            );
         }
     });
 }
@@ -632,12 +632,12 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else if output.is_basic() {
-                assert!(is_remainder_or_return(
+                assert_remainder_or_return(
                     output,
                     1_000_000,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     None,
-                ));
+                );
             } else {
                 panic!("unexpected output type")
             }
@@ -891,12 +891,12 @@ fn create_native_token_but_burn_account() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 2_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            );
         }
     });
 }

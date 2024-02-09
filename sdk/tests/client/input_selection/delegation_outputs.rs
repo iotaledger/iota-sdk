@@ -17,7 +17,6 @@ use iota_sdk::{
             address::rand_account_address, output::rand_output_metadata_with_id,
             transaction::rand_transaction_id_with_slot_index,
         },
-        slot::SlotIndex,
     },
 };
 use pretty_assertions::assert_eq;
@@ -96,7 +95,11 @@ fn remainder_needed_for_mana() {
                 .iter()
                 .map(|i| i
                     .output
-                    .available_mana(&protocol_parameters, SlotIndex(0), SLOT_INDEX)
+                    .available_mana(
+                        &protocol_parameters,
+                        i.output_id().transaction_id().slot_index(),
+                        SLOT_INDEX
+                    )
                     .unwrap())
                 .sum::<u64>(),
         selected.outputs.iter().map(|o| o.mana()).sum::<u64>()

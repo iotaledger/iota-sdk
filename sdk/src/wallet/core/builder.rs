@@ -17,7 +17,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address},
+    types::block::address::{Address, Bech32Address, Hrp},
     wallet::{
         core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletData, WalletInner},
         operations::syncing::SyncOptions,
@@ -195,10 +195,26 @@ where
                 .and_then(|builder| builder.address.clone());
         }
 
+        // Create the node client.
+        let client = self
+            .client_options
+            .clone()
+            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
+            .finish()
+            .await?;
+
         // May create a default Ed25519 wallet address if there's a secret manager.
         if self.address.is_none() {
             if self.secret_manager.is_some() {
-                let address = self.create_default_wallet_address().await?;
+                let bech32_hrp = client
+                    .network_info
+                    .read()
+                    .await
+                    .as_ref()
+                    .ok_or(crate::wallet::Error::MissingParameter("protocol_parameters"))?
+                    .protocol_parameters
+                    .bech32_hrp();
+                let address = self.create_default_wallet_address(bech32_hrp).await?;
                 self.address = Some(address);
             } else {
                 return Err(crate::wallet::Error::MissingParameter("address"));
@@ -233,14 +249,6 @@ where
         if let Some(wallet_data) = &mut wallet_data {
             unlock_unused_inputs(wallet_data)?;
         }
-
-        // Create the node client.
-        let client = self
-            .client_options
-            .clone()
-            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
-            .finish()
-            .await?;
 
         let background_syncing_status = tokio::sync::watch::channel(BackgroundSyncStatus::Stopped);
         let background_syncing_status = (Arc::new(background_syncing_status.0), background_syncing_status.1);
@@ -278,16 +286,7 @@ where
     }
 
     /// Generate the wallet address.
-    pub(crate) async fn create_default_wallet_address(&self) -> crate::wallet::Result<Bech32Address> {
-        let bech32_hrp = self
-            .client_options
-            .as_ref()
-            .unwrap()
-            .network_info
-            .as_ref()
-            .ok_or(crate::wallet::Error::MissingParameter("protocol_parameters"))?
-            .protocol_parameters
-            .bech32_hrp;
+    pub(crate) async fn create_default_wallet_address(&self, bech32_hrp: Hrp) -> crate::wallet::Result<Bech32Address> {
         let bip_path = self.bip_path.as_ref().unwrap();
 
         Ok(Bech32Address::new(
