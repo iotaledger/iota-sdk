@@ -33,8 +33,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def __init__(
         self,
         nodes: Optional[Union[str, List[str]]] = None,
-        primary_node: Optional[str] = None,
-        permanode: Optional[str] = None,
+        primary_nodes: Optional[Union[str, List[str]]] = None,
         ignore_node_health: Optional[bool] = None,
         api_timeout: Optional[timedelta] = None,
         node_sync_interval: Optional[timedelta] = None,
@@ -50,10 +49,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         **Arguments**
         nodes :
             A single Node URL or an array of URLs.
-        primary_node :
-            Node which will be tried first for all requests.
-        permanode :
-            Permanode URL.
+        primary_nodes :
+            Nodes which will be tried first for all requests.
         ignore_node_health :
             If the node health should be ignored.
         api_timeout :

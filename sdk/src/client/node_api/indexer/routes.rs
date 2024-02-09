@@ -29,7 +29,7 @@ impl ClientInner {
     pub async fn output_ids(&self, query_parameters: OutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get basic outputs filtered by the given parameters.
@@ -39,7 +39,7 @@ impl ClientInner {
     pub async fn basic_output_ids(&self, query_parameters: BasicOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/basic";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get account outputs filtered by the given parameters.
@@ -52,7 +52,7 @@ impl ClientInner {
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/account";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get account output by its accountID.
@@ -62,7 +62,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/account/{bech32_address}");
 
         Ok(*(self
-            .get_output_ids(&route, AccountOutputQueryParameters::new(), true, false)
+            .get_output_ids(&route, AccountOutputQueryParameters::new(), true)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
@@ -75,7 +75,7 @@ impl ClientInner {
     pub async fn anchor_output_ids(&self, query_parameters: AnchorOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/anchor";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get anchor output by its anchorID.
@@ -85,7 +85,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/anchor/{bech32_address}");
 
         Ok(*(self
-            .get_output_ids(&route, AnchorOutputQueryParameters::new(), true, false)
+            .get_output_ids(&route, AnchorOutputQueryParameters::new(), true)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{anchor_id:?}")))?))
@@ -101,7 +101,7 @@ impl ClientInner {
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/delegation";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get delegation output by its delegationID.
@@ -110,7 +110,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/delegation/{delegation_id}");
 
         Ok(*(self
-            .get_output_ids(&route, DelegationOutputQueryParameters::new(), true, false)
+            .get_output_ids(&route, DelegationOutputQueryParameters::new(), true)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{delegation_id:?}")))?))
@@ -126,7 +126,7 @@ impl ClientInner {
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/foundry";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get foundry output by its foundryID.
@@ -135,7 +135,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/foundry/{foundry_id}");
 
         Ok(*(self
-            .get_output_ids(&route, FoundryOutputQueryParameters::new(), true, false)
+            .get_output_ids(&route, FoundryOutputQueryParameters::new(), true)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{foundry_id:?}")))?))
@@ -147,7 +147,7 @@ impl ClientInner {
     pub async fn nft_output_ids(&self, query_parameters: NftOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/nft";
 
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, query_parameters, true).await
     }
 
     /// Get NFT output by its nftID.
@@ -157,7 +157,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/nft/{bech32_address}");
 
         Ok(*(self
-            .get_output_ids(&route, NftOutputQueryParameters::new(), true, false)
+            .get_output_ids(&route, NftOutputQueryParameters::new(), true)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{nft_id:?}")))?))
