@@ -50,7 +50,7 @@ class CommitteeMember:
         validator_stake: The stake of a validator.
         fixed_cost: The fixed cost of the validator, which it receives as part of its Mana rewards.
     """
-    address: HexStr
+    address: str
     pool_stake: int = field(metadata=config(
         encoder=str
     ))
@@ -100,7 +100,7 @@ class ValidatorResponse:
         latest_supported_protocol_version: The latest protocol version the validator supported.
         latest_supported_protocol_hash: The protocol hash of the latest supported protocol of the validator.
     """
-    address: HexStr
+    address: str
     staking_end_epoch: EpochIndex
     pool_stake: int = field(metadata=config(
         encoder=str
@@ -289,13 +289,13 @@ class OutputWithMetadataResponse:
     Attributes:
         output: One of the possible outputs.
         output_id_proof: The associated Output ID proof.
-        output_metadata: The metadata of an output.
+        metadata: The metadata of an output.
     """
     output: Output = field(metadata=config(
         decoder=deserialize_output
     ))
     output_id_proof: OutputIdProof
-    output_metadata: OutputMetadata
+    metadata: OutputMetadata
 
 
 @json
