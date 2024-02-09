@@ -16,7 +16,6 @@ class AddressType(IntEnum):
         NFT (16): Nft address.
         ANCHOR (24): Anchor address.
         IMPLICIT_ACCOUNT_CREATION (32): Implicit Account Creation address.
-        MULTI (40): Multi address.
         RESTRICTED (48): Address with restricted capabilities.
 
     """
@@ -25,7 +24,6 @@ class AddressType(IntEnum):
     NFT = 16
     ANCHOR = 24
     IMPLICIT_ACCOUNT_CREATION = 32
-    MULTI = 40
     RESTRICTED = 48
 
 
@@ -113,34 +111,6 @@ class ImplicitAccountCreationAddress:
 
 @json
 @dataclass
-class WeightedAddress:
-    """An address with an assigned weight.
-    Attributes:
-        address: The unlocked address.
-        weight: The weight of the unlocked address.
-    """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress, AnchorAddress]
-    weight: int
-
-
-@json
-@dataclass
-class MultiAddress:
-    """An address that consists of addresses with weights and a threshold value.
-    The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
-    threshold.
-    Attributes:
-        addresses: The weighted unlocked addresses.
-        threshold: The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
-    """
-    type: int = field(default_factory=lambda: int(
-        AddressType.MULTI), init=False)
-    addresses: List[WeightedAddress]
-    threshold: int
-
-
-@json
-@dataclass
 class RestrictedAddress:
     """Represents an address with restricted capabilities.
     Attributes:
@@ -168,7 +138,6 @@ Address: TypeAlias = Union[Ed25519Address,
                            NFTAddress,
                            AnchorAddress,
                            ImplicitAccountCreationAddress,
-                           MultiAddress,
                            RestrictedAddress]
 
 
@@ -191,8 +160,6 @@ def deserialize_address(d: Dict[str, Any]) -> Address:
         return AnchorAddress.from_dict(d)
     if address_type == AddressType.IMPLICIT_ACCOUNT_CREATION:
         return ImplicitAccountCreationAddress.from_dict(d)
-    if address_type == AddressType.MULTI:
-        return MultiAddress.from_dict(d)
     if address_type == AddressType.RESTRICTED:
         return RestrictedAddress.from_dict(d)
     raise Exception(f'invalid address type: {address_type}')

@@ -86,7 +86,7 @@ fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
     if VERIFY
         && !matches!(
             address,
-            Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
+            Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_)
         )
     {
         Err(Error::InvalidAddressKind(address.kind()))

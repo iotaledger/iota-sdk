@@ -6,7 +6,6 @@ mod anchor;
 mod bech32;
 mod ed25519;
 mod implicit_account_creation;
-mod multi;
 mod nft;
 mod restricted;
 
@@ -15,14 +14,12 @@ use alloc::boxed::Box;
 use derive_more::{Display, From};
 use packable::Packable;
 
-pub(crate) use self::multi::WeightedAddressCount;
 pub use self::{
     account::AccountAddress,
     anchor::AnchorAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
-    multi::{MultiAddress, WeightedAddress},
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
@@ -55,9 +52,6 @@ pub enum Address {
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
-    /// A multi address.
-    #[packable(tag = MultiAddress::KIND)]
-    Multi(MultiAddress),
     /// An address with restricted capabilities.
     #[packable(tag = RestrictedAddress::KIND)]
     #[from(ignore)]
@@ -78,7 +72,6 @@ impl core::fmt::Debug for Address {
             Self::Nft(address) => address.fmt(f),
             Self::Anchor(address) => address.fmt(f),
             Self::ImplicitAccountCreation(address) => address.fmt(f),
-            Self::Multi(address) => address.fmt(f),
             Self::Restricted(address) => address.fmt(f),
         }
     }
@@ -93,7 +86,6 @@ impl Address {
             Self::Nft(_) => NftAddress::KIND,
             Self::Anchor(_) => AnchorAddress::KIND,
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
-            Self::Multi(_) => MultiAddress::KIND,
             Self::Restricted(_) => RestrictedAddress::KIND,
         }
     }
@@ -106,12 +98,11 @@ impl Address {
             Self::Nft(_) => "Nft",
             Self::Anchor(_) => "Anchor",
             Self::ImplicitAccountCreation(_) => "ImplicitAccountCreation",
-            Self::Multi(_) => "Multi",
             Self::Restricted(_) => "Restricted",
         }
     }
 
-    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Restricted);
 
     /// Checks whether the address is backed by an [`Ed25519Address`].
     pub fn is_ed25519_backed(&self) -> bool {
@@ -152,7 +143,6 @@ impl StorageScore for Address {
             Self::Nft(address) => address.storage_score(params),
             Self::Anchor(address) => address.storage_score(params),
             Self::ImplicitAccountCreation(address) => address.storage_score(params),
-            Self::Multi(address) => address.storage_score(params),
             Self::Restricted(address) => address.storage_score(params),
         }
     }
@@ -185,4 +175,4 @@ impl<T: Into<Address>> ToBech32Ext for T {
 }
 
 #[cfg(feature = "serde")]
-crate::impl_deserialize_untagged!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
+crate::impl_deserialize_untagged!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Restricted);

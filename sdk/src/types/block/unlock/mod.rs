@@ -3,8 +3,6 @@
 
 mod account;
 mod anchor;
-mod empty;
-mod multi;
 mod nft;
 mod reference;
 mod signature;
@@ -16,10 +14,9 @@ use derive_more::{Deref, From};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-pub(crate) use self::multi::UnlocksCount;
 pub use self::{
-    account::AccountUnlock, anchor::AnchorUnlock, empty::EmptyUnlock, multi::MultiUnlock, nft::NftUnlock,
-    reference::ReferenceUnlock, signature::SignatureUnlock,
+    account::AccountUnlock, anchor::AnchorUnlock, nft::NftUnlock, reference::ReferenceUnlock,
+    signature::SignatureUnlock,
 };
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
@@ -60,12 +57,6 @@ pub enum Unlock {
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
-    /// A multi unlock.
-    #[packable(tag = MultiUnlock::KIND)]
-    Multi(MultiUnlock),
-    /// An empty unlock.
-    #[packable(tag = EmptyUnlock::KIND)]
-    Empty(EmptyUnlock),
 }
 
 impl Unlock {
@@ -77,12 +68,10 @@ impl Unlock {
             Self::Account(_) => AccountUnlock::KIND,
             Self::Anchor(_) => AnchorUnlock::KIND,
             Self::Nft(_) => NftUnlock::KIND,
-            Self::Multi(_) => MultiUnlock::KIND,
-            Self::Empty(_) => EmptyUnlock::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft);
 }
 
 impl WorkScore for Unlock {
@@ -93,8 +82,6 @@ impl WorkScore for Unlock {
             Self::Account(unlock) => unlock.work_score(params),
             Self::Anchor(unlock) => unlock.work_score(params),
             Self::Nft(unlock) => unlock.work_score(params),
-            Self::Multi(unlock) => unlock.work_score(params),
-            Self::Empty(unlock) => unlock.work_score(params),
         }
     }
 }
@@ -113,8 +100,6 @@ impl core::fmt::Debug for Unlock {
             Self::Account(unlock) => unlock.fmt(f),
             Self::Anchor(unlock) => unlock.fmt(f),
             Self::Nft(unlock) => unlock.fmt(f),
-            Self::Multi(unlock) => unlock.fmt(f),
-            Self::Empty(unlock) => unlock.fmt(f),
         }
     }
 }
@@ -185,8 +170,6 @@ fn verify_non_multi_unlock<'a>(
                 return Err(Error::InvalidUnlockNft(index));
             }
         }
-        Unlock::Multi(_) => return Err(Error::MultiUnlockRecursion),
-        Unlock::Empty(_) => {}
     }
 
     Ok(())
@@ -198,11 +181,6 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
 
         for (index, unlock) in (0u16..).zip(unlocks.iter()) {
             match unlock {
-                Unlock::Multi(multi) => {
-                    for unlock in multi.unlocks() {
-                        verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?
-                    }
-                }
                 _ => verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?,
             }
         }
@@ -212,4 +190,4 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
 }
 
 #[cfg(feature = "serde")]
-crate::impl_deserialize_untagged!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
+crate::impl_deserialize_untagged!(Unlock: Signature, Reference, Account, Anchor, Nft);

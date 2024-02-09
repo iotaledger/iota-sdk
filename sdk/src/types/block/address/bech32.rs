@@ -7,7 +7,6 @@ use alloc::{
 };
 use core::str::FromStr;
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::{AsRef, Deref, Display};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -17,10 +16,7 @@ use packable::{
 };
 
 use crate::{
-    types::block::{
-        address::{Address, MultiAddress},
-        Error,
-    },
+    types::block::{address::Address, Error},
     utils::ConvertTo,
 };
 
@@ -179,16 +175,12 @@ impl Bech32Address {
 
 impl core::fmt::Display for Bech32Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let bytes = if self.inner.is_multi() {
-            core::iter::once(MultiAddress::KIND)
-                .chain(Blake2b256::digest(self.inner.pack_to_vec()))
-                .collect()
-        } else {
-            self.inner.pack_to_vec()
-        };
-
         // PANIC: unwrap is fine as the Bech32Address has been validated at construction.
-        write!(f, "{}", bech32::encode::<bech32::Bech32>(self.hrp.0, &bytes).unwrap())
+        write!(
+            f,
+            "{}",
+            bech32::encode::<bech32::Bech32>(self.hrp.0, &self.inner.pack_to_vec()).unwrap()
+        )
     }
 }
 

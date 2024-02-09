@@ -14,7 +14,7 @@ use primitive_types::U256;
 
 use super::slot::EpochIndex;
 use crate::types::block::{
-    address::{AddressCapabilityFlag, WeightedAddressCount},
+    address::AddressCapabilityFlag,
     context_input::{ContextInputCount, RewardContextInputIndex},
     input::UtxoInput,
     mana::ManaAllotmentCount,
@@ -29,7 +29,7 @@ use crate::types::block::{
         InputCount, OutputCount,
     },
     protocol::ProtocolParametersHash,
-    unlock::{UnlockCount, UnlockIndex, UnlocksCount},
+    unlock::{UnlockCount, UnlockIndex},
 };
 
 /// Error occurring when creating/parsing/validating blocks.
@@ -77,16 +77,6 @@ pub enum Error {
         deposit: u64,
         required: u64,
     },
-    InvalidAddressWeight(u8),
-    InvalidMultiAddressThreshold(u16),
-    InvalidMultiAddressCumulativeWeight {
-        cumulative_weight: u16,
-        threshold: u16,
-    },
-    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
-    InvalidMultiUnlockCount(<UnlocksCount as TryFrom<usize>>::Error),
-    MultiUnlockRecursion,
-    WeightedAddressesNotUniqueSorted,
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
@@ -280,23 +270,6 @@ impl fmt::Display for Error {
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
-            Self::InvalidAddressWeight(w) => write!(f, "invalid address weight: {w}"),
-            Self::InvalidMultiAddressThreshold(t) => write!(f, "invalid multi address threshold: {t}"),
-            Self::InvalidMultiAddressCumulativeWeight {
-                cumulative_weight,
-                threshold,
-            } => {
-                write!(
-                    f,
-                    "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}"
-                )
-            }
-            Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
-            Self::InvalidMultiUnlockCount(count) => write!(f, "invalid multi unlock count: {count}"),
-            Self::MultiUnlockRecursion => write!(f, "multi unlock recursion"),
-            Self::WeightedAddressesNotUniqueSorted => {
-                write!(f, "weighted addresses are not unique and/or sorted")
-            }
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),

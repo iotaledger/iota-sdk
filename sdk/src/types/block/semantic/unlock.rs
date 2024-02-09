@@ -74,24 +74,6 @@ impl SemanticValidationContext<'_> {
                     unlock,
                 );
             }
-            (Address::Multi(multi_address), Unlock::Multi(unlock)) => {
-                if multi_address.len() != unlock.len() {
-                    return Err(TransactionFailureReason::MultiAddressLengthUnlockLengthMismatch);
-                }
-
-                let mut cumulative_unlocked_weight = 0u16;
-
-                for (address, unlock) in multi_address.addresses().iter().zip(unlock.unlocks()) {
-                    if !unlock.is_empty() {
-                        self.address_unlock(address, unlock)?;
-                        cumulative_unlocked_weight += address.weight() as u16;
-                    }
-                }
-
-                if cumulative_unlocked_weight < multi_address.threshold() {
-                    return Err(TransactionFailureReason::MultiAddressUnlockThresholdNotReached);
-                }
-            }
             (Address::Restricted(restricted_address), _) => {
                 return self.address_unlock(restricted_address.address(), unlock);
             }
