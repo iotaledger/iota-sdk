@@ -22,7 +22,7 @@ use crate::{
     },
 };
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(
         &self,

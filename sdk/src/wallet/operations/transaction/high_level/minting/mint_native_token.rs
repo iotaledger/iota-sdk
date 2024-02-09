@@ -13,7 +13,7 @@ use crate::{
     },
 };
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Mints additional native tokens.
     ///
     /// The max supply must not be reached yet. The foundry needs to be

@@ -12,7 +12,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, BlockSignExt, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, BlockSignExt},
         Client, Result,
     },
     types::block::output::AccountId,

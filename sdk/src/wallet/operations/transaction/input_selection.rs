@@ -8,7 +8,7 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         api::input_selection::{Burn, InputSelection, Selected},
-        secret::{types::InputSigningData, SecretManage},
+        secret::types::InputSigningData,
     },
     types::block::{
         address::Address,

@@ -5,10 +5,7 @@ use std::time::Duration;
 
 use tokio::time::timeout;
 
-use crate::{
-    client::secret::SecretManage,
-    wallet::{operations::syncing::SyncOptions, task, Wallet},
-};
+use crate::wallet::{operations::syncing::SyncOptions, task, Wallet};
 
 /// The default interval for background syncing
 pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_secs(7);

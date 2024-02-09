@@ -15,7 +15,7 @@
 //! ```
 
 use iota_sdk::{
-    client::secret::{stronghold::StrongholdSecretManager, SecretManager},
+    client::secret::SecretManager,
     types::block::{
         output::{feature::MetadataFeature, NftId, Output, OutputId},
         payload::signed_transaction::TransactionId,

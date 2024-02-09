@@ -11,7 +11,7 @@ use crate::{
 
 pub(crate) mod melt_native_token;
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// A generic function that can be used to burn native tokens, nfts, delegations, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase

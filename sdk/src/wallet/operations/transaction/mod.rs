@@ -32,7 +32,7 @@ use crate::{
     },
 };
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Sends a transaction by specifying its outputs.
     ///
     /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet

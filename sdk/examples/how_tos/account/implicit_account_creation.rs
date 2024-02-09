@@ -11,10 +11,10 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions},
     },
     crypto::keys::bip44::Bip44,
-    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
+    wallet::{ClientOptions, Result, WalletBuilder},
 };
 
 #[tokio::main]

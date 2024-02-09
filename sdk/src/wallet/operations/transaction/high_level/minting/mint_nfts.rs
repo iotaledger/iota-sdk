@@ -108,7 +108,7 @@ impl MintNftParams {
     }
 }
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Mints NFTs.
     ///
     /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy or custom inputs.

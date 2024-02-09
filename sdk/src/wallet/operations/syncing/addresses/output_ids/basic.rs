@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManage},
+    client::node_api::indexer::query_parameters::BasicOutputQueryParameters,
     types::block::{address::Bech32Address, output::OutputId},
     utils::ConvertTo,
     wallet::Wallet,

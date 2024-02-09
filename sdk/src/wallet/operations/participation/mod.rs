@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{node_manager::node::Node, secret::SecretManage},
+    client::node_manager::node::Node,
     types::{
         api::plugins::participation::{
             responses::TrackedParticipation,

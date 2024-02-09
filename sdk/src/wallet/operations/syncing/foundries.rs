@@ -4,7 +4,6 @@
 use std::collections::HashSet;
 
 use crate::{
-    client::secret::SecretManage,
     types::block::output::{FoundryId, Output},
     wallet::{task, Wallet},
 };

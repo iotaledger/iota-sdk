@@ -8,12 +8,12 @@ use crate::{
         api::{
             transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
         },
-        secret::SecretManage,
+        secret::{DowncastSecretManager, SecretManage},
     },
     wallet::{core::SecretData, operations::transaction::SignedTransactionPayload, Wallet},
 };
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Signs a transaction.
     pub async fn sign_transaction(
         &self,
@@ -27,41 +27,31 @@ impl<S: SecretManage> Wallet<SecretData<S>> {
         ))
         .await;
 
-        // #[cfg(all(feature = "events", feature = "ledger_nano"))]
-        // {
-        //     use crate::client::secret::SecretManager;
-        //     let secret_manager = self.secret_manager.read().await;
-        //     if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
-        //         secret_manager.downcast::<SecretManager>().and_then(|s| {
-        //             if let SecretManager::LedgerNano(n) = s {
-        //                 Some(n)
-        //             } else {
-        //                 None
-        //             }
-        //         })
-        //     }) {
-        //         let ledger_nano_status = ledger.get_ledger_nano_status().await;
-        //         if let Some(buffer_size) = ledger_nano_status.buffer_size() {
-        //             if needs_blind_signing(prepared_transaction_data, buffer_size) {
-        //                 self.emit(WalletEvent::TransactionProgress(
-        //                     TransactionProgressEvent::PreparedTransactionSigningHash(
-        //                         prepared_transaction_data.transaction.signing_hash().to_string(),
-        //                     ),
-        //                 ))
-        //                 .await;
-        //             } else {
-        //                 self.emit(WalletEvent::TransactionProgress(
-        //                     TransactionProgressEvent::PreparedTransaction(Box::new(PreparedTransactionDataDto::from(
-        //                         prepared_transaction_data,
-        //                     ))),
-        //                 ))
-        //                 .await;
-        //             }
-        //         }
-        //     }
-        // }
-
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
+        #[cfg(all(feature = "events", feature = "ledger_nano"))]
+        {
+            use crate::client::{api::PreparedTransactionDataDto, secret::ledger_nano::needs_blind_signing};
+            let secret_manager = &*self.secret_manager().read().await;
+            if let Ok(ledger) = secret_manager.as_ledger_nano() {
+                let ledger_nano_status = ledger.get_ledger_nano_status().await;
+                if let Some(buffer_size) = ledger_nano_status.buffer_size() {
+                    if needs_blind_signing(prepared_transaction_data, buffer_size) {
+                        self.emit(WalletEvent::TransactionProgress(
+                            TransactionProgressEvent::PreparedTransactionSigningHash(
+                                prepared_transaction_data.transaction.signing_hash().to_string(),
+                            ),
+                        ))
+                        .await;
+                    } else {
+                        self.emit(WalletEvent::TransactionProgress(
+                            TransactionProgressEvent::PreparedTransaction(Box::new(PreparedTransactionDataDto::from(
+                                prepared_transaction_data,
+                            ))),
+                        ))
+                        .await;
+                    }
+                }
+            }
+        }
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let unlocks = match self

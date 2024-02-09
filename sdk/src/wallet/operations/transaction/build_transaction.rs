@@ -6,10 +6,7 @@ use std::collections::HashSet;
 use instant::Instant;
 
 use crate::{
-    client::{
-        api::{input_selection::Selected, transaction::validate_transaction_length, PreparedTransactionData},
-        secret::SecretManage,
-    },
+    client::api::{input_selection::Selected, transaction::validate_transaction_length, PreparedTransactionData},
     types::block::{
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput, RewardContextInput},
         input::{Input, UtxoInput},

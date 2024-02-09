@@ -4,10 +4,7 @@
 use std::collections::HashSet;
 
 use crate::{
-    client::{
-        node_api::indexer::query_parameters::{AccountOutputQueryParameters, FoundryOutputQueryParameters},
-        secret::SecretManage,
-    },
+    client::node_api::indexer::query_parameters::{AccountOutputQueryParameters, FoundryOutputQueryParameters},
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{

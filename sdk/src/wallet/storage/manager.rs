@@ -4,10 +4,10 @@
 use zeroize::Zeroizing;
 
 use crate::{
-    client::{secret::SecretManage, storage::StorageAdapter},
+    client::storage::StorageAdapter,
     types::TryFromDto,
     wallet::{
-        core::{SecretData, WalletData, WalletDataDto},
+        core::{WalletData, WalletDataDto},
         migration::migrate,
         operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},

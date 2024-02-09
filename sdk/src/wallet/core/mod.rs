@@ -600,12 +600,10 @@ impl<S: SecretManage> OptionalSecretManager<S> for Wallet<SecretData<S>> {
 mod test {
     use core::str::FromStr;
 
-    use crypto::keys::bip44::Bip44;
     use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::{
-        client::secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions},
         types::block::{
             address::{Address, Ed25519Address},
             input::{Input, UtxoInput},

@@ -74,7 +74,7 @@ impl SendParams {
     }
 }
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Sends a certain amount of base coins to a single address.
     ///
     /// Calls [Wallet::send_with_params()] internally.

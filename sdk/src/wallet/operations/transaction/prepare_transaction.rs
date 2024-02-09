@@ -7,7 +7,7 @@ use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::api::PreparedTransactionData,
     types::block::{input::INPUT_COUNT_RANGE, output::Output},
     wallet::{
         operations::transaction::{RemainderValueStrategy, TransactionOptions},

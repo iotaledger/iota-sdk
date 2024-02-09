@@ -6,10 +6,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{
-        api::PreparedTransactionData,
-        secret::{SecretManage, Sign},
-    },
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{Address, Ed25519Address},
         output::{
@@ -188,7 +185,7 @@ impl<T> Wallet<T> {
     }
 }
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
     /// from [`Wallet::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(

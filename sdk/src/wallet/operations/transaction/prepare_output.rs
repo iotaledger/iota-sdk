@@ -4,7 +4,6 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::secret::SecretManage,
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         output::{

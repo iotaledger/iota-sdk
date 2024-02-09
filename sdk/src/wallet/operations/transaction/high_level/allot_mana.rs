@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     pub async fn allot_mana(
         &self,
         allotments: impl IntoIterator<Item = impl Into<ManaAllotment>> + Send,

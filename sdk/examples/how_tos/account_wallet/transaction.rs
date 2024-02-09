@@ -7,10 +7,7 @@
 //! `cargo run --release --all-features --example account_wallet_transaction`
 
 use iota_sdk::{
-    client::{
-        node_api::indexer::query_parameters::BasicOutputQueryParameters,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
-    },
+    client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManager},
     types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{AccountSyncOptions, Result, SyncOptions, TransactionOptions},
     Wallet,

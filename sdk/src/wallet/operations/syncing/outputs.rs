@@ -4,7 +4,7 @@
 use instant::Instant;
 
 use crate::{
-    client::{secret::SecretManage, Client, Error as ClientError},
+    client::{Client, Error as ClientError},
     types::{
         api::core::OutputWithMetadataResponse,
         block::{

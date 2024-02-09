@@ -17,7 +17,7 @@ use crate::{
     },
 };
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Melts native tokens.
     ///
     /// This happens with the foundry output which minted them, by increasing it's

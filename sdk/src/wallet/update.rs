@@ -3,8 +3,13 @@
 
 use std::collections::HashMap;
 
+#[cfg(feature = "events")]
 use crate::{
-    client::secret::SecretManage,
+    types::api::core::OutputWithMetadataResponse,
+    types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
+    wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
+};
+use crate::{
     types::block::{
         output::{OutputConsumptionMetadata, OutputId, OutputMetadata},
         payload::signed_transaction::TransactionId,
@@ -13,12 +18,6 @@ use crate::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
     },
-};
-#[cfg(feature = "events")]
-use crate::{
-    types::api::core::OutputWithMetadataResponse,
-    types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
-    wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
 
 impl<T> Wallet<T> {

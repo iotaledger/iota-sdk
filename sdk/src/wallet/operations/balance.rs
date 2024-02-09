@@ -4,7 +4,6 @@
 use primitive_types::U256;
 
 use crate::{
-    client::secret::SecretManage,
     types::block::output::{
         unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },

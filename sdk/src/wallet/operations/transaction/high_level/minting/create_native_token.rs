@@ -47,7 +47,7 @@ pub struct PreparedCreateNativeTokenTransaction {
     pub transaction: PreparedTransactionData,
 }
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Creates a new foundry output with minted native tokens.
     ///
     /// Calls [Wallet::send_outputs()] internally, the options may define the remainder value strategy or custom inputs.

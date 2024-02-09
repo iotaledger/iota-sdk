@@ -32,7 +32,7 @@ pub struct CreateAccountParams {
     pub metadata: Option<MetadataFeature>,
 }
 
-impl<S: SecretManage> Wallet<SecretData<S>> {
+impl<S: SecretManage + 'static> Wallet<SecretData<S>> {
     /// Creates an account output.
     /// ```ignore
     /// let params = CreateAccountParams {
