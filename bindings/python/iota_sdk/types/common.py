@@ -139,3 +139,18 @@ class AddressAndAmount():
         encoder=str
     ))
     address: str
+
+
+class IdWithSlotIndex(str):
+    """Represents an hex encoded ID that contains a slot index at the end.
+
+    Attributes:
+        id: The hex encoded ID with a slot index.
+
+    """
+
+    def slot_index(self):
+        """Returns the slot index of the ID.
+        """
+        return int.from_bytes(
+            bytes.fromhex(self[-8:]), 'little')

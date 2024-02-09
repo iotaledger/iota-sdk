@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from iota_sdk import Wallet, WalletOptions
 
-# In this example we will create an account output
+# In this example we will create an account output.
 
 load_dotenv()
 
@@ -15,7 +15,7 @@ for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']:
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Sync wallet with the node
+# Sync wallet with the node.
 balance = wallet.sync()
 print(f'Accounts BEFORE: {balance.accounts}')
 

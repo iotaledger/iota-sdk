@@ -1522,7 +1522,7 @@ export class Wallet {
      * included (referenced by a milestone). Returns the included block id.
      */
     async reissueTransactionUntilIncluded(
-        transactionId: string,
+        transactionId: TransactionId,
         interval?: number,
         maxAttempts?: number,
     ): Promise<string> {

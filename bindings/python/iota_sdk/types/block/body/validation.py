@@ -4,6 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.block.body.type import BlockBodyType
 from iota_sdk.types.common import HexStr, json
 
@@ -25,8 +26,8 @@ class ValidationBlockBody:
     type: int = field(
         default_factory=lambda: int(BlockBodyType.Validation),
         init=False)
-    strong_parents: List[HexStr]
+    strong_parents: List[BlockId]
     highest_supported_version: int
     protocol_parameters_hash: HexStr
-    weak_parents: Optional[List[HexStr]] = None
-    shallow_like_parents: Optional[List[HexStr]] = None
+    weak_parents: Optional[List[BlockId]] = None
+    shallow_like_parents: Optional[List[BlockId]] = None

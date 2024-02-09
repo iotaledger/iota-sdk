@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger } from '@iota/sdk';
+import { Client, initLogger, OutputId } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -33,7 +33,9 @@ async function run() {
         console.log('First output of query:');
         console.log('ID: ', outputIdsResponse.items[0]);
 
-        const outputs = await client.getOutputs(outputIdsResponse.items);
+        const outputs = await client.getOutputs(
+            outputIdsResponse.items.map((id) => new OutputId(id)),
+        );
         console.log(outputs[0]);
     } catch (error) {
         console.error('Error: ', error);

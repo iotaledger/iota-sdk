@@ -6,11 +6,13 @@ from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
 from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.transaction_id import TransactionId
 
 
 class NodeCoreAPI(metaclass=ABCMeta):
@@ -65,12 +67,12 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return from_dict(NodeInfoWrapper, self._call_method('getInfo'))
 
-    def get_tips(self) -> List[HexStr]:
+    def get_tips(self) -> List[BlockId]:
         """Request tips from the node.
         """
         return self._call_method('getTips')
 
-    def post_block(self, block: Block) -> HexStr:
+    def post_block(self, block: Block) -> BlockId:
         """Post a block.
 
         Args:
@@ -79,47 +81,47 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The block id of the posted block.
         """
-        return self._call_method('postBlock', {
+        return BlockId(self._call_method('postBlock', {
             'block': block
-        })
+        }))
 
-    def get_block(self, block_id: HexStr) -> Block:
+    def get_block(self, block_id: BlockId) -> Block:
         """Get the block corresponding to the given block id.
         """
         return Block.from_dict(self._call_method('getBlock', {
             'blockId': block_id
         }))
 
-    def get_block_metadata(self, block_id: HexStr) -> BlockMetadata:
+    def get_block_metadata(self, block_id: BlockId) -> BlockMetadata:
         """Get the block metadata corresponding to the given block id.
         """
         return BlockMetadata.from_dict(self._call_method('getBlockMetadata', {
             'blockId': block_id
         }))
 
-    def get_block_with_metadata(self, block_id: HexStr) -> BlockWithMetadata:
+    def get_block_with_metadata(self, block_id: BlockId) -> BlockWithMetadata:
         """Get a block with its metadata corresponding to the given block id.
         """
         return BlockWithMetadata.from_dict(self._call_method('getBlockWithMetadata', {
             'blockId': block_id
         }))
 
-    def get_block_raw(self, block_id: HexStr) -> List[int]:
+    def get_block_raw(self, block_id: BlockId) -> List[int]:
         """Get the raw bytes of the block corresponding to the given block id.
         """
         return self._call_method('getBlockRaw', {
             'blockId': block_id
         })
 
-    def post_block_raw(self, block_bytes: List[int]) -> HexStr:
+    def post_block_raw(self, block_bytes: List[int]) -> BlockId:
         """Post a block as raw bytes.
 
         Returns:
             The corresponding block id of the block.
         """
-        return self._call_method('postBlockRaw', {
+        return BlockId(self._call_method('postBlockRaw', {
             'blockBytes': block_bytes
-        })
+        }))
 
     def get_output(
             self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
@@ -147,7 +149,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'outputId': output_id_str
         }))
 
-    def get_included_block(self, transaction_id: HexStr) -> Block:
+    def get_included_block(self, transaction_id: TransactionId) -> Block:
         """Returns the included block of the given transaction.
 
         Returns:
@@ -158,7 +160,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def get_included_block_metadata(
-            self, transaction_id: HexStr) -> BlockMetadata:
+            self, transaction_id: TransactionId) -> BlockMetadata:
         """Returns the metadata of the included block of the given transaction.
 
         Returns:
