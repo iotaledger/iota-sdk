@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
-from dataclasses_json import config
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import json
 
@@ -96,7 +95,7 @@ Unlock: TypeAlias = Union[SignatureUnlock,
                           ReferenceUnlock,
                           AccountUnlock,
                           AnchorUnlock,
-                          NftUnlock,
+                          NftUnlock]
 
 # pylint: disable=too-many-return-statements
 
