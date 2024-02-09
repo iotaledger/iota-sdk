@@ -3,6 +3,7 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
+    crate::client::NetworkInfo,
     crate::types::api::core::InfoResponse,
     crate::types::block::PROTOCOL_VERSION,
     std::{collections::HashSet, time::Duration},
@@ -10,7 +11,7 @@ use {
 };
 
 use super::{Node, NodeManager};
-use crate::client::{Client, ClientInner, Error, NetworkInfo, Result};
+use crate::client::{Client, ClientInner, Error, Result};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.

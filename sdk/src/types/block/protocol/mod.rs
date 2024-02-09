@@ -3,7 +3,6 @@
 
 mod work_score;
 
-use alloc::string::String;
 use core::borrow::Borrow;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
@@ -17,7 +16,7 @@ use crate::types::block::{
     mana::{ManaParameters, RewardsParameters},
     output::{StorageScore, StorageScoreParameters},
     slot::{EpochIndex, SlotCommitmentId, SlotIndex},
-    Error, PROTOCOL_VERSION,
+    Error,
 };
 
 /// Defines the parameters of the protocol at a particular version.
@@ -268,43 +267,6 @@ impl ProtocolParameters {
     pub fn work_score(&self, value: &impl WorkScore) -> u32 {
         value.work_score(self.work_score_parameters())
     }
-
-    pub(crate) fn init(mut self) -> Self {
-        self.derive_mana_decay_factors();
-        self.derive_mana_decay_factors_epochs_sum();
-        self.derive_bootstrapping_duration();
-        self
-    }
-
-    pub(crate) fn derive_mana_decay_factors(&mut self) {
-        self.mana_parameters.decay_factors = {
-            let epochs_in_table = (u16::MAX as usize).min(self.epochs_per_year().floor() as usize);
-            let decay_per_epoch = self.decay_per_epoch();
-            (1..=epochs_in_table)
-                .map(|epoch| {
-                    (decay_per_epoch.powi(epoch as _) * 2f64.powi(self.mana_parameters().decay_factors_exponent() as _))
-                        .floor() as u32
-                })
-                .collect::<Box<[_]>>()
-        }
-        .try_into()
-        .unwrap();
-    }
-
-    pub(crate) fn derive_mana_decay_factors_epochs_sum(&mut self) {
-        self.mana_parameters.decay_factor_epochs_sum = {
-            let delta = self.epochs_per_year().recip();
-            let annual_decay_factor = self.mana_parameters().annual_decay_factor();
-            (annual_decay_factor.powf(delta) / (1.0 - annual_decay_factor.powf(delta))
-                * (2f64.powi(self.mana_parameters().decay_factor_epochs_sum_exponent() as _)))
-            .floor() as _
-        };
-    }
-
-    pub(crate) fn derive_bootstrapping_duration(&mut self) {
-        self.rewards_parameters.bootstrapping_duration =
-            (self.epochs_per_year() / -self.mana_parameters().annual_decay_factor().ln()).floor() as _;
-    }
 }
 
 /// Defines the age in which a block can be issued.
@@ -372,7 +334,7 @@ pub struct VersionSignalingParameters {
 pub fn iota_mainnet_v3_protocol_parameters() -> ProtocolParameters {
     ProtocolParameters {
         kind: 0,
-        version: PROTOCOL_VERSION,
+        version: super::PROTOCOL_VERSION,
         network_name: String::from("testnet").try_into().unwrap(),
         bech32_hrp: Hrp::from_str_unchecked("rms"),
         storage_score_parameters: StorageScoreParameters {
@@ -446,6 +408,46 @@ pub fn iota_mainnet_v3_protocol_parameters() -> ProtocolParameters {
         chain_switching_threshold: 3,
     }
     .init()
+}
+
+#[cfg(any(feature = "test", feature = "rand"))]
+impl ProtocolParameters {
+    pub(crate) fn init(mut self) -> Self {
+        self.derive_mana_decay_factors();
+        self.derive_mana_decay_factors_epochs_sum();
+        self.derive_bootstrapping_duration();
+        self
+    }
+
+    pub(crate) fn derive_mana_decay_factors(&mut self) {
+        self.mana_parameters.decay_factors = {
+            let epochs_in_table = (u16::MAX as usize).min(self.epochs_per_year().floor() as usize);
+            let decay_per_epoch = self.decay_per_epoch();
+            (1..=epochs_in_table)
+                .map(|epoch| {
+                    (decay_per_epoch.powi(epoch as _) * 2f64.powi(self.mana_parameters().decay_factors_exponent() as _))
+                        .floor() as u32
+                })
+                .collect::<Box<[_]>>()
+        }
+        .try_into()
+        .unwrap();
+    }
+
+    pub(crate) fn derive_mana_decay_factors_epochs_sum(&mut self) {
+        self.mana_parameters.decay_factor_epochs_sum = {
+            let delta = self.epochs_per_year().recip();
+            let annual_decay_factor = self.mana_parameters().annual_decay_factor();
+            (annual_decay_factor.powf(delta) / (1.0 - annual_decay_factor.powf(delta))
+                * (2f64.powi(self.mana_parameters().decay_factor_epochs_sum_exponent() as _)))
+            .floor() as _
+        };
+    }
+
+    pub(crate) fn derive_bootstrapping_duration(&mut self) {
+        self.rewards_parameters.bootstrapping_duration =
+            (self.epochs_per_year() / -self.mana_parameters().annual_decay_factor().ln()).floor() as _;
+    }
 }
 
 crate::impl_id!(

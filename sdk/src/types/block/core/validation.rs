@@ -175,7 +175,7 @@ fn verify_protocol_parameters_hash(hash: &ProtocolParametersHash, params: &Proto
 
 fn verify_validation_block_body(
     validation_block_body: &ValidationBlockBody,
-    params: &ProtocolParameters,
+    _: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_parents_sets(
         &validation_block_body.strong_parents,
