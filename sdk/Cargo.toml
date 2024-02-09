@@ -155,6 +155,7 @@ ledger_nano = ["dep:iota-ledger-nano"]
 mqtt = ["std", "tls", "dep:regex", "dep:rumqttc", "dep:once_cell"]
 participation = ["storage"]
 rocksdb = ["storage", "dep:rocksdb"]
+samples = ["std"]
 serde = [
     "hashbrown/serde",
     "packable/serde",

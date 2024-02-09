@@ -330,7 +330,7 @@ pub struct VersionSignalingParameters {
 }
 
 /// Returns a [`ProtocolParameters`] for testing purposes.
-#[cfg(feature = "std")]
+#[cfg(feature = "samples")]
 pub fn iota_mainnet_v3_protocol_parameters() -> &'static ProtocolParameters {
     use std::sync::OnceLock;
 
@@ -415,7 +415,7 @@ pub fn iota_mainnet_v3_protocol_parameters() -> &'static ProtocolParameters {
     })
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "samples")]
 impl ProtocolParameters {
     pub(crate) fn init(mut self) -> Self {
         self.derive_mana_decay_factors();

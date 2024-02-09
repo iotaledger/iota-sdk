@@ -11,6 +11,7 @@ publish = false
 [dependencies]
 iota-sdk = { path = "../../sdk", default-features = false, features = [
     "wallet",
+    "samples",
     "tls",
 ] }
 
