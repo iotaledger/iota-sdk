@@ -10,7 +10,7 @@ import {
 } from './block-issuer-key';
 import { u256, u64 } from '../../utils/type-aliases';
 import { EpochIndex } from '../../block/slot';
-import { INativeToken } from '../../models/native-token';
+import { NativeToken } from '../../models/native-token';
 import { HexEncodedString } from '../../utils/hex-encoding';
 
 /**
@@ -132,7 +132,7 @@ class NativeTokenFeature extends Feature {
      * Creates a new `NativeTokenFeature`.
      * @param nativeToken The native token stored with the feature.
      */
-    constructor(nativeToken: INativeToken) {
+    constructor(nativeToken: NativeToken) {
         super(FeatureType.NativeToken);
         this.id = nativeToken.id;
         this.amount = nativeToken.amount;
@@ -141,7 +141,7 @@ class NativeTokenFeature extends Feature {
     /**
      * Returns the native token contained in this feature.
      */
-    public asNativeToken(): INativeToken {
+    public asNativeToken(): NativeToken {
         return {
             id: this.id,
             amount: this.amount,

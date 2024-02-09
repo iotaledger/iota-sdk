@@ -70,6 +70,10 @@ where
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
+                    // Add mana rewards
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
+                        balance.mana.rewards += response.rewards;
+                    }
 
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
@@ -99,6 +103,10 @@ where
                 Output::Delegation(delegation) => {
                     // Add amount
                     balance.base_coin.total += delegation.amount();
+                    // Add mana rewards
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
+                        balance.mana.rewards += response.rewards;
+                    }
                     // Add storage deposit
                     balance.required_storage_deposit.delegation += storage_cost;
                     if !wallet_ledger.locked_outputs.contains(output_id) {

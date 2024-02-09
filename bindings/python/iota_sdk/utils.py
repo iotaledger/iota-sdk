@@ -6,6 +6,7 @@ import json
 from typing import TYPE_CHECKING, List, Optional
 from iota_sdk.common import custom_encoder
 
+from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
@@ -16,6 +17,7 @@ from iota_sdk.types.output import Output
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.unlock import Unlock
 from iota_sdk.types.transaction_data import InputSigningData
+from iota_sdk.types.transaction_id import TransactionId
 from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
@@ -145,7 +147,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_output_id(transaction_id: HexStr, index: int) -> OutputId:
+    def compute_output_id(transaction_id: TransactionId, index: int) -> OutputId:
         """Compute the output id from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {
@@ -165,21 +167,21 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: Block, params: ProtocolParameters) -> HexStr:
+    def block_id(block: Block, params: ProtocolParameters) -> BlockId:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
-        return _call_method('blockId', {
+        return BlockId(_call_method('blockId', {
             'block': block,
             'protocolParameters': params,
-        })
+        }))
 
     @staticmethod
-    def transaction_id(payload: SignedTransactionPayload) -> HexStr:
+    def transaction_id(payload: SignedTransactionPayload) -> TransactionId:
         """ Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
         """
-        return _call_method('transactionId', {
+        return TransactionId(_call_method('transactionId', {
             'payload': payload
-        })
+        }))
 
     @staticmethod
     def protocol_parameters_hash(params: ProtocolParameters) -> HexStr:
@@ -220,13 +222,14 @@ class Utils():
 
     @staticmethod
     def verify_transaction_semantic(
-            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None, mana_rewards: Optional[dict[OutputId, int]] = None) -> str:
         """Verifies the semantic of a transaction.
         """
         return _call_method('verifyTransactionSemantic', {
             'transaction': transaction,
             'inputs': inputs,
             'unlocks': unlocks,
+            'manaRewards': mana_rewards,
             'protocolParameters': protocol_parameters,
         })
 
@@ -270,6 +273,25 @@ class Utils():
 
         return DecayedMana(int(decayed_mana["stored"]), int(
             decayed_mana["potential"]))
+
+    @staticmethod
+    def verify_transaction_syntax(
+            transaction: SignedTransactionPayload, protocol_parameters: ProtocolParameters):
+        """Verifies the syntax of a transaction.
+        """
+        _call_method('verifyTransactionSyntax', {
+            'transaction': transaction.as_dict(),
+            'protocolParameters': protocol_parameters.as_dict(),
+        })
+
+    @staticmethod
+    def block_bytes(
+            block: Block) -> bytes:
+        """Returns the serialized bytes of a block.
+        """
+        return bytes(_call_method('blockBytes', {
+            'block': block.as_dict(),
+        }))
 
 
 class UtilsError(Exception):

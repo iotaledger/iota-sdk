@@ -1,6 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::str::FromStr;
 use std::path::Path;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
@@ -80,7 +81,7 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
     let mnemonic = match selected_choice {
         0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
-        _ => unreachable!(),
+        _ => panic!("invalid choice index"),
     };
 
     Ok(mnemonic)
@@ -317,4 +318,46 @@ pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
         )));
     }
     Ok(())
+}
+
+#[derive(Copy, Clone, Debug, clap::ValueEnum)]
+pub enum SecretManagerChoice {
+    Stronghold,
+    LedgerNano,
+    LedgerNanoSimulator,
+}
+
+impl From<usize> for SecretManagerChoice {
+    fn from(value: usize) -> Self {
+        match value {
+            0 => Self::Stronghold,
+            1 => Self::LedgerNano,
+            2 => Self::LedgerNanoSimulator,
+            _ => panic!("invalid secret manager choice index"),
+        }
+    }
+}
+
+impl FromStr for SecretManagerChoice {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "stronghold" => Ok(Self::Stronghold),
+            "ledger-nano" => Ok(Self::LedgerNano),
+            "ledger-nano-sim" => Ok(Self::LedgerNanoSimulator),
+            _ => Err("invalid secret manager specifier [stronghold|ledger-nano|ledger-nano-sim]"),
+        }
+    }
+}
+
+pub async fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
+    let choices = ["Stronghold", "Ledger Nano", "Ledger Nano Simulator"];
+
+    Ok(Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select secret manager")
+        .items(&choices)
+        .default(0)
+        .interact_on(&Term::stderr())?
+        .into())
 }

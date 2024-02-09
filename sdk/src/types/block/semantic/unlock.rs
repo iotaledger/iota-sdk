@@ -15,7 +15,7 @@ impl SemanticValidationContext<'_> {
         match (address, unlock) {
             (Address::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
                 if self.unlocked_addresses.contains(address) {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                    return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
 
                 let Signature::Ed25519(signature) = unlock.signature();
@@ -24,7 +24,7 @@ impl SemanticValidationContext<'_> {
                     .is_valid(self.transaction_signing_hash.as_ref(), ed25519_address)
                     .is_err()
                 {
-                    return Err(TransactionFailureReason::InvalidUnlockBlockSignature);
+                    return Err(TransactionFailureReason::UnlockSignatureInvalid);
                 }
 
                 self.unlocked_addresses.insert(address.clone());
@@ -32,36 +32,41 @@ impl SemanticValidationContext<'_> {
             (Address::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !self.unlocked_addresses.contains(address) {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                    return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
             (Address::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Account(account_output)) = self.inputs[unlock.index() as usize] {
                     if &account_output.account_id_non_null(output_id) != account_address.account_id() {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                        return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                     if !self.unlocked_addresses.contains(address) {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                        return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                 } else {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                    return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
             (Address::Nft(nft_address), Unlock::Nft(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Nft(nft_output)) = self.inputs[unlock.index() as usize] {
                     if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                        return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                     if !self.unlocked_addresses.contains(address) {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                        return Err(TransactionFailureReason::SemanticValidationFailed);
                     }
                 } else {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+                    return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
             }
-            // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Address::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
             (Address::ImplicitAccountCreation(implicit_account_creation_address), _) => {
                 return self.address_unlock(
@@ -71,7 +76,7 @@ impl SemanticValidationContext<'_> {
             }
             (Address::Multi(multi_address), Unlock::Multi(unlock)) => {
                 if multi_address.len() != unlock.len() {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                    return Err(TransactionFailureReason::MultiAddressLengthUnlockLengthMismatch);
                 }
 
                 let mut cumulative_unlocked_weight = 0u16;
@@ -84,13 +89,14 @@ impl SemanticValidationContext<'_> {
                 }
 
                 if cumulative_unlocked_weight < multi_address.threshold() {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                    return Err(TransactionFailureReason::MultiAddressUnlockThresholdNotReached);
                 }
             }
             (Address::Restricted(restricted_address), _) => {
                 return self.address_unlock(restricted_address.address(), unlock);
             }
-            _ => return Err(TransactionFailureReason::InvalidInputUnlock),
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
+            _ => return Err(TransactionFailureReason::SemanticValidationFailed),
         }
 
         Ok(())
@@ -104,11 +110,7 @@ impl SemanticValidationContext<'_> {
     ) -> Result<(), TransactionFailureReason> {
         match output {
             Output::Basic(output) => {
-                let slot_index = self
-                    .transaction
-                    .context_inputs()
-                    .iter()
-                    .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+                let slot_index = self.transaction.context_inputs().commitment().map(|c| c.slot_index());
                 let locked_address = output
                     .unlock_conditions()
                     .locked_address(
@@ -116,9 +118,8 @@ impl SemanticValidationContext<'_> {
                         slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
-                    .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
-                    // because of expiration the input can't be unlocked at this time
-                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+                    .map_err(|_| TransactionFailureReason::ExpirationCommitmentInputMissing)?
+                    .ok_or(TransactionFailureReason::ExpirationNotUnlockable)?;
 
                 self.address_unlock(locked_address, unlock)?;
             }
@@ -139,11 +140,7 @@ impl SemanticValidationContext<'_> {
             // Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             Output::Foundry(output) => self.address_unlock(&Address::from(*output.account_address()), unlock)?,
             Output::Nft(output) => {
-                let slot_index = self
-                    .transaction
-                    .context_inputs()
-                    .iter()
-                    .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+                let slot_index = self.transaction.context_inputs().commitment().map(|c| c.slot_index());
                 let locked_address = output
                     .unlock_conditions()
                     .locked_address(
@@ -151,9 +148,8 @@ impl SemanticValidationContext<'_> {
                         slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
-                    .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
-                    // because of expiration the input can't be unlocked at this time
-                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+                    .map_err(|_| TransactionFailureReason::ExpirationCommitmentInputMissing)?
+                    .ok_or(TransactionFailureReason::ExpirationNotUnlockable)?;
 
                 self.address_unlock(locked_address, unlock)?;
 

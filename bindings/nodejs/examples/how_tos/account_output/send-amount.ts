@@ -6,12 +6,12 @@ import { Wallet, initLogger, Utils } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `how_tos/accounts_and_addresses/create-wallet` example!
+// running the `how_tos/wallet/create-wallet` example!
 //
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/account_wallet/transaction.ts
+// yarn run-example ./how_tos/account_output/send-amount.ts
 
 // In this example we send funds from an account wallet.
 async function run() {

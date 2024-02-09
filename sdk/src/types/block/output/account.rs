@@ -22,7 +22,7 @@ use crate::types::block::{
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::StateTransitionError,
+    semantic::TransactionFailureReason,
     Error,
 };
 
@@ -397,11 +397,11 @@ impl AccountOutput {
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_chains: &HashMap<ChainId, &Output>,
+        input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
         outputs: &[Output],
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if current_state.immutable_features != next_state.immutable_features {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
         // TODO update when TIP is updated
@@ -437,12 +437,12 @@ impl AccountOutput {
             created_foundries_count += 1;
 
             if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                return Err(StateTransitionError::UnsortedCreatedFoundries);
+                return Err(TransactionFailureReason::FoundrySerialInvalid);
             }
         }
 
         if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-            return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
+            return Err(TransactionFailureReason::AccountInvalidFoundryCounter);
         }
 
         Ok(())
@@ -548,7 +548,7 @@ fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Account(account_address) = unlock_condition.address() {
-            if account_address.account_id() == account_id {
+            if !account_id.is_null() && account_address.account_id() == account_id {
                 return Err(Error::SelfDepositAccount(*account_id));
             }
         }

@@ -29,6 +29,7 @@ import {
     PreparedCreateNativeTokenTransactionData,
     ConsolidationParams,
     CreateDelegationTransaction,
+    BeginStakingParams,
 } from '../types/wallet';
 import { Client, INode, Burn, PreparedTransactionData } from '../client';
 import {
@@ -47,6 +48,7 @@ import {
     NumericString,
     Bech32Address,
     DelegationId,
+    BlockId,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
@@ -309,7 +311,7 @@ export class Wallet {
     /**
      * A generic function that can be used to burn native tokens, nfts, foundries and accounts.
      * @param burn The outputs or native tokens to burn
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The transaction.
      */
     async burn(
@@ -351,7 +353,7 @@ export class Wallet {
      * recommended to use melting, if the foundry output is available.
      * @param tokenId The native token id.
      * @param burnAmount The to be burned amount.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareBurnNativeToken(
@@ -380,7 +382,7 @@ export class Wallet {
     /**
      * Burn an nft output.
      * @param nftId The NftId.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareBurnNft(
@@ -482,7 +484,7 @@ export class Wallet {
     /**
      * Creates an account output.
      * @param params The account output options.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The transaction.
      */
     async createAccountOutput(
@@ -497,7 +499,7 @@ export class Wallet {
     /**
      * Creates an account output.
      * @param params The account output options.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareCreateAccountOutput(
@@ -525,7 +527,7 @@ export class Wallet {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The transaction.
      */
     async meltNativeToken(
@@ -547,7 +549,7 @@ export class Wallet {
      * `melted_tokens` field.
      * @param tokenId The native token id.
      * @param meltAmount To be melted amount.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareMeltNativeToken(
@@ -593,7 +595,7 @@ export class Wallet {
      * Destroy an account output.
      *
      * @param accountId The AccountId.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareDestroyAccount(
@@ -622,7 +624,7 @@ export class Wallet {
      * Function to destroy a foundry output with a circulating supply of 0.
      * Native tokens in the foundry (minted by other foundries) will be transacted to the controlling account.
      * @param foundryId The FoundryId.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareDestroyFoundry(
@@ -1004,7 +1006,7 @@ export class Wallet {
      *
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The minting transaction.
      */
     async mintNativeToken(
@@ -1026,7 +1028,7 @@ export class Wallet {
      *
      * @param tokenId The native token id.
      * @param mintAmount To be minted amount.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared minting transaction.
      */
     async prepareMintNativeToken(
@@ -1056,7 +1058,7 @@ export class Wallet {
      * Create a native token.
      *
      * @param params The options for creating a native token.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The created transaction.
      */
     async createNativeToken(
@@ -1072,7 +1074,7 @@ export class Wallet {
      * Create a native token.
      *
      * @param params The options for creating a native token.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The created transaction and the token ID.
      */
     async prepareCreateNativeToken(
@@ -1109,7 +1111,7 @@ export class Wallet {
      * Mint NFTs.
      *
      * @param params The options for minting nfts.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The minting transaction.
      */
     async mintNfts(
@@ -1123,7 +1125,7 @@ export class Wallet {
      * Mint NFTs.
      *
      * @param params The options for minting nfts.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared minting transaction.
      */
     async prepareMintNfts(
@@ -1157,7 +1159,7 @@ export class Wallet {
      * storage deposit will be sent to the recipient. When the assets contain
      * an nft id, the data from the existing `NftOutput` will be used, just with
      * the address unlock conditions replaced.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared output.
      */
     async prepareOutput(
@@ -1183,7 +1185,7 @@ export class Wallet {
      * Prepare to send base coins, useful for offline signing.
      *
      * @param params Address with amounts to send.
-     * @param options Additional transaction options or custom inputs.
+     * @param options Additional transaction options.
      * @returns The prepared transaction data.
      */
     async prepareSend(
@@ -1215,7 +1217,7 @@ export class Wallet {
      * Create a delegation.
      *
      * @param params The options for creating a delegation.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The created transaction and the delegation ID.
      */
     async createDelegation(
@@ -1238,7 +1240,7 @@ export class Wallet {
      * Prepare a transaction to create a delegation.
      *
      * @param params The options for creating a delegation.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction and the delegation ID.
      */
     async prepareCreateDelegation(
@@ -1316,10 +1318,151 @@ export class Wallet {
     }
 
     /**
+     * Begin staking.
+     *
+     * @param params The options for beginning staking.
+     * @param transactionOptions Additional transaction options.
+     * @returns The created transaction.
+     */
+    async beginStaking(
+        params: BeginStakingParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<TransactionWithMetadata> {
+        return await (
+            await this.prepareBeginStaking(params, transactionOptions)
+        ).send();
+    }
+
+    /**
+     * Prepare a transaction to begin staking.
+     *
+     * @param params The options for beginning staking.
+     * @param transactionOptions Additional transaction options.
+     * @returns The prepared transaction.
+     */
+    async prepareBeginStaking(
+        params: BeginStakingParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareBeginStaking',
+            data: {
+                params,
+                options: transactionOptions,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * Extend staking period.
+     *
+     * @param accountId The ID of the staking account.
+     * @param additionalEpochs The number of epochs to add to the staking period.
+     * @returns The created transaction.
+     */
+    async extendStaking(
+        accountId: AccountId,
+        additionalEpochs: number,
+    ): Promise<TransactionWithMetadata> {
+        return await (
+            await this.prepareExtendStaking(accountId, additionalEpochs)
+        ).send();
+    }
+
+    /**
+     * Prepare a transaction to extend a staking period.
+     *
+     * @param accountId The ID of the staking account.
+     * @param additionalEpochs The number of epochs to add to the staking period.
+     * @returns The prepared transaction.
+     */
+    async prepareExtendStaking(
+        accountId: AccountId,
+        additionalEpochs: number,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareExtendStaking',
+            data: {
+                accountId,
+                additionalEpochs,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * End staking and claim rewards.
+     *
+     * @param accountId The ID of the staking account.
+     * @returns The created transaction.
+     */
+    async endStaking(accountId: AccountId): Promise<TransactionWithMetadata> {
+        return await (await this.prepareEndStaking(accountId)).send();
+    }
+
+    /**
+     * Prepare a transaction to end staking and claim rewards.
+     *
+     * @param accountId The ID of the staking account.
+     * @returns The prepared transaction.
+     */
+    async prepareEndStaking(
+        accountId: AccountId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareEndStaking',
+            data: {
+                accountId,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
+     * Announce a staking account's candidacy for the staking period.
+     *
+     * @param accountId The ID of the account to announce candidacy.
+     * @returns The submitted block ID.
+     */
+    async announceCandidacy(accountId: AccountId): Promise<BlockId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'announceCandidacy',
+            data: {
+                accountId,
+            },
+        });
+
+        const parsed = JSON.parse(response) as Response<BlockId>;
+        return parsed.payload;
+    }
+
+    /**
      * Send a transaction.
      *
      * @param outputs Outputs to use in the transaction.
-     * @param options Additional transaction options or custom inputs.
+     * @param options Additional transaction options.
      * @returns The transaction data.
      */
     async sendTransaction(
@@ -1333,7 +1476,7 @@ export class Wallet {
      * Prepare a transaction, useful for offline signing.
      *
      * @param outputs Outputs to use in the transaction.
-     * @param options Additional transaction options or custom inputs.
+     * @param options Additional transaction options.
      * @returns The prepared transaction data.
      */
     async prepareTransaction(
@@ -1399,7 +1542,7 @@ export class Wallet {
      *
      * @param amount Amount of coins.
      * @param address Receiving address.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The sent transaction.
      */
     async send(
@@ -1428,7 +1571,7 @@ export class Wallet {
      * Send base coins with amounts from input addresses.
      *
      * @param params Addresses with amounts.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The sent transaction.
      */
     async sendWithParams(
@@ -1457,7 +1600,7 @@ export class Wallet {
      * Send native tokens.
      *
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The transaction.
      */
     async sendNativeTokens(
@@ -1473,7 +1616,7 @@ export class Wallet {
      * Send native tokens.
      *
      * @param params Addresses amounts and native tokens.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
@@ -1500,7 +1643,7 @@ export class Wallet {
      * Send NFT.
      *
      * @param params Addresses and nft ids.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The transaction.
      */
     async sendNft(
@@ -1514,7 +1657,7 @@ export class Wallet {
      * Send NFT.
      *
      * @param params Addresses and nft ids.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The prepared transaction.
      */
     async prepareSendNft(
@@ -1541,7 +1684,7 @@ export class Wallet {
      * Send outputs in a transaction.
      *
      * @param outputs The outputs to send.
-     * @param transactionOptions Additional transaction options or custom inputs.
+     * @param transactionOptions Additional transaction options.
      * @returns The sent transaction.
      */
     async sendOutputs(

@@ -46,8 +46,12 @@ use crate::{
 /// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
+    // REMINDER #1934: we need to be able to change the HRP of the address, which also requires a BIP44 (coin type)
+    // change. TODO #1934: `address` and `bip_path` need to be reside in their own type to prevent setting them to
+    // something inconsistent.
     pub(crate) address: Bech32Address,
     pub(crate) bip_path: Option<Bip44>,
+    // REMINDER #1934: we need to be able to change the alias of the wallet
     pub(crate) alias: Option<String>,
     pub(crate) inner: Arc<WalletInner<S>>,
     pub(crate) ledger: Arc<RwLock<WalletLedger>>,
@@ -641,7 +645,7 @@ mod test {
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
         let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-        let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+        let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
         let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
         let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
         let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();

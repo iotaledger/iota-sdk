@@ -85,6 +85,8 @@ pub struct ManaBalance {
     pub(crate) total: DecayedMana,
     /// Available mana.
     pub(crate) available: DecayedMana,
+    /// Mana rewards.
+    pub(crate) rewards: u64,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize, CopyGetters, derive_more::AddAssign)]

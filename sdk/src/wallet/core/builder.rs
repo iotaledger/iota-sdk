@@ -113,7 +113,7 @@ where
     /// Set the storage path to be used.
     #[cfg(feature = "storage")]
     #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
-    pub fn with_storage_path(mut self, path: &str) -> Self {
+    pub fn with_storage_path(mut self, path: impl Into<std::path::PathBuf>) -> Self {
         self.storage_options = Some(StorageOptions {
             path: path.into(),
             ..Default::default()

@@ -23,7 +23,7 @@ impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
-    /// Builds the transaction from the selected in and outputs.
+    /// Builds the transaction from the selected inputs and outputs.
     pub(crate) async fn build_transaction(
         &self,
         mut selected_transaction_data: Selected,
@@ -36,8 +36,6 @@ where
 
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = HashSet::new();
-        // TODO: Use for semantic validation https://github.com/iotaledger/iota-sdk/pull/1906
-        let mut mana_rewards = 0;
 
         let issuance = self.client().get_issuance().await?;
         let latest_slot_commitment_id = issuance.latest_commitment.id();
@@ -54,10 +52,18 @@ where
                 }
             }
 
+            // Inputs with timelock or expiration unlock condition require a CommitmentContextInput
+            if input
+                .output
+                .unlock_conditions()
+                .map_or(false, |u| u.iter().any(|u| u.is_timelock() || u.is_expiration()))
+            {
+                needs_commitment_context = true;
+            }
+
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
 
-            if let Some(reward) = selected_transaction_data.mana_rewards.get(input.output_id()) {
-                mana_rewards += *reward;
+            if selected_transaction_data.mana_rewards.get(input.output_id()).is_some() {
                 context_inputs.insert(ContextInput::from(RewardContextInput::new(idx as _)?));
                 needs_commitment_context = true;
             }
@@ -130,6 +136,7 @@ where
             transaction,
             inputs_data: selected_transaction_data.inputs,
             remainders: selected_transaction_data.remainders,
+            mana_rewards: selected_transaction_data.mana_rewards.into_iter().collect(),
         };
 
         log::debug!(

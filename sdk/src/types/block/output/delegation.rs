@@ -16,7 +16,7 @@ use crate::types::block::{
         MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::StateTransitionError,
+    semantic::TransactionFailureReason,
     slot::EpochIndex,
     Error,
 };
@@ -183,24 +183,16 @@ impl DelegationOutputBuilder {
         match self.delegated_amount {
             OutputBuilderAmount::Amount(amount) => {
                 output.delegated_amount = amount;
-                output.amount = if let Some(builder_amount) = self.amount {
-                    match builder_amount {
-                        OutputBuilderAmount::Amount(amount) => amount,
-                        OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
-                    }
-                } else {
-                    amount
-                };
+                output.amount = self.amount.map_or(amount, |builder_amount| match builder_amount {
+                    OutputBuilderAmount::Amount(amount) => amount,
+                    OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
+                });
             }
             OutputBuilderAmount::MinimumAmount(params) => {
                 let min = output.minimum_amount(params);
                 output.delegated_amount = min;
-                output.amount = if let Some(builder_amount) = self.amount {
-                    if let OutputBuilderAmount::Amount(amount) = builder_amount {
-                        amount
-                    } else {
-                        min
-                    }
+                output.amount = if let Some(OutputBuilderAmount::Amount(amount)) = self.amount {
+                    amount
                 } else {
                     min
                 };
@@ -340,17 +332,16 @@ impl DelegationOutput {
     }
 
     // Transition, just without full SemanticValidationContext.
-    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
-        #[allow(clippy::nonminimal_bool)]
-        if !(current_state.delegation_id.is_null() && !next_state.delegation_id.is_null()) {
-            return Err(StateTransitionError::NonDelayedClaimingTransition);
+    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), TransactionFailureReason> {
+        if !current_state.delegation_id.is_null() || next_state.delegation_id.is_null() {
+            return Err(TransactionFailureReason::DelegationOutputTransitionedTwice);
         }
 
         if current_state.delegated_amount != next_state.delegated_amount
             || current_state.start_epoch != next_state.start_epoch
             || current_state.validator_address != next_state.validator_address
         {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::DelegationModified);
         }
 
         Ok(())

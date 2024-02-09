@@ -4,6 +4,8 @@
 import { Type } from 'class-transformer';
 import { SignedTransactionPayload } from '../block/payload/signed_transaction';
 import { InputSigningData } from '../client';
+import { OutputId } from '../block/output';
+import { NumericString } from '../utils';
 
 /** The signed transaction with inputs data */
 export class SignedTransactionData {
@@ -13,4 +15,6 @@ export class SignedTransactionData {
     /** Signed inputs data. */
     @Type(() => InputSigningData)
     inputsData!: InputSigningData;
+    /** Mana rewards by input */
+    manaRewards?: { [outputId: OutputId]: NumericString };
 }
