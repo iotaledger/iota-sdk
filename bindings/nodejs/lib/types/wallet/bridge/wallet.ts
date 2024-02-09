@@ -372,7 +372,7 @@ export type __RegisterParticipationEventsMethod__ = {
     };
 };
 
-export type __awaitTransactionAcceptanceMethod__ = {
+export type __AwaitTransactionAcceptanceMethod__ = {
     name: 'awaitTransactionAcceptance';
     data: {
         transactionId: TransactionId;
