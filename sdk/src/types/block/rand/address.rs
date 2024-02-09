@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    address::{
-        AccountAddress, Address, AddressCapabilities, AnchorAddress, Ed25519Address, ImplicitAccountCreationAddress,
-        NftAddress, RestrictedAddress,
-    },
+    address::{AccountAddress, Address, AnchorAddress, Ed25519Address, ImplicitAccountCreationAddress, NftAddress},
     output::{AccountId, AnchorId, NftId},
     rand::{bytes::rand_bytes_array, number::rand_number},
 };
@@ -35,22 +32,14 @@ pub fn rand_implicit_address() -> ImplicitAccountCreationAddress {
     ImplicitAccountCreationAddress::from(rand_ed25519_address())
 }
 
-/// Generates a random [`RestrictedAddress`].
-pub fn rand_restricted_address() -> RestrictedAddress {
-    RestrictedAddress::new(rand_base_address())
-        .unwrap()
-        .with_allowed_capabilities(AddressCapabilities::all())
-}
-
 /// Generates a random [`Address`].
 pub fn rand_address() -> Address {
-    match rand_number::<u64>() % 6 {
+    match rand_number::<u64>() % 5 {
         0 => rand_ed25519_address().into(),
         1 => rand_account_address().into(),
         2 => rand_nft_address().into(),
         3 => rand_anchor_address().into(),
         4 => rand_implicit_address().into(),
-        5 => rand_restricted_address().into(),
         _ => unreachable!(),
     }
 }

@@ -42,11 +42,6 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
-            Address::Restricted(restricted_address) => {
-                log::debug!("Forwarding {address:?} sender requirement to inner address");
-
-                self.fulfill_sender_requirement(restricted_address.address())
-            }
             _ => Err(Error::UnsupportedAddressType(address.kind())),
         }
     }

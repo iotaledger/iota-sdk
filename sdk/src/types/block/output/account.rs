@@ -15,10 +15,7 @@ use crate::types::block::{
     address::{AccountAddress, Address},
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{
-            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
-            UnlockConditions,
-        },
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
@@ -220,12 +217,6 @@ impl AccountOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
-        verify_restricted_addresses(
-            &unlock_conditions,
-            AccountOutput::KIND,
-            features.native_token(),
-            self.mana,
-        )?;
         verify_allowed_features(&features, AccountOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -512,8 +503,6 @@ impl Packable for AccountOutput {
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
-            verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
-                .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 

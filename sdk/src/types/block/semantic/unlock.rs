@@ -74,9 +74,6 @@ impl SemanticValidationContext<'_> {
                     unlock,
                 );
             }
-            (Address::Restricted(restricted_address), _) => {
-                return self.address_unlock(restricted_address.address(), unlock);
-            }
             // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             _ => return Err(TransactionFailureReason::SemanticValidationFailed),
         }

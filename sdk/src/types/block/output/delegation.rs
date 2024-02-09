@@ -9,10 +9,7 @@ use crate::types::block::{
     address::{AccountAddress, Address},
     output::{
         chain_id::ChainId,
-        unlock_condition::{
-            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
-            UnlockConditions,
-        },
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
         MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
@@ -168,7 +165,6 @@ impl DelegationOutputBuilder {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
-        verify_restricted_addresses(&unlock_conditions, DelegationOutput::KIND, None, 0)?;
 
         let mut output = DelegationOutput {
             amount: 0,
@@ -226,7 +222,6 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(verify_with = verify_delegation_output)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -404,13 +399,6 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
-}
-
-fn verify_delegation_output<const VERIFY: bool>(
-    output: &DelegationOutput,
-    _: &ProtocolParameters,
-) -> Result<(), Error> {
-    verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
 }
 
 #[cfg(feature = "serde")]

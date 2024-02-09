@@ -5,7 +5,6 @@ mod account;
 mod bech32;
 mod ed25519;
 mod nft;
-mod restricted;
 
 use core::str::FromStr;
 
@@ -13,7 +12,6 @@ use iota_sdk::types::block::{
     address::{AccountAddress, Address, Ed25519Address, NftAddress},
     rand::address::{
         rand_account_address, rand_anchor_address, rand_ed25519_address, rand_implicit_address, rand_nft_address,
-        rand_restricted_address,
     },
     Error,
 };
@@ -74,11 +72,8 @@ fn address_display_similar() {
         rand_nft_address().into(),
         rand_anchor_address().into(),
         rand_implicit_address().into(),
-        rand_multi_address().into(),
-        rand_restricted_address().into(),
     ];
-    // Restricted address is 72 length, the rest 64.
-    let regex_pattern = regex::Regex::new(r"^0x[0-9a-fA-F]{64,72}$").unwrap();
+    let regex_pattern = regex::Regex::new(r"^0x[0-9a-fA-F]{64}$").unwrap();
 
     // Check if all addresses match the regex pattern.
     assert!(

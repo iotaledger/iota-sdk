@@ -70,12 +70,6 @@ impl InputSelection {
             .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
             .expect("expiration unlockable outputs already filtered out");
 
-        let required_address = if let Address::Restricted(restricted) = &required_address {
-            restricted.address()
-        } else {
-            &required_address
-        };
-
         match required_address {
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
@@ -279,13 +273,7 @@ impl InputSelection {
                 .unwrap();
 
             let required_address = match &required_address {
-                Some(address) => {
-                    if let Address::Restricted(restricted) = address {
-                        restricted.address()
-                    } else {
-                        address
-                    }
-                }
+                Some(address) => address,
                 // Time in which no address can unlock the output because of an expiration unlock condition
                 None => return false,
             };

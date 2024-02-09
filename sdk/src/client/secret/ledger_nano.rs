@@ -543,10 +543,9 @@ fn merge_unlocks(
             // Time in which no address can unlock the output because of an expiration unlock condition
             .ok_or(Error::ExpirationDeadzone)?;
 
-        // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
+        // Convert implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
         let required_address = match required_address {
             Address::ImplicitAccountCreation(implicit) => Address::Ed25519(*implicit.ed25519_address()),
-            Address::Restricted(restricted) => restricted.address().clone(),
             _ => required_address,
         };
 

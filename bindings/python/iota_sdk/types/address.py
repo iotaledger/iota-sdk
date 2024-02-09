@@ -16,7 +16,6 @@ class AddressType(IntEnum):
         NFT (16): Nft address.
         ANCHOR (24): Anchor address.
         IMPLICIT_ACCOUNT_CREATION (32): Implicit Account Creation address.
-        RESTRICTED (48): Address with restricted capabilities.
 
     """
     ED25519 = 0
@@ -24,7 +23,6 @@ class AddressType(IntEnum):
     NFT = 16
     ANCHOR = 24
     IMPLICIT_ACCOUNT_CREATION = 32
-    RESTRICTED = 48
 
 
 @json
@@ -109,36 +107,11 @@ class ImplicitAccountCreationAddress:
             Ed25519Address(addr_dict['pubKeyHash']))
 
 
-@json
-@dataclass
-class RestrictedAddress:
-    """Represents an address with restricted capabilities.
-    Attributes:
-        address: The inner restricted Address.
-        allowed_capabilities: The allowed capabilities bitflags.
-    """
-    type: int = field(default_factory=lambda: int(
-        AddressType.RESTRICTED), init=False)
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
-    allowed_capabilities: Optional[HexStr] = field(default=None, init=False)
-
-    def with_allowed_capabilities(self, capabilities: bytes):
-        """Sets the allowed capabilities from a byte array.
-        Attributes:
-            capabilities: The allowed capabilities bitflags.
-        """
-        if any(c != 0 for c in capabilities):
-            self.allowed_capabilities = '0x' + capabilities.hex()
-        else:
-            self.allowed_capabilities = None
-
-
 Address: TypeAlias = Union[Ed25519Address,
                            AccountAddress,
                            NFTAddress,
                            AnchorAddress,
-                           ImplicitAccountCreationAddress,
-                           RestrictedAddress]
+                           ImplicitAccountCreationAddress]
 
 
 # pylint: disable=too-many-return-statements
@@ -160,8 +133,6 @@ def deserialize_address(d: Dict[str, Any]) -> Address:
         return AnchorAddress.from_dict(d)
     if address_type == AddressType.IMPLICIT_ACCOUNT_CREATION:
         return ImplicitAccountCreationAddress.from_dict(d)
-    if address_type == AddressType.RESTRICTED:
-        return RestrictedAddress.from_dict(d)
     raise Exception(f'invalid address type: {address_type}')
 
 
