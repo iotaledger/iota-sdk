@@ -12,7 +12,7 @@ from iota_sdk.types.native_token import NativeToken
 
 @json
 @dataclass
-class SendParams():
+class SendParams:
     """Parameters for sending base coins.
 
     Attributes:
@@ -33,7 +33,7 @@ class SendParams():
 
 @json
 @dataclass
-class SendNativeTokenParams():
+class SendNativeTokenParams:
     """Parameters for sending a native token
 
     Attributes:
@@ -50,7 +50,7 @@ class SendNativeTokenParams():
 
 @json
 @dataclass
-class SendNftParams():
+class SendNftParams:
     """Parameters for sending NFTs.
 
     Attributes:
@@ -63,7 +63,7 @@ class SendNftParams():
 
 @json
 @dataclass
-class CreateNativeTokenParams():
+class CreateNativeTokenParams:
     """Parameters for creating native tokens.
 
     Attributes:
@@ -86,7 +86,7 @@ class CreateNativeTokenParams():
 
 @json
 @dataclass
-class CreateDelegationParams():
+class CreateDelegationParams:
     """Parameters for creating a delegation output.
 
     Attributes:
@@ -103,7 +103,7 @@ class CreateDelegationParams():
 
 @json
 @dataclass
-class BeginStakingParams():
+class BeginStakingParams:
     """Parameters for beginning staking.
 
     Attributes:
@@ -120,7 +120,7 @@ class BeginStakingParams():
 
 @json
 @dataclass
-class MintNftParams():
+class MintNftParams:
     """Parameters for minting NFTs.
 
     Attributes:
@@ -141,7 +141,7 @@ class MintNftParams():
 
 @json
 @dataclass
-class CreateAccountOutputParams():
+class CreateAccountOutputParams:
     """Parameters for creating accounts.
 
     Attributes:

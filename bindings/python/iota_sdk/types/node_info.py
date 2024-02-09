@@ -306,19 +306,6 @@ class ProtocolParameters:
 
 @json
 @dataclass
-class ProtocolParametersResponse:
-    """Protocol Parameters with start epoch.
-
-    Attributes:
-        start_epoch: The start epoch of the set of protocol parameters.
-        parameters: The protocol parameters.
-    """
-    start_epoch: EpochIndex
-    parameters: ProtocolParameters
-
-
-@json
-@dataclass
 class NodeInfoBaseToken:
     """The base coin info.
 
@@ -334,37 +321,3 @@ class NodeInfoBaseToken:
     unit: str
     decimals: int
     subunit: Optional[str] = None
-
-
-@json
-@dataclass
-class NodeInfo:
-    """Response from the /info endpoint.
-
-    Attributes:
-        name: The name of the node (e.g. Hornet).
-        version: The semantic version of the node.
-        status: The status of the node.
-        metrics: Node metrics.
-        protocol_parameters: Supported protocol versions by the node.
-        base_token: Gives info about the base token the network uses.
-    """
-    name: str
-    version: str
-    status: NodeInfoStatus
-    metrics: NodeInfoMetrics
-    protocol_parameters: List[ProtocolParametersResponse]
-    base_token: NodeInfoBaseToken
-
-
-@json
-@dataclass
-class NodeInfoWrapper:
-    """NodeInfo wrapper which contains the node info and the url from the node.
-
-    Attributes:
-        node_info: A NodeInfo object.
-        url: The URL of the node.
-    """
-    node_info: NodeInfo
-    url: str

@@ -251,12 +251,18 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .get_utxo_changes_full_by_slot_commitment_id(&commitment_id)
                 .await?,
         ),
+        // TODO: this should be renamed to `GetCommitmentBySlot`
+        // https://github.com/iotaledger/iota-sdk/issues/1921
         ClientMethod::GetCommitmentByIndex { slot } => {
             Response::SlotCommitment(client.get_slot_commitment_by_slot(slot).await?)
         }
+        // TODO: this should be renamed to `GetUtxoChangesBySlot`
+        // https://github.com/iotaledger/iota-sdk/issues/1921
         ClientMethod::GetUtxoChangesByIndex { slot } => {
             Response::UtxoChanges(client.get_utxo_changes_by_slot(slot).await?)
         }
+        // TODO: this should be renamed to `GetUtxoChangesFullBySlot`
+        // https://github.com/iotaledger/iota-sdk/issues/1921
         ClientMethod::GetUtxoChangesFullByIndex { slot } => {
             Response::UtxoChangesFull(client.get_utxo_changes_full_by_slot(slot).await?)
         }
