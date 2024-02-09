@@ -1518,7 +1518,7 @@ export class Wallet {
     }
 
     /**
-     * Checks the transaction state for a provided transaction id until it's accepted. Returns the block id that
+     * Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds. Returns the block id that
      * contains this transaction.
      */
     async awaitTransactionAcceptance(

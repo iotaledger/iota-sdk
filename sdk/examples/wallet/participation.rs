@@ -135,7 +135,7 @@ async fn main() -> Result<()> {
     let transaction = wallet.increase_voting_power(INCREASE_VOTING_POWER_AMOUNT).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `increase voting power` transaction to be included...");
+    println!("Waiting for `increase voting power` transaction to be accepted...");
     let block_id = wallet
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -160,7 +160,7 @@ async fn main() -> Result<()> {
     let transaction = wallet.decrease_voting_power(DECREASE_VOTING_POWER_AMOUNT).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `decrease voting power` transaction to be included...");
+    println!("Waiting for `decrease voting power` transaction to be accepted...");
     let block_id = wallet
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -185,7 +185,7 @@ async fn main() -> Result<()> {
     // changed the constants above with a valid (i.e. ongoing) event id for
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `vote` transaction to be included...");
+    println!("Waiting for `vote` transaction to be accepted...");
     let block_id = wallet
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -212,7 +212,7 @@ async fn main() -> Result<()> {
     let transaction = wallet.stop_participating(event_id).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `stop participating` transaction to be included...");
+    println!("Waiting for `stop participating` transaction to be accepted...");
     let block_id = wallet
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -236,7 +236,7 @@ async fn main() -> Result<()> {
     let transaction = wallet.decrease_voting_power(voting_output.output.amount()).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `decrease voting power` transaction to be included...");
+    println!("Waiting for `decrease voting power` transaction to be accepted...");
     let block_id = wallet
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;

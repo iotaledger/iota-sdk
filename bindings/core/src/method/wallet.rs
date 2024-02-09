@@ -397,8 +397,8 @@ pub enum WalletMethod {
     // RegisterParticipationEvents {
     //     options: ParticipationEventRegistrationOptions,
     // },
-    /// Checks the transaction state for a provided transaction id until it's accepted. Returns the block id that
-    /// contains this transaction.
+    /// Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds.
+    /// Returns the block id that contains this transaction.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
     #[serde(rename_all = "camelCase")]
     AwaitTransactionAcceptance {

@@ -16,7 +16,8 @@ use crate::{
     wallet::{types::InclusionState, Error, Wallet},
 };
 
-const DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL: u64 = 1;
+// Time in milliseconds
+const DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL: u64 = 500;
 const DEFAULT_AWAIT_TX_ACCEPTANCE_MAX_AMOUNT: u64 = 80;
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -24,8 +25,8 @@ where
     Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Checks the transaction state for a provided transaction id until it's accepted. Returns the block id that
-    /// contains this transaction.
+    /// Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds.
+    /// Returns the block id that contains this transaction.
     pub async fn await_transaction_acceptance(
         &self,
         transaction_id: &TransactionId,
@@ -52,7 +53,7 @@ where
         if transaction.inclusion_state == InclusionState::Conflicting
             || transaction.inclusion_state == InclusionState::UnknownPruned
         {
-            return Err(ClientError::TangleInclusion(format!(
+            return Err(ClientError::TransactionAcceptance(format!(
                 "transaction id: {} inclusion state: {:?}",
                 transaction_id, transaction.inclusion_state
             ))
@@ -90,10 +91,10 @@ where
             }
         };
 
-        let duration = std::time::Duration::from_secs(interval.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL));
+        let duration = std::time::Duration::from_millis(interval.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL));
         for _ in 0..max_attempts.unwrap_or(DEFAULT_AWAIT_TX_ACCEPTANCE_MAX_AMOUNT) {
             #[cfg(target_family = "wasm")]
-            gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
+            gloo_timers::future::TimeoutFuture::new(duration).await;
 
             #[cfg(not(target_family = "wasm"))]
             tokio::time::sleep(duration).await;
@@ -113,8 +114,8 @@ where
             if failed {
                 let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
                     if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
-                        // If no block was found with this transaction id, then it can't get included
-                        ClientError::TangleInclusion(block_id.to_string())
+                        // If no block was found with this transaction id, then it couldn't get accepted
+                        ClientError::TransactionAcceptance(transaction_id.to_string())
                     } else {
                         e
                     }
@@ -123,6 +124,6 @@ where
                 return Ok(included_block.id(&protocol_parameters));
             }
         }
-        Err(ClientError::TangleInclusion(block_id.to_string()).into())
+        Err(ClientError::TransactionAcceptance(transaction_id.to_string()).into())
     }
 }

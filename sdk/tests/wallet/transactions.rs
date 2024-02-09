@@ -240,11 +240,11 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .unwrap_err()
 //     {
 //         iota_sdk::wallet::Error::Client(client_error) => {
-//             let iota_sdk::client::Error::TangleInclusion(_) = *client_error else {
-//                 panic!("Expected TangleInclusion error");
+//             let iota_sdk::client::Error::TransactionAcceptance(_) = *client_error else {
+//                 panic!("Expected TransactionAcceptance error");
 //             };
 //         }
-//         _ => panic!("Expected TangleInclusion error"),
+//         _ => panic!("Expected TransactionAcceptance error"),
 //     }
 
 //     // After syncing the balance is still equal
