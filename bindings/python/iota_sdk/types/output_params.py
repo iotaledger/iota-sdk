@@ -12,7 +12,7 @@ from iota_sdk.types.native_token import NativeToken
 
 @json
 @dataclass
-class Assets():
+class Assets:
     """Assets for OutputParams.
     """
     nft_id: Optional[HexStr] = None
@@ -20,7 +20,7 @@ class Assets():
 
 @json
 @dataclass
-class Features():
+class Features:
     """Features for OutputParams.
     """
     tag: Optional[HexStr] = None
@@ -32,7 +32,7 @@ class Features():
 
 @json
 @dataclass
-class Unlocks():
+class Unlocks:
     """Unlocks for OutputParams.
     """
     expiration_slot_index: Optional[int] = field(default=None, metadata=config(
@@ -52,7 +52,7 @@ class ReturnStrategy(str, Enum):
 
 @json
 @dataclass
-class StorageDeposit():
+class StorageDeposit:
     """Storage deposit options for OutputParams.
     """
     return_strategy: Optional[ReturnStrategy] = None
@@ -61,7 +61,7 @@ class StorageDeposit():
 
 @json
 @dataclass
-class OutputParams():
+class OutputParams:
     """Params for `Wallet.prepare_output()`.
     """
     recipient_address: str

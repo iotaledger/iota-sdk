@@ -46,7 +46,7 @@ class WalletOptions:
 # pylint: disable=too-many-public-methods
 
 
-class Wallet():
+class Wallet:
     """An IOTA Wallet.
 
     Attributes:

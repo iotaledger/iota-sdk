@@ -26,7 +26,7 @@ Signature: TypeAlias = Ed25519Signature
 
 @json
 @dataclass
-class Bip44():
+class Bip44:
     """A BIP44 chain.
 
     Attributes:

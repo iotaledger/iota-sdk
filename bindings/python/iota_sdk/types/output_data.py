@@ -14,7 +14,7 @@ from iota_sdk.types.signature import Bip44
 
 @json
 @dataclass
-class OutputData():
+class OutputData:
     """Output data.
 
     Attributes:
