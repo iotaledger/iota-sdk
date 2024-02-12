@@ -41,6 +41,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) output_mana: u64,
     pub(crate) output_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) output_chains: HashMap<ChainId, (OutputId, &'a Output)>,
+    pub(crate) block_issuer_mana: HashMap<AccountId, (u64, u64)>,
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
@@ -99,6 +100,7 @@ impl<'a> SemanticValidationContext<'a> {
             output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
             output_chains,
+            block_issuer_mana: HashMap::new(),
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),
@@ -138,15 +140,23 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
                 Output::Account(output) => {
                     if output.features().block_issuer().is_some() {
+                        let account_id = output.account_id_non_null(&output_id);
+
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
                         }
-                        if !self
-                            .bic_context_inputs
-                            .contains(&output.account_id_non_null(&output_id))
-                        {
+                        if !self.bic_context_inputs.contains(&account_id) {
                             return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
                         }
+                        let entry = self.block_issuer_mana.entry(account_id).or_default();
+                        entry.0 = entry
+                            .0
+                            .checked_add(consumed_output.available_mana(
+                                &self.protocol_parameters,
+                                output_id.transaction_id().slot_index(),
+                                self.transaction.creation_slot(),
+                            )?)
+                            .ok_or(Error::ConsumedManaOverflow)?;
                     }
 
                     (output.amount(), None, output.unlock_conditions())
