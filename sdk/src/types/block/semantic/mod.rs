@@ -274,15 +274,20 @@ impl<'a> SemanticValidationContext<'a> {
                 }
                 Output::Account(output) => {
                     if output.features().block_issuer().is_some() {
+                        let account_id = output.account_id_non_null(&OutputId::new(self.transaction_id, index as u16));
+
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
                         }
-                        let output_id = OutputId::new(self.transaction_id, index as u16);
-                        if !self
-                            .bic_context_inputs
-                            .contains(&output.account_id_non_null(&output_id))
-                        {
+                        if !self.bic_context_inputs.contains(&account_id) {
                             return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
+                        }
+                        if let Some(allotment) = self.transaction.allotments().get(&account_id) {
+                            let entry = self.block_issuer_mana.entry(account_id).or_default();
+                            entry.1 = entry
+                                .1
+                                .checked_add(allotment.mana())
+                                .ok_or(Error::CreatedManaOverflow)?;
                         }
                     }
 
@@ -330,7 +335,7 @@ impl<'a> SemanticValidationContext<'a> {
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
 
             // Add allotted mana
-            for mana_allotment in self.transaction.allotments() {
+            for mana_allotment in (*self.transaction.allotments()).iter() {
                 self.output_mana = self
                     .output_mana
                     .checked_add(mana_allotment.mana())
