@@ -282,8 +282,11 @@ impl<'a> SemanticValidationContext<'a> {
                         if !self.bic_context_inputs.contains(&account_id) {
                             return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
                         }
+                        let entry = self.block_issuer_mana.entry(account_id).or_default();
+
+                        entry.1 = entry.1.checked_add(output.mana()).ok_or(Error::CreatedManaOverflow)?;
+
                         if let Some(allotment) = self.transaction.allotments().get(&account_id) {
-                            let entry = self.block_issuer_mana.entry(account_id).or_default();
                             entry.1 = entry
                                 .1
                                 .checked_add(allotment.mana())
