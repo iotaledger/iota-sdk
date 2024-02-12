@@ -723,7 +723,7 @@ class Wallet:
         contains this transaction.
         """
         return BlockId(self._call_method(
-            'reissueTransactionUntilIncluded', {
+            'awaitTransactionAcceptance', {
                 'transactionId': transaction_id,
                 'interval': interval,
                 'maxAttempts': max_attempts

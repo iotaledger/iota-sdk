@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for the consolidation transaction to get confirmed
+    // Wait for the consolidation transaction to get accepted
     let block_id = wallet
         .await_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
