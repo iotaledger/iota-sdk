@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// Address types used in the wallet
@@ -42,14 +42,17 @@ pub struct OutputData {
     pub output: Output,
     /// The output ID proof
     pub output_id_proof: OutputIdProof,
-    /// If an output is spent
-    pub is_spent: bool,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
 }
 
 impl OutputData {
+    /// Returns whether the [`OutputMetadata`] is spent or not.
+    pub fn is_spent(&self) -> bool {
+        self.metadata.is_spent()
+    }
+
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
@@ -169,6 +172,15 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
             note: dto.note,
             inputs: dto.inputs,
         })
+    }
+}
+
+impl Serialize for TransactionWithMetadata {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        TransactionWithMetadataDto::from(self).serialize(serializer)
     }
 }
 

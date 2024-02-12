@@ -47,7 +47,6 @@ where
                     metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
                     output_id_proof: output_with_meta.output_id_proof().clone(),
-                    is_spent: output_with_meta.metadata().is_spent(),
                     network_id,
                     remainder,
                 }
@@ -70,9 +69,12 @@ where
 
         for output_id in output_ids {
             match wallet_data.outputs.get_mut(&output_id) {
-                // set unspent
+                // set unspent if not already
                 Some(output_data) => {
-                    output_data.is_spent = false;
+                    if output_data.is_spent() {
+                        log::warn!("Removing spent output metadata for {output_id}, because it's still unspent");
+                        output_data.metadata.spent = None;
+                    }
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),

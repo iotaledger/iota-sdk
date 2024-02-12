@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::{native_tokens::get_native_tokens, Error, InputSelection, Requirement};
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            MinimumOutputAmount, NftOutputBuilder, Output, OutputId, StorageScoreParameters,
+            MinimumOutputAmount, NativeTokens, NftOutputBuilder, Output, OutputId, StorageScoreParameters, TokenId,
         },
         slot::SlotIndex,
     },
@@ -35,44 +35,42 @@ pub(crate) fn sdruc_not_expired(
     })
 }
 
-pub(crate) fn amount_sums(
-    selected_inputs: &[InputSigningData],
-    outputs: &[Output],
-    slot_index: SlotIndex,
-) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
-    let mut inputs_sum = 0;
-    let mut outputs_sum = 0;
-    let mut inputs_sdr = HashMap::new();
-    let mut outputs_sdr = HashMap::new();
+impl InputSelection {
+    pub(crate) fn amount_sums(&self) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
+        let mut inputs_sum = 0;
+        let mut outputs_sum = 0;
+        let mut inputs_sdr = HashMap::new();
+        let mut outputs_sdr = HashMap::new();
 
-    for selected_input in selected_inputs {
-        inputs_sum += selected_input.output.amount();
+        for selected_input in &self.selected_inputs {
+            inputs_sum += selected_input.output.amount();
 
-        if let Some(sdruc) = sdruc_not_expired(&selected_input.output, slot_index) {
-            *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
-        }
-    }
-
-    for output in outputs {
-        outputs_sum += output.amount();
-
-        if let Output::Basic(output) = output {
-            if let Some(address) = output.simple_deposit_address() {
-                *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_index) {
+                *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
         }
-    }
 
-    // TODO explanation about that
-    for (sdr_address, input_sdr_amount) in &inputs_sdr {
-        let output_sdr_amount = outputs_sdr.get(sdr_address).unwrap_or(&0);
+        for output in &self.outputs {
+            outputs_sum += output.amount();
 
-        if input_sdr_amount > output_sdr_amount {
-            outputs_sum += input_sdr_amount - output_sdr_amount;
+            if let Output::Basic(output) = output {
+                if let Some(address) = output.simple_deposit_address() {
+                    *outputs_sdr.entry(address.clone()).or_default() += output.amount();
+                }
+            }
         }
-    }
 
-    (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
+        // TODO explanation about that
+        for (sdr_address, input_sdr_amount) in &inputs_sdr {
+            let output_sdr_amount = outputs_sdr.get(sdr_address).unwrap_or(&0);
+
+            if input_sdr_amount > output_sdr_amount {
+                outputs_sum += input_sdr_amount - output_sdr_amount;
+            }
+        }
+
+        (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -84,18 +82,24 @@ struct AmountSelection {
     outputs_sdr: HashMap<Address, u64>,
     remainder_amount: u64,
     native_tokens_remainder: bool,
+    mana_remainder: bool,
     slot_index: SlotIndex,
     storage_score_parameters: StorageScoreParameters,
+    selected_native_tokens: HashSet<TokenId>,
 }
 
 impl AmountSelection {
     fn new(input_selection: &InputSelection) -> Result<Self, Error> {
-        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = amount_sums(
-            &input_selection.selected_inputs,
-            &input_selection.outputs,
-            input_selection.slot_index,
+        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = input_selection.amount_sums();
+        let selected_native_tokens = HashSet::<TokenId>::from_iter(
+            input_selection
+                .selected_inputs
+                .iter()
+                .filter_map(|i| i.output.native_token().map(|n| *n.token_id())),
         );
         let (remainder_amount, native_tokens_remainder) = input_selection.remainder_amount()?;
+
+        let (selected_mana, required_mana) = input_selection.mana_sums()?;
 
         Ok(Self {
             newly_selected_inputs: HashMap::new(),
@@ -105,8 +109,10 @@ impl AmountSelection {
             outputs_sdr,
             remainder_amount,
             native_tokens_remainder,
+            mana_remainder: selected_mana > required_mana,
             slot_index: input_selection.slot_index,
             storage_score_parameters: input_selection.protocol_parameters.storage_score_parameters(),
+            selected_native_tokens,
         })
     }
 
@@ -122,7 +128,7 @@ impl AmountSelection {
             }
         } else if self.inputs_sum < self.outputs_sum {
             self.outputs_sum - self.inputs_sum
-        } else if self.native_tokens_remainder {
+        } else if self.native_tokens_remainder || self.mana_remainder {
             self.remainder_amount
         } else {
             0
@@ -150,6 +156,19 @@ impl AmountSelection {
                 }
 
                 *self.inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
+            }
+
+            if let Some(nt) = input.output.native_token() {
+                let mut selected_native_tokens = self.selected_native_tokens.clone();
+
+                selected_native_tokens.insert(*nt.token_id());
+                // Don't select input if the tx would end up with more than allowed native tokens.
+                if selected_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
+                    continue;
+                } else {
+                    // Update selected with NTs from this output.
+                    self.selected_native_tokens = selected_native_tokens;
+                }
             }
 
             self.inputs_sum += input.output.amount();
@@ -322,7 +341,19 @@ impl InputSelection {
             return Ok(r);
         }
 
-        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into() {
+        // If the available inputs have more NTs than are allowed in a single tx, we might not be able to find inputs
+        // without exceeding the threshold, so in this case we also try again with the outputs ordered the other way
+        // around.
+        let potentially_too_many_native_tokens = self
+            .available_inputs
+            .iter()
+            .filter_map(|i| i.output.native_token())
+            .count()
+            > NativeTokens::COUNT_MAX.into();
+
+        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into()
+            || potentially_too_many_native_tokens
+        {
             // Clear before trying with reversed ordering.
             log::debug!("Clearing amount selection");
             amount_selection = AmountSelection::new(self)?;

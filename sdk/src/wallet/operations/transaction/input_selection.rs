@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::{hash_map::Values, HashSet};
+use std::collections::{hash_map::Values, HashMap, HashSet};
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
@@ -78,15 +78,48 @@ where
             mandatory_inputs.as_ref(),
         )?;
 
+        let mut mana_rewards = HashMap::new();
+
+        if let Some(burn) = burn {
+            for delegation_id in burn.delegations() {
+                if let Some(output) = wallet_data.unspent_delegation_output(delegation_id) {
+                    mana_rewards.insert(
+                        output.output_id,
+                        self.client()
+                            .get_output_mana_rewards(&output.output_id, slot_index)
+                            .await?
+                            .rewards,
+                    );
+                }
+            }
+        }
+
         // if custom inputs are provided we should only use them (validate if we have the outputs in this account and
         // that the amount is enough)
         if let Some(custom_inputs) = custom_inputs {
             // Check that no input got already locked
-            for input in custom_inputs.iter() {
-                if wallet_data.locked_outputs.contains(input) {
+            for output_id in &custom_inputs {
+                if wallet_data.locked_outputs.contains(output_id) {
                     return Err(crate::wallet::Error::CustomInput(format!(
-                        "provided custom input {input} is already used in another transaction",
+                        "provided custom input {output_id} is already used in another transaction",
                     )));
+                }
+                if let Some(input) = wallet_data.outputs.get(output_id) {
+                    if input.output.can_claim_rewards(outputs.iter().find(|o| {
+                        input
+                            .output
+                            .chain_id()
+                            .map(|chain_id| chain_id.or_from_output_id(output_id))
+                            == o.chain_id()
+                    })) {
+                        mana_rewards.insert(
+                            *output_id,
+                            self.client()
+                                .get_output_mana_rewards(output_id, slot_index)
+                                .await?
+                                .rewards,
+                        );
+                    }
                 }
             }
 
@@ -98,7 +131,8 @@ where
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
-            .with_forbidden_inputs(forbidden_inputs);
+            .with_forbidden_inputs(forbidden_inputs)
+            .with_mana_rewards(mana_rewards);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -122,11 +156,28 @@ where
             return Ok(selected_transaction_data);
         } else if let Some(mandatory_inputs) = mandatory_inputs {
             // Check that no input got already locked
-            for input in mandatory_inputs.iter() {
-                if wallet_data.locked_outputs.contains(input) {
+            for output_id in &mandatory_inputs {
+                if wallet_data.locked_outputs.contains(output_id) {
                     return Err(crate::wallet::Error::CustomInput(format!(
-                        "provided custom input {input} is already used in another transaction",
+                        "provided custom input {output_id} is already used in another transaction",
                     )));
+                }
+                if let Some(input) = wallet_data.outputs.get(output_id) {
+                    if input.output.can_claim_rewards(outputs.iter().find(|o| {
+                        input
+                            .output
+                            .chain_id()
+                            .map(|chain_id| chain_id.or_from_output_id(output_id))
+                            == o.chain_id()
+                    })) {
+                        mana_rewards.insert(
+                            *output_id,
+                            self.client()
+                                .get_output_mana_rewards(output_id, slot_index)
+                                .await?
+                                .rewards,
+                        );
+                    }
                 }
             }
 
@@ -138,7 +189,8 @@ where
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
-            .with_forbidden_inputs(forbidden_inputs);
+            .with_forbidden_inputs(forbidden_inputs)
+            .with_mana_rewards(mana_rewards);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -174,7 +226,8 @@ where
             slot_index,
             protocol_parameters.clone(),
         )
-        .with_forbidden_inputs(forbidden_inputs);
+        .with_forbidden_inputs(forbidden_inputs)
+        .with_mana_rewards(mana_rewards);
 
         if let Some(address) = remainder_address {
             input_selection = input_selection.with_remainder_address(address);

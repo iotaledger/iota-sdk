@@ -24,12 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Optional `max_parallel_api_requests` to `Client` constructor;
+- `Utils::{verify_transaction_syntax(), block_bytes(), block_hash_without_nonce()}`;
+- `NodeInfoProtocol.belowMaxDepth`;
+- `{NodeInfoProtocol, RentStructure}::as_dict()`;
 
 ## 1.1.2 - 2023-12-01
 
 ### Added
 
-- `Utils:verify_transaction_semantic()`;
+- `Utils::verify_transaction_semantic()`;
 - `Account::prepare_claim_outputs()` method;
 
 ### Fixed
@@ -41,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `Utils:transaction_id()`;
+- `Utils::transaction_id()`;
 - `py.typed` file to the package;
 
 ### Fixed

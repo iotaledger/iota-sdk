@@ -10,7 +10,7 @@ pub(crate) mod requirement;
 pub(crate) mod transition;
 
 use core::ops::Deref;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use packable::PackableExt;
 
@@ -47,6 +47,7 @@ pub struct InputSelection {
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
     mana_allotments: u64,
+    mana_rewards: HashMap<OutputId, u64>,
 }
 
 /// Result of the input selection algorithm.
@@ -58,6 +59,8 @@ pub struct Selected {
     pub outputs: Vec<Output>,
     /// Remainder outputs information.
     pub remainders: Vec<RemainderData>,
+    /// Mana rewards by input.
+    pub mana_rewards: HashMap<OutputId, u64>,
 }
 
 impl InputSelection {
@@ -104,7 +107,7 @@ impl InputSelection {
 
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial mana requirement.
-        self.requirements.push(Requirement::Mana(self.mana_allotments));
+        self.requirements.push(Requirement::Mana);
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
@@ -195,6 +198,7 @@ impl InputSelection {
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
             mana_allotments: 0,
+            mana_rewards: Default::default(),
         }
     }
 
@@ -228,15 +232,35 @@ impl InputSelection {
         self
     }
 
+    /// Sets the total mana rewards for required inputs.
+    pub fn with_mana_rewards(mut self, mana_rewards: HashMap<OutputId, u64>) -> Self {
+        self.mana_rewards = mana_rewards;
+        self
+    }
+
+    /// Sets the mana rewards for the given input.
+    pub fn add_mana_rewards(mut self, input: OutputId, mana_rewards: u64) -> Self {
+        self.mana_rewards.insert(input, mana_rewards);
+        self
+    }
+
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
             // Filter out non basic/account/foundry/nft outputs.
-            if !input.output.is_basic()
-                && !input.output.is_account()
-                && !input.output.is_foundry()
-                && !input.output.is_nft()
+            if !(input.output.is_basic()
+                || input.output.is_account()
+                || input.output.is_foundry()
+                || input.output.is_nft())
             {
+                // Keep burned outputs
+                if let Some(burn) = &self.burn {
+                    if let Some(delegation) = input.output.as_delegation_opt() {
+                        return burn
+                            .delegations()
+                            .contains(&delegation.delegation_id_non_null(input.output_id()));
+                    }
+                }
                 return false;
             }
 
@@ -378,8 +402,11 @@ impl InputSelection {
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn or mana allotments are provided, outputs will be added later.
-            if !(self.outputs.is_empty() && (self.burn.is_some() || self.mana_allotments != 0)) {
+            // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
+            // create remainder outputs.
+            if !(self.outputs.is_empty()
+                && (self.burn.is_some() || self.mana_allotments != 0 || !self.required_inputs.is_empty()))
+            {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
         }
@@ -420,6 +447,12 @@ impl InputSelection {
 
         self.validate_transitions()?;
 
+        for output_id in self.mana_rewards.keys() {
+            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
+                return Err(Error::ExtraManaRewards(*output_id));
+            }
+        }
+
         Ok(Selected {
             inputs: Self::sort_input_signing_data(
                 self.selected_inputs,
@@ -428,6 +461,7 @@ impl InputSelection {
             )?,
             outputs: self.outputs,
             remainders,
+            mana_rewards: self.mana_rewards,
         })
     }
 
@@ -453,7 +487,7 @@ impl InputSelection {
                     input_accounts.push(input);
                 }
                 Output::Foundry(foundry) => {
-                    input_chains_foundries.insert(foundry.chain_id(), &input.output);
+                    input_chains_foundries.insert(foundry.chain_id(), (input.output_id(), &input.output));
                     input_foundries.push(input);
                 }
                 Output::Nft(_) => {

@@ -1,10 +1,10 @@
-// Copyright 2021-2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountId, Bech32Address } from '../block';
+import { AccountAddress, AccountId, Bech32Address, OutputId } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
-import { u256, HexEncodedString } from '../utils';
+import { u256, HexEncodedString, NumericString, u64 } from '../utils';
 import { Bip44Address } from './address';
 
 /** Options for creating a transaction. */
@@ -18,9 +18,9 @@ export interface TransactionOptions {
      * If custom inputs are provided, only those are used.
      * If also other additional inputs should be used, `mandatoryInputs` should be used instead.
      */
-    customInputs?: string[];
+    customInputs?: OutputId[];
     /** Inputs that must be used for the transaction. */
-    mandatoryInputs?: string[];
+    mandatoryInputs?: OutputId[];
     /** Specifies what needs to be burned during input selection. */
     burn?: Burn;
     /** Optional note, that is only stored locally. */
@@ -89,4 +89,26 @@ export interface AccountOutputParams {
     immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */
     metadata?: HexEncodedString;
+}
+
+/** Options for delegation output creation */
+export interface CreateDelegationParams {
+    /** Bech32 encoded address which will control the delegation. By default, the ed25519 wallet address will be used. */
+    address?: Bech32Address;
+    /** The amount to delegate. */
+    delegatedAmount: NumericString;
+    /** The Account Address of the validator to which this output will delegate. */
+    validatorAddress: AccountAddress;
+}
+
+/** Options for beginning staking. */
+export interface BeginStakingParams {
+    /** The account id which will become a validator. */
+    accountId: AccountId;
+    /** The amount of tokens to stake. */
+    stakedAmount: u64;
+    /** The fixed cost of the validator, which it receives as part of its Mana rewards. */
+    fixedCost: NumericString;
+    /** The staking period (in epochs). Will default to the staking unbonding period. */
+    stakingPeriod?: number;
 }

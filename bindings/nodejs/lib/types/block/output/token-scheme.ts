@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { u256 } from '../../utils';
+import { Transform } from 'class-transformer';
 import { hexToBigInt } from '../../utils/hex-encoding';
 
 /**
@@ -36,14 +37,19 @@ class SimpleTokenScheme extends TokenScheme {
     /**
      * The amount of tokens minted.
      */
+    @Transform((value) => hexToBigInt(value.value))
     readonly mintedTokens: u256;
+
     /**
      * The amount of tokens melted.
      */
+    @Transform((value) => hexToBigInt(value.value))
     readonly meltedTokens: u256;
+
     /**
      * The maximum supply of tokens.
      */
+    @Transform((value) => hexToBigInt(value.value))
     readonly maximumSupply: u256;
 
     /**

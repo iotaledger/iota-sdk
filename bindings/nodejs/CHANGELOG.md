@@ -19,11 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.5 - 2024-01-29
+
+### Added
+
+- `Utils::{verifyTransactionSyntax(), blockBytes(), blockHashWithoutNonce()}`;
+
+### Fixed
+
+- `Output` and `SimpleTokenScheme` (sub)fields not setting the `bigint` properly;
+
 ## 1.1.4 - 2023-12-07
 
 ### Added
 
-- `Utils:verifyTransactionSemantic()`;
+- `Utils::verifyTransactionSemantic()`;
 - `Account::prepareClaimOutputs()` method;
 
 ### Fixed

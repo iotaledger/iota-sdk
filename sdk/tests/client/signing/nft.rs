@@ -53,25 +53,65 @@ async fn nft_reference_unlocks() -> Result<()> {
 
     let inputs = build_inputs(
         [
-            Nft(
-                1_000_000,
-                nft_id,
-                address_0.clone(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id,
+                    address: address_0.clone(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: nft_address.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: nft_address.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
         ],
         Some(slot_index),
     );
 
     let outputs = build_outputs([
-        Nft(1_000_000, nft_id, address_0, None, None, None, None, None),
-        Basic(2_000_000, nft_address, None, None, None, None, None, None),
+        Nft {
+            amount: 1_000_000,
+            nft_id: nft_id,
+            address: address_0,
+            sender: None,
+            issuer: None,
+            sdruc: None,
+            expiration: None,
+        },
+        Basic {
+            amount: 2_000_000,
+            address: nft_address,
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -89,6 +129,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -114,7 +155,12 @@ async fn nft_reference_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

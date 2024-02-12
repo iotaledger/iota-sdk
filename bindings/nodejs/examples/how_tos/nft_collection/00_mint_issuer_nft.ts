@@ -14,7 +14,7 @@ require('dotenv').config({ path: '.env' });
 // In this example we will mint the issuer NFT for the NFT collection.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts_and_addresses/create-wallet` example!
+// running the `how_tos/wallet/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nft_collection/00_mint_issuer_nft.ts

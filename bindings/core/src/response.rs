@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(not(target_family = "wasm"))]
@@ -9,7 +9,7 @@ use derivative::Derivative;
 use iota_sdk::client::secret::LedgerNanoStatus;
 use iota_sdk::{
     client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{PreparedTransactionData, SignedTransactionDataDto},
         node_manager::node::Node,
         NetworkInfo, NodeInfoWrapper,
     },
@@ -41,7 +41,7 @@ use iota_sdk::{
     utils::serde::string,
     wallet::{
         types::{Balance, OutputData, TransactionWithMetadataDto},
-        PreparedCreateNativeTokenTransactionDto,
+        PreparedCreateDelegationTransaction, PreparedCreateNativeTokenTransaction,
     },
 };
 use serde::Serialize;
@@ -156,6 +156,7 @@ pub enum Response {
     BlockWithMetadata(BlockWithMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
+    /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
@@ -288,6 +289,7 @@ pub enum Response {
     /// - [`StartBackgroundSync`](crate::method::WalletMethod::StartBackgroundSync),
     /// - [`StoreMnemonic`](crate::method::WalletMethod::StoreMnemonic),
     /// - [`StopBackgroundSync`](crate::method::WalletMethod::StopBackgroundSync),
+    /// - [`VerifyTransactionSyntax`](crate::method::UtilsMethod::VerifyTransactionSyntax),
     Ok,
     /// Response for any method that returns an error.
     Error(Error),
@@ -334,10 +336,13 @@ pub enum Response {
     /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
     /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
-    PreparedTransaction(PreparedTransactionDataDto),
+    PreparedTransaction(PreparedTransactionData),
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::WalletMethod::PrepareCreateNativeToken),
-    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto),
+    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransaction),
+    /// Response for:
+    /// - [`PrepareCreateDelegation`](crate::method::WalletMethod::PrepareCreateDelegation),
+    PreparedCreateDelegationTransaction(PreparedCreateDelegationTransaction),
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::WalletMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::WalletMethod::GetTransaction),

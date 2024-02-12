@@ -6,7 +6,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `how_tos/accounts_and_addresses/create-wallet` example!
+// running the `how_tos/wallet/create-wallet` example!
 //
 require('dotenv').config({ path: '.env' });
 

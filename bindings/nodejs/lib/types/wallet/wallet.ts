@@ -8,10 +8,10 @@ import {
     NftId,
     TokenId,
 } from '../block/id';
-import { DecayedMana, u256, u64 } from '../utils';
+import { DecayedMana, HexEncodedString, u256, u64 } from '../utils';
 import { IClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
-import { Bech32Address, OutputId } from '../block';
+import { Bech32Address } from '../block';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {
@@ -49,7 +49,7 @@ export interface Balance {
      * Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
      * TimelockUnlockCondition or ExpirationUnlockCondition this can change at any time
      */
-    potentiallyLockedOutputs: { [outputId: OutputId]: boolean };
+    potentiallyLockedOutputs: { [outputId: HexEncodedString]: boolean };
 }
 
 /** The balance of the base coin */
@@ -105,7 +105,7 @@ export interface SyncOptions {
     /// Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
     /// pruned.
     syncIncomingTransactions?: boolean;
-    /** Checks pending transactions and reissues them if necessary. Default: true. */
+    /** Checks pending transactions. Default: true. */
     syncPendingTransactions?: boolean;
     /** Specifies what outputs should be synced for the ed25519 address from the wallet. */
     wallet?: WalletSyncOptions;

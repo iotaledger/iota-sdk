@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! The IOTA Wallet Library
@@ -52,16 +52,19 @@ pub use self::{
         transaction::{
             high_level::{
                 create_account::CreateAccountParams,
+                delegation::create::{
+                    CreateDelegationParams, CreateDelegationTransaction, PreparedCreateDelegationTransaction,
+                },
                 minting::{
                     create_native_token::{
-                        CreateNativeTokenParams, CreateNativeTokenTransactionDto,
-                        PreparedCreateNativeTokenTransactionDto,
+                        CreateNativeTokenParams, CreateNativeTokenTransaction, PreparedCreateNativeTokenTransaction,
                     },
                     mint_nfts::MintNftParams,
                 },
                 send::SendParams,
                 send_native_tokens::SendNativeTokenParams,
                 send_nft::SendNftParams,
+                staking::begin::BeginStakingParams,
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
             RemainderValueStrategy, TransactionOptions,

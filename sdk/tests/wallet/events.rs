@@ -59,7 +59,6 @@ fn wallet_events_serde() {
                 hash: [0u8; 32],
             }),
         },
-        is_spent: false,
         network_id: 42,
         remainder: true,
     };
@@ -116,6 +115,7 @@ fn wallet_events_serde() {
                 transaction: (&transaction).into(),
                 inputs_data: Vec::new(),
                 remainders: Vec::new(),
+                mana_rewards: Default::default(),
             })),
         ));
     }

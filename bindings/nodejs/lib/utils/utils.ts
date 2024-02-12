@@ -20,6 +20,7 @@ import {
     InputSigningData,
     Unlock,
     DecayedMana,
+    NumericString,
 } from '../types';
 import {
     AccountId,
@@ -454,21 +455,27 @@ export class Utils {
      *
      * @param transaction The transaction payload.
      * @param inputs The inputs data.
+     * @param protocolParameters The protocol parameters.
      * @param unlocks The unlocks.
+     * @param manaRewards The total mana rewards claimed in the transaction.
      *
      * @returns The conflict reason.
      */
     static verifyTransactionSemantic(
         transaction: SignedTransactionPayload,
         inputs: InputSigningData[],
+        protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
+        manaRewards?: { [outputId: HexEncodedString]: NumericString },
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
                 transaction,
                 inputs,
+                protocolParameters,
                 unlocks,
+                manaRewards,
             },
         });
         return conflictReason;
@@ -560,5 +567,41 @@ export class Utils {
             stored: BigInt(decayedMana.stored),
             potential: BigInt(decayedMana.potential),
         };
+    }
+
+    /**
+     * Verifies the syntax of a transaction.
+     *
+     * @param transaction The transaction payload.
+     * @param protocolParameters The protocol parameters used for the validation.
+     * @returns void.
+     */
+    static verifyTransactionSyntax(
+        transaction: SignedTransactionPayload,
+        protocolParameters: ProtocolParameters,
+    ): void {
+        return callUtilsMethod({
+            name: 'verifyTransactionSyntax',
+            data: {
+                transaction,
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
+     * Returns the serialized bytes of a block.
+     *
+     * @param block The block.
+     * @returns The block bytes.
+     */
+    static blockBytes(block: Block): Uint8Array {
+        const blockBytes = callUtilsMethod({
+            name: 'blockBytes',
+            data: {
+                block,
+            },
+        });
+        return new Uint8Array(blockBytes);
     }
 }
