@@ -10,8 +10,12 @@ import { OutputResponse } from '../models/api';
 export enum InclusionState {
     /** The transaction is pending. */
     Pending = 'Pending',
+    /** The transaction is accepted. */
+    Accepted = 'Accepted',
     /** The transaction is confirmed. */
     Confirmed = 'Confirmed',
+    /** The transaction is finalized. */
+    Finalized = 'Finalized',
     /** The transaction is conflicting. */
     Conflicting = 'Conflicting',
     /** The transaction and its in- and outputs are pruned, so it's unknown if it got confirmed or was conflicting. */

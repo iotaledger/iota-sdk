@@ -75,7 +75,7 @@ async function run() {
             allowMicroAmount: false,
         };
         const transaction = await wallet.sendWithParams(params, options);
-        await wallet.reissueTransactionUntilIncluded(transaction.transactionId);
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
         console.log(
             `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,
         );
