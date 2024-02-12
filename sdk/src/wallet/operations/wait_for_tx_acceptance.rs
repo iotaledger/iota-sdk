@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::time::Duration;
+
 use crate::{
     client::{secret::SecretManage, Error as ClientError},
     types::{
@@ -10,8 +12,7 @@ use crate::{
     wallet::{types::InclusionState, Error, Wallet},
 };
 
-// Time in milliseconds
-const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL: u64 = 500;
+const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL: Duration = Duration::from_millis(500);
 const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_AMOUNT: u64 = 80;
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -62,14 +63,10 @@ where
             .block_id
             .ok_or_else(|| ClientError::TransactionAcceptance(transaction_id.to_string()))?;
 
-        let duration = std::time::Duration::from_millis(interval.unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL));
+        let duration = interval
+            .map(std::time::Duration::from_millis)
+            .unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL);
         for _ in 0..max_attempts.unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_AMOUNT) {
-            #[cfg(target_family = "wasm")]
-            gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
-
-            #[cfg(not(target_family = "wasm"))]
-            tokio::time::sleep(duration).await;
-
             let block_metadata = self.client().get_block_metadata(&block_id).await?;
             if let Some(transaction_state) = block_metadata.transaction_metadata.map(|m| m.transaction_state) {
                 match transaction_state {
@@ -78,7 +75,11 @@ where
                     }
                     TransactionState::Failed => {
                         // Check if the transaction got reissued in another block and confirmed there
-                        let included_block = self.client().get_included_block(transaction_id).await.map_err(|e| {
+                        let included_block_metadata = self
+                            .client()
+                            .get_included_block_metadata(transaction_id)
+                            .await
+                            .map_err(|e| {
                             if matches!(e, ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) {
                                 // If no block was found with this transaction id, then it couldn't get accepted
                                 ClientError::TransactionAcceptance(transaction_id.to_string())
@@ -86,12 +87,16 @@ where
                                 e
                             }
                         })?;
-                        let protocol_parameters = self.client().get_protocol_parameters().await?;
-                        return Ok(included_block.id(&protocol_parameters));
+                        return Ok(included_block_metadata.block_id);
                     }
                     TransactionState::Pending => {} // Just need to wait longer
                 };
             }
+
+            #[cfg(target_family = "wasm")]
+            gloo_timers::future::TimeoutFuture::new(duration.as_millis() as u32).await;
+            #[cfg(not(target_family = "wasm"))]
+            tokio::time::sleep(duration).await;
         }
         Err(ClientError::TransactionAcceptance(transaction_id.to_string()).into())
     }
