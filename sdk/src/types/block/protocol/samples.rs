@@ -3,8 +3,6 @@
 
 use std::sync::OnceLock;
 
-use time::OffsetDateTime;
-
 use crate::types::block::{
     address::Hrp,
     mana::{ManaParameters, RewardsParameters},
@@ -44,7 +42,13 @@ pub fn iota_mainnet_protocol_parameters() -> &'static ProtocolParameters {
             },
             token_supply: 1_813_620_509_061_365,
             genesis_slot: 0,
-            genesis_unix_timestamp: OffsetDateTime::now_utc().unix_timestamp() as _,
+            #[cfg(not(target_family = "wasm"))]
+            genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
+            #[cfg(target_family = "wasm")]
+            genesis_unix_timestamp: instant::SystemTime::now()
+                .duration_since(instant::SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 60,
             slots_per_epoch_exponent: 13,
@@ -127,7 +131,13 @@ pub fn shimmer_mainnet_protocol_parameters() -> &'static ProtocolParameters {
             },
             token_supply: 1_813_620_509_061_365,
             genesis_slot: 0,
+            #[cfg(not(target_family = "wasm"))]
             genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
+            #[cfg(target_family = "wasm")]
+            genesis_unix_timestamp: instant::SystemTime::now()
+                .duration_since(instant::SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 60,
             slots_per_epoch_exponent: 13,
