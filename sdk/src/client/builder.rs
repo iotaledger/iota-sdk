@@ -244,7 +244,7 @@ impl ClientBuilder {
 
         let client = Client {
             inner: Arc::new(ClientInner {
-                node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
+                node_manager: RwLock::new(self.node_manager_builder.build(HashSet::new())),
                 network_info: RwLock::new(self.network_info),
                 api_timeout: RwLock::new(self.api_timeout),
                 #[cfg(feature = "mqtt")]
