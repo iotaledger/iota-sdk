@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any, Optional, List, Union
+from typing import Any, Dict, Optional, List, Union
 from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
@@ -143,7 +143,7 @@ class TaggedDataPayload(Payload):
         tag: The tag part of the tagged data payload.
         data: The data part of the tagged data payload.
     """
-    tag: HexStr
+    tag: Optional[HexStr] = None
     data: Optional[HexStr] = None
     type: int = field(
         default_factory=lambda: int(
