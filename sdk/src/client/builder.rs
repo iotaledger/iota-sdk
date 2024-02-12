@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Builder of the Client Instance
-use std::{sync::Arc, time::Duration};
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
@@ -185,8 +185,6 @@ impl ClientBuilder {
     /// Build the Client instance.
     #[cfg(not(target_family = "wasm"))]
     pub async fn finish(self) -> Result<Client> {
-        use std::collections::HashSet;
-
         use tokio::sync::RwLock;
 
         let node_sync_interval = self.node_manager_builder.node_sync_interval;

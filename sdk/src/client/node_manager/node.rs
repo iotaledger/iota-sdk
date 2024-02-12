@@ -38,7 +38,7 @@ impl From<Url> for Node {
             url,
             auth: None,
             disabled: false,
-            permanode: true,
+            permanode: false,
         }
     }
 }
