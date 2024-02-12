@@ -144,21 +144,13 @@ impl InputSelection {
                 })
             {
                 let new_mana = output.mana() + std::mem::take(&mut mana_diff);
-                match output {
-                    Output::Basic(b) => {
-                        *output = BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?;
-                    }
-                    Output::Account(a) => {
-                        *output = AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?;
-                    }
-                    Output::Anchor(a) => {
-                        *output = AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?;
-                    }
-                    Output::Nft(n) => {
-                        *output = NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?;
-                    }
-                    _ => (),
-                }
+                *output = match output {
+                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
+                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
+                    _ => unreachable!(),
+                };
                 // If we have no other remainders, we are done
                 if input_amount == output_amount && native_tokens_diff.is_none() {
                     return Ok((storage_deposit_returns, Vec::new()));
