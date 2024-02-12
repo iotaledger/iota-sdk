@@ -151,7 +151,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(FoundryOutputQueryParameters::new().account(address))
+                    .foundry_output_ids(FoundryOutputQueryParameters::new().account(*address))
                     .await?
                     .items))
             }
