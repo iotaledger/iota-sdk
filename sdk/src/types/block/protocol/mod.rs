@@ -339,8 +339,8 @@ pub fn iota_mainnet_v3_protocol_parameters() -> &'static ProtocolParameters {
         ProtocolParameters {
             kind: 0,
             version: super::PROTOCOL_VERSION,
-            network_name: String::from("testnet").try_into().unwrap(),
-            bech32_hrp: Hrp::from_str_unchecked("rms"),
+            network_name: String::from("iota-mainnet").try_into().unwrap(),
+            bech32_hrp: Hrp::from_str_unchecked("iota"),
             storage_score_parameters: StorageScoreParameters {
                 storage_cost: 100,
                 factor_data: 1,
