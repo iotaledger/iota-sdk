@@ -28,7 +28,7 @@ fn builder() {
         .add_unlock_condition(address_1)
         .add_feature(sender_1)
         .replace_feature(sender_2)
-        .replace_immutable_feature(issuer_1.clone())
+        .replace_immutable_feature(issuer_1)
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();

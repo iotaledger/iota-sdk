@@ -43,7 +43,6 @@ async fn nft_reference_unlocks() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -57,7 +56,7 @@ async fn nft_reference_unlocks() -> Result<()> {
                 Nft {
                     amount: 1_000_000,
                     nft_id,
-                    address: address_0.clone(),
+                    address: address_0,
                     sender: None,
                     issuer: None,
                     sdruc: None,

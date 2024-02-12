@@ -27,9 +27,9 @@ fn builder() {
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
         .add_unlock_condition(address_1)
-        .add_feature(sender_1.clone())
+        .add_feature(sender_1)
         .replace_feature(sender_2)
-        .replace_immutable_feature(issuer_1.clone())
+        .replace_immutable_feature(issuer_1)
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();
@@ -53,8 +53,8 @@ fn builder() {
     let output = builder
         .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
-        .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
-        .with_immutable_features([Feature::from(metadata.clone()), issuer_1.clone().into()])
+        .with_features([Feature::from(metadata.clone()), sender_1.into()])
+        .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
         .finish()
         .unwrap();
 

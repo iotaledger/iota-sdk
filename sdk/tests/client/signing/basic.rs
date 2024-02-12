@@ -35,7 +35,6 @@ async fn single_ed25519_unlock() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -45,7 +44,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address_0.clone(),
+                address: address_0,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -121,7 +120,6 @@ async fn ed25519_reference_unlocks() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -132,7 +130,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: address_0.clone(),
+                    address: address_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -144,7 +142,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: address_0.clone(),
+                    address: address_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -156,7 +154,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: address_0.clone(),
+                    address: address_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -245,7 +243,6 @@ async fn two_signature_unlocks() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
     let address_1 = secret_manager
         .generate_ed25519_addresses(
@@ -254,7 +251,6 @@ async fn two_signature_unlocks() -> Result<()> {
                 .with_range(1..2),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -265,7 +261,7 @@ async fn two_signature_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: address_0.clone(),
+                    address: address_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,

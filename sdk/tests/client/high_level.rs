@@ -42,7 +42,6 @@ async fn test_find_inputs() {
             .address()
             .unwrap()
             .address()
-            .clone()
             .to_bech32(client.get_bech32_hrp().await.unwrap());
 
         let input = client.find_inputs(vec![address], 1_000_000).await.unwrap();

@@ -22,8 +22,7 @@ async fn private_key_secret_manager_hex() -> Result<()> {
                 .with_range(0..1),
         )
         .await
-        .unwrap()[0]
-        .clone();
+        .unwrap()[0];
     // Changing range generates the same address.
     let address_1 = secret_manager
         .generate_ed25519_addresses(
@@ -33,8 +32,7 @@ async fn private_key_secret_manager_hex() -> Result<()> {
                 .with_range(1..2),
         )
         .await
-        .unwrap()[0]
-        .clone();
+        .unwrap()[0];
     // Changing account generates the same address.
     let address_2 = secret_manager
         .generate_ed25519_addresses(
@@ -44,8 +42,7 @@ async fn private_key_secret_manager_hex() -> Result<()> {
                 .with_range(0..1),
         )
         .await
-        .unwrap()[0]
-        .clone();
+        .unwrap()[0];
 
     assert_eq!(
         address_0,
@@ -77,8 +74,7 @@ async fn private_key_secret_manager_bs58() -> Result<()> {
                 .with_range(0..1),
         )
         .await
-        .unwrap()[0]
-        .clone();
+        .unwrap()[0];
 
     assert_eq!(
         address,

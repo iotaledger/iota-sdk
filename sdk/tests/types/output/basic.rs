@@ -29,7 +29,7 @@ fn builder() {
     let mut builder = BasicOutput::build_with_amount(amount)
         .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1)
-        .add_feature(sender_1.clone())
+        .add_feature(sender_1)
         .replace_feature(sender_2);
 
     let output = builder.clone().finish().unwrap();
@@ -50,7 +50,7 @@ fn builder() {
     let output = builder
         .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(rand_address_unlock_condition())
-        .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
+        .with_features([Feature::from(metadata.clone()), sender_1.into()])
         .finish()
         .unwrap();
 
