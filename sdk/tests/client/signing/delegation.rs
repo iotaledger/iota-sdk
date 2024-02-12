@@ -43,7 +43,6 @@ async fn valid_creation() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -131,7 +130,6 @@ async fn creation_missing_commitment_input() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -219,7 +217,6 @@ async fn non_null_id_creation() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -304,7 +301,6 @@ async fn mismatch_amount_creation() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -389,7 +385,6 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -474,7 +469,6 @@ async fn invalid_start_epoch_creation() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -560,7 +554,6 @@ async fn delay_not_null_id() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -660,7 +653,6 @@ async fn delay_modified_amount() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -757,7 +749,6 @@ async fn delay_modified_validator() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -854,7 +845,6 @@ async fn delay_modified_start_epoch() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -951,7 +941,6 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -1048,7 +1037,6 @@ async fn destroy_null_id() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -1148,7 +1136,6 @@ async fn destroy_reward_missing() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();

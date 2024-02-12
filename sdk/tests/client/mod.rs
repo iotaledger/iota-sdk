@@ -126,7 +126,7 @@ impl<'a> Build<'a> {
                 }
 
                 if let Some(sender) = sender {
-                    builder = builder.add_feature(SenderFeature::new(sender.clone()));
+                    builder = builder.add_feature(SenderFeature::new(sender));
                 }
 
                 if let Some((address, amount)) = sdruc {

@@ -43,7 +43,6 @@ async fn sign_account_state_transition() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
@@ -126,7 +125,6 @@ async fn account_reference_unlocks() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
-        .clone()
         .into_inner();
 
     let protocol_parameters = protocol_parameters();

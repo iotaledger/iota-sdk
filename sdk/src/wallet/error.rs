@@ -120,7 +120,7 @@ pub enum Error {
     Voting(String),
     /// Address not the wallet address
     #[error("address {0} is not the wallet address")]
-    WalletAddressMismatch(Bech32Address),
+    WalletAddressMismatch(Box<Bech32Address>),
     /// Action requires the wallet to be Ed25519 address based
     #[error("tried to perform an action that requires the wallet to be Ed25519 address based")]
     NonEd25519Address,

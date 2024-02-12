@@ -54,9 +54,9 @@ async fn all_combined() -> Result<()> {
                 .with_range(0..3),
         )
         .await?;
-    let ed25519_0 = ed25519_bech32_addresses[0].clone().into_inner();
-    let ed25519_1 = ed25519_bech32_addresses[1].clone().into_inner();
-    let ed25519_2 = ed25519_bech32_addresses[2].clone().into_inner();
+    let ed25519_0 = ed25519_bech32_addresses[0].into_inner();
+    let ed25519_1 = ed25519_bech32_addresses[1].into_inner();
+    let ed25519_2 = ed25519_bech32_addresses[2].into_inner();
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2)?;
@@ -80,7 +80,7 @@ async fn all_combined() -> Result<()> {
                 Account {
                     amount: 1_000_000,
                     account_id: account_id_1,
-                    address: nft_1.clone(),
+                    address: nft_1,
                     sender: None,
                     issuer: None,
                 },
@@ -111,7 +111,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: account_2.clone(),
+                    address: account_2,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -135,7 +135,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: nft_2.clone(),
+                    address: nft_2,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -159,7 +159,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: nft_4.clone(),
+                    address: nft_4,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -183,7 +183,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: ed25519_1.clone(),
+                    address: ed25519_1,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -195,7 +195,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: ed25519_2.clone(),
+                    address: ed25519_2,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -207,7 +207,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: ed25519_2.clone(),
+                    address: ed25519_2,
                     native_token: None,
                     sender: None,
                     sdruc: None,

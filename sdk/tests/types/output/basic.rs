@@ -40,7 +40,7 @@ fn builder() {
     builder = builder
         .clear_unlock_conditions()
         .clear_features()
-        .replace_unlock_condition(address_2.clone());
+        .replace_unlock_condition(address_2);
     let output = builder.clone().finish().unwrap();
     assert_eq!(output.unlock_conditions().address(), Some(&address_2));
     assert!(output.features().is_empty());

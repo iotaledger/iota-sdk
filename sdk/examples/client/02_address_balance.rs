@@ -42,8 +42,7 @@ async fn main() -> Result<()> {
                 .with_account_index(0)
                 .with_range(0..1),
         )
-        .await?[0]
-        .clone();
+        .await?[0];
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
