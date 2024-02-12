@@ -18,7 +18,7 @@ class WalletDestroy(unittest.TestCase):
             "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
 
         bip_path = Bip44(
-            coin_type=CoinType.SHIMMER
+            coin_type=CoinType.IOTA
         )
         wallet_options = WalletOptions(
             None,
@@ -30,7 +30,7 @@ class WalletDestroy(unittest.TestCase):
         wallet = Wallet(wallet_options)
 
         address = wallet.address()
-        assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == address
+        assert 'iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg' == address
 
         # Destroy the wallet
         wallet.destroy()
@@ -39,7 +39,7 @@ class WalletDestroy(unittest.TestCase):
         wallet = Wallet(wallet_options)
 
         address = wallet.address()
-        assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == address
+        assert 'iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg' == address
         shutil.rmtree(db_path, ignore_errors=True)
 
     def test_wallet_destroy_error(self):
