@@ -37,16 +37,20 @@ where
             .cloned()
             .ok_or_else(|| Error::TransactionNotFound(*transaction_id))?;
 
-        if matches!(transaction.inclusion_state, InclusionState::Accepted | InclusionState::Confirmed | InclusionState::Finalized)
-        {
+        if matches!(
+            transaction.inclusion_state,
+            InclusionState::Accepted | InclusionState::Confirmed | InclusionState::Finalized
+        ) {
             return Ok(transaction
                 .block_id
                 // Safe to unwrap, we always set the block id together with any of these inclusion states.
                 .expect("missing block id in TransactionWithMetadata"));
         }
 
-        if matches!(transaction.inclusion_state, InclusionState::Conflicting | InclusionState::UnknownPruned)
-        {
+        if matches!(
+            transaction.inclusion_state,
+            InclusionState::Conflicting | InclusionState::UnknownPruned
+        ) {
             return Err(ClientError::TransactionAcceptance(format!(
                 "transaction id: {} inclusion state: {:?}",
                 transaction_id, transaction.inclusion_state
