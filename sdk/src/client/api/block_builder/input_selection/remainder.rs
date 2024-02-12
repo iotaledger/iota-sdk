@@ -126,44 +126,12 @@ impl InputSelection {
             .checked_sub(output_mana)
             .ok_or(BlockError::ConsumedManaOverflow)?;
 
-        // If there is only a mana remainder, try to fit it in an automatically transitioned output.
-        if input_amount == output_amount && input_mana != output_mana && native_tokens_diff.is_none() {
-            let filter = |output: &Output| {
-                output
-                    .chain_id()
-                    .as_ref()
-                    .map(|chain_id| self.automatically_transitioned.contains(chain_id))
-                    .unwrap_or(false)
-                    // Foundries can't hold mana so they are not considered here.
-                    && !output.is_foundry()
-            };
-            let index = self
-                .outputs
-                .iter()
-                .position(|output| filter(output) && output.is_account())
-                .or_else(|| self.outputs.iter().position(filter));
-
-            if let Some(index) = index {
-                self.outputs[index] = match &self.outputs[index] {
-                    Output::Account(output) => AccountOutputBuilder::from(output)
-                        .with_mana(output.mana() + mana_diff)
-                        .finish_output()?,
-                    Output::Nft(output) => NftOutputBuilder::from(output)
-                        .with_mana(output.mana() + mana_diff)
-                        .finish_output()?,
-                    _ => panic!("only account, nft can be automatically created and can hold mana"),
-                };
-
-                return Ok((storage_deposit_returns, Vec::new()));
-            }
-        }
-
         let Some((remainder_address, chain)) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        if mana_diff > 0 {
-            // Find any output that can take the mana, so we don't need to create a remainder specifically for it
+        // If there is a mana remainder, try to fit it in an existing output
+        if input_mana > output_mana {
             if let Some(output) = self
                 .outputs
                 .iter_mut()
@@ -190,6 +158,10 @@ impl InputSelection {
                         *output = NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?;
                     }
                     _ => (),
+                }
+                // If we have no other remainders, we are done
+                if input_amount == output_amount && native_tokens_diff.is_none() {
+                    return Ok((storage_deposit_returns, Vec::new()));
                 }
             }
         }
