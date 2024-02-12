@@ -22,5 +22,5 @@ pub(crate) mod participation;
 pub(crate) mod syncing;
 /// The module for transactions
 pub(crate) mod transaction;
-/// The module for awaiting on transaction acceptance
+/// The module for waiting for transaction acceptance
 pub(crate) mod wait_for_tx_acceptance;

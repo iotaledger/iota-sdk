@@ -11,8 +11,8 @@ use crate::{
 };
 
 // Time in milliseconds
-const DEFAULT_AWAIT_TX_ACCEPTANCE_INTERVAL: u64 = 500;
-const DEFAULT_AWAIT_TX_ACCEPTANCE_MAX_AMOUNT: u64 = 80;
+const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL: u64 = 500;
+const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_AMOUNT: u64 = 80;
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
