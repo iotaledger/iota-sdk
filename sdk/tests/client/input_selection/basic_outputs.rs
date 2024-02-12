@@ -55,6 +55,7 @@ fn input_amount_equal_output_amount() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -99,6 +100,7 @@ fn input_amount_lower_than_output_amount() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -161,6 +163,7 @@ fn input_amount_lower_than_output_amount_2() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -209,6 +212,7 @@ fn input_amount_greater_than_output_amount() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -266,6 +270,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -337,6 +342,7 @@ fn two_same_inputs_one_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -408,6 +414,7 @@ fn two_inputs_one_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -466,6 +473,7 @@ fn two_inputs_one_needed_reversed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -524,6 +532,7 @@ fn two_inputs_both_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -582,6 +591,7 @@ fn two_inputs_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -734,6 +744,7 @@ fn ed25519_sender() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -786,6 +797,7 @@ fn missing_ed25519_sender() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -880,6 +892,7 @@ fn account_sender() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -947,6 +960,7 @@ fn account_sender_zero_id() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -997,6 +1011,7 @@ fn missing_account_sender() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1093,6 +1108,7 @@ fn nft_sender() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1163,6 +1179,7 @@ fn nft_sender_zero_id() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1213,6 +1230,7 @@ fn missing_nft_sender() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1258,6 +1276,7 @@ fn simple_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1393,6 +1412,7 @@ fn one_provided_one_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1437,6 +1457,7 @@ fn insufficient_amount() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1499,6 +1520,7 @@ fn two_inputs_remainder_2() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1569,6 +1591,7 @@ fn two_inputs_remainder_3() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1667,6 +1690,7 @@ fn sender_already_selected() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1715,6 +1739,7 @@ fn single_mandatory_input() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1764,6 +1789,7 @@ fn too_many_inputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1831,6 +1857,7 @@ fn more_than_max_inputs_only_one_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1878,6 +1905,7 @@ fn too_many_outputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1927,6 +1955,7 @@ fn too_many_outputs_with_remainder() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -2025,6 +2054,7 @@ fn restricted_ed25519() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -2087,6 +2117,7 @@ fn restricted_nft() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -2147,6 +2178,7 @@ fn restricted_account() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -2247,6 +2279,7 @@ fn restricted_ed25519_sender() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -2343,6 +2376,7 @@ fn multi_address_sender_already_fulfilled() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -2420,6 +2454,7 @@ fn ed25519_backed_available_address() {
         outputs.clone(),
         // Restricted address is provided, but it can also unlock the ed25519 one
         [restricted_address],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )

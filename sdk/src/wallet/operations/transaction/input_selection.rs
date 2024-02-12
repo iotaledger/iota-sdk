@@ -38,6 +38,7 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let creation_slot_index = self.client().get_slot_index().await?;
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         if options.issuer_id.is_none() {
             options.issuer_id = self.data().await.first_account_id();
@@ -81,7 +82,7 @@ where
         let available_outputs_signing_data = filter_inputs(
             &wallet_data,
             wallet_data.unspent_outputs.values(),
-            slot_commitment_id.slot_index(),
+            creation_slot_index,
             protocol_parameters.committable_age_range(),
             &options.mandatory_inputs,
         )?;
@@ -94,7 +95,7 @@ where
                     mana_rewards.insert(
                         output.output_id,
                         self.client()
-                            .get_output_mana_rewards(&output.output_id, slot_commitment_id.slot_index())
+                            .get_output_mana_rewards(&output.output_id, creation_slot_index)
                             .await?
                             .rewards,
                     );
@@ -120,7 +121,7 @@ where
                     mana_rewards.insert(
                         *output_id,
                         self.client()
-                            .get_output_mana_rewards(output_id, slot_commitment_id.slot_index())
+                            .get_output_mana_rewards(output_id, creation_slot_index)
                             .await?
                             .rewards,
                     );
@@ -133,6 +134,7 @@ where
             options.context_inputs,
             outputs,
             Some(wallet_data.address.clone().into_inner()),
+            creation_slot_index,
             slot_commitment_id,
             protocol_parameters.clone(),
         )

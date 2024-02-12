@@ -50,7 +50,7 @@ impl InputSelection {
             + input.output.available_mana(
                 &self.protocol_parameters,
                 input.output_id().transaction_id().slot_index(),
-                self.slot_commitment_id.slot_index(),
+                self.creation_slot_index,
             )?)
     }
 }

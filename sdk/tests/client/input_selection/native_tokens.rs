@@ -63,6 +63,7 @@ fn two_native_tokens_one_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -133,6 +134,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -214,6 +216,7 @@ fn three_inputs_two_needed_plus_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -295,6 +298,7 @@ fn three_inputs_two_needed_no_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -339,6 +343,7 @@ fn insufficient_native_tokens_one_input() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -413,6 +418,7 @@ fn insufficient_native_tokens_three_inputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -475,6 +481,7 @@ fn burn_and_send_at_the_same_time() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -526,6 +533,7 @@ fn burn_one_input_no_output() {
         None,
         None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -591,6 +599,7 @@ fn multiple_native_tokens() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -636,6 +645,7 @@ fn insufficient_native_tokens() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -684,6 +694,7 @@ fn insufficient_native_tokens_2() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -732,6 +743,7 @@ fn insufficient_amount_for_remainder() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -780,6 +792,7 @@ fn single_output_native_token_no_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -824,6 +837,7 @@ fn single_output_native_token_remainder_1() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -875,6 +889,7 @@ fn single_output_native_token_remainder_2() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -940,6 +955,7 @@ fn two_basic_outputs_1() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1006,6 +1022,7 @@ fn two_basic_outputs_2() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1072,6 +1089,7 @@ fn two_basic_outputs_3() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1138,6 +1156,7 @@ fn two_basic_outputs_4() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1204,6 +1223,7 @@ fn two_basic_outputs_5() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1270,6 +1290,7 @@ fn two_basic_outputs_6() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1335,6 +1356,7 @@ fn two_basic_outputs_7() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1400,6 +1422,7 @@ fn two_basic_outputs_8() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1462,6 +1485,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1552,6 +1576,7 @@ fn multiple_remainders() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )

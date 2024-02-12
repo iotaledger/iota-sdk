@@ -10,7 +10,7 @@ impl InputSelection {
         let required_address = input
             .output
             .required_address(
-                self.slot_commitment_id.slot_index(),
+                self.creation_slot_index,
                 self.protocol_parameters.committable_age_range(),
             )
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
@@ -26,7 +26,7 @@ impl InputSelection {
         let required_address = input
             .output
             .required_address(
-                self.slot_commitment_id.slot_index(),
+                self.creation_slot_index,
                 self.protocol_parameters.committable_age_range(),
             )
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.

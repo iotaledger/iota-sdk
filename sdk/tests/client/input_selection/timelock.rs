@@ -49,7 +49,8 @@ fn one_output_timelock_not_expired() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select();
@@ -91,7 +92,8 @@ fn timelock_equal_timestamp() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
     .select()
@@ -149,7 +151,8 @@ fn two_outputs_one_timelock_expired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -208,7 +211,8 @@ fn two_outputs_one_timelocked_one_missing() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -253,7 +257,8 @@ fn one_output_timelock_expired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()

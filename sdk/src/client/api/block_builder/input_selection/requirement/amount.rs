@@ -5,13 +5,13 @@ use std::collections::{HashMap, HashSet};
 
 use super::{native_tokens::get_native_tokens, Error, InputSelection, Requirement};
 use crate::{
-    client::{api::input_selection::remainder::required_remainder_amount, secret::types::InputSigningData},
+    client::secret::types::InputSigningData,
     types::block::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            MinimumOutputAmount, NativeTokens, NftOutputBuilder, Output, OutputId, StorageScoreParameters, TokenId,
+            MinimumOutputAmount, NativeTokens, NftOutputBuilder, Output, OutputId, TokenId,
         },
         slot::SlotIndex,
     },
@@ -45,7 +45,7 @@ impl InputSelection {
         for selected_input in &self.selected_inputs {
             inputs_sum += selected_input.output.amount();
 
-            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_commitment_id.slot_index()) {
+            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.creation_slot_index) {
                 *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
         }
@@ -83,8 +83,6 @@ struct AmountSelection {
     remainder_amount: u64,
     native_tokens_remainder: bool,
     mana_remainder: bool,
-    slot_index: SlotIndex,
-    storage_score_parameters: StorageScoreParameters,
     selected_native_tokens: HashSet<TokenId>,
 }
 
@@ -97,9 +95,7 @@ impl AmountSelection {
                 .iter()
                 .filter_map(|i| i.output.native_token().map(|n| *n.token_id())),
         );
-        let (remainder_amount, native_tokens_remainder) = input_selection.remainder_amount()?;
-
-        let (selected_mana, required_mana) = input_selection.mana_sums()?;
+        let (remainder_amount, native_tokens_remainder, mana_remainder) = input_selection.remainder_amount()?;
 
         Ok(Self {
             newly_selected_inputs: HashMap::new(),
@@ -109,9 +105,7 @@ impl AmountSelection {
             outputs_sdr,
             remainder_amount,
             native_tokens_remainder,
-            mana_remainder: selected_mana > required_mana,
-            slot_index: input_selection.slot_commitment_id.slot_index(),
-            storage_score_parameters: input_selection.protocol_parameters.storage_score_parameters(),
+            mana_remainder,
             selected_native_tokens,
         })
     }
@@ -135,13 +129,17 @@ impl AmountSelection {
         }
     }
 
-    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData>) -> Result<bool, Error> {
+    fn fulfil<'a>(
+        &mut self,
+        input_selection: &InputSelection,
+        inputs: impl Iterator<Item = &'a InputSigningData>,
+    ) -> Result<bool, Error> {
         for input in inputs {
             if self.newly_selected_inputs.contains_key(input.output_id()) {
                 continue;
             }
 
-            if let Some(sdruc) = sdruc_not_expired(&input.output, self.slot_index) {
+            if let Some(sdruc) = sdruc_not_expired(&input.output, input_selection.creation_slot_index) {
                 // Skip if no additional amount is made available
                 if input.output.amount() == sdruc.amount() {
                     continue;
@@ -176,12 +174,14 @@ impl AmountSelection {
 
             if input.output.native_token().is_some() {
                 // Recalculate the remaining amount, as a new native token may require a new remainder output.
-                let (remainder_amount, native_tokens_remainder) = self.remainder_amount()?;
+                let (remainder_amount, native_tokens_remainder, mana_remainder) =
+                    self.remainder_amount(input_selection)?;
                 log::debug!(
                     "Calculated new remainder_amount: {remainder_amount}, native_tokens_remainder: {native_tokens_remainder}"
                 );
                 self.remainder_amount = remainder_amount;
                 self.native_tokens_remainder = native_tokens_remainder;
+                self.mana_remainder = mana_remainder;
             }
 
             if self.missing_amount() == 0 {
@@ -192,11 +192,11 @@ impl AmountSelection {
         Ok(false)
     }
 
-    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
+    pub(crate) fn remainder_amount(&self, input_selection: &InputSelection) -> Result<(u64, bool, bool), Error> {
         let input_native_tokens =
             get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish()?;
 
-        required_remainder_amount(Some(input_native_tokens), self.storage_score_parameters)
+        input_selection.required_remainder_amount(Some(input_native_tokens))
     }
 
     fn into_newly_selected_inputs(self) -> Vec<InputSigningData> {
@@ -213,45 +213,45 @@ impl InputSelection {
         // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_token().is_none()
-                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_none()
+                && sdruc_not_expired(&input.output, self.creation_slot_index).is_none()
         });
 
-        if amount_selection.fulfil(inputs)? {
+        if amount_selection.fulfil(self, inputs)? {
             return Ok(true);
         }
 
         // No native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_token().is_none()
-                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_some()
+                && sdruc_not_expired(&input.output, self.creation_slot_index).is_some()
         });
 
-        if amount_selection.fulfil(inputs)? {
+        if amount_selection.fulfil(self, inputs)? {
             return Ok(true);
         }
 
         // Native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_token().is_some()
-                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_none()
+                && sdruc_not_expired(&input.output, self.creation_slot_index).is_none()
         });
 
-        if amount_selection.fulfil(inputs)? {
+        if amount_selection.fulfil(self, inputs)? {
             return Ok(true);
         }
 
         // Native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
             input.output.native_token().is_some()
-                && sdruc_not_expired(&input.output, self.slot_commitment_id.slot_index()).is_some()
+                && sdruc_not_expired(&input.output, self.creation_slot_index).is_some()
         });
 
-        if amount_selection.fulfil(inputs)? {
+        if amount_selection.fulfil(self, inputs)? {
             return Ok(true);
         }
 
         // Everything else.
-        if amount_selection.fulfil(base_inputs)? {
+        if amount_selection.fulfil(self, base_inputs)? {
             return Ok(true);
         }
 
@@ -403,7 +403,7 @@ impl InputSelection {
                     .unlock_conditions()
                     .locked_address(
                         output.address(),
-                        self.slot_commitment_id.slot_index(),
+                        self.creation_slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
                     .expect("slot index was provided")
@@ -424,7 +424,7 @@ impl InputSelection {
                     .unlock_conditions()
                     .locked_address(
                         output.address(),
-                        self.slot_commitment_id.slot_index(),
+                        self.creation_slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
                     .expect("slot index was provided")
@@ -450,7 +450,7 @@ impl InputSelection {
             .peekable();
 
         if inputs.peek().is_some() {
-            amount_selection.fulfil(inputs)?;
+            amount_selection.fulfil(self, inputs)?;
 
             log::debug!(
                 "Outputs {:?} selected to fulfill the amount requirement",

@@ -55,7 +55,8 @@ fn one_output_expiration_not_expired() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select();
@@ -97,7 +98,8 @@ fn expiration_equal_timestamp() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
     .select()
@@ -141,7 +143,8 @@ fn one_output_expiration_expired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -199,7 +202,8 @@ fn two_outputs_one_expiration_expired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -258,7 +262,8 @@ fn two_outputs_one_unexpired_one_missing() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -329,7 +334,8 @@ fn two_outputs_two_expired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
     .select()
@@ -391,7 +397,8 @@ fn two_outputs_two_expired_2() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
-        SlotCommitmentHash::null().into_slot_commitment_id(200),
+        200,
+        SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
     .select()
@@ -435,7 +442,8 @@ fn expiration_expired_with_sdr() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -479,7 +487,8 @@ fn expiration_expired_with_sdr_2() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -523,7 +532,8 @@ fn expiration_expired_with_sdr_and_timelock() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -567,7 +577,8 @@ fn expiration_expired_with_sdr_and_timelock_2() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -664,7 +675,8 @@ fn sender_in_expiration() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -712,7 +724,8 @@ fn sender_in_expiration_already_selected() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -760,7 +773,8 @@ fn remainder_in_expiration() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -815,7 +829,8 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -873,7 +888,8 @@ fn expiration_expired_only_account_addresses() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -918,7 +934,8 @@ fn one_nft_output_expiration_unexpired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
@@ -963,7 +980,8 @@ fn one_nft_output_expiration_expired() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SlotCommitmentHash::null().into_slot_commitment_id(100),
+        100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()

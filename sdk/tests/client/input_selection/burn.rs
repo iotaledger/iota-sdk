@@ -70,6 +70,7 @@ fn burn_account_present() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -129,6 +130,7 @@ fn burn_account_present_and_required() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -192,6 +194,7 @@ fn burn_account_id_zero() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -239,6 +242,7 @@ fn burn_account_absent() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -309,6 +313,7 @@ fn burn_accounts_present() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -376,6 +381,7 @@ fn burn_account_in_outputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -437,6 +443,7 @@ fn burn_nft_present() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -498,6 +505,7 @@ fn burn_nft_present_and_required() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -559,6 +567,7 @@ fn burn_nft_id_zero() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -606,6 +615,7 @@ fn burn_nft_absent() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -680,6 +690,7 @@ fn burn_nfts_present() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -751,6 +762,7 @@ fn burn_nft_in_outputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -820,6 +832,7 @@ fn burn_foundry_present() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -921,6 +934,7 @@ fn burn_foundry_absent() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -988,6 +1002,7 @@ fn burn_foundries_present() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1074,6 +1089,7 @@ fn burn_foundry_in_outputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1125,6 +1141,7 @@ fn burn_native_tokens() {
         None,
         None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1210,6 +1227,7 @@ fn burn_foundry_and_its_account() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )

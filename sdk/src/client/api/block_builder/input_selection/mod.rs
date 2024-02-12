@@ -46,7 +46,8 @@ pub struct InputSelection {
     addresses: HashSet<Address>,
     burn: Option<Burn>,
     remainder_address: Option<Address>,
-    slot_commitment_id: SlotCommitmentId,
+    creation_slot_index: SlotIndex,
+    latest_slot_commitment_id: SlotCommitmentId,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
     auto_mana_allotment: Option<AutoManaAllotment>,
@@ -88,7 +89,8 @@ impl InputSelection {
         context_inputs: impl IntoIterator<Item = ContextInput>,
         outputs: impl IntoIterator<Item = Output>,
         addresses: impl IntoIterator<Item = Address>,
-        slot_commitment_id: SlotCommitmentId,
+        creation_slot_index: impl Into<SlotIndex>,
+        latest_slot_commitment_id: SlotCommitmentId,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let available_inputs = available_inputs.into_iter().collect::<Vec<_>>();
@@ -124,7 +126,8 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            slot_commitment_id,
+            creation_slot_index: creation_slot_index.into(),
+            latest_slot_commitment_id,
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
             auto_mana_allotment: None,
@@ -250,7 +253,7 @@ impl InputSelection {
         Ok(Selected {
             inputs: Self::sort_input_signing_data(
                 self.selected_inputs,
-                self.slot_commitment_id.slot_index(),
+                self.creation_slot_index,
                 self.protocol_parameters.committable_age_range(),
             )?,
             outputs: self.outputs,
@@ -352,7 +355,7 @@ impl InputSelection {
         let required_address = input
             .output
             .required_address(
-                self.slot_commitment_id.slot_index(),
+                self.creation_slot_index,
                 self.protocol_parameters.committable_age_range(),
             )?
             .expect("expiration unlockable outputs already filtered out");
@@ -393,10 +396,8 @@ impl InputSelection {
             // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
-            if unlock_conditions.is_timelocked(
-                self.slot_commitment_id.slot_index(),
-                self.protocol_parameters.min_committable_age(),
-            ) {
+            if unlock_conditions.is_timelocked(self.creation_slot_index, self.protocol_parameters.min_committable_age())
+            {
                 return false;
             }
 
@@ -404,7 +405,7 @@ impl InputSelection {
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
                 .required_address(
-                    self.slot_commitment_id.slot_index(),
+                    self.creation_slot_index,
                     self.protocol_parameters.committable_age_range(),
                 )
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.

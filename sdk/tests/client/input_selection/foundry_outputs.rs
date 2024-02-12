@@ -59,6 +59,7 @@ fn missing_input_account_for_foundry() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -153,6 +154,7 @@ fn minted_native_tokens_in_new_remainder() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -229,6 +231,7 @@ fn minted_native_tokens_in_provided_output() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -302,6 +305,7 @@ fn melt_native_tokens() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -362,6 +366,7 @@ fn destroy_foundry_with_account_state_transition() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -419,6 +424,7 @@ fn destroy_foundry_with_account_burn() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -502,6 +508,7 @@ fn prefer_basic_to_foundry() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -571,6 +578,7 @@ fn simple_foundry_transition_basic_not_needed() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -655,6 +663,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -805,6 +814,7 @@ fn mint_and_burn_at_the_same_time() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -878,6 +888,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -940,6 +951,7 @@ fn create_native_token_but_burn_account() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1008,6 +1020,7 @@ fn melted_tokens_not_provided() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1067,6 +1080,7 @@ fn burned_tokens_not_provided() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1125,6 +1139,7 @@ fn foundry_in_outputs_and_required() {
         None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -1201,6 +1216,7 @@ fn melt_and_burn_native_tokens() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )

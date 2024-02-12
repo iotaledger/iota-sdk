@@ -5,7 +5,6 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
-        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{
             feature::{
                 BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeySource, BlockIssuerKeys,
@@ -98,15 +97,7 @@ where
 
         drop(wallet_data);
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-        let issuance = self.client().get_issuance().await?;
-
         let transaction_options = TransactionOptions {
-            context_inputs: vec![
-                // TODO Remove in https://github.com/iotaledger/iota-sdk/pull/1872
-                CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
-                BlockIssuanceCreditContextInput::new(account_id).into(),
-            ],
             mandatory_inputs: [*output_id].into(),
             issuer_id: Some(account_id),
             allow_additional_input_selection: false,

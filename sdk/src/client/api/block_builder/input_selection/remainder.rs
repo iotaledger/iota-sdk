@@ -21,14 +21,14 @@ use crate::{
 
 impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
-    fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
+    pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
         if let Some(remainder_address) = &self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
                 let required_address = input
                     .output
                     .required_address(
-                        self.slot_commitment_id.slot_index(),
+                        self.creation_slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )?
                     .expect("expiration unlockable outputs already filtered out");
@@ -44,20 +44,20 @@ impl InputSelection {
             let required_address = input
                 .output
                 .required_address(
-                    self.slot_commitment_id.slot_index(),
+                    self.creation_slot_index,
                     self.protocol_parameters.committable_age_range(),
                 )?
                 .expect("expiration unlockable outputs already filtered out");
 
-            if required_address.is_ed25519_backed() {
-                return Ok(Some((required_address, input.chain)));
+            if let Some(&required_address) = required_address.backing_ed25519() {
+                return Ok(Some((required_address.into(), input.chain)));
             }
         }
 
         Ok(None)
     }
 
-    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
+    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), Error> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
         let mut output_native_tokens = get_native_tokens(self.outputs.iter())?;
         let (minted_native_tokens, melted_native_tokens) =
@@ -72,7 +72,7 @@ impl InputSelection {
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
-        required_remainder_amount(native_tokens_diff, self.protocol_parameters.storage_score_parameters())
+        self.required_remainder_amount(native_tokens_diff)
     }
 
     pub(crate) fn storage_deposit_returns_and_remainders(
@@ -138,7 +138,7 @@ impl InputSelection {
                 .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
                 .find(|o| {
                     matches!(o.required_address(
-                        self.slot_commitment_id.slot_index(),
+                        self.creation_slot_index,
                         self.protocol_parameters.committable_age_range(),
                     ), Ok(Some(address)) if address == remainder_address)
                 })
@@ -169,33 +169,54 @@ impl InputSelection {
 
         Ok((storage_deposit_returns, remainder_outputs))
     }
-}
 
-/// Calculates the required amount for required remainder outputs (multiple outputs are required if multiple native
-/// tokens are remaining) and returns if there are native tokens as remainder.
-pub(crate) fn required_remainder_amount(
-    remainder_native_tokens: Option<NativeTokens>,
-    storage_score_parameters: StorageScoreParameters,
-) -> Result<(u64, bool), Error> {
-    let native_tokens_remainder = remainder_native_tokens.is_some();
+    /// Calculates the required amount for required remainder outputs (multiple outputs are required if multiple native
+    /// tokens are remaining) and returns if there are native tokens as remainder.
+    pub(crate) fn required_remainder_amount(
+        &self,
+        remainder_native_tokens: Option<NativeTokens>,
+    ) -> Result<(u64, bool, bool), Error> {
+        let native_tokens_remainder = remainder_native_tokens.is_some();
 
-    let remainder_builder = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters).add_unlock_condition(
-        AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; 32]))),
-    );
+        let remainder_builder =
+            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
+                    [0; 32],
+                ))));
 
-    let remainder_amount = if let Some(native_tokens) = remainder_native_tokens {
-        let nt_remainder_amount = remainder_builder
-            .with_native_token(*native_tokens.first().unwrap())
-            .finish_output()?
-            .amount();
-        // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
-        // cost.
-        nt_remainder_amount * native_tokens.len() as u64
-    } else {
-        remainder_builder.finish_output()?.amount()
-    };
+        let remainder_amount = if let Some(native_tokens) = remainder_native_tokens {
+            let nt_remainder_amount = remainder_builder
+                .with_native_token(*native_tokens.first().unwrap())
+                .finish_output()?
+                .amount();
+            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
+            // cost.
+            nt_remainder_amount * native_tokens.len() as u64
+        } else {
+            remainder_builder.finish_output()?.amount()
+        };
 
-    Ok((remainder_amount, native_tokens_remainder))
+        let (selected_mana, required_mana) = self.mana_sums()?;
+
+        let remainder_address = self.get_remainder_address()?.map(|v| v.0);
+
+        // Mana can potentially be added to an appropriate existing output instead of a new remainder output
+        let mana_remainder = selected_mana > required_mana
+            && remainder_address.map_or(true, |remainder_address| {
+                self.outputs
+                    .iter()
+                    .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
+                    .find(|o| {
+                        matches!(o.required_address(
+                        self.creation_slot_index,
+                        self.protocol_parameters.committable_age_range(),
+                ), Ok(Some(address)) if address == remainder_address)
+                    })
+                    .is_none()
+            });
+
+        Ok((remainder_amount, native_tokens_remainder, mana_remainder))
+    }
 }
 
 fn create_remainder_outputs(

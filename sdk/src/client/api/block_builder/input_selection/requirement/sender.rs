@@ -51,7 +51,7 @@ impl InputSelection {
                         let required_address = input
                             .output
                             .required_address(
-                                self.slot_commitment_id.slot_index(),
+                                self.creation_slot_index,
                                 self.protocol_parameters.committable_age_range(),
                             )?
                             .expect("expiration unlockable outputs already filtered out");

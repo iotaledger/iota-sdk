@@ -6,7 +6,7 @@ use crate::{
     client::secret::types::InputSigningData,
     types::block::{
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
-        output::{DelegationOutputBuilder, Output},
+        output::{AccountId, DelegationOutputBuilder, Output},
     },
 };
 
@@ -21,6 +21,13 @@ impl InputSelection {
                     self.context_inputs.insert(
                         BlockIssuanceCreditContextInput::from(account.account_id_non_null(input.output_id())).into(),
                     );
+                }
+            }
+            // Transitioning an implicit account requires a BlockIssuanceCreditContextInput.
+            if let Output::Basic(implicit_account) = &input.output {
+                if implicit_account.is_implicit_account() {
+                    self.context_inputs
+                        .insert(BlockIssuanceCreditContextInput::from(AccountId::from(input.output_id())).into());
                 }
             }
 
@@ -42,11 +49,17 @@ impl InputSelection {
             // Created delegations have their start epoch set, and delayed delegations have their end set
             if output.as_delegation().delegation_id().is_null() {
                 *output = DelegationOutputBuilder::from(output.as_delegation())
-                    .with_start_epoch(self.protocol_parameters.delegation_start_epoch(self.slot_commitment_id))
+                    .with_start_epoch(
+                        self.protocol_parameters
+                            .delegation_start_epoch(self.latest_slot_commitment_id),
+                    )
                     .finish_output()?;
             } else {
                 *output = DelegationOutputBuilder::from(output.as_delegation())
-                    .with_end_epoch(self.protocol_parameters.delegation_end_epoch(self.slot_commitment_id))
+                    .with_end_epoch(
+                        self.protocol_parameters
+                            .delegation_end_epoch(self.latest_slot_commitment_id),
+                    )
                     .finish_output()?;
             }
             needs_commitment_context = true;
@@ -69,7 +82,7 @@ impl InputSelection {
         {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
             self.context_inputs
-                .insert(CommitmentContextInput::new(self.slot_commitment_id).into());
+                .insert(CommitmentContextInput::new(self.latest_slot_commitment_id).into());
         }
         Ok(Vec::new())
     }

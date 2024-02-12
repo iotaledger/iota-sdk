@@ -35,6 +35,7 @@ fn no_inputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -69,6 +70,7 @@ fn no_outputs() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -103,6 +105,7 @@ fn no_outputs_but_required_input() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -146,6 +149,7 @@ fn no_outputs_but_burn() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -192,7 +196,16 @@ fn no_address_provided() {
         expiration: None,
     }]);
 
-    let selected = InputSelection::new(inputs, None, outputs, None, SLOT_COMMITMENT_ID, protocol_parameters).select();
+    let selected = InputSelection::new(
+        inputs,
+        None,
+        outputs,
+        None,
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
 }
@@ -231,6 +244,7 @@ fn no_matching_address_provided() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -287,6 +301,7 @@ fn two_addresses_one_missing() {
         None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
@@ -352,6 +367,7 @@ fn two_addresses() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
