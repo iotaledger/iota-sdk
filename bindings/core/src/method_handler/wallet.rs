@@ -373,13 +373,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         //     let events = wallet.register_participation_events(&options).await?;
         //     Response::ParticipationEvents(events)
         // }
-        WalletMethod::ReissueTransactionUntilIncluded {
+        WalletMethod::WaitForTransactionAcceptance {
             transaction_id,
             interval,
             max_attempts,
         } => {
             let block_id = wallet
-                .reissue_transaction_until_included(&transaction_id, interval, max_attempts)
+                .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
             Response::BlockId(block_id)
         }

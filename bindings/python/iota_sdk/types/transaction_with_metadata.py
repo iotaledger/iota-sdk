@@ -17,12 +17,16 @@ class InclusionState(str, Enum):
 
     Attributes:
         Pending: The transaction is pending.
+        Accepted: The transaction is accepted.
         Confirmed: The transaction is confirmed.
+        Finalized: The transaction is finalized.
         Conflicting: The transaction is conflicting.
         UnknownPruned: The transaction is unknown or already pruned.
     """
     Pending = 'pending'
+    Accepted = 'accepted'
     Confirmed = 'confirmed'
+    Finalized = 'finalized'
     Conflicting = 'conflicting'
     UnknownPruned = 'unknownPruned'
 

@@ -98,7 +98,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         .transaction()
         .id();
 
-    // TODO reenable but `reissue_transaction_until_included` is on Wallet and not on Client.
+    // TODO reenable but `wait_for_transaction_acceptance` is on Wallet and not on Client.
     // let retried_blocks = client.retry_until_included(&block.id(), None, None).await.unwrap();
     // (retried_blocks[0].0, transaction_id)
 

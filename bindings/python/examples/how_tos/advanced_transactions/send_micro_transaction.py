@@ -30,7 +30,7 @@ params = [SendParams(
 transaction = wallet.send_with_params(params, {"allowMicroAmount": True})
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = wallet.reissue_transaction_until_included(
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 
 print(

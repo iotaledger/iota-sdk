@@ -25,7 +25,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .await?;
 
 //     wallet_0
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 
 //     let balance = wallet_1.sync(None).await.unwrap();
@@ -63,7 +63,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .await?;
 
 //     wallet_0
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 
 //     let balance = wallet_1.sync(None).await.unwrap();
@@ -95,7 +95,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .await?;
 
 //     wallet_0
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 
 //     let balance = wallet_1.sync(None).await.unwrap();
@@ -139,7 +139,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 //     let transaction = wallet_0.mint_nfts(nft_options, None).await.unwrap();
 //     wallet_0
-//         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
 //         .await?;
 //     let nft_id = *wallet_0.sync(None).await?.nfts().first().unwrap();
 
@@ -152,7 +152,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .await
 //         .unwrap();
 //     wallet_0
-//         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
 //         .await?;
 
 //     let balance = wallet_1.sync(None).await?;
@@ -219,7 +219,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         )
 //         .await?;
 //     wallet_0
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 //     // Second transaction will be conflicting
 //     let tx = wallet_1
@@ -235,16 +235,16 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .await?;
 //     // Should return an error since the tx is conflicting
 //     match wallet_1
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await
 //         .unwrap_err()
 //     {
 //         iota_sdk::wallet::Error::Client(client_error) => {
-//             let iota_sdk::client::Error::TangleInclusion(_) = *client_error else {
-//                 panic!("Expected TangleInclusion error");
+//             let iota_sdk::client::Error::TransactionAcceptance(_) = *client_error else {
+//                 panic!("Expected TransactionAcceptance error");
 //             };
 //         }
-//         _ => panic!("Expected TangleInclusion error"),
+//         _ => panic!("Expected TransactionAcceptance error"),
 //     }
 
 //     // After syncing the balance is still equal
