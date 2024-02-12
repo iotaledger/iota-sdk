@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.4 - 2024-05-02
+
+### Fixed
+
+- Made `TaggedDataPayload::data` optional;
+
 ## 1.1.3 - 2024-02-14
 
 ### Added

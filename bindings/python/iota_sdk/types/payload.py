@@ -144,7 +144,7 @@ class TaggedDataPayload(Payload):
         data: The data part of the tagged data payload.
     """
     tag: HexStr
-    data: HexStr
+    data: Optional[HexStr] = None
     type: int = field(
         default_factory=lambda: int(
             PayloadType.TaggedData),
