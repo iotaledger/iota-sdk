@@ -37,9 +37,7 @@ where
             .cloned()
             .ok_or_else(|| Error::TransactionNotFound(*transaction_id))?;
 
-        if transaction.inclusion_state == InclusionState::Accepted
-            || transaction.inclusion_state == InclusionState::Confirmed
-            || transaction.inclusion_state == InclusionState::Finalized
+        if matches!(transaction.inclusion_state, InclusionState::Accepted | InclusionState::Confirmed | InclusionState::Finalized)
         {
             return Ok(transaction
                 .block_id
@@ -47,8 +45,7 @@ where
                 .expect("missing block id in TransactionWithMetadata"));
         }
 
-        if transaction.inclusion_state == InclusionState::Conflicting
-            || transaction.inclusion_state == InclusionState::UnknownPruned
+        if matches!(transaction.inclusion_state, InclusionState::Conflicting | InclusionState::UnknownPruned)
         {
             return Err(ClientError::TransactionAcceptance(format!(
                 "transaction id: {} inclusion state: {:?}",
