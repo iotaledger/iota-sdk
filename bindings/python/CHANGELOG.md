@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.3 - 202Y-MM-DD
+## 1.1.3 - 2024-02-12
 
 ### Added
 
@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Utils::{verify_transaction_syntax(), block_bytes(), block_hash_without_nonce()}`;
 - `NodeInfoProtocol.belowMaxDepth`;
 - `{NodeInfoProtocol, RentStructure}::as_dict()`;
+
+### Fixed
+
+- Made `TaggedDataPayload::data` optional;
 
 ## 1.1.2 - 2023-12-01
 
