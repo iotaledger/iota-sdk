@@ -19,7 +19,7 @@ pub use self::{
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, AnchorId, AnchorOutput,
-        BasicOutput, FoundryOutput, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme,
+        BasicOutput, DelegationId, FoundryOutput, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme,
         OUTPUT_INDEX_RANGE,
     },
     rand::{
@@ -70,6 +70,11 @@ pub fn rand_account_id() -> AccountId {
 /// Generates a random [`AnchorId`].
 pub fn rand_anchor_id() -> AnchorId {
     AnchorId::from(rand_bytes_array())
+}
+
+/// Generates a random [`DelegationId`].
+pub fn rand_delegation_id() -> DelegationId {
+    DelegationId::from(rand_bytes_array())
 }
 
 /// Generates a random [`AccountOutput`].
