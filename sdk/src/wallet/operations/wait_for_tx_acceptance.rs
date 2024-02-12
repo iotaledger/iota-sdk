@@ -13,7 +13,7 @@ use crate::{
 };
 
 const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL: Duration = Duration::from_millis(500);
-const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_AMOUNT: u64 = 80;
+const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_ATTEMPTS: u64 = 80;
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
@@ -66,7 +66,7 @@ where
         let duration = interval
             .map(std::time::Duration::from_millis)
             .unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL);
-        for _ in 0..max_attempts.unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_AMOUNT) {
+        for _ in 0..max_attempts.unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_ATTEMPTS) {
             let block_metadata = self.client().get_block_metadata(&block_id).await?;
             if let Some(transaction_state) = block_metadata.transaction_metadata.map(|m| m.transaction_state) {
                 match transaction_state {
