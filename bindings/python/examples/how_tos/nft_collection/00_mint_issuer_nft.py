@@ -28,8 +28,8 @@ params = MintNftParams(
 
 tx = wallet.mint_nfts([params])
 
-# Wait for transaction to get included
-block_id = wallet.reissue_transaction_until_included(
+# Wait for transaction to get accepted
+block_id = wallet.wait_for_transaction_acceptance(
     tx.transaction_id)
 
 print(

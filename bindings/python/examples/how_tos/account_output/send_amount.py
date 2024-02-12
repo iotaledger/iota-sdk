@@ -20,7 +20,8 @@ sync_options = SyncOptions(wallet=WalletSyncOptions(basic_outputs=True))
 balance = wallet.sync(sync_options)
 
 total_base_token_balance = balance.base_coin.total
-print(f'Balance before sending funds from the account output: {total_base_token_balance}')
+print(
+    f'Balance before sending funds from the account output: {total_base_token_balance}')
 
 account_id = balance.accounts[0]
 print(f'Account Id: {account_id}')
@@ -42,10 +43,11 @@ options = {
     'mandatoryInputs': inputs,
 }
 transaction = wallet.send_with_params(params, options)
-wallet.reissue_transaction_until_included(
+wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transaction_id}')
 
 total_base_token_balance = wallet.sync(sync_options).base_coin.total
-print(f'Balance after sending funds from the account output: {total_base_token_balance}')
+print(
+    f'Balance after sending funds from the account output: {total_base_token_balance}')

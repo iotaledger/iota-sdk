@@ -266,7 +266,7 @@ pub enum Response {
     /// - [`BlockId`](crate::method::UtilsMethod::BlockId)
     /// - [`PostBlock`](crate::method::ClientMethod::PostBlock)
     /// - [`PostBlockRaw`](crate::method::ClientMethod::PostBlockRaw)
-    /// - [`ReissueTransactionUntilIncluded`](crate::method::WalletMethod::ReissueTransactionUntilIncluded)
+    /// - [`WaitForTransactionAcceptance`](crate::method::WalletMethod::WaitForTransactionAcceptance)
     BlockId(BlockId),
     /// Response for:
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)

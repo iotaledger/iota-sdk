@@ -45,7 +45,7 @@ async function run() {
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        const blockId = await wallet.reissueTransactionUntilIncluded(
+        const blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 

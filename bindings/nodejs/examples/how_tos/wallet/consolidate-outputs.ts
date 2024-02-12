@@ -67,13 +67,13 @@ async function run() {
         });
         console.log('Transaction sent: %s', transaction.transactionId);
 
-        // Wait for the consolidation transaction to get confirmed
-        const blockId = wallet.reissueTransactionUntilIncluded(
+        // Wait for the consolidation transaction to get accepted
+        const blockId = wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 
         console.log(
-            'Transaction included: %s/block/$s',
+            'Transaction accepted: %s/block/$s',
             process.env.EXPLORER_URL,
             blockId,
         );

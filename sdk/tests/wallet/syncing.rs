@@ -110,7 +110,7 @@
 
 //     let tx = wallet_0.send_outputs(outputs, None).await?;
 //     wallet_0
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 
 //     // Sync with sync_only_most_basic_outputs: true, only the first output should be synced
@@ -169,7 +169,7 @@
 
 //     let tx = wallet_0.send_outputs(outputs, None).await?;
 //     wallet_0
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 
 //     wallet_1
