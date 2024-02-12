@@ -71,7 +71,7 @@ class CoinType(IntEnum):
 
 @json
 @dataclass
-class Node():
+class Node:
     """Represents a node in the network.
 
         Attributes:
@@ -128,7 +128,7 @@ def hex_str_decoder(value: str) -> int:
 
 @json
 @dataclass
-class AddressAndAmount():
+class AddressAndAmount:
     """Parameters to send a certain amount of coins to an address.
 
      Attributes:

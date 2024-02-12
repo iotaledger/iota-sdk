@@ -51,18 +51,26 @@ async fn sign_account_state_transition() -> Result<()> {
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
-        [Account(
-            1_000_000,
-            account_id,
-            address.clone(),
-            None,
-            None,
+        [(
+            Account {
+                amount: 1_000_000,
+                account_id: account_id,
+                address: address.clone(),
+                sender: None,
+                issuer: None,
+            },
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         )],
         Some(slot_index),
     );
 
-    let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None, None)]);
+    let outputs = build_outputs([Account {
+        amount: 1_000_000,
+        account_id: account_id,
+        address: address.clone(),
+        sender: None,
+        issuer: None,
+    }]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -128,23 +136,61 @@ async fn account_reference_unlocks() -> Result<()> {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id,
-                address.clone(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id,
+                    address: address.clone(),
+                    sender: None,
+                    issuer: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_address.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_address.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
         ],
         Some(slot_index),
     );
 
     let outputs = build_outputs([
-        Account(1_000_000, account_id, address, None, None, None),
-        Basic(2_000_000, account_address, None, None, None, None, None, None),
+        Account {
+            amount: 1_000_000,
+            account_id: account_id,
+            address: address,
+            sender: None,
+            issuer: None,
+        },
+        Basic {
+            amount: 2_000_000,
+            address: account_address,
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())

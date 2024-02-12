@@ -85,7 +85,7 @@ class SecretManagerError(Exception):
     """
 
 
-class SecretManager():
+class SecretManager:
     """Secret manager wrapper.
     """
 
