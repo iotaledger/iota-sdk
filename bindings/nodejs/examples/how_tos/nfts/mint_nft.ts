@@ -74,7 +74,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get accepted
-        let blockId = await wallet.awaitTransactionAcceptance(
+        let blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 
@@ -105,7 +105,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get accepted
-        blockId = await wallet.awaitTransactionAcceptance(
+        blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 

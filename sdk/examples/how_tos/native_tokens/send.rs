@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
 
         // Wait for transaction to get accepted
         let block_id = wallet
-            .await_transaction_acceptance(&transaction.transaction_id, None, None)
+            .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         println!(
             "Tx accepted in block: {}/block/{}",

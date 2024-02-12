@@ -55,7 +55,7 @@ async function run() {
         const transaction = await wallet.mintNfts([params]);
 
         // Wait for transaction to get accepted
-        const blockId = await wallet.awaitTransactionAcceptance(
+        const blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
         console.log(

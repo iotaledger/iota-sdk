@@ -68,7 +68,7 @@ async function run() {
         console.log('Transaction sent: %s', transaction.transactionId);
 
         // Wait for the consolidation transaction to get accepted
-        const blockId = wallet.awaitTransactionAcceptance(
+        const blockId = wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 

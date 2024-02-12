@@ -34,7 +34,7 @@ transaction = wallet.send_native_tokens(outputs, None)
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get accepted
-block_id = wallet.await_transaction_acceptance(
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 

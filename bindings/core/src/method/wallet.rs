@@ -401,7 +401,7 @@ pub enum WalletMethod {
     /// Returns the block id that contains this transaction.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
     #[serde(rename_all = "camelCase")]
-    AwaitTransactionAcceptance {
+    WaitForTransactionAcceptance {
         /// Transaction id
         transaction_id: TransactionId,
         /// Interval

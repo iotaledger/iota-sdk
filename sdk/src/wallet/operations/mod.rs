@@ -3,8 +3,6 @@
 
 /// The module for announcing candidacy.
 pub(crate) mod announce_candidacy;
-/// The module for awaiting on transaction acceptance
-pub(crate) mod await_tx_acceptance;
 /// The module to get the wallet's balance
 pub(crate) mod balance;
 /// The module for blocks
@@ -24,3 +22,5 @@ pub(crate) mod participation;
 pub(crate) mod syncing;
 /// The module for transactions
 pub(crate) mod transaction;
+/// The module for awaiting on transaction acceptance
+pub(crate) mod wait_for_tx_acceptance;

@@ -43,7 +43,7 @@ options = {
     'mandatoryInputs': inputs,
 }
 transaction = wallet.send_with_params(params, options)
-wallet.await_transaction_acceptance(
+wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transaction_id}')

@@ -717,13 +717,13 @@ class Wallet:
         ))
         return PreparedTransaction(self, prepared)
 
-    def await_transaction_acceptance(
+    def wait_for_transaction_acceptance(
             self, transaction_id: TransactionId, interval=None, max_attempts=None) -> BlockId:
         """Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds. Returns the block id that
         contains this transaction.
         """
         return BlockId(self._call_method(
-            'awaitTransactionAcceptance', {
+            'waitForTransactionAcceptance', {
                 'transactionId': transaction_id,
                 'interval': interval,
                 'maxAttempts': max_attempts

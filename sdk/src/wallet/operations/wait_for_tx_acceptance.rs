@@ -21,13 +21,13 @@ where
 {
     /// Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds.
     /// Returns the block id that contains this transaction.
-    pub async fn await_transaction_acceptance(
+    pub async fn wait_for_transaction_acceptance(
         &self,
         transaction_id: &TransactionId,
         interval: Option<u64>,
         max_attempts: Option<u64>,
     ) -> crate::wallet::Result<BlockId> {
-        log::debug!("[await_transaction_acceptance]");
+        log::debug!("[wait_for_transaction_acceptance]");
 
         let transaction = self
             .data()

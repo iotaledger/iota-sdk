@@ -372,8 +372,8 @@ export type __RegisterParticipationEventsMethod__ = {
     };
 };
 
-export type __AwaitTransactionAcceptanceMethod__ = {
-    name: 'awaitTransactionAcceptance';
+export type __WaitForTransactionAcceptanceMethod__ = {
+    name: 'waitForTransactionAcceptance';
     data: {
         transactionId: TransactionId;
         interval?: number;

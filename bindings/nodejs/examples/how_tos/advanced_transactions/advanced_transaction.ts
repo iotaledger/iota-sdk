@@ -63,7 +63,7 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         console.log('Waiting until transaction is accepted...');
-        const blockId = await wallet.awaitTransactionAcceptance(
+        const blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);

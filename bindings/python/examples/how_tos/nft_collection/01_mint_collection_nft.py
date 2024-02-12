@@ -66,7 +66,7 @@ while nft_mint_params:
     transaction = wallet.mint_nfts(chunk)
 
     # Wait for transaction to get accepted
-    block_id = wallet.await_transaction_acceptance(
+    block_id = wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
 
     print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
