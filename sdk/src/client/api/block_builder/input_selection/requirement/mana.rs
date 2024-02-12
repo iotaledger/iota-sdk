@@ -16,7 +16,7 @@ impl InputSelection {
 
             // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
-                selected_mana += input.output.mana();
+                selected_mana += self.total_mana(&input)?;
                 inputs.push(input);
 
                 if selected_mana >= required_mana {
@@ -40,13 +40,17 @@ impl InputSelection {
         let mut selected_mana = 0;
 
         for input in &self.selected_inputs {
-            selected_mana += self.mana_rewards.get(input.output_id()).copied().unwrap_or_default();
-            selected_mana += input.output.available_mana(
+            selected_mana += self.total_mana(input)?;
+        }
+        Ok((selected_mana, required_mana))
+    }
+
+    fn total_mana(&self, input: &InputSigningData) -> Result<u64, Error> {
+        Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
+            + input.output.available_mana(
                 &self.protocol_parameters,
                 input.output_id().transaction_id().slot_index(),
                 self.slot_commitment_id.slot_index(),
-            )?;
-        }
-        Ok((selected_mana, required_mana))
+            )?)
     }
 }
