@@ -164,7 +164,7 @@ where
                     Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or_else(|| default_return_address);
+                .unwrap_or(default_return_address);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_amount(amount)

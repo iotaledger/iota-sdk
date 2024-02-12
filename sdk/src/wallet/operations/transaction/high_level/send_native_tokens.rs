@@ -152,7 +152,7 @@ where
                     Ok::<_, Error>(addr)
                 })
                 .transpose()?
-                .unwrap_or_else(|| default_return_address);
+                .unwrap_or(default_return_address);
 
             let native_token = NativeToken::new(native_token.0, native_token.1)?;
 
