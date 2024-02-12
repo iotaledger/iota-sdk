@@ -144,16 +144,17 @@ impl ClientInner {
             }
         }
 
-        // Get network_id with the most nodes
-        let mut most_nodes = ("network_id", 0);
-        // TODO this does not seem to do what it is supposed to do
-        for (network_id, node) in &network_nodes {
-            if node.len() > most_nodes.1 {
-                most_nodes.0 = network_id;
-                most_nodes.1 = node.len();
+        // Get the network_name that most nodes have in common
+        let mut most_nodes = ("network_name", 0);
+        for (network_name, nodes) in &network_nodes {
+            if nodes.len() > most_nodes.1 {
+                most_nodes.0 = network_name;
+                most_nodes.1 = nodes.len();
             }
         }
 
+        // Set the protocol_parameters to the parameters that most nodes have in common and only use these nodes as
+        // healthy_nodes
         if let Some(nodes) = network_nodes.get(most_nodes.0) {
             if let Some((parameters, _node_url, tangle_time)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
