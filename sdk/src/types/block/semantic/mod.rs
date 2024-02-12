@@ -300,6 +300,27 @@ impl<'a> SemanticValidationContext<'a> {
                 }
             }
 
+            // TODO: should be done only towards block issuers
+            if let Some(unlock_conditions) = created_output.unlock_conditions() {
+                if let (Some(address), Some(timelock)) = (unlock_conditions.address(), unlock_conditions.timelock()) {
+                    if let Address::Account(account_address) = address.address() {
+                        let past_bounded_slot_index = self
+                            .protocol_parameters
+                            .past_bounded_slot(self.commitment_context_input.unwrap());
+
+                        if timelock.slot_index()
+                            >= past_bounded_slot_index + self.protocol_parameters.max_committable_age()
+                        {
+                            let entry = self.block_issuer_mana.entry(*account_address.account_id()).or_default();
+                            entry.1 = entry
+                                .1
+                                .checked_add(created_output.mana())
+                                .ok_or(Error::CreatedAmountOverflow)?;
+                        }
+                    }
+                }
+            }
+
             self.output_amount = self
                 .output_amount
                 .checked_add(amount)
