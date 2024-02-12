@@ -49,6 +49,7 @@ impl InputSelection {
             builder = builder.with_payload(payload.clone());
         }
 
+        // Add the empty allotment so the work score includes it
         self.mana_allotments.entry(issuer_id).or_default();
 
         let transaction = builder
@@ -60,16 +61,17 @@ impl InputSelection {
             )
             .finish_with_params(&self.protocol_parameters)?;
 
-        let signed_transaction = SignedTransactionPayload::new(transaction, self.transaction_unlocks()?)?;
+        let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
 
         let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
             + self.protocol_parameters.work_score_parameters().block();
         let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
-        let allotment = self.mana_allotments[&issuer_id];
-        if allotment < required_allotment_mana {
+        if self.mana_allotments[&issuer_id] < required_allotment_mana {
+            log::debug!("Allotting at least {required_allotment_mana} to account ID {issuer_id}");
             self.mana_allotments.insert(issuer_id, required_allotment_mana);
+            log::debug!("Checking mana requirement again with added allotment");
             let additional_inputs = self.fulfill_mana_requirement()?;
             // If we needed more inputs to cover the additional allotment mana
             // then re-add this requirement so we try again
@@ -82,7 +84,7 @@ impl InputSelection {
         Ok(Vec::new())
     }
 
-    pub(crate) fn transaction_unlocks(&self) -> Result<Unlocks, Error> {
+    pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, Error> {
         let mut blocks = Vec::new();
         let mut block_indexes = HashMap::<Address, usize>::new();
 

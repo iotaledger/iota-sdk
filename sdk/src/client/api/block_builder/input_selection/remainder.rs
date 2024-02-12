@@ -143,6 +143,7 @@ impl InputSelection {
                     ), Ok(Some(address)) if address == remainder_address)
                 })
             {
+                log::debug!("Adding {mana_diff} excess input mana to output with address {remainder_address}");
                 let new_mana = output.mana() + std::mem::take(&mut mana_diff);
                 *output = match output {
                     Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
@@ -153,6 +154,7 @@ impl InputSelection {
                 };
                 // If we have no other remainders, we are done
                 if input_amount == output_amount && native_tokens_diff.is_none() {
+                    log::debug!("No more remainder required");
                     return Ok((storage_deposit_returns, Vec::new()));
                 }
             }
