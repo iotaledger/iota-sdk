@@ -26,9 +26,9 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
-        .add_unlock_condition(address_1.clone())
+        .add_unlock_condition(address_1)
         .add_feature(sender_1.clone())
-        .replace_feature(sender_2.clone())
+        .replace_feature(sender_2)
         .replace_immutable_feature(issuer_1.clone())
         .add_immutable_feature(issuer_2);
 

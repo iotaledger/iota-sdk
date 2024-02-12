@@ -55,7 +55,7 @@ async fn sign_account_state_transition() -> Result<()> {
             Account {
                 amount: 1_000_000,
                 account_id,
-                address: address.clone(),
+                address,
                 sender: None,
                 issuer: None,
             },
@@ -67,7 +67,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let outputs = build_outputs([Account {
         amount: 1_000_000,
         account_id,
-        address: address.clone(),
+        address,
         sender: None,
         issuer: None,
     }]);
@@ -140,7 +140,7 @@ async fn account_reference_unlocks() -> Result<()> {
                 Account {
                     amount: 1_000_000,
                     account_id,
-                    address: address.clone(),
+                    address,
                     sender: None,
                     issuer: None,
                 },
@@ -149,7 +149,7 @@ async fn account_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: account_address.clone(),
+                    address: account_address,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -161,7 +161,7 @@ async fn account_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: account_address.clone(),
+                    address: account_address,
                     native_token: None,
                     sender: None,
                     sdruc: None,

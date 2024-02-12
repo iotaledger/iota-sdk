@@ -56,7 +56,7 @@ async fn nft_reference_unlocks() -> Result<()> {
             (
                 Nft {
                     amount: 1_000_000,
-                    nft_id: nft_id,
+                    nft_id,
                     address: address_0.clone(),
                     sender: None,
                     issuer: None,
@@ -68,7 +68,7 @@ async fn nft_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: nft_address.clone(),
+                    address: nft_address,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -80,7 +80,7 @@ async fn nft_reference_unlocks() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: nft_address.clone(),
+                    address: nft_address,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -96,7 +96,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let outputs = build_outputs([
         Nft {
             amount: 1_000_000,
-            nft_id: nft_id,
+            nft_id,
             address: address_0,
             sender: None,
             issuer: None,

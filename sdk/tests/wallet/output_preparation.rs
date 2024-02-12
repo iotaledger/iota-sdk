@@ -33,7 +33,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500,
                 assets: None,
                 features: None,
@@ -52,7 +52,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: None,
                 features: None,
@@ -73,7 +73,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets { nft_id: None }),
                 features: Some(Features {
@@ -97,7 +97,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 300000,
                 assets: None,
                 features: Some(Features {
@@ -123,7 +123,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 1,
                 assets: None,
                 features: Some(Features {
@@ -152,7 +152,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 12000,
                 assets: None,
                 features: Some(Features {
@@ -178,7 +178,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 1,
                 assets: None,
                 features: Some(Features {
@@ -208,7 +208,7 @@ async fn output_preparation() -> Result<()> {
     let error = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     nft_id: Some(NftId::from_str(
@@ -231,7 +231,7 @@ async fn output_preparation() -> Result<()> {
     if let Ok(output) = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     nft_id: Some(NftId::from_str(
@@ -262,7 +262,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets { nft_id: None }),
                 features: Some(Features {
@@ -290,7 +290,7 @@ async fn output_preparation() -> Result<()> {
     let error = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: None,
                 features: Some(Features {
@@ -316,7 +316,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500000,
                 assets: Some(Assets {
                     nft_id: Some(NftId::from_str(
@@ -363,7 +363,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 500,
                 assets: Some(Assets {
                     nft_id: Some(NftId::from_str(
@@ -394,7 +394,7 @@ async fn output_preparation() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 42600,
                 assets: None,
                 features: Some(Features {
@@ -449,7 +449,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 8001,
                 assets: None,
                 features: None,
@@ -470,7 +470,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -492,7 +492,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,
@@ -517,7 +517,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let output = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: recipient_address,
+                recipient_address,
                 amount: 42599,
                 assets: None,
                 features: None,

@@ -9,7 +9,7 @@ use crate::types::block::{
 };
 
 /// Defines the Address that owns this output, that is, it can unlock it with the proper Unlock in a transaction.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct AddressUnlockCondition(Address);
 
 impl AddressUnlockCondition {

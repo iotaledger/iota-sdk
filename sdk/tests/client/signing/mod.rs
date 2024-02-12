@@ -90,7 +90,7 @@ async fn all_combined() -> Result<()> {
                 Account {
                     amount: 1_000_000,
                     account_id: account_id_2,
-                    address: ed25519_0.clone(),
+                    address: ed25519_0,
                     sender: None,
                     issuer: None,
                 },
@@ -99,7 +99,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: account_1.clone(),
+                    address: account_1,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -171,7 +171,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 1_000_000,
-                    address: ed25519_0.clone(),
+                    address: ed25519_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -220,7 +220,7 @@ async fn all_combined() -> Result<()> {
                 Nft {
                     amount: 1_000_000,
                     nft_id: nft_id_1,
-                    address: ed25519_0.clone(),
+                    address: ed25519_0,
                     sender: None,
                     issuer: None,
                     sdruc: None,
@@ -232,7 +232,7 @@ async fn all_combined() -> Result<()> {
                 Nft {
                     amount: 1_000_000,
                     nft_id: nft_id_2,
-                    address: account_1.clone(),
+                    address: account_1,
                     sender: None,
                     issuer: None,
                     sdruc: None,
@@ -244,19 +244,19 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 2_000_000,
-                    address: ed25519_0.clone(),
+                    address: ed25519_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
                     timelock: None,
-                    expiration: Some((account_1.clone(), 50)),
+                    expiration: Some((account_1, 50)),
                 },
                 None,
             ),
             (
                 Basic {
                     amount: 2_000_000,
-                    address: ed25519_0.clone(),
+                    address: ed25519_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -268,7 +268,7 @@ async fn all_combined() -> Result<()> {
             (
                 Basic {
                     amount: 2_000_000,
-                    address: ed25519_0.clone(),
+                    address: ed25519_0,
                     native_token: None,
                     sender: None,
                     sdruc: None,
@@ -281,7 +281,7 @@ async fn all_combined() -> Result<()> {
                 Nft {
                     amount: 1_000_000,
                     nft_id: nft_id_3,
-                    address: account_1.clone(),
+                    address: account_1,
                     sender: None,
                     issuer: None,
                     sdruc: None,
@@ -316,13 +316,13 @@ async fn all_combined() -> Result<()> {
         Account {
             amount: 1_000_000,
             account_id: account_id_2,
-            address: ed25519_0.clone(),
+            address: ed25519_0,
             sender: None,
             issuer: None,
         },
         Basic {
             amount: 10_000_000,
-            address: ed25519_0.clone(),
+            address: ed25519_0,
             native_token: None,
             sender: None,
             sdruc: None,
@@ -332,7 +332,7 @@ async fn all_combined() -> Result<()> {
         Nft {
             amount: 1_000_000,
             nft_id: nft_id_1,
-            address: ed25519_0.clone(),
+            address: ed25519_0,
             sender: None,
             issuer: None,
             sdruc: None,
@@ -341,7 +341,7 @@ async fn all_combined() -> Result<()> {
         Nft {
             amount: 1_000_000,
             nft_id: nft_id_2,
-            address: ed25519_0.clone(),
+            address: ed25519_0,
             sender: None,
             issuer: None,
             sdruc: None,
@@ -350,7 +350,7 @@ async fn all_combined() -> Result<()> {
         Nft {
             amount: 1_000_000,
             nft_id: nft_id_3,
-            address: ed25519_0.clone(),
+            address: ed25519_0,
             sender: None,
             issuer: None,
             sdruc: None,
@@ -359,7 +359,7 @@ async fn all_combined() -> Result<()> {
         Nft {
             amount: 1_000_000,
             nft_id: nft_id_4,
-            address: ed25519_0.clone(),
+            address: ed25519_0,
             sender: None,
             issuer: None,
             sdruc: None,

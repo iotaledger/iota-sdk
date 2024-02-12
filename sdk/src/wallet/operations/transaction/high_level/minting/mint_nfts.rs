@@ -175,7 +175,7 @@ where
             let address = match address {
                 Some(address) => {
                     self.client().bech32_hrp_matches(address.hrp()).await?;
-                    address.inner().clone()
+                    *address.inner()
                 }
                 None => wallet_address,
             };

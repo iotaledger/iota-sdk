@@ -210,7 +210,7 @@ impl PartialEq<str> for Bech32Address {
 
 impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
-        value.borrow().inner.clone()
+        value.borrow().inner
     }
 }
 

@@ -118,7 +118,7 @@ impl<'a> Build<'a> {
                 expiration,
             } => {
                 let mut builder = BasicOutputBuilder::new_with_amount(amount)
-                    .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+                    .add_unlock_condition(AddressUnlockCondition::new(address));
 
                 if let Some((id, amount)) = native_token {
                     builder =
@@ -130,9 +130,8 @@ impl<'a> Build<'a> {
                 }
 
                 if let Some((address, amount)) = sdruc {
-                    builder = builder.add_unlock_condition(
-                        StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap(),
-                    );
+                    builder = builder
+                        .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount).unwrap());
                 }
 
                 if let Some(timelock) = timelock {
@@ -140,8 +139,7 @@ impl<'a> Build<'a> {
                 }
 
                 if let Some((address, timestamp)) = expiration {
-                    builder = builder
-                        .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
+                    builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
                 }
 
                 builder.finish_output().unwrap()

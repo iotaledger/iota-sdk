@@ -10,7 +10,7 @@ use crate::types::block::{
 
 /// Defines the Governor Address that owns this output, that is, it can unlock it with the proper Unlock in a
 /// transaction that governance transitions the anchor output.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct GovernorAddressUnlockCondition(Address);
 
 impl GovernorAddressUnlockCondition {

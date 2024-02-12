@@ -54,7 +54,7 @@ async fn valid_creation() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address.clone(),
+                address,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -70,7 +70,7 @@ async fn valid_creation() -> Result<()> {
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id: DelegationId::null(),
-        address: address.clone(),
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id),
         end_epoch: 0,
@@ -142,7 +142,7 @@ async fn creation_missing_commitment_input() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address.clone(),
+                address,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -158,7 +158,7 @@ async fn creation_missing_commitment_input() -> Result<()> {
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id: DelegationId::null(),
-        address: address.clone(),
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id),
         end_epoch: 0,
@@ -230,7 +230,7 @@ async fn non_null_id_creation() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address.clone(),
+                address,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -315,7 +315,7 @@ async fn mismatch_amount_creation() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address.clone(),
+                address,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -400,7 +400,7 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address.clone(),
+                address,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -485,7 +485,7 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         [(
             Basic {
                 amount: 1_000_000,
-                address: address.clone(),
+                address,
                 native_token: None,
                 sender: None,
                 sdruc: None,
@@ -581,7 +581,7 @@ async fn delay_not_null_id() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id,
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: *protocol_parameters.delegation_end_epoch(slot_commitment_id_1),
@@ -679,7 +679,7 @@ async fn delay_modified_amount() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id: DelegationId::null(),
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: 0,
@@ -776,7 +776,7 @@ async fn delay_modified_validator() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id: DelegationId::null(),
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: 0,
@@ -873,7 +873,7 @@ async fn delay_modified_start_epoch() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id: DelegationId::null(),
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: 0,
@@ -970,7 +970,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id: DelegationId::null(),
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: 0,
@@ -1067,7 +1067,7 @@ async fn destroy_null_id() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id: DelegationId::null(),
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: 0,
@@ -1167,7 +1167,7 @@ async fn destroy_reward_missing() -> Result<()> {
                 amount: 1_000_000,
                 delegation_amount: 1_000_000,
                 delegation_id: DelegationId::null(),
-                address: address.clone(),
+                address,
                 validator_address,
                 start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
                 end_epoch: 0,

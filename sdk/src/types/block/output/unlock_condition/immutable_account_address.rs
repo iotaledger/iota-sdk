@@ -10,7 +10,7 @@ use crate::types::block::{
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct ImmutableAccountAddressUnlockCondition(#[packable(verify_with = verify_address)] Address);
 
 impl ImmutableAccountAddressUnlockCondition {

@@ -10,7 +10,7 @@ use crate::types::block::{
 };
 
 /// Identifies the validated issuer of the UTXO state machine.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct IssuerFeature(pub(crate) Address);
 
 impl IssuerFeature {
