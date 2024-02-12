@@ -105,11 +105,6 @@ where
             // Create the new account output with the same features, just updated mana and foundry_counter.
             let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_mana(account_output_data.output.available_mana(
-                    &protocol_parameters,
-                    account_output_data.output_id.transaction_id().slot_index(),
-                    self.client().get_slot_index().await?,
-                )?)
                 .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens

@@ -89,11 +89,6 @@ where
 
         let account_id = AccountId::from(output_id);
         let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
-            .with_mana(implicit_account_data.output.available_mana(
-                &self.client().get_protocol_parameters().await?,
-                implicit_account_data.output_id.transaction_id().slot_index(),
-                self.client().get_slot_index().await?,
-            )?)
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(ed25519_address))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,

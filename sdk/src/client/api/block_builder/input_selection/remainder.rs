@@ -12,8 +12,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokens,
-            NativeTokensBuilder, NftOutputBuilder, Output, StorageScoreParameters,
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder,
+            NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, StorageScoreParameters,
         },
         Error as BlockError,
     },
@@ -122,7 +122,7 @@ impl InputSelection {
         let amount_diff = input_amount
             .checked_sub(output_amount)
             .ok_or(BlockError::ConsumedAmountOverflow)?;
-        let mana_diff = input_mana
+        let mut mana_diff = input_mana
             .checked_sub(output_mana)
             .ok_or(BlockError::ConsumedManaOverflow)?;
 
@@ -161,6 +161,38 @@ impl InputSelection {
         let Some((remainder_address, chain)) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
+
+        if mana_diff > 0 {
+            // Find any output that can take the mana, so we don't need to create a remainder specifically for it
+            if let Some(output) = self
+                .outputs
+                .iter_mut()
+                .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
+                .find(|o| {
+                    matches!(o.required_address(
+                        self.slot_commitment_id.slot_index(),
+                        self.protocol_parameters.committable_age_range(),
+                    ), Ok(Some(address)) if address == remainder_address)
+                })
+            {
+                let new_mana = output.mana() + std::mem::take(&mut mana_diff);
+                match output {
+                    Output::Basic(b) => {
+                        *output = BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?;
+                    }
+                    Output::Account(a) => {
+                        *output = AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?;
+                    }
+                    Output::Anchor(a) => {
+                        *output = AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?;
+                    }
+                    Output::Nft(n) => {
+                        *output = NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?;
+                    }
+                    _ => (),
+                }
+            }
+        }
 
         let remainder_outputs = create_remainder_outputs(
             amount_diff,
