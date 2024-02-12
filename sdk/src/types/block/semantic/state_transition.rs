@@ -178,13 +178,6 @@ impl StateTransitionVerifier for AccountOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )?;
-
         match (
             current_state.features().block_issuer(),
             next_state.features().block_issuer(),
@@ -202,7 +195,12 @@ impl StateTransitionVerifier for AccountOutput {
             _ => {}
         }
 
-        Ok(())
+        Self::transition_inner(
+            current_state,
+            next_state,
+            &context.input_chains,
+            context.transaction.outputs(),
+        )
     }
 
     fn destruction(
