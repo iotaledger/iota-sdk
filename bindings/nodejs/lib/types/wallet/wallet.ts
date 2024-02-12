@@ -11,7 +11,6 @@ import {
 import { DecayedMana, HexEncodedString, u256, u64 } from '../utils';
 import { IClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
-import { Bech32Address } from '../block';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {
