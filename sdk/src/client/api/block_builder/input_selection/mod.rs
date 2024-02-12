@@ -59,7 +59,7 @@ pub struct InputSelection {
 
 /// Account and RMC for automatic mana allotment
 #[derive(Copy, Clone, Debug)]
-pub struct AutoManaAllotment {
+pub(crate) struct AutoManaAllotment {
     issuer_id: AccountId,
     reference_mana_cost: u64,
 }
