@@ -98,12 +98,15 @@ impl ClientBuilder {
         Ok(self)
     }
 
-    /// Adds a list of IOTA nodes by their URLs.
-    // TODO: accept Vec<Node> or have `with_primary_permanodes()`? Need a way to differentiate between them, same for
-    // `with_nodes()`
+    // Adds a node as primary node.
+    pub fn with_primary_node(mut self, node: Node) -> Result<Self> {
+        self.node_manager_builder = self.node_manager_builder.with_primary_node(node)?;
+        Ok(self)
+    }
+
+    /// Adds a list of IOTA nodes by their URLs to the primary nodes list.
     pub fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
-        todo!("decide");
-        // self.node_manager_builder = self.node_manager_builder.with_primary_nodes(urls)?;
+        self.node_manager_builder = self.node_manager_builder.with_primary_nodes(urls)?;
         Ok(self)
     }
 

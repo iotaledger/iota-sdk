@@ -82,22 +82,31 @@ impl NodeManagerBuilder {
         Ok(self)
     }
 
-    pub(crate) fn with_primary_nodes(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
-        let mut url = validate_url(Url::parse(url)?)?;
-        if let Some(auth) = &auth {
+    pub(crate) fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
+        for url in urls {
+            let url = validate_url(Url::parse(url)?)?;
+            self.primary_nodes.push(NodeDto::Node(Node {
+                url,
+                auth: None,
+                disabled: false,
+                permanode: false,
+            }));
+        }
+        Ok(self)
+    }
+
+    pub(crate) fn with_primary_node(mut self, mut node: Node) -> Result<Self> {
+        let mut url = validate_url(node.url.clone())?;
+        if let Some(auth) = &node.auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
                 url.set_username(name)
                     .map_err(|_| crate::client::Error::UrlAuth("username"))?;
                 url.set_password(Some(password))
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
+            node.url = url;
         }
-        self.primary_nodes.push(NodeDto::Node(Node {
-            url,
-            auth,
-            disabled: false,
-            permanode: false,
-        }));
+        self.primary_nodes.push(NodeDto::Node(node));
         Ok(self)
     }
 
