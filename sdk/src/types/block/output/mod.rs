@@ -358,14 +358,14 @@ impl Output {
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, committable_age_range)?
                 .cloned(),
-            Self::Account(output) => Some(output.address().clone()),
+            Self::Account(output) => Some(*output.address()),
             Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             Self::Foundry(output) => Some(Address::Account(*output.account_address())),
             Self::Nft(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, committable_age_range)?
                 .cloned(),
-            Self::Delegation(output) => Some(output.address().clone()),
+            Self::Delegation(output) => Some(*output.address()),
         })
     }
 

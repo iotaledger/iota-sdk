@@ -203,7 +203,7 @@ where
             }
         }
         // Panic: can be safely unwrapped now
-        let address = self.address.as_ref().unwrap().clone();
+        let address = *self.address.as_ref().unwrap();
 
         #[cfg(feature = "storage")]
         let mut wallet_data = storage_manager.load_wallet_data().await?;

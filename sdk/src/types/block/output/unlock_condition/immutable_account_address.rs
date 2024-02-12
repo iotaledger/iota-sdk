@@ -62,7 +62,7 @@ mod dto {
         fn from(value: &ImmutableAccountAddressUnlockCondition) -> Self {
             Self {
                 kind: ImmutableAccountAddressUnlockCondition::KIND,
-                address: value.0.clone(),
+                address: value.0,
             }
         }
     }

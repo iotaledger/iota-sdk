@@ -55,7 +55,7 @@ mod dto {
         fn from(value: &IssuerFeature) -> Self {
             Self {
                 kind: IssuerFeature::KIND,
-                address: value.0.clone(),
+                address: value.0,
             }
         }
     }

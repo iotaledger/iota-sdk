@@ -54,7 +54,7 @@ pub(crate) mod dto {
         fn from(value: &StateControllerAddressUnlockCondition) -> Self {
             Self {
                 kind: StateControllerAddressUnlockCondition::KIND,
-                address: value.address().clone(),
+                address: *value.address(),
             }
         }
     }

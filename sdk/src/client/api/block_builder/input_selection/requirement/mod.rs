@@ -140,7 +140,7 @@ impl InputSelection {
 
             // Add a sender requirement if the sender feature is present.
             if let Some(sender) = output.features().and_then(Features::sender) {
-                let requirement = Requirement::Sender(sender.address().clone());
+                let requirement = Requirement::Sender(*sender.address());
                 log::debug!("Adding {requirement:?} from output");
                 self.requirements.push(requirement);
             }
@@ -148,7 +148,7 @@ impl InputSelection {
             // Add an issuer requirement if the issuer feature is present and the chain output is created.
             if is_created {
                 if let Some(issuer) = output.immutable_features().and_then(Features::issuer) {
-                    let requirement = Requirement::Issuer(issuer.address().clone());
+                    let requirement = Requirement::Issuer(*issuer.address());
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
                 }

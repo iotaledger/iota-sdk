@@ -46,7 +46,7 @@ impl InputSelection {
             inputs_sum += selected_input.output.amount();
 
             if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.slot_index) {
-                *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
+                *inputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
             }
         }
 
@@ -152,10 +152,10 @@ impl AmountSelection {
                 if input_sdr > output_sdr {
                     let diff = input_sdr - output_sdr;
                     self.outputs_sum += diff;
-                    *self.outputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
+                    *self.outputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
                 }
 
-                *self.inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
+                *self.inputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
             }
 
             if let Some(nt) = input.output.native_token() {

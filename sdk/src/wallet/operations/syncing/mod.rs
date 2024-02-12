@@ -195,13 +195,13 @@ where
                         Output::Account(account) => {
                             addresses_to_scan.insert(
                                 AccountAddress::from(account.account_id_non_null(&unspent_data.output_id)).into(),
-                                address_with_unspent.address.inner().clone(),
+                                *address_with_unspent.address.inner(),
                             );
                         }
                         Output::Nft(nft) => {
                             addresses_to_scan.insert(
                                 NftAddress::from(nft.nft_id_non_null(&unspent_data.output_id)).into(),
-                                address_with_unspent.address.inner().clone(),
+                                *address_with_unspent.address.inner(),
                             );
                         }
                         _ => {}

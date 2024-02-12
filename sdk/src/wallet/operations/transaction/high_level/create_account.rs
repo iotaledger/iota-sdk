@@ -75,9 +75,9 @@ where
         let address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
-                bech32_address.inner().clone()
+                *bech32_address.inner()
             }
-            None => self.address().await.inner().clone(),
+            None => *self.address().await.inner(),
         };
 
         let mut account_output_builder =

@@ -104,7 +104,6 @@ async fn main() -> Result<()> {
         let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
-            let recv_address = recv_address;
             let wallet = wallet.clone();
 
             tasks.spawn(async move {

@@ -89,10 +89,7 @@ impl Address {
 
     /// Checks whether the address is backed by an [`Ed25519Address`].
     pub fn is_ed25519_backed(&self) -> bool {
-        match self {
-            Self::Ed25519(_) | Self::ImplicitAccountCreation(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Ed25519(_) | Self::ImplicitAccountCreation(_))
     }
 
     /// Returns the backing [`Ed25519Address`], if any.

@@ -54,7 +54,7 @@ async fn sign_account_state_transition() -> Result<()> {
         [(
             Account {
                 amount: 1_000_000,
-                account_id: account_id,
+                account_id,
                 address: address.clone(),
                 sender: None,
                 issuer: None,
@@ -66,7 +66,7 @@ async fn sign_account_state_transition() -> Result<()> {
 
     let outputs = build_outputs([Account {
         amount: 1_000_000,
-        account_id: account_id,
+        account_id,
         address: address.clone(),
         sender: None,
         issuer: None,
@@ -139,7 +139,7 @@ async fn account_reference_unlocks() -> Result<()> {
             (
                 Account {
                     amount: 1_000_000,
-                    account_id: account_id,
+                    account_id,
                     address: address.clone(),
                     sender: None,
                     issuer: None,
@@ -177,8 +177,8 @@ async fn account_reference_unlocks() -> Result<()> {
     let outputs = build_outputs([
         Account {
             amount: 1_000_000,
-            account_id: account_id,
-            address: address,
+            account_id,
+            address,
             sender: None,
             issuer: None,
         },

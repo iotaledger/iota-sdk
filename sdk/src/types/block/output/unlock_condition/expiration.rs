@@ -132,7 +132,7 @@ pub(crate) mod dto {
         fn from(value: &ExpirationUnlockCondition) -> Self {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
-                return_address: value.return_address().clone(),
+                return_address: value.return_address,
                 slot: value.slot_index(),
             }
         }

@@ -52,7 +52,7 @@ pub(crate) mod dto {
         fn from(value: &AddressUnlockCondition) -> Self {
             Self {
                 kind: AddressUnlockCondition::KIND,
-                address: value.0.clone(),
+                address: value.0,
             }
         }
     }

@@ -78,7 +78,7 @@ where
                         *delegation_output.as_delegation().validator_address(),
                     )
                     .add_unlock_condition(AddressUnlockCondition::new(
-                        delegation_output.as_delegation().address().clone(),
+                        *delegation_output.as_delegation().address(),
                     ))
                     .finish_output()?,
                 );
