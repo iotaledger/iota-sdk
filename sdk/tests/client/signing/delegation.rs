@@ -18,7 +18,10 @@ use iota_sdk::{
         context_input::{CommitmentContextInput, RewardContextInput},
         input::{Input, UtxoInput},
         output::DelegationId,
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilityFlag},
+            SignedTransactionPayload,
+        },
         protocol::iota_mainnet_protocol_parameters,
         rand::{address::rand_account_address, output::rand_delegation_id, slot::rand_slot_commitment_id},
         semantic::TransactionFailureReason,
@@ -86,6 +89,7 @@ async fn valid_creation() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_context_inputs([CommitmentContextInput::new(slot_commitment_id).into()])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -173,6 +177,7 @@ async fn creation_missing_commitment_input() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -261,6 +266,7 @@ async fn non_null_id_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -346,6 +352,7 @@ async fn mismatch_amount_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -431,6 +438,7 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -516,6 +524,7 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .with_context_inputs([CommitmentContextInput::new(slot_commitment_id).into()])
         .finish_with_params(&protocol_parameters)?;
 
@@ -614,6 +623,7 @@ async fn delay_not_null_id() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -714,6 +724,7 @@ async fn delay_modified_amount() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -811,6 +822,7 @@ async fn delay_modified_validator() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -908,6 +920,7 @@ async fn delay_modified_start_epoch() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -1005,6 +1018,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -1100,6 +1114,7 @@ async fn destroy_null_id() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let mut mana_rewards = BTreeMap::default();
@@ -1197,6 +1212,7 @@ async fn destroy_reward_missing() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index_2 + 1)
         .with_context_inputs([CommitmentContextInput::new(slot_commitment_id_2).into()])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
