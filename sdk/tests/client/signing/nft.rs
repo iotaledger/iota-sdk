@@ -22,7 +22,7 @@ use iota_sdk::{
             signed_transaction::{Transaction, TransactionCapabilityFlag},
             SignedTransactionPayload,
         },
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -49,7 +49,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id = NftId::from_str(NFT_ID_1)?;
     let nft_address = Address::Nft(NftAddress::new(nft_id));
     let slot_index = SlotIndex::from(10);

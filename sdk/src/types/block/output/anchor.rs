@@ -679,13 +679,13 @@ mod dto {
 mod tests {
     use super::*;
     use crate::types::block::{
-        output::anchor::dto::AnchorOutputDto, protocol::iota_mainnet_v3_protocol_parameters,
+        output::anchor::dto::AnchorOutputDto, protocol::iota_mainnet_protocol_parameters,
         rand::output::rand_anchor_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let anchor_output = rand_anchor_output(protocol_parameters.token_supply());
         let dto = AnchorOutputDto::from(&anchor_output);
         let output = Output::Anchor(AnchorOutput::try_from(dto).unwrap());

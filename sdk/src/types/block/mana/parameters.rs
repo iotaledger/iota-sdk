@@ -208,12 +208,12 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::block::protocol::iota_mainnet_v3_protocol_parameters;
+    use crate::types::block::protocol::iota_mainnet_protocol_parameters;
 
     // Tests from https://github.com/iotaledger/iota.go/blob/develop/mana_decay_provider_test.go
 
     fn params() -> &'static ProtocolParameters {
-        iota_mainnet_v3_protocol_parameters()
+        iota_mainnet_protocol_parameters()
     }
 
     #[test]

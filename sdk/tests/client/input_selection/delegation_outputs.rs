@@ -12,7 +12,7 @@ use iota_sdk::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, DelegationId, DelegationOutputBuilder,
             OutputId,
         },
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::{
             address::rand_account_address, output::rand_output_metadata_with_id,
             transaction::rand_transaction_id_with_slot_index,
@@ -25,7 +25,7 @@ use crate::client::{BECH32_ADDRESS_ED25519_0, SLOT_INDEX};
 
 #[test]
 fn remainder_needed_for_mana() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
 
     let delegation_input =
         DelegationOutputBuilder::new_with_amount(1_000_000, DelegationId::null(), rand_account_address())

@@ -146,11 +146,11 @@ mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::block::protocol::iota_mainnet_v3_protocol_parameters;
+    use crate::types::block::protocol::iota_mainnet_protocol_parameters;
 
     #[test]
     fn epoch_index_to_from_slot() {
-        let mut params = iota_mainnet_v3_protocol_parameters().clone();
+        let mut params = iota_mainnet_protocol_parameters().clone();
         params.slots_per_epoch_exponent = 10;
         let slot_index = SlotIndex(3000);
         let epoch_index =

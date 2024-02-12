@@ -294,10 +294,16 @@ class Utils:
         }))
 
     @staticmethod
-    def iota_mainnet_v3_protocol_parameters() -> ProtocolParameters:
-        """Returns sample protocol parameters for IOTA mainnet V3.
+    def iota_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for IOTA mainnet.
         """
-        return ProtocolParameters.from_dict(_call_method('iotaMainnetV3ProtocolParameters'))
+        return ProtocolParameters.from_dict(_call_method('iotaMainnetProtocolParameters'))
+
+    @staticmethod
+    def shimmer_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for Shimmer mainnet.
+        """
+        return ProtocolParameters.from_dict(_call_method('shimmerMainnetProtocolParameters'))
 
 
 class UtilsError(Exception):

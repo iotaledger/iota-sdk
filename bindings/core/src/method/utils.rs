@@ -212,5 +212,6 @@ pub enum UtilsMethod {
         /// Block
         block: BlockDto,
     },
-    IotaMainnetV3ProtocolParameters,
+    IotaMainnetProtocolParameters,
+    ShimmerMainnetProtocolParameters,
 }

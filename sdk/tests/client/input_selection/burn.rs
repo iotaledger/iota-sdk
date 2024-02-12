@@ -11,7 +11,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{AccountId, ChainId, NftId, SimpleTokenScheme, TokenId},
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
     },
 };
 use pretty_assertions::assert_eq;
@@ -27,7 +27,7 @@ use crate::client::{
 
 #[test]
 fn burn_account_present() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -85,7 +85,7 @@ fn burn_account_present() {
 
 #[test]
 fn burn_account_present_and_required() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -144,7 +144,7 @@ fn burn_account_present_and_required() {
 
 #[test]
 fn burn_account_id_zero() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -205,7 +205,7 @@ fn burn_account_id_zero() {
 
 #[test]
 fn burn_account_absent() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -251,7 +251,7 @@ fn burn_account_absent() {
 
 #[test]
 fn burn_accounts_present() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -319,7 +319,7 @@ fn burn_accounts_present() {
 
 #[test]
 fn burn_account_in_outputs() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -386,7 +386,7 @@ fn burn_account_in_outputs() {
 
 #[test]
 fn burn_nft_present() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -446,7 +446,7 @@ fn burn_nft_present() {
 
 #[test]
 fn burn_nft_present_and_required() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -507,7 +507,7 @@ fn burn_nft_present_and_required() {
 
 #[test]
 fn burn_nft_id_zero() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -566,7 +566,7 @@ fn burn_nft_id_zero() {
 
 #[test]
 fn burn_nft_absent() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -612,7 +612,7 @@ fn burn_nft_absent() {
 
 #[test]
 fn burn_nfts_present() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
@@ -684,7 +684,7 @@ fn burn_nfts_present() {
 
 #[test]
 fn burn_nft_in_outputs() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -755,7 +755,7 @@ fn burn_nft_in_outputs() {
 
 #[test]
 fn burn_foundry_present() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -849,7 +849,7 @@ fn burn_foundry_present() {
 
 #[test]
 fn burn_foundry_absent() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id_1 = build_inputs(
         [(
@@ -923,7 +923,7 @@ fn burn_foundry_absent() {
 
 #[test]
 fn burn_foundries_present() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1006,7 +1006,7 @@ fn burn_foundries_present() {
 
 #[test]
 fn burn_foundry_in_outputs() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1074,7 +1074,7 @@ fn burn_foundry_in_outputs() {
 
 #[test]
 fn burn_native_tokens() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1141,7 +1141,7 @@ fn burn_native_tokens() {
 
 #[test]
 fn burn_foundry_and_its_account() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(

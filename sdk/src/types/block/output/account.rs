@@ -632,13 +632,13 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::account::dto::AccountOutputDto, protocol::iota_mainnet_v3_protocol_parameters,
+        output::account::dto::AccountOutputDto, protocol::iota_mainnet_protocol_parameters,
         rand::output::rand_account_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let account_output = rand_account_output(protocol_parameters.token_supply());
         let dto = AccountOutputDto::from(&account_output);
         let output = Output::Account(AccountOutput::try_from(dto).unwrap());

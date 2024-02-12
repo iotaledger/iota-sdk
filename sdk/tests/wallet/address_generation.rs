@@ -15,7 +15,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{address::ToBech32Ext, protocol::iota_mainnet_v3_protocol_parameters},
+    types::block::{address::ToBech32Ext, protocol::iota_mainnet_protocol_parameters},
     wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -29,7 +29,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
 
     let client_options = ClientOptions::new()
         .with_node(NODE_LOCAL)?
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone());
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
@@ -72,7 +72,7 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
 
     let client_options = ClientOptions::new()
         .with_node(NODE_LOCAL)?
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone());
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))

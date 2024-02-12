@@ -45,7 +45,7 @@ describe('Wallet', () => {
             storagePath: './test-create-wallet',
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
-                protocolParameters: Utils.iotaMainnetV3ProtocolParameters(),
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             bipPath: {
                 coinType: CoinType.IOTA,
@@ -91,7 +91,7 @@ describe('Wallet', () => {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
-                protocolParameters: Utils.iotaMainnetV3ProtocolParameters(),
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             bipPath: {
                 coinType: CoinType.IOTA,
@@ -148,7 +148,7 @@ describe('Wallet', () => {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
-                protocolParameters: Utils.iotaMainnetV3ProtocolParameters(),
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             bipPath: {
                 coinType: CoinType.IOTA,

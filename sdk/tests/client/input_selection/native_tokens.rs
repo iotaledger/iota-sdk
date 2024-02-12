@@ -8,7 +8,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
-        protocol::{iota_mainnet_v3_protocol_parameters, ProtocolParameters},
+        protocol::{iota_mainnet_protocol_parameters, ProtocolParameters},
     },
 };
 use pretty_assertions::assert_eq;
@@ -21,7 +21,7 @@ use crate::client::{
 
 #[test]
 fn two_native_tokens_one_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -79,7 +79,7 @@ fn two_native_tokens_one_needed() {
 
 #[test]
 fn two_native_tokens_both_needed_plus_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -158,7 +158,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
 
 #[test]
 fn three_inputs_two_needed_plus_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -238,7 +238,7 @@ fn three_inputs_two_needed_plus_remainder() {
 
 #[test]
 fn three_inputs_two_needed_no_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -307,7 +307,7 @@ fn three_inputs_two_needed_no_remainder() {
 
 #[test]
 fn insufficient_native_tokens_one_input() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -354,7 +354,7 @@ fn insufficient_native_tokens_one_input() {
 
 #[test]
 fn insufficient_native_tokens_three_inputs() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -427,7 +427,7 @@ fn insufficient_native_tokens_three_inputs() {
 
 #[test]
 fn burn_and_send_at_the_same_time() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -500,7 +500,7 @@ fn burn_and_send_at_the_same_time() {
 
 #[test]
 fn burn_one_input_no_output() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -541,7 +541,7 @@ fn burn_one_input_no_output() {
 
 #[test]
 fn multiple_native_tokens() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -599,7 +599,7 @@ fn multiple_native_tokens() {
 
 #[test]
 fn insufficient_native_tokens() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -646,7 +646,7 @@ fn insufficient_native_tokens() {
 
 #[test]
 fn insufficient_native_tokens_2() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -693,7 +693,7 @@ fn insufficient_native_tokens_2() {
 
 #[test]
 fn insufficient_amount_for_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -742,7 +742,7 @@ fn insufficient_amount_for_remainder() {
 
 #[test]
 fn single_output_native_token_no_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -785,7 +785,7 @@ fn single_output_native_token_no_remainder() {
 
 #[test]
 fn single_output_native_token_remainder_1() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -835,7 +835,7 @@ fn single_output_native_token_remainder_1() {
 
 #[test]
 fn single_output_native_token_remainder_2() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -885,7 +885,7 @@ fn single_output_native_token_remainder_2() {
 
 #[test]
 fn two_basic_outputs_1() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -950,7 +950,7 @@ fn two_basic_outputs_1() {
 
 #[test]
 fn two_basic_outputs_2() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1015,7 +1015,7 @@ fn two_basic_outputs_2() {
 
 #[test]
 fn two_basic_outputs_3() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1080,7 +1080,7 @@ fn two_basic_outputs_3() {
 
 #[test]
 fn two_basic_outputs_4() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1145,7 +1145,7 @@ fn two_basic_outputs_4() {
 
 #[test]
 fn two_basic_outputs_5() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1210,7 +1210,7 @@ fn two_basic_outputs_5() {
 
 #[test]
 fn two_basic_outputs_6() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1274,7 +1274,7 @@ fn two_basic_outputs_6() {
 
 #[test]
 fn two_basic_outputs_7() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1338,7 +1338,7 @@ fn two_basic_outputs_7() {
 
 #[test]
 fn two_basic_outputs_8() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1399,7 +1399,7 @@ fn two_basic_outputs_8() {
 
 #[test]
 fn two_basic_outputs_native_tokens_not_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1464,7 +1464,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
 
 #[test]
 fn multiple_remainders() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [

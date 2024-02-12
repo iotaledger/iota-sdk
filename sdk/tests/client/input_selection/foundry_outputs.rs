@@ -14,7 +14,7 @@ use iota_sdk::{
             unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, Output,
             SimpleTokenScheme, TokenId,
         },
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
@@ -28,7 +28,7 @@ use crate::client::{
 
 #[test]
 fn missing_input_account_for_foundry() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -109,7 +109,7 @@ fn missing_input_account_for_foundry() {
 
 #[test]
 fn minted_native_tokens_in_new_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -171,7 +171,7 @@ fn minted_native_tokens_in_new_remainder() {
 
 #[test]
 fn minted_native_tokens_in_provided_output() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_2), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -241,7 +241,7 @@ fn minted_native_tokens_in_provided_output() {
 
 #[test]
 fn melt_native_tokens() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs(
@@ -318,7 +318,7 @@ fn melt_native_tokens() {
 
 #[test]
 fn destroy_foundry_with_account_state_transition() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -371,7 +371,7 @@ fn destroy_foundry_with_account_state_transition() {
 
 #[test]
 fn destroy_foundry_with_account_burn() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -441,7 +441,7 @@ fn destroy_foundry_with_account_burn() {
 
 #[test]
 fn prefer_basic_to_foundry() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -508,7 +508,7 @@ fn prefer_basic_to_foundry() {
 
 #[test]
 fn simple_foundry_transition_basic_not_needed() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs(
@@ -592,7 +592,7 @@ fn simple_foundry_transition_basic_not_needed() {
 
 #[test]
 fn simple_foundry_transition_basic_not_needed_with_remainder() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs(
@@ -752,7 +752,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 
 #[test]
 fn mint_and_burn_at_the_same_time() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -809,7 +809,7 @@ fn mint_and_burn_at_the_same_time() {
 
 #[test]
 fn take_amount_from_account_and_foundry_to_fund_basic() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -886,7 +886,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 
 #[test]
 fn create_native_token_but_burn_account() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -953,7 +953,7 @@ fn create_native_token_but_burn_account() {
 
 #[test]
 fn melted_tokens_not_provided() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
@@ -1011,7 +1011,7 @@ fn melted_tokens_not_provided() {
 
 #[test]
 fn burned_tokens_not_provided() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
@@ -1070,7 +1070,7 @@ fn burned_tokens_not_provided() {
 
 #[test]
 fn foundry_in_outputs_and_required() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let mut inputs = build_inputs(
@@ -1129,7 +1129,7 @@ fn foundry_in_outputs_and_required() {
 
 #[test]
 fn melt_and_burn_native_tokens() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);

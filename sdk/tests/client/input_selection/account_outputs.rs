@@ -8,7 +8,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{AccountId, AccountOutputBuilder, Output},
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
@@ -22,7 +22,7 @@ use crate::client::{
 
 #[test]
 fn input_account_eq_output_account() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -62,7 +62,7 @@ fn input_account_eq_output_account() {
 
 #[test]
 fn transition_account_id_zero() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -237,7 +237,7 @@ fn transition_account_id_zero() {
 
 #[test]
 fn create_account() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -288,7 +288,7 @@ fn create_account() {
 
 #[test]
 fn burn_account() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -376,7 +376,7 @@ fn burn_account() {
 
 #[test]
 fn missing_input_for_account_output() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -419,7 +419,7 @@ fn missing_input_for_account_output() {
 
 #[test]
 fn missing_input_for_account_output_2() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -475,7 +475,7 @@ fn missing_input_for_account_output_2() {
 
 #[test]
 fn missing_input_for_account_output_but_created() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -515,7 +515,7 @@ fn missing_input_for_account_output_but_created() {
 
 #[test]
 fn account_in_output_and_sender() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -575,7 +575,7 @@ fn account_in_output_and_sender() {
 
 #[test]
 fn missing_ed25519_sender() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -616,7 +616,7 @@ fn missing_ed25519_sender() {
 
 #[test]
 fn missing_ed25519_issuer_created() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -659,7 +659,7 @@ fn missing_ed25519_issuer_created() {
 
 #[test]
 fn missing_ed25519_issuer_transition() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -697,7 +697,7 @@ fn missing_ed25519_issuer_transition() {
 
 #[test]
 fn missing_account_sender() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -738,7 +738,7 @@ fn missing_account_sender() {
 
 #[test]
 fn missing_account_issuer_created() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -781,7 +781,7 @@ fn missing_account_issuer_created() {
 
 #[test]
 fn missing_account_issuer_transition() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -819,7 +819,7 @@ fn missing_account_issuer_transition() {
 
 #[test]
 fn missing_nft_sender() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -860,7 +860,7 @@ fn missing_nft_sender() {
 
 #[test]
 fn missing_nft_issuer_created() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -903,7 +903,7 @@ fn missing_nft_issuer_created() {
 
 #[test]
 fn missing_nft_issuer_transition() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -941,7 +941,7 @@ fn missing_nft_issuer_transition() {
 
 #[test]
 fn increase_account_amount() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -995,7 +995,7 @@ fn increase_account_amount() {
 
 #[test]
 fn decrease_account_amount() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1061,7 +1061,7 @@ fn decrease_account_amount() {
 
 #[test]
 fn prefer_basic_to_account() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1118,7 +1118,7 @@ fn prefer_basic_to_account() {
 
 #[test]
 fn take_amount_from_account_to_fund_basic() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1189,7 +1189,7 @@ fn take_amount_from_account_to_fund_basic() {
 
 #[test]
 fn account_burn_should_validate_account_sender() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1258,7 +1258,7 @@ fn account_burn_should_validate_account_sender() {
 
 #[test]
 fn account_burn_should_validate_account_address() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1327,7 +1327,7 @@ fn account_burn_should_validate_account_address() {
 
 #[test]
 fn transitioned_zero_account_id_no_longer_is_zero() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -1384,7 +1384,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
 
 #[test]
 fn two_accounts_required() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -1460,7 +1460,7 @@ fn two_accounts_required() {
 
 #[test]
 fn state_controller_sender_required() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1503,7 +1503,7 @@ fn state_controller_sender_required() {
 
 #[test]
 fn state_controller_sender_required_already_selected() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1555,7 +1555,7 @@ fn state_controller_sender_required_already_selected() {
 
 #[test]
 fn state_transition_and_required() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1596,7 +1596,7 @@ fn state_transition_and_required() {
 
 #[test]
 fn remainder_address_in_state_controller() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(

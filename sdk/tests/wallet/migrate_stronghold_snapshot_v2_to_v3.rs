@@ -13,7 +13,7 @@ use iota_sdk::{
         Error as ClientError,
     },
     crypto::keys::bip44::Bip44,
-    types::block::protocol::iota_mainnet_v3_protocol_parameters,
+    types::block::protocol::iota_mainnet_protocol_parameters,
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -26,7 +26,7 @@ const PBKDF_ITER: u32 = 100;
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration() {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
 
     let storage_path = "test-storage/stronghold_snapshot_v2_v3_migration";
     setup(storage_path).unwrap();

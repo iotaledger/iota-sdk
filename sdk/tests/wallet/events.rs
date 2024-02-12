@@ -11,7 +11,7 @@ use iota_sdk::{
             OutputIdProof,
         },
         payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
             output::{rand_basic_output, rand_output_metadata},
@@ -90,7 +90,7 @@ fn wallet_events_serde() {
     ));
 
     {
-        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
         let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
         let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));

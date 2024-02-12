@@ -30,7 +30,7 @@ describe('wallet tests', () => {
             },
             clientOptions: {
                 nodes: ['http://localhost:8050'],
-                protocolParameters: Utils.iotaMainnetV3ProtocolParameters(),
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             secretManager: mnemonicSecretManager,
         });

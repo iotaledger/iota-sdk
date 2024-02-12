@@ -650,13 +650,13 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::foundry::dto::FoundryOutputDto, protocol::iota_mainnet_v3_protocol_parameters,
+        output::foundry::dto::FoundryOutputDto, protocol::iota_mainnet_protocol_parameters,
         rand::output::rand_foundry_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let foundry_output = rand_foundry_output(protocol_parameters.token_supply());
         let dto = FoundryOutputDto::from(&foundry_output);
         let output = Output::Foundry(FoundryOutput::try_from(dto).unwrap());

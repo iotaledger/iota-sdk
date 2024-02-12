@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{address::Address, protocol::iota_mainnet_v3_protocol_parameters, slot::SlotIndex},
+    types::block::{address::Address, protocol::iota_mainnet_protocol_parameters, slot::SlotIndex},
 };
 use pretty_assertions::assert_eq;
 
@@ -13,7 +13,7 @@ use crate::client::{
 
 #[test]
 fn one_output_timelock_not_expired() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -54,7 +54,7 @@ fn one_output_timelock_not_expired() {
 
 #[test]
 fn timelock_equal_timestamp() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -97,7 +97,7 @@ fn timelock_equal_timestamp() {
 
 #[test]
 fn two_outputs_one_timelock_expired() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -155,7 +155,7 @@ fn two_outputs_one_timelock_expired() {
 
 #[test]
 fn two_outputs_one_timelocked_one_missing() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -213,7 +213,7 @@ fn two_outputs_one_timelocked_one_missing() {
 
 #[test]
 fn one_output_timelock_expired() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(

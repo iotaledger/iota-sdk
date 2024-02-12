@@ -14,7 +14,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    types::block::{address::Bech32Address, protocol::iota_mainnet_v3_protocol_parameters},
+    types::block::{address::Bech32Address, protocol::iota_mainnet_protocol_parameters},
     wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -143,7 +143,7 @@ async fn iota_coin_type() -> Result<()> {
 
     let client_options = ClientOptions::new()
         .with_node(NODE_LOCAL)?
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone());
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]

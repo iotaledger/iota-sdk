@@ -9,7 +9,7 @@ use iota_sdk::types::block::{
         signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
         Payload, TaggedDataPayload,
     },
-    protocol::iota_mainnet_v3_protocol_parameters,
+    protocol::iota_mainnet_protocol_parameters,
     rand::{bytes::rand_bytes, mana::rand_mana_allotment},
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -24,7 +24,7 @@ const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99
 
 #[test]
 fn transaction() {
-    let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));

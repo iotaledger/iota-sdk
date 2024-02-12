@@ -609,7 +609,7 @@ mod test {
             input::{Input, UtxoInput},
             output::{AddressUnlockCondition, BasicOutput, Output},
             payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
-            protocol::iota_mainnet_v3_protocol_parameters,
+            protocol::iota_mainnet_protocol_parameters,
             rand::mana::rand_mana_allotment,
             signature::{Ed25519Signature, Signature},
             unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -624,7 +624,7 @@ mod test {
 
     #[test]
     fn serialize() {
-        let protocol_parameters = iota_mainnet_v3_protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
 
         let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
         let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));

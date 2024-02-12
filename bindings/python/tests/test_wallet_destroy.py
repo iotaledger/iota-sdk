@@ -12,7 +12,7 @@ class WalletDestroy(unittest.TestCase):
         shutil.rmtree(db_path, ignore_errors=True)
 
         client_options = ClientOptions(
-            nodes=[], protocol_parameters=Utils.iota_mainnet_v3_protocol_parameters())
+            nodes=[], protocol_parameters=Utils.iota_mainnet_protocol_parameters())
 
         secret_manager = MnemonicSecretManager(
             "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
@@ -47,7 +47,7 @@ class WalletDestroy(unittest.TestCase):
         shutil.rmtree(db_path, ignore_errors=True)
 
         client_options = ClientOptions(
-            nodes=[], protocol_parameters=Utils.iota_mainnet_v3_protocol_parameters())
+            nodes=[], protocol_parameters=Utils.iota_mainnet_protocol_parameters())
         secret_manager = MnemonicSecretManager(
             "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
 

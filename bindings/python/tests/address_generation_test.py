@@ -10,7 +10,7 @@ def test_address_generation_iota():
     shutil.rmtree(db_path, ignore_errors=True)
 
     client_options = ClientOptions(
-        nodes=[], protocol_parameters=Utils.iota_mainnet_v3_protocol_parameters())
+        nodes=[], protocol_parameters=Utils.iota_mainnet_protocol_parameters())
 
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
@@ -29,7 +29,7 @@ def test_address_generation_iota():
 
     address = wallet.address()
 
-    assert 'smr1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4sp36wye' == address
+    assert 'iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg' == address
     shutil.rmtree(db_path, ignore_errors=True)
 
 
@@ -38,7 +38,7 @@ def test_address_generation_shimmer():
     shutil.rmtree(db_path, ignore_errors=True)
 
     client_options = ClientOptions(
-        nodes=[], protocol_parameters=Utils.iota_mainnet_v3_protocol_parameters())
+        nodes=[], protocol_parameters=Utils.shimmer_mainnet_protocol_parameters())
 
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")

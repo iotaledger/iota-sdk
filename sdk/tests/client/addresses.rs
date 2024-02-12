@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     types::block::{
         address::{Address, Hrp},
-        protocol::iota_mainnet_v3_protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
     },
 };
 use pretty_assertions::assert_eq;
@@ -256,7 +256,7 @@ async fn address_generation() {
 #[tokio::test]
 async fn search_address() -> Result<()> {
     let client = Client::builder()
-        .with_protocol_parameters(iota_mainnet_v3_protocol_parameters().clone())
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone())
         .finish()
         .await
         .unwrap();

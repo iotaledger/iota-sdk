@@ -146,7 +146,7 @@ impl Balance {
 
         use crate::types::block::rand::bytes::rand_bytes_array;
 
-        let token_supply = crate::types::block::protocol::iota_mainnet_v3_protocol_parameters().token_supply();
+        let token_supply = crate::types::block::protocol::iota_mainnet_protocol_parameters().token_supply();
         let total = rand::thread_rng().gen_range(128..token_supply / 1000000);
 
         let mut generator = 0u8;
