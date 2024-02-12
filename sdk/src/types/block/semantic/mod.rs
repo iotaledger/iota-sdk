@@ -13,10 +13,11 @@ use primitive_types::U256;
 pub use self::{error::TransactionFailureReason, state_transition::StateTransitionVerifier};
 use crate::types::block::{
     address::Address,
-    context_input::{CommitmentContextInput, RewardContextInput},
+    context_input::RewardContextInput,
     output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     protocol::ProtocolParameters,
+    slot::SlotCommitmentId,
     unlock::Unlock,
     Error,
 };
@@ -31,7 +32,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
-    pub(crate) commitment_context_input: Option<CommitmentContextInput>,
+    pub(crate) commitment_context_input: Option<SlotCommitmentId>,
     pub(crate) bic_context_inputs: HashSet<AccountId>,
     pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -107,7 +108,11 @@ impl<'a> SemanticValidationContext<'a> {
 
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
-        self.commitment_context_input = self.transaction.context_inputs().commitment().copied();
+        self.commitment_context_input = self
+            .transaction
+            .context_inputs()
+            .commitment()
+            .map(|c| c.slot_commitment_id());
 
         self.bic_context_inputs = self
             .transaction

@@ -152,6 +152,16 @@ impl StateTransitionVerifier for AccountOutput {
             return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
+        if let Some(block_issuer) = next_state.features().block_issuer() {
+            let past_bounded_slot_index = context
+                .protocol_parameters
+                .past_bounded_slot(context.commitment_context_input.unwrap());
+
+            if block_issuer.expiry_slot() < past_bounded_slot_index {
+                return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
+            }
+        }
+
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
                 return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
@@ -173,7 +183,26 @@ impl StateTransitionVerifier for AccountOutput {
             next_state,
             &context.input_chains,
             context.transaction.outputs(),
-        )
+        )?;
+
+        match (
+            current_state.features().block_issuer(),
+            next_state.features().block_issuer(),
+        ) {
+            (None, Some(block_issuer_output)) => {
+                let past_bounded_slot_index = context
+                    .protocol_parameters
+                    .past_bounded_slot(context.commitment_context_input.unwrap());
+
+                if block_issuer_output.expiry_slot() < past_bounded_slot_index {
+                    return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
+                }
+            }
+            (Some(block_issuer_input), Some(block_issuer_output)) => {}
+            _ => {}
+        }
+
+        Ok(())
     }
 
     fn destruction(
@@ -392,7 +421,6 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let slot_commitment_id = context
             .commitment_context_input
-            .map(|c| c.slot_commitment_id())
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
@@ -415,7 +443,6 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let slot_commitment_id = context
             .commitment_context_input
-            .map(|c| c.slot_commitment_id())
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
