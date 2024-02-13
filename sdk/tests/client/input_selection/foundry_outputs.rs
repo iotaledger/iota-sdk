@@ -56,7 +56,6 @@ fn missing_input_account_for_foundry() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -151,7 +150,6 @@ fn minted_native_tokens_in_new_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -228,7 +226,6 @@ fn minted_native_tokens_in_provided_output() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -302,7 +299,6 @@ fn melt_native_tokens() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -363,7 +359,6 @@ fn destroy_foundry_with_account_state_transition() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -421,7 +416,6 @@ fn destroy_foundry_with_account_burn() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -505,7 +499,6 @@ fn prefer_basic_to_foundry() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -575,7 +568,6 @@ fn simple_foundry_transition_basic_not_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -660,7 +652,6 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -811,7 +802,6 @@ fn mint_and_burn_at_the_same_time() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -885,7 +875,6 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -948,7 +937,6 @@ fn create_native_token_but_burn_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1017,7 +1005,6 @@ fn melted_tokens_not_provided() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1077,7 +1064,6 @@ fn burned_tokens_not_provided() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1136,7 +1122,6 @@ fn foundry_in_outputs_and_required() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1213,7 +1198,6 @@ fn melt_and_burn_native_tokens() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,

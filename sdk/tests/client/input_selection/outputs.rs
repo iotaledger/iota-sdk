@@ -32,7 +32,6 @@ fn no_inputs() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -67,7 +66,6 @@ fn no_outputs() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -102,7 +100,6 @@ fn no_outputs_but_required_input() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -146,7 +143,6 @@ fn no_outputs_but_burn() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -198,7 +194,6 @@ fn no_address_provided() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         None,
         SLOT_INDEX,
@@ -241,7 +236,6 @@ fn no_matching_address_provided() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         SLOT_INDEX,
@@ -298,7 +292,6 @@ fn two_addresses_one_missing() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -361,7 +354,6 @@ fn two_addresses() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),

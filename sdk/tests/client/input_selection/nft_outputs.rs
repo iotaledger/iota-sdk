@@ -56,7 +56,6 @@ fn input_nft_eq_output_nft() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -103,7 +102,6 @@ fn transition_nft_id_zero() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -237,7 +235,6 @@ fn mint_nft() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -292,7 +289,6 @@ fn burn_nft() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -384,7 +380,6 @@ fn missing_input_for_nft_output() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -431,7 +426,6 @@ fn missing_input_for_nft_output_but_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -500,7 +494,6 @@ fn nft_in_output_and_sender() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -554,7 +547,6 @@ fn missing_ed25519_sender() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -601,7 +593,6 @@ fn missing_ed25519_issuer_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -648,7 +639,6 @@ fn missing_ed25519_issuer_transition() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -692,7 +682,6 @@ fn missing_account_sender() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -739,7 +728,6 @@ fn missing_account_issuer_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -786,7 +774,6 @@ fn missing_account_issuer_transition() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -830,7 +817,6 @@ fn missing_nft_sender() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -877,7 +863,6 @@ fn missing_nft_issuer_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -924,7 +909,6 @@ fn missing_nft_issuer_transition() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -982,7 +966,6 @@ fn increase_nft_amount() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1042,7 +1025,6 @@ fn decrease_nft_amount() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1114,7 +1096,6 @@ fn prefer_basic_to_nft() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1175,7 +1156,6 @@ fn take_amount_from_nft_to_fund_basic() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1248,7 +1228,6 @@ fn nft_burn_should_validate_nft_sender() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1309,7 +1288,6 @@ fn nft_burn_should_validate_nft_address() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1356,7 +1334,6 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1435,7 +1412,6 @@ fn changed_immutable_metadata() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,

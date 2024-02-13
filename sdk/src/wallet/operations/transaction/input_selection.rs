@@ -131,7 +131,6 @@ where
 
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
-            options.context_inputs,
             outputs,
             Some(wallet_data.address.clone().into_inner()),
             creation_slot_index,
@@ -140,6 +139,7 @@ where
         )
         .with_required_inputs(options.required_inputs)
         .with_forbidden_inputs(forbidden_inputs)
+        .with_context_inputs(options.context_inputs)
         .with_mana_rewards(mana_rewards)
         .with_payload(options.tagged_data_payload)
         .with_mana_allotments(options.mana_allotments)

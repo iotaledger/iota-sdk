@@ -86,7 +86,6 @@ impl InputSelection {
     /// Creates a new [`InputSelection`].
     pub fn new(
         available_inputs: impl IntoIterator<Item = InputSigningData>,
-        context_inputs: impl IntoIterator<Item = ContextInput>,
         outputs: impl IntoIterator<Item = Output>,
         addresses: impl IntoIterator<Item = Address>,
         creation_slot_index: impl Into<SlotIndex>,
@@ -120,7 +119,7 @@ impl InputSelection {
             required_inputs: HashSet::new(),
             forbidden_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
-            context_inputs: context_inputs.into_iter().collect(),
+            context_inputs: HashSet::new(),
             outputs: outputs.into_iter().collect(),
             addresses,
             burn: None,
@@ -299,6 +298,12 @@ impl InputSelection {
     /// Sets the forbidden inputs of an [`InputSelection`].
     pub fn with_forbidden_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
         self.forbidden_inputs = inputs.into_iter().collect();
+        self
+    }
+
+    /// Sets the context inputs of an [`InputSelection`].
+    pub fn with_context_inputs(mut self, context_inputs: impl IntoIterator<Item = ContextInput>) -> Self {
+        self.context_inputs = context_inputs.into_iter().collect();
         self
     }
 

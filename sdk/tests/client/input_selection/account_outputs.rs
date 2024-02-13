@@ -48,7 +48,6 @@ fn input_account_eq_output_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -91,7 +90,6 @@ fn transition_account_id_zero() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -269,7 +267,6 @@ fn create_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -322,7 +319,6 @@ fn burn_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -412,7 +408,6 @@ fn missing_input_for_account_output() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -470,7 +465,6 @@ fn missing_input_for_account_output_2() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -515,7 +509,6 @@ fn missing_input_for_account_output_but_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -575,7 +568,6 @@ fn account_in_output_and_sender() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -617,7 +609,6 @@ fn missing_ed25519_sender() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -662,7 +653,6 @@ fn missing_ed25519_issuer_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -705,7 +695,6 @@ fn missing_ed25519_issuer_transition() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -745,7 +734,6 @@ fn missing_account_sender() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -790,7 +778,6 @@ fn missing_account_issuer_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -833,7 +820,6 @@ fn missing_account_issuer_transition() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -873,7 +859,6 @@ fn missing_nft_sender() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -918,7 +903,6 @@ fn missing_nft_issuer_created() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -961,7 +945,6 @@ fn missing_nft_issuer_transition() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1015,7 +998,6 @@ fn increase_account_amount() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1071,7 +1053,6 @@ fn decrease_account_amount() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1141,7 +1122,6 @@ fn prefer_basic_to_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1200,7 +1180,6 @@ fn take_amount_from_account_to_fund_basic() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1273,7 +1252,6 @@ fn account_burn_should_validate_account_sender() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1344,7 +1322,6 @@ fn account_burn_should_validate_account_address() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1401,7 +1378,6 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1473,7 +1449,6 @@ fn two_accounts_required() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1538,7 +1513,6 @@ fn state_controller_sender_required() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1592,7 +1566,6 @@ fn state_controller_sender_required_already_selected() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1635,7 +1608,6 @@ fn state_transition_and_required() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
@@ -1678,7 +1650,6 @@ fn remainder_address_in_state_controller() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,

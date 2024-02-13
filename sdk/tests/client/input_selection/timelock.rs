@@ -46,7 +46,6 @@ fn one_output_timelock_not_expired() {
 
     let selected = InputSelection::new(
         inputs,
-        None,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
@@ -89,7 +88,6 @@ fn timelock_equal_timestamp() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         200,
@@ -148,7 +146,6 @@ fn two_outputs_one_timelock_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
@@ -208,7 +205,6 @@ fn two_outputs_one_timelocked_one_missing() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
@@ -254,7 +250,6 @@ fn one_output_timelock_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,

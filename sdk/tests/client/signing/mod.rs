@@ -370,7 +370,6 @@ async fn all_combined() -> Result<()> {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],
         slot_index,
