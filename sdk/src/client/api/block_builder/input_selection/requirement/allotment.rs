@@ -84,19 +84,10 @@ impl InputSelection {
                 "Reducing account mana of {} by {required_allotment_mana} for allotment",
                 output.as_account().account_id()
             );
-            // If the output can only partially pay for the allotment, we still need to check mana balances
-            if required_allotment_mana > output.mana() {
-                *output = AccountOutputBuilder::from(output.as_account())
-                    .with_mana(0)
-                    .finish_output()?;
-            } else {
-                // Otherwise the output can pay for the allotment, so just use it and return without checking
-                let new_mana = output.mana() - required_allotment_mana;
-                *output = AccountOutputBuilder::from(output.as_account())
-                    .with_mana(new_mana)
-                    .finish_output()?;
-                return Ok(Vec::new());
-            }
+            let new_mana = output.mana().saturating_sub(required_allotment_mana);
+            *output = AccountOutputBuilder::from(output.as_account())
+                .with_mana(new_mana)
+                .finish_output()?;
         }
 
         log::debug!("Checking mana requirement again with added allotment");
