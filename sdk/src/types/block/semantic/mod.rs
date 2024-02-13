@@ -33,7 +33,6 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) input_mana: u64,
     pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
     pub(crate) commitment_context_input: Option<SlotCommitmentId>,
-    pub(crate) bic_context_inputs: HashSet<AccountId>,
     pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) input_chains: HashMap<ChainId, (&'a OutputId, &'a Output)>,
@@ -92,7 +91,6 @@ impl<'a> SemanticValidationContext<'a> {
             input_mana: 0,
             mana_rewards,
             commitment_context_input: None,
-            bic_context_inputs: Default::default(),
             reward_context_inputs: Default::default(),
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
@@ -116,12 +114,12 @@ impl<'a> SemanticValidationContext<'a> {
             .commitment()
             .map(|c| c.slot_commitment_id());
 
-        self.bic_context_inputs = self
+        let bic_context_inputs = self
             .transaction
             .context_inputs()
             .iter()
             .filter_map(|c| c.as_block_issuance_credit_opt().map(|bic| *bic.account_id()))
-            .collect();
+            .collect::<HashSet<_>>();
 
         for reward_context_input in self.transaction.context_inputs().rewards() {
             if let Some(output_id) = self.inputs.get(reward_context_input.index() as usize).map(|v| v.0) {
@@ -145,7 +143,7 @@ impl<'a> SemanticValidationContext<'a> {
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
                         }
-                        if !self.bic_context_inputs.contains(&account_id) {
+                        if !bic_context_inputs.contains(&account_id) {
                             return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
                         }
                         let entry = self.block_issuer_mana.entry(account_id).or_default();
@@ -279,7 +277,7 @@ impl<'a> SemanticValidationContext<'a> {
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
                         }
-                        if !self.bic_context_inputs.contains(&account_id) {
+                        if !bic_context_inputs.contains(&account_id) {
                             return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
                         }
                         let entry = self.block_issuer_mana.entry(account_id).or_default();
