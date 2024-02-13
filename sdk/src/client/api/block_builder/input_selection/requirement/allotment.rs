@@ -13,7 +13,7 @@ use crate::{
         address::Address,
         input::{Input, UtxoInput},
         mana::ManaAllotment,
-        output::Output,
+        output::{AccountOutputBuilder, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -71,6 +71,24 @@ impl InputSelection {
         if self.mana_allotments[&issuer_id] < required_allotment_mana {
             log::debug!("Allotting at least {required_allotment_mana} to account ID {issuer_id}");
             self.mana_allotments.insert(issuer_id, required_allotment_mana);
+
+            if let Some(output) = self
+                .outputs
+                .iter_mut()
+                .filter(|o| o.is_account())
+                .find(|o| *o.as_account().account_id() == issuer_id && o.mana() >= required_allotment_mana)
+            {
+                log::debug!(
+                    "Reducing account mana of {} by {required_allotment_mana} for allotment",
+                    output.as_account().account_id()
+                );
+                let new_mana = output.mana() - required_allotment_mana;
+                *output = match output {
+                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                    _ => unreachable!(),
+                };
+            }
+
             log::debug!("Checking mana requirement again with added allotment");
             let additional_inputs = self.fulfill_mana_requirement()?;
             // If we needed more inputs to cover the additional allotment mana
