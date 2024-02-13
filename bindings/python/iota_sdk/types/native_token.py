@@ -9,7 +9,7 @@ from iota_sdk.types.common import hex_str_decoder, HexStr, json
 
 @json
 @dataclass
-class NativeToken():
+class NativeToken:
     """A native token.
 
     Attributes:

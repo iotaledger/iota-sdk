@@ -560,7 +560,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
 
     let nft_id = *wallet.sync(None).await?.nfts().first().unwrap();
@@ -647,7 +647,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
     let transaction = wallet_0.send_outputs(vec![output], None).await?;
     wallet_0
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     let balance = wallet_0.sync(None).await?;
 
@@ -775,7 +775,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
         .mint_nfts([MintNftParams::new().try_with_address(wallet_1_address)?], None)
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await?;
@@ -807,7 +807,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
         .await?;
     let tx = wallet_1.send_outputs([output], None).await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // wallet_0 now has the NFT
@@ -845,7 +845,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
 
     let nft_id = *wallet.sync(None).await?.nfts().first().unwrap();

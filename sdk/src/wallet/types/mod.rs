@@ -192,7 +192,9 @@ impl Serialize for TransactionWithMetadata {
 #[non_exhaustive]
 pub enum InclusionState {
     Pending,
+    Accepted,
     Confirmed,
+    Finalized,
     Conflicting,
     UnknownPruned,
 }

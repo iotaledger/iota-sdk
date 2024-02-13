@@ -309,6 +309,8 @@ impl ClientInner {
 
     // Commitments routes.
 
+    // TODO: rename this to `get_commitment`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Finds a slot commitment by its ID and returns it as object.
     /// GET /api/core/v3/commitments/{commitmentId}
     pub async fn get_slot_commitment_by_id(&self, slot_commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
@@ -317,6 +319,8 @@ impl ClientInner {
         self.get_request(path, None, false, true).await
     }
 
+    // TODO: rename this to `get_commitment_raw`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Finds a slot commitment by its ID and returns it as raw bytes.
     /// GET /api/core/v3/commitments/{commitmentId}
     pub async fn get_slot_commitment_by_id_raw(&self, slot_commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
@@ -325,6 +329,8 @@ impl ClientInner {
         self.get_request_bytes(path, None).await
     }
 
+    // TODO: rename this to `get_utxo_changes`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Get all UTXO changes of a given slot by slot commitment ID.
     /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes
     pub async fn get_utxo_changes_by_slot_commitment_id(
@@ -336,6 +342,8 @@ impl ClientInner {
         self.get_request(path, None, false, true).await
     }
 
+    // TODO: rename this to `get_utxo_changes_full`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Get all full UTXO changes of a given slot by slot commitment ID.
     /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
     pub async fn get_utxo_changes_full_by_slot_commitment_id(

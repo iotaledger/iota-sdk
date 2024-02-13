@@ -2,31 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 from abc import ABCMeta, abstractmethod
 
+from iota_sdk.client.responses import OutputIdsResponse
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.output_id import OutputId
-
-
-@json
-@dataclass
-class OutputIdsResponse:
-    """Response type for output IDs.
-
-    Attributes:
-        committed_slot: The committed slot at which these outputs were available at.
-        page_size: The maximum amount of items returned in one call. If there are more items, a cursor to the next page is returned too.
-        cursor: The cursor to the next page of results.
-        items: The query results.
-    """
-
-    def __init__(self, output_dict: Dict):
-        self.committed_slot = output_dict["committedSlot"]
-        self.page_size = output_dict["pageSize"]
-        self.cursor = output_dict["cursor"]
-        self.items = [OutputId.from_string(
-            output_id) for output_id in output_dict["items"]]
 
 
 class NodeIndexerAPI(metaclass=ABCMeta):

@@ -704,7 +704,7 @@ pub async fn create_native_token_command(
             transaction.block_id
         );
         wallet
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+            .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         // Sync wallet after the transaction got confirmed, so the account output is available
         wallet.sync(None).await?;

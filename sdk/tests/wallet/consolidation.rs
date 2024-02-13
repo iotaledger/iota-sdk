@@ -26,7 +26,7 @@ async fn consolidation() -> Result<()> {
         .await?;
 
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
@@ -37,7 +37,7 @@ async fn consolidation() -> Result<()> {
         .consolidate_outputs(ConsolidationParams::new().with_force(true))
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
