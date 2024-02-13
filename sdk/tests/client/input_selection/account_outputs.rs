@@ -4,11 +4,16 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    client::{
+        api::input_selection::{Burn, Error, InputSelection, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
-        output::{AccountId, AccountOutputBuilder, Output},
+        mana::ManaAllotment,
+        output::{unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output},
         protocol::protocol_parameters,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
@@ -1672,4 +1677,60 @@ fn remainder_address_in_state_controller() {
             ));
         }
     });
+}
+
+#[test]
+fn automatic_allot_account_mana() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let mut inputs = Vec::new();
+    let mana_input_amount = 1_000_000;
+
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(mana_input_amount)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_auto_mana_allotment(account_id_1, 500)
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.mana_allotments.len(), 1);
+    let mana_cost = 230_000;
+    assert_eq!(
+        selected.mana_allotments[0],
+        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+    );
+    assert_eq!(selected.outputs[1].as_account().mana(), mana_input_amount - mana_cost);
 }
