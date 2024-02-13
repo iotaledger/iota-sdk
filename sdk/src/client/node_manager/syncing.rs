@@ -117,15 +117,10 @@ impl ClientInner {
                     .expect("missing v3 protocol parameters")
                     .parameters
                     .clone();
-                if let Some(network_info) = network_info.as_mut() {
-                    network_info.tangle_time = info.status.relative_accepted_tangle_time;
-                    network_info.protocol_parameters = protocol_parameters;
-                } else {
-                    network_info.replace(NetworkInfo {
-                        protocol_parameters,
-                        tangle_time: info.status.relative_accepted_tangle_time,
-                    });
-                }
+                network_info.replace(NetworkInfo {
+                    protocol_parameters,
+                    tangle_time: info.status.relative_accepted_tangle_time,
+                });
             }
 
             for (info, node_url) in nodes {
