@@ -11,7 +11,10 @@ use iota_sdk::{
     types::block::{
         address::Address,
         mana::ManaAllotment,
-        output::{unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output},
+        output::{
+            feature::SenderFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder,
+            BasicOutputBuilder, Output,
+        },
         protocol::protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
@@ -1732,4 +1735,134 @@ fn automatic_allot_account_mana() {
         ManaAllotment::new(account_id_1, mana_cost).unwrap()
     );
     assert_eq!(selected.outputs[1].as_account().mana(), mana_input_amount - mana_cost);
+}
+
+#[test]
+fn automatic_allot_account_mana_additional() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let additional_allotment = 1000;
+    let txn_required_mana_allotment = 240_000;
+    // The account does not have enough to cover the requirement
+    let account_mana = txn_required_mana_allotment - 100;
+    // But there is additional available mana elsewhere
+    let additional_available_mana = additional_allotment + 111;
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(account_mana)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+            .with_mana(additional_available_mana)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .with_mana(11)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_feature(SenderFeature::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .finish_output()
+        .unwrap()];
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_auto_mana_allotment(account_id_1, 500)
+    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+
+    assert_eq!(selected.mana_allotments.len(), 1);
+    assert_eq!(
+        selected.mana_allotments[0],
+        ManaAllotment::new(account_id_1, txn_required_mana_allotment + additional_allotment).unwrap()
+    );
+    assert_eq!(
+        selected.outputs.iter().map(|o| o.mana()).sum::<u64>(),
+        account_mana + additional_available_mana - (txn_required_mana_allotment + additional_allotment)
+    );
+}
+
+#[test]
+fn automatic_allot_account_mana_cannot_select_additional() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let additional_allotment = 1000;
+    let txn_required_mana_allotment = 240_000;
+    // The account does not have enough to cover the requirement
+    let account_mana = txn_required_mana_allotment - 100;
+    // But there is additional available mana elsewhere
+    let additional_available_mana = additional_allotment + 111;
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(account_mana)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+            .with_mana(additional_available_mana)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_auto_mana_allotment(account_id_1, 500)
+    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .with_required_inputs([*inputs[0].output_id()])
+    .disable_additional_input_selection()
+    .select();
+
+    assert!(matches!(selected.unwrap_err(), Error::AdditionalInputsRequired(_)));
 }
