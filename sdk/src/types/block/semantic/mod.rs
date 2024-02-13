@@ -14,7 +14,7 @@ pub use self::{error::TransactionFailureReason, state_transition::StateTransitio
 use crate::types::block::{
     address::Address,
     context_input::RewardContextInput,
-    output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
+    output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     protocol::ProtocolParameters,
     slot::SlotCommitmentId,
@@ -390,9 +390,6 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
-        // Validation of input native tokens.
-        let mut native_token_ids = self.input_native_tokens.keys().collect::<HashSet<_>>();
-
         // Validation of output native tokens.
         for (token_id, output_amount) in self.output_native_tokens.iter() {
             let input_amount = self.input_native_tokens.get(token_id).copied().unwrap_or_default();
@@ -404,13 +401,6 @@ impl<'a> SemanticValidationContext<'a> {
             {
                 return Ok(Some(TransactionFailureReason::NativeTokenSumUnbalanced));
             }
-
-            native_token_ids.insert(token_id);
-        }
-
-        if native_token_ids.len() > NativeTokens::COUNT_MAX as usize {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-            return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
         }
 
         // Validation of state transitions and destructions.
