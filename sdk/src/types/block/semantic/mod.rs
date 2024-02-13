@@ -384,6 +384,12 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
+        for (_, (account_input_mana, account_output_mana)) in &self.block_issuer_mana {
+            if self.input_mana - account_input_mana < self.output_mana - account_output_mana {
+                return Ok(Some(TransactionFailureReason::ManaMovedOffBlockIssuerAccount));
+            }
+        }
+
         // Validation of input native tokens.
         let mut native_token_ids = self.input_native_tokens.keys().collect::<HashSet<_>>();
 
