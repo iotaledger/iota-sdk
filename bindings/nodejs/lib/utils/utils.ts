@@ -453,7 +453,7 @@ export class Utils {
      * @param id The block or transaction Id.
      * @returns The slotIndex.
      */
-    static computeSlotIndex(id: BlockId | TransactionId): SlotIndex {
+    static computeSlotIndex(id: BlockId | SlotCommitmentId | TransactionId): SlotIndex {
         const numberString = id.slice(-8);
         const chunks = [];
 
