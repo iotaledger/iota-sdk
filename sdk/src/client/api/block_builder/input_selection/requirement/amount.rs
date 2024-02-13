@@ -159,11 +159,7 @@ impl AmountSelection {
             }
 
             if let Some(nt) = input.output.native_token() {
-                let mut selected_native_tokens = self.selected_native_tokens.clone();
-
-                selected_native_tokens.insert(*nt.token_id());
-                // Update selected with NTs from this output.
-                self.selected_native_tokens = selected_native_tokens;
+                self.selected_native_tokens.insert(*nt.token_id());
             }
 
             self.inputs_sum += input.output.amount();
