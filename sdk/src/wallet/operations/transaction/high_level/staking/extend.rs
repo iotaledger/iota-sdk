@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        context_input::{ContextInput, RewardContextInput},
-        output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
-    },
+    types::block::output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -84,7 +81,6 @@ where
                 end_epoch,
             ));
             options.required_inputs = [account_output_data.output_id].into();
-            options.context_inputs = vec![ContextInput::from(RewardContextInput::new(0)?)];
         }
 
         let output = output_builder.finish_output()?;
