@@ -11,7 +11,10 @@ use iota_sdk::{
     types::block::{
         address::Address,
         mana::ManaAllotment,
-        output::{unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output},
+        output::{
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, BasicOutputBuilder, NftId,
+            Output,
+        },
         protocol::protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
@@ -1491,26 +1494,22 @@ fn two_accounts_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1762,4 +1761,80 @@ fn automatic_allot_account_mana() {
         ManaAllotment::new(account_id_1, mana_cost).unwrap()
     );
     assert_eq!(selected.outputs[1].as_account().mana(), mana_input_amount - mana_cost);
+}
+
+#[test]
+fn automatic_allot_account_mana_mana_requirement_twice() {
+    let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
+        .name("isa.log")
+        .target_exclusions(&["h2", "hyper", "rustls"])
+        .level_filter(log::LevelFilter::Debug);
+    let config = fern_logger::LoggerConfig::build()
+        .with_output(logger_output_config)
+        .finish();
+    fern_logger::logger_init(config).unwrap();
+
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let mut inputs = Vec::new();
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(1000)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let basic_output = BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(100)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: basic_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_auto_mana_allotment(account_id_1, 2)
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.mana_allotments.len(), 1);
+    let mana_cost = 960;
+    assert_eq!(
+        selected.mana_allotments[0],
+        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+    );
+    assert_eq!(selected.outputs[1].as_account().mana(), 140);
 }

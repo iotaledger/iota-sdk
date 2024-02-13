@@ -13,7 +13,7 @@ use crate::{
         address::Address,
         input::{Input, UtxoInput},
         mana::ManaAllotment,
-        output::{AccountOutputBuilder, Output},
+        output::{AccountOutputBuilder, ChainId, NftOutputBuilder, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -54,11 +54,10 @@ impl InputSelection {
 
         let transaction = builder
             .with_context_inputs(self.context_inputs.clone())
-            .with_mana_allotments(
-                self.mana_allotments
-                    .iter()
-                    .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
-            )
+            .with_mana_allotments(self.mana_allotments.iter().map(|(&account_id, &mana)| ManaAllotment {
+                account_id,
+                mana: mana.0,
+            }))
             .finish_with_params(&self.protocol_parameters)?;
 
         let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
@@ -68,26 +67,95 @@ impl InputSelection {
         let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
-        if self.mana_allotments[&issuer_id] < required_allotment_mana {
-            log::debug!("Allotting at least {required_allotment_mana} to account ID {issuer_id}");
-            self.mana_allotments.insert(issuer_id, required_allotment_mana);
+        if self.mana_allotments[&issuer_id].0 < required_allotment_mana {
+            let (selected_mana, required_mana) = self.mana_sums_without_allotments()?;
+            let available_mana = selected_mana.saturating_sub(required_mana);
+            log::debug!("available_mana {available_mana}");
 
-            if let Some(output) = self
-                .outputs
-                .iter_mut()
-                .filter(|o| o.is_account())
-                .find(|o| *o.as_account().account_id() == issuer_id && o.mana() >= required_allotment_mana)
-            {
-                log::debug!(
-                    "Reducing account mana of {} by {required_allotment_mana} for allotment",
-                    output.as_account().account_id()
-                );
-                let new_mana = output.mana() - required_allotment_mana;
-                *output = match output {
-                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+            let mut previously_added_mana = self.mana_allotments[&issuer_id].1;
+            log::debug!("previously_added_mana {previously_added_mana}");
+
+            let mut updated_required_allotment_mana = required_allotment_mana
+                .saturating_sub(previously_added_mana)
+                .saturating_sub(available_mana);
+            let mut new_added_mana = 0;
+
+            // Reduce mana amount of automatically transitioned outputs
+            for output in self.outputs.iter_mut().filter(|o| match o {
+                Output::Account(account) => {
+                    self.automatically_transitioned
+                        .contains(&ChainId::Account(*account.account_id()))
+                        && *account.account_id() == issuer_id
+                }
+                Output::Nft(nft) => self.automatically_transitioned.contains(&ChainId::Nft(*nft.nft_id())),
+                _ => false,
+            }) {
+                if updated_required_allotment_mana == 0 {
+                    break;
+                }
+                match output {
+                    Output::Account(account) => {
+                        let account_id = *account.account_id();
+
+                        let new_mana = if output.mana() >= updated_required_allotment_mana {
+                            let new_mana = output.mana() - updated_required_allotment_mana;
+                            updated_required_allotment_mana = 0;
+                            new_mana
+                        } else {
+                            updated_required_allotment_mana -= output.mana();
+                            0
+                        };
+
+                        new_added_mana += output.mana() - new_mana;
+                        log::debug!(
+                            "Reducing account mana of {} by {} for allotment",
+                            account_id,
+                            output.mana() - new_mana
+                        );
+                        *output = match output {
+                            Output::Account(a) => {
+                                AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?
+                            }
+                            _ => unreachable!(),
+                        };
+                    }
+                    Output::Nft(nft) => {
+                        let nft_id = *nft.nft_id();
+                        let new_mana = if output.mana() >= updated_required_allotment_mana {
+                            let new_mana = output.mana() - updated_required_allotment_mana;
+                            updated_required_allotment_mana = 0;
+                            new_mana
+                        } else {
+                            updated_required_allotment_mana -= output.mana();
+                            0
+                        };
+
+                        new_added_mana += output.mana() - new_mana;
+                        log::debug!(
+                            "Reducing nft mana of {} by {} for allotment",
+                            nft_id,
+                            output.mana() - new_mana
+                        );
+                        *output = match output {
+                            Output::Nft(a) => NftOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                            _ => unreachable!(),
+                        };
+                    }
                     _ => unreachable!(),
-                };
+                }
             }
+
+            log::debug!("Allotting {required_allotment_mana} to account ID {issuer_id}");
+            previously_added_mana += new_added_mana;
+
+            if updated_required_allotment_mana == 0 {
+                // needs to be set to 0 if enough was found, otherwise would try to create a remainder for it
+                previously_added_mana = 0
+            }
+
+            log::debug!("setting previously_added_mana {}", previously_added_mana);
+            self.mana_allotments
+                .insert(issuer_id, (required_allotment_mana, previously_added_mana));
 
             log::debug!("Checking mana requirement again with added allotment");
             let additional_inputs = self.fulfill_mana_requirement()?;

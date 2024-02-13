@@ -51,7 +51,9 @@ pub struct InputSelection {
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
     auto_mana_allotment: Option<AutoManaAllotment>,
-    mana_allotments: BTreeMap<AccountId, u64>,
+    // first u64 is the actual allotment amount, the second value specifies the amount that was added by reducing
+    // amounts of automatically transitioned chains
+    mana_allotments: BTreeMap<AccountId, (u64, u64)>,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
     allow_additional_input_selection: bool,
@@ -263,7 +265,7 @@ impl InputSelection {
             mana_allotments: self
                 .mana_allotments
                 .into_iter()
-                .map(|(account_id, mana)| ManaAllotment::new(account_id, mana))
+                .map(|(account_id, mana)| ManaAllotment::new(account_id, mana.0))
                 .collect::<Result<_, _>>()?,
         })
     }
@@ -316,7 +318,7 @@ impl InputSelection {
 
     /// Sets the mana allotments of an [`InputSelection`].
     pub fn with_mana_allotments(mut self, mana_allotments: impl IntoIterator<Item = (AccountId, u64)>) -> Self {
-        self.mana_allotments = mana_allotments.into_iter().collect();
+        self.mana_allotments = mana_allotments.into_iter().map(|a| (a.0, (a.1, 0))).collect();
         self
     }
 
