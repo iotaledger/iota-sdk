@@ -27,10 +27,7 @@ impl InputSelection {
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
                 let required_address = input
                     .output
-                    .required_address(
-                        self.creation_slot_index,
-                        self.protocol_parameters.committable_age_range(),
-                    )?
+                    .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
                     .expect("expiration unlockable outputs already filtered out");
 
                 if &required_address == remainder_address {
@@ -43,10 +40,7 @@ impl InputSelection {
         for input in &self.selected_inputs {
             let required_address = input
                 .output
-                .required_address(
-                    self.creation_slot_index,
-                    self.protocol_parameters.committable_age_range(),
-                )?
+                .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
                 .expect("expiration unlockable outputs already filtered out");
 
             if let Some(&required_address) = required_address.backing_ed25519() {
@@ -138,7 +132,7 @@ impl InputSelection {
                 .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
                 .find(|o| {
                     matches!(o.required_address(
-                        self.creation_slot_index,
+                        self.creation_slot,
                         self.protocol_parameters.committable_age_range(),
                     ), Ok(Some(address)) if address == remainder_address)
                 })
@@ -210,7 +204,7 @@ impl InputSelection {
                     .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
                     .find(|o| {
                         matches!(o.required_address(
-                        self.creation_slot_index,
+                        self.creation_slot,
                         self.protocol_parameters.committable_age_range(),
                 ), Ok(Some(address)) if address == remainder_address)
                     })

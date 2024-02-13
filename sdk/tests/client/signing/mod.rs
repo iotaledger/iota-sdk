@@ -385,7 +385,7 @@ async fn all_combined() -> Result<()> {
         ))])
         .with_inputs(
             selected
-                .inputs
+                .inputs_data
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
                 .collect::<Vec<_>>(),
@@ -396,7 +396,7 @@ async fn all_combined() -> Result<()> {
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
-        inputs_data: selected.inputs,
+        inputs_data: selected.inputs_data,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
     };

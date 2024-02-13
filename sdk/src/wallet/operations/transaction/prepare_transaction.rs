@@ -38,16 +38,7 @@ where
             ))?;
         }
 
-        let selected_transaction_data = self.select_inputs(outputs, options.clone()).await?;
-
-        let prepared_transaction_data = match self.build_transaction(selected_transaction_data.clone(), options).await {
-            Ok(res) => res,
-            Err(err) => {
-                // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(&selected_transaction_data.inputs).await?;
-                return Err(err);
-            }
-        };
+        let prepared_transaction_data = self.select_inputs(outputs, options.clone()).await?;
 
         log::debug!(
             "[TRANSACTION] finished prepare_transaction in {:.2?}",

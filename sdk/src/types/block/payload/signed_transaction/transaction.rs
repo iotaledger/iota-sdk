@@ -96,8 +96,8 @@ impl TransactionBuilder {
         self
     }
 
-    pub fn with_capabilities(mut self, capabilities: TransactionCapabilities) -> Self {
-        self.capabilities = capabilities;
+    pub fn with_capabilities(mut self, capabilities: impl Into<TransactionCapabilities>) -> Self {
+        self.capabilities = capabilities.into();
         self
     }
 

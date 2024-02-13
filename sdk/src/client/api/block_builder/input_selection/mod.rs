@@ -18,17 +18,20 @@ use packable::PackableExt;
 use self::requirement::account::is_account_with_id;
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
-    client::{api::types::RemainderData, secret::types::InputSigningData},
+    client::{api::PreparedTransactionData, secret::types::InputSigningData},
     types::block::{
         address::{AccountAddress, Address, NftAddress},
         context_input::ContextInput,
-        input::INPUT_COUNT_RANGE,
+        input::{Input, UtxoInput, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
             AccountId, AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
             OUTPUT_COUNT_RANGE,
         },
-        payload::{signed_transaction::TransactionCapabilities, TaggedDataPayload},
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilities},
+            TaggedDataPayload,
+        },
         protocol::{CommittableAgeRange, ProtocolParameters},
         slot::{SlotCommitmentId, SlotIndex},
     },
@@ -46,7 +49,7 @@ pub struct InputSelection {
     addresses: HashSet<Address>,
     burn: Option<Burn>,
     remainder_address: Option<Address>,
-    creation_slot_index: SlotIndex,
+    creation_slot: SlotIndex,
     latest_slot_commitment_id: SlotCommitmentId,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
@@ -56,6 +59,7 @@ pub struct InputSelection {
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
     allow_additional_input_selection: bool,
+    transaction_capabilities: TransactionCapabilities,
     protocol_parameters: ProtocolParameters,
 }
 
@@ -66,22 +70,24 @@ pub(crate) struct AutoManaAllotment {
     reference_mana_cost: u64,
 }
 
-/// Result of the input selection algorithm.
-#[derive(Clone, Debug)]
-pub struct Selected {
-    /// Selected inputs.
-    pub inputs: Vec<InputSigningData>,
-    /// Provided and created outputs.
-    pub outputs: Vec<Output>,
-    /// Remainder outputs information.
-    pub remainders: Vec<RemainderData>,
-    /// Mana rewards by input.
-    pub mana_rewards: HashMap<OutputId, u64>,
-    /// Required context inputs.
-    pub context_inputs: HashSet<ContextInput>,
-    /// Mana allotments.
-    pub mana_allotments: Vec<ManaAllotment>,
-}
+// /// Result of the input selection algorithm.
+// #[derive(Clone, Debug)]
+// pub struct Selected {
+//     /// Selected inputs.
+//     pub inputs: Vec<InputSigningData>,
+//     /// Provided and created outputs.
+//     pub outputs: Vec<Output>,
+//     /// Remainder outputs information.
+//     pub remainders: Vec<RemainderData>,
+//     /// Mana rewards by input.
+//     pub mana_rewards: HashMap<OutputId, u64>,
+//     /// Required context inputs.
+//     pub context_inputs: HashSet<ContextInput>,
+//     /// Mana allotments.
+//     pub mana_allotments: Vec<ManaAllotment>,
+//     /// The creation slot used by input selection.
+//     pub creation_slot: SlotIndex,
+// }
 
 impl InputSelection {
     /// Creates a new [`InputSelection`].
@@ -126,7 +132,7 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            creation_slot_index: creation_slot_index.into(),
+            creation_slot: creation_slot_index.into(),
             latest_slot_commitment_id,
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
@@ -135,6 +141,7 @@ impl InputSelection {
             required_allotment_mana: 0,
             mana_rewards: Default::default(),
             allow_additional_input_selection: true,
+            transaction_capabilities: Default::default(),
             payload: None,
         }
     }
@@ -194,7 +201,7 @@ impl InputSelection {
 
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
-    pub fn select(mut self) -> Result<Selected, Error> {
+    pub fn select(mut self) -> Result<PreparedTransactionData, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
@@ -251,21 +258,45 @@ impl InputSelection {
             }
         }
 
-        Ok(Selected {
-            inputs: Self::sort_input_signing_data(
-                self.selected_inputs,
-                self.creation_slot_index,
-                self.protocol_parameters.committable_age_range(),
-            )?,
-            outputs: self.outputs,
+        let inputs_data = Self::sort_input_signing_data(
+            self.selected_inputs,
+            self.creation_slot,
+            self.protocol_parameters.committable_age_range(),
+        )?;
+
+        let mut inputs: Vec<Input> = Vec::new();
+
+        for input in &inputs_data {
+            inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+        }
+
+        let mana_allotments = self
+            .mana_allotments
+            .into_iter()
+            .map(|(account_id, mana)| ManaAllotment::new(account_id, mana))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        // Build transaction
+
+        let mut builder = Transaction::builder(self.protocol_parameters.network_id())
+            .with_inputs(inputs)
+            .with_outputs(self.outputs)
+            .with_mana_allotments(mana_allotments)
+            .with_context_inputs(self.context_inputs)
+            .with_creation_slot(self.creation_slot)
+            .with_capabilities(self.transaction_capabilities);
+
+        if let Some(payload) = self.payload {
+            builder = builder.with_payload(payload);
+        }
+
+        let transaction = builder.finish_with_params(&self.protocol_parameters)?;
+
+        Ok(PreparedTransactionData {
+            transaction,
+            inputs_data,
             remainders,
-            mana_rewards: self.mana_rewards,
-            context_inputs: self.context_inputs,
-            mana_allotments: self
-                .mana_allotments
-                .into_iter()
-                .map(|(account_id, mana)| ManaAllotment::new(account_id, mana))
-                .collect::<Result<_, _>>()?,
+            mana_rewards: self.mana_rewards.into_iter().collect(),
         })
     }
 
@@ -358,13 +389,18 @@ impl InputSelection {
         self
     }
 
+    pub fn with_transaction_capabilities(
+        mut self,
+        transaction_capabilities: impl Into<TransactionCapabilities>,
+    ) -> Self {
+        self.transaction_capabilities = transaction_capabilities.into();
+        self
+    }
+
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output
-            .required_address(
-                self.creation_slot_index,
-                self.protocol_parameters.committable_age_range(),
-            )?
+            .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
             .expect("expiration unlockable outputs already filtered out");
 
         let required_address = if let Address::Restricted(restricted) = &required_address {
@@ -403,18 +439,14 @@ impl InputSelection {
             // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
-            if unlock_conditions.is_timelocked(self.creation_slot_index, self.protocol_parameters.min_committable_age())
-            {
+            if unlock_conditions.is_timelocked(self.creation_slot, self.protocol_parameters.min_committable_age()) {
                 return false;
             }
 
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_address(
-                    self.creation_slot_index,
-                    self.protocol_parameters.committable_age_range(),
-                )
+                .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap();
 

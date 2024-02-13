@@ -77,9 +77,9 @@ fn burn_account_present() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -137,9 +137,9 @@ fn burn_account_present_and_required() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -199,9 +199,9 @@ fn burn_account_id_zero() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -316,8 +316,8 @@ fn burn_accounts_present() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -444,9 +444,9 @@ fn burn_nft_present() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -506,9 +506,9 @@ fn burn_nft_present_and_required() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -566,9 +566,9 @@ fn burn_nft_id_zero() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -687,8 +687,8 @@ fn burn_nfts_present() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -827,12 +827,12 @@ fn burn_foundry_present() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_basic() {
                 assert!(is_remainder_or_return(
@@ -998,10 +998,10 @@ fn burn_foundries_present() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
@@ -1135,17 +1135,17 @@ fn burn_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
     let nt_remainder_output_amount = 106000;
     assert!(
         is_remainder_or_return(
-            &selected.outputs[0],
+            &selected.transaction.outputs()[0],
             nt_remainder_output_amount,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Some((TOKEN_ID_1, 80))
         ) && is_remainder_or_return(
-            &selected.outputs[1],
+            &selected.transaction.outputs()[1],
             2_000_000 - nt_remainder_output_amount,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Some((TOKEN_ID_2, 70))
@@ -1221,13 +1221,13 @@ fn burn_foundry_and_its_account() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(selected.inputs.contains(&inputs[1]));
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[1]));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,

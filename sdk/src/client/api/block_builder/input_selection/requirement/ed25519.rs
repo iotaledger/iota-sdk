@@ -9,10 +9,7 @@ impl InputSelection {
     fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
         let required_address = input
             .output
-            .required_address(
-                self.creation_slot_index,
-                self.protocol_parameters.committable_age_range(),
-            )
+            .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");
@@ -25,10 +22,7 @@ impl InputSelection {
     fn available_has_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
         let required_address = input
             .output
-            .required_address(
-                self.creation_slot_index,
-                self.protocol_parameters.committable_age_range(),
-            )
+            .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");

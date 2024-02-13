@@ -61,8 +61,8 @@ fn input_amount_equal_output_amount() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -215,11 +215,11 @@ fn input_amount_greater_than_output_amount() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -273,11 +273,11 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -344,11 +344,11 @@ fn two_same_inputs_one_needed() {
     .unwrap();
 
     // One input has enough amount.
-    assert_eq!(selected.inputs.len(), 1);
+    assert_eq!(selected.inputs_data.len(), 1);
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -414,8 +414,8 @@ fn two_inputs_one_needed() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs, [inputs[0].clone()]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data, [inputs[0].clone()]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -472,8 +472,8 @@ fn two_inputs_one_needed_reversed() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs, [inputs[1].clone()]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data, [inputs[1].clone()]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -530,8 +530,8 @@ fn two_inputs_both_needed() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -588,11 +588,11 @@ fn two_inputs_remainder() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -741,15 +741,15 @@ fn ed25519_sender() {
     .unwrap();
 
     // Sender + another for amount
-    assert_eq!(selected.inputs.len(), 2);
+    assert_eq!(selected.inputs_data.len(), 2);
     assert!(
         selected
-            .inputs
+            .inputs_data
             .iter()
             .any(|input| *input.output.as_basic().address() == sender)
     );
     // Provided output + remainder
-    assert_eq!(selected.outputs.len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 2);
 }
 
 #[test]
@@ -887,16 +887,16 @@ fn account_sender() {
     .unwrap();
 
     // Sender + another for amount
-    assert_eq!(selected.inputs.len(), 2);
+    assert_eq!(selected.inputs_data.len(), 2);
     assert!(
         selected
-            .inputs
+            .inputs_data
             .iter()
             .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
     );
     // Provided output + account
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
 }
 
 #[test]
@@ -953,11 +953,12 @@ fn account_sender_zero_id() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(
         selected
-            .outputs
+            .transaction
+            .outputs()
             .iter()
             .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
     );
@@ -1100,17 +1101,17 @@ fn nft_sender() {
     .unwrap();
 
     // Sender + another for amount
-    assert_eq!(selected.inputs.len(), 2);
+    assert_eq!(selected.inputs_data.len(), 2);
     assert!(
         selected
-            .inputs
+            .inputs_data
             .iter()
             .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
     );
     // Provided output + nft
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&inputs[2].output));
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&inputs[2].output));
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
 }
 
 #[test]
@@ -1169,11 +1170,12 @@ fn nft_sender_zero_id() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(
         selected
-            .outputs
+            .transaction
+            .outputs()
             .iter()
             .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
     );
@@ -1264,10 +1266,10 @@ fn simple_remainder() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1399,8 +1401,8 @@ fn one_provided_one_needed() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1505,11 +1507,11 @@ fn two_inputs_remainder_2() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1575,10 +1577,10 @@ fn two_inputs_remainder_3() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1620,10 +1622,10 @@ fn two_inputs_remainder_3() {
 //     .select()
 //     .unwrap();
 
-//     assert!(unsorted_eq(&selected.inputs, &inputs));
-//     assert_eq!(selected.outputs.len(), 2);
-//     assert!(selected.outputs.contains(&outputs[0]));
-//     selected.outputs.iter().for_each(|output| {
+//     assert!(unsorted_eq(&selected.inputs_data, &inputs));
+//     assert_eq!(selected.transaction.outputs().len(), 2);
+//     assert!(selected.transaction.outputs().contains(&outputs[0]));
+//     selected.transaction.outputs().iter().for_each(|output| {
 //         if !outputs.contains(output) {
 //             assert!(is_remainder_or_return(output, 800_000,
 // Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None));         }
@@ -1674,8 +1676,8 @@ fn sender_already_selected() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1722,8 +1724,8 @@ fn single_mandatory_input() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1837,8 +1839,8 @@ fn more_than_max_inputs_only_one_needed() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &needed_input));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &needed_input));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -2031,9 +2033,9 @@ fn restricted_ed25519() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs, [inputs[2].clone()]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data, [inputs[2].clone()]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -2093,9 +2095,9 @@ fn restricted_nft() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
 }
 
 #[test]
@@ -2153,9 +2155,9 @@ fn restricted_account() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
 }
 
 #[test]
@@ -2254,15 +2256,15 @@ fn restricted_ed25519_sender() {
     .unwrap();
 
     // Sender + another for amount
-    assert_eq!(selected.inputs.len(), 2);
+    assert_eq!(selected.inputs_data.len(), 2);
     assert!(
         selected
-            .inputs
+            .inputs_data
             .iter()
             .any(|input| *input.output.as_basic().address() == sender)
     );
     // Provided output + remainder
-    assert_eq!(selected.outputs.len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 2);
 }
 
 #[test]
@@ -2350,8 +2352,8 @@ fn multi_address_sender_already_fulfilled() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -2426,7 +2428,7 @@ fn ed25519_backed_available_address() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Provided outputs
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }

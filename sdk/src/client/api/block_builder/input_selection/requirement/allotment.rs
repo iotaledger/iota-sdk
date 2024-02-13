@@ -32,7 +32,7 @@ impl InputSelection {
 
         self.selected_inputs = Self::sort_input_signing_data(
             std::mem::take(&mut self.selected_inputs),
-            self.creation_slot_index,
+            self.creation_slot,
             self.protocol_parameters.committable_age_range(),
         )?;
 
@@ -111,10 +111,7 @@ impl InputSelection {
             // Get the address that is required to unlock the input
             let required_address = input
                 .output
-                .required_address(
-                    self.creation_slot_index,
-                    self.protocol_parameters.committable_age_range(),
-                )?
+                .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
                 .expect("expiration deadzone");
 
             // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in

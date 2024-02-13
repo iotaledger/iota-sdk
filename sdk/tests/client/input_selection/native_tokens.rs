@@ -69,9 +69,9 @@ fn two_native_tokens_one_needed() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs.len(), 1);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
 }
 
 #[test]
@@ -139,10 +139,10 @@ fn two_native_tokens_both_needed_plus_remainder() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -220,10 +220,10 @@ fn three_inputs_two_needed_plus_remainder() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -301,8 +301,8 @@ fn three_inputs_two_needed_no_remainder() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -486,10 +486,10 @@ fn burn_and_send_at_the_same_time() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -533,10 +533,10 @@ fn burn_one_input_no_output() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 1);
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 1);
     assert!(is_remainder_or_return(
-        &selected.outputs[0],
+        &selected.transaction.outputs()[0],
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 50))
@@ -597,9 +597,9 @@ fn multiple_native_tokens() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -786,8 +786,8 @@ fn single_output_native_token_no_remainder() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -830,11 +830,11 @@ fn single_output_native_token_remainder_1() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[0],
+        &selected.transaction.outputs()[0],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 50))
@@ -881,11 +881,11 @@ fn single_output_native_token_remainder_2() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None
@@ -946,12 +946,12 @@ fn two_basic_outputs_1() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 100)),
@@ -1012,12 +1012,12 @@ fn two_basic_outputs_2() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 50)),
@@ -1078,12 +1078,12 @@ fn two_basic_outputs_3() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 25)),
@@ -1144,12 +1144,12 @@ fn two_basic_outputs_4() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
@@ -1210,12 +1210,12 @@ fn two_basic_outputs_5() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
@@ -1276,11 +1276,11 @@ fn two_basic_outputs_6() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         1_500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 50)),
@@ -1341,11 +1341,11 @@ fn two_basic_outputs_7() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         1_500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
@@ -1468,12 +1468,12 @@ fn two_basic_outputs_native_tokens_not_needed() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(is_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
@@ -1558,11 +1558,11 @@ fn multiple_remainders() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 4);
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 4);
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     let nt_remainder_min_storage_deposit = 106000;
-    selected.outputs.iter().for_each(|output| {
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(
                 is_remainder_or_return(
@@ -1636,12 +1636,12 @@ fn multiple_remainders() {
 //     .select()
 //     .unwrap();
 
-//     assert_eq!(selected.inputs.len(), 1);
-//     assert!(selected.inputs.contains(&inputs[1]));
-//     assert_eq!(selected.outputs.len(), 2);
-//     assert!(selected.outputs.contains(&outputs[0]));
+//     assert_eq!(selected.inputs_data.len(), 1);
+//     assert!(selected.inputs_data.contains(&inputs[1]));
+//     assert_eq!(selected.transaction.outputs().len(), 2);
+//     assert!(selected.transaction.outputs().contains(&outputs[0]));
 //     assert!(is_remainder_or_return(
-//         &selected.outputs[1],
+//         &selected.transaction.outputs()[1],
 //         5_000_000,
 //         BECH32_ADDRESS_ED25519_0,
 //         Some(input_native_tokens_1.iter().map(|(t, a)| (t.as_str(), *a)).collect()),

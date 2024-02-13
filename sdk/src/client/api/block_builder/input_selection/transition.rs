@@ -64,7 +64,7 @@ impl InputSelection {
             builder = builder.with_mana(Output::from(input.clone()).available_mana(
                 &self.protocol_parameters,
                 output_id.transaction_id().slot_index(),
-                self.creation_slot_index,
+                self.creation_slot,
             )?)
         }
 

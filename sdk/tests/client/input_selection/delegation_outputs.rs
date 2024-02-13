@@ -87,19 +87,19 @@ fn remainder_needed_for_mana() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert_eq!(
         mana_rewards
             + selected
-                .inputs
+                .inputs_data
                 .iter()
                 .map(|i| i
                     .output
                     .available_mana(&protocol_parameters, SlotIndex(0), SLOT_INDEX)
                     .unwrap())
                 .sum::<u64>(),
-        selected.outputs.iter().map(|o| o.mana()).sum::<u64>()
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>()
     );
 }

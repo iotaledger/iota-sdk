@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::input_selection::{InputSelection, Selected},
+        api::{input_selection::InputSelection, transaction::validate_transaction_length, PreparedTransactionData},
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
@@ -32,13 +32,13 @@ where
         &self,
         outputs: Vec<Output>,
         mut options: TransactionOptions,
-    ) -> crate::wallet::Result<Selected> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let creation_slot_index = self.client().get_slot_index().await?;
+        let creation_slot = self.client().get_slot_index().await?;
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         if options.issuer_id.is_none() {
             options.issuer_id = self.data().await.first_account_id();
@@ -82,7 +82,7 @@ where
         let available_outputs_signing_data = filter_inputs(
             &wallet_data,
             wallet_data.unspent_outputs.values(),
-            creation_slot_index,
+            creation_slot,
             protocol_parameters.committable_age_range(),
             &options.required_inputs,
         )?;
@@ -95,7 +95,7 @@ where
                     mana_rewards.insert(
                         output.output_id,
                         self.client()
-                            .get_output_mana_rewards(&output.output_id, creation_slot_index)
+                            .get_output_mana_rewards(&output.output_id, creation_slot)
                             .await?
                             .rewards,
                     );
@@ -121,7 +121,7 @@ where
                     mana_rewards.insert(
                         *output_id,
                         self.client()
-                            .get_output_mana_rewards(output_id, creation_slot_index)
+                            .get_output_mana_rewards(output_id, creation_slot)
                             .await?
                             .rewards,
                     );
@@ -133,7 +133,7 @@ where
             available_outputs_signing_data,
             outputs,
             Some(wallet_data.address.clone().into_inner()),
-            creation_slot_index,
+            creation_slot,
             slot_commitment_id,
             protocol_parameters.clone(),
         )
@@ -154,15 +154,17 @@ where
             input_selection = input_selection.disable_additional_input_selection();
         }
 
-        let selected_transaction_data = input_selection.select()?;
+        let prepared_transaction_data = input_selection.select()?;
+
+        validate_transaction_length(&prepared_transaction_data.transaction)?;
 
         // lock outputs so they don't get used by another transaction
-        for output in &selected_transaction_data.inputs {
+        for output in &prepared_transaction_data.inputs_data {
             log::debug!("[TRANSACTION] locking: {}", output.output_id());
             wallet_data.locked_outputs.insert(*output.output_id());
         }
 
-        Ok(selected_transaction_data)
+        Ok(prepared_transaction_data)
     }
 }
 

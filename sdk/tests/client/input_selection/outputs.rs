@@ -110,11 +110,11 @@ fn no_outputs_but_required_input() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs, inputs);
+    assert_eq!(selected.inputs_data, inputs);
     // Just a remainder
-    assert_eq!(selected.outputs.len(), 1);
+    assert_eq!(selected.transaction.outputs().len(), 1);
     assert!(is_remainder_or_return(
-        &selected.outputs[0],
+        &selected.transaction.outputs()[0],
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None
@@ -153,10 +153,10 @@ fn no_outputs_but_burn() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs, inputs);
-    assert_eq!(selected.outputs.len(), 1);
+    assert_eq!(selected.inputs_data, inputs);
+    assert_eq!(selected.transaction.outputs().len(), 1);
     assert!(is_remainder_or_return(
-        &selected.outputs[0],
+        &selected.transaction.outputs()[0],
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None
@@ -366,6 +366,6 @@ fn two_addresses() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }

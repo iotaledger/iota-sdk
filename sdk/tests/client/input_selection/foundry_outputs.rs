@@ -103,9 +103,9 @@ fn missing_input_account_for_foundry() {
 //     .select()
 //     .unwrap();
 
-//     assert!(unsorted_eq(&selected.inputs, &inputs));
+//     assert!(unsorted_eq(&selected.inputs_data, &inputs));
 //     // Account next state + foundry
-//     assert_eq!(selected.outputs.len(), 2);
+//     assert_eq!(selected.transaction.outputs().len(), 2);
 // }
 
 #[test]
@@ -159,10 +159,10 @@ fn minted_native_tokens_in_new_remainder() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the minted native tokens
             // TODO reenable when ISA supports NTs again
@@ -235,11 +235,11 @@ fn minted_native_tokens_in_provided_output() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.contains(&outputs[1]));
-    assert!(selected.outputs.iter().any(|output| output.is_account()));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert!(selected.transaction.outputs().contains(&outputs[1]));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_account()));
 }
 
 #[test]
@@ -308,10 +308,10 @@ fn melt_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             // TODO reenable when ISA supports NTs again
@@ -369,9 +369,9 @@ fn destroy_foundry_with_account_state_transition() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state
-    assert_eq!(selected.outputs.len(), 1);
+    assert_eq!(selected.transaction.outputs().len(), 1);
 }
 
 #[test]
@@ -430,10 +430,10 @@ fn destroy_foundry_with_account_burn() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -508,9 +508,9 @@ fn prefer_basic_to_foundry() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[2]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[2]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -577,12 +577,12 @@ fn simple_foundry_transition_basic_not_needed() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert!(selected.inputs.contains(&inputs[2]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert!(selected.inputs_data.contains(&inputs[2]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 2_000_000);
@@ -661,12 +661,12 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert!(selected.inputs.contains(&inputs[2]));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert!(selected.inputs_data.contains(&inputs[2]));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_account() {
                 assert_eq!(output.amount(), 2_000_000);
@@ -722,11 +722,11 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //         .select()
 //         .unwrap();
 
-//     assert_eq!(selected.inputs.len(), 1);
-//     assert!(selected.inputs.contains(&inputs[2]));
-//     // assert_eq!(selected.outputs.len(), 3);
-//     // assert!(selected.outputs.contains(&outputs[0]));
-//     // selected.outputs.iter().for_each(|output| {
+//     assert_eq!(selected.inputs_data.len(), 1);
+//     assert!(selected.inputs_data.contains(&inputs[2]));
+//     // assert_eq!(selected.transaction.outputs().len(), 3);
+//     // assert!(selected.transaction.outputs().contains(&outputs[0]));
+//     // selected.transaction.outputs().iter().for_each(|output| {
 //     //     if !outputs.contains(output) {
 //     //         if output.is_account() {
 //     //             assert_eq!(output.amount(), 2_000_000);
@@ -884,13 +884,18 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.iter().any(|output| output.is_account()));
-    assert!(selected.outputs.iter().any(|output| output.is_foundry()));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_account()));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_foundry()));
     assert_eq!(
-        selected.outputs.iter().map(|output| output.amount()).sum::<u64>(),
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .map(|output| output.amount())
+            .sum::<u64>(),
         4_000_000
     );
 }
@@ -947,11 +952,11 @@ fn create_native_token_but_burn_account() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1132,10 +1137,10 @@ fn foundry_in_outputs_and_required() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert_eq!(*output.as_account().account_id(), account_id_2);
         }
@@ -1209,11 +1214,11 @@ fn melt_and_burn_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
+    assert_eq!(selected.transaction.outputs().len(), 3);
     // Account state index is increased
-    selected.outputs.iter().for_each(|output| {
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             // TODO reenable when ISA supports NTs again
