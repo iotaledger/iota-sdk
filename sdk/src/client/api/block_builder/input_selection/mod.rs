@@ -70,25 +70,6 @@ pub(crate) struct AutoManaAllotment {
     reference_mana_cost: u64,
 }
 
-// /// Result of the input selection algorithm.
-// #[derive(Clone, Debug)]
-// pub struct Selected {
-//     /// Selected inputs.
-//     pub inputs: Vec<InputSigningData>,
-//     /// Provided and created outputs.
-//     pub outputs: Vec<Output>,
-//     /// Remainder outputs information.
-//     pub remainders: Vec<RemainderData>,
-//     /// Mana rewards by input.
-//     pub mana_rewards: HashMap<OutputId, u64>,
-//     /// Required context inputs.
-//     pub context_inputs: HashSet<ContextInput>,
-//     /// Mana allotments.
-//     pub mana_allotments: Vec<ManaAllotment>,
-//     /// The creation slot used by input selection.
-//     pub creation_slot: SlotIndex,
-// }
-
 impl InputSelection {
     /// Creates a new [`InputSelection`].
     pub fn new(
