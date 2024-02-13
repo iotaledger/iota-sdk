@@ -29,7 +29,11 @@ import {
     NftId,
     TokenId,
 } from '../types/block/id';
-import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
+import {
+    SlotCommitment,
+    SlotCommitmentId,
+    SlotIndex,
+} from '../types/block/slot';
 
 /** Utils class for utils. */
 export class Utils {
@@ -125,6 +129,39 @@ export class Utils {
                 index,
             },
         });
+    }
+
+    /**
+     * Compute the transaction ID from an output ID.
+     *
+     * @param outputId The output ID.
+     * @returns The transaction ID of the transaction which created the output.
+     */
+    static transactionIdFromOutputId(outputId: OutputId): TransactionId {
+        return outputId.slice(0, 74);
+    }
+
+    /**
+     * Compute the output index from an output ID.
+     *
+     * @param outputId The output ID.
+     * @returns The output index.
+     */
+    static outputIndexFromOutputId(outputId: OutputId): number {
+        const numberString = outputId.slice(-4);
+        const chunks = [];
+        for (
+            let i = 0, charsLength = numberString.length;
+            i < charsLength;
+            i += 2
+        ) {
+            chunks.push(numberString.substring(i, i + 2));
+        }
+        const separated = chunks.map((n) => parseInt(n, 16));
+        const buf = Uint8Array.from(separated).buffer;
+        const view = new DataView(buf);
+
+        return view.getUint16(0, true);
     }
 
     /**
@@ -409,6 +446,29 @@ export class Utils {
             name: 'verifyMnemonic',
             data: { mnemonic },
         });
+    }
+
+    /**
+     * Computes a slotIndex from a block or transaction Id.
+     * @param id The block or transaction Id.
+     * @returns The slotIndex.
+     */
+    static computeSlotIndex(id: BlockId | TransactionId): SlotIndex {
+        const numberString = id.slice(-8);
+        const chunks = [];
+
+        for (
+            let i = 0, charsLength = numberString.length;
+            i < charsLength;
+            i += 2
+        ) {
+            chunks.push(numberString.substring(i, i + 2));
+        }
+        const separated = chunks.map((n) => parseInt(n, 16));
+        const buf = Uint8Array.from(separated).buffer;
+        const view = new DataView(buf);
+
+        return view.getUint32(0, true);
     }
 
     /**

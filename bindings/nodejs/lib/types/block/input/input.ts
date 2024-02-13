@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transform, Type } from 'class-transformer';
 import { TransactionId } from '../id';
 import { OutputId } from '../output';
 
@@ -34,8 +33,6 @@ class UTXOInput extends Input {
     /**
      * The transaction ID.
      */
-    @Type(() => TransactionId)
-    @Transform(({ value }) => new TransactionId(value), { toClassOnly: true })
     readonly transactionId: TransactionId;
     /**
      * The output index.

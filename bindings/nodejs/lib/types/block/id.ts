@@ -2,28 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HexEncodedString } from '../utils';
-import { SlotIndex } from './slot';
-
-/**
- * Base class for IDs with a hex encoded slot index at the end.
- */
-export class IdWithSlotIndex extends String {
-    slotIndex(): SlotIndex {
-        const numberString = super.slice(-8);
-        const chunks = [];
-        for (
-            let i = 0, charsLength = numberString.length;
-            i < charsLength;
-            i += 2
-        ) {
-            chunks.push(numberString.substring(i, i + 2));
-        }
-        const separated = chunks.map((n) => parseInt(n, 16));
-        const buf = Uint8Array.from(separated).buffer;
-        const view = new DataView(buf);
-        return view.getUint32(0, true);
-    }
-}
 
 /**
  * An Account ID represented as hex-encoded string.
@@ -43,7 +21,7 @@ export type NftId = HexEncodedString;
 /**
  * A Block ID represented as hex-encoded string.
  */
-export class BlockId extends IdWithSlotIndex {}
+export type BlockId = HexEncodedString;
 
 /**
  * A Token ID represented as hex-encoded string.
@@ -53,7 +31,7 @@ export type TokenId = HexEncodedString;
 /**
  * A Transaction ID represented as hex-encoded string.
  */
-export class TransactionId extends IdWithSlotIndex {}
+export type TransactionId = HexEncodedString;
 
 /**
  * A Foundry ID represented as hex-encoded string.
