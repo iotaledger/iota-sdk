@@ -202,6 +202,8 @@ impl StateTransitionVerifier for AccountOutput {
                     {
                         return Err(TransactionFailureReason::BlockIssuerNotExpired);
                     }
+                } else if block_issuer_output.expiry_slot() < past_bounded_slot_index {
+                    return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
                 }
             }
             _ => {}
