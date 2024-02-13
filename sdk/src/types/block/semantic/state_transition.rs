@@ -178,24 +178,30 @@ impl StateTransitionVerifier for AccountOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        let commitment_index = context.commitment_context_input.unwrap();
-        let past_bounded_slot_index = context.protocol_parameters.past_bounded_slot(commitment_index);
-
         match (
             current_state.features().block_issuer(),
             next_state.features().block_issuer(),
         ) {
             (None, Some(block_issuer_output)) => {
+                let past_bounded_slot_index = context
+                    .protocol_parameters
+                    .past_bounded_slot(context.commitment_context_input.unwrap());
+
                 if block_issuer_output.expiry_slot() < past_bounded_slot_index {
                     return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
                 }
             }
             (Some(block_issuer_input), None) => {
+                let commitment_index = context.commitment_context_input.unwrap();
+
                 if block_issuer_input.expiry_slot() >= commitment_index.slot_index() {
                     return Err(TransactionFailureReason::BlockIssuerNotExpired);
                 }
             }
             (Some(block_issuer_input), Some(block_issuer_output)) => {
+                let commitment_index = context.commitment_context_input.unwrap();
+                let past_bounded_slot_index = context.protocol_parameters.past_bounded_slot(commitment_index);
+
                 if block_issuer_input.expiry_slot() >= commitment_index.slot_index() {
                     if block_issuer_input.expiry_slot() != block_issuer_output.expiry_slot()
                         && block_issuer_input.expiry_slot() < past_bounded_slot_index
