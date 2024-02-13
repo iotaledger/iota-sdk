@@ -23,7 +23,7 @@ export interface TransactionOptions {
     /** Transaction context inputs to include. */
     contextInputs?: ContextInput[];
     /** Inputs that must be used for the transaction. */
-    mandatoryInputs?: OutputId[];
+    requiredInputs?: OutputId[];
     /** Specifies what needs to be burned during input selection. */
     burn?: Burn;
     /** Optional note, that is only stored locally. */
