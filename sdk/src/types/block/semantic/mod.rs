@@ -308,7 +308,6 @@ impl<'a> SemanticValidationContext<'a> {
                 }
             }
 
-            // Handling `Account Out_locked` mana.
             if let Some(unlock_conditions) = created_output.unlock_conditions() {
                 if let (Some(address), Some(timelock)) = (unlock_conditions.address(), unlock_conditions.timelock()) {
                     if let Address::Account(account_address) = address.address() {
@@ -339,7 +338,7 @@ impl<'a> SemanticValidationContext<'a> {
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
 
             // Add allotted mana
-            for mana_allotment in (*self.transaction.allotments()).iter() {
+            for mana_allotment in self.transaction.allotments().iter() {
                 self.output_mana = self
                     .output_mana
                     .checked_add(mana_allotment.mana())
