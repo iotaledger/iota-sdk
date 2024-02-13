@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        context_input::{ContextInput, RewardContextInput},
-        output::{AccountId, AccountOutputBuilder},
-    },
+    types::block::output::{AccountId, AccountOutputBuilder},
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -67,7 +64,6 @@ where
 
         let options = TransactionOptions {
             required_inputs: [account_output_data.output_id].into(),
-            context_inputs: vec![ContextInput::from(RewardContextInput::new(0)?)],
             ..Default::default()
         };
 
