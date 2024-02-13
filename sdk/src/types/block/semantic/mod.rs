@@ -140,7 +140,7 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
                 Output::Account(output) => {
                     if output.features().block_issuer().is_some() {
-                        let account_id = output.account_id_non_null(&output_id);
+                        let account_id = output.account_id_non_null(output_id);
 
                         if self.commitment_context_input.is_none() {
                             return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
