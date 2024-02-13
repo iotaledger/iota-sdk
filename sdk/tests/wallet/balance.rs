@@ -144,13 +144,13 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
-            UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address())),
+            UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                wallet_2.address(),
+                wallet_2.address().await,
                 wallet_0.client().get_slot_index().await? + slots_until_expired,
             )?),
         ])
-        .with_features([SenderFeature::new(wallet_0.address())])
+        .with_features([SenderFeature::new(wallet_0.address().await)])
         .finish_output()?];
 
     let balance_before_tx = wallet_0.balance().await?;
@@ -198,7 +198,7 @@ async fn balance_expiration() -> Result<()> {
     // It's possible to send the expired output
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to wallet 1 with expiration to wallet 2, both have no amount yet
-        .with_unlock_conditions([AddressUnlockCondition::new(wallet_1.address())])
+        .with_unlock_conditions([AddressUnlockCondition::new(wallet_1.address().await)])
         .finish_output()?];
     let _tx = wallet_2.send_outputs(outputs, None).await?;
 
@@ -234,7 +234,7 @@ async fn balance_transfer() -> Result<()> {
     assert_eq!(balance_1.base_coin().available(), 0);
 
     // Send to 1
-    let tx = wallet_0.send(to_send, wallet_1.address().clone(), None).await?;
+    let tx = wallet_0.send(to_send, wallet_1.address().await, None).await?;
 
     // Balance should update without sync
     let balance_0 = wallet_0.balance().await?;

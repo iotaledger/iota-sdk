@@ -34,7 +34,7 @@ where
     crate::wallet::Error: From<S::Error>,
     WalletBuilder<S>: SaveLoadWallet,
 {
-    pub async fn set_client_options(&mut self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
+    pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,
             #[cfg(feature = "mqtt")]
@@ -67,7 +67,7 @@ where
             }
             *self.client.network_info.write().await = network_info;
 
-            self.update_bech32_hrp().await?;
+            self.update_wallet_address_hrp().await?;
         }
 
         #[cfg(feature = "storage")]
@@ -152,7 +152,7 @@ where
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
 
-        self.update_bech32_hrp().await?;
+        self.update_wallet_address_hrp().await?;
 
         Ok(())
     }

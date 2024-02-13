@@ -1,10 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{MintNftParams, Result, SendNftParams, SendParams, TransactionOptions};
-use pretty_assertions::assert_eq;
+// use iota_sdk::wallet::{MintNftParams, Result, SendNftParams, SendParams, TransactionOptions};
+// use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
+// use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 // #[ignore]
 // #[tokio::test]

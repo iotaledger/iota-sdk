@@ -548,7 +548,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
-    let wallet_address = wallet.address().clone();
+    let wallet_address = wallet.address().await;
 
     let nft_options = [MintNftParams::new()
         .with_address(wallet_address.clone())
@@ -588,7 +588,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         .clone();
 
     assert_eq!(nft.amount(), 1_000_000);
-    assert_eq!(nft.address(), wallet.address().clone().inner());
+    assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
     assert_eq!(
@@ -607,7 +607,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        wallet.address().clone().inner()
+        wallet.address().await.inner()
     );
 
     tear_down(storage_path)
@@ -629,13 +629,13 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
 
     let balance = wallet_0.sync(None).await?;
-    let minimum_amount = BasicOutput::minimum_amount(&*wallet_1.address().clone(), storage_score_params);
+    let minimum_amount = BasicOutput::minimum_amount(&*wallet_1.address().await, storage_score_params);
 
     // Send away most balance so we can test with leaving dust
     let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: wallet_1.address().clone(),
+                recipient_address: wallet_1.address().await,
                 amount: balance.base_coin().available() - 63900,
                 assets: None,
                 features: None,
@@ -655,7 +655,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: wallet_1.address().clone(),
+                recipient_address: wallet_1.address().await,
                 amount: minimum_amount - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
@@ -679,7 +679,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let result = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: wallet_1.address().clone(),
+                recipient_address: wallet_1.address().await,
                 amount: minimum_amount - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
@@ -699,7 +699,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: wallet_1.address().clone(),
+                recipient_address: wallet_1.address().await,
                 amount: 100, // leave more behind than min. deposit
                 assets: None,
                 features: None,
@@ -723,7 +723,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: wallet_1.address().clone(),
+                recipient_address: wallet_1.address().await,
                 amount: 100, // leave more behind than min. deposit
                 assets: None,
                 features: None,
@@ -767,8 +767,8 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     // Create second wallet without funds, so it only gets the NFT
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let wallet_0_address = wallet_0.address().clone();
-    let wallet_1_address = wallet_1.address().clone();
+    let wallet_0_address = wallet_0.address().await;
+    let wallet_1_address = wallet_1.address().await;
 
     // Send NFT to second wallet
     let tx = wallet_0
@@ -833,7 +833,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
-    let address = wallet.address().clone();
+    let address = wallet.address().await;
 
     let nft_options = [MintNftParams::new()
         .with_address(address.clone())
@@ -874,7 +874,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);
-    assert_eq!(nft.address(), wallet.address().clone().inner());
+    assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().is_empty());
     assert_eq!(
         nft.immutable_features()
@@ -888,7 +888,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        wallet.address().clone().inner()
+        wallet.address().await.inner()
     );
 
     tear_down(storage_path)

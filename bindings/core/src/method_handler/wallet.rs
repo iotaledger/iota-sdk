@@ -82,7 +82,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
-                None => *wallet.address().hrp(),
+                None => *wallet.address().await.hrp(),
             };
 
             Response::Bech32Address(address.to_bech32(bech32_hrp))
@@ -144,10 +144,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
         //     wallet.deregister_participation_event(&event_id).await?;
         //     Response::Ok
         // }
-        WalletMethod::GetAddress => {
-            let address = wallet.address().clone();
-            Response::Address(address)
-        }
+        WalletMethod::GetAddress => Response::Address(wallet.address().await),
         WalletMethod::GetBalance => Response::Balance(wallet.balance().await?),
         WalletMethod::GetFoundryOutput { token_id } => {
             let output = wallet.get_foundry_output(token_id).await?;
@@ -400,7 +397,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SetAlias { alias } => {
-            wallet.set_alias(&alias).await?;
+            wallet.update_wallet_alias(&alias).await?;
             Response::Ok
         }
         WalletMethod::SetDefaultSyncOptions { options } => {

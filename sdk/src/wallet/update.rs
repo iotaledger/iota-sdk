@@ -27,21 +27,50 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Set the alias for the wallet.
-    pub async fn set_alias(&mut self, alias: &str) -> crate::wallet::Result<()> {
-        self.alias = Some(alias.to_string());
+    /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible incoming transactions.
+    pub(crate) async fn update_wallet_address_hrp(&self) -> crate::wallet::Result<()> {
+        let bech32_hrp = self.client().get_bech32_hrp().await?;
+        log::debug!("updating wallet with new bech32 hrp: {}", bech32_hrp);
+
+        self.address_mut().await.hrp = bech32_hrp;
+
+        #[cfg(feature = "storage")]
+        {
+            let wallet_ledger = {
+                let mut wallet_ledger = self.ledger_mut().await;
+                wallet_ledger.inaccessible_incoming_transactions.clear();
+                WalletLedgerDto::from(&*wallet_ledger)
+            };
+
+            log::debug!("[save] wallet with updated bech32 hrp",);
+            self.storage_manager()
+                .save_wallet(
+                    &self.address().await,
+                    self.bip_path().await.as_ref(),
+                    self.alias().await.as_ref(),
+                    &wallet_ledger,
+                )
+                .await?;
+        }
+
+        Ok(())
+    }
+
+    /// Update the alias for the wallet.
+    pub async fn update_wallet_alias(&self, alias: &str) -> crate::wallet::Result<()> {
+        *self.alias_mut().await = Some(alias.to_string());
 
         #[cfg(feature = "storage")]
         {
             // TODO: change `save_wallet` signature to accept a `Wallet<S>`
-            let wallet_address = self.address();
-            let wallet_bip_path = self.bip_path();
-            let wallet_alias = self.alias();
+            let wallet_address = self.address().await;
+            let wallet_bip_path = self.bip_path().await;
+            let wallet_alias = self.alias().await;
             let wallet_ledger = WalletLedgerDto::from(&*self.ledger().await);
 
             self.storage_manager()
                 .save_wallet(
-                    wallet_address,
+                    &wallet_address,
                     wallet_bip_path.as_ref(),
                     wallet_alias.as_ref(),
                     &wallet_ledger,
@@ -150,9 +179,9 @@ where
             log::debug!("[SYNC] storing wallet with new synced data");
             self.storage_manager()
                 .save_wallet(
-                    self.address(),
-                    self.bip_path.as_ref(),
-                    self.alias().as_ref(),
+                    &self.address().await,
+                    self.bip_path().await.as_ref(),
+                    self.alias().await.as_ref(),
                     &WalletLedgerDto::from(&*wallet_ledger),
                 )
                 .await?;
@@ -230,42 +259,13 @@ where
             log::debug!("[SYNC] storing wallet with new synced transactions");
             self.storage_manager()
                 .save_wallet(
-                    self.address(),
-                    self.bip_path.as_ref(),
-                    self.alias().as_ref(),
+                    &self.address().await,
+                    self.bip_path().await.as_ref(),
+                    self.alias().await.as_ref(),
                     &WalletLedgerDto::from(&*wallet_ledger),
                 )
                 .await?;
         }
-        Ok(())
-    }
-
-    /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible incoming transactions.
-    pub(crate) async fn update_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
-        let bech32_hrp = self.client().get_bech32_hrp().await?;
-        log::debug!("updating wallet with new bech32 hrp: {}", bech32_hrp);
-
-        (&mut self.address).hrp = bech32_hrp;
-
-        #[cfg(feature = "storage")]
-        {
-            let wallet_ledger = {
-                let mut wallet_ledger = self.ledger_mut().await;
-                wallet_ledger.inaccessible_incoming_transactions.clear();
-                WalletLedgerDto::from(&*wallet_ledger)
-            };
-
-            log::debug!("[save] wallet with updated bech32 hrp",);
-            self.storage_manager()
-                .save_wallet(
-                    self.address(),
-                    self.bip_path.as_ref(),
-                    self.alias().as_ref(),
-                    &wallet_ledger,
-                )
-                .await?;
-        }
-
         Ok(())
     }
 }

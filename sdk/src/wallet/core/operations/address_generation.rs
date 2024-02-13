@@ -27,7 +27,7 @@ impl Wallet {
     ) -> crate::wallet::Result<Ed25519Address> {
         // TODO: not sure yet whether we also should allow this method to generate addresses for different bip
         // paths.
-        let coin_type = self.bip_path().ok_or(Error::MissingBipPath)?.coin_type;
+        let coin_type = self.bip_path().await.ok_or(Error::MissingBipPath)?.coin_type;
 
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
@@ -53,7 +53,7 @@ impl Wallet {
                         )
                         .await?;
 
-                    let bech32_hrp = self.bech32_hrp();
+                    let bech32_hrp = self.bech32_hrp().await;
 
                     self.emit(WalletEvent::LedgerAddressGeneration(AddressData {
                         address: address[0].to_bech32(bech32_hrp),

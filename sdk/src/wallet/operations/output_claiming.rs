@@ -148,7 +148,12 @@ where
         let slot_index = self.client().get_slot_index().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        wallet_ledger.claimable_outputs(self.address(), outputs_to_claim, slot_index, &protocol_parameters)
+        wallet_ledger.claimable_outputs(
+            &self.address().await,
+            outputs_to_claim,
+            slot_index,
+            &protocol_parameters,
+        )
     }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
@@ -259,7 +264,7 @@ where
             ));
         }
 
-        let wallet_address = self.address.clone();
+        let wallet_address = self.address().await;
         drop(wallet_ledger);
 
         let mut nft_outputs_to_send = Vec::new();
@@ -282,13 +287,13 @@ where
                     // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
+                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
+                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
                         .finish_output()?
                 };
 

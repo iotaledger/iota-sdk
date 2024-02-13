@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("Wallet synced");
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");

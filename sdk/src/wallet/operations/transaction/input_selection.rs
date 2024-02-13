@@ -69,8 +69,8 @@ where
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_outputs_signing_data = filter_inputs(
-            self.address(),
-            self.bip_path(),
+            &self.address().await,
+            self.bip_path().await,
             wallet_ledger.unspent_outputs.values(),
             slot_index,
             protocol_parameters.committable_age_range(),
@@ -126,7 +126,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(self.address.clone().into_inner()),
+                Some(self.address().await.into_inner()),
                 slot_index,
                 protocol_parameters.clone(),
             )
@@ -184,7 +184,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(self.address.clone().into_inner()),
+                Some(self.address().await.into_inner()),
                 slot_index,
                 protocol_parameters.clone(),
             )
@@ -222,7 +222,7 @@ where
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
             outputs,
-            Some(self.address.clone().into_inner()),
+            Some(self.address().await.into_inner()),
             slot_index,
             protocol_parameters.clone(),
         )

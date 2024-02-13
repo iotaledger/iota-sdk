@@ -77,7 +77,7 @@ where
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
                 bech32_address.inner().clone()
             }
-            None => self.address().inner().clone(),
+            None => self.address().await.inner().clone(),
         };
 
         let mut account_output_builder =

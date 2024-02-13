@@ -67,7 +67,7 @@ impl Wallet {
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
     pub async fn restore_from_stronghold_backup(
-        &mut self,
+        &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_bip_path_mismatch: Option<bool>,
@@ -90,7 +90,7 @@ impl Wallet {
             ));
         }
 
-        let curr_bip_path = self.bip_path();
+        let curr_bip_path = self.bip_path().await;
 
         // Explicitly drop the data to avoid contention
         drop(wallet_ledger);
@@ -114,7 +114,7 @@ impl Wallet {
         });
 
         if !ignore_backup_values {
-            self.bip_path = read_bip_path;
+            *self.bip_path_mut().await = read_bip_path;
         }
 
         // Get the current snapshot path if set
@@ -161,9 +161,9 @@ impl Wallet {
                 });
 
                 if restore_wallet {
-                    self.address = read_address;
-                    self.bip_path = read_bip_path;
-                    self.alias = read_alias;
+                    *self.address_mut().await = read_address;
+                    *self.bip_path_mut().await = read_bip_path;
+                    *self.alias_mut().await = read_alias;
                     *self.ledger_mut().await = read_wallet_ledger;
                 }
             }
@@ -185,16 +185,16 @@ impl Wallet {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.bip_path);
+                .with_bip_path(self.bip_path().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
             // also save wallet to db
             self.storage_manager()
                 .save_wallet(
-                    self.address(),
-                    self.bip_path.as_ref(),
-                    self.alias.as_ref(),
+                    &self.address().await,
+                    self.bip_path().await.as_ref(),
+                    self.alias().await.as_ref(),
                     &WalletLedgerDto::from(&*self.ledger().await),
                 )
                 .await?;
@@ -260,7 +260,7 @@ impl Wallet<StrongholdSecretManager> {
             ));
         }
 
-        let curr_bip_path = self.bip_path;
+        let curr_bip_path = self.bip_path().await;
 
         // Explicitly drop the data to avoid contention
         drop(wallet_ledger);
@@ -284,7 +284,7 @@ impl Wallet<StrongholdSecretManager> {
         });
 
         if !ignore_backup_values {
-            self.bip_path = read_bip_path;
+            *self.bip_path_mut().await = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
@@ -320,9 +320,9 @@ impl Wallet<StrongholdSecretManager> {
                 });
 
                 if restore_wallet {
-                    self.address = read_address;
-                    self.bip_path = read_bip_path;
-                    self.alias = read_alias;
+                    *self.address_mut().await = read_address;
+                    *self.bip_path_mut().await = read_bip_path;
+                    *self.alias_mut().await = read_alias;
                     *self.ledger_mut().await = read_wallet_ledger;
                 }
             }
@@ -344,16 +344,16 @@ impl Wallet<StrongholdSecretManager> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.bip_path);
+                .with_bip_path(self.bip_path().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
             // also save wallet to db
             self.storage_manager()
                 .save_wallet(
-                    &self.address,
-                    self.bip_path.as_ref(),
-                    self.alias.as_ref(),
+                    &self.address().await,
+                    self.bip_path().await.as_ref(),
+                    self.alias().await.as_ref(),
                     &WalletLedgerDto::from(&*self.ledger().await),
                 )
                 .await?;

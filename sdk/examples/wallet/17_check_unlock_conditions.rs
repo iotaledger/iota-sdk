@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
 
     println!("Wallet address:\n{:#?}", wallet_address);
 

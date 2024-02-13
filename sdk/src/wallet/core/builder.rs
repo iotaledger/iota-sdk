@@ -211,7 +211,7 @@ where
         let mut wallet_address = storage_manager.load_wallet_address().await?;
 
         #[cfg(feature = "storage")]
-        let mut wallet_bip_path = storage_manager.load_wallet_bip_path().await?;
+        let wallet_bip_path = storage_manager.load_wallet_bip_path().await?;
 
         // The bip path must not change.
         #[cfg(feature = "storage")]
@@ -269,10 +269,10 @@ where
         #[cfg(not(feature = "storage"))]
         let wallet_ledger = WalletLedger::default();
 
-        let mut wallet = Wallet {
-            address,
-            bip_path: wallet_bip_path,
-            alias: wallet_alias,
+        let wallet = Wallet {
+            address: Arc::new(RwLock::new(address)),
+            bip_path: Arc::new(RwLock::new(wallet_bip_path)),
+            alias: Arc::new(RwLock::new(wallet_alias)),
             inner: Arc::new(wallet_inner),
             ledger: Arc::new(RwLock::new(wallet_ledger)),
         };
@@ -280,7 +280,7 @@ where
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if provided_client_options {
-            wallet.update_bech32_hrp().await?;
+            wallet.update_wallet_address_hrp().await?;
         }
 
         Ok(wallet)
@@ -322,9 +322,9 @@ where
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
-            bip_path: wallet.bip_path(),
-            address: Some(wallet.address().clone()),
-            alias: wallet.alias(),
+            address: Some(wallet.address().await),
+            bip_path: wallet.bip_path().await,
+            alias: wallet.alias().await,
             client_options: Some(wallet.client_options().await),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),

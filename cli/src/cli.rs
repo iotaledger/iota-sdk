@@ -486,7 +486,7 @@ pub async fn restore_command_stronghold(
 
     // If the restore fails we do not want to remove an already existing wallet
     let restore_into_existing_wallet = storage_path.is_dir();
-    let mut wallet = builder
+    let wallet = builder
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))

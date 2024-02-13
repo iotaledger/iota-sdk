@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
 
     // Manually sync to ensure we have the correct funds to start with
     let balance = wallet.sync(None).await?;

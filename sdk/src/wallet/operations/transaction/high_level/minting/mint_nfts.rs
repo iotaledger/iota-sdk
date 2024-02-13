@@ -160,7 +160,7 @@ where
     {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
-        let wallet_address = self.address().clone().into_inner();
+        let wallet_address = self.address().await.into_inner();
         let mut outputs = Vec::new();
 
         for MintNftParams {
