@@ -84,9 +84,8 @@ impl InputSelection {
                 "Reducing account mana of {} by {required_allotment_mana} for allotment",
                 output.as_account().account_id()
             );
-            let new_mana = output.mana().saturating_sub(required_allotment_mana);
             *output = AccountOutputBuilder::from(output.as_account())
-                .with_mana(new_mana)
+                .with_mana(output.mana().saturating_sub(required_allotment_mana))
                 .finish_output()?;
         }
 
