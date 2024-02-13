@@ -164,7 +164,7 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance_after_tx.base_coin().available(), 0);
 
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Wallet 1 balance before expiration
@@ -243,7 +243,7 @@ async fn balance_transfer() -> Result<()> {
     assert_eq!(balance_0, balance_0_sync);
 
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Balance should have transferred entirely
@@ -277,7 +277,7 @@ async fn balance_transfer() -> Result<()> {
 //     // Only use a part as voting power
 //     let tx = wallet.increase_voting_power(voting_power).await?;
 //     wallet
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 //     let balance = wallet.sync(None).await?;
 //     assert_eq!(balance.base_coin().total(), faucet_amount);
@@ -288,7 +288,7 @@ async fn balance_transfer() -> Result<()> {
 //     // Increase voting power to total amount
 //     let tx = wallet.increase_voting_power(faucet_amount - voting_power).await?;
 //     wallet
-//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
 //         .await?;
 //     let balance = wallet.sync(None).await?;
 //     assert_eq!(balance.base_coin().total(), faucet_amount);
