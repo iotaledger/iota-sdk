@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
             1_000_000,
             "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             TransactionOptions {
-                mandatory_inputs: [input].into(),
+                required_inputs: [input].into(),
                 ..Default::default()
             },
         )

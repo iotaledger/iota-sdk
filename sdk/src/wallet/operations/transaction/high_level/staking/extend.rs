@@ -83,7 +83,7 @@ where
                 past_bounded_epoch,
                 end_epoch,
             ));
-            options.mandatory_inputs = [account_output_data.output_id].into();
+            options.required_inputs = [account_output_data.output_id].into();
             options.context_inputs = vec![ContextInput::from(RewardContextInput::new(0)?)];
         }
 

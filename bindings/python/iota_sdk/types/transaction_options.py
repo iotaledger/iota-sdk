@@ -72,7 +72,7 @@ class TransactionOptions:
         remainder_value_strategy: The strategy applied for base coin remainders.
         tagged_data_payload: An optional tagged data payload.
         context_inputs: Transaction context inputs to include.
-        mandatory_inputs: Inputs that must be used for the transaction.
+        required_inputs: Inputs that must be used for the transaction.
         burn: Specifies what needs to be burned during input selection.
         note: A string attached to the transaction.
         allow_micro_amount: Whether to allow sending a micro amount.
@@ -85,7 +85,7 @@ class TransactionOptions:
     def __init__(self, remainder_value_strategy: Optional[Union[RemainderValueStrategy, RemainderValueStrategyCustomAddress]] = None,
                  tagged_data_payload: Optional[TaggedDataPayload] = None,
                  context_inputs: Optional[List[ContextInput]] = None,
-                 mandatory_inputs: Optional[List[OutputId]] = None,
+                 required_inputs: Optional[List[OutputId]] = None,
                  burn: Optional[Burn] = None,
                  note: Optional[str] = None,
                  allow_micro_amount: Optional[bool] = None,
@@ -98,7 +98,7 @@ class TransactionOptions:
         self.remainder_value_strategy = remainder_value_strategy
         self.tagged_data_payload = tagged_data_payload
         self.context_inputs = context_inputs
-        self.mandatory_inputs = mandatory_inputs
+        self.required_inputs = required_inputs
         self.burn = burn
         self.note = note
         self.allow_micro_amount = allow_micro_amount

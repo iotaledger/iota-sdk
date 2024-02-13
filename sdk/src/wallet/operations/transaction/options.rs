@@ -27,7 +27,7 @@ pub struct TransactionOptions {
     /// Transaction context inputs to include.
     pub context_inputs: Vec<ContextInput>,
     /// Inputs that must be used for the transaction.
-    pub mandatory_inputs: BTreeSet<OutputId>,
+    pub required_inputs: BTreeSet<OutputId>,
     /// Specifies what needs to be burned during input selection.
     pub burn: Option<Burn>,
     /// A string attached to the transaction.
@@ -50,7 +50,7 @@ impl Default for TransactionOptions {
             remainder_value_strategy: Default::default(),
             tagged_data_payload: Default::default(),
             context_inputs: Default::default(),
-            mandatory_inputs: Default::default(),
+            required_inputs: Default::default(),
             burn: Default::default(),
             note: Default::default(),
             allow_micro_amount: false,

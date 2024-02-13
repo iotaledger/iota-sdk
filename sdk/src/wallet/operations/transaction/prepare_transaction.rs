@@ -32,9 +32,9 @@ where
             output.verify_storage_deposit(storage_score_params)?;
         }
 
-        if options.mandatory_inputs.len() as u16 > INPUT_COUNT_MAX {
+        if options.required_inputs.len() as u16 > INPUT_COUNT_MAX {
             return Err(crate::types::block::Error::InvalidInputCount(
-                TryIntoBoundedU16Error::Truncated(options.mandatory_inputs.len()),
+                TryIntoBoundedU16Error::Truncated(options.required_inputs.len()),
             ))?;
         }
 

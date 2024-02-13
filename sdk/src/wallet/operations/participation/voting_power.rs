@@ -62,7 +62,7 @@ where
                     new_output,
                     Some(TransactionOptions {
                         // Use the previous voting output and additionally other for the additional amount.
-                        mandatory_inputs: Some(vec![current_output_data.output_id]),
+                        required_inputs: Some(vec![current_output_data.output_id]),
                         tagged_data_payload: Some(tagged_data_payload),
                         ..Default::default()
                     }),
@@ -119,7 +119,7 @@ where
             Some(TransactionOptions {
                 // Use the previous voting output and additionally others for possible additional required amount for
                 // the remainder to reach the minimum required storage deposit.
-                mandatory_inputs: Some(vec![current_output_data.output_id]),
+                required_inputs: Some(vec![current_output_data.output_id]),
                 tagged_data_payload,
                 ..Default::default()
             }),

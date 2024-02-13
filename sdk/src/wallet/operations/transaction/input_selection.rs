@@ -72,7 +72,7 @@ where
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
         if let Some(voting_output) = &voting_output {
-            if !options.mandatory_inputs.contains(&voting_output.output_id) {
+            if !options.required_inputs.contains(&voting_output.output_id) {
                 forbidden_inputs.insert(voting_output.output_id);
             }
         }
@@ -84,7 +84,7 @@ where
             wallet_data.unspent_outputs.values(),
             creation_slot_index,
             protocol_parameters.committable_age_range(),
-            &options.mandatory_inputs,
+            &options.required_inputs,
         )?;
 
         let mut mana_rewards = HashMap::new();
@@ -104,7 +104,7 @@ where
         }
 
         // Check that no input got already locked
-        for output_id in &options.mandatory_inputs {
+        for output_id in &options.required_inputs {
             if wallet_data.locked_outputs.contains(output_id) {
                 return Err(crate::wallet::Error::CustomInput(format!(
                     "provided custom input {output_id} is already used in another transaction",
@@ -138,7 +138,7 @@ where
             slot_commitment_id,
             protocol_parameters.clone(),
         )
-        .with_required_inputs(options.mandatory_inputs)
+        .with_required_inputs(options.required_inputs)
         .with_forbidden_inputs(forbidden_inputs)
         .with_mana_rewards(mana_rewards)
         .with_payload(options.tagged_data_payload)
@@ -175,12 +175,12 @@ fn filter_inputs<'a>(
     available_outputs: impl IntoIterator<Item = &'a OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
-    mandatory_inputs: &BTreeSet<OutputId>,
+    required_inputs: &BTreeSet<OutputId>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {
     let mut available_outputs_signing_data = Vec::new();
 
     for output_data in available_outputs {
-        if !mandatory_inputs.contains(&output_data.output_id) {
+        if !required_inputs.contains(&output_data.output_id) {
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output

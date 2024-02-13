@@ -98,7 +98,7 @@ where
         drop(wallet_data);
 
         let transaction_options = TransactionOptions {
-            mandatory_inputs: [*output_id].into(),
+            required_inputs: [*output_id].into(),
             issuer_id: Some(account_id),
             allow_additional_input_selection: false,
             ..Default::default()

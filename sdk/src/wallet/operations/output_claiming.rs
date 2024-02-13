@@ -297,7 +297,7 @@ where
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
             TransactionOptions {
-                mandatory_inputs: outputs_to_claim
+                required_inputs: outputs_to_claim
                     .iter()
                     .map(|o| o.output_id)
                     // add additional inputs

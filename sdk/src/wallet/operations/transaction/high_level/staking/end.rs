@@ -66,7 +66,7 @@ where
             .finish_output()?;
 
         let options = TransactionOptions {
-            mandatory_inputs: [account_output_data.output_id].into(),
+            required_inputs: [account_output_data.output_id].into(),
             context_inputs: vec![ContextInput::from(RewardContextInput::new(0)?)],
             ..Default::default()
         };

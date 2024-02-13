@@ -96,7 +96,7 @@ where
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
         let options = Some(TransactionOptions {
-            mandatory_inputs: outputs_to_consolidate.into_iter().map(|o| o.output_id).collect(),
+            required_inputs: outputs_to_consolidate.into_iter().map(|o| o.output_id).collect(),
             remainder_value_strategy: RemainderValueStrategy::CustomAddress(
                 params
                     .target_address
