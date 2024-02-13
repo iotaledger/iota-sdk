@@ -32,6 +32,6 @@ for output_id in output_ids:
 transaction = wallet.claim_outputs(output_ids)
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = wallet.reissue_transaction_until_included(
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

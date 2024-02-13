@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            MinimumOutputAmount, NativeTokens, NftOutputBuilder, Output, OutputId, StorageScoreParameters, TokenId,
+            MinimumOutputAmount, NftOutputBuilder, Output, OutputId, StorageScoreParameters, TokenId,
         },
         slot::SlotIndex,
     },
@@ -159,16 +159,7 @@ impl AmountSelection {
             }
 
             if let Some(nt) = input.output.native_token() {
-                let mut selected_native_tokens = self.selected_native_tokens.clone();
-
-                selected_native_tokens.insert(*nt.token_id());
-                // Don't select input if the tx would end up with more than allowed native tokens.
-                if selected_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
-                    continue;
-                } else {
-                    // Update selected with NTs from this output.
-                    self.selected_native_tokens = selected_native_tokens;
-                }
+                self.selected_native_tokens.insert(*nt.token_id());
             }
 
             self.inputs_sum += input.output.amount();
@@ -341,19 +332,7 @@ impl InputSelection {
             return Ok(r);
         }
 
-        // If the available inputs have more NTs than are allowed in a single tx, we might not be able to find inputs
-        // without exceeding the threshold, so in this case we also try again with the outputs ordered the other way
-        // around.
-        let potentially_too_many_native_tokens = self
-            .available_inputs
-            .iter()
-            .filter_map(|i| i.output.native_token())
-            .count()
-            > NativeTokens::COUNT_MAX.into();
-
-        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into()
-            || potentially_too_many_native_tokens
-        {
+        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into() {
             // Clear before trying with reversed ordering.
             log::debug!("Clearing amount selection");
             amount_selection = AmountSelection::new(self)?;

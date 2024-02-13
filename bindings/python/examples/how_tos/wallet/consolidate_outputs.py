@@ -49,12 +49,12 @@ print('Sending consolidation transaction...')
 transaction = wallet.consolidate_outputs(ConsolidationParams(force=True))
 print('Transaction sent: ', transaction.transaction_id)
 
-# Wait for the consolidation transaction to get confirmed
-block_id = wallet.reissue_transaction_until_included(
+# Wait for the consolidation transaction to get accepted
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 
 print(
-    f'Transaction included: {os.environ["EXPLORER_URL"]}/block/{block_id}'
+    f'Transaction accepted: {os.environ["EXPLORER_URL"]}/block/{block_id}'
 )
 
 # Sync wallet

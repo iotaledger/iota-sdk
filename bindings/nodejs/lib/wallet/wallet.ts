@@ -1518,16 +1518,16 @@ export class Wallet {
     }
 
     /**
-     * Reissues a transaction sent from the wallet for a provided transaction id until it's
-     * included (referenced by a milestone). Returns the included block id.
+     * Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds. Returns the block id that
+     * contains this transaction.
      */
-    async reissueTransactionUntilIncluded(
+    async waitForTransactionAcceptance(
         transactionId: TransactionId,
         interval?: number,
         maxAttempts?: number,
     ): Promise<string> {
         const response = await this.methodHandler.callMethod({
-            name: 'reissueTransactionUntilIncluded',
+            name: 'waitForTransactionAcceptance',
             data: {
                 transactionId,
                 interval,
