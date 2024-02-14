@@ -106,14 +106,16 @@ async fn changed_bip_path() -> Result<()> {
     assert!(matches!(err, mismatch_err));
 
     // Building the wallet with the same coin type still works
-    assert!(Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
-            mnemonic,
-        )?))
-        .with_storage_path(storage_path)
-        .finish()
-        .await
-        .is_ok());
+    assert!(
+        Wallet::builder()
+            .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+                mnemonic,
+            )?))
+            .with_storage_path(storage_path)
+            .finish()
+            .await
+            .is_ok()
+    );
 
     tear_down(storage_path)
 }

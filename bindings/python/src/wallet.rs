@@ -44,7 +44,7 @@ pub fn create_wallet(options: String) -> Result<Wallet> {
 
 /// Call a wallet method.
 #[pyfunction]
-pub fn call_wallet_method(wallet: &mut Wallet, method: String) -> Result<String> {
+pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
     let method = serde_json::from_str::<WalletMethod>(&method)?;
     let response = crate::block_on(async {
         match wallet.wallet.write().await.as_mut() {

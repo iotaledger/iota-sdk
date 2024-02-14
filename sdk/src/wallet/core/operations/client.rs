@@ -81,7 +81,7 @@ where
     }
 
     /// Update the authentication for a node.
-    pub async fn update_node_auth(&mut self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
+    pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
         log::debug!("[update_node_auth]");
         let mut node_manager_builder = NodeManagerBuilder::from(&*self.client.node_manager.read().await);
 
