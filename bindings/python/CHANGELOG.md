@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `TransactionOptions::as_dict()` for remainder_value_strategy;
 - `Wallet::client_options` typing;
 
 ## 1.1.2 - 2023-12-01

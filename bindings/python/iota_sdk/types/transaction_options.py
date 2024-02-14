@@ -83,4 +83,9 @@ class TransactionOptions():
     def as_dict(self):
         """Converts this object to a dict.
         """
-        return dict(self.__dict__)
+        config = {k: v for k, v in self.__dict__.items() if v is not None}
+
+        if 'remainder_value_strategy' in config:
+            config['remainder_value_strategy'] = config['remainder_value_strategy'].as_dict()
+
+        return config
