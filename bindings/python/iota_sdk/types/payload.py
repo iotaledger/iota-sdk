@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+import dacite
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any, Dict, Optional, List, Union
@@ -140,6 +141,7 @@ class TaggedDataPayload(Payload):
     """A tagged data payload.
 
     Attributes:
+        type: The type of the tagged data payload, must be 5.
         tag: The tag part of the tagged data payload.
         data: The data part of the tagged data payload.
     """
@@ -148,7 +150,14 @@ class TaggedDataPayload(Payload):
     type: int = field(
         default_factory=lambda: int(
             PayloadType.TaggedData),
-        init=False)
+        init=True)
+
+    def __post_init__(self):
+        if self.type != int(
+                PayloadType.TaggedData):
+            return dacite.UnionMatchError("invalid TaggedDataPayload type")
+        self.type = int(
+            PayloadType.TaggedData)
 
 
 @dataclass

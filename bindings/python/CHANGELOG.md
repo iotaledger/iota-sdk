@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NodeInfoProtocol.belowMaxDepth`;
 - `{NodeInfoProtocol, RentStructure}::as_dict()`;
 
+### Changed
+
+- Made the type of `TaggedDataPayload` required as first field in `__init__()`;
+
 ### Fixed
 
 - `TransactionOptions::as_dict()` for remainder_value_strategy;
