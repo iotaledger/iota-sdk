@@ -1,13 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    Client,
-    CommonOutput,
-    SecretManager,
-    initLogger,
-    OutputId,
-} from '@iota/sdk';
+import { Client, CommonOutput, SecretManager, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -51,9 +45,7 @@ async function run() {
         });
 
         // Get outputs by their IDs
-        const addressOutputs = await client.getOutputs(
-            outputIdsResponse.items.map((id) => new OutputId(id)),
-        );
+        const addressOutputs = await client.getOutputs(outputIdsResponse.items);
 
         // Calculate the total amount and native tokens
         let totalAmount = BigInt(0);
