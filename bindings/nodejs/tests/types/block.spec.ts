@@ -31,7 +31,7 @@ describe('Block tests', () => {
         const block = parseBlock(validation_block_json.block);
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
-        const expected_id = validation_block_json.id;
+        const expected_id: BlockId = validation_block_json.id;
         expect(Block.id(block, params)).toEqual(expected_id);
     });
 });

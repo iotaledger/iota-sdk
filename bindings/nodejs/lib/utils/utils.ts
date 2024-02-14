@@ -449,8 +449,8 @@ export class Utils {
     }
 
     /**
-     * Computes a slotIndex from a block or transaction Id.
-     * @param id The block or transaction Id.
+     * Computes a slotIndex from a block, transaction or slotCommitment Id.
+     * @param id The block, transaction or slotCommitment Id.
      * @returns The slotIndex.
      */
     static computeSlotIndex(
