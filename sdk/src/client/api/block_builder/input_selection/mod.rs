@@ -300,6 +300,10 @@ impl InputSelection {
 
         self.selected_inputs.push(input);
 
+        if !matches!(self.requirements.last(), Some(Requirement::ContextInputs)) {
+            self.requirements.push(Requirement::ContextInputs);
+        }
+
         Ok(())
     }
 

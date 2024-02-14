@@ -65,38 +65,43 @@ impl InputSelection {
 
         let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
             + self.protocol_parameters.work_score_parameters().block();
-        // Subtract the old requirement from the previous run
-        // This value can only increase as new inputs are added, so this cannot underflow or be 0
-        let required_allotment_mana = block_work_score as u64 * reference_mana_cost - self.required_allotment_mana;
+
+        self.required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
-        log::debug!("Allotting additional {required_allotment_mana} mana to account ID {issuer_id}");
-        // Unwrap: safe because we always add the record above
-        *self.mana_allotments.get_mut(&issuer_id).unwrap() += required_allotment_mana;
+        log::debug!(
+            "Allotting at least {} mana to account ID {issuer_id}",
+            self.required_allotment_mana
+        );
+        if self.mana_allotments[&issuer_id] < self.required_allotment_mana {
+            let additional_allotment = self.required_allotment_mana - self.mana_allotments[&issuer_id];
+            log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
+            // Unwrap: safe because we always add the record above
+            *self.mana_allotments.get_mut(&issuer_id).unwrap() = self.required_allotment_mana;
 
-        if let Some(output) = self
-            .outputs
-            .iter_mut()
-            .filter(|o| o.is_account() && o.mana() != 0)
-            .find(|o| *o.as_account().account_id() == issuer_id)
-        {
-            log::debug!(
-                "Reducing account mana of {} by {required_allotment_mana} for allotment",
-                output.as_account().account_id()
-            );
-            *output = AccountOutputBuilder::from(output.as_account())
-                .with_mana(output.mana().saturating_sub(required_allotment_mana))
-                .finish_output()?;
-        }
+            if let Some(output) = self
+                .outputs
+                .iter_mut()
+                .filter(|o| o.is_account() && o.mana() != 0)
+                .find(|o| *o.as_account().account_id() == issuer_id)
+            {
+                log::debug!(
+                    "Reducing account mana of {} by {additional_allotment} for allotment",
+                    output.as_account().account_id()
+                );
+                *output = AccountOutputBuilder::from(output.as_account())
+                    .with_mana(output.mana().saturating_sub(additional_allotment))
+                    .finish_output()?;
+            }
 
-        log::debug!("Checking mana requirement again with added allotment");
-        let additional_inputs = self.fulfill_mana_requirement()?;
-        // If we needed more inputs to cover the additional allotment mana
-        // then re-add this requirement so we try again
-        if !additional_inputs.is_empty() {
-            self.required_allotment_mana = required_allotment_mana;
-            self.requirements.push(Requirement::Allotment);
-            return Ok(additional_inputs);
+            log::debug!("Checking mana requirement again with added allotment");
+            let additional_inputs = self.fulfill_mana_requirement()?;
+            // If we needed more inputs to cover the additional allotment mana
+            // then re-add this requirement so we try again
+            if !additional_inputs.is_empty() {
+                self.requirements.push(Requirement::Allotment);
+                return Ok(additional_inputs);
+            }
         }
 
         Ok(Vec::new())

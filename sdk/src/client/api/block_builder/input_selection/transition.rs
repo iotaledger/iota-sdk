@@ -7,9 +7,12 @@ use super::{
 };
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{
-        AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
-        Output, OutputId,
+    types::block::{
+        context_input::BlockIssuanceCreditContextInput,
+        output::{
+            AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput,
+            NftOutputBuilder, Output, OutputId,
+        },
     },
 };
 
