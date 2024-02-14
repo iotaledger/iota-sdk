@@ -4,11 +4,9 @@
 from enum import Enum
 from typing import Optional, List, Union
 from dataclasses import dataclass
-from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.context_input import ContextInput
-from iota_sdk.types.mana import ManaAllotment
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
 
