@@ -55,7 +55,6 @@ pub struct InputSelection {
     automatically_transitioned: HashSet<ChainId>,
     min_mana_allotment: Option<MinManaAllotment>,
     mana_allotments: BTreeMap<AccountId, u64>,
-    allotment_debt: u64,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
     allow_additional_input_selection: bool,
@@ -68,6 +67,7 @@ pub struct InputSelection {
 pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
     reference_mana_cost: u64,
+    allotment_debt: u64,
 }
 
 impl InputSelection {
@@ -119,7 +119,6 @@ impl InputSelection {
             automatically_transitioned: HashSet::new(),
             min_mana_allotment: None,
             mana_allotments: Default::default(),
-            allotment_debt: 0,
             mana_rewards: Default::default(),
             allow_additional_input_selection: true,
             transaction_capabilities: Default::default(),
@@ -128,13 +127,24 @@ impl InputSelection {
     }
 
     fn init(&mut self) -> Result<(), Error> {
-        // Automatic mana allotment must be done last, if needed
-        if self.min_mana_allotment.is_some() {
+        // If automatic min mana allotment is enabled, we need to push that requirement last.
+        if let Some(MinManaAllotment {
+            issuer_id,
+            allotment_debt,
+            ..
+        }) = self.min_mana_allotment.as_mut()
+        {
             self.requirements.push(Requirement::Allotment);
+            // Add initial debt from any passed-in allotments
+            *allotment_debt = self.mana_allotments.get(issuer_id).copied().unwrap_or_default();
+            // If there was a fitting account output, we can check the mana first.
+            // Otherwise the allotment can mess up the mana calculation.
+            if self.reduce_account_output()? {
+                self.requirements.push(Requirement::Mana);
+            }
         }
         // Add initial requirements
         self.requirements.extend([
-            Requirement::Mana,
             Requirement::ContextInputs,
             Requirement::Amount,
             Requirement::NativeTokens,
@@ -300,7 +310,8 @@ impl InputSelection {
 
         self.selected_inputs.push(input);
 
-        if !matches!(self.requirements.last(), Some(Requirement::ContextInputs)) {
+        // New inputs/outputs may need context inputs
+        if !self.requirements.contains(&Requirement::ContextInputs) {
             self.requirements.push(Requirement::ContextInputs);
         }
 
@@ -366,6 +377,7 @@ impl InputSelection {
         self.min_mana_allotment.replace(MinManaAllotment {
             issuer_id: account_id,
             reference_mana_cost,
+            allotment_debt: 0,
         });
         self
     }

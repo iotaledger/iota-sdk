@@ -26,6 +26,7 @@ impl InputSelection {
         let MinManaAllotment {
             issuer_id,
             reference_mana_cost,
+            ..
         } = self
             .min_mana_allotment
             .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
@@ -68,47 +69,71 @@ impl InputSelection {
 
         let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
+        let MinManaAllotment {
+            issuer_id,
+            allotment_debt,
+            ..
+        } = self
+            .min_mana_allotment
+            .as_mut()
+            .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
+
         // Add the required allotment to the issuing allotment
-        log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
-        if required_allotment_mana > self.mana_allotments[&issuer_id] {
+        if required_allotment_mana > self.mana_allotments[issuer_id] {
+            log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
             let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
             log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
             // Unwrap: safe because we always add the record above
-            *self.mana_allotments.get_mut(&issuer_id).unwrap() = required_allotment_mana;
+            *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
+            log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
+            *allotment_debt += additional_allotment;
+        } else {
+            log::debug!("Setting allotment debt to {}", self.mana_allotments[issuer_id]);
+            *allotment_debt = self.mana_allotments[issuer_id];
+        }
 
-            if let Some(output) = self
-                .outputs
-                .iter_mut()
-                .filter(|o| o.is_account() && o.mana() != 0)
-                .find(|o| *o.as_account().account_id() == issuer_id)
-            {
-                log::debug!(
-                    "Reducing account mana of {} by {} for allotment",
-                    output.as_account().account_id(),
-                    additional_allotment + self.allotment_debt
-                );
-                *output = AccountOutputBuilder::from(output.as_account())
-                    .with_mana(output.mana().saturating_sub(additional_allotment + self.allotment_debt))
-                    .finish_output()?;
-                self.allotment_debt = 0;
-            } else {
-                log::debug!("Adding {additional_allotment} to allotment debt");
-                self.allotment_debt += additional_allotment;
-            }
+        self.reduce_account_output()?;
 
-            log::debug!("Allotment debt: {}", self.allotment_debt);
-
-            log::debug!("Checking mana requirement again with added allotment");
-            let additional_inputs = self.fulfill_mana_requirement()?;
-            // If we needed more inputs to cover the additional allotment mana
-            // then re-add this requirement so we try again
-            if !additional_inputs.is_empty() {
-                self.requirements.push(Requirement::Allotment);
-                return Ok(additional_inputs);
-            }
+        let additional_inputs = self.fulfill_mana_requirement()?;
+        // If we needed more inputs to cover the additional allotment mana
+        // then re-add this requirement so we try again
+        if !additional_inputs.is_empty() {
+            self.requirements.push(Requirement::Allotment);
+            return Ok(additional_inputs);
         }
 
         Ok(Vec::new())
+    }
+
+    pub(crate) fn reduce_account_output(&mut self) -> Result<bool, Error> {
+        let MinManaAllotment {
+            issuer_id,
+            allotment_debt,
+            ..
+        } = self
+            .min_mana_allotment
+            .as_mut()
+            .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
+        if let Some(output) = self
+            .outputs
+            .iter_mut()
+            .filter(|o| o.is_account() && o.mana() != 0)
+            .find(|o| o.as_account().account_id() == issuer_id)
+        {
+            log::debug!(
+                "Reducing account mana of {} by {} for allotment",
+                output.as_account().account_id(),
+                allotment_debt
+            );
+            let output_mana = output.mana();
+            *output = AccountOutputBuilder::from(output.as_account())
+                .with_mana(output_mana.saturating_sub(*allotment_debt))
+                .finish_output()?;
+            *allotment_debt = allotment_debt.saturating_sub(output_mana);
+            log::debug!("Allotment debt after reduction: {}", allotment_debt);
+            return Ok(true);
+        }
+        Ok(false)
     }
 
     pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, Error> {
