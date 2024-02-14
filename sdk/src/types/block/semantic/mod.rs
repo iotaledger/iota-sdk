@@ -117,8 +117,8 @@ impl<'a> SemanticValidationContext<'a> {
         let bic_context_inputs = self
             .transaction
             .context_inputs()
-            .iter()
-            .filter_map(|c| c.as_block_issuance_credit_opt().map(|bic| *bic.account_id()))
+            .block_issuance_credits()
+            .map(|bic| *bic.account_id())
             .collect::<HashSet<_>>();
 
         for reward_context_input in self.transaction.context_inputs().rewards() {
