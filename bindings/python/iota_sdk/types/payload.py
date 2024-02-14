@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-import dacite
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Optional, List, Union
+import dacite
 from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
@@ -155,9 +155,8 @@ class TaggedDataPayload(Payload):
     def __post_init__(self):
         if self.type != int(
                 PayloadType.TaggedData):
-            return dacite.UnionMatchError("invalid TaggedDataPayload type")
-        self.type = int(
-            PayloadType.TaggedData)
+            return dacite.UnionMatchError("invalid TaggedDataPayload type", self)
+        return self
 
 
 @dataclass
