@@ -1723,7 +1723,7 @@ fn automatic_allot_account_mana() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_auto_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 500)
     .select()
     .unwrap();
 
@@ -1798,7 +1798,7 @@ fn automatic_allot_account_mana_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_auto_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 500)
     .with_mana_allotments(Some((account_id_1, additional_allotment)))
     .select()
     .unwrap();
@@ -1863,7 +1863,7 @@ fn automatic_allot_account_mana_cannot_select_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_auto_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 500)
     .with_mana_allotments(Some((account_id_1, additional_allotment)))
     .with_required_inputs([*inputs[0].output_id()])
     .disable_additional_input_selection()

@@ -15,22 +15,26 @@ impl InputSelection {
         let mut needs_commitment_context = false;
 
         for (idx, input) in self.selected_inputs.iter().enumerate() {
-            // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
-            if let Output::Account(account) = &input.output {
-                if account.features().block_issuer().is_some() {
-                    log::debug!("Adding block issuance context input for transitioned account output");
-                    self.context_inputs.insert(
-                        BlockIssuanceCreditContextInput::from(account.account_id_non_null(input.output_id())).into(),
-                    );
+            match &input.output {
+                // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
+                Output::Account(account) => {
+                    if account.features().block_issuer().is_some() {
+                        log::debug!("Adding block issuance context input for transitioned account output");
+                        self.context_inputs.insert(
+                            BlockIssuanceCreditContextInput::from(account.account_id_non_null(input.output_id()))
+                                .into(),
+                        );
+                    }
                 }
-            }
-            // Transitioning an implicit account requires a BlockIssuanceCreditContextInput.
-            if let Output::Basic(implicit_account) = &input.output {
-                if implicit_account.is_implicit_account() {
-                    log::debug!("Adding block issuance context input for transitioned implicit account output");
-                    self.context_inputs
-                        .insert(BlockIssuanceCreditContextInput::from(AccountId::from(input.output_id())).into());
+                // Transitioning an implicit account requires a BlockIssuanceCreditContextInput.
+                Output::Basic(basic) => {
+                    if basic.is_implicit_account() {
+                        log::debug!("Adding block issuance context input for transitioned implicit account output");
+                        self.context_inputs
+                            .insert(BlockIssuanceCreditContextInput::from(AccountId::from(input.output_id())).into());
+                    }
                 }
+                _ => (),
             }
 
             // Inputs with timelock or expiration unlock condition require a CommitmentContextInput

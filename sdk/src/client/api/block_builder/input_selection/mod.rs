@@ -53,7 +53,7 @@ pub struct InputSelection {
     latest_slot_commitment_id: SlotCommitmentId,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
-    auto_mana_allotment: Option<AutoManaAllotment>,
+    min_mana_allotment: Option<MinManaAllotment>,
     mana_allotments: BTreeMap<AccountId, u64>,
     required_allotment_mana: u64,
     mana_rewards: HashMap<OutputId, u64>,
@@ -65,7 +65,7 @@ pub struct InputSelection {
 
 /// Account and RMC for automatic mana allotment
 #[derive(Copy, Clone, Debug)]
-pub(crate) struct AutoManaAllotment {
+pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
     reference_mana_cost: u64,
 }
@@ -117,7 +117,7 @@ impl InputSelection {
             latest_slot_commitment_id,
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
-            auto_mana_allotment: None,
+            min_mana_allotment: None,
             mana_allotments: Default::default(),
             required_allotment_mana: 0,
             mana_rewards: Default::default(),
@@ -129,7 +129,7 @@ impl InputSelection {
 
     fn init(&mut self) -> Result<(), Error> {
         // Automatic mana allotment must be done last, if needed
-        if self.auto_mana_allotment.is_some() {
+        if self.min_mana_allotment.is_some() {
             self.requirements.push(Requirement::Allotment);
         }
         // Add initial requirements
@@ -357,19 +357,22 @@ impl InputSelection {
         self
     }
 
-    pub fn with_auto_mana_allotment(mut self, account_id: AccountId, reference_mana_cost: u64) -> Self {
-        self.auto_mana_allotment.replace(AutoManaAllotment {
+    /// Specifies an account to which the minimum required mana allotment will be added.
+    pub fn with_min_mana_allotment(mut self, account_id: AccountId, reference_mana_cost: u64) -> Self {
+        self.min_mana_allotment.replace(MinManaAllotment {
             issuer_id: account_id,
             reference_mana_cost,
         });
         self
     }
 
+    /// Disables selecting additional inputs.
     pub fn disable_additional_input_selection(mut self) -> Self {
         self.allow_additional_input_selection = false;
         self
     }
 
+    /// Sets the transaction capabilities.
     pub fn with_transaction_capabilities(
         mut self,
         transaction_capabilities: impl Into<TransactionCapabilities>,

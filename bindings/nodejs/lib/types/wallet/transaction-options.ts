@@ -35,7 +35,7 @@ export interface TransactionOptions {
     /** Transaction capabilities. */
     capabilities?: HexEncodedString;
     /** Mana allotments for the transaction. */
-    manaAllotments?: ManaAllotment[];
+    manaAllotments?: { [account_id: AccountId]: u64 };
     /** Optional block issuer to which the transaction will have required mana allotted. */
     issuerId?: AccountId;
 }

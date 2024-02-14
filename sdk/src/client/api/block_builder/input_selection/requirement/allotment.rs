@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use super::{Error, InputSelection};
 use crate::{
     client::{
-        api::input_selection::{AutoManaAllotment, Requirement},
+        api::input_selection::{MinManaAllotment, Requirement},
         secret::types::InputSigningData,
     },
     types::block::{
@@ -23,11 +23,11 @@ use crate::{
 
 impl InputSelection {
     pub(crate) fn fulfill_allotment_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
-        let AutoManaAllotment {
+        let MinManaAllotment {
             issuer_id,
             reference_mana_cost,
         } = self
-            .auto_mana_allotment
+            .min_mana_allotment
             .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
 
         self.selected_inputs = Self::sort_input_signing_data(

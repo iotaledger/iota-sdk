@@ -91,8 +91,8 @@ class TransactionOptions:
                  allow_micro_amount: Optional[bool] = None,
                  allow_additional_input_selection: Optional[bool] = None,
                  capabilities: Optional[HexStr] = None,
-                 mana_allotments: Optional[ManaAllotment] = None,
-                 issuer_id: Optional[AccountAddress] = None):
+                 mana_allotments: dict[HexStr, int] = {},
+                 issuer_id: Optional[HexStr] = None):
         """Initialize transaction options.
         """
         self.remainder_value_strategy = remainder_value_strategy

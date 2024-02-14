@@ -38,7 +38,7 @@ where
             ))?;
         }
 
-        let prepared_transaction_data = self.select_inputs(outputs, options.clone()).await?;
+        let prepared_transaction_data = self.select_inputs(outputs, options).await?;
 
         log::debug!(
             "[TRANSACTION] finished prepare_transaction in {:.2?}",
