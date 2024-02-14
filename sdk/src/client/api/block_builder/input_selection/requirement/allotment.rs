@@ -37,62 +37,64 @@ impl InputSelection {
             self.protocol_parameters.committable_age_range(),
         )?;
 
-        let mut inputs = Vec::new();
-        for input in &self.selected_inputs {
-            inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+        if !self.selected_inputs.is_empty() {
+            let mut inputs = Vec::new();
+            for input in &self.selected_inputs {
+                inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+            }
+
+            let mut builder = Transaction::builder(self.protocol_parameters.network_id())
+                .with_inputs(inputs)
+                .with_outputs(self.outputs.clone());
+
+            if let Some(payload) = &self.payload {
+                builder = builder.with_payload(payload.clone());
+            }
+
+            // Add the empty allotment so the work score includes it
+            self.mana_allotments.entry(issuer_id).or_default();
+
+            let transaction = builder
+                .with_context_inputs(self.context_inputs.clone())
+                .with_mana_allotments(
+                    self.mana_allotments
+                        .iter()
+                        .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
+                )
+                .finish_with_params(&self.protocol_parameters)?;
+
+            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
+
+            let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
+                + self.protocol_parameters.work_score_parameters().block();
+
+            let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
+
+            let MinManaAllotment {
+                issuer_id,
+                allotment_debt,
+                ..
+            } = self
+                .min_mana_allotment
+                .as_mut()
+                .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
+
+            // Add the required allotment to the issuing allotment
+            if required_allotment_mana > self.mana_allotments[issuer_id] {
+                log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
+                let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
+                log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
+                // Unwrap: safe because we always add the record above
+                *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
+                log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
+                *allotment_debt += additional_allotment;
+            } else {
+                log::debug!("Setting allotment debt to {}", self.mana_allotments[issuer_id]);
+                *allotment_debt = self.mana_allotments[issuer_id];
+            }
+
+            self.reduce_account_output()?;
         }
-
-        let mut builder = Transaction::builder(self.protocol_parameters.network_id())
-            .with_inputs(inputs)
-            .with_outputs(self.outputs.clone());
-
-        if let Some(payload) = &self.payload {
-            builder = builder.with_payload(payload.clone());
-        }
-
-        // Add the empty allotment so the work score includes it
-        self.mana_allotments.entry(issuer_id).or_default();
-
-        let transaction = builder
-            .with_context_inputs(self.context_inputs.clone())
-            .with_mana_allotments(
-                self.mana_allotments
-                    .iter()
-                    .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
-            )
-            .finish_with_params(&self.protocol_parameters)?;
-
-        let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
-
-        let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
-            + self.protocol_parameters.work_score_parameters().block();
-
-        let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
-
-        let MinManaAllotment {
-            issuer_id,
-            allotment_debt,
-            ..
-        } = self
-            .min_mana_allotment
-            .as_mut()
-            .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
-
-        // Add the required allotment to the issuing allotment
-        if required_allotment_mana > self.mana_allotments[issuer_id] {
-            log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
-            let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
-            log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
-            // Unwrap: safe because we always add the record above
-            *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
-            log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
-            *allotment_debt += additional_allotment;
-        } else {
-            log::debug!("Setting allotment debt to {}", self.mana_allotments[issuer_id]);
-            *allotment_debt = self.mana_allotments[issuer_id];
-        }
-
-        self.reduce_account_output()?;
 
         let additional_inputs = self.fulfill_mana_requirement()?;
         // If we needed more inputs to cover the additional allotment mana
