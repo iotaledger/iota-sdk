@@ -1685,7 +1685,7 @@ fn remainder_address_in_state_controller() {
 }
 
 #[test]
-fn automatic_allot_account_mana() {
+fn min_allot_account_mana() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1743,7 +1743,7 @@ fn automatic_allot_account_mana() {
 }
 
 #[test]
-fn automatic_allot_account_mana_additional() {
+fn min_allot_account_mana_additional() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1818,7 +1818,7 @@ fn automatic_allot_account_mana_additional() {
 }
 
 #[test]
-fn automatic_allot_account_mana_cannot_select_additional() {
+fn min_allot_account_mana_cannot_select_additional() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1872,7 +1872,7 @@ fn automatic_allot_account_mana_cannot_select_additional() {
 }
 
 #[test]
-fn automatic_allot_account_mana_requirement_twice() {
+fn min_allot_account_mana_requirement_twice() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
