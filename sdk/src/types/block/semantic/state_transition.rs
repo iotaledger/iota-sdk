@@ -127,8 +127,7 @@ impl BasicOutput {
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
         } else {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::BlockIssuerNotExpired);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
