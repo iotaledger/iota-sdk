@@ -66,18 +66,15 @@ impl InputSelection {
         let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
             + self.protocol_parameters.work_score_parameters().block();
 
-        self.required_allotment_mana = block_work_score as u64 * reference_mana_cost;
+        let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
         // Add the required allotment to the issuing allotment
-        log::debug!(
-            "Allotting at least {} mana to account ID {issuer_id}",
-            self.required_allotment_mana
-        );
-        if self.mana_allotments[&issuer_id] < self.required_allotment_mana {
-            let additional_allotment = self.required_allotment_mana - self.mana_allotments[&issuer_id];
+        log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
+        if required_allotment_mana > self.mana_allotments[&issuer_id] {
+            let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
             log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
             // Unwrap: safe because we always add the record above
-            *self.mana_allotments.get_mut(&issuer_id).unwrap() = self.required_allotment_mana;
+            *self.mana_allotments.get_mut(&issuer_id).unwrap() = required_allotment_mana;
 
             if let Some(output) = self
                 .outputs
@@ -86,13 +83,20 @@ impl InputSelection {
                 .find(|o| *o.as_account().account_id() == issuer_id)
             {
                 log::debug!(
-                    "Reducing account mana of {} by {additional_allotment} for allotment",
-                    output.as_account().account_id()
+                    "Reducing account mana of {} by {} for allotment",
+                    output.as_account().account_id(),
+                    additional_allotment + self.allotment_debt
                 );
                 *output = AccountOutputBuilder::from(output.as_account())
-                    .with_mana(output.mana().saturating_sub(additional_allotment))
+                    .with_mana(output.mana().saturating_sub(additional_allotment + self.allotment_debt))
                     .finish_output()?;
+                self.allotment_debt = 0;
+            } else {
+                log::debug!("Adding {additional_allotment} to allotment debt");
+                self.allotment_debt += additional_allotment;
             }
+
+            log::debug!("Allotment debt: {}", self.allotment_debt);
 
             log::debug!("Checking mana requirement again with added allotment");
             let additional_inputs = self.fulfill_mana_requirement()?;

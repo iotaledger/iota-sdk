@@ -7,12 +7,9 @@ use super::{
 };
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::{
-        context_input::BlockIssuanceCreditContextInput,
-        output::{
-            AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput,
-            NftOutputBuilder, Output, OutputId,
-        },
+    types::block::output::{
+        AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
+        Output, OutputId,
     },
 };
 
@@ -58,12 +55,20 @@ impl InputSelection {
         // Remove potential sender feature because it will not be needed anymore as it only needs to be verified once.
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
-        let output = AccountOutputBuilder::from(input)
-            .with_mana(0)
+        let mut builder = AccountOutputBuilder::from(input)
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
-            .with_features(features)
-            .finish_output()?;
+            .with_features(features);
+
+        if input.is_block_issuer() {
+            builder = builder.with_mana(Output::from(input.clone()).available_mana(
+                &self.protocol_parameters,
+                output_id.transaction_id().slot_index(),
+                self.creation_slot,
+            )?)
+        }
+
+        let output = builder.finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(account_id));
 
