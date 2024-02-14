@@ -153,10 +153,9 @@ class TaggedDataPayload(Payload):
         init=True)
 
     def __post_init__(self):
-        if self.type != int(
-                PayloadType.TaggedData):
-            return dacite.UnionMatchError("invalid TaggedDataPayload type", self)
-        return self
+        if self.type != PayloadType.TaggedData:
+            raise dacite.UnionMatchError(
+                "invalid TaggedDataPayload type", self)
 
 
 @dataclass
