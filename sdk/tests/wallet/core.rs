@@ -30,7 +30,7 @@ async fn update_client_options() -> Result<()> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
-    let mut wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
@@ -173,7 +173,7 @@ async fn update_node_auth() -> Result<()> {
     let storage_path = "test-storage/update_node_auth";
     setup(storage_path)?;
 
-    let mut wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_auth = iota_sdk::client::node_manager::node::NodeAuth {
         jwt: Some("jwt".to_string()),

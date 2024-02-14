@@ -39,7 +39,7 @@ async fn create_wallet() -> Result<()> {
             ]
          }"#;
 
-    let mut wallet = WalletOptions::default()
+    let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
         .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
