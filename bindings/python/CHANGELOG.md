@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.1.4 - 2024-05-02
 
+### Changed
+
+- Made the type of `TaggedDataPayload` required as first field in `__init__()`;
+
 ### Fixed
 
 - Made `TaggedDataPayload::{tag, data}` optional;
@@ -33,10 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Utils::{verify_transaction_syntax(), block_bytes(), block_hash_without_nonce()}`;
 - `NodeInfoProtocol.belowMaxDepth`;
 - `{NodeInfoProtocol, RentStructure}::as_dict()`;
-
-### Changed
-
-- Made the type of `TaggedDataPayload` required as first field in `__init__()`;
 
 ### Fixed
 
