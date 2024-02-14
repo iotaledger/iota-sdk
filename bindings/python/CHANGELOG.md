@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `TransactionOptions::as_dict()` for remainder_value_strategy;
 - Made `TaggedDataPayload::{tag, data}` optional;
 
 ## 1.1.2 - 2023-12-01

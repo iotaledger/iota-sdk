@@ -21,6 +21,9 @@ def _call_method_routine(func):
                 to_dict_method = getattr(o, "to_dict", None)
                 if callable(to_dict_method):
                     return o.to_dict()
+                as_dict_method = getattr(o, "as_dict", None)
+                if callable(as_dict_method):
+                    return o.as_dict()
                 if isinstance(o, str):
                     return o
                 if isinstance(o, Enum):
