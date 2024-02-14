@@ -1,8 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { u64 } from '../..';
-import { IdWithSlotIndex } from '../id';
+import { HexEncodedString, u64 } from '../..';
 
 /**
  * Timeline is divided into slots, and each slot has a corresponding slot index.
@@ -22,7 +21,7 @@ type EpochIndex = number;
 /**
  * Identifier of a slot commitment
  */
-class SlotCommitmentId extends IdWithSlotIndex {}
+type SlotCommitmentId = HexEncodedString;
 
 /**
  * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
