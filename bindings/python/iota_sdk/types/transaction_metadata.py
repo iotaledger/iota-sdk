@@ -25,7 +25,6 @@ class TransactionFailureReason(Enum):
     """Represents the possible reasons for a failing transaction.
     """
     Null = 0
-    TypeInvalid = 1
     Conflicting = 2
     InputAlreadySpent = 3
     InputCreationAfterTxCreation = 4
@@ -94,7 +93,6 @@ class TransactionFailureReason(Enum):
     def __str__(self):
         return {
             0: "Null.",
-            1: "Transaction type is invalid.",
             2: "Transaction is conflicting.",
             3: "Input already spent.",
             4: "Input creation slot after tx creation slot.",
