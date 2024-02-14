@@ -148,7 +148,7 @@ class TransactionFailureReason(Enum):
             52: "Invalid delegation mana rewards claiming.",
             53: "Delegation output attempted to be transitioned twice.",
             54: "Delegated amount, validator ID and start epoch cannot be modified.",
-            55: "Invalid start epoch.",
+            55: "Delegation output has invalid start epoch.",
             56: "Delegated amount does not match amount.",
             57: "End epoch must be set to zero at output genesis.",
             58: "Delegation end epoch does not match current epoch.",

@@ -204,7 +204,7 @@ impl fmt::Display for TransactionFailureReason {
                 write!(f, "delegation output attempted to be transitioned twice.")
             }
             Self::DelegationModified => write!(f, "delegated amount, validator ID and start epoch cannot be modified."),
-            Self::DelegationStartEpochInvalid => write!(f, "invalid start epoch."),
+            Self::DelegationStartEpochInvalid => write!(f, "delegation output has invalid start epoch."),
             Self::DelegationAmountMismatch => write!(f, "delegated amount does not match amount."),
             Self::DelegationEndEpochNotZero => write!(f, "end epoch must be set to zero at output genesis."),
             Self::DelegationEndEpochInvalid => write!(f, "delegation end epoch does not match current epoch."),

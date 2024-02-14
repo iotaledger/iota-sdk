@@ -185,7 +185,7 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.DelegationModified]:
         'Delegated amount, validator ID and start epoch cannot be modified.',
     [TransactionFailureReason.DelegationStartEpochInvalid]:
-        'Invalid start epoch.',
+        'Delegation output has invalid start epoch.',
     [TransactionFailureReason.DelegationAmountMismatch]:
         'Delegated amount does not match amount.',
     [TransactionFailureReason.DelegationEndEpochNotZero]:
