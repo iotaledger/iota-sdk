@@ -44,3 +44,11 @@ def test_block():
     assert block.as_dict() == block_dict
     assert isinstance(block.payload, Payload)
     assert block.payload.type == PayloadType.Milestone
+
+    # with tx payload and tagged data payload where the data is optional
+    block_dict = {"protocolVersion": 2, "parents": ["0x0882f56f6aa18a473c1104aaa6df5260ccf0b4b7a013763c44f231ebdd23a3c7", "0x1b26789153a9f1d5e139498f18e4cb2b7e31b67f6ddbec1053f49ce5034cdac4", "0x25ac8b75c5b14f13875dafb4de92b5256dd9c7fd73576eacc99740bd90413f62", "0xd36066423f2b225c9b9566794ea2ed25331afee340ea045271a1dd1d28f87b92"], "payload": {"type": 6, "essence": {"type": 1, "networkId": "7784367046153662236", "inputs": [{"type": 0, "transactionId": "0x9649d1ce9177435ee8fd3234267d7f1c82a858d3d36994379c495be864fdb223", "transactionOutputIndex": 0}], "inputsCommitment": "0xbeb2d535e60610e4284dd8de2046b695ed820519b8d7bea1b4e87859e01a4613", "outputs": [{"type": 3, "amount": "1000000000", "unlockConditions": [
+        {"type": 0, "address": {"type": 0, "pubKeyHash": "0x7258772f96283ebcc91997805a0b4acc98c83d3d0bb1bc919e31974bb6cea9a2"}}]}, {"type": 3, "amount": "288098760415811743", "unlockConditions": [{"type": 0, "address": {"type": 0, "pubKeyHash": "0x77c2f4cdd686cc9e7667ff66977fc9e7687866a3a97745917cf786ba13a4124c"}}]}], "payload": {"type": 5}}, "unlocks": [{"type": 0, "signature": {"type": 0, "publicKey": "0xbae586465c574fcc9339ee0baae32bbabede7fab87b94f150c6bd38afd76abbe", "signature": "0x1c208a3afe0a5cb1045c0a4d2a5ae003ea56c9bed06128c60bde7e07266314ecd8bbfba22ecbba04e4f2e436d50d699b402537aef65a586149e6ae4d8be1fe0a"}}]}, "nonce": "1673315"}
+    block = Block.from_dict(block_dict)
+    assert block.as_dict() == block_dict
+    assert isinstance(block.payload, Payload)
+    assert block.payload.type == PayloadType.Transaction

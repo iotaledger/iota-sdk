@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any, Optional, List, Union
+import dacite
 from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
@@ -140,15 +141,21 @@ class TaggedDataPayload(Payload):
     """A tagged data payload.
 
     Attributes:
+        type: The type of the tagged data payload, must be 5.
         tag: The tag part of the tagged data payload.
         data: The data part of the tagged data payload.
     """
-    tag: HexStr
-    data: HexStr
+    tag: Optional[HexStr] = None
+    data: Optional[HexStr] = None
     type: int = field(
         default_factory=lambda: int(
             PayloadType.TaggedData),
-        init=False)
+        init=True)
+
+    def __post_init__(self):
+        if self.type != PayloadType.TaggedData:
+            raise dacite.UnionMatchError(
+                "invalid TaggedDataPayload type", self)
 
 
 @dataclass
