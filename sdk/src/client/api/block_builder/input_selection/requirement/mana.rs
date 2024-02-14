@@ -8,6 +8,8 @@ impl InputSelection {
     pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
         let (mut selected_mana, required_mana) = self.mana_sums()?;
 
+        log::debug!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
+
         if selected_mana >= required_mana {
             log::debug!("Mana requirement already fulfilled");
             Ok(Vec::new())

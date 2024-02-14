@@ -1,6 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeMap;
+use std::collections::HashMap;
+
 use crypto::keys::bip44::Bip44;
 
 use super::{
@@ -12,8 +15,9 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder,
-            NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, StorageScoreParameters,
+            unlock_condition::AddressUnlockCondition, AccountOutput, AccountOutputBuilder, AnchorOutput,
+            AnchorOutputBuilder, BasicOutput, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutput,
+            NftOutputBuilder, Output, StorageScoreParameters,
         },
         Error as BlockError,
     },
@@ -126,17 +130,26 @@ impl InputSelection {
 
         // If there is a mana remainder, try to fit it in an existing output
         if input_mana > output_mana {
-            if let Some(output) = self
+            // Establish the order in which we want to pick an output
+            let sort_order = HashMap::from([
+                (AccountOutput::KIND, 1),
+                (BasicOutput::KIND, 2),
+                (NftOutput::KIND, 3),
+                (AnchorOutput::KIND, 4),
+            ]);
+            // Remove those that do not have an ordering and sort
+            let ordered_outputs = self
                 .outputs
                 .iter_mut()
-                .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
-                .find(|o| {
-                    matches!(o.required_address(
-                        self.creation_slot,
-                        self.protocol_parameters.committable_age_range(),
-                    ), Ok(Some(address)) if address == remainder_address)
-                })
-            {
+                .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
+                .collect::<BTreeMap<_, _>>();
+            // Find the first value that matches the remainder address
+            if let Some(output) = ordered_outputs.into_values().find(|o| {
+                matches!(o.required_address(
+                    self.creation_slot,
+                    self.protocol_parameters.committable_age_range(),
+                ), Ok(Some(address)) if address == remainder_address)
+            }) {
                 log::debug!("Adding {mana_diff} excess input mana to output with address {remainder_address}");
                 let new_mana = output.mana() + std::mem::take(&mut mana_diff);
                 *output = match output {
