@@ -91,7 +91,7 @@ class TransactionOptions:
                  allow_micro_amount: Optional[bool] = None,
                  allow_additional_input_selection: Optional[bool] = None,
                  capabilities: Optional[HexStr] = None,
-                 mana_allotments: dict[HexStr, int] = {},
+                 mana_allotments: Optional[dict[HexStr, int]] = None,
                  issuer_id: Optional[HexStr] = None):
         """Initialize transaction options.
         """
