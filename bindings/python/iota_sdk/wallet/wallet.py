@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 from iota_sdk.types.address import AccountAddress
+from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.wallet.account import Account, _call_method_routine
 from iota_sdk.wallet.sync_options import SyncOptions
 
@@ -21,7 +22,8 @@ class Wallet():
 
     def __init__(self,
                  storage_path: Optional[str] = None,
-                 client_options: Optional[Dict[str, Any]] = None,
+                 client_options: Optional[Union[Dict[str,
+                                                     Any], ClientOptions]] = None,
                  coin_type: Optional[int] = None,
                  secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None):
         """Initialize `self`.
@@ -30,7 +32,10 @@ class Wallet():
         # Setup the options
         options: Dict[str, Any] = {'storagePath': storage_path}
         if client_options:
-            options['clientOptions'] = client_options.as_dict()
+            if isinstance(client_options, ClientOptions):
+                options['clientOptions'] = client_options.as_dict()
+            else:
+                options['clientOptions'] = client_options
         if coin_type:
             options['coinType'] = coin_type
         if secret_manager:
