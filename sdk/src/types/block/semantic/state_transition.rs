@@ -118,8 +118,7 @@ impl BasicOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if next_state.account_id().is_null() {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::ImplicitAccountDestructionDisallowed);
         }
 
         if let Some(_block_issuer) = next_state.features().block_issuer() {
