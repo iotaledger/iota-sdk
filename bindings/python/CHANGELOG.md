@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NodeInfoProtocol.belowMaxDepth`;
 - `{NodeInfoProtocol, RentStructure}::as_dict()`;
 
+### Fixed
+
+- `TransactionOptions::as_dict()` for remainder_value_strategy;
+
 ## 1.1.2 - 2023-12-01
 
 ### Added
