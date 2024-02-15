@@ -96,7 +96,7 @@ class TransactionFailureReason(Enum):
     def __str__(self):
         return {
             0: "Null.",
-            1: "Transaction is conflicting.",
+            1: "Transaction was conflicting and was rejected.",
             2: "Input already spent.",
             3: "Input creation slot after tx creation slot.",
             4: "Signature in unlock is invalid.",
