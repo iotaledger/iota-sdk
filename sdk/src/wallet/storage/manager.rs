@@ -51,15 +51,15 @@ impl StorageManager {
     }
 
     pub(crate) async fn load_wallet_address(&self) -> crate::wallet::Result<Option<Bech32Address>> {
-        Ok(self.get::<Bech32Address>(WALLET_ADDRESS_KEY).await?)
+        self.get::<Bech32Address>(WALLET_ADDRESS_KEY).await
     }
 
     pub(crate) async fn load_wallet_bip_path(&self) -> crate::wallet::Result<Option<Bip44>> {
-        Ok(self.get::<Bip44>(WALLET_BIP_PATH_KEY).await?)
+        self.get::<Bip44>(WALLET_BIP_PATH_KEY).await
     }
 
     pub(crate) async fn load_wallet_alias(&self) -> crate::wallet::Result<Option<String>> {
-        Ok(self.get::<String>(WALLET_ALIAS_KEY).await?)
+        self.get::<String>(WALLET_ALIAS_KEY).await
     }
 
     pub(crate) async fn load_wallet_ledger(&self) -> crate::wallet::Result<Option<WalletLedger>> {
@@ -148,43 +148,49 @@ mod tests {
     #[tokio::test]
     async fn save_load_wallet() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        assert!(storage_manager.load_wallet_address().await.unwrap().is_none());
+        assert!(storage_manager.load_wallet_bip_path().await.unwrap().is_none());
+        assert!(storage_manager.load_wallet_alias().await.unwrap().is_none());
         assert!(storage_manager.load_wallet_ledger().await.unwrap().is_none());
 
         let wallet_address = Bech32Address::new("rms".parse().unwrap(), Ed25519Address::null());
         let wallet_bip_path = Some(Bip44::new(SHIMMER_COIN_TYPE));
         let wallet_alias = Some("savings".to_string());
-        let wallet_ledger = WalletLedgerDto::from(&WalletLedger::non_empty_test_instance());
+        let wallet_ledger = WalletLedger::non_empty_test_instance();
 
         storage_manager
             .save_wallet(
                 &wallet_address,
                 wallet_bip_path.as_ref(),
                 wallet_alias.as_ref(),
-                &wallet_ledger,
+                &WalletLedgerDto::from(&wallet_ledger),
             )
             .await
             .unwrap();
-        assert!(storage_manager.load_wallet_ledger().await.unwrap().is_some());
+
+        assert_eq!(
+            storage_manager.load_wallet_address().await.unwrap(),
+            Some(wallet_address)
+        );
+        assert_eq!(storage_manager.load_wallet_bip_path().await.unwrap(), wallet_bip_path);
+        assert_eq!(storage_manager.load_wallet_alias().await.unwrap(), wallet_alias);
+        assert_eq!(storage_manager.load_wallet_ledger().await.unwrap(), Some(wallet_ledger));
     }
 
     #[tokio::test]
     async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_none());
 
         let wallet_builder = WalletBuilder::<SecretManager>::new();
         wallet_builder.save(&storage_manager).await.unwrap();
 
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_some()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_some());
     }
 }

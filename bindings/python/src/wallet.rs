@@ -47,7 +47,7 @@ pub fn create_wallet(options: String) -> Result<Wallet> {
 pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
     let method = serde_json::from_str::<WalletMethod>(&method)?;
     let response = crate::block_on(async {
-        match wallet.wallet.write().await.as_mut() {
+        match wallet.wallet.read().await.as_ref() {
             Some(wallet) => rust_call_wallet_method(wallet, method).await,
             None => Response::Panic("wallet was destroyed".into()),
         }

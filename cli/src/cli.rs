@@ -317,8 +317,8 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                 }
             }
             CliCommand::SetNodeUrl { url } => {
-                if let Some((mut wallet, _)) = wallet_and_secret_manager {
-                    set_node_url_command(&mut wallet, url).await?;
+                if let Some((wallet, _)) = wallet_and_secret_manager {
+                    set_node_url_command(&wallet, url).await?;
                     Some(wallet)
                 } else {
                     return Err(Error::Miscellaneous(format!(
@@ -517,7 +517,7 @@ pub async fn restore_command_stronghold(
     }
 }
 
-pub async fn set_node_url_command(wallet: &mut Wallet, url: String) -> Result<(), Error> {
+pub async fn set_node_url_command(wallet: &Wallet, url: String) -> Result<(), Error> {
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
 
     Ok(())
