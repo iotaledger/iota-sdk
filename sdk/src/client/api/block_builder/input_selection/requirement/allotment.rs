@@ -33,31 +33,26 @@ impl InputSelection {
             return self.fulfill_mana_requirement();
         };
 
-        // Remainders can only be calculated when the input mana is >= the output mana
-        let (input_mana, output_mana) = self.mana_sums(false)?;
-        if input_mana >= output_mana {
-            // Update remainders so the transaction is valid
-            self.update_remainders()?;
-        }
-
-        self.selected_inputs = Self::sort_input_signing_data(
-            std::mem::take(&mut self.selected_inputs),
-            self.creation_slot,
-            self.protocol_parameters.committable_age_range(),
-        )?;
-
         if !self.selected_inputs.is_empty() {
+            // Remainders can only be calculated when the input mana is >= the output mana
+            let (input_mana, output_mana) = self.mana_sums(false)?;
+            if input_mana >= output_mana {
+                // Update remainders so the transaction is valid
+                self.update_remainders()?;
+            }
+
+            self.selected_inputs = Self::sort_input_signing_data(
+                std::mem::take(&mut self.selected_inputs),
+                self.creation_slot,
+                self.protocol_parameters.committable_age_range(),
+            )?;
+
             let inputs = self
                 .selected_inputs
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
 
-            let outputs = self
-                .outputs
-                .iter()
-                .chain(self.remainders.data.iter().map(|r| &r.output))
-                .chain(&self.remainders.storage_deposit_returns)
-                .cloned();
+            let outputs = self.all_outputs().cloned();
 
             let mut builder = Transaction::builder(self.protocol_parameters.network_id())
                 .with_inputs(inputs)
@@ -139,8 +134,9 @@ impl InputSelection {
             .as_mut()
             .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
         if let Some(output) = self
-            .outputs
+            .provided_outputs
             .iter_mut()
+            .chain(&mut self.added_outputs)
             .filter(|o| o.is_account() && o.mana() != 0)
             .find(|o| o.as_account().account_id() == issuer_id)
         {

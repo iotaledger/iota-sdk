@@ -9,9 +9,7 @@ use crypto::keys::bip44::Bip44;
 use super::{Error, InputSelection};
 use crate::{
     client::api::{
-        input_selection::requirement::native_tokens::{
-            get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff,
-        },
+        input_selection::requirement::native_tokens::{get_native_tokens, get_native_tokens_diff},
         RemainderData,
     },
     types::block::{
@@ -74,9 +72,8 @@ impl InputSelection {
 
     pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), Error> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.outputs.iter())?;
-        let (minted_native_tokens, melted_native_tokens) =
-            get_minted_and_melted_native_tokens(&self.selected_inputs, self.outputs.as_slice())?;
+        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
+        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
         input_native_tokens.merge(minted_native_tokens)?;
         output_native_tokens.merge(melted_native_tokens)?;
@@ -114,9 +111,8 @@ impl InputSelection {
         }
 
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.outputs.iter())?;
-        let (minted_native_tokens, melted_native_tokens) =
-            get_minted_and_melted_native_tokens(&self.selected_inputs, &self.outputs)?;
+        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
+        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
         input_native_tokens.merge(minted_native_tokens)?;
         output_native_tokens.merge(melted_native_tokens)?;
@@ -172,8 +168,10 @@ impl InputSelection {
 
     fn output_for_added_mana_exists(&self, remainder_address: &Address) -> bool {
         // Find the first value that matches the remainder address
-        self.outputs.iter().any(|o| {
+        self.added_outputs.iter().any(|o| {
             (o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
+                && o.unlock_conditions()
+                    .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
                 && matches!(o.required_address(
                     self.latest_slot_commitment_id.slot_index(),
                     self.protocol_parameters.committable_age_range(),
@@ -191,8 +189,12 @@ impl InputSelection {
         ]);
         // Remove those that do not have an ordering and sort
         let ordered_outputs = self
-            .outputs
+            .added_outputs
             .iter_mut()
+            .filter(|o| {
+                o.unlock_conditions()
+                    .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
+            })
             .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
             .collect::<BTreeMap<_, _>>();
         // Find the first value that matches the remainder address

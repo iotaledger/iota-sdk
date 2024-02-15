@@ -48,7 +48,8 @@ pub struct InputSelection {
     forbidden_inputs: HashSet<OutputId>,
     selected_inputs: Vec<InputSigningData>,
     context_inputs: HashSet<ContextInput>,
-    outputs: Vec<Output>,
+    provided_outputs: Vec<Output>,
+    added_outputs: Vec<Output>,
     addresses: HashSet<Address>,
     burn: Option<Burn>,
     remainders: Remainders,
@@ -119,7 +120,8 @@ impl InputSelection {
             forbidden_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
             context_inputs: HashSet::new(),
-            outputs: outputs.into_iter().collect(),
+            provided_outputs: outputs.into_iter().collect(),
+            added_outputs: Vec::new(),
             addresses,
             burn: None,
             remainders: Default::default(),
@@ -199,13 +201,13 @@ impl InputSelection {
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<PreparedTransactionData, Error> {
-        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
+        if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
-            if !(self.outputs.is_empty()
+            if !(self.provided_outputs.is_empty()
                 && (self.burn.is_some() || !self.mana_allotments.is_empty() || !self.required_inputs.is_empty()))
             {
-                return Err(Error::InvalidOutputCount(self.outputs.len()));
+                return Err(Error::InvalidOutputCount(self.provided_outputs.len()));
             }
         }
 
@@ -242,10 +244,6 @@ impl InputSelection {
             return Err(Error::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        self.outputs.extend(self.remainders.storage_deposit_returns.drain(..));
-        self.outputs
-            .extend(self.remainders.data.iter().map(|r| r.output.clone()));
-
         if self.remainders.added_mana > 0 {
             let remainder_address = self
                 .get_remainder_address()?
@@ -265,12 +263,19 @@ impl InputSelection {
             }
         }
 
+        let outputs = self
+            .added_outputs
+            .into_iter()
+            .chain(self.remainders.storage_deposit_returns)
+            .chain(self.remainders.data.iter().map(|r| r.output.clone()))
+            .collect::<Vec<_>>();
+
         // Check again, because more outputs may have been added.
-        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            return Err(Error::InvalidOutputCount(self.outputs.len()));
+        if !OUTPUT_COUNT_RANGE.contains(&(outputs.len() as u16)) {
+            return Err(Error::InvalidOutputCount(outputs.len()));
         }
 
-        self.validate_transitions()?;
+        Self::validate_transitions(&self.selected_inputs, &outputs)?;
 
         for output_id in self.mana_rewards.keys() {
             if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
@@ -300,7 +305,7 @@ impl InputSelection {
 
         let mut builder = Transaction::builder(self.protocol_parameters.network_id())
             .with_inputs(inputs)
-            .with_outputs(self.outputs)
+            .with_outputs(outputs)
             .with_mana_allotments(mana_allotments)
             .with_context_inputs(self.context_inputs)
             .with_creation_slot(self.creation_slot)
@@ -329,7 +334,7 @@ impl InputSelection {
             // - the issuer feature doesn't need to be verified as the chain is not new
             // - input doesn't need to be checked for as we just transitioned it
             // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
-            self.outputs.push(output);
+            self.added_outputs.push(output);
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
@@ -424,6 +429,16 @@ impl InputSelection {
     ) -> Self {
         self.transaction_capabilities = transaction_capabilities.into();
         self
+    }
+
+    pub(crate) fn all_outputs(&self) -> impl Iterator<Item = &Output> {
+        self.non_remainder_outputs()
+            .chain(self.remainders.data.iter().map(|r| &r.output))
+            .chain(&self.remainders.storage_deposit_returns)
+    }
+
+    pub(crate) fn non_remainder_outputs(&self) -> impl Iterator<Item = &Output> {
+        self.provided_outputs.iter().chain(&self.added_outputs)
     }
 
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
@@ -608,7 +623,7 @@ impl InputSelection {
         Ok(sorted_inputs)
     }
 
-    fn validate_transitions(&self) -> Result<(), Error> {
+    fn validate_transitions(inputs: &[InputSigningData], outputs: &[Output]) -> Result<(), Error> {
         let mut input_native_tokens_builder = NativeTokensBuilder::new();
         let mut output_native_tokens_builder = NativeTokensBuilder::new();
         let mut input_accounts = Vec::new();
@@ -616,7 +631,7 @@ impl InputSelection {
         let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
 
-        for input in &self.selected_inputs {
+        for input in inputs {
             if let Some(native_token) = input.output.native_token() {
                 input_native_tokens_builder.add_native_token(*native_token)?;
             }
@@ -640,14 +655,14 @@ impl InputSelection {
             }
         }
 
-        for output in self.outputs.iter() {
+        for output in outputs {
             if let Some(native_token) = output.native_token() {
                 output_native_tokens_builder.add_native_token(*native_token)?;
             }
         }
 
         // Validate utxo chain transitions
-        for output in self.outputs.iter() {
+        for output in outputs {
             match output {
                 Output::Account(account_output) => {
                     // Null id outputs are just minted and can't be a transition
@@ -666,7 +681,7 @@ impl InputSelection {
                                 account,
                                 account_output,
                                 &input_chains_foundries,
-                                &self.outputs,
+                                outputs,
                             ) {
                                 log::debug!("validate_transitions error {err:?}");
                                 return Err(Error::UnfulfillableRequirement(Requirement::Account(

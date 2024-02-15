@@ -82,7 +82,7 @@ impl InputSelection {
     pub(crate) fn outputs_requirements(&mut self) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
 
-        for output in &self.outputs {
+        for output in self.provided_outputs.iter().chain(&self.added_outputs) {
             let is_created = match output {
                 // Add an account requirement if the account output is transitioning and then required in the inputs.
                 Output::Account(account_output) => {
@@ -169,8 +169,7 @@ impl InputSelection {
         if let Some(burn) = self.burn.as_ref() {
             for account_id in &burn.accounts {
                 if self
-                    .outputs
-                    .iter()
+                    .non_remainder_outputs()
                     .any(|output| is_account_with_id_non_null(output, account_id))
                 {
                     return Err(Error::BurnAndTransition(ChainId::from(*account_id)));
@@ -182,7 +181,10 @@ impl InputSelection {
             }
 
             for foundry_id in &burn.foundries {
-                if self.outputs.iter().any(|output| is_foundry_with_id(output, foundry_id)) {
+                if self
+                    .non_remainder_outputs()
+                    .any(|output| is_foundry_with_id(output, foundry_id))
+                {
                     return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
                 }
 
@@ -193,8 +195,7 @@ impl InputSelection {
 
             for nft_id in &burn.nfts {
                 if self
-                    .outputs
-                    .iter()
+                    .non_remainder_outputs()
                     .any(|output| is_nft_with_id_non_null(output, nft_id))
                 {
                     return Err(Error::BurnAndTransition(ChainId::from(*nft_id)));
@@ -207,8 +208,7 @@ impl InputSelection {
 
             for delegation_id in &burn.delegations {
                 if self
-                    .outputs
-                    .iter()
+                    .non_remainder_outputs()
                     .any(|output| is_delegation_with_id_non_null(output, delegation_id))
                 {
                     return Err(Error::BurnAndTransition(ChainId::from(*delegation_id)));

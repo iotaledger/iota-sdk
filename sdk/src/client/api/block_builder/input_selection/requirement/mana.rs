@@ -38,15 +38,9 @@ impl InputSelection {
 
     pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {
         let required_mana = if include_remainders {
-            self.outputs
-                .iter()
-                .chain(self.remainders.data.iter().map(|r| &r.output))
-                .chain(&self.remainders.storage_deposit_returns)
-                .map(|o| o.mana())
-                .sum::<u64>()
-                + self.remainders.added_mana
+            self.all_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana
         } else {
-            self.outputs.iter().map(|o| o.mana()).sum::<u64>()
+            self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>()
         } + self.mana_allotments.values().sum::<u64>();
         let mut selected_mana = 0;
 

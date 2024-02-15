@@ -53,7 +53,12 @@ impl InputSelection {
                 needs_commitment_context = true;
             }
         }
-        for output in self.outputs.iter_mut().filter(|o| o.is_delegation()) {
+        for output in self
+            .provided_outputs
+            .iter_mut()
+            .chain(&mut self.added_outputs)
+            .filter(|o| o.is_delegation())
+        {
             // Created delegations have their start epoch set, and delayed delegations have their end set
             if output.as_delegation().delegation_id().is_null() {
                 let start_epoch = self

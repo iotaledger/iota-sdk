@@ -50,7 +50,7 @@ impl InputSelection {
             }
         }
 
-        for output in &self.outputs {
+        for output in self.all_outputs() {
             outputs_sum += output.amount();
 
             if let Output::Basic(output) = output {
@@ -247,13 +247,17 @@ impl InputSelection {
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
         // Only consider automatically transitioned outputs.
-        let outputs = self.outputs.iter_mut().filter(|output| {
-            output
-                .chain_id()
-                .as_ref()
-                .map(|chain_id| self.automatically_transitioned.contains(chain_id))
-                .unwrap_or(false)
-        });
+        let outputs = self
+            .provided_outputs
+            .iter_mut()
+            .chain(&mut self.added_outputs)
+            .filter(|output| {
+                output
+                    .chain_id()
+                    .as_ref()
+                    .map(|chain_id| self.automatically_transitioned.contains(chain_id))
+                    .unwrap_or(false)
+            });
 
         for output in outputs {
             let diff = amount_selection.missing_amount();
