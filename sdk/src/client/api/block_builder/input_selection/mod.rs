@@ -28,8 +28,8 @@ use crate::{
         input::{Input, UtxoInput, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
-            AccountId, AccountOutput, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, ChainId,
-            FoundryOutput, NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
+            AccountId, AccountOutput, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, FoundryOutput,
+            NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
             signed_transaction::{Transaction, TransactionCapabilities},
