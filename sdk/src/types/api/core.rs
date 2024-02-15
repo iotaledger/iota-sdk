@@ -370,8 +370,20 @@ pub enum TransactionState {
 }
 
 /// Describes the reason of a block failure.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, serde_repr::Serialize_repr, serde_repr::Deserialize_repr)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    PartialEq,
+    serde_repr::Serialize_repr,
+    serde_repr::Deserialize_repr,
+    strum::FromRepr,
+    strum::EnumString,
+    strum::AsRefStr,
+)]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum BlockFailureReason {
