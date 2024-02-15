@@ -3,7 +3,11 @@
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{address::Address, protocol::protocol_parameters, slot::SlotIndex},
+    types::block::{
+        address::Address,
+        protocol::protocol_parameters,
+        slot::{SlotCommitmentHash, SlotIndex},
+    },
 };
 use pretty_assertions::assert_eq;
 
@@ -45,6 +49,7 @@ fn one_output_timelock_not_expired() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select();
@@ -86,13 +91,14 @@ fn timelock_equal_timestamp() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         200,
+        SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -143,14 +149,15 @@ fn two_outputs_one_timelock_expired() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[1]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[1]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -201,14 +208,15 @@ fn two_outputs_one_timelocked_one_missing() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[1]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[1]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -245,11 +253,12 @@ fn one_output_timelock_expired() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }

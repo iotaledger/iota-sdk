@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! Input selection for transactions
@@ -9,6 +9,7 @@ pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
+use alloc::collections::BTreeMap;
 use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
@@ -17,17 +18,25 @@ use packable::PackableExt;
 use self::requirement::account::is_account_with_id;
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
-    client::{api::types::RemainderData, secret::types::InputSigningData},
+    client::{
+        api::{PreparedTransactionData, RemainderData},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::{AccountAddress, Address, NftAddress},
-        input::INPUT_COUNT_RANGE,
+        context_input::ContextInput,
+        input::{Input, UtxoInput, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
-            AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
+            AccountId, AccountOutput, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, FoundryOutput,
+            NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
-        payload::signed_transaction::TransactionCapabilities,
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilities},
+            TaggedDataPayload,
+        },
         protocol::{CommittableAgeRange, ProtocolParameters},
-        slot::SlotIndex,
+        slot::{SlotCommitmentId, SlotIndex},
     },
 };
 
@@ -38,80 +47,114 @@ pub struct InputSelection {
     required_inputs: HashSet<OutputId>,
     forbidden_inputs: HashSet<OutputId>,
     selected_inputs: Vec<InputSigningData>,
-    outputs: Vec<Output>,
+    context_inputs: HashSet<ContextInput>,
+    provided_outputs: Vec<Output>,
+    added_outputs: Vec<Output>,
     addresses: HashSet<Address>,
     burn: Option<Burn>,
-    remainder_address: Option<Address>,
-    protocol_parameters: ProtocolParameters,
-    slot_index: SlotIndex,
+    remainders: Remainders,
+    creation_slot: SlotIndex,
+    latest_slot_commitment_id: SlotCommitmentId,
     requirements: Vec<Requirement>,
-    automatically_transitioned: HashSet<ChainId>,
-    mana_allotments: u64,
+    min_mana_allotment: Option<MinManaAllotment>,
+    mana_allotments: BTreeMap<AccountId, u64>,
     mana_rewards: HashMap<OutputId, u64>,
+    payload: Option<TaggedDataPayload>,
+    allow_additional_input_selection: bool,
+    transaction_capabilities: TransactionCapabilities,
+    protocol_parameters: ProtocolParameters,
 }
 
-/// Result of the input selection algorithm.
-#[derive(Clone, Debug)]
-pub struct Selected {
-    /// Selected inputs.
-    pub inputs: Vec<InputSigningData>,
-    /// Provided and created outputs.
-    pub outputs: Vec<Output>,
-    /// Remainder outputs information.
-    pub remainders: Vec<RemainderData>,
-    /// Mana rewards by input.
-    pub mana_rewards: HashMap<OutputId, u64>,
+/// Account and RMC for automatic mana allotment
+#[derive(Copy, Clone, Debug)]
+pub(crate) struct MinManaAllotment {
+    issuer_id: AccountId,
+    reference_mana_cost: u64,
+    allotment_debt: u64,
+}
+
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Remainders {
+    address: Option<Address>,
+    data: Vec<RemainderData>,
+    storage_deposit_returns: Vec<Output>,
+    added_mana: u64,
 }
 
 impl InputSelection {
-    fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let required_address = input
-            .output
-            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
-            .expect("expiration unlockable outputs already filtered out");
+    /// Creates a new [`InputSelection`].
+    pub fn new(
+        available_inputs: impl IntoIterator<Item = InputSigningData>,
+        outputs: impl IntoIterator<Item = Output>,
+        addresses: impl IntoIterator<Item = Address>,
+        creation_slot_index: impl Into<SlotIndex>,
+        latest_slot_commitment_id: SlotCommitmentId,
+        protocol_parameters: ProtocolParameters,
+    ) -> Self {
+        let available_inputs = available_inputs.into_iter().collect::<Vec<_>>();
 
-        let required_address = if let Address::Restricted(restricted) = &required_address {
-            restricted.address()
-        } else {
-            &required_address
-        };
+        let mut addresses = HashSet::from_iter(addresses.into_iter().map(|a| {
+            // Get a potential Ed25519 address directly since we're only interested in that
+            #[allow(clippy::option_if_let_else)] // clippy's suggestion requires a clone
+            if let Some(address) = a.backing_ed25519() {
+                Address::Ed25519(*address)
+            } else {
+                a
+            }
+        }));
 
-        match required_address {
-            Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
-            Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
-            _ => Ok(None),
+        addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
+            Output::Account(output) => Some(Address::Account(AccountAddress::from(
+                output.account_id_non_null(input.output_id()),
+            ))),
+            Output::Nft(output) => Some(Address::Nft(NftAddress::from(
+                output.nft_id_non_null(input.output_id()),
+            ))),
+            _ => None,
+        }));
+
+        Self {
+            available_inputs,
+            required_inputs: HashSet::new(),
+            forbidden_inputs: HashSet::new(),
+            selected_inputs: Vec::new(),
+            context_inputs: HashSet::new(),
+            provided_outputs: outputs.into_iter().collect(),
+            added_outputs: Vec::new(),
+            addresses,
+            burn: None,
+            remainders: Default::default(),
+            creation_slot: creation_slot_index.into(),
+            latest_slot_commitment_id,
+            requirements: Vec::new(),
+            min_mana_allotment: None,
+            mana_allotments: Default::default(),
+            mana_rewards: Default::default(),
+            allow_additional_input_selection: true,
+            transaction_capabilities: Default::default(),
+            payload: None,
+            protocol_parameters,
         }
-    }
-
-    fn select_input(&mut self, input: InputSigningData) -> Result<(), Error> {
-        log::debug!("Selecting input {:?}", input.output_id());
-
-        if let Some(output) = self.transition_input(&input)? {
-            // No need to check for `outputs_requirements` because
-            // - the sender feature doesn't need to be verified as it has been removed
-            // - the issuer feature doesn't need to be verified as the chain is not new
-            // - input doesn't need to be checked for as we just transitioned it
-            // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
-            self.outputs.push(output);
-        }
-
-        if let Some(requirement) = self.required_account_nft_addresses(&input)? {
-            log::debug!("Adding {requirement:?} from input {:?}", input.output_id());
-            self.requirements.push(requirement);
-        }
-
-        self.selected_inputs.push(input);
-
-        Ok(())
     }
 
     fn init(&mut self) -> Result<(), Error> {
-        // Adds an initial mana requirement.
-        self.requirements.push(Requirement::Mana);
-        // Adds an initial amount requirement.
-        self.requirements.push(Requirement::Amount);
-        // Adds an initial native tokens requirement.
-        self.requirements.push(Requirement::NativeTokens);
+        // If automatic min mana allotment is enabled, we need to initialize the allotment debt.
+        if let Some(MinManaAllotment {
+            issuer_id,
+            allotment_debt,
+            ..
+        }) = self.min_mana_allotment.as_mut()
+        {
+            // Add initial debt from any passed-in allotments
+            *allotment_debt = self.mana_allotments.get(issuer_id).copied().unwrap_or_default();
+        }
+        // Add initial requirements
+        self.requirements.extend([
+            Requirement::Mana,
+            Requirement::ContextInputs,
+            Requirement::Amount,
+            Requirement::NativeTokens,
+        ]);
 
         // Removes forbidden inputs from available inputs.
         self.available_inputs
@@ -153,64 +196,176 @@ impl InputSelection {
         Ok(())
     }
 
-    /// Creates a new [`InputSelection`].
-    pub fn new(
-        available_inputs: impl Into<Vec<InputSigningData>>,
-        outputs: impl Into<Vec<Output>>,
-        addresses: impl IntoIterator<Item = Address>,
-        slot_index: impl Into<SlotIndex>,
-        protocol_parameters: ProtocolParameters,
-    ) -> Self {
-        let available_inputs = available_inputs.into();
-
-        let mut addresses = HashSet::from_iter(addresses.into_iter().map(|a| {
-            // Get a potential Ed25519 address directly since we're only interested in that
-            #[allow(clippy::option_if_let_else)] // clippy's suggestion requires a clone
-            if let Some(address) = a.backing_ed25519() {
-                Address::Ed25519(*address)
-            } else {
-                a
+    /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
+    /// transaction. Also creates a remainder output and chain transition outputs if required.
+    pub fn select(mut self) -> Result<PreparedTransactionData, Error> {
+        if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
+            // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
+            // create remainder outputs.
+            if !(self.provided_outputs.is_empty()
+                && (self.burn.is_some() || !self.mana_allotments.is_empty() || !self.required_inputs.is_empty()))
+            {
+                return Err(Error::InvalidOutputCount(self.provided_outputs.len()));
             }
-        }));
-
-        addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
-            Output::Account(output) => Some(Address::Account(AccountAddress::from(
-                output.account_id_non_null(input.output_id()),
-            ))),
-            Output::Nft(output) => Some(Address::Nft(NftAddress::from(
-                output.nft_id_non_null(input.output_id()),
-            ))),
-            _ => None,
-        }));
-
-        Self {
-            available_inputs,
-            required_inputs: HashSet::new(),
-            forbidden_inputs: HashSet::new(),
-            selected_inputs: Vec::new(),
-            outputs: outputs.into(),
-            addresses,
-            burn: None,
-            remainder_address: None,
-            protocol_parameters,
-            // Should be set from a commitment context input
-            slot_index: slot_index.into(),
-            requirements: Vec::new(),
-            automatically_transitioned: HashSet::new(),
-            mana_allotments: 0,
-            mana_rewards: Default::default(),
         }
+
+        self.filter_inputs();
+
+        if self.available_inputs.is_empty() {
+            return Err(Error::NoAvailableInputsProvided);
+        }
+
+        // Creates the initial state, selected inputs and requirements, based on the provided outputs.
+        self.init()?;
+
+        // Process all the requirements until there are no more.
+        while let Some(requirement) = self.requirements.pop() {
+            // Fulfill the requirement.
+            let inputs = self.fulfill_requirement(&requirement)?;
+
+            if !self.allow_additional_input_selection && !inputs.is_empty() {
+                return Err(Error::AdditionalInputsRequired(requirement));
+            }
+
+            // Select suggested inputs.
+            for input in inputs {
+                self.select_input(input)?;
+            }
+        }
+
+        // If there is no min allotment calculation, then we should update the remainders as the last step
+        if self.min_mana_allotment.is_none() {
+            self.update_remainders()?;
+        }
+
+        if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
+            return Err(Error::InvalidInputCount(self.selected_inputs.len()));
+        }
+
+        if self.remainders.added_mana > 0 {
+            let remainder_address = self
+                .get_remainder_address()?
+                .ok_or(Error::MissingInputWithEd25519Address)?
+                .0;
+            let added_mana = self.remainders.added_mana;
+            if let Some(output) = self.get_output_for_added_mana(&remainder_address) {
+                log::debug!("Adding {added_mana} excess input mana to output with address {remainder_address}");
+                let new_mana = output.mana() + added_mana;
+                *output = match output {
+                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
+                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
+                    _ => unreachable!(),
+                };
+            }
+        }
+
+        let outputs = self
+            .provided_outputs
+            .into_iter()
+            .chain(self.added_outputs)
+            .chain(self.remainders.storage_deposit_returns)
+            .chain(self.remainders.data.iter().map(|r| r.output.clone()))
+            .collect::<Vec<_>>();
+
+        // Check again, because more outputs may have been added.
+        if !OUTPUT_COUNT_RANGE.contains(&(outputs.len() as u16)) {
+            return Err(Error::InvalidOutputCount(outputs.len()));
+        }
+
+        Self::validate_transitions(&self.selected_inputs, &outputs)?;
+
+        for output_id in self.mana_rewards.keys() {
+            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
+                return Err(Error::ExtraManaRewards(*output_id));
+            }
+        }
+
+        let inputs_data = Self::sort_input_signing_data(
+            self.selected_inputs,
+            self.creation_slot,
+            self.protocol_parameters.committable_age_range(),
+        )?;
+
+        let mut inputs: Vec<Input> = Vec::new();
+
+        for input in &inputs_data {
+            inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+        }
+
+        let mana_allotments = self
+            .mana_allotments
+            .into_iter()
+            .map(|(account_id, mana)| ManaAllotment::new(account_id, mana))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        // Build transaction
+
+        let mut builder = Transaction::builder(self.protocol_parameters.network_id())
+            .with_inputs(inputs)
+            .with_outputs(outputs)
+            .with_mana_allotments(mana_allotments)
+            .with_context_inputs(self.context_inputs)
+            .with_creation_slot(self.creation_slot)
+            .with_capabilities(self.transaction_capabilities);
+
+        if let Some(payload) = self.payload {
+            builder = builder.with_payload(payload);
+        }
+
+        let transaction = builder.finish_with_params(&self.protocol_parameters)?;
+
+        Ok(PreparedTransactionData {
+            transaction,
+            inputs_data,
+            remainders: self.remainders.data,
+            mana_rewards: self.mana_rewards.into_iter().collect(),
+        })
+    }
+
+    fn select_input(&mut self, input: InputSigningData) -> Result<(), Error> {
+        log::debug!("Selecting input {:?}", input.output_id());
+
+        if let Some(output) = self.transition_input(&input)? {
+            // No need to check for `outputs_requirements` because
+            // - the sender feature doesn't need to be verified as it has been removed
+            // - the issuer feature doesn't need to be verified as the chain is not new
+            // - input doesn't need to be checked for as we just transitioned it
+            // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
+            self.added_outputs.push(output);
+        }
+
+        if let Some(requirement) = self.required_account_nft_addresses(&input)? {
+            log::debug!("Adding {requirement:?} from input {:?}", input.output_id());
+            self.requirements.push(requirement);
+        }
+
+        self.selected_inputs.push(input);
+
+        // New inputs/outputs may need context inputs
+        if !self.requirements.contains(&Requirement::ContextInputs) {
+            self.requirements.push(Requirement::ContextInputs);
+        }
+
+        Ok(())
     }
 
     /// Sets the required inputs of an [`InputSelection`].
-    pub fn with_required_inputs(mut self, inputs: impl Into<HashSet<OutputId>>) -> Self {
-        self.required_inputs = inputs.into();
+    pub fn with_required_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
+        self.required_inputs = inputs.into_iter().collect();
         self
     }
 
     /// Sets the forbidden inputs of an [`InputSelection`].
-    pub fn with_forbidden_inputs(mut self, inputs: HashSet<OutputId>) -> Self {
-        self.forbidden_inputs = inputs;
+    pub fn with_forbidden_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
+        self.forbidden_inputs = inputs.into_iter().collect();
+        self
+    }
+
+    /// Sets the context inputs of an [`InputSelection`].
+    pub fn with_context_inputs(mut self, context_inputs: impl IntoIterator<Item = ContextInput>) -> Self {
+        self.context_inputs = context_inputs.into_iter().collect();
         self
     }
 
@@ -222,13 +377,13 @@ impl InputSelection {
 
     /// Sets the remainder address of an [`InputSelection`].
     pub fn with_remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
-        self.remainder_address = address.into();
+        self.remainders.address = address.into();
         self
     }
 
-    /// Sets the mana allotments sum of an [`InputSelection`].
-    pub fn with_mana_allotments<'a>(mut self, mana_allotments: impl Iterator<Item = &'a ManaAllotment>) -> Self {
-        self.mana_allotments = mana_allotments.map(ManaAllotment::mana).sum();
+    /// Sets the mana allotments of an [`InputSelection`].
+    pub fn with_mana_allotments(mut self, mana_allotments: impl IntoIterator<Item = (AccountId, u64)>) -> Self {
+        self.mana_allotments = mana_allotments.into_iter().collect();
         self
     }
 
@@ -242,6 +397,69 @@ impl InputSelection {
     pub fn add_mana_rewards(mut self, input: OutputId, mana_rewards: u64) -> Self {
         self.mana_rewards.insert(input, mana_rewards);
         self
+    }
+
+    /// Add a transaction data payload.
+    pub fn with_payload(mut self, payload: impl Into<Option<TaggedDataPayload>>) -> Self {
+        self.payload = payload.into();
+        self
+    }
+
+    /// Specifies an account to which the minimum required mana allotment will be added.
+    pub fn with_min_mana_allotment(mut self, account_id: AccountId, reference_mana_cost: u64) -> Self {
+        self.min_mana_allotment.replace(MinManaAllotment {
+            issuer_id: account_id,
+            reference_mana_cost,
+            allotment_debt: 0,
+        });
+        self
+    }
+
+    /// Disables selecting additional inputs.
+    pub fn disable_additional_input_selection(mut self) -> Self {
+        self.allow_additional_input_selection = false;
+        self
+    }
+
+    /// Sets the transaction capabilities.
+    pub fn with_transaction_capabilities(
+        mut self,
+        transaction_capabilities: impl Into<TransactionCapabilities>,
+    ) -> Self {
+        self.transaction_capabilities = transaction_capabilities.into();
+        self
+    }
+
+    pub(crate) fn all_outputs(&self) -> impl Iterator<Item = &Output> {
+        self.non_remainder_outputs()
+            .chain(self.remainders.data.iter().map(|r| &r.output))
+            .chain(&self.remainders.storage_deposit_returns)
+    }
+
+    pub(crate) fn non_remainder_outputs(&self) -> impl Iterator<Item = &Output> {
+        self.provided_outputs.iter().chain(&self.added_outputs)
+    }
+
+    fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
+        let required_address = input
+            .output
+            .required_address(
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.committable_age_range(),
+            )?
+            .expect("expiration unlockable outputs already filtered out");
+
+        let required_address = if let Address::Restricted(restricted) = &required_address {
+            restricted.address()
+        } else {
+            &required_address
+        };
+
+        match required_address {
+            Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
+            Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
+            _ => Ok(None),
+        }
     }
 
     fn filter_inputs(&mut self) {
@@ -267,14 +485,20 @@ impl InputSelection {
             // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
-            if unlock_conditions.is_timelocked(self.slot_index, self.protocol_parameters.min_committable_age()) {
+            if unlock_conditions.is_timelocked(
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.min_committable_age(),
+            ) {
                 return false;
             }
 
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_address(self.slot_index, self.protocol_parameters.committable_age_range())
+                .required_address(
+                    self.latest_slot_commitment_id.slot_index(),
+                    self.protocol_parameters.committable_age_range(),
+                )
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap();
 
@@ -306,7 +530,7 @@ impl InputSelection {
     // Inputs need to be sorted before signing, because the reference unlock conditions can only reference a lower index
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
-        slot_index: SlotIndex,
+        commitment_slot_index: SlotIndex,
         committable_age_range: CommittableAgeRange,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
@@ -318,7 +542,7 @@ impl InputSelection {
             inputs.into_iter().partition(|input_signing_data| {
                 let required_address = input_signing_data
                     .output
-                    .required_address(slot_index, committable_age_range)
+                    .required_address(commitment_slot_index, committable_age_range)
                     // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                     .unwrap()
                     .expect("expiration unlockable outputs already filtered out");
@@ -329,7 +553,7 @@ impl InputSelection {
         for input in account_nft_address_inputs {
             let required_address = input
                 .output
-                .required_address(slot_index, committable_age_range)?
+                .required_address(commitment_slot_index, committable_age_range)?
                 .expect("expiration unlockable outputs already filtered out");
 
             match sorted_inputs
@@ -373,7 +597,7 @@ impl InputSelection {
                         match sorted_inputs.iter().position(|input_signing_data| {
                             let required_address = input_signing_data
                                 .output
-                                .required_address(slot_index, committable_age_range)
+                                .required_address(commitment_slot_index, committable_age_range)
                                 // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
                                 .unwrap()
                                 .expect("expiration unlockable outputs already filtered out");
@@ -398,74 +622,7 @@ impl InputSelection {
         Ok(sorted_inputs)
     }
 
-    /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
-    /// transaction. Also creates a remainder output and chain transition outputs if required.
-    pub fn select(mut self) -> Result<Selected, Error> {
-        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
-            // create remainder outputs.
-            if !(self.outputs.is_empty()
-                && (self.burn.is_some() || self.mana_allotments != 0 || !self.required_inputs.is_empty()))
-            {
-                return Err(Error::InvalidOutputCount(self.outputs.len()));
-            }
-        }
-
-        self.filter_inputs();
-
-        if self.available_inputs.is_empty() {
-            return Err(Error::NoAvailableInputsProvided);
-        }
-
-        // Creates the initial state, selected inputs and requirements, based on the provided outputs.
-        self.init()?;
-
-        // Process all the requirements until there are no more.
-        while let Some(requirement) = self.requirements.pop() {
-            // Fulfill the requirement.
-            let inputs = self.fulfill_requirement(requirement)?;
-
-            // Select suggested inputs.
-            for input in inputs {
-                self.select_input(input)?;
-            }
-        }
-
-        if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
-            return Err(Error::InvalidInputCount(self.selected_inputs.len()));
-        }
-
-        let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
-
-        self.outputs.extend(storage_deposit_returns);
-        self.outputs.extend(remainders.iter().map(|r| r.output.clone()));
-
-        // Check again, because more outputs may have been added.
-        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            return Err(Error::InvalidOutputCount(self.outputs.len()));
-        }
-
-        self.validate_transitions()?;
-
-        for output_id in self.mana_rewards.keys() {
-            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
-                return Err(Error::ExtraManaRewards(*output_id));
-            }
-        }
-
-        Ok(Selected {
-            inputs: Self::sort_input_signing_data(
-                self.selected_inputs,
-                self.slot_index,
-                self.protocol_parameters.committable_age_range(),
-            )?,
-            outputs: self.outputs,
-            remainders,
-            mana_rewards: self.mana_rewards,
-        })
-    }
-
-    fn validate_transitions(&self) -> Result<(), Error> {
+    fn validate_transitions(inputs: &[InputSigningData], outputs: &[Output]) -> Result<(), Error> {
         let mut input_native_tokens_builder = NativeTokensBuilder::new();
         let mut output_native_tokens_builder = NativeTokensBuilder::new();
         let mut input_accounts = Vec::new();
@@ -473,7 +630,7 @@ impl InputSelection {
         let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
 
-        for input in &self.selected_inputs {
+        for input in inputs {
             if let Some(native_token) = input.output.native_token() {
                 input_native_tokens_builder.add_native_token(*native_token)?;
             }
@@ -497,14 +654,14 @@ impl InputSelection {
             }
         }
 
-        for output in self.outputs.iter() {
+        for output in outputs {
             if let Some(native_token) = output.native_token() {
                 output_native_tokens_builder.add_native_token(*native_token)?;
             }
         }
 
         // Validate utxo chain transitions
-        for output in self.outputs.iter() {
+        for output in outputs {
             match output {
                 Output::Account(account_output) => {
                     // Null id outputs are just minted and can't be a transition
@@ -523,7 +680,7 @@ impl InputSelection {
                                 account,
                                 account_output,
                                 &input_chains_foundries,
-                                &self.outputs,
+                                outputs,
                             ) {
                                 log::debug!("validate_transitions error {err:?}");
                                 return Err(Error::UnfulfillableRequirement(Requirement::Account(

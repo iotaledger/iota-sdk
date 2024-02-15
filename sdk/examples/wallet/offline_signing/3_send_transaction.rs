@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
 
     // Sends offline signed transaction online.
     let transaction = wallet
-        .submit_and_store_transaction(signed_transaction_data, None, None)
+        .submit_and_store_transaction(signed_transaction_data, None)
         .await?;
     wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 

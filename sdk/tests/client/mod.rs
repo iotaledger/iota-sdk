@@ -36,7 +36,7 @@ use iota_sdk::{
             output::rand_output_metadata_with_id,
             transaction::{rand_transaction_id, rand_transaction_id_with_slot_index},
         },
-        slot::SlotIndex,
+        slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
     },
 };
 
@@ -59,6 +59,7 @@ const BECH32_ADDRESS_ACCOUNT_2: &str = "rms1pq3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3z
 const BECH32_ADDRESS_NFT_1: &str = "rms1zqg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zxddmy7"; // Corresponds to NFT_ID_1
 const _BECH32_ADDRESS_NFT_2: &str = "rms1zq3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zynm6ctf"; // Corresponds to NFT_ID_2
 const SLOT_INDEX: SlotIndex = SlotIndex(10);
+const SLOT_COMMITMENT_ID: SlotCommitmentId = SlotCommitmentHash::null().const_into_slot_commitment_id(SlotIndex(9));
 
 #[derive(Debug, Clone)]
 enum Build<'a> {

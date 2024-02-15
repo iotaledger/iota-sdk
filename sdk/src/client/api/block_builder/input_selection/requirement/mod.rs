@@ -1,8 +1,9 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
 pub(crate) mod amount;
+pub(crate) mod context_inputs;
 pub(crate) mod delegation;
 pub(crate) mod ed25519;
 pub(crate) mod foundry;
@@ -48,25 +49,28 @@ pub enum Requirement {
     Amount,
     /// Mana requirement.
     Mana,
+    /// Context inputs requirement.
+    ContextInputs,
 }
 
 impl InputSelection {
     /// Fulfills a requirement by selecting the appropriate available inputs.
     /// Returns the selected inputs and an optional new requirement.
-    pub(crate) fn fulfill_requirement(&mut self, requirement: Requirement) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_requirement(&mut self, requirement: &Requirement) -> Result<Vec<InputSigningData>, Error> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {
-            Requirement::Sender(address) => self.fulfill_sender_requirement(&address),
-            Requirement::Issuer(address) => self.fulfill_issuer_requirement(&address),
-            Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(&address),
-            Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
-            Requirement::Account(account_id) => self.fulfill_account_requirement(account_id),
-            Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
-            Requirement::Delegation(delegation_id) => self.fulfill_delegation_requirement(delegation_id),
+            Requirement::Sender(address) => self.fulfill_sender_requirement(address),
+            Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
+            Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
+            Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(*foundry_id),
+            Requirement::Account(account_id) => self.fulfill_account_requirement(*account_id),
+            Requirement::Nft(nft_id) => self.fulfill_nft_requirement(*nft_id),
+            Requirement::Delegation(delegation_id) => self.fulfill_delegation_requirement(*delegation_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
             Requirement::Mana => self.fulfill_mana_requirement(),
+            Requirement::ContextInputs => self.fulfill_context_inputs_requirement(),
         }
     }
 
@@ -74,7 +78,7 @@ impl InputSelection {
     pub(crate) fn outputs_requirements(&mut self) {
         let inputs = self.available_inputs.iter().chain(self.selected_inputs.iter());
 
-        for output in &self.outputs {
+        for output in self.provided_outputs.iter().chain(&self.added_outputs) {
             let is_created = match output {
                 // Add an account requirement if the account output is transitioning and then required in the inputs.
                 Output::Account(account_output) => {
@@ -161,8 +165,7 @@ impl InputSelection {
         if let Some(burn) = self.burn.as_ref() {
             for account_id in &burn.accounts {
                 if self
-                    .outputs
-                    .iter()
+                    .non_remainder_outputs()
                     .any(|output| is_account_with_id_non_null(output, account_id))
                 {
                     return Err(Error::BurnAndTransition(ChainId::from(*account_id)));
@@ -174,7 +177,10 @@ impl InputSelection {
             }
 
             for foundry_id in &burn.foundries {
-                if self.outputs.iter().any(|output| is_foundry_with_id(output, foundry_id)) {
+                if self
+                    .non_remainder_outputs()
+                    .any(|output| is_foundry_with_id(output, foundry_id))
+                {
                     return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
                 }
 
@@ -185,8 +191,7 @@ impl InputSelection {
 
             for nft_id in &burn.nfts {
                 if self
-                    .outputs
-                    .iter()
+                    .non_remainder_outputs()
                     .any(|output| is_nft_with_id_non_null(output, nft_id))
                 {
                     return Err(Error::BurnAndTransition(ChainId::from(*nft_id)));
@@ -199,8 +204,7 @@ impl InputSelection {
 
             for delegation_id in &burn.delegations {
                 if self
-                    .outputs
-                    .iter()
+                    .non_remainder_outputs()
                     .any(|output| is_delegation_with_id_non_null(output, delegation_id))
                 {
                     return Err(Error::BurnAndTransition(ChainId::from(*delegation_id)));
