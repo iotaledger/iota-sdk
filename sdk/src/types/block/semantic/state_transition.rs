@@ -161,6 +161,19 @@ impl StateTransitionVerifier for AccountOutput {
                 return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
             }
         }
+        if let Some(staking) = next_state.features().staking() {
+            let past_bounded_slot_index = context
+                .protocol_parameters
+                .past_bounded_slot(context.commitment_context_input.unwrap());
+            let past_bounded_epoch_index = context.protocol_parameters.epoch_index_of(past_bounded_slot_index);
+
+            if staking.start_epoch() != past_bounded_epoch_index {
+                return Err(TransactionFailureReason::StakingStartEpochInvalid);
+            }
+            if staking.end_epoch() < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period {
+                return Err(TransactionFailureReason::StakingEndEpochTooEarly);
+            }
+        }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
