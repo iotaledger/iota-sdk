@@ -50,7 +50,7 @@ impl InputSelection {
             }
         }
 
-        for output in self.all_outputs() {
+        for output in self.non_remainder_outputs() {
             outputs_sum += output.amount();
 
             if let Output::Basic(output) = output {
