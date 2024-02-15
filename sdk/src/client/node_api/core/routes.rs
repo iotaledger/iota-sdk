@@ -392,25 +392,27 @@ impl ClientInner {
 impl Client {
     /// GET /api/core/v3/info endpoint
     pub(crate) async fn get_permanode_info(node: &Node) -> Result<PermanodeInfoResponse> {
-        let mut url = node.url.clone();
+        let mut node = node.clone();
         if let Some(auth) = &node.auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
+                node.url
+                    .set_username(name)
                     .map_err(|_| crate::client::Error::UrlAuth("username"))?;
-                url.set_password(Some(password))
+                node.url
+                    .set_password(Some(password))
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
 
-        if url.path().ends_with('/') {
-            url.set_path(&format!("{}{}", url.path(), INFO_PATH));
+        if node.url.path().ends_with('/') {
+            node.url.set_path(&format!("{}{}", node.url.path(), INFO_PATH));
         } else {
-            url.set_path(&format!("{}/{}", url.path(), INFO_PATH));
+            node.url.set_path(&format!("{}/{}", node.url.path(), INFO_PATH));
         }
 
         let resp: PermanodeInfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
-                .get(node, DEFAULT_API_TIMEOUT)
+                .get(&node, DEFAULT_API_TIMEOUT)
                 .await?
                 .into_json()
                 .await?;
