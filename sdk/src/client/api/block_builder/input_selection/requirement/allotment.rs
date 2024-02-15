@@ -23,13 +23,23 @@ use crate::{
 
 impl InputSelection {
     pub(crate) fn fulfill_allotment_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
-        let MinManaAllotment {
+        let Some(MinManaAllotment {
             issuer_id,
             reference_mana_cost,
             ..
-        } = self
-            .min_mana_allotment
-            .ok_or(Error::UnfulfillableRequirement(Requirement::Allotment))?;
+        }) = self.min_mana_allotment
+        else {
+            let res = self.fulfill_mana_requirement()?;
+            self.update_remainders()?;
+            return Ok(res);
+        };
+
+        // Remainders can only be calculated when the input mana is >= the output mana
+        let (input_mana, output_mana) = self.mana_sums(false)?;
+        if input_mana >= output_mana {
+            // Update remainders so the transaction is valid
+            self.update_remainders()?;
+        }
 
         self.selected_inputs = Self::sort_input_signing_data(
             std::mem::take(&mut self.selected_inputs),
@@ -38,14 +48,21 @@ impl InputSelection {
         )?;
 
         if !self.selected_inputs.is_empty() {
-            let mut inputs = Vec::new();
-            for input in &self.selected_inputs {
-                inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
-            }
+            let inputs = self
+                .selected_inputs
+                .iter()
+                .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
+
+            let outputs = self
+                .outputs
+                .iter()
+                .chain(self.remainders.data.iter().map(|r| &r.output))
+                .chain(&self.remainders.storage_deposit_returns)
+                .cloned();
 
             let mut builder = Transaction::builder(self.protocol_parameters.network_id())
                 .with_inputs(inputs)
-                .with_outputs(self.outputs.clone());
+                .with_outputs(outputs);
 
             if let Some(payload) = &self.payload {
                 builder = builder.with_payload(payload.clone());
@@ -96,9 +113,15 @@ impl InputSelection {
             self.reduce_account_output()?;
         }
 
+        // Remainders can only be calculated when the input mana is >= the output mana
+        let (input_mana, output_mana) = self.mana_sums(false)?;
+        if input_mana >= output_mana {
+            self.update_remainders()?;
+        }
+
         let additional_inputs = self.fulfill_mana_requirement()?;
         // If we needed more inputs to cover the additional allotment mana
-        // then re-add this requirement so we try again
+        // then update remainders and re-run this requirement
         if !additional_inputs.is_empty() {
             self.requirements.push(Requirement::Allotment);
             return Ok(additional_inputs);
@@ -107,7 +130,7 @@ impl InputSelection {
         Ok(Vec::new())
     }
 
-    pub(crate) fn reduce_account_output(&mut self) -> Result<bool, Error> {
+    pub(crate) fn reduce_account_output(&mut self) -> Result<(), Error> {
         let MinManaAllotment {
             issuer_id,
             allotment_debt,
@@ -133,9 +156,8 @@ impl InputSelection {
                 .finish_output()?;
             *allotment_debt = allotment_debt.saturating_sub(output_mana);
             log::debug!("Allotment debt after reduction: {}", allotment_debt);
-            return Ok(true);
         }
-        Ok(false)
+        Ok(())
     }
 
     pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, Error> {
@@ -147,7 +169,10 @@ impl InputSelection {
             // Get the address that is required to unlock the input
             let required_address = input
                 .output
-                .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
+                .required_address(
+                    self.latest_slot_commitment_id.slot_index(),
+                    self.protocol_parameters.committable_age_range(),
+                )?
                 .expect("expiration deadzone");
 
             // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in

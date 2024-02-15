@@ -6,7 +6,7 @@ use crate::client::secret::types::InputSigningData;
 
 impl InputSelection {
     pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
-        let (mut selected_mana, required_mana) = self.mana_sums()?;
+        let (mut selected_mana, required_mana) = self.mana_sums(true)?;
 
         log::debug!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
 
@@ -36,9 +36,18 @@ impl InputSelection {
         }
     }
 
-    pub(crate) fn mana_sums(&self) -> Result<(u64, u64), Error> {
-        let required_mana =
-            self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
+    pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {
+        let required_mana = if include_remainders {
+            self.outputs
+                .iter()
+                .chain(self.remainders.data.iter().map(|r| &r.output))
+                .chain(&self.remainders.storage_deposit_returns)
+                .map(|o| o.mana())
+                .sum::<u64>()
+                + self.remainders.added_mana
+        } else {
+            self.outputs.iter().map(|o| o.mana()).sum::<u64>()
+        } + self.mana_allotments.values().sum::<u64>();
         let mut selected_mana = 0;
 
         for input in &self.selected_inputs {

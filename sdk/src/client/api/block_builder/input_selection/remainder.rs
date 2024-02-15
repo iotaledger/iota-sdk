@@ -6,32 +6,46 @@ use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
 
-use super::{
-    requirement::native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
-    Error, InputSelection,
-};
+use super::{Error, InputSelection};
 use crate::{
-    client::api::RemainderData,
+    client::api::{
+        input_selection::requirement::native_tokens::{
+            get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff,
+        },
+        RemainderData,
+    },
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutput, AccountOutputBuilder, AnchorOutput,
-            AnchorOutputBuilder, BasicOutput, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutput,
-            NftOutputBuilder, Output, StorageScoreParameters,
+            unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
+            NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
         },
         Error as BlockError,
     },
 };
 
 impl InputSelection {
-    // Gets the remainder address from configuration of finds one from the inputs.
+    /// Updates the remainders, overwriting old values.
+    pub(crate) fn update_remainders(&mut self) -> Result<(), Error> {
+        let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
+
+        self.remainders.storage_deposit_returns = storage_deposit_returns;
+        self.remainders.data = remainders;
+
+        Ok(())
+    }
+
+    /// Gets the remainder address from configuration of finds one from the inputs.
     pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
-        if let Some(remainder_address) = &self.remainder_address {
+        if let Some(remainder_address) = &self.remainders.address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
                 let required_address = input
                     .output
-                    .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
+                    .required_address(
+                        self.latest_slot_commitment_id.slot_index(),
+                        self.protocol_parameters.committable_age_range(),
+                    )?
                     .expect("expiration unlockable outputs already filtered out");
 
                 if &required_address == remainder_address {
@@ -44,7 +58,10 @@ impl InputSelection {
         for input in &self.selected_inputs {
             let required_address = input
                 .output
-                .required_address(self.creation_slot, self.protocol_parameters.committable_age_range())?
+                .required_address(
+                    self.latest_slot_commitment_id.slot_index(),
+                    self.protocol_parameters.committable_age_range(),
+                )?
                 .expect("expiration unlockable outputs already filtered out");
 
             if let Some(&required_address) = required_address.backing_ed25519() {
@@ -110,7 +127,7 @@ impl InputSelection {
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
-        let (input_mana, output_mana) = self.mana_sums()?;
+        let (input_mana, output_mana) = self.mana_sums(false)?;
 
         if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
@@ -124,41 +141,15 @@ impl InputSelection {
             .checked_sub(output_mana)
             .ok_or(BlockError::ConsumedManaOverflow)?;
 
-        let Some((remainder_address, chain)) = self.get_remainder_address()? else {
-            return Err(Error::MissingInputWithEd25519Address);
-        };
+        let (remainder_address, chain) = self
+            .get_remainder_address()?
+            .ok_or(Error::MissingInputWithEd25519Address)?;
 
         // If there is a mana remainder, try to fit it in an existing output
         if input_mana > output_mana {
-            // Establish the order in which we want to pick an output
-            let sort_order = HashMap::from([
-                (AccountOutput::KIND, 1),
-                (BasicOutput::KIND, 2),
-                (NftOutput::KIND, 3),
-                (AnchorOutput::KIND, 4),
-            ]);
-            // Remove those that do not have an ordering and sort
-            let ordered_outputs = self
-                .outputs
-                .iter_mut()
-                .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
-                .collect::<BTreeMap<_, _>>();
-            // Find the first value that matches the remainder address
-            if let Some(output) = ordered_outputs.into_values().find(|o| {
-                matches!(o.required_address(
-                    self.creation_slot,
-                    self.protocol_parameters.committable_age_range(),
-                ), Ok(Some(address)) if address == remainder_address)
-            }) {
-                log::debug!("Adding {mana_diff} excess input mana to output with address {remainder_address}");
-                let new_mana = output.mana() + std::mem::take(&mut mana_diff);
-                *output = match output {
-                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
-                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
-                    _ => unreachable!(),
-                };
+            if self.output_for_added_mana_exists(&remainder_address) {
+                log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
+                self.remainders.added_mana = std::mem::take(&mut mana_diff);
                 // If we have no other remainders, we are done
                 if input_amount == output_amount && native_tokens_diff.is_none() {
                     log::debug!("No more remainder required");
@@ -177,6 +168,40 @@ impl InputSelection {
         )?;
 
         Ok((storage_deposit_returns, remainder_outputs))
+    }
+
+    fn output_for_added_mana_exists(&self, remainder_address: &Address) -> bool {
+        // Find the first value that matches the remainder address
+        self.outputs.iter().any(|o| {
+            (o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
+                && matches!(o.required_address(
+                    self.latest_slot_commitment_id.slot_index(),
+                    self.protocol_parameters.committable_age_range(),
+                ), Ok(Some(address)) if &address == remainder_address)
+        })
+    }
+
+    pub(crate) fn get_output_for_added_mana(&mut self, remainder_address: &Address) -> Option<&mut Output> {
+        // Establish the order in which we want to pick an output
+        let sort_order = HashMap::from([
+            (AccountOutput::KIND, 1),
+            (BasicOutput::KIND, 2),
+            (NftOutput::KIND, 3),
+            (AnchorOutput::KIND, 4),
+        ]);
+        // Remove those that do not have an ordering and sort
+        let ordered_outputs = self
+            .outputs
+            .iter_mut()
+            .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
+            .collect::<BTreeMap<_, _>>();
+        // Find the first value that matches the remainder address
+        ordered_outputs.into_values().find(|o| {
+            matches!(o.required_address(
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.committable_age_range(),
+            ), Ok(Some(address)) if &address == remainder_address)
+        })
     }
 
     /// Calculates the required amount for required remainder outputs (multiple outputs are required if multiple native
@@ -205,23 +230,14 @@ impl InputSelection {
             remainder_builder.finish_output()?.amount()
         };
 
-        let (selected_mana, required_mana) = self.mana_sums()?;
+        let (selected_mana, required_mana) = self.mana_sums(false)?;
 
         let remainder_address = self.get_remainder_address()?.map(|v| v.0);
 
         // Mana can potentially be added to an appropriate existing output instead of a new remainder output
         let mana_remainder = selected_mana > required_mana
             && remainder_address.map_or(true, |remainder_address| {
-                self.outputs
-                    .iter()
-                    .filter(|o| o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
-                    .find(|o| {
-                        matches!(o.required_address(
-                        self.creation_slot,
-                        self.protocol_parameters.committable_age_range(),
-                ), Ok(Some(address)) if address == remainder_address)
-                    })
-                    .is_none()
+                !self.output_for_added_mana_exists(&remainder_address)
             });
 
         Ok((remainder_amount, native_tokens_remainder, mana_remainder))
