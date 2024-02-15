@@ -254,7 +254,30 @@ impl StateTransitionVerifier for AccountOutput {
                     return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
                 }
             }
-            (Some(_staking_input), Some(_staking_output)) => {}
+            (Some(staking_input), Some(staking_output)) => {
+                let past_bounded_slot_index = context
+                    .protocol_parameters
+                    .past_bounded_slot(context.commitment_context_input.unwrap());
+                let past_bounded_epoch_index = context.protocol_parameters.epoch_index_of(past_bounded_slot_index);
+                let future_bounded_slot_index = context
+                    .protocol_parameters
+                    .future_bounded_slot(context.commitment_context_input.unwrap());
+                let future_bounded_epoch_index = context.protocol_parameters.epoch_index_of(future_bounded_slot_index);
+
+                if staking_input.end_epoch() >= future_bounded_epoch_index {
+                    if staking_input.staked_amount() != staking_output.staked_amount()
+                        || staking_input.start_epoch() != staking_output.start_epoch()
+                        || staking_input.fixed_cost() != staking_output.fixed_cost()
+                    {
+                        return Err(TransactionFailureReason::StakingFeatureModifiedBeforeUnbonding);
+                    }
+                    if staking_input.end_epoch() != staking_output.end_epoch()
+                        && staking_input.end_epoch()
+                            < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
+                    {
+                    }
+                }
+            }
             _ => {}
         }
 
