@@ -55,8 +55,10 @@ pub fn rand_output_id() -> OutputId {
 
 /// Generates a random [`BasicOutput`].
 pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
-    BasicOutput::build_with_amount(rand_number_range(0..token_supply))
-        .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
+    let amount = rand_number_range(0..token_supply);
+
+    BasicOutput::build_with_amount(amount)
+        .with_features(rand_allowed_features(amount, BasicOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition())
         .finish()
         .unwrap()
@@ -81,9 +83,10 @@ pub fn rand_delegation_id() -> DelegationId {
 pub fn rand_account_output(token_supply: u64) -> AccountOutput {
     // We need to make sure that `AccountId` and `Address` don't match.
     let account_id = rand_account_id();
+    let amount = rand_number_range(0..token_supply);
 
-    AccountOutput::build_with_amount(rand_number_range(0..token_supply), account_id)
-        .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
+    AccountOutput::build_with_amount(amount, account_id)
+        .with_features(rand_allowed_features(amount, AccountOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
         .finish()
         .unwrap()
@@ -93,9 +96,10 @@ pub fn rand_account_output(token_supply: u64) -> AccountOutput {
 pub fn rand_anchor_output(token_supply: u64) -> AnchorOutput {
     // We need to make sure that `AnchorId` and `Address` don't match.
     let anchor_id = rand_anchor_id();
+    let amount = rand_number_range(0..token_supply);
 
-    AnchorOutput::build_with_amount(rand_number_range(0..token_supply), anchor_id)
-        .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
+    AnchorOutput::build_with_amount(amount, anchor_id)
+        .with_features(rand_allowed_features(amount, AnchorOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
             &anchor_id,
         ))
@@ -118,8 +122,10 @@ pub fn rand_token_scheme() -> TokenScheme {
 
 /// Generates a random [`FoundryOutput`].
 pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
-    FoundryOutput::build_with_amount(rand_number_range(0..token_supply), rand_number(), rand_token_scheme())
-        .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES))
+    let amount = rand_number_range(0..token_supply);
+
+    FoundryOutput::build_with_amount(amount, rand_number(), rand_token_scheme())
+        .with_features(rand_allowed_features(amount, FoundryOutput::ALLOWED_FEATURES))
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
         .finish()
         .unwrap()
@@ -129,9 +135,10 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
 pub fn rand_nft_output(token_supply: u64) -> NftOutput {
     // We need to make sure that `NftId` and `Address` don't match.
     let nft_id = NftId::from(rand_bytes_array());
+    let amount = rand_number_range(0..token_supply);
 
-    NftOutput::build_with_amount(rand_number_range(0..token_supply), nft_id)
-        .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
+    NftOutput::build_with_amount(amount, nft_id)
+        .with_features(rand_allowed_features(amount, NftOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition_different_from(&nft_id))
         .finish()
         .unwrap()

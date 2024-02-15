@@ -256,7 +256,7 @@ impl Transaction {
     }
 
     /// Returns the [`ManaAllotment`]s of a [`Transaction`].
-    pub fn allotments(&self) -> &[ManaAllotment] {
+    pub fn allotments(&self) -> &ManaAllotments {
         &self.allotments
     }
 
