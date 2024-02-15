@@ -95,7 +95,7 @@ where
                     mana_rewards.insert(
                         output.output_id,
                         self.client()
-                            .get_output_mana_rewards(&output.output_id, creation_slot)
+                            .get_output_mana_rewards(&output.output_id, slot_commitment_id.slot_index())
                             .await?
                             .rewards,
                     );
