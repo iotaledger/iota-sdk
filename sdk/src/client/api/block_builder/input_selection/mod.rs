@@ -233,6 +233,11 @@ impl InputSelection {
             }
         }
 
+        // If there is no min allotment calculation, then we should update the remainders as the last step
+        if self.min_mana_allotment.is_none() {
+            self.update_remainders()?;
+        }
+
         if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
             return Err(Error::InvalidInputCount(self.selected_inputs.len()));
         }

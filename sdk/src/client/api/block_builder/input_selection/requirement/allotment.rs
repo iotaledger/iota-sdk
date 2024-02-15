@@ -29,9 +29,8 @@ impl InputSelection {
             ..
         }) = self.min_mana_allotment
         else {
-            let res = self.fulfill_mana_requirement()?;
-            self.update_remainders()?;
-            return Ok(res);
+            // If there is no min allotment calculation needed, just check mana
+            return self.fulfill_mana_requirement();
         };
 
         // Remainders can only be calculated when the input mana is >= the output mana
