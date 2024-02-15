@@ -134,6 +134,10 @@ impl<'a> SemanticValidationContext<'a> {
         let mut has_implicit_account_creation_address = false;
 
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
+            if output_id.transaction_id().slot_index() > self.transaction.creation_slot() {
+                return Ok(Some(TransactionFailureReason::InputCreationAfterTxCreation));
+            }
+
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
                 Output::Account(output) => {
