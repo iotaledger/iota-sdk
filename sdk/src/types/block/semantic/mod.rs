@@ -385,7 +385,7 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
-        for (_, (account_input_mana, account_output_mana)) in &self.block_issuer_mana {
+        for (account_input_mana, account_output_mana) in self.block_issuer_mana.values() {
             if self.input_mana - account_input_mana < self.output_mana - account_output_mana {
                 return Ok(Some(TransactionFailureReason::ManaMovedOffBlockIssuerAccount));
             }
