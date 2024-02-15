@@ -8,8 +8,8 @@ use super::{
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{
-        AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
-        Output, OutputId,
+        AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder, Output,
+        OutputId,
     },
 };
 
@@ -69,8 +69,6 @@ impl InputSelection {
 
         let output = builder.finish_output()?;
 
-        self.automatically_transitioned.insert(ChainId::from(account_id));
-
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
         Ok(Some(output))
@@ -108,8 +106,6 @@ impl InputSelection {
             .with_features(features)
             .finish_output()?;
 
-        self.automatically_transitioned.insert(ChainId::from(nft_id));
-
         log::debug!("Automatic transition of {output_id:?}/{nft_id:?}");
 
         Ok(Some(output))
@@ -144,8 +140,6 @@ impl InputSelection {
         }
 
         let output = FoundryOutputBuilder::from(input).finish_output()?;
-
-        self.automatically_transitioned.insert(ChainId::from(foundry_id));
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
 

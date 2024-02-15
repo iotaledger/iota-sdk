@@ -247,19 +247,7 @@ impl InputSelection {
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
         // Only consider automatically transitioned outputs.
-        let outputs = self
-            .provided_outputs
-            .iter_mut()
-            .chain(&mut self.added_outputs)
-            .filter(|output| {
-                output
-                    .chain_id()
-                    .as_ref()
-                    .map(|chain_id| self.automatically_transitioned.contains(chain_id))
-                    .unwrap_or(false)
-            });
-
-        for output in outputs {
+        for output in self.added_outputs.iter_mut() {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
             let minimum_amount = output.minimum_amount(self.protocol_parameters.storage_score_parameters());
