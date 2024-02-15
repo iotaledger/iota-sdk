@@ -146,11 +146,16 @@ pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
 }
 
 /// Generates a random [`StakingFeature`].
-pub fn rand_staking_feature() -> StakingFeature {
-    StakingFeature::new(rand_number(), rand_number(), rand_epoch_index(), rand_epoch_index())
+pub fn rand_staking_feature(output_amount: u64) -> StakingFeature {
+    StakingFeature::new(
+        rand_number_range(0..output_amount),
+        rand_number(),
+        rand_epoch_index(),
+        rand_epoch_index(),
+    )
 }
 
-fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
+fn rand_feature_from_flag(output_amount: u64, flag: &FeatureFlags) -> Feature {
     match *flag {
         FeatureFlags::SENDER => Feature::Sender(rand_sender_feature()),
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
@@ -159,16 +164,16 @@ fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
         FeatureFlags::NATIVE_TOKEN => Feature::NativeToken(rand_native_token_feature()),
         FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
-        FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
+        FeatureFlags::STAKING => Feature::Staking(rand_staking_feature(output_amount)),
         _ => unreachable!(),
     }
 }
 
 /// Generates a [`Vec`] of random [`Feature`]s given a set of allowed [`FeatureFlags`].
-pub fn rand_allowed_features(allowed_features: FeatureFlags) -> Vec<Feature> {
+pub fn rand_allowed_features(output_amount: u64, allowed_features: FeatureFlags) -> Vec<Feature> {
     let mut all_features = FeatureFlags::ALL_FLAGS
         .iter()
-        .map(rand_feature_from_flag)
+        .map(|flag| rand_feature_from_flag(output_amount, flag))
         .collect::<Vec<_>>();
     all_features.retain(|feature| allowed_features.contains(feature.flag()));
     all_features

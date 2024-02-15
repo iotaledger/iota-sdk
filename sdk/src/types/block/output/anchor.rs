@@ -468,8 +468,7 @@ impl AnchorOutput {
                 || current_state.governor_address() != next_state.governor_address()
                 || current_state.features.metadata() != next_state.features.metadata()
             {
-                // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                return Err(TransactionFailureReason::SemanticValidationFailed);
+                return Err(TransactionFailureReason::AnchorInvalidStateTransition);
             }
         } else if next_state.state_index == current_state.state_index {
             // Governance transition.
@@ -477,12 +476,10 @@ impl AnchorOutput {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1650
             // || current_state.state_metadata != next_state.state_metadata
             {
-                // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                return Err(TransactionFailureReason::SemanticValidationFailed);
+                return Err(TransactionFailureReason::AnchorInvalidGovernanceTransition);
             }
         } else {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::AnchorInvalidStateTransition);
         }
 
         Ok(())
