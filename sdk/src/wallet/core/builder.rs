@@ -205,25 +205,7 @@ where
             }
         }
         // Panic: can be safely unwrapped now
-        let address = self.address.as_ref().unwrap().clone();
-
-        #[cfg(feature = "storage")]
-        let mut wallet_address = storage_manager.load_wallet_address().await?;
-
-        #[cfg(feature = "storage")]
-        let wallet_bip_path = storage_manager.load_wallet_bip_path().await?;
-
-        // The bip path must not change.
-        #[cfg(feature = "storage")]
-        if wallet_bip_path.is_some() && self.bip_path != wallet_bip_path {
-            return Err(crate::wallet::Error::BipPathMismatch {
-                new_bip_path: self.bip_path,
-                old_bip_path: wallet_bip_path,
-            });
-        }
-
-        #[cfg(feature = "storage")]
-        let wallet_alias = storage_manager.load_wallet_alias().await?;
+        let wallet_address = self.address.as_ref().unwrap().clone();
 
         #[cfg(feature = "storage")]
         let mut wallet_ledger = storage_manager.load_wallet_ledger().await?;
@@ -270,9 +252,9 @@ where
         let wallet_ledger = WalletLedger::default();
 
         let wallet = Wallet {
-            address: Arc::new(RwLock::new(address)),
-            bip_path: Arc::new(RwLock::new(wallet_bip_path)),
-            alias: Arc::new(RwLock::new(wallet_alias)),
+            address: Arc::new(RwLock::new(wallet_address)),
+            bip_path: Arc::new(RwLock::new(self.bip_path)),
+            alias: Arc::new(RwLock::new(self.alias)),
             inner: Arc::new(wallet_inner),
             ledger: Arc::new(RwLock::new(wallet_ledger)),
         };
@@ -287,6 +269,8 @@ where
     }
 
     /// Generate the wallet address.
+    ///
+    /// Note: make sure to only call it after `self.secret_manager` and `self.bip_path` has been set.
     pub(crate) async fn create_default_wallet_address(&self) -> crate::wallet::Result<Bech32Address> {
         let bech32_hrp = self
             .client_options
@@ -367,9 +351,9 @@ pub(crate) mod dto {
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub(crate) bip_path: Option<Bip44>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) address: Option<Bech32Address>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub(crate) bip_path: Option<Bip44>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) alias: Option<String>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -382,8 +366,8 @@ pub(crate) mod dto {
     impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
         fn from(value: WalletBuilderDto) -> Self {
             Self {
-                bip_path: value.bip_path,
                 address: value.address,
+                bip_path: value.bip_path,
                 alias: value.alias,
                 client_options: value.client_options,
                 #[cfg(feature = "storage")]

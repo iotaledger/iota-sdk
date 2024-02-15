@@ -14,7 +14,10 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{core::WalletLedgerDto, Wallet},
+    wallet::{
+        core::{builder::dto::WalletBuilderDto, WalletLedgerDto},
+        Wallet,
+    },
 };
 
 impl Wallet {
@@ -185,18 +188,15 @@ impl Wallet {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.bip_path().await);
+                .with_address(self.address().await)
+                .with_bip_path(self.bip_path().await)
+                .with_alias(self.alias().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet to db
+            // also save wallet ledger to db
             self.storage_manager()
-                .save_wallet(
-                    &self.address().await,
-                    self.bip_path().await.as_ref(),
-                    self.alias().await.as_ref(),
-                    &WalletLedgerDto::from(&*self.ledger().await),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*self.ledger().await))
                 .await?;
         }
 
@@ -344,18 +344,15 @@ impl Wallet<StrongholdSecretManager> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.bip_path().await);
+                .with_address(self.address().await)
+                .with_bip_path(self.bip_path().await)
+                .with_alias(self.alias().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet to db
+            // also save wallet ledger to db
             self.storage_manager()
-                .save_wallet(
-                    &self.address().await,
-                    self.bip_path().await.as_ref(),
-                    self.alias().await.as_ref(),
-                    &WalletLedgerDto::from(&*self.ledger().await),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*self.ledger().await))
                 .await?;
         }
 

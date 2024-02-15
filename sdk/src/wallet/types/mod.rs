@@ -30,7 +30,6 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::core::WalletLedger,
 };
 
 /// An output with metadata

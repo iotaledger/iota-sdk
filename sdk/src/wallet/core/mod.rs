@@ -46,7 +46,7 @@ use crate::{
 /// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
-    // TODO #1934: should we maybe group the next 3 fields into a `WalletDetails` struct?
+    // TODO: should we maybe group the next 3 fields into a `WalletDetails` struct?
     pub(crate) address: Arc<RwLock<Bech32Address>>,
     pub(crate) bip_path: Arc<RwLock<Option<Bip44>>>,
     pub(crate) alias: Arc<RwLock<Option<String>>>,
@@ -688,8 +688,6 @@ mod test {
             incoming_transaction,
         );
 
-        // TODO #1934 removed the data address/bip_path/alias from `WalletLedger`, so
-        // now for this test to be meaningful we should create some outputs instead.
         let wallet_ledger = WalletLedger {
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
@@ -713,10 +711,9 @@ mod test {
     }
 
     impl WalletLedger {
-        // TODO #1934 removed the data address/bip_path/alias from `WalletLedger`, so
-        // now for this test to be meaningful we should create some outputs instead.
+        // TODO: use something non-empty
         #[cfg(feature = "storage")]
-        pub(crate) fn non_empty_test_instance() -> Self {
+        pub(crate) fn test_instance() -> Self {
             Self {
                 outputs: HashMap::new(),
                 locked_outputs: HashSet::new(),

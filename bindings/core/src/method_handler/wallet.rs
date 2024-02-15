@@ -396,6 +396,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let transaction = wallet.send_outputs(outputs, options).await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
+        // TODO #1934: create issue
+        // WalletMethod::SetBipPath { bip_path: String } => {
+        //     wallet.update_wallet_bip_path(...).await?;
+        //     Response::Ok
+        // }
         WalletMethod::SetAlias { alias } => {
             wallet.update_wallet_alias(&alias).await?;
             Response::Ok

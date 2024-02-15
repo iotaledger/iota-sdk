@@ -184,14 +184,9 @@ where
         #[cfg(feature = "storage")]
         {
             // TODO: maybe better to use the wallet address as identifier now?
-            log::debug!("[TRANSACTION] storing wallet");
+            log::debug!("[TRANSACTION] storing wallet ledger");
             self.storage_manager()
-                .save_wallet(
-                    &self.address().await,
-                    self.bip_path().await.as_ref(),
-                    self.alias().await.as_ref(),
-                    &WalletLedgerDto::from(&*wallet_ledger),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*wallet_ledger))
                 .await?;
         }
 

@@ -3,6 +3,8 @@
 
 use std::collections::HashMap;
 
+use crypto::keys::bip44::Bip44;
+
 use crate::{
     client::secret::SecretManage,
     types::block::{
@@ -41,15 +43,8 @@ where
                 WalletLedgerDto::from(&*wallet_ledger)
             };
 
-            log::debug!("[save] wallet with updated bech32 hrp",);
-            self.storage_manager()
-                .save_wallet(
-                    &self.address().await,
-                    self.bip_path().await.as_ref(),
-                    self.alias().await.as_ref(),
-                    &wallet_ledger,
-                )
-                .await?;
+            log::debug!("[save] wallet ledger with updated bech32 hrp",);
+            self.storage_manager().save_wallet_ledger(&wallet_ledger).await?;
         }
 
         Ok(())
@@ -57,25 +52,10 @@ where
 
     /// Update the alias for the wallet.
     pub async fn update_wallet_alias(&self, alias: &str) -> crate::wallet::Result<()> {
+        log::debug!("updating wallet with new alias: {}", alias);
+
         *self.alias_mut().await = Some(alias.to_string());
 
-        #[cfg(feature = "storage")]
-        {
-            // TODO: change `save_wallet` signature to accept a `Wallet<S>`
-            let wallet_address = self.address().await;
-            let wallet_bip_path = self.bip_path().await;
-            let wallet_alias = self.alias().await;
-            let wallet_ledger = WalletLedgerDto::from(&*self.ledger().await);
-
-            self.storage_manager()
-                .save_wallet(
-                    &wallet_address,
-                    wallet_bip_path.as_ref(),
-                    wallet_alias.as_ref(),
-                    &wallet_ledger,
-                )
-                .await?;
-        }
         Ok(())
     }
 
@@ -85,7 +65,7 @@ where
         unspent_outputs: Vec<OutputData>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
     ) -> crate::wallet::Result<()> {
-        log::debug!("[SYNC] Update wallet with new synced transactions");
+        log::debug!("[SYNC] Update wallet ledger with new synced transactions");
 
         let network_id = self.client().get_network_id().await?;
         let mut wallet_ledger = self.ledger_mut().await;
@@ -169,14 +149,9 @@ where
 
         #[cfg(feature = "storage")]
         {
-            log::debug!("[SYNC] storing wallet with new synced data");
+            log::debug!("[SYNC] storing wallet ledger with new synced data");
             self.storage_manager()
-                .save_wallet(
-                    &self.address().await,
-                    self.bip_path().await.as_ref(),
-                    self.alias().await.as_ref(),
-                    &WalletLedgerDto::from(&*wallet_ledger),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*wallet_ledger))
                 .await?;
         }
         Ok(())
@@ -249,14 +224,9 @@ where
 
         #[cfg(feature = "storage")]
         {
-            log::debug!("[SYNC] storing wallet with new synced transactions");
+            log::debug!("[SYNC] storing wallet ledger with new synced transactions");
             self.storage_manager()
-                .save_wallet(
-                    &self.address().await,
-                    self.bip_path().await.as_ref(),
-                    self.alias().await.as_ref(),
-                    &WalletLedgerDto::from(&*wallet_ledger),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*wallet_ledger))
                 .await?;
         }
         Ok(())
