@@ -87,7 +87,7 @@ impl fmt::Display for TransactionFailureReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::None => write!(f, "none."),
-            Self::ConflictRejected => write!(f, "transaction is conflicting."),
+            Self::ConflictRejected => write!(f, "transaction was conflicting and was rejected."),
             Self::InputAlreadySpent => write!(f, "input already spent."),
             Self::InputCreationAfterTxCreation => write!(f, "input creation slot after tx creation slot."),
             Self::UnlockSignatureInvalid => write!(f, "signature in unlock is invalid."),
@@ -119,12 +119,24 @@ impl fmt::Display for TransactionFailureReason {
             ),
             Self::NativeTokenSumUnbalanced => write!(f, "native token sums are unbalanced."),
             Self::SimpleTokenSchemeMintedMeltedTokenDecrease => {
-                write!(f, "simple token scheme minted/melted value decreased.")
+                write!(f, "simple token scheme's minted or melted tokens decreased.")
             }
-            Self::SimpleTokenSchemeMintingInvalid => write!(f, "simple token scheme minting invalid."),
-            Self::SimpleTokenSchemeMeltingInvalid => write!(f, "simple token scheme melting invalid."),
-            Self::SimpleTokenSchemeMaximumSupplyChanged => write!(f, "simple token scheme maximum supply changed."),
-            Self::SimpleTokenSchemeGenesisInvalid => write!(f, "simple token scheme genesis invalid."),
+            Self::SimpleTokenSchemeMintingInvalid => write!(
+                f,
+                "simple token scheme's minted tokens did not increase by the minted amount or melted tokens changed."
+            ),
+            Self::SimpleTokenSchemeMeltingInvalid => write!(
+                f,
+                "simple token scheme's melted tokens did not increase by the melted amount or minted tokens changed."
+            ),
+            Self::SimpleTokenSchemeMaximumSupplyChanged => write!(
+                f,
+                "simple token scheme's maximum supply cannot change during transition."
+            ),
+            Self::SimpleTokenSchemeGenesisInvalid => write!(
+                f,
+                "newly created simple token scheme's melted tokens are not zero or minted tokens do not equal native token amount in transaction."
+            ),
             Self::MultiAddressLengthUnlockLengthMismatch => {
                 write!(f, "multi address length and multi unlock length do not match.")
             }
@@ -190,12 +202,8 @@ impl fmt::Display for TransactionFailureReason {
                 f,
                 "foundry counter in account decreased or did not increase by the number of new foundries."
             ),
-            Self::AnchorInvalidStateTransition => {
-                write!(f, "anchor has an invalid state transition.")
-            }
-            Self::AnchorInvalidGovernanceTransition => {
-                write!(f, "anchor has an invalid governance transition.")
-            }
+            Self::AnchorInvalidStateTransition => write!(f, "invalid anchor state transition."),
+            Self::AnchorInvalidGovernanceTransition => write!(f, "invalid anchor governance transition."),
             Self::FoundryTransitionWithoutAccount => write!(
                 f,
                 "foundry output transitioned without accompanying account on input or output side."
@@ -212,7 +220,7 @@ impl fmt::Display for TransactionFailureReason {
                 write!(f, "delegation output attempted to be transitioned twice.")
             }
             Self::DelegationModified => write!(f, "delegated amount, validator ID and start epoch cannot be modified."),
-            Self::DelegationStartEpochInvalid => write!(f, "invalid start epoch."),
+            Self::DelegationStartEpochInvalid => write!(f, "delegation output has invalid start epoch."),
             Self::DelegationAmountMismatch => write!(f, "delegated amount does not match amount."),
             Self::DelegationEndEpochNotZero => write!(f, "end epoch must be set to zero at output genesis."),
             Self::DelegationEndEpochInvalid => write!(f, "delegation end epoch does not match current epoch."),

@@ -82,7 +82,8 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [key in TransactionFailureReason]: string;
 } = {
     [TransactionFailureReason.None]: 'None.',
-    [TransactionFailureReason.ConflictRejected]: 'Transaction is conflicting.',
+    [TransactionFailureReason.ConflictRejected]:
+        'Transaction was conflicting and was rejected.',
     [TransactionFailureReason.InputAlreadySpent]: 'Input already spent.',
     [TransactionFailureReason.InputCreationAfterTxCreation]:
         'Input creation slot after tx creation slot.',
@@ -109,15 +110,15 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.NativeTokenSumUnbalanced]:
         'Native token sums are unbalanced.',
     [TransactionFailureReason.SimpleTokenSchemeMintedMeltedTokenDecrease]:
-        'Simple token scheme minted/melted value decreased.',
+        "Simple token scheme's minted or melted tokens decreased.",
     [TransactionFailureReason.SimpleTokenSchemeMintingInvalid]:
-        'Simple token scheme minting invalid.',
+        "Simple token scheme's minted tokens did not increase by the minted amount or melted tokens changed.",
     [TransactionFailureReason.SimpleTokenSchemeMeltingInvalid]:
-        'Simple token scheme melting invalid.',
+        "Simple token scheme's melted tokens did not increase by the melted amount or minted tokens changed.",
     [TransactionFailureReason.SimpleTokenSchemeMaximumSupplyChanged]:
-        'Simple token scheme maximum supply changed.',
+        "Simple token scheme's maximum supply cannot change during transition.",
     [TransactionFailureReason.SimpleTokenSchemeGenesisInvalid]:
-        'Simple token scheme genesis invalid.',
+        "Newly created simple token scheme's melted tokens are not zero or minted tokens do not equal native token amount in transaction.",
     [TransactionFailureReason.MultiAddressLengthUnlockLengthMismatch]:
         'Multi address length and multi unlock length do not match.',
     [TransactionFailureReason.MultiAddressUnlockThresholdNotReached]:
@@ -174,9 +175,9 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.AccountInvalidFoundryCounter]:
         'Foundry counter in account decreased or did not increase by the number of new foundries.',
     [TransactionFailureReason.AnchorInvalidStateTransition]:
-        'Anchor has an invalid state transition.',
+        'Invalid anchor state transition.',
     [TransactionFailureReason.AnchorInvalidGovernanceTransition]:
-        'Anchor has an invalid governance transition.',
+        'Invalid anchor governance transition.',
     [TransactionFailureReason.FoundryTransitionWithoutAccount]:
         'Foundry output transitioned without accompanying account on input or output side.',
     [TransactionFailureReason.FoundrySerialInvalid]:
@@ -192,7 +193,7 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.DelegationModified]:
         'Delegated amount, validator ID and start epoch cannot be modified.',
     [TransactionFailureReason.DelegationStartEpochInvalid]:
-        'Invalid start epoch.',
+        'Delegation output has invalid start epoch.',
     [TransactionFailureReason.DelegationAmountMismatch]:
         'Delegated amount does not match amount.',
     [TransactionFailureReason.DelegationEndEpochNotZero]:

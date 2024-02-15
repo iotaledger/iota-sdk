@@ -110,7 +110,7 @@ impl SemanticValidationContext<'_> {
     ) -> Result<(), TransactionFailureReason> {
         match output {
             Output::Basic(output) => {
-                let slot_index = self.transaction.context_inputs().commitment().map(|c| c.slot_index());
+                let slot_index = self.commitment_context_input.map(|c| c.slot_index());
                 let locked_address = output
                     .unlock_conditions()
                     .locked_address(
@@ -140,7 +140,7 @@ impl SemanticValidationContext<'_> {
             // Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             Output::Foundry(output) => self.address_unlock(&Address::from(*output.account_address()), unlock)?,
             Output::Nft(output) => {
-                let slot_index = self.transaction.context_inputs().commitment().map(|c| c.slot_index());
+                let slot_index = self.commitment_context_input.map(|c| c.slot_index());
                 let locked_address = output
                     .unlock_conditions()
                     .locked_address(
