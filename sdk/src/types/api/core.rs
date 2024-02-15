@@ -71,16 +71,8 @@ pub(crate) struct PermanodeInfoResponse {
 }
 
 impl PermanodeInfoResponse {
-    pub fn latest_protocol_parameters(&self) -> &ProtocolParametersResponse {
-        self.protocol_parameters.latest()
-    }
-
-    pub fn protocol_parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
+    pub(crate) fn protocol_parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
         self.protocol_parameters.by_version(protocol_version)
-    }
-
-    pub fn protocol_parameters_by_epoch(&self, epoch_index: EpochIndex) -> Option<&ProtocolParametersResponse> {
-        self.protocol_parameters.by_epoch(epoch_index)
     }
 }
 
