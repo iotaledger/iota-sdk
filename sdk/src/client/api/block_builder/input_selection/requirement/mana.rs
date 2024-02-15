@@ -35,7 +35,7 @@ impl InputSelection {
             return self.get_inputs_for_mana_balance();
         };
 
-        if !self.selected_inputs.is_empty() {
+        if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
             self.selected_inputs = Self::sort_input_signing_data(
                 std::mem::take(&mut self.selected_inputs),
                 self.creation_slot,
@@ -61,46 +61,49 @@ impl InputSelection {
             self.mana_allotments.entry(issuer_id).or_default();
 
             // If the transaction fails to build, just keep going in case another requirement helps
-            if let Ok(transaction) = builder
+            let transaction = builder
                 .with_context_inputs(self.context_inputs.clone())
                 .with_mana_allotments(
                     self.mana_allotments
                         .iter()
                         .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
                 )
-                .finish_with_params(&self.protocol_parameters)
-            {
-                let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
+                .finish_with_params(&self.protocol_parameters)?;
 
-                let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
-                    + self.protocol_parameters.work_score_parameters().block();
+            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
 
-                let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
+            let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
+                + self.protocol_parameters.work_score_parameters().block();
 
-                let MinManaAllotment {
-                    issuer_id,
-                    allotment_debt,
-                    ..
-                } = self
-                    .min_mana_allotment
-                    .as_mut()
-                    .ok_or(Error::UnfulfillableRequirement(Requirement::Mana))?;
+            let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
 
-                // Add the required allotment to the issuing allotment
-                if required_allotment_mana > self.mana_allotments[issuer_id] {
-                    println!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
-                    let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
-                    println!("{additional_allotment} additional mana required to meet minimum allotment");
-                    // Unwrap: safe because we always add the record above
-                    *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
-                    println!("Adding {additional_allotment} to allotment debt {allotment_debt}");
-                    *allotment_debt += additional_allotment;
-                } else {
-                    println!("Setting allotment debt to {}", self.mana_allotments[issuer_id]);
-                    *allotment_debt = self.mana_allotments[issuer_id];
-                }
+            let MinManaAllotment {
+                issuer_id,
+                allotment_debt,
+                ..
+            } = self
+                .min_mana_allotment
+                .as_mut()
+                .ok_or(Error::UnfulfillableRequirement(Requirement::Mana))?;
 
-                self.reduce_account_output()?;
+            // Add the required allotment to the issuing allotment
+            if required_allotment_mana > self.mana_allotments[issuer_id] {
+                log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
+                let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
+                log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
+                // Unwrap: safe because we always add the record above
+                *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
+                log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
+                *allotment_debt += additional_allotment;
+            } else {
+                log::debug!("Setting allotment debt to {}", self.mana_allotments[issuer_id]);
+                *allotment_debt = self.mana_allotments[issuer_id];
+            }
+
+            self.reduce_account_output()?;
+        } else {
+            if !self.requirements.contains(&Requirement::Mana) {
+                self.requirements.push(Requirement::Mana);
             }
         }
 
@@ -114,7 +117,9 @@ impl InputSelection {
         // If we needed more inputs to cover the additional allotment mana
         // then update remainders and re-run this requirement
         if !additional_inputs.is_empty() {
-            self.requirements.push(Requirement::Mana);
+            if !self.requirements.contains(&Requirement::Mana) {
+                self.requirements.push(Requirement::Mana);
+            }
             return Ok(additional_inputs);
         }
 
@@ -137,7 +142,7 @@ impl InputSelection {
             .filter(|o| o.is_account() && o.mana() != 0)
             .find(|o| o.as_account().account_id() == issuer_id)
         {
-            println!(
+            log::debug!(
                 "Reducing account mana of {} by {} for allotment",
                 output.as_account().account_id(),
                 allotment_debt
@@ -147,7 +152,7 @@ impl InputSelection {
                 .with_mana(output_mana.saturating_sub(*allotment_debt))
                 .finish_output()?;
             *allotment_debt = allotment_debt.saturating_sub(output_mana);
-            println!("Allotment debt after reduction: {}", allotment_debt);
+            log::debug!("Allotment debt after reduction: {}", allotment_debt);
         }
         Ok(())
     }
@@ -233,10 +238,10 @@ impl InputSelection {
     pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<Vec<InputSigningData>, Error> {
         let (mut selected_mana, required_mana) = self.mana_sums(true)?;
 
-        println!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
+        log::debug!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
 
         if selected_mana >= required_mana {
-            println!("Mana requirement already fulfilled");
+            log::debug!("Mana requirement already fulfilled");
             Ok(Vec::new())
         } else {
             let mut inputs = Vec::new();

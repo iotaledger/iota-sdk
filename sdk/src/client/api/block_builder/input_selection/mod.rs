@@ -249,7 +249,7 @@ impl InputSelection {
                 .0;
             let added_mana = self.remainders.added_mana;
             if let Some(output) = self.get_output_for_added_mana(&remainder_address) {
-                println!("Adding {added_mana} excess input mana to output with address {remainder_address}");
+                log::debug!("Adding {added_mana} excess input mana to output with address {remainder_address}");
                 let new_mana = output.mana() + added_mana;
                 *output = match output {
                     Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
@@ -325,7 +325,7 @@ impl InputSelection {
     }
 
     fn select_input(&mut self, input: InputSigningData) -> Result<(), Error> {
-        println!("Selecting input {:?}", input.output_id());
+        log::debug!("Selecting input {:?}", input.output_id());
 
         if let Some(output) = self.transition_input(&input)? {
             // No need to check for `outputs_requirements` because
@@ -337,7 +337,7 @@ impl InputSelection {
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
-            println!("Adding {requirement:?} from input {:?}", input.output_id());
+            log::debug!("Adding {requirement:?} from input {:?}", input.output_id());
             self.requirements.push(requirement);
         }
 
@@ -682,7 +682,7 @@ impl InputSelection {
                                 &input_chains_foundries,
                                 outputs,
                             ) {
-                                println!("validate_transitions error {err:?}");
+                                log::debug!("validate_transitions error {err:?}");
                                 return Err(Error::UnfulfillableRequirement(Requirement::Account(
                                     *account_output.account_id(),
                                 )));
@@ -715,7 +715,7 @@ impl InputSelection {
                             // native tokens, and validation will fail without the capability.
                             &TransactionCapabilities::all(),
                         ) {
-                            println!("validate_transitions error {err:?}");
+                            log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
                                 foundry_output.id(),
                             )));
@@ -740,7 +740,7 @@ impl InputSelection {
                         .expect("ISA is broken because there is no nft input");
 
                     if let Err(err) = NftOutput::transition_inner(nft_input.output.as_nft(), nft_output) {
-                        println!("validate_transitions error {err:?}");
+                        log::debug!("validate_transitions error {err:?}");
                         return Err(Error::UnfulfillableRequirement(Requirement::Nft(*nft_output.nft_id())));
                     }
                 }
