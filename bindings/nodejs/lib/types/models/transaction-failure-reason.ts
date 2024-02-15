@@ -177,7 +177,7 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.AnchorInvalidStateTransition]:
         'Invalid anchor state transition.',
     [TransactionFailureReason.AnchorInvalidGovernanceTransition]:
-        'invalid anchor governance transition.',
+        'Invalid anchor governance transition.',
     [TransactionFailureReason.FoundryTransitionWithoutAccount]:
         'Foundry output transitioned without accompanying account on input or output side.',
     [TransactionFailureReason.FoundrySerialInvalid]:

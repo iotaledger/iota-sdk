@@ -11,24 +11,22 @@ export enum BlockFailureReason {
     ParentTooOld = 2,
     /** One of the block's parents does not exist. */
     ParentDoesNotExist = 3,
-    /** One of the block's parents is invalid. */
-    ParentInvalid = 4,
     /** The block's issuer account could not be found. */
-    IssuerAccountNotFound = 5,
-    /** The block's protocol version is invalid. */
-    VersionInvalid = 6,
+    IssuerAccountNotFound = 4,
     /** The mana cost could not be calculated. */
-    ManaCostCalculationFailed = 7,
+    ManaCostCalculationFailed = 5,
     /** The block's issuer account burned insufficient Mana for a block. */
-    BurnedInsufficientMana = 8,
-    /** The account is invalid. */
-    AccountInvalid = 9,
+    BurnedInsufficientMana = 6,
+    /** The account is locked. */
+    AccountLocked = 7,
+    /** The account is expired. */
+    AccountExpired = 8,
     /** The block's signature is invalid. */
-    SignatureInvalid = 10,
+    SignatureInvalid = 9,
     /** The block is dropped due to congestion. */
-    DroppedDueToCongestion = 11,
+    DroppedDueToCongestion = 10,
     /** The block payload is invalid. */
-    PayloadInvalid = 12,
+    PayloadInvalid = 11,
     /** The block is invalid. */
     Invalid = 255,
 }
@@ -43,17 +41,14 @@ export const BLOCK_FAILURE_REASON_STRINGS: {
     [BlockFailureReason.ParentTooOld]: "One of the block's parents is too old.",
     [BlockFailureReason.ParentDoesNotExist]:
         "One of the block's parents does not exist.",
-    [BlockFailureReason.ParentInvalid]:
-        "One of the block's parents is invalid.",
     [BlockFailureReason.IssuerAccountNotFound]:
         "The block's issuer account could not be found.",
-    [BlockFailureReason.VersionInvalid]:
-        "The block's protocol version is invalid.",
     [BlockFailureReason.ManaCostCalculationFailed]:
         'The mana cost could not be calculated.',
     [BlockFailureReason.BurnedInsufficientMana]:
         "The block's issuer account burned insufficient Mana for a block.",
-    [BlockFailureReason.AccountInvalid]: 'The account is invalid.',
+    [BlockFailureReason.AccountLocked]: 'The account is locked.',
+    [BlockFailureReason.AccountExpired]: 'The account is expired.',
     [BlockFailureReason.SignatureInvalid]: "The block's signature is invalid.",
     [BlockFailureReason.DroppedDueToCongestion]:
         'The block is dropped due to congestion.',
