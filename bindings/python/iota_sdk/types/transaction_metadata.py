@@ -25,27 +25,27 @@ class TransactionFailureReason(Enum):
     """Represents the possible reasons for a failing transaction.
     """
     Null = 0
-    TypeInvalid = 1
-    Conflicting = 2
-    InputAlreadySpent = 3
-    InputCreationAfterTxCreation = 4
-    UnlockSignatureInvalid = 5
-    CommitmentInputMissing = 6
-    CommitmentInputReferenceInvalid = 7
-    BicInputReferenceInvalid = 8
-    RewardInputReferenceInvalid = 9
-    StakingRewardCalculationFailure = 10
-    DelegationRewardCalculationFailure = 11
-    InputOutputBaseTokenMismatch = 12
-    ManaOverflow = 13
-    InputOutputManaMismatch = 14
-    ManaDecayCreationIndexExceedsTargetIndex = 15
-    NativeTokenAmountLessThanZero = 16
-    NativeTokenSumExceedsUint256 = 17
-    NativeTokenSumUnbalanced = 18
-    MultiAddressLengthUnlockLengthMismatch = 19
-    MultiAddressUnlockThresholdNotReached = 20
-    NestedMultiUnlock = 21
+    ConflictRejected = 1
+    InputAlreadySpent = 2
+    InputCreationAfterTxCreation = 3
+    UnlockSignatureInvalid = 4
+    CommitmentInputReferenceInvalid = 5
+    BicInputReferenceInvalid = 6
+    RewardInputReferenceInvalid = 7
+    StakingRewardCalculationFailure = 8
+    DelegationRewardCalculationFailure = 9
+    InputOutputBaseTokenMismatch = 10
+    ManaOverflow = 11
+    InputOutputManaMismatch = 12
+    ManaDecayCreationIndexExceedsTargetIndex = 13
+    NativeTokenSumUnbalanced = 14
+    SimpleTokenSchemeMintedMeltedTokenDecrease = 15
+    SimpleTokenSchemeMintingInvalid = 16
+    SimpleTokenSchemeMeltingInvalid = 17
+    SimpleTokenSchemeMaximumSupplyChanged = 18
+    SimpleTokenSchemeGenesisInvalid = 19
+    MultiAddressLengthUnlockLengthMismatch = 20
+    MultiAddressUnlockThresholdNotReached = 21
     SenderFeatureNotUnlocked = 22
     IssuerFeatureNotUnlocked = 23
     StakingRewardInputMissing = 24
@@ -72,49 +72,51 @@ class TransactionFailureReason(Enum):
     ImplicitAccountDestructionDisallowed = 45
     MultipleImplicitAccountCreationAddresses = 46
     AccountInvalidFoundryCounter = 47
-    FoundryTransitionWithoutAccount = 48
-    FoundrySerialInvalid = 49
-    DelegationCommitmentInputMissing = 50
-    DelegationRewardInputMissing = 51
-    DelegationRewardsClaimingInvalid = 52
-    DelegationOutputTransitionedTwice = 53
-    DelegationModified = 54
-    DelegationStartEpochInvalid = 55
-    DelegationAmountMismatch = 56
-    DelegationEndEpochNotZero = 57
-    DelegationEndEpochInvalid = 58
-    CapabilitiesNativeTokenBurningNotAllowed = 59
-    CapabilitiesManaBurningNotAllowed = 60
-    CapabilitiesAccountDestructionNotAllowed = 61
-    CapabilitiesAnchorDestructionNotAllowed = 62
-    CapabilitiesFoundryDestructionNotAllowed = 63
-    CapabilitiesNftDestructionNotAllowed = 64
+    AnchorInvalidStateTransition = 48
+    AnchorInvalidGovernanceTransition = 49
+    FoundryTransitionWithoutAccount = 50
+    FoundrySerialInvalid = 51
+    DelegationCommitmentInputMissing = 52
+    DelegationRewardInputMissing = 53
+    DelegationRewardsClaimingInvalid = 54
+    DelegationOutputTransitionedTwice = 55
+    DelegationModified = 56
+    DelegationStartEpochInvalid = 57
+    DelegationAmountMismatch = 58
+    DelegationEndEpochNotZero = 59
+    DelegationEndEpochInvalid = 60
+    CapabilitiesNativeTokenBurningNotAllowed = 61
+    CapabilitiesManaBurningNotAllowed = 62
+    CapabilitiesAccountDestructionNotAllowed = 63
+    CapabilitiesAnchorDestructionNotAllowed = 64
+    CapabilitiesFoundryDestructionNotAllowed = 65
+    CapabilitiesNftDestructionNotAllowed = 66
     SemanticValidationFailed = 255
 
     def __str__(self):
         return {
             0: "Null.",
-            1: "Transaction type is invalid.",
-            2: "Transaction is conflicting.",
-            3: "Input already spent.",
-            4: "Input creation slot after tx creation slot.",
-            5: "Signature in unlock is invalid.",
-            6: "Commitment input required with reward or BIC input.",
-            7: "Commitment input references an invalid or non-existent commitment.",
-            8: "BIC input reference cannot be loaded.",
-            9: "Reward input does not reference a staking account or a delegation output.",
-            10: "Staking rewards could not be calculated due to storage issues or overflow.",
-            11: "Delegation rewards could not be calculated due to storage issues or overflow.",
-            12: "Inputs and outputs do not spend/deposit the same amount of base tokens.",
-            13: "Under- or overflow in Mana calculations.",
-            14: "Inputs and outputs do not contain the same amount of Mana.",
-            15: "Mana decay creation slot/epoch index exceeds target slot/epoch index.",
-            16: "Native token amount must be greater than zero.",
-            17: "Native token sum exceeds max value of a uint256.",
-            18: "Native token sums are unbalanced.",
-            19: "Multi address length and multi unlock length do not match.",
-            20: "Multi address unlock threshold not reached.",
-            21: "Multi unlocks can't be nested.",
+            1: "Transaction is conflicting.",
+            2: "Input already spent.",
+            3: "Input creation slot after tx creation slot.",
+            4: "Signature in unlock is invalid.",
+            5: "Commitment input required with reward or BIC input.",
+            6: "BIC input reference cannot be loaded.",
+            7:  "Reward input does not reference a staking account or a delegation output.",
+            8:  "Staking rewards could not be calculated due to storage issues or overflow.",
+            9:  "Delegation rewards could not be calculated due to storage issues or overflow.",
+            10: "Inputs and outputs do not spend/deposit the same amount of base tokens.",
+            11: "Under- or overflow in Mana calculations.",
+            12: "Inputs and outputs do not contain the same amount of Mana.",
+            13: "Mana decay creation slot/epoch index exceeds target slot/epoch index.",
+            14: "Native token sums are unbalanced.",
+            15: "Simple token scheme minted/melted value decreased.",
+            16: "Simple token scheme minting invalid.",
+            17: "Simple token scheme melting invalid.",
+            18: "Simple token scheme maximum supply changed.",
+            19: "Simple token scheme genesis invalid.",
+            20: "Multi address length and multi unlock length do not match.",
+            21: "Multi address unlock threshold not reached.",
             22: "Sender feature is not unlocked.",
             23: "Issuer feature is not unlocked.",
             24: "Staking feature removal or resetting requires a reward input.",
@@ -141,22 +143,24 @@ class TransactionFailureReason(Enum):
             45: "Cannot destroy implicit account; must be transitioned to account.",
             46: "Multiple implicit account creation addresses on the input side.",
             47: "Foundry counter in account decreased or did not increase by the number of new foundries.",
-            48: "Foundry output transitioned without accompanying account on input or output side.",
-            49: "Foundry output serial number is invalid.",
-            50: "Delegation output validation requires a commitment input.",
-            51: "Delegation output cannot be destroyed without a reward input.",
-            52: "Invalid delegation mana rewards claiming.",
-            53: "Delegation output attempted to be transitioned twice.",
-            54: "Delegated amount, validator ID and start epoch cannot be modified.",
-            55: "Invalid start epoch.",
-            56: "Delegated amount does not match amount.",
-            57: "End epoch must be set to zero at output genesis.",
-            58: "Delegation end epoch does not match current epoch.",
-            59: "Native token burning is not allowed by the transaction capabilities.",
-            60: "Mana burning is not allowed by the transaction capabilities.",
-            61: "Account destruction is not allowed by the transaction capabilities.",
-            62: "Anchor destruction is not allowed by the transaction capabilities.",
-            63: "Foundry destruction is not allowed by the transaction capabilities.",
-            64: "NFT destruction is not allowed by the transaction capabilities.",
+            48: "Anchor has an invalid state transition.",
+            49: "Anchor has an invalid governance transition.",
+            50: "Foundry output transitioned without accompanying account on input or output side.",
+            51: "Foundry output serial number is invalid.",
+            52: "Delegation output validation requires a commitment input.",
+            53: "Delegation output cannot be destroyed without a reward input.",
+            54: "Invalid delegation mana rewards claiming.",
+            55: "Delegation output attempted to be transitioned twice.",
+            56: "Delegated amount, validator ID and start epoch cannot be modified.",
+            57: "Invalid start epoch.",
+            58: "Delegated amount does not match amount.",
+            59: "End epoch must be set to zero at output genesis.",
+            60: "Delegation end epoch does not match current epoch.",
+            61: "Native token burning is not allowed by the transaction capabilities.",
+            62: "Mana burning is not allowed by the transaction capabilities.",
+            63: "Account destruction is not allowed by the transaction capabilities.",
+            64: "Anchor destruction is not allowed by the transaction capabilities.",
+            65: "Foundry destruction is not allowed by the transaction capabilities.",
+            66: "NFT destruction is not allowed by the transaction capabilities.",
             255: "Semantic validation failed.",
         }[self.value]

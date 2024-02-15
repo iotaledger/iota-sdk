@@ -14,29 +14,27 @@ use crate::types::block::Error;
 #[non_exhaustive]
 pub enum TransactionFailureReason {
     None = 0,
-    TypeInvalid = 1,
-    Conflicting = 2,
-    InputAlreadySpent = 3,
-    InputCreationAfterTxCreation = 4,
-    UnlockSignatureInvalid = 5,
-    // TODO syntactic? https://github.com/iotaledger/iota-sdk/issues/1954
-    CommitmentInputMissing = 6,
-    CommitmentInputReferenceInvalid = 7,
-    BicInputReferenceInvalid = 8,
-    RewardInputReferenceInvalid = 9,
-    StakingRewardCalculationFailure = 10,
-    DelegationRewardCalculationFailure = 11,
-    InputOutputBaseTokenMismatch = 12,
-    ManaOverflow = 13,
-    InputOutputManaMismatch = 14,
-    ManaDecayCreationIndexExceedsTargetIndex = 15,
-    NativeTokenAmountLessThanZero = 16,
-    NativeTokenSumExceedsUint256 = 17,
-    NativeTokenSumUnbalanced = 18,
-    MultiAddressLengthUnlockLengthMismatch = 19,
-    MultiAddressUnlockThresholdNotReached = 20,
-    // TODO remove? https://github.com/iotaledger/iota-sdk/issues/1954
-    NestedMultiUnlock = 21,
+    ConflictRejected = 1,
+    InputAlreadySpent = 2,
+    InputCreationAfterTxCreation = 3,
+    UnlockSignatureInvalid = 4,
+    CommitmentInputReferenceInvalid = 5,
+    BicInputReferenceInvalid = 6,
+    RewardInputReferenceInvalid = 7,
+    StakingRewardCalculationFailure = 8,
+    DelegationRewardCalculationFailure = 9,
+    InputOutputBaseTokenMismatch = 10,
+    ManaOverflow = 11,
+    InputOutputManaMismatch = 12,
+    ManaDecayCreationIndexExceedsTargetIndex = 13,
+    NativeTokenSumUnbalanced = 14,
+    SimpleTokenSchemeMintedMeltedTokenDecrease = 15,
+    SimpleTokenSchemeMintingInvalid = 16,
+    SimpleTokenSchemeMeltingInvalid = 17,
+    SimpleTokenSchemeMaximumSupplyChanged = 18,
+    SimpleTokenSchemeGenesisInvalid = 19,
+    MultiAddressLengthUnlockLengthMismatch = 20,
+    MultiAddressUnlockThresholdNotReached = 21,
     SenderFeatureNotUnlocked = 22,
     IssuerFeatureNotUnlocked = 23,
     StakingRewardInputMissing = 24,
@@ -63,23 +61,25 @@ pub enum TransactionFailureReason {
     ImplicitAccountDestructionDisallowed = 45,
     MultipleImplicitAccountCreationAddresses = 46,
     AccountInvalidFoundryCounter = 47,
-    FoundryTransitionWithoutAccount = 48,
-    FoundrySerialInvalid = 49,
-    DelegationCommitmentInputMissing = 50,
-    DelegationRewardInputMissing = 51,
-    DelegationRewardsClaimingInvalid = 52,
-    DelegationOutputTransitionedTwice = 53,
-    DelegationModified = 54,
-    DelegationStartEpochInvalid = 55,
-    DelegationAmountMismatch = 56,
-    DelegationEndEpochNotZero = 57,
-    DelegationEndEpochInvalid = 58,
-    CapabilitiesNativeTokenBurningNotAllowed = 59,
-    CapabilitiesManaBurningNotAllowed = 60,
-    CapabilitiesAccountDestructionNotAllowed = 61,
-    CapabilitiesAnchorDestructionNotAllowed = 62,
-    CapabilitiesFoundryDestructionNotAllowed = 63,
-    CapabilitiesNftDestructionNotAllowed = 64,
+    AnchorInvalidStateTransition = 48,
+    AnchorInvalidGovernanceTransition = 49,
+    FoundryTransitionWithoutAccount = 50,
+    FoundrySerialInvalid = 51,
+    DelegationCommitmentInputMissing = 52,
+    DelegationRewardInputMissing = 53,
+    DelegationRewardsClaimingInvalid = 54,
+    DelegationOutputTransitionedTwice = 55,
+    DelegationModified = 56,
+    DelegationStartEpochInvalid = 57,
+    DelegationAmountMismatch = 58,
+    DelegationEndEpochNotZero = 59,
+    DelegationEndEpochInvalid = 60,
+    CapabilitiesNativeTokenBurningNotAllowed = 61,
+    CapabilitiesManaBurningNotAllowed = 62,
+    CapabilitiesAccountDestructionNotAllowed = 63,
+    CapabilitiesAnchorDestructionNotAllowed = 64,
+    CapabilitiesFoundryDestructionNotAllowed = 65,
+    CapabilitiesNftDestructionNotAllowed = 66,
     SemanticValidationFailed = 255,
 }
 
@@ -87,12 +87,10 @@ impl fmt::Display for TransactionFailureReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::None => write!(f, "none."),
-            Self::TypeInvalid => write!(f, "transaction type is invalid."),
-            Self::Conflicting => write!(f, "transaction is conflicting."),
+            Self::ConflictRejected => write!(f, "transaction is conflicting."),
             Self::InputAlreadySpent => write!(f, "input already spent."),
             Self::InputCreationAfterTxCreation => write!(f, "input creation slot after tx creation slot."),
             Self::UnlockSignatureInvalid => write!(f, "signature in unlock is invalid."),
-            Self::CommitmentInputMissing => write!(f, "commitment input required with reward or BIC input."),
             Self::CommitmentInputReferenceInvalid => {
                 write!(f, "commitment input references an invalid or non-existent commitment.")
             }
@@ -119,14 +117,18 @@ impl fmt::Display for TransactionFailureReason {
                 f,
                 "mana decay creation slot/epoch index exceeds target slot/epoch index."
             ),
-            Self::NativeTokenAmountLessThanZero => write!(f, "native token amount must be greater than zero."),
-            Self::NativeTokenSumExceedsUint256 => write!(f, "native token sum exceeds max value of a uint256."),
             Self::NativeTokenSumUnbalanced => write!(f, "native token sums are unbalanced."),
+            Self::SimpleTokenSchemeMintedMeltedTokenDecrease => {
+                write!(f, "simple token scheme minted/melted value decreased.")
+            }
+            Self::SimpleTokenSchemeMintingInvalid => write!(f, "simple token scheme minting invalid."),
+            Self::SimpleTokenSchemeMeltingInvalid => write!(f, "simple token scheme melting invalid."),
+            Self::SimpleTokenSchemeMaximumSupplyChanged => write!(f, "simple token scheme maximum supply changed."),
+            Self::SimpleTokenSchemeGenesisInvalid => write!(f, "simple token scheme genesis invalid."),
             Self::MultiAddressLengthUnlockLengthMismatch => {
                 write!(f, "multi address length and multi unlock length do not match.")
             }
             Self::MultiAddressUnlockThresholdNotReached => write!(f, "multi address unlock threshold not reached."),
-            Self::NestedMultiUnlock => write!(f, "multi unlocks can't be nested."),
             Self::SenderFeatureNotUnlocked => write!(f, "sender feature is not unlocked."),
             Self::IssuerFeatureNotUnlocked => write!(f, "issuer feature is not unlocked."),
             Self::StakingRewardInputMissing => {
@@ -188,6 +190,12 @@ impl fmt::Display for TransactionFailureReason {
                 f,
                 "foundry counter in account decreased or did not increase by the number of new foundries."
             ),
+            Self::AnchorInvalidStateTransition => {
+                write!(f, "anchor has an invalid state transition.")
+            }
+            Self::AnchorInvalidGovernanceTransition => {
+                write!(f, "anchor has an invalid governance transition.")
+            }
             Self::FoundryTransitionWithoutAccount => write!(
                 f,
                 "foundry output transitioned without accompanying account on input or output side."
