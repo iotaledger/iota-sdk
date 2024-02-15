@@ -264,8 +264,9 @@ impl InputSelection {
         }
 
         let outputs = self
-            .added_outputs
+            .provided_outputs
             .into_iter()
+            .chain(self.added_outputs)
             .chain(self.remainders.storage_deposit_returns)
             .chain(self.remainders.data.iter().map(|r| r.output.clone()))
             .collect::<Vec<_>>();
