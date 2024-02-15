@@ -13,10 +13,11 @@ use primitive_types::U256;
 pub use self::{error::TransactionFailureReason, state_transition::StateTransitionVerifier};
 use crate::types::block::{
     address::Address,
-    context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
-    output::{AccountId, AnchorOutput, ChainId, FoundryId, Output, OutputId, TokenId},
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
+    context_input::RewardContextInput,
+    output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, Output, OutputId, TokenId},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     protocol::ProtocolParameters,
+    slot::SlotCommitmentId,
     unlock::Unlock,
     Error,
 };
@@ -24,21 +25,22 @@ use crate::types::block::{
 ///
 pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
+    pub(crate) transaction_id: TransactionId,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
     pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
+    pub(crate) commitment_context_input: Option<SlotCommitmentId>,
     pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
-    pub(crate) commitment_context_input: Option<CommitmentContextInput>,
-    pub(crate) bic_context_input: Option<BlockIssuanceCreditContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) input_chains: HashMap<ChainId, (&'a OutputId, &'a Output)>,
     pub(crate) output_amount: u64,
     pub(crate) output_mana: u64,
     pub(crate) output_native_tokens: BTreeMap<TokenId, U256>,
     pub(crate) output_chains: HashMap<ChainId, (OutputId, &'a Output)>,
+    pub(crate) block_issuer_mana: HashMap<AccountId, (u64, u64)>,
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
@@ -81,21 +83,22 @@ impl<'a> SemanticValidationContext<'a> {
 
         Self {
             transaction,
+            transaction_id,
             transaction_signing_hash: transaction.signing_hash(),
             inputs,
             unlocks,
             input_amount: 0,
             input_mana: 0,
             mana_rewards,
-            reward_context_inputs: Default::default(),
             commitment_context_input: None,
-            bic_context_input: None,
+            reward_context_inputs: Default::default(),
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains,
             output_amount: 0,
             output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
             output_chains,
+            block_issuer_mana: HashMap::new(),
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),
@@ -105,17 +108,18 @@ impl<'a> SemanticValidationContext<'a> {
 
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
-        // Validation of inputs.
-        let mut has_implicit_account_creation_address = false;
-
-        self.commitment_context_input = self.transaction.context_inputs().commitment().copied();
-
-        self.bic_context_input = self
+        self.commitment_context_input = self
             .transaction
             .context_inputs()
-            .iter()
-            .find_map(|c| c.as_block_issuance_credit_opt())
-            .copied();
+            .commitment()
+            .map(|c| c.slot_commitment_id());
+
+        let bic_context_inputs = self
+            .transaction
+            .context_inputs()
+            .block_issuance_credits()
+            .map(|bic| *bic.account_id())
+            .collect::<HashSet<_>>();
 
         for reward_context_input in self.transaction.context_inputs().rewards() {
             if let Some(output_id) = self.inputs.get(reward_context_input.index() as usize).map(|v| v.0) {
@@ -125,10 +129,36 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
+        // Validation of inputs.
+
+        let mut has_implicit_account_creation_address = false;
+
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
-                Output::Account(output) => (output.amount(), None, output.unlock_conditions()),
+                Output::Account(output) => {
+                    if output.features().block_issuer().is_some() {
+                        let account_id = output.account_id_non_null(output_id);
+
+                        if self.commitment_context_input.is_none() {
+                            return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
+                        }
+                        if !bic_context_inputs.contains(&account_id) {
+                            return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
+                        }
+                        let entry = self.block_issuer_mana.entry(account_id).or_default();
+                        entry.0 = entry
+                            .0
+                            .checked_add(consumed_output.available_mana(
+                                &self.protocol_parameters,
+                                output_id.transaction_id().slot_index(),
+                                self.transaction.creation_slot(),
+                            )?)
+                            .ok_or(Error::ConsumedManaOverflow)?;
+                    }
+
+                    (output.amount(), None, output.unlock_conditions())
+                }
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
                 Output::Foundry(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
                 Output::Nft(output) => (output.amount(), None, output.unlock_conditions()),
@@ -222,7 +252,7 @@ impl<'a> SemanticValidationContext<'a> {
         }
 
         // Validation of outputs.
-        for created_output in self.transaction.outputs() {
+        for (index, created_output) in self.transaction.outputs().iter().enumerate() {
             let (amount, mana, created_native_token, features) = match created_output {
                 Output::Basic(output) => {
                     if let Some(address) = output.simple_deposit_address() {
@@ -240,16 +270,63 @@ impl<'a> SemanticValidationContext<'a> {
                         Some(output.features()),
                     )
                 }
-                Output::Account(output) => (output.amount(), output.mana(), None, Some(output.features())),
+                Output::Account(output) => {
+                    if output.features().block_issuer().is_some() {
+                        let account_id = output.account_id_non_null(&OutputId::new(self.transaction_id, index as u16));
+
+                        if self.commitment_context_input.is_none() {
+                            return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
+                        }
+                        if !bic_context_inputs.contains(&account_id) {
+                            return Ok(Some(TransactionFailureReason::BlockIssuanceCreditInputMissing));
+                        }
+                        let entry = self.block_issuer_mana.entry(account_id).or_default();
+
+                        entry.1 = entry.1.checked_add(output.mana()).ok_or(Error::CreatedManaOverflow)?;
+
+                        if let Some(allotment) = self.transaction.allotments().get(&account_id) {
+                            entry.1 = entry
+                                .1
+                                .checked_add(allotment.mana())
+                                .ok_or(Error::CreatedManaOverflow)?;
+                        }
+                    }
+
+                    (output.amount(), output.mana(), None, Some(output.features()))
+                }
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
                 Output::Foundry(output) => (output.amount(), 0, output.native_token(), Some(output.features())),
                 Output::Nft(output) => (output.amount(), output.mana(), None, Some(output.features())),
                 Output::Delegation(output) => (output.amount(), 0, None, None),
             };
 
-            if let Some(sender) = features.and_then(|f| f.sender()) {
+            if let Some(sender) = features.and_then(Features::sender) {
                 if !self.unlocked_addresses.contains(sender.address()) {
                     return Ok(Some(TransactionFailureReason::SenderFeatureNotUnlocked));
+                }
+            }
+
+            if let Some(unlock_conditions) = created_output.unlock_conditions() {
+                if let (Some(address), Some(timelock)) = (unlock_conditions.address(), unlock_conditions.timelock()) {
+                    if let Address::Account(account_address) = address.address() {
+                        if let Some(entry) = self.block_issuer_mana.get_mut(account_address.account_id()) {
+                            if let Some(commitment_context_input) = self.commitment_context_input {
+                                let past_bounded_slot_index =
+                                    self.protocol_parameters.past_bounded_slot(commitment_context_input);
+
+                                if timelock.slot_index()
+                                    >= past_bounded_slot_index + self.protocol_parameters.max_committable_age()
+                                {
+                                    entry.1 = entry
+                                        .1
+                                        .checked_add(created_output.mana())
+                                        .ok_or(Error::CreatedAmountOverflow)?;
+                                }
+                            } else {
+                                return Ok(Some(TransactionFailureReason::BlockIssuerCommitmentInputMissing));
+                            }
+                        }
+                    }
                 }
             }
 
@@ -262,7 +339,7 @@ impl<'a> SemanticValidationContext<'a> {
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
 
             // Add allotted mana
-            for mana_allotment in self.transaction.allotments() {
+            for mana_allotment in self.transaction.allotments().iter() {
                 self.output_mana = self
                     .output_mana
                     .checked_add(mana_allotment.mana())
@@ -305,6 +382,12 @@ impl<'a> SemanticValidationContext<'a> {
                 }
             } else {
                 return Ok(Some(TransactionFailureReason::InputOutputManaMismatch));
+            }
+        }
+
+        for (account_input_mana, account_output_mana) in self.block_issuer_mana.values() {
+            if self.input_mana - account_input_mana < self.output_mana - account_output_mana {
+                return Ok(Some(TransactionFailureReason::ManaMovedOffBlockIssuerAccount));
             }
         }
 
