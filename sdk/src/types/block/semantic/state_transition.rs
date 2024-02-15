@@ -228,6 +228,27 @@ impl StateTransitionVerifier for AccountOutput {
             _ => {}
         }
 
+        match (current_state.features().staking(), next_state.features().staking()) {
+            (None, Some(staking_output)) => {
+                let past_bounded_slot_index = context
+                    .protocol_parameters
+                    .past_bounded_slot(context.commitment_context_input.unwrap());
+                let past_bounded_epoch_index = context.protocol_parameters.epoch_index_of(past_bounded_slot_index);
+
+                if staking_output.start_epoch() != past_bounded_epoch_index {
+                    return Err(TransactionFailureReason::StakingStartEpochInvalid);
+                }
+                if staking_output.end_epoch()
+                    < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
+                {
+                    return Err(TransactionFailureReason::StakingEndEpochTooEarly);
+                }
+            }
+            (Some(_staking_input), None) => {}
+            (Some(_staking_input), Some(_staking_output)) => {}
+            _ => {}
+        }
+
         Self::transition_inner(
             current_state,
             next_state,
