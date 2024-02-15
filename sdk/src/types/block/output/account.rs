@@ -247,6 +247,8 @@ impl AccountOutputBuilder {
             OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
+        verify_staked_amount(output.amount, &output.features)?;
+
         Ok(output)
     }
 
@@ -515,6 +517,7 @@ impl Packable for AccountOutput {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
+            verify_staked_amount(amount, &features).map_err(UnpackError::Packable)?;
         }
 
         let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
@@ -557,6 +560,16 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     }
 
     verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
+}
+
+fn verify_staked_amount(amount: u64, features: &Features) -> Result<(), Error> {
+    if let Some(staking) = features.staking() {
+        if amount < staking.staked_amount() {
+            return Err(Error::InvalidStakedAmount);
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(feature = "serde")]
