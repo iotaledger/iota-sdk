@@ -244,7 +244,16 @@ impl StateTransitionVerifier for AccountOutput {
                     return Err(TransactionFailureReason::StakingEndEpochTooEarly);
                 }
             }
-            (Some(_staking_input), None) => {}
+            (Some(staking_input), None) => {
+                let future_bounded_slot_index = context
+                    .protocol_parameters
+                    .future_bounded_slot(context.commitment_context_input.unwrap());
+                let future_bounded_epoch_index = context.protocol_parameters.epoch_index_of(future_bounded_slot_index);
+
+                if staking_input.end_epoch() >= future_bounded_epoch_index {
+                    return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
+                }
+            }
             (Some(_staking_input), Some(_staking_output)) => {}
             _ => {}
         }
@@ -272,6 +281,16 @@ impl StateTransitionVerifier for AccountOutput {
         if let Some(block_issuer) = current_state.features().block_issuer() {
             if block_issuer.expiry_slot() >= context.commitment_context_input.unwrap().slot_index() {
                 return Err(TransactionFailureReason::BlockIssuerNotExpired);
+            }
+        }
+        if let Some(staking) = current_state.features().staking() {
+            let future_bounded_slot_index = context
+                .protocol_parameters
+                .future_bounded_slot(context.commitment_context_input.unwrap());
+            let future_bounded_epoch_index = context.protocol_parameters.epoch_index_of(future_bounded_slot_index);
+
+            if staking.end_epoch() >= future_bounded_epoch_index {
+                return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
             }
         }
 
