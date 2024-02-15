@@ -152,7 +152,7 @@ impl InputSelection {
         }
         // Add initial requirements
         self.requirements.extend([
-            Requirement::Allotment,
+            Requirement::Mana,
             Requirement::ContextInputs,
             Requirement::Amount,
             Requirement::NativeTokens,
