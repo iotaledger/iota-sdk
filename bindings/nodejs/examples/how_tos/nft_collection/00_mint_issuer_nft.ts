@@ -54,12 +54,12 @@ async function run() {
         };
         const transaction = await wallet.mintNfts([params]);
 
-        // Wait for transaction to get included
-        const blockId = await wallet.reissueTransactionUntilIncluded(
+        // Wait for transaction to get accepted
+        const blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
         console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         transaction.payload.transaction.outputs.forEach(

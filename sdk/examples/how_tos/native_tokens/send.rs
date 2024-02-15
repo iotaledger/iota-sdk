@@ -64,12 +64,12 @@ async fn main() -> Result<()> {
         let transaction = wallet.send_native_tokens(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get included
+        // Wait for transaction to get accepted
         let block_id = wallet
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+            .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Block included: {}/block/{}",
+            "Tx accepted in block: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );
