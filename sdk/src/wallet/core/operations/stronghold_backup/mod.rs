@@ -237,7 +237,7 @@ impl Wallet<StrongholdSecretManager> {
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
     pub async fn restore_from_stronghold_backup(
-        &mut self,
+        &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_bip_path_mismatch: Option<bool>,
