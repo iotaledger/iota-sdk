@@ -32,9 +32,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     # pylint: disable=unused-argument
     def __init__(
         self,
-        nodes: Optional[Union[str, List[str]]] = None,
-        primary_node: Optional[str] = None,
-        permanode: Optional[str] = None,
+        primary_nodes: Optional[Union[Union[str, Node],
+                                      List[Union[str, Node]]]] = None,
+        nodes: Optional[Union[Union[str, Node],
+                              List[Union[str, Node]]]] = None,
         ignore_node_health: Optional[bool] = None,
         api_timeout: Optional[timedelta] = None,
         node_sync_interval: Optional[timedelta] = None,
@@ -48,12 +49,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Initialize the IOTA Client.
 
         **Arguments**
+        primary_nodes :
+            Nodes which will be tried first for all requests.
         nodes :
             A single Node URL or an array of URLs.
-        primary_node :
-            Node which will be tried first for all requests.
-        permanode :
-            Permanode URL.
         ignore_node_health :
             If the node health should be ignored.
         api_timeout :
@@ -80,15 +79,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if "client_handle" in client_config:
             del client_config["client_handle"]
 
-        if isinstance(nodes, list):
-            nodes = [node.to_dict() if isinstance(node, Node)
-                     else node for node in nodes]
-        elif nodes:
-            if isinstance(nodes, Node):
-                nodes = [nodes.to_dict()]
-            else:
-                nodes = [nodes]
-        client_config['nodes'] = nodes
+        client_config['primary_nodes'] = convert_nodes(primary_nodes)
+        client_config['nodes'] = convert_nodes(nodes)
 
         client_config = {
             k: v for k,
@@ -313,3 +305,17 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         return self._call_method('clearListeners', {
             'topics': topics
         })
+
+
+def convert_nodes(
+        nodes: Optional[Union[Union[str, Node], List[Union[str, Node]]]] = None):
+    """Helper function to convert provided nodes to a list for the client options.
+    """
+    if isinstance(nodes, list):
+        return [node.to_dict() if isinstance(node, Node)
+                else node for node in nodes]
+    if isinstance(nodes, Node):
+        return [nodes.to_dict()]
+    if nodes is not None:
+        return [nodes]
+    return None

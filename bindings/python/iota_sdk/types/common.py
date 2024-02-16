@@ -80,6 +80,7 @@ class Node:
             username: A username for basic authentication.
             password: A password for basic authentication.
             disabled: Whether the node should be used for API requests or not.
+            permanode: Whether the node is a permanode or not.
     """
 
     url: Optional[str] = None
@@ -87,6 +88,7 @@ class Node:
     username: Optional[str] = None
     password: Optional[str] = None
     disabled: Optional[bool] = None
+    permanode: Optional[bool] = None
 
     def to_dict(self) -> dict:
         """Custom dict conversion.
@@ -94,7 +96,8 @@ class Node:
 
         res = {
             'url': self.url,
-            'disabled': self.disabled
+            'disabled': self.disabled,
+            'permanode': self.permanode
         }
         if self.jwt is not None or self.username is not None or self.password is not None:
             auth = res['auth'] = {}
