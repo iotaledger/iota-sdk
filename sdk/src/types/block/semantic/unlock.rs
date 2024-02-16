@@ -22,7 +22,7 @@ impl SemanticValidationContext<'_> {
                     let Signature::Ed25519(signature) = unlock.signature();
 
                     if signature
-                        .is_valid(self.transaction_signing_hash.as_ref(), ed25519_address)
+                        .validate(self.transaction_signing_hash.as_ref(), ed25519_address)
                         .is_err()
                     {
                         return Err(TransactionFailureReason::UnlockSignatureInvalid);
