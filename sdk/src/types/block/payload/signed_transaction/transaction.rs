@@ -13,7 +13,7 @@ use crate::{
         context_input::{ContextInput, ContextInputs},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{Output, OUTPUT_COUNT_RANGE},
+        output::{Output, OutputCommitmentProof, OutputIdProof, OUTPUT_COUNT_RANGE},
         payload::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
             OptionalPayload, Payload,
@@ -311,6 +311,25 @@ impl Transaction {
     fn output_commitment(&self) -> [u8; 32] {
         let outputs_serialized = self.outputs.iter().map(|o| o.pack_to_vec()).collect::<Vec<_>>();
         merkle_hasher::MerkleHasher::digest::<Blake2b256>(&outputs_serialized).into()
+    }
+
+    /// Returns a proof for the output in the transaction at the given index,
+    /// if the transaction has an output at that index.
+    pub fn output_id_proof(&self, index: u16) -> Option<OutputIdProof> {
+        let num_outputs = self.outputs().len() as u16;
+        if index >= num_outputs {
+            return None;
+        }
+        let txn_id = self.id();
+        let output_ids = (0..num_outputs)
+            .map(|idx| txn_id.into_output_id(idx))
+            .collect::<Vec<_>>();
+        Some(OutputIdProof {
+            slot: self.creation_slot(),
+            output_index: index,
+            transaction_commitment: self.transaction_commitment(),
+            output_commitment_proof: OutputCommitmentProof::new(&output_ids, index),
+        })
     }
 
     /// Computes the identifier of a [`Transaction`].

@@ -51,6 +51,14 @@ impl OutputId {
     pub fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
     }
+
+    pub fn to_bytes(&self) -> [u8; Self::LENGTH] {
+        let mut buffer = [0u8; Self::LENGTH];
+        let (transaction_id, index) = buffer.split_at_mut(TransactionId::LENGTH);
+        transaction_id.copy_from_slice(self.transaction_id.as_ref());
+        index.copy_from_slice(&self.index().to_le_bytes());
+        buffer
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -76,11 +84,7 @@ impl FromStr for OutputId {
 
 impl core::fmt::Display for OutputId {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut buffer = [0u8; Self::LENGTH];
-        let (transaction_id, index) = buffer.split_at_mut(TransactionId::LENGTH);
-        transaction_id.copy_from_slice(self.transaction_id.as_ref());
-        index.copy_from_slice(&self.index().to_le_bytes());
-        write!(f, "{}", prefix_hex::encode(buffer))
+        write!(f, "{}", prefix_hex::encode(self.to_bytes()))
     }
 }
 

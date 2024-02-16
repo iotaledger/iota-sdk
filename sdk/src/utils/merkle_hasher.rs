@@ -48,7 +48,7 @@ impl MerkleHasher {
 }
 
 /// Computes the largest power of two less than or equal to `n`.
-fn largest_power_of_two(n: u32) -> usize {
+pub(crate) fn largest_power_of_two(n: u32) -> usize {
     debug_assert!(n > 1, "invalid input to `largest_power_of_two`");
     1 << (32 - (n - 1).leading_zeros() - 1)
 }
