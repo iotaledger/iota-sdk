@@ -82,9 +82,9 @@ impl HttpClient {
         request_builder
     }
 
-    pub(crate) async fn get(&self, node: Node, timeout: Duration) -> Result<Response> {
+    pub(crate) async fn get(&self, node: &Node, timeout: Duration) -> Result<Response> {
         let mut request_builder = self.client.get(node.url.clone());
-        request_builder = self.build_request(request_builder, &node, timeout);
+        request_builder = self.build_request(request_builder, node, timeout);
         let start_time = instant::Instant::now();
         let resp = request_builder.send().await?;
         log::debug!(

@@ -4,12 +4,10 @@ import type { IMqttBrokerOptions, INetworkInfo, INode } from './network';
 
 /** Options for the client builder */
 export interface IClientOptions {
-    /** Node which will be tried first for all requests */
-    primaryNode?: string | INode;
+    /** Nodes which will be tried first for all requests */
+    primaryNodes?: Array<string | INode>;
     /** A list of nodes. */
     nodes?: Array<string | INode>;
-    /** A list of permanodes. */
-    permanodes?: Array<string | INode>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;
     /** Interval in which nodes will be checked for their sync status and the NetworkInfo gets updated */

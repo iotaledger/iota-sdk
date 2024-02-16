@@ -3,41 +3,31 @@
 
 //! The node manager that takes care of sending requests with healthy nodes and quorum if enabled
 
-use std::{
-    collections::{HashMap, HashSet},
-    sync::RwLock,
-    time::Duration,
-};
+use std::{collections::HashSet, sync::RwLock, time::Duration};
 
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{
-    client::{
-        constants::{DEFAULT_MIN_QUORUM_SIZE, DEFAULT_QUORUM_THRESHOLD, DEFAULT_USER_AGENT, NODE_SYNC_INTERVAL},
-        error::{Error, Result},
-        node_manager::{
-            http_client::HttpClient,
-            node::{Node, NodeAuth, NodeDto},
-            NodeManager,
-        },
+use crate::client::{
+    constants::{DEFAULT_MIN_QUORUM_SIZE, DEFAULT_QUORUM_THRESHOLD, DEFAULT_USER_AGENT, NODE_SYNC_INTERVAL},
+    error::{Error, Result},
+    node_manager::{
+        http_client::HttpClient,
+        node::{Node, NodeAuth, NodeDto},
+        NodeManager,
     },
-    types::api::core::InfoResponse,
 };
 
 /// Node manager builder
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct NodeManagerBuilder {
-    /// Node which will be tried first for all requests
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub primary_node: Option<NodeDto>,
+    /// Nodes which will be tried first for all requests
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub primary_nodes: Vec<NodeDto>,
     /// Nodes
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub nodes: HashSet<NodeDto>,
-    /// Permanodes
-    #[serde(default, skip_serializing_if = "HashSet::is_empty")]
-    pub permanodes: HashSet<NodeDto>,
     /// If the node health should be ignored
     #[serde(default)]
     pub ignore_node_health: bool,
@@ -81,57 +71,42 @@ impl NodeManagerBuilder {
         Default::default()
     }
 
+    pub(crate) fn with_primary_node(mut self, mut node: Node) -> Result<Self> {
+        let mut url = validate_url(node.url.clone())?;
+        if let Some(auth) = &node.auth {
+            if let Some((name, password)) = &auth.basic_auth_name_pwd {
+                url.set_username(name)
+                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                url.set_password(Some(password))
+                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+            }
+            node.url = url;
+        }
+        self.primary_nodes.push(NodeDto::Node(node));
+        Ok(self)
+    }
+    pub(crate) fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
+        for url in urls {
+            let url = validate_url(Url::parse(url)?)?;
+            self.primary_nodes.push(NodeDto::Node(Node {
+                url,
+                auth: None,
+                disabled: false,
+                permanode: false,
+            }));
+        }
+        Ok(self)
+    }
+
     pub(crate) fn with_node(mut self, url: &str) -> Result<Self> {
         let url = validate_url(Url::parse(url)?)?;
         self.nodes.insert(NodeDto::Node(Node {
             url,
             auth: None,
             disabled: false,
+            permanode: false,
         }));
         Ok(self)
-    }
-
-    pub(crate) fn with_primary_node(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
-        let mut url = validate_url(Url::parse(url)?)?;
-        if let Some(auth) = &auth {
-            if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
-                url.set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
-            }
-        }
-        self.primary_node.replace(NodeDto::Node(Node {
-            url,
-            auth,
-            disabled: false,
-        }));
-        Ok(self)
-    }
-
-    pub(crate) fn with_permanode(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
-        let mut url = validate_url(Url::parse(url)?)?;
-        let auth = auth.into();
-        if let Some(auth) = &auth {
-            if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
-                url.set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
-            }
-        }
-        self.permanodes.insert(NodeDto::Node(Node {
-            url,
-            auth,
-            disabled: false,
-        }));
-
-        Ok(self)
-    }
-
-    pub(crate) fn with_ignore_node_health(mut self) -> Self {
-        self.ignore_node_health = true;
-        self
     }
 
     pub(crate) fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
@@ -149,6 +124,7 @@ impl NodeManagerBuilder {
             url,
             auth,
             disabled: false,
+            permanode: false,
         }));
         Ok(self)
     }
@@ -160,9 +136,15 @@ impl NodeManagerBuilder {
                 url,
                 auth: None,
                 disabled: false,
+                permanode: false,
             }));
         }
         Ok(self)
+    }
+
+    pub(crate) fn with_ignore_node_health(mut self) -> Self {
+        self.ignore_node_health = true;
+        self
     }
 
     pub(crate) fn with_node_sync_interval(mut self, node_sync_interval: Duration) -> Self {
@@ -190,11 +172,10 @@ impl NodeManagerBuilder {
         self
     }
 
-    pub(crate) fn build(self, healthy_nodes: HashMap<Node, InfoResponse>) -> NodeManager {
+    pub(crate) fn build(self, healthy_nodes: HashSet<Node>) -> NodeManager {
         NodeManager {
-            primary_node: self.primary_node.map(Into::into),
+            primary_nodes: self.primary_nodes.into_iter().map(Into::into).collect(),
             nodes: self.nodes.into_iter().map(Into::into).collect(),
-            permanodes: self.permanodes.into_iter().map(Into::into).collect(),
             ignore_node_health: self.ignore_node_health,
             node_sync_interval: self.node_sync_interval,
             healthy_nodes: RwLock::new(healthy_nodes),
@@ -209,9 +190,8 @@ impl NodeManagerBuilder {
 impl Default for NodeManagerBuilder {
     fn default() -> Self {
         Self {
-            primary_node: None,
+            primary_nodes: Vec::new(),
             nodes: HashSet::new(),
-            permanodes: HashSet::new(),
             ignore_node_health: false,
             node_sync_interval: NODE_SYNC_INTERVAL,
             quorum: false,
@@ -233,9 +213,8 @@ pub fn validate_url(url: Url) -> Result<Url> {
 impl From<&NodeManager> for NodeManagerBuilder {
     fn from(value: &NodeManager) -> Self {
         Self {
-            primary_node: value.primary_node.clone().map(NodeDto::Node),
+            primary_nodes: value.primary_nodes.iter().cloned().map(NodeDto::Node).collect(),
             nodes: value.nodes.iter().cloned().map(NodeDto::Node).collect(),
-            permanodes: value.permanodes.iter().cloned().map(NodeDto::Node).collect(),
             ignore_node_health: value.ignore_node_health,
             node_sync_interval: value.node_sync_interval,
             quorum: value.quorum,
