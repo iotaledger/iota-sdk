@@ -53,7 +53,7 @@ impl WalletCli {
 }
 
 /// Commands
-#[derive(Debug, Subcommand, strum::EnumVariantNames)]
+#[derive(Debug, Subcommand, strum::VariantNames)]
 #[strum(serialize_all = "kebab-case")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
