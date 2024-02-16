@@ -575,7 +575,7 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature.is_valid(transaction_signing_hash.as_ref(), &ed25519_address)?;
+                    ed25519_signature.validate(transaction_signing_hash.as_ref(), &ed25519_address)?;
                 }
 
                 merged_unlocks.push(unlock);

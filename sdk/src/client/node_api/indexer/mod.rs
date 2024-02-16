@@ -20,7 +20,6 @@ impl ClientInner {
         route: &str,
         mut query_parameters: impl QueryParameter,
         need_quorum: bool,
-        prefer_permanode: bool,
     ) -> Result<OutputIdsResponse> {
         let mut merged_output_ids_response = OutputIdsResponse {
             committed_slot: 0,
@@ -37,12 +36,7 @@ impl ClientInner {
 
         while let Some(cursor) = {
             let output_ids_response = self
-                .get_request::<OutputIdsResponse>(
-                    route,
-                    query_parameters.to_query_string().as_deref(),
-                    need_quorum,
-                    prefer_permanode,
-                )
+                .get_request::<OutputIdsResponse>(route, query_parameters.to_query_string().as_deref(), need_quorum)
                 .await?;
 
             if return_early {
