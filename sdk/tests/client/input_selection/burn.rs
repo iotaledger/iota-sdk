@@ -21,8 +21,8 @@ use crate::client::{
     input_selection::native_tokens::nt_remainder_min_storage_deposit,
     unsorted_eq,
     Build::{Account, Basic, Foundry, Nft},
-    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, SLOT_INDEX,
-    TOKEN_ID_1, TOKEN_ID_2,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2,
+    SLOT_COMMITMENT_ID, SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
 };
 
 #[test]
@@ -72,15 +72,16 @@ fn burn_account_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -130,6 +131,7 @@ fn burn_account_present_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -137,9 +139,9 @@ fn burn_account_present_and_required() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -192,15 +194,16 @@ fn burn_account_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -238,6 +241,7 @@ fn burn_account_absent() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -307,14 +311,15 @@ fn burn_accounts_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_accounts(HashSet::from([account_id_1, account_id_2])))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -373,6 +378,7 @@ fn burn_account_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -433,15 +439,16 @@ fn burn_nft_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -493,6 +500,7 @@ fn burn_nft_present_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -500,9 +508,9 @@ fn burn_nft_present_and_required() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -553,15 +561,16 @@ fn burn_nft_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -599,6 +608,7 @@ fn burn_nft_absent() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -672,14 +682,15 @@ fn burn_nfts_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_nfts(HashSet::from([nft_id_1, nft_id_2])))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -742,6 +753,7 @@ fn burn_nft_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -810,18 +822,19 @@ fn burn_foundry_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[0].output.as_foundry().id()))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_basic() {
                 assert_remainder_or_return(
@@ -910,6 +923,7 @@ fn burn_foundry_absent() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
@@ -976,6 +990,7 @@ fn burn_foundries_present() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_foundries(HashSet::from([
@@ -985,10 +1000,10 @@ fn burn_foundries_present() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
@@ -1061,6 +1076,7 @@ fn burn_foundry_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
@@ -1110,9 +1126,10 @@ fn burn_native_tokens() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        Vec::new(),
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_native_tokens(HashMap::from([
@@ -1122,17 +1139,17 @@ fn burn_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
 
     assert_remainder_or_return(
-        &selected.outputs[0],
+        &selected.transaction.outputs()[0],
         nt_remainder_output_amount,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 80)),
     );
     assert_remainder_or_return(
-        &selected.outputs[1],
+        &selected.transaction.outputs()[1],
         2_000_000 - nt_remainder_output_amount,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_2, 70)),
@@ -1196,6 +1213,7 @@ fn burn_foundry_and_its_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(
@@ -1206,13 +1224,13 @@ fn burn_foundry_and_its_account() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(selected.inputs.contains(&inputs[1]));
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[1]));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert_remainder_or_return(
                 output,

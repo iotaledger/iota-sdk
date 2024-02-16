@@ -39,7 +39,7 @@ where
         let options = options.into();
         let prepared = self.prepare_begin_staking(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared, None, options).await
+        self.sign_and_submit_transaction(prepared, options).await
     }
 
     /// Prepares the transaction for [Wallet::begin_staking()].

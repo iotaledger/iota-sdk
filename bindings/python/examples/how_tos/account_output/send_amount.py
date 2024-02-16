@@ -40,7 +40,7 @@ params = [SendParams(
     amount=1000000,
 )]
 options = {
-    'mandatoryInputs': inputs,
+    'requiredInputs': inputs,
 }
 transaction = wallet.send_with_params(params, options)
 wallet.wait_for_transaction_acceptance(

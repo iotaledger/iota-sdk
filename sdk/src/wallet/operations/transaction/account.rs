@@ -1,11 +1,10 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
-        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{
             feature::{
                 BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeySource, BlockIssuerKeys,
@@ -36,8 +35,10 @@ where
 
         self.sign_and_submit_transaction(
             self.prepare_implicit_account_transition(output_id, key_source).await?,
-            issuer_id,
-            None,
+            TransactionOptions {
+                issuer_id: Some(issuer_id),
+                ..Default::default()
+            },
         )
         .await
     }
@@ -87,11 +88,6 @@ where
 
         let account_id = AccountId::from(output_id);
         let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
-            .with_mana(implicit_account_data.output.available_mana(
-                &self.client().get_protocol_parameters().await?,
-                implicit_account_data.output_id.transaction_id().slot_index(),
-                self.client().get_slot_index().await?,
-            )?)
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(ed25519_address))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
@@ -101,16 +97,10 @@ where
 
         drop(wallet_data);
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-        let issuance = self.client().get_issuance().await?;
-
         let transaction_options = TransactionOptions {
-            context_inputs: Some(vec![
-                // TODO Remove in https://github.com/iotaledger/iota-sdk/pull/1872
-                CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
-                BlockIssuanceCreditContextInput::new(account_id).into(),
-            ]),
-            custom_inputs: Some(vec![*output_id]),
+            required_inputs: [*output_id].into(),
+            issuer_id: Some(account_id),
+            allow_additional_input_selection: false,
             ..Default::default()
         };
 
