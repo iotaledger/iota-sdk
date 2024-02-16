@@ -144,18 +144,10 @@ impl ClientInner {
             }
         }
 
-        // Get the network_name that most nodes have in common
-        let mut most_nodes = ("network_name", 0);
-        for (network_name, nodes) in &network_nodes {
-            if nodes.len() > most_nodes.1 {
-                most_nodes.0 = network_name;
-                most_nodes.1 = nodes.len();
-            }
-        }
-
-        // Set the protocol_parameters to the parameters that most nodes have in common and only use these nodes as
-        // healthy_nodes
-        if let Some(nodes) = network_nodes.get(most_nodes.0) {
+        // Get the nodes of which the most are in the same network
+        if let Some((_network_name, nodes)) = network_nodes.iter().max_by_key(|a| a.1.len()) {
+            // Set the protocol_parameters to the parameters that most nodes have in common and only use these nodes as
+            // healthy_nodes
             if let Some((parameters, _node_url, tangle_time)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
@@ -165,7 +157,7 @@ impl ClientInner {
             }
 
             healthy_nodes.extend(nodes.iter().map(|(_info, node_url, _time)| node_url).cloned())
-        }
+        };
 
         // Update the sync list.
         *self
