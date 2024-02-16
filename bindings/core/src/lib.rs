@@ -17,6 +17,7 @@ use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
+    types::block::address::Bech32Address,
     utils::serde::bip44::option_bip44,
     wallet::{ClientOptions, Wallet},
 };
@@ -43,6 +44,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 #[derivative(Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
+    pub address: Option<Bech32Address>,
     pub alias: Option<String>,
     #[serde(with = "option_bip44", default)]
     pub bip_path: Option<Bip44>,
@@ -53,13 +55,18 @@ pub struct WalletOptions {
 }
 
 impl WalletOptions {
-    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
-        self.alias = alias.into();
+    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.address = address.into();
         self
     }
 
     pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
         self.bip_path = bip_path.into();
+        self
+    }
+
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
@@ -82,8 +89,9 @@ impl WalletOptions {
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
-            .with_alias(self.alias)
+            .with_address(self.address)
             .with_bip_path(self.bip_path)
+            .with_alias(self.alias)
             .with_client_options(self.client_options);
 
         #[cfg(feature = "storage")]
