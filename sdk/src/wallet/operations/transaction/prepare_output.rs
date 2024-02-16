@@ -280,11 +280,11 @@ where
         Ok(if let Some(options) = &transaction_options {
             match &options.remainder_value_strategy {
                 // TODO is this correct? It was None before the accounts removal
-                RemainderValueStrategy::ReuseAddress => self.address().clone().into_inner(),
+                RemainderValueStrategy::ReuseAddress => self.address().await.into_inner(),
                 RemainderValueStrategy::CustomAddress(address) => address.clone(),
             }
         } else {
-            self.address().clone().into_inner()
+            self.address().await.into_inner()
         })
     }
 }

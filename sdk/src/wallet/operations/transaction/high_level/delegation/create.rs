@@ -70,7 +70,7 @@ where
         let options = options.into();
         let prepared = self.prepare_create_delegation_output(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared.transaction, None, options)
+        self.sign_and_submit_transaction(prepared.transaction, options)
             .await
             .map(|transaction| CreateDelegationTransaction {
                 delegation_id: prepared.delegation_id,
@@ -91,7 +91,7 @@ where
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
                 bech32_address.inner().clone()
             }
-            None => self.address().inner().clone(),
+            None => self.address().await.into_inner(),
         };
 
         let output = DelegationOutputBuilder::new_with_amount(

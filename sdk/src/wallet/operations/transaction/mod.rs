@@ -1,8 +1,7 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
-mod build_transaction;
 pub(crate) mod high_level;
 mod input_selection;
 mod options;
@@ -20,10 +19,7 @@ use crate::{
     },
     types::{
         api::core::OutputWithMetadataResponse,
-        block::{
-            output::{AccountId, Output},
-            payload::signed_transaction::SignedTransactionPayload,
-        },
+        block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
     },
     wallet::{
         core::WalletLedgerDto,
@@ -69,6 +65,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let outputs = outputs.into();
+        let options = options.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
         let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -78,22 +75,9 @@ where
             output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
-        self.finish_transaction(outputs, options).await
-    }
-
-    /// Separated function from send, so syncing isn't called recursively with the consolidation function, which sends
-    /// transactions
-    pub async fn finish_transaction(
-        &self,
-        outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
-        log::debug!("[TRANSACTION] finish_transaction");
-        let options = options.into();
-
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction_data, None, options)
+        self.sign_and_submit_transaction(prepared_transaction_data, options)
             .await
     }
 
@@ -101,7 +85,6 @@ where
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
@@ -115,7 +98,7 @@ where
             }
         };
 
-        self.submit_and_store_transaction(signed_transaction_data, issuer_id, options)
+        self.submit_and_store_transaction(signed_transaction_data, options)
             .await
     }
 
@@ -123,7 +106,6 @@ where
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,
-        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
@@ -136,6 +118,7 @@ where
         let conflict = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.payload,
+            signed_transaction_data.mana_rewards,
             self.client().get_protocol_parameters().await?,
         )?;
 
@@ -151,7 +134,10 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_signed_transaction(signed_transaction_data.payload.clone(), issuer_id)
+            .submit_signed_transaction(
+                signed_transaction_data.payload.clone(),
+                options.as_ref().and_then(|options| options.issuer_id),
+            )
             .await
         {
             Ok(block_id) => Some(block_id),
@@ -195,14 +181,9 @@ where
         #[cfg(feature = "storage")]
         {
             // TODO: maybe better to use the wallet address as identifier now?
-            log::debug!("[TRANSACTION] storing wallet");
+            log::debug!("[TRANSACTION] storing wallet ledger");
             self.storage_manager()
-                .save_wallet(
-                    self.address(),
-                    self.bip_path().as_ref(),
-                    self.alias().as_ref(),
-                    &WalletLedgerDto::from(&*wallet_ledger),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*wallet_ledger))
                 .await?;
         }
 

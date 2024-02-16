@@ -42,6 +42,9 @@ pub enum Error {
     /// Insufficient funds to send transaction.
     #[error("address owns insufficient funds: {required} base unit required, but {available} base unit available")]
     InsufficientFunds { available: u64, required: u64 },
+    /// Insufficient block issuance credit to submit block.
+    #[error("account has insufficient block issuance credit: {required} required, but {available} available")]
+    InsufficientBic { available: i128, required: u64 },
     /// Invalid event type.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
@@ -127,6 +130,8 @@ pub enum Error {
     /// Account not found.
     #[error("account not found")]
     AccountNotFound,
+    #[error("staking failed: {0}")]
+    StakingFailed(String),
 }
 
 impl Error {

@@ -4,7 +4,7 @@
 //! In this example we check if an output has only an address unlock condition and that the address is from the wallet.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! ```sh
 //! cargo run --release --all-features --example check_unlock_conditions
@@ -24,9 +24,8 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    #[allow(clippy::single_element_loop)]
     for var in ["WALLET_DB_PATH"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let wallet = Wallet::builder()
@@ -34,7 +33,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
 
     println!("Wallet address:\n{:#?}", wallet_address);
 

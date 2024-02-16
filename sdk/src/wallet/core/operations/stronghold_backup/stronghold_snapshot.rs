@@ -21,7 +21,11 @@ pub(crate) const WALLET_ADDRESS_KEY: &str = "wallet_address";
 pub(crate) const WALLET_BIP_PATH_KEY: &str = "wallet_bip_path";
 pub(crate) const WALLET_ALIAS_KEY: &str = "wallet_alias";
 
-impl<S: 'static + SecretManagerConfig> Wallet<S> {
+impl<S: 'static + SecretManagerConfig> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
+{
     pub(crate) async fn backup_wallet_to_stronghold_snapshot(
         &self,
         stronghold: &StrongholdAdapter,
@@ -41,13 +45,15 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         }
 
         // Store the wallet address
-        stronghold.set(WALLET_ADDRESS_KEY, &self.address).await?;
+        stronghold
+            .set(WALLET_ADDRESS_KEY, self.address().await.as_ref())
+            .await?;
 
         // Store the wallet bip path
-        stronghold.set(WALLET_BIP_PATH_KEY, &self.bip_path).await?;
+        stronghold.set(WALLET_BIP_PATH_KEY, &self.bip_path().await).await?;
 
         // Store the wallet alias)
-        stronghold.set(WALLET_ALIAS_KEY, &self.alias).await?;
+        stronghold.set(WALLET_ALIAS_KEY, &self.alias().await).await?;
 
         let serialized_wallet_ledger = serde_json::to_value(&WalletLedgerDto::from(&*self.ledger.read().await))?;
         stronghold.set(WALLET_LEDGER_KEY, &serialized_wallet_ledger).await?;

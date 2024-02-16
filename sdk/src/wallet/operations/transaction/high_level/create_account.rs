@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use serde::{Deserialize, Serialize};
@@ -59,8 +59,7 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::create_account_output()].
@@ -77,7 +76,7 @@ where
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
                 bech32_address.inner().clone()
             }
-            None => self.address().inner().clone(),
+            None => self.address().await.inner().clone(),
         };
 
         let mut account_output_builder =
@@ -105,8 +104,12 @@ where
     }
 
     /// Gets an existing account output.
-    pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
+    pub(crate) async fn get_account_output(
+        &self,
+        account_id: impl Into<Option<AccountId>> + Send,
+    ) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
+        let account_id = account_id.into();
         self.ledger()
             .await
             .unspent_outputs

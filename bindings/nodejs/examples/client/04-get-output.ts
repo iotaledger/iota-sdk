@@ -22,7 +22,7 @@ async function run() {
     });
     try {
         const output = await client.getOutput(
-            '0x022aefa73dff09b35b21ab5493412b0d354ad07a970a12b71e8087c6f3a7b8660000',
+            '0x022aefa73dff09b35b21ab5493412b0d354ad07a970a12b71e8087c6f3a7b866000000000000',
         );
         console.log('Output: ', output);
     } catch (error) {

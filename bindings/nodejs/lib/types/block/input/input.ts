@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { HexEncodedString } from '../../utils';
+import { TransactionId } from '../id';
 import { OutputId } from '../output';
 
 /**
@@ -33,7 +33,7 @@ class UTXOInput extends Input {
     /**
      * The transaction ID.
      */
-    readonly transactionId: HexEncodedString;
+    readonly transactionId: TransactionId;
     /**
      * The output index.
      */
@@ -43,10 +43,7 @@ class UTXOInput extends Input {
      * @param transactionId The ID of the transaction it is an input of.
      * @param transactionOutputIndex The index of the input within the transaction.
      */
-    constructor(
-        transactionId: HexEncodedString,
-        transactionOutputIndex: number,
-    ) {
+    constructor(transactionId: TransactionId, transactionOutputIndex: number) {
         super(InputType.UTXO);
         this.transactionId = transactionId;
         this.transactionOutputIndex = transactionOutputIndex;

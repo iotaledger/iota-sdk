@@ -38,7 +38,7 @@ pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, 
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE));
+        .with_address(Bip44::new(SHIMMER_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -59,7 +59,7 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_client_options(client_options)
-        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE));
+        .with_address(Bip44::new(SHIMMER_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
@@ -71,7 +71,7 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
 /// Request funds from the faucet and sync the wallet.
 #[allow(dead_code)]
 pub(crate) async fn request_funds(wallet: &Wallet) -> Result<()> {
-    request_funds_from_faucet(FAUCET_URL, &wallet.address()).await?;
+    request_funds_from_faucet(FAUCET_URL, &wallet.address().await).await?;
 
     // Continue only after funds are received
     for _ in 0..30 {

@@ -22,11 +22,11 @@ async fn consolidation() -> Result<()> {
     // Send 10 outputs to wallet_1
     let amount = 1_000_000;
     let tx = wallet_0
-        .send_with_params(vec![SendParams::new(amount, wallet_1.address().clone())?; 10], None)
+        .send_with_params(vec![SendParams::new(amount, wallet_1.address().await)?; 10], None)
         .await?;
 
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
@@ -37,7 +37,7 @@ async fn consolidation() -> Result<()> {
         .consolidate_outputs(ConsolidationParams::new().with_force(true))
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();

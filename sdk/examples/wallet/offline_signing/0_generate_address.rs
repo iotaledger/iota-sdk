@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["STRONGHOLD_PASSWORD", "MNEMONIC"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let offline_client = ClientOptions::new();
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_storage_path(OFFLINE_WALLET_DB_PATH)
         .with_client_options(offline_client)
-        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
 async fn write_wallet_address_to_file(wallet: &Wallet) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
     let json = serde_json::to_string_pretty(&wallet_address)?;
     let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(ADDRESS_FILE_PATH).await?);
     println!("example.address.json:\n{json}");

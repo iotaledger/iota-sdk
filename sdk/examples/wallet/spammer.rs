@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC", "EXPLORER_URL", "FAUCET_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let num_simultaneous_txs = NUM_SIMULTANEOUS_TXS.min(num_cpus::get());
@@ -60,11 +60,11 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_address_provider((address, bip_path.into()))
+        .with_address((address, bip_path.into()))
         .finish()
         .await?;
 
-    let recv_address = wallet.address();
+    let recv_address = wallet.address().await;
     println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.
@@ -206,12 +206,12 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> 
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
-    // Wait for transaction to get included
+    // Wait for transaction to get accepted
     let block_id = wallet
-        .reissue_transaction_until_included(transaction_id, None, None)
+        .wait_for_transaction_acceptance(transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

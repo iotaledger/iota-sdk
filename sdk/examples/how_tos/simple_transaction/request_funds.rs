@@ -4,7 +4,7 @@
 //! In this example we request funds from the faucet to the first address in the wallet.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "FAUCET_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let wallet = Wallet::builder()
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("Wallet synced");
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");

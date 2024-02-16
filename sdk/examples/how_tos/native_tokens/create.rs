@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let wallet = Wallet::builder()
@@ -50,12 +50,12 @@ async fn main() -> Result<()> {
         let transaction = wallet.create_account_output(None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get included
+        // Wait for transaction to get accepted
         let block_id = wallet
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+            .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Block included: {}/block/{}",
+            "Tx accepted in block: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );
@@ -79,12 +79,12 @@ async fn main() -> Result<()> {
     let transaction = wallet.create_native_token(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
-    // Wait for transaction to get included
+    // Wait for transaction to get accepted
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

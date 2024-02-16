@@ -27,6 +27,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
 
+        let wallet_address = self.address().await;
         let wallet_ledger = self.ledger().await.clone();
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
@@ -39,12 +40,12 @@ where
         let voting_output = wallet_ledger.get_voting_output()?;
 
         let claimable_outputs =
-            wallet_ledger.claimable_outputs(self.address(), OutputsToClaim::All, slot_index, &protocol_parameters)?;
+            wallet_ledger.claimable_outputs(&wallet_address, OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
         #[cfg(feature = "participation")]
         {
             if let Some(voting_output) = &voting_output {
-                if voting_output.output.as_basic().address() == self.address.inner() {
+                if voting_output.output.as_basic().address() == self.address.read().await.inner() {
                     balance.base_coin.voting_power = voting_output.output.amount();
                 }
             }
@@ -70,6 +71,10 @@ where
                         output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
+                    // Add mana rewards
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
+                        balance.mana.rewards += response.rewards;
+                    }
 
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
@@ -99,6 +104,10 @@ where
                 Output::Delegation(delegation) => {
                     // Add amount
                     balance.base_coin.total += delegation.amount();
+                    // Add mana rewards
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
+                        balance.mana.rewards += response.rewards;
+                    }
                     // Add storage deposit
                     balance.required_storage_deposit.delegation += storage_cost;
                     if !wallet_ledger.locked_outputs.contains(output_id) {
@@ -165,7 +174,7 @@ where
                                 // We use the addresses with unspent outputs, because other addresses of
                                 // the account without unspent
                                 // outputs can't be related to this output
-                                self.address.inner(),
+                                wallet_address.inner(),
                                 output,
                                 slot_index,
                                 protocol_parameters.committable_age_range(),
@@ -181,7 +190,7 @@ where
                                     .map_or_else(
                                         || output.amount(),
                                         |sdr| {
-                                            if self.address.inner() == sdr.return_address() {
+                                            if wallet_address.inner() == sdr.return_address() {
                                                 // sending to ourself, we get the full amount
                                                 output.amount()
                                             } else {

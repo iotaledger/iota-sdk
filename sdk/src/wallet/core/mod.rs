@@ -46,9 +46,10 @@ use crate::{
 /// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
-    pub(crate) address: Bech32Address,
-    pub(crate) bip_path: Option<Bip44>,
-    pub(crate) alias: Option<String>,
+    // TODO: should we maybe group the next 3 fields into a `WalletDetails` struct?
+    pub(crate) address: Arc<RwLock<Bech32Address>>,
+    pub(crate) bip_path: Arc<RwLock<Option<Bip44>>>,
+    pub(crate) alias: Arc<RwLock<Option<String>>>,
     pub(crate) inner: Arc<WalletInner<S>>,
     pub(crate) ledger: Arc<RwLock<WalletLedger>>,
 }
@@ -57,7 +58,7 @@ impl<S: SecretManage> Clone for Wallet<S> {
     fn clone(&self) -> Self {
         Self {
             address: self.address.clone(),
-            bip_path: self.bip_path,
+            bip_path: self.bip_path.clone(),
             alias: self.alias.clone(),
             inner: self.inner.clone(),
             ledger: self.ledger.clone(),
@@ -344,11 +345,12 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
+    // TODO: Is this method needed? It calls `get_default_sync_options` which the builder does not.
     /// Create a new wallet.
     pub(crate) async fn new(
         address: Bech32Address,
-        bip_path: impl Into<Option<Bip44>>,
-        alias: impl Into<Option<String>>,
+        bip_path: impl Into<Option<Bip44>> + Send,
+        alias: impl Into<Option<String>> + Send,
         inner: Arc<WalletInner<S>>,
         ledger: WalletLedger,
     ) -> Result<Self> {
@@ -358,6 +360,7 @@ where
             .get_default_sync_options()
             .await?
             .unwrap_or_default();
+
         #[cfg(not(feature = "storage"))]
         let default_sync_options = Default::default();
 
@@ -370,9 +373,9 @@ where
         }
 
         Ok(Self {
-            address,
-            bip_path: bip_path.into(),
-            alias: alias.into(),
+            address: Arc::new(RwLock::new(address)),
+            bip_path: Arc::new(RwLock::new(bip_path.into())),
+            alias: Arc::new(RwLock::new(alias.into())),
             inner,
             ledger: Arc::new(RwLock::new(ledger)),
         })
@@ -403,24 +406,39 @@ where
         self.inner.emit(wallet_event).await
     }
 
-    /// Get the wallet address.
-    pub fn address(&self) -> &Bech32Address {
-        &self.address
+    /// Get the wallet address config.
+    pub async fn address(&self) -> Bech32Address {
+        self.address.read().await.clone()
+    }
+
+    /// Get the wallet address config mutably.
+    pub async fn address_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Bech32Address> {
+        self.address.write().await
     }
 
     /// Get the wallet's configured Bech32 HRP.
-    pub fn bech32_hrp(&self) -> Hrp {
-        self.address.hrp
+    pub async fn bech32_hrp(&self) -> Hrp {
+        self.address.read().await.hrp
     }
 
     /// Get the wallet's configured bip path.
-    pub fn bip_path(&self) -> Option<Bip44> {
-        self.bip_path
+    pub async fn bip_path(&self) -> Option<Bip44> {
+        *self.bip_path.read().await
+    }
+
+    /// Get the wallet's configured bip path mutably.
+    pub async fn bip_path_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<Bip44>> {
+        self.bip_path.write().await
     }
 
     /// Get the alias of the wallet if one was set.
-    pub fn alias(&self) -> Option<String> {
-        self.alias.clone()
+    pub async fn alias(&self) -> Option<String> {
+        self.alias.read().await.clone()
+    }
+
+    /// Get the alias of the wallet if one was set mutably.
+    pub async fn alias_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<String>> {
+        self.alias.write().await
     }
 
     pub async fn ledger(&self) -> tokio::sync::RwLockReadGuard<'_, WalletLedger> {
@@ -438,7 +456,7 @@ where
 
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     pub async fn implicit_account_creation_address(&self) -> Result<Bech32Address> {
-        let bech32_address = &self.address;
+        let bech32_address = &self.address().await;
 
         if let Address::Ed25519(address) = bech32_address.inner() {
             Ok(Bech32Address::new(
@@ -641,7 +659,7 @@ mod test {
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
         let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-        let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+        let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
         let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
         let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
         let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
@@ -670,8 +688,6 @@ mod test {
             incoming_transaction,
         );
 
-        // TODO #1934 removed the data address/bip_path/alias from `WalletLedger`, so
-        // now for this test to be meaningful we should create some outputs instead.
         let wallet_ledger = WalletLedger {
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
@@ -695,10 +711,9 @@ mod test {
     }
 
     impl WalletLedger {
-        // TODO #1934 removed the data address/bip_path/alias from `WalletLedger`, so
-        // now for this test to be meaningful we should create some outputs instead.
+        // TODO: use something non-empty
         #[cfg(feature = "storage")]
-        pub(crate) fn non_empty_test_instance() -> Self {
+        pub(crate) fn test_instance() -> Self {
             Self {
                 outputs: HashMap::new(),
                 locked_outputs: HashSet::new(),

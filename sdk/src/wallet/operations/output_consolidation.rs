@@ -1,4 +1,4 @@
-// Copyright 2021-2024 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::{HashMap, HashSet};
@@ -77,9 +77,7 @@ where
     /// consolidates the amount of outputs that fit into a single transaction.
     pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
-        let consolidation_tx = self
-            .sign_and_submit_transaction(prepared_transaction, None, None)
-            .await?;
+        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
         log::debug!(
             "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
@@ -93,18 +91,19 @@ where
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
-        let wallet_address = self.address.clone();
+        let wallet_address = self.address().await;
 
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
         let options = Some(TransactionOptions {
-            custom_inputs: Some(outputs_to_consolidate.into_iter().map(|o| o.output_id).collect()),
+            required_inputs: outputs_to_consolidate.into_iter().map(|o| o.output_id).collect(),
             remainder_value_strategy: RemainderValueStrategy::CustomAddress(
                 params
                     .target_address
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
+            allow_additional_input_selection: false,
             ..Default::default()
         });
 
@@ -162,7 +161,7 @@ where
         let slot_index = self.client().get_slot_index().await?;
         let storage_score_parameters = self.client().get_protocol_parameters().await?.storage_score_parameters;
         let wallet_ledger = self.ledger().await;
-        let wallet_address = self.address.clone();
+        let wallet_address = self.address().await;
 
         let mut outputs_to_consolidate = Vec::new();
         let mut native_token_inputs = HashMap::new();
@@ -173,12 +172,12 @@ where
             //     // Remove voting output from inputs, because we want to keep its features and not consolidate it.
             //     if output_data.output_id == voting_output.output_id {
             //         continue;
-            //     }
+            //     }.await
             // }
 
             let is_locked_output = wallet_ledger.locked_outputs.contains(output_id);
             let should_consolidate_output = self
-                .should_consolidate_output(output_data, slot_index, &wallet_address)
+                .should_consolidate_output(output_data, slot_index, wallet_address.as_ref())
                 .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());

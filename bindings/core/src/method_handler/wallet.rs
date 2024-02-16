@@ -16,7 +16,7 @@ use iota_sdk::{
 use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: WalletMethod) -> crate::Result<Response> {
+pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
@@ -82,7 +82,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
-                None => *wallet.address().hrp(),
+                None => *wallet.address().await.hrp(),
             };
 
             Response::Bech32Address(address.to_bech32(bech32_hrp))
@@ -144,10 +144,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
         //     wallet.deregister_participation_event(&event_id).await?;
         //     Response::Ok
         // }
-        WalletMethod::GetAddress => {
-            let address = wallet.address().clone();
-            Response::Address(address)
-        }
+        WalletMethod::GetAddress => Response::Address(wallet.address().await),
         WalletMethod::GetBalance => Response::Balance(wallet.balance().await?),
         WalletMethod::GetFoundryOutput { token_id } => {
             let output = wallet.get_foundry_output(token_id).await?;
@@ -336,6 +333,24 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
                 .await?;
             Response::PreparedTransaction(data)
         }
+        WalletMethod::PrepareBeginStaking { params, options } => {
+            let data = wallet.prepare_begin_staking(params, options).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareExtendStaking {
+            account_id,
+            additional_epochs,
+        } => {
+            let data = wallet.prepare_extend_staking(account_id, additional_epochs).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareEndStaking { account_id } => {
+            let data = wallet.prepare_end_staking(account_id).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::AnnounceCandidacy { account_id } => {
+            Response::BlockId(wallet.announce_candidacy(account_id).await?)
+        }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareStopParticipating { event_id } => {
         //     let data = wallet.prepare_stop_participating(event_id).await?;
@@ -355,13 +370,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
         //     let events = wallet.register_participation_events(&options).await?;
         //     Response::ParticipationEvents(events)
         // }
-        WalletMethod::ReissueTransactionUntilIncluded {
+        WalletMethod::WaitForTransactionAcceptance {
             transaction_id,
             interval,
             max_attempts,
         } => {
             let block_id = wallet
-                .reissue_transaction_until_included(&transaction_id, interval, max_attempts)
+                .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
             Response::BlockId(block_id)
         }
@@ -381,8 +396,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
             let transaction = wallet.send_outputs(outputs, options).await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
+        // TODO #1934: create issue
+        // WalletMethod::SetBipPath { bip_path: String } => {
+        //     wallet.update_wallet_bip_path(...).await?;
+        //     Response::Ok
+        // }
         WalletMethod::SetAlias { alias } => {
-            wallet.set_alias(&alias).await?;
+            wallet.update_wallet_alias(&alias).await?;
             Response::Ok
         }
         WalletMethod::SetDefaultSyncOptions { options } => {
@@ -398,7 +418,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
                         prepared_transaction_data,
                         &wallet.client().get_protocol_parameters().await?,
                     )?,
-                    None,
                     None,
                 )
                 .await?;
@@ -420,7 +439,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &mut Wallet, method: Wal
                 &wallet.client().get_protocol_parameters().await?,
             )?;
             let transaction = wallet
-                .submit_and_store_transaction(signed_transaction_data, None, None)
+                .submit_and_store_transaction(signed_transaction_data, None)
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }

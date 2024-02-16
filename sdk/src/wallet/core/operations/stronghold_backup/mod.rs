@@ -15,7 +15,10 @@ use crate::{
     },
     types::block::address::Hrp,
     wallet::{
-        core::{builder::AddressProvider, WalletLedgerDto},
+        core::{
+            builder::{dto::WalletBuilderDto, AddressProvider},
+            WalletLedgerDto,
+        },
         Wallet,
     },
 };
@@ -70,7 +73,7 @@ impl Wallet {
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
     pub async fn restore_from_stronghold_backup(
-        &mut self,
+        &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_bip_path_mismatch: Option<bool>,
@@ -93,7 +96,7 @@ impl Wallet {
             ));
         }
 
-        let curr_bip_path = self.bip_path();
+        let curr_bip_path = self.bip_path().await;
 
         // Explicitly drop the data to avoid contention
         drop(wallet_ledger);
@@ -117,7 +120,7 @@ impl Wallet {
         });
 
         if !ignore_backup_values {
-            self.bip_path = read_bip_path;
+            *self.bip_path_mut().await = read_bip_path;
         }
 
         // Get the current snapshot path if set
@@ -130,7 +133,7 @@ impl Wallet {
         if let Some(mut read_secret_manager) = read_secret_manager {
             // We have to replace the snapshot path with the current one, when building stronghold
             if let SecretManagerDto::Stronghold(stronghold_dto) = &mut read_secret_manager {
-                stronghold_dto.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
+                stronghold_dto.snapshot_path = new_snapshot_path.display().to_string();
             }
 
             let restored_secret_manager = SecretManager::from_config(&read_secret_manager)
@@ -164,9 +167,9 @@ impl Wallet {
                 });
 
                 if restore_wallet {
-                    self.address = read_address;
-                    self.bip_path = read_bip_path;
-                    self.alias = read_alias;
+                    *self.address_mut().await = read_address;
+                    *self.bip_path_mut().await = read_bip_path;
+                    *self.alias_mut().await = read_alias;
                     *self.ledger_mut().await = read_wallet_ledger;
                 }
             }
@@ -188,19 +191,14 @@ impl Wallet {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                // TODO: expect
-                .with_address_provider(self.bip_path().expect("todo"));
+                .with_address((self.address().await, self.bip_path().await))
+                .with_alias(self.alias().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet to db
+            // also save wallet ledger to db
             self.storage_manager()
-                .save_wallet(
-                    self.address(),
-                    self.bip_path.as_ref(),
-                    self.alias.as_ref(),
-                    &WalletLedgerDto::from(&*self.ledger().await),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*self.ledger().await))
                 .await?;
         }
 
@@ -241,7 +239,7 @@ impl Wallet<StrongholdSecretManager> {
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
     pub async fn restore_from_stronghold_backup(
-        &mut self,
+        &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_bip_path_mismatch: Option<bool>,
@@ -264,7 +262,7 @@ impl Wallet<StrongholdSecretManager> {
             ));
         }
 
-        let curr_bip_path = self.bip_path;
+        let curr_bip_path = self.bip_path().await;
 
         // Explicitly drop the data to avoid contention
         drop(wallet_ledger);
@@ -288,7 +286,7 @@ impl Wallet<StrongholdSecretManager> {
         });
 
         if !ignore_backup_values {
-            self.bip_path = read_bip_path;
+            *self.bip_path_mut().await = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
@@ -324,9 +322,9 @@ impl Wallet<StrongholdSecretManager> {
                 });
 
                 if restore_wallet {
-                    self.address = read_address;
-                    self.bip_path = read_bip_path;
-                    self.alias = read_alias;
+                    *self.address_mut().await = read_address;
+                    *self.bip_path_mut().await = read_bip_path;
+                    *self.alias_mut().await = read_alias;
                     *self.ledger_mut().await = read_wallet_ledger;
                 }
             }
@@ -348,19 +346,14 @@ impl Wallet<StrongholdSecretManager> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                // TODO: expect
-                .with_address_provider(self.bip_path().expect("todo"));
+                .with_address((self.address().await, self.bip_path().await))
+                .with_alias(self.alias().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet to db
+            // also save wallet ledger to db
             self.storage_manager()
-                .save_wallet(
-                    &self.address,
-                    self.bip_path.as_ref(),
-                    self.alias.as_ref(),
-                    &WalletLedgerDto::from(&*self.ledger().await),
-                )
+                .save_wallet_ledger(&WalletLedgerDto::from(&*self.ledger().await))
                 .await?;
         }
 

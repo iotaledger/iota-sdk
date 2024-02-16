@@ -119,6 +119,13 @@ macro_rules! impl_id {
                             slot_index: slot_index.into().to_le_bytes(),
                         }
                     }
+
+                    pub const fn [<const_into_ $id_name:snake>](self, slot_index: $crate::types::block::slot::SlotIndex) -> $id_name {
+                        $id_name {
+                            hash: self,
+                            slot_index: slot_index.0.to_le_bytes(),
+                        }
+                    }
                 }
             }
 
@@ -359,4 +366,33 @@ macro_rules! def_is_as_opt {
             )+
         }
     };
+}
+
+#[macro_export]
+macro_rules! impl_deserialize_untagged {
+    ($type:ty: $($name:ident),+$(,)?) => {
+        paste::paste!{
+            impl<'de> serde::Deserialize<'de> for $type {
+                fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+                    let value = serde_json::Value::deserialize(d)?;
+                    Ok(
+                        match value
+                            .get("type")
+                            .and_then(serde_json::Value::as_u64)
+                            .ok_or_else(|| serde::de::Error::custom(core::concat!("invalid ", core::stringify!($type), " type")))? as u8
+                        {
+                            $(
+                            [<$name $type>]::KIND => {
+                                Self::from([<$name $type>]::deserialize(value).map_err(|e| {
+                                    serde::de::Error::custom(alloc::format!(core::concat!("cannot deserialize ", core::stringify!($name), core::stringify!($type), ": {}"), e))
+                                })?)
+                            }
+                            )+
+                            _ => return Err(serde::de::Error::custom(core::concat!("invalid ", core::stringify!($type), " type"))),
+                        },
+                    )
+                }
+            }
+        }
+    }
 }

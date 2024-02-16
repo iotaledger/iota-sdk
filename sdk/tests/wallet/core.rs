@@ -30,7 +30,7 @@ async fn update_client_options() -> Result<()> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
-    let mut wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
@@ -88,22 +88,18 @@ async fn changed_bip_path() -> Result<()> {
 
     drop(wallet);
 
-    let err = Wallet::builder()
+    let result = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic.clone(),
         )?))
-        .with_address_provider(Bip44::new(IOTA_COIN_TYPE))
+        .with_address(Bip44::new(IOTA_COIN_TYPE))
         .with_storage_path(storage_path)
         .finish()
         .await;
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    let mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
-        new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
-        old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    });
-    assert!(matches!(err, mismatch_err));
+    assert!(matches!(result, Err(Error::BipPathMismatch { .. })));
 
     // Building the wallet with the same coin type still works
     assert!(
@@ -129,7 +125,7 @@ async fn shimmer_coin_type() -> Result<()> {
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
     assert_eq!(
-        Bech32Address::try_new("smr", wallet.address().clone())?.to_string(),
+        Bech32Address::try_new("smr", wallet.address().await)?.to_string(),
         // Address generated with bip32 path: [44, 4219, 0, 0, 0]
         "smr1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat65xq7jz"
     );
@@ -149,7 +145,7 @@ async fn iota_coin_type() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_address_provider(Bip44::new(IOTA_COIN_TYPE));
+        .with_address(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -159,7 +155,7 @@ async fn iota_coin_type() -> Result<()> {
 
     // Creating a new account with providing a coin type will use the iota coin type with shimmer testnet bech32 hrp
     assert_eq!(
-        Bech32Address::try_new("smr", wallet.address().clone())?.to_string(),
+        Bech32Address::try_new("smr", wallet.address().await)?.to_string(),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0]
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -173,7 +169,7 @@ async fn update_node_auth() -> Result<()> {
     let storage_path = "test-storage/update_node_auth";
     setup(storage_path)?;
 
-    let mut wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_auth = iota_sdk::client::node_manager::node::NodeAuth {
         jwt: Some("jwt".to_string()),

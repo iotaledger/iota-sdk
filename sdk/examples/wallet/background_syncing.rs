@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC", "WALLET_DB_PATH", "FAUCET_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Create a wallet
@@ -34,11 +34,11 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
 
     // Manually sync to ensure we have the correct funds to start with
     let balance = wallet.sync(None).await?;

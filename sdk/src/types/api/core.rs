@@ -283,7 +283,7 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are directly referenced to adjust opinion.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
-    // Latest issuing time of the returned parents.
+    /// Latest issuing time of the returned parents.
     #[serde(with = "string")]
     pub latest_parent_block_issuing_time: u64,
     /// The slot index of the latest finalized slot.
@@ -339,15 +339,17 @@ pub struct SubmitBlockResponse {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BlockState {
-    // Stored but not confirmed.
+    /// Stored but not accepted/confirmed.
     Pending,
-    // Confirmed with the first level of knowledge.
+    /// Valid block referenced by some validators.
+    Accepted,
+    /// Valid block referenced by more than 2/3 of the validators.
     Confirmed,
-    // Included and can no longer be reverted.
+    /// Accepted/confirmed block and the slot was finalized, can no longer be reverted.
     Finalized,
-    // Rejected by the node, and user should reissue payload if it contains one.
+    /// Rejected by the node, and user should reissue payload if it contains one.
     Rejected,
-    // Not successfully issued due to failure reason.
+    /// Not successfully issued due to failure reason.
     Failed,
 }
 
@@ -355,21 +357,33 @@ pub enum BlockState {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionState {
-    // Not included yet.
+    /// Not included yet.
     Pending,
-    // Included.
+    /// Included.
     Accepted,
-    // Included and its included block is confirmed.
+    /// Included and its included block is confirmed.
     Confirmed,
-    // Included, its included block is finalized and cannot be reverted anymore.
+    /// Included, its included block is finalized and cannot be reverted anymore.
     Finalized,
-    // The block is not successfully issued due to failure reason.
+    /// The block is not successfully issued due to failure reason.
     Failed,
 }
 
 /// Describes the reason of a block failure.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, serde_repr::Serialize_repr, serde_repr::Deserialize_repr)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    PartialEq,
+    serde_repr::Serialize_repr,
+    serde_repr::Deserialize_repr,
+    strum::FromRepr,
+    strum::EnumString,
+    strum::AsRefStr,
+)]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum BlockFailureReason {
@@ -379,24 +393,22 @@ pub enum BlockFailureReason {
     ParentTooOld = 2,
     /// One of the block's parents does not exist.
     ParentDoesNotExist = 3,
-    /// One of the block's parents is invalid.
-    ParentInvalid = 4,
     /// The block's issuer account could not be found.
-    IssuerAccountNotFound = 5,
-    /// The block's protocol version is invalid.
-    VersionInvalid = 6,
+    IssuerAccountNotFound = 4,
     /// The mana cost could not be calculated.
-    ManaCostCalculationFailed = 7,
+    ManaCostCalculationFailed = 5,
     // The block's issuer account burned insufficient Mana for a block.
-    BurnedInsufficientMana = 8,
-    /// The account is invalid.
-    AccountInvalid = 9,
+    BurnedInsufficientMana = 6,
+    /// The account is locked.
+    AccountLocked = 7,
+    /// The account is locked.
+    AccountExpired = 8,
     /// The block's signature is invalid.
-    SignatureInvalid = 10,
+    SignatureInvalid = 9,
     /// The block is dropped due to congestion.
-    DroppedDueToCongestion = 11,
+    DroppedDueToCongestion = 10,
     /// The block payload is invalid.
-    PayloadInvalid = 12,
+    PayloadInvalid = 11,
     /// The block is invalid.
     Invalid = 255,
 }
@@ -407,14 +419,13 @@ impl core::fmt::Display for BlockFailureReason {
             Self::TooOldToIssue => write!(f, "The block is too old to issue."),
             Self::ParentTooOld => write!(f, "One of the block's parents is too old."),
             Self::ParentDoesNotExist => write!(f, "One of the block's parents does not exist."),
-            Self::ParentInvalid => write!(f, "One of the block's parents is invalid."),
             Self::IssuerAccountNotFound => write!(f, "The block's issuer account could not be found."),
-            Self::VersionInvalid => write!(f, "The block's protocol version is invalid."),
             Self::ManaCostCalculationFailed => write!(f, "The mana cost could not be calculated."),
             Self::BurnedInsufficientMana => {
                 write!(f, "The block's issuer account burned insufficient Mana for a block.")
             }
-            Self::AccountInvalid => write!(f, "The account is invalid."),
+            Self::AccountLocked => write!(f, "The account is locked."),
+            Self::AccountExpired => write!(f, "The account is expired."),
             Self::SignatureInvalid => write!(f, "The block's signature is invalid."),
             Self::DroppedDueToCongestion => write!(f, "The block is dropped due to congestion."),
             Self::PayloadInvalid => write!(f, "The block payload is invalid."),
@@ -454,20 +465,22 @@ pub struct BlockWithMetadataResponse {
     pub metadata: BlockMetadataResponse,
 }
 
+// TODO: needs to be aligned with TIP-48.
+// https://github.com/iotaledger/iota-sdk/issues/1921
 /// Response of GET /api/core/v3/outputs/{output_id}.
 /// An output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
-    pub metadata: OutputMetadata,
     pub output: Output,
+    pub metadata: OutputMetadata,
 }
 
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
-            metadata: value.metadata,
             output: value.output().clone(),
+            metadata: value.metadata,
         }
     }
 }
@@ -514,8 +527,8 @@ pub struct UtxoChangesFullResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithId {
-    pub output_id: OutputId,
     pub output: Output,
+    pub output_id: OutputId,
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].

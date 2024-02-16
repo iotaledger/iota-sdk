@@ -8,23 +8,24 @@ use std::str::FromStr;
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use iota_sdk::{
-    client::request_funds_from_faucet,
+    client::{request_funds_from_faucet, secret::SecretManager},
     types::block::{
-        address::{Bech32Address, ToBech32Ext},
+        address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
         output::{
             feature::{BlockIssuerKeySource, MetadataFeature},
             unlock_condition::AddressUnlockCondition,
-            AccountId, BasicOutputBuilder, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId,
-            TokenId,
+            AccountId, BasicOutputBuilder, DelegationId, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output,
+            OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
-        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
+        Error as WalletError, MintNftParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams,
+        SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -33,7 +34,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 use self::completer::WalletCommandHelper;
 use crate::{
     error::Error,
-    helper::{bytes_from_hex_or_file, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -62,8 +63,23 @@ pub enum WalletCommand {
     Address,
     /// Allots mana to an account.
     AllotMana { mana: u64, account_id: Option<AccountId> },
+    /// Announces that a staking account wants to be a validator for the current epoch.
+    AnnounceCandidacy {
+        /// The account ID which will announce its candidacy to be a validator.
+        account_id: AccountId,
+    },
     /// Print the wallet balance.
     Balance,
+    BeginStaking {
+        /// The Account ID which will begin staking.
+        account_id: AccountId,
+        /// The amount of tokens to stake.
+        staked_amount: u64,
+        /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+        fixed_cost: u64,
+        /// The staking period (in epochs). Will default to the staking unbonding period.
+        staking_period: Option<u32>,
+    },
     /// Burn an amount of native token.
     BurnNativeToken {
         /// Token ID to be burnt, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -93,6 +109,15 @@ pub enum WalletCommand {
     Consolidate,
     /// Create a new account output.
     CreateAccountOutput,
+    /// Create a delegation.
+    CreateDelegation {
+        /// The amount to delegate.
+        delegated_amount: u64,
+        /// The account ID of the validator.
+        validator_account_id: AccountId,
+        /// The address that will control the delegation. Defaults to the wallet address.
+        address: Option<Bech32Address>,
+    },
     /// Create a native token.
     CreateNativeToken {
         /// Circulating supply of the native token to be minted, e.g. 100.
@@ -111,10 +136,23 @@ pub enum WalletCommand {
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_file: Option<String>,
     },
+    /// Delay the claiming of a delegation.
+    DelayDelegationClaiming {
+        /// ID of the delegation to be delayed.
+        delegation_id: DelegationId,
+        /// Whether excess amount above the minimum storage requirement should be reclaimed.
+        /// Otherwise the excess will be transferred into a new delegation.
+        reclaim_excess: bool,
+    },
     /// Destroy an account output.
     DestroyAccount {
         /// Account ID to be destroyed, e.g. 0xed5a90106ae5d402ebaecb9ba36f32658872df789f7a29b9f6d695b912ec6a1e.
         account_id: AccountId,
+    },
+    /// Destroy a delegation.
+    DestroyDelegation {
+        /// ID of the delegation to be destroyed.
+        delegation_id: DelegationId,
     },
     /// Destroy a foundry.
     DestroyFoundry {
@@ -122,8 +160,20 @@ pub enum WalletCommand {
         /// 0x08cb54928954c3eb7ece1bf1cc0c68eb179dc1c4634ae5d23df1c70643d0911c3d0200000000.
         foundry_id: FoundryId,
     },
+    /// End a staking and claim the rewards.
+    EndStaking {
+        /// The Account ID of the staking account.
+        account_id: AccountId,
+    },
     /// Exit the CLI wallet.
     Exit,
+    /// Extend a staking by some additional epochs.
+    ExtendStaking {
+        /// The Account ID of the staking account.
+        account_id: AccountId,
+        /// The number of additional epochs to add to the staking period.
+        additional_epochs: u32,
+    },
     /// Request funds from the faucet.
     Faucet {
         /// Address the faucet sends the funds to, defaults to the wallet address.
@@ -379,11 +429,12 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let wallet_ledger = wallet.ledger().await;
-    let account_id = account_id
-        .or_else(|| wallet_ledger.first_account_id())
-        .ok_or(WalletError::AccountNotFound)?;
-    drop(wallet_ledger);
+    let account_id = {
+        let wallet_ledger = wallet.ledger().await;
+        account_id
+            .or_else(|| wallet_ledger.first_account_id())
+            .ok_or(WalletError::AccountNotFound)?
+    };
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
 
@@ -396,10 +447,51 @@ pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<A
     Ok(())
 }
 
+// `announce-candidacy` command
+pub async fn announce_candidacy_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
+    println_log_info!("Announcing candidacy for account {account_id}");
+
+    let block_id = wallet.announce_candidacy(account_id).await?;
+
+    println_log_info!("Block submitted: {block_id}");
+    Ok(())
+}
+
 // `balance` command
 pub async fn balance_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet.balance().await?;
     println_log_info!("{balance:#?}");
+
+    Ok(())
+}
+
+// `begin-staking` command
+pub async fn begin_staking_command(
+    wallet: &Wallet,
+    account_id: AccountId,
+    staked_amount: u64,
+    fixed_cost: u64,
+    staking_period: Option<u32>,
+) -> Result<(), Error> {
+    println_log_info!("Begin staking for {account_id}.");
+
+    let transaction = wallet
+        .begin_staking(
+            BeginStakingParams {
+                account_id,
+                staked_amount,
+                fixed_cost,
+                staking_period,
+            },
+            None,
+        )
+        .await?;
+
+    println_log_info!(
+        "Begin staking transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
@@ -472,15 +564,10 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
 
 /// `claimable-outputs` command
 pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    let balance = wallet.balance().await?;
-    for output_id in balance
-        .potentially_locked_outputs()
-        .iter()
-        .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
-    {
+    for output_id in wallet.claimable_outputs(OutputsToClaim::All).await? {
         let wallet_ledger = wallet.ledger().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output = &wallet_ledger.get_output(output_id).unwrap().output;
+        let output = &wallet_ledger.get_output(&output_id).unwrap().output;
         let kind = match output {
             Output::Nft(_) => "Nft",
             Output::Basic(_) => "Basic",
@@ -488,15 +575,10 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
-        // if let Some(native_tokens) = output.native_tokens() {
-        //     if !native_tokens.is_empty() {
-        //         println_log_info!("  - native token amount:");
-        //         native_tokens.iter().for_each(|token| {
-        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
-        //         });
-        //     }
-        // }
+        if let Some(native_token) = output.native_token() {
+            println_log_info!("  - native token amount:");
+            println_log_info!("    + {} {}", native_token.amount(), native_token.token_id());
+        }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions
@@ -576,6 +658,36 @@ pub async fn create_account_output_command(wallet: &Wallet) -> Result<(), Error>
     Ok(())
 }
 
+// `create-delegation` command
+pub async fn create_delegation_command(
+    wallet: &Wallet,
+    address: Option<Bech32Address>,
+    delegated_amount: u64,
+    validator_account_id: AccountId,
+) -> Result<(), Error> {
+    println_log_info!("Creating delegation output.");
+
+    let transaction = wallet
+        .create_delegation_output(
+            CreateDelegationParams {
+                address,
+                delegated_amount,
+                validator_address: AccountAddress::new(validator_account_id),
+            },
+            None,
+        )
+        .await?;
+
+    println_log_info!(
+        "Delegation creation transaction sent:\n{:?}\n{:?}\n{:?}",
+        transaction.transaction.transaction_id,
+        transaction.transaction.block_id,
+        transaction.delegation_id
+    );
+
+    Ok(())
+}
+
 // `create-native-token` command
 pub async fn create_native_token_command(
     wallet: &Wallet,
@@ -592,7 +704,7 @@ pub async fn create_native_token_command(
             transaction.block_id
         );
         wallet
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+            .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         // Sync wallet after the transaction got confirmed, so the account output is available
         wallet.sync(None).await?;
@@ -616,6 +728,25 @@ pub async fn create_native_token_command(
     Ok(())
 }
 
+// `delay-delegation-claiming` command
+pub async fn delay_delegation_claiming_command(
+    wallet: &Wallet,
+    delegation_id: DelegationId,
+    reclaim_excess: bool,
+) -> Result<(), Error> {
+    println_log_info!("Delaying delegation claiming.");
+
+    let transaction = wallet.delay_delegation_claiming(delegation_id, reclaim_excess).await?;
+
+    println_log_info!(
+        "Delay delegation claiming transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `destroy-account` command
 pub async fn destroy_account_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
     println_log_info!("Destroying account {account_id}.");
@@ -624,6 +755,21 @@ pub async fn destroy_account_command(wallet: &Wallet, account_id: AccountId) -> 
 
     println_log_info!(
         "Destroying account transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `destroy-delegation` command
+pub async fn destroy_delegation_command(wallet: &Wallet, delegation_id: DelegationId) -> Result<(), Error> {
+    println_log_info!("Destroying delegation {delegation_id}.");
+
+    let transaction = wallet.burn(delegation_id, None).await?;
+
+    println_log_info!(
+        "Destroying delegation transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
@@ -646,12 +792,46 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
     Ok(())
 }
 
+// `end-staking` command
+pub async fn end_staking_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
+    println_log_info!("Ending staking for {account_id}.");
+
+    let transaction = wallet.end_staking(account_id).await?;
+
+    println_log_info!(
+        "End staking transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `extend-staking` command
+pub async fn extend_staking_command(
+    wallet: &Wallet,
+    account_id: AccountId,
+    additional_epochs: u32,
+) -> Result<(), Error> {
+    println_log_info!("Extending staking for {account_id} by {additional_epochs} epochs.");
+
+    let transaction = wallet.extend_staking(account_id, additional_epochs).await?;
+
+    println_log_info!(
+        "Extend staking transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `faucet` command
 pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url: Option<String>) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
     } else {
-        wallet.address().clone()
+        wallet.address().await
     };
 
     let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
@@ -1051,7 +1231,7 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // }
 
 async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
-    let address = wallet.address();
+    let address = wallet.address().await;
 
     let mut log = format!(
         "Address:\n{:<9}{}\n{:<9}{:?}",
@@ -1110,7 +1290,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         }
     }
 
-    let bip_path = wallet.bip_path();
+    let bip_path = wallet.bip_path().await;
     log = format!("{log}\nBIP path: {bip_path:?}");
 
     log = format!(
@@ -1162,11 +1342,22 @@ pub enum PromptResponse {
     Done,
 }
 
+async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
+    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+        && !wallet.is_stronghold_password_available().await?
+    {
+        let password = get_password("Stronghold password", false)?;
+        wallet.set_stronghold_password(password).await?;
+    }
+
+    Ok(())
+}
+
 pub async fn prompt_internal(
     wallet: &Wallet,
     rl: &mut Editor<WalletCommandHelper, MemHistory>,
 ) -> Result<PromptResponse, Error> {
-    let prompt = if let Some(alias) = wallet.alias() {
+    let prompt = if let Some(alias) = wallet.alias().await {
         format!("Wallet \"{alias}\": ")
     } else {
         String::from("Wallet: ")
@@ -1200,20 +1391,55 @@ pub async fn prompt_internal(
                         WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
                         WalletCommand::AllotMana { mana, account_id } => {
+                            ensure_password(wallet).await?;
                             allot_mana_command(wallet, mana, account_id).await
                         }
+                        WalletCommand::AnnounceCandidacy { account_id } => {
+                            ensure_password(wallet).await?;
+                            announce_candidacy_command(wallet, account_id).await
+                        }
                         WalletCommand::Balance => balance_command(wallet).await,
+                        WalletCommand::BeginStaking {
+                            account_id,
+                            staked_amount,
+                            fixed_cost,
+                            staking_period,
+                        } => {
+                            ensure_password(wallet).await?;
+                            begin_staking_command(wallet, account_id, staked_amount, fixed_cost, staking_period).await
+                        }
                         WalletCommand::BurnNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             burn_native_token_command(wallet, token_id, amount).await
                         }
-                        WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
-                        WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
+                        WalletCommand::BurnNft { nft_id } => {
+                            ensure_password(wallet).await?;
+                            burn_nft_command(wallet, nft_id).await
+                        }
+                        WalletCommand::Claim { output_id } => {
+                            ensure_password(wallet).await?;
+                            claim_command(wallet, output_id).await
+                        }
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
                         WalletCommand::Congestion { account_id, work_score } => {
                             congestion_command(wallet, account_id, work_score).await
                         }
-                        WalletCommand::Consolidate => consolidate_command(wallet).await,
-                        WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
+                        WalletCommand::Consolidate => {
+                            ensure_password(wallet).await?;
+                            consolidate_command(wallet).await
+                        }
+                        WalletCommand::CreateAccountOutput => {
+                            ensure_password(wallet).await?;
+                            create_account_output_command(wallet).await
+                        }
+                        WalletCommand::CreateDelegation {
+                            address,
+                            delegated_amount,
+                            validator_account_id,
+                        } => {
+                            ensure_password(wallet).await?;
+                            create_delegation_command(wallet, address, delegated_amount, validator_account_id).await
+                        }
                         WalletCommand::CreateNativeToken {
                             circulating_supply,
                             maximum_supply,
@@ -1221,6 +1447,7 @@ pub async fn prompt_internal(
                             foundry_metadata_hex,
                             foundry_metadata_file,
                         } => {
+                            ensure_password(wallet).await?;
                             create_native_token_command(
                                 wallet,
                                 circulating_supply,
@@ -1232,27 +1459,54 @@ pub async fn prompt_internal(
                             )
                             .await
                         }
+                        WalletCommand::DelayDelegationClaiming {
+                            delegation_id,
+                            reclaim_excess,
+                        } => {
+                            ensure_password(wallet).await?;
+                            delay_delegation_claiming_command(wallet, delegation_id, reclaim_excess).await
+                        }
                         WalletCommand::DestroyAccount { account_id } => {
+                            ensure_password(wallet).await?;
                             destroy_account_command(wallet, account_id).await
                         }
+                        WalletCommand::DestroyDelegation { delegation_id } => {
+                            ensure_password(wallet).await?;
+                            destroy_delegation_command(wallet, delegation_id).await
+                        }
                         WalletCommand::DestroyFoundry { foundry_id } => {
+                            ensure_password(wallet).await?;
                             destroy_foundry_command(wallet, foundry_id).await
+                        }
+                        WalletCommand::EndStaking { account_id } => {
+                            ensure_password(wallet).await?;
+                            end_staking_command(wallet, account_id).await
                         }
                         WalletCommand::Exit => {
                             return Ok(PromptResponse::Done);
+                        }
+                        WalletCommand::ExtendStaking {
+                            account_id,
+                            additional_epochs,
+                        } => {
+                            ensure_password(wallet).await?;
+                            extend_staking_command(wallet, account_id, additional_epochs).await
                         }
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
                             implicit_account_creation_address_command(wallet).await
                         }
                         WalletCommand::ImplicitAccountTransition { output_id } => {
+                            ensure_password(wallet).await?;
                             implicit_account_transition_command(wallet, output_id).await
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             melt_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNativeToken { token_id, amount } => {
+                            ensure_password(wallet).await?;
                             mint_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNft {
@@ -1267,6 +1521,7 @@ pub async fn prompt_internal(
                             sender,
                             issuer,
                         } => {
+                            ensure_password(wallet).await?;
                             mint_nft_command(
                                 wallet,
                                 address,
@@ -1294,6 +1549,7 @@ pub async fn prompt_internal(
                             expiration,
                             allow_micro_amount,
                         } => {
+                            ensure_password(wallet).await?;
                             let allow_micro_amount = if return_address.is_some() || expiration.is_some() {
                                 true
                             } else {
@@ -1306,8 +1562,14 @@ pub async fn prompt_internal(
                             token_id,
                             amount,
                             gift_storage_deposit,
-                        } => send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await,
-                        WalletCommand::SendNft { address, nft_id } => send_nft_command(wallet, address, nft_id).await,
+                        } => {
+                            ensure_password(wallet).await?;
+                            send_native_token_command(wallet, address, token_id, amount, gift_storage_deposit).await
+                        }
+                        WalletCommand::SendNft { address, nft_id } => {
+                            ensure_password(wallet).await?;
+                            send_nft_command(wallet, address, nft_id).await
+                        }
                         WalletCommand::Sync => sync_command(wallet).await,
                         WalletCommand::Transaction { selector } => transaction_command(wallet, selector).await,
                         WalletCommand::Transactions { show_details } => {

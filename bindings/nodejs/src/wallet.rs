@@ -68,7 +68,7 @@ pub async fn destroy_wallet(wallet: External<WalletMethodHandler>) {
 pub async fn call_wallet_method(wallet: External<WalletMethodHandler>, method: String) -> Result<String> {
     let method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::new)?;
 
-    match &mut **wallet.as_ref().write().await {
+    match &**wallet.as_ref().read().await {
         Some(wallet) => {
             let response = rust_call_wallet_method(wallet, method).await;
             match response {

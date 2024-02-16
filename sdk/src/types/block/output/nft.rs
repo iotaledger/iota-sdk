@@ -22,7 +22,7 @@ use crate::types::block::{
         StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::StateTransitionError,
+    semantic::TransactionFailureReason,
     Error,
 };
 
@@ -407,10 +407,11 @@ impl NftOutput {
     }
 
     // Transition, just without full SemanticValidationContext
-    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), TransactionFailureReason> {
         if current_state.immutable_features != next_state.immutable_features {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
+
         Ok(())
     }
 }
@@ -496,7 +497,7 @@ impl Packable for NftOutput {
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Nft(nft_address) = unlock_condition.address() {
-            if nft_address.nft_id() == nft_id {
+            if !nft_id.is_null() && nft_address.nft_id() == nft_id {
                 return Err(Error::SelfDepositNft(*nft_id));
             }
         }

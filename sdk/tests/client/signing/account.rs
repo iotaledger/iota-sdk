@@ -51,18 +51,26 @@ async fn sign_account_state_transition() -> Result<()> {
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
-        [Account(
-            1_000_000,
-            account_id,
-            address.clone(),
-            None,
-            None,
+        [(
+            Account {
+                amount: 1_000_000,
+                account_id: account_id,
+                address: address.clone(),
+                sender: None,
+                issuer: None,
+            },
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         )],
         Some(slot_index),
     );
 
-    let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None, None)]);
+    let outputs = build_outputs([Account {
+        amount: 1_000_000,
+        account_id: account_id,
+        address: address.clone(),
+        sender: None,
+        issuer: None,
+    }]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -79,6 +87,7 @@ async fn sign_account_state_transition() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -92,7 +101,12 @@ async fn sign_account_state_transition() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -122,23 +136,61 @@ async fn account_reference_unlocks() -> Result<()> {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id,
-                address.clone(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id,
+                    address: address.clone(),
+                    sender: None,
+                    issuer: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_address.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_address.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
         ],
         Some(slot_index),
     );
 
     let outputs = build_outputs([
-        Account(1_000_000, account_id, address, None, None, None),
-        Basic(2_000_000, account_address, None, None, None, None, None, None),
+        Account {
+            amount: 1_000_000,
+            account_id: account_id,
+            address: address,
+            sender: None,
+            issuer: None,
+        },
+        Basic {
+            amount: 2_000_000,
+            address: account_address,
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -156,6 +208,7 @@ async fn account_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -181,7 +234,12 @@ async fn account_reference_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

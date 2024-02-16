@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC", "WALLET_DB_PATH"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
@@ -34,11 +34,11 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
-    let bech32_address = wallet.address();
+    let bech32_address = wallet.address().await;
 
     println!("ADDRESS:\n{bech32_address}");
 
@@ -49,7 +49,6 @@ async fn main() -> Result<()> {
 }
 
 async fn sync_print_balance(wallet: &Wallet) -> Result<()> {
-    let alias = wallet.alias();
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
     println!("Wallet synced in: {:.2?}", now.elapsed());

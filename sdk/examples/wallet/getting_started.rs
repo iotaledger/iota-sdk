@@ -22,9 +22,8 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    #[allow(clippy::single_element_loop)]
     for var in ["NODE_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Setup Stronghold secret manager.
@@ -40,7 +39,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
         .with_storage_path("getting-started-db")
-        .with_address_provider(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address(Bip44::new(SHIMMER_COIN_TYPE))
         .with_alias("Alice".to_string())
         .finish()
         .await?;
@@ -51,7 +50,7 @@ async fn main() -> Result<()> {
     println!("Mnemonic: {}", mnemonic.as_ref());
     wallet.store_mnemonic(mnemonic).await?;
 
-    let wallet_address = wallet.address();
+    let wallet_address = wallet.address().await;
     println!("{}", wallet_address);
 
     Ok(())

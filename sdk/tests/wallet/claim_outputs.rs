@@ -31,8 +31,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     let tx = wallet_1
         .send_with_params(
             [
-                SendParams::new(micro_amount, wallet_0.address().clone())?,
-                SendParams::new(micro_amount, wallet_0.address().clone())?,
+                SendParams::new(micro_amount, wallet_0.address().await)?,
+                SendParams::new(micro_amount, wallet_0.address().await)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -42,7 +42,7 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
         .await?;
 
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -54,7 +54,7 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
         .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_0.sync(None).await.unwrap();
@@ -88,8 +88,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     let tx = wallet_1
         .send_with_params(
             [
-                SendParams::new(amount, wallet_0.address().clone())?,
-                SendParams::new(0, wallet_0.address().clone())?,
+                SendParams::new(amount, wallet_0.address().await)?,
+                SendParams::new(0, wallet_0.address().await)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -99,7 +99,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
         .await?;
 
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -111,7 +111,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
         .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Amount).await?)
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_0.sync(None).await.unwrap();
@@ -145,9 +145,9 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
 
     let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-        .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().clone()))
+        .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
         .add_unlock_condition(ExpirationUnlockCondition::new(
-            wallet_0.address().clone(),
+            wallet_0.address().await,
             expiration_slot,
         )?)
         .finish_output()?;
@@ -158,7 +158,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let tx = wallet_0.send_outputs(outputs, None).await?;
 
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with wallet 1
@@ -170,7 +170,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
         .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::All).await?)
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
@@ -201,7 +201,7 @@ async fn claim_2_native_tokens() -> Result<()> {
 
     let tx = wallet_1.create_account_output(None, None).await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
     wallet_1.sync(None).await?;
 
@@ -217,7 +217,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
     wallet_1.sync(None).await?;
 
@@ -233,21 +233,21 @@ async fn claim_2_native_tokens() -> Result<()> {
         )
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
     wallet_1.sync(None).await?;
 
     let tx = wallet_1
         .send_native_tokens(
             [
-                SendNativeTokenParams::new(wallet_0.address().clone(), (create_tx_0.token_id, native_token_amount))?,
-                SendNativeTokenParams::new(wallet_0.address().clone(), (create_tx_1.token_id, native_token_amount))?,
+                SendNativeTokenParams::new(wallet_0.address().await, (create_tx_0.token_id, native_token_amount))?,
+                SendNativeTokenParams::new(wallet_0.address().await, (create_tx_1.token_id, native_token_amount))?,
             ],
             None,
         )
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -258,7 +258,7 @@ async fn claim_2_native_tokens() -> Result<()> {
         .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_0.sync(None).await.unwrap();
@@ -292,7 +292,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
 
     let tx = wallet_0.create_account_output(None, None).await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
     wallet_0.sync(None).await?;
 
@@ -308,7 +308,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
     wallet_0.sync(None).await?;
 
@@ -324,7 +324,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
     wallet_0.sync(None).await?;
 
@@ -334,17 +334,17 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .send_outputs(
             [
                 BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-                    .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().clone()))
+                    .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        wallet_0.address().clone(),
+                        wallet_0.address().await,
                         wallet_0.client().get_slot_index().await? + 5000,
                     )?)
                     .with_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output()?,
                 BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-                    .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().clone()))
+                    .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        wallet_0.address().clone(),
+                        wallet_0.address().await,
                         wallet_0.client().get_slot_index().await? + 5000,
                     )?)
                     .with_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
@@ -354,7 +354,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         )
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 1
@@ -365,7 +365,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
@@ -400,18 +400,18 @@ async fn claim_2_nft_outputs() -> Result<()> {
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().clone())),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    wallet_1.address().clone(),
+                    wallet_1.address().await,
                     wallet_1.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output()?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().clone())),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    wallet_1.address().clone(),
+                    wallet_1.address().await,
                     wallet_1.client().get_slot_index().await? + 5000,
                 )?),
             ])
@@ -420,7 +420,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
 
     let tx = wallet_1.send_outputs(outputs, None).await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
@@ -431,7 +431,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
         .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_0.sync(None).await.unwrap();
@@ -461,18 +461,18 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().clone())),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    wallet_0.address().clone(),
+                    wallet_0.address().await,
                     wallet_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output()?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().clone())),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    wallet_0.address().clone(),
+                    wallet_0.address().await,
                     wallet_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
@@ -481,7 +481,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let tx = wallet_0.send_outputs(outputs, None).await?;
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with wallet 1
@@ -492,7 +492,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
         .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
     wallet_1
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
@@ -521,7 +521,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     let micro_amount = 1;
     let tx = wallet_0
         .send_with_params(
-            [SendParams::new(micro_amount, wallet_1.address().clone())?],
+            [SendParams::new(micro_amount, wallet_1.address().await)?],
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()
@@ -530,7 +530,7 @@ async fn claim_basic_micro_output_error() -> Result<()> {
         .await?;
 
     wallet_0
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
     // Try claim with account 1 will fail since it has no funds to cover the storage deposit

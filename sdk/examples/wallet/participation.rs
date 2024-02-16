@@ -8,7 +8,7 @@
 //! * if a voting occurred, stops the voting and destroys the voting output
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example and there are funds on the first address
+//! running the `./how_tos/wallet/create_wallet.rs` example and there are funds on the first address
 //! by running the `get_funds` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let wallet = Wallet::builder()
@@ -135,12 +135,12 @@ async fn main() -> Result<()> {
     let transaction = wallet.increase_voting_power(INCREASE_VOTING_POWER_AMOUNT).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `increase voting power` transaction to be included...");
+    println!("Waiting for `increase voting power` transaction to be accepted...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
@@ -160,12 +160,12 @@ async fn main() -> Result<()> {
     let transaction = wallet.decrease_voting_power(DECREASE_VOTING_POWER_AMOUNT).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `decrease voting power` transaction to be included...");
+    println!("Waiting for `decrease voting power` transaction to be accepted...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
@@ -185,12 +185,12 @@ async fn main() -> Result<()> {
     // changed the constants above with a valid (i.e. ongoing) event id for
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `vote` transaction to be included...");
+    println!("Waiting for `vote` transaction to be accepted...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
@@ -212,12 +212,12 @@ async fn main() -> Result<()> {
     let transaction = wallet.stop_participating(event_id).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `stop participating` transaction to be included...");
+    println!("Waiting for `stop participating` transaction to be accepted...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
@@ -236,12 +236,12 @@ async fn main() -> Result<()> {
     let transaction = wallet.decrease_voting_power(voting_output.output.amount()).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    println!("Waiting for `decrease voting power` transaction to be included...");
+    println!("Waiting for `decrease voting power` transaction to be accepted...");
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );

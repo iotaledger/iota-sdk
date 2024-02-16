@@ -133,7 +133,7 @@ impl OutputWithMetadata {
 
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
@@ -336,12 +336,10 @@ impl Output {
     pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
         match self {
             // Validator Rewards
-            Output::Account(account_input) => {
-                account_input.can_claim_rewards(next_state.and_then(Output::as_account_opt))
-            }
+            Self::Account(account_input) => account_input.can_claim_rewards(next_state.and_then(Self::as_account_opt)),
             // Delegator Rewards
-            Output::Delegation(delegation_input) => {
-                delegation_input.can_claim_rewards(next_state.and_then(Output::as_delegation_opt))
+            Self::Delegation(delegation_input) => {
+                delegation_input.can_claim_rewards(next_state.and_then(Self::as_delegation_opt))
             }
             _ => false,
         }
@@ -352,20 +350,20 @@ impl Output {
     /// Returns the address that is required to unlock this [`Output`].
     pub fn required_address(
         &self,
-        slot_index: impl Into<Option<SlotIndex>>,
+        commitment_slot_index: impl Into<Option<SlotIndex>>,
         committable_age_range: CommittableAgeRange,
     ) -> Result<Option<Address>, Error> {
         Ok(match self {
             Self::Basic(output) => output
                 .unlock_conditions()
-                .locked_address(output.address(), slot_index, committable_age_range)?
+                .locked_address(output.address(), commitment_slot_index, committable_age_range)?
                 .cloned(),
             Self::Account(output) => Some(output.address().clone()),
             Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             Self::Foundry(output) => Some(Address::Account(*output.account_address())),
             Self::Nft(output) => output
                 .unlock_conditions()
-                .locked_address(output.address(), slot_index, committable_age_range)?
+                .locked_address(output.address(), commitment_slot_index, committable_age_range)?
                 .cloned(),
             Self::Delegation(output) => Some(output.address().clone()),
         })
@@ -462,3 +460,6 @@ pub struct DecayedMana {
     #[cfg_attr(feature = "serde", serde(with = "string"))]
     pub(crate) potential: u64,
 }
+
+#[cfg(feature = "serde")]
+crate::impl_deserialize_untagged!(Output: Basic, Account, Anchor, Foundry, Nft, Delegation);

@@ -3,6 +3,7 @@
 
 mod account;
 mod basic;
+mod delegation;
 mod nft;
 
 use std::str::FromStr;
@@ -25,7 +26,7 @@ use iota_sdk::{
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
-        slot::{SlotCommitmentId, SlotIndex},
+        slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -72,124 +73,233 @@ async fn all_combined() -> Result<()> {
     let nft_4 = Address::Nft(NftAddress::new(nft_id_4));
 
     let slot_index = SlotIndex::from(90);
+    let slot_commitment_id = SlotCommitmentHash::null().into_slot_commitment_id(89);
 
     let inputs = build_inputs(
         [
-            Account(1_000_000, account_id_1, nft_1.clone(), None, None, None),
-            Account(
-                1_000_000,
-                account_id_2,
-                ed25519_0.clone(),
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: nft_1.clone(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
-                None,
+            ),
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_2,
+                    address: ed25519_0.clone(),
+                    sender: None,
+                    issuer: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(1_000_000, account_1.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, account_2.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, account_2, None, None, None, None, None, None),
-            Basic(1_000_000, nft_2.clone(), None, None, None, None, None, None),
-            Basic(1_000_000, nft_2, None, None, None, None, None, None),
-            Basic(1_000_000, nft_4.clone(), None, None, None, None, None, None),
-            Basic(
-                1_000_000,
-                ed25519_0.clone(),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_1.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_2.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: account_2,
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: nft_2.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: nft_2,
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: nft_4.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: ed25519_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(
-                1_000_000,
-                ed25519_1.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: ed25519_1.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
             ),
-            Basic(
-                1_000_000,
-                ed25519_2.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: ed25519_2.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(2)),
             ),
-            Basic(
-                1_000_000,
-                ed25519_2.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: ed25519_2.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(2)),
             ),
-            Nft(
-                1_000_000,
-                nft_id_1,
-                ed25519_0.clone(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_1,
+                    address: ed25519_0.clone(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Nft(1_000_000, nft_id_2, account_1.clone(), None, None, None, None, None),
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_2,
+                    address: account_1.clone(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
+                None,
+            ),
             // Expirations
-            Basic(
-                2_000_000,
-                ed25519_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                Some((account_1.clone(), 50)),
-                None,
-            ),
-            Basic(
-                2_000_000,
-                ed25519_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                Some((nft_3.clone(), 50)),
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: ed25519_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: Some((account_1.clone(), 50)),
+                },
                 None,
             ),
-            Basic(
-                2_000_000,
-                ed25519_0.clone(),
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: ed25519_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: Some((nft_3.clone(), 50)),
+                },
                 None,
-                None,
-                None,
-                None,
-                Some((nft_3.clone(), 150)),
+            ),
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: ed25519_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: Some((nft_3.clone(), 150)),
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Nft(
-                1_000_000,
-                nft_id_3,
-                account_1.clone(),
-                None,
-                None,
-                None,
-                Some((nft_4, 50)),
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_3,
+                    address: account_1.clone(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: Some((nft_4, 50)),
+                },
                 None,
             ),
-            Nft(
-                1_000_000,
-                nft_id_4,
-                account_1,
-                None,
-                None,
-                None,
-                Some((nft_3, 150)),
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_4,
+                    address: account_1,
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: Some((nft_3, 150)),
+                },
                 None,
             ),
         ],
@@ -197,13 +307,65 @@ async fn all_combined() -> Result<()> {
     );
 
     let outputs = build_outputs([
-        Account(1_000_000, account_id_1, nft_1, None, None, None),
-        Account(1_000_000, account_id_2, ed25519_0.clone(), None, None, None),
-        Basic(10_000_000, ed25519_0.clone(), None, None, None, None, None, None),
-        Nft(1_000_000, nft_id_1, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_2, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_3, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_4, ed25519_0.clone(), None, None, None, None, None),
+        Account {
+            amount: 1_000_000,
+            account_id: account_id_1,
+            address: nft_1,
+            sender: None,
+            issuer: None,
+        },
+        Account {
+            amount: 1_000_000,
+            account_id: account_id_2,
+            address: ed25519_0.clone(),
+            sender: None,
+            issuer: None,
+        },
+        Basic {
+            amount: 10_000_000,
+            address: ed25519_0.clone(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
+        Nft {
+            amount: 1_000_000,
+            nft_id: nft_id_1,
+            address: ed25519_0.clone(),
+            sender: None,
+            issuer: None,
+            sdruc: None,
+            expiration: None,
+        },
+        Nft {
+            amount: 1_000_000,
+            nft_id: nft_id_2,
+            address: ed25519_0.clone(),
+            sender: None,
+            issuer: None,
+            sdruc: None,
+            expiration: None,
+        },
+        Nft {
+            amount: 1_000_000,
+            nft_id: nft_id_3,
+            address: ed25519_0.clone(),
+            sender: None,
+            issuer: None,
+            sdruc: None,
+            expiration: None,
+        },
+        Nft {
+            amount: 1_000_000,
+            nft_id: nft_id_4,
+            address: ed25519_0.clone(),
+            sender: None,
+            issuer: None,
+            sdruc: None,
+            expiration: None,
+        },
     ]);
 
     let selected = InputSelection::new(
@@ -211,6 +373,7 @@ async fn all_combined() -> Result<()> {
         outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],
         slot_index,
+        slot_commitment_id,
         protocol_parameters.clone(),
     )
     .select()
@@ -222,7 +385,7 @@ async fn all_combined() -> Result<()> {
         ))])
         .with_inputs(
             selected
-                .inputs
+                .inputs_data
                 .iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
                 .collect::<Vec<_>>(),
@@ -233,8 +396,9 @@ async fn all_combined() -> Result<()> {
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
-        inputs_data: selected.inputs,
+        inputs_data: selected.inputs_data,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -323,7 +487,12 @@ async fn all_combined() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

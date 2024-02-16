@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_INDEX,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -32,31 +32,34 @@ fn missing_input_account_for_foundry() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
+        [(
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
             None,
         )],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_2,
-        1,
-        SimpleTokenScheme::new(0, 0, 10).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_2,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -100,9 +103,9 @@ fn missing_input_account_for_foundry() {
 //     .select()
 //     .unwrap();
 
-//     assert!(unsorted_eq(&selected.inputs, &inputs));
+//     assert!(unsorted_eq(&selected.inputs_data, &inputs));
 //     // Account next state + foundry
-//     assert_eq!(selected.outputs.len(), 2);
+//     assert_eq!(selected.transaction.outputs().len(), 2);
 // }
 
 #[test]
@@ -112,49 +115,54 @@ fn minted_native_tokens_in_new_remainder() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Account(
-                1_000_000,
-                account_id_2,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_2,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_2,
-        1,
-        SimpleTokenScheme::new(10, 0, 10).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_2,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(10, 0, 10).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the minted native tokens
             // TODO reenable when ISA supports NTs again
@@ -172,45 +180,48 @@ fn minted_native_tokens_in_provided_output() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                2_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Account(
-                1_000_000,
-                account_id_2,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_2,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
-        Foundry(
-            1_000_000,
-            account_id_2,
-            1,
-            SimpleTokenScheme::new(100, 0, 100).unwrap(),
-            None,
-        ),
-        Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((&token_id.to_string(), 100)),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Foundry {
+            amount: 1_000_000,
+            account_id: account_id_2,
+            serial_number: 1,
+            token_scheme: SimpleTokenScheme::new(100, 0, 100).unwrap(),
+            native_token: None,
+        },
+        Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: Some((&token_id.to_string(), 100)),
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
 
     let selected = InputSelection::new(
@@ -218,16 +229,17 @@ fn minted_native_tokens_in_provided_output() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.contains(&outputs[1]));
-    assert!(selected.outputs.iter().any(|output| output.is_account()));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert!(selected.transaction.outputs().contains(&outputs[1]));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_account()));
 }
 
 #[test]
@@ -237,25 +249,30 @@ fn melt_native_tokens() {
 
     let mut inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(10, 0, 10).unwrap(),
-                Some((
-                    "0x0811111111111111111111111111111111111111111111111111111111111111110100000000",
-                    10,
-                )),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(10, 0, 10).unwrap(),
+                    native_token: Some((
+                        "0x0811111111111111111111111111111111111111111111111111111111111111110100000000",
+                        10,
+                    )),
+                },
+                None,
             ),
         ],
         Some(SLOT_INDEX),
@@ -272,29 +289,29 @@ fn melt_native_tokens() {
         output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        // Melt 5 native tokens
-        SimpleTokenScheme::new(10, 5, 10).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(10, 5, 10).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             // TODO reenable when ISA supports NTs again
@@ -310,19 +327,24 @@ fn destroy_foundry_with_account_state_transition() {
 
     let inputs = build_inputs(
         [
-            Account(
-                50_300,
-                account_id_2,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 50_300,
+                    account_id: account_id_2,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Foundry(
-                52_800,
-                account_id_2,
-                1,
-                SimpleTokenScheme::new(10, 10, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 52_800,
+                    account_id: account_id_2,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
@@ -340,15 +362,16 @@ fn destroy_foundry_with_account_state_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state
-    assert_eq!(selected.outputs.len(), 1);
+    assert_eq!(selected.transaction.outputs().len(), 1);
 }
 
 #[test]
@@ -358,40 +381,45 @@ fn destroy_foundry_with_account_burn() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_2,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_2,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_2,
-                1,
-                SimpleTokenScheme::new(10, 10, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_2,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(
@@ -402,10 +430,10 @@ fn destroy_foundry_with_account_burn() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -424,58 +452,65 @@ fn prefer_basic_to_foundry() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-            ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(10, 10, 10).unwrap(),
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
-                None,
-                None,
-                None,
-                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[2]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[2]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -485,21 +520,26 @@ fn simple_foundry_transition_basic_not_needed() {
 
     let mut inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(10, 10, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
@@ -518,30 +558,31 @@ fn simple_foundry_transition_basic_not_needed() {
         chain: None,
     });
 
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        SimpleTokenScheme::new(10, 10, 10).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert!(selected.inputs.contains(&inputs[2]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert!(selected.inputs_data.contains(&inputs[2]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 2_000_000);
@@ -564,21 +605,26 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 
     let mut inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Foundry(
-                2_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(10, 10, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 2_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
@@ -596,30 +642,31 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        SimpleTokenScheme::new(10, 10, 10).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(10, 10, 10).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert!(selected.inputs.contains(&inputs[2]));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert!(selected.inputs_data.contains(&inputs[2]));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_account() {
                 assert_eq!(output.amount(), 2_000_000);
@@ -675,11 +722,11 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //         .select()
 //         .unwrap();
 
-//     assert_eq!(selected.inputs.len(), 1);
-//     assert!(selected.inputs.contains(&inputs[2]));
-//     // assert_eq!(selected.outputs.len(), 3);
-//     // assert!(selected.outputs.contains(&outputs[0]));
-//     // selected.outputs.iter().for_each(|output| {
+//     assert_eq!(selected.inputs_data.len(), 1);
+//     assert!(selected.inputs_data.contains(&inputs[2]));
+//     // assert_eq!(selected.transaction.outputs().len(), 3);
+//     // assert!(selected.transaction.outputs().contains(&outputs[0]));
+//     // selected.transaction.outputs().iter().for_each(|output| {
 //     //     if !outputs.contains(output) {
 //     //         if output.is_account() {
 //     //             assert_eq!(output.amount(), 2_000_000);
@@ -720,12 +767,15 @@ fn mint_and_burn_at_the_same_time() {
     let token_id = TokenId::from(foundry_id);
 
     let mut inputs = build_inputs(
-        [Foundry(
-            1_000_000,
-            account_id_1,
-            1,
-            SimpleTokenScheme::new(100, 0, 200).unwrap(),
-            Some((&token_id.to_string(), 100)),
+        [(
+            Foundry {
+                amount: 1_000_000,
+                account_id: account_id_1,
+                serial_number: 1,
+                token_scheme: SimpleTokenScheme::new(100, 0, 200).unwrap(),
+                native_token: Some((&token_id.to_string(), 100)),
+            },
+            None,
         )],
         Some(SLOT_INDEX),
     );
@@ -742,19 +792,20 @@ fn mint_and_burn_at_the_same_time() {
         chain: None,
     });
 
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        SimpleTokenScheme::new(120, 0, 200).unwrap(),
-        Some((&token_id.to_string(), 110)),
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(120, 0, 200).unwrap(),
+        native_token: Some((&token_id.to_string(), 110)),
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
@@ -775,22 +826,27 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 
     let mut inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(100, 0, 200).unwrap(),
-                Some((&token_id.to_string(), 100)),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(100, 0, 200).unwrap(),
+                    native_token: Some((&token_id.to_string(), 100)),
+                },
+                None,
             ),
         ],
         Some(SLOT_INDEX),
@@ -807,34 +863,39 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
-    let outputs = build_outputs([Basic(
-        3_200_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 3_200_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.iter().any(|output| output.is_account()));
-    assert!(selected.outputs.iter().any(|output| output.is_foundry()));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_account()));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_foundry()));
     assert_eq!(
-        selected.outputs.iter().map(|output| output.amount()).sum::<u64>(),
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .map(|output| output.amount())
+            .sum::<u64>(),
         4_000_000
     );
 }
@@ -848,48 +909,54 @@ fn create_native_token_but_burn_account() {
 
     let inputs = build_inputs(
         [
-            Account(
-                2_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 2_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(0, 0, 100).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(0, 0, 100).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        SimpleTokenScheme::new(100, 0, 100).unwrap(),
-        Some((&token_id.to_string(), 100)),
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(100, 0, 100).unwrap(),
+        native_token: Some((&token_id.to_string(), 100)),
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -910,37 +977,43 @@ fn melted_tokens_not_provided() {
 
     let inputs = build_inputs(
         [
-            Account(
-                2_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 2_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(100, 0, 100).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(100, 0, 100).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        SimpleTokenScheme::new(100, 100, 100).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(100, 100, 100).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -963,37 +1036,43 @@ fn burned_tokens_not_provided() {
 
     let inputs = build_inputs(
         [
-            Account(
-                2_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 2_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(100, 0, 100).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(100, 0, 100).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_1,
-        1,
-        SimpleTokenScheme::new(100, 0, 100).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_1,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(100, 0, 100).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
@@ -1014,11 +1093,14 @@ fn foundry_in_outputs_and_required() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let mut inputs = build_inputs(
-        [Foundry(
-            1_000_000,
-            account_id_2,
-            1,
-            SimpleTokenScheme::new(0, 0, 10).unwrap(),
+        [(
+            Foundry {
+                amount: 1_000_000,
+                account_id: account_id_2,
+                serial_number: 1,
+                token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                native_token: None,
+            },
             None,
         )],
         Some(SLOT_INDEX),
@@ -1035,29 +1117,30 @@ fn foundry_in_outputs_and_required() {
         output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
-    let outputs = build_outputs([Foundry(
-        1_000_000,
-        account_id_2,
-        1,
-        SimpleTokenScheme::new(0, 0, 10).unwrap(),
-        None,
-    )]);
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
+        account_id: account_id_2,
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert_eq!(*output.as_account().account_id(), account_id_2);
         }
@@ -1073,22 +1156,27 @@ fn melt_and_burn_native_tokens() {
 
     let mut inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id,
-                1,
-                SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
-                Some((&token_id.to_string(), 1000)),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+                    native_token: Some((&token_id.to_string(), 1000)),
+                },
+                None,
             ),
         ],
         Some(SLOT_INDEX),
@@ -1105,20 +1193,20 @@ fn melt_and_burn_native_tokens() {
         output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
-    let outputs = build_outputs([Foundry(
-        1_000_000,
+    let outputs = build_outputs([Foundry {
+        amount: 1_000_000,
         account_id,
-        1,
-        // Melt 123 native tokens
-        SimpleTokenScheme::new(1000, 123, 1000).unwrap(),
-        None,
-    )]);
+        serial_number: 1,
+        token_scheme: SimpleTokenScheme::new(1000, 123, 1000).unwrap(),
+        native_token: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     // Burn 456 native tokens
@@ -1126,11 +1214,11 @@ fn melt_and_burn_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
+    assert_eq!(selected.transaction.outputs().len(), 3);
     // Account state index is increased
-    selected.outputs.iter().for_each(|output| {
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             // TODO reenable when ISA supports NTs again

@@ -94,9 +94,9 @@ impl WalletOptions {
             .with_client_options(self.client_options);
 
         if let Some(address) = self.address {
-            builder = builder.with_address_provider((address, self.bip_path));
+            builder = builder.with_address((address, self.bip_path));
         } else if let Some(bip_path) = self.bip_path {
-            builder = builder.with_address_provider(bip_path);
+            builder = builder.with_address(bip_path);
         } else {
             // TODO: return error
             todo!("return error")

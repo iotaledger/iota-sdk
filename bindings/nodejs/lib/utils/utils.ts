@@ -20,6 +20,7 @@ import {
     InputSigningData,
     Unlock,
     DecayedMana,
+    NumericString,
 } from '../types';
 import {
     AccountId,
@@ -28,7 +29,11 @@ import {
     NftId,
     TokenId,
 } from '../types/block/id';
-import { SlotCommitment, SlotCommitmentId } from '../types/block/slot';
+import {
+    SlotCommitment,
+    SlotCommitmentId,
+    SlotIndex,
+} from '../types/block/slot';
 
 /** Utils class for utils. */
 export class Utils {
@@ -124,6 +129,39 @@ export class Utils {
                 index,
             },
         });
+    }
+
+    /**
+     * Compute the transaction ID from an output ID.
+     *
+     * @param outputId The output ID.
+     * @returns The transaction ID of the transaction which created the output.
+     */
+    static transactionIdFromOutputId(outputId: OutputId): TransactionId {
+        return outputId.slice(0, 74);
+    }
+
+    /**
+     * Compute the output index from an output ID.
+     *
+     * @param outputId The output ID.
+     * @returns The output index.
+     */
+    static outputIndexFromOutputId(outputId: OutputId): number {
+        const numberString = outputId.slice(-4);
+        const chunks = [];
+        for (
+            let i = 0, charsLength = numberString.length;
+            i < charsLength;
+            i += 2
+        ) {
+            chunks.push(numberString.substring(i, i + 2));
+        }
+        const separated = chunks.map((n) => parseInt(n, 16));
+        const buf = Uint8Array.from(separated).buffer;
+        const view = new DataView(buf);
+
+        return view.getUint16(0, true);
     }
 
     /**
@@ -411,6 +449,31 @@ export class Utils {
     }
 
     /**
+     * Computes a slotIndex from a block, transaction or slotCommitment Id.
+     * @param id The block, transaction or slotCommitment Id.
+     * @returns The slotIndex.
+     */
+    static computeSlotIndex(
+        id: BlockId | SlotCommitmentId | TransactionId,
+    ): SlotIndex {
+        const numberString = id.slice(-8);
+        const chunks = [];
+
+        for (
+            let i = 0, charsLength = numberString.length;
+            i < charsLength;
+            i += 2
+        ) {
+            chunks.push(numberString.substring(i, i + 2));
+        }
+        const separated = chunks.map((n) => parseInt(n, 16));
+        const buf = Uint8Array.from(separated).buffer;
+        const view = new DataView(buf);
+
+        return view.getUint32(0, true);
+    }
+
+    /**
      * Derives the `SlotCommitmentId` of the `SlotCommitment`.
      */
     static computeSlotCommitmentId(
@@ -454,21 +517,27 @@ export class Utils {
      *
      * @param transaction The transaction payload.
      * @param inputs The inputs data.
+     * @param protocolParameters The protocol parameters.
      * @param unlocks The unlocks.
+     * @param manaRewards The total mana rewards claimed in the transaction.
      *
      * @returns The conflict reason.
      */
     static verifyTransactionSemantic(
         transaction: SignedTransactionPayload,
         inputs: InputSigningData[],
+        protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
+        manaRewards?: { [outputId: HexEncodedString]: NumericString },
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
                 transaction,
                 inputs,
+                protocolParameters,
                 unlocks,
+                manaRewards,
             },
         });
         return conflictReason;
@@ -560,5 +629,41 @@ export class Utils {
             stored: BigInt(decayedMana.stored),
             potential: BigInt(decayedMana.potential),
         };
+    }
+
+    /**
+     * Verifies the syntax of a transaction.
+     *
+     * @param transaction The transaction payload.
+     * @param protocolParameters The protocol parameters used for the validation.
+     * @returns void.
+     */
+    static verifyTransactionSyntax(
+        transaction: SignedTransactionPayload,
+        protocolParameters: ProtocolParameters,
+    ): void {
+        return callUtilsMethod({
+            name: 'verifyTransactionSyntax',
+            data: {
+                transaction,
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
+     * Returns the serialized bytes of a block.
+     *
+     * @param block The block.
+     * @returns The block bytes.
+     */
+    static blockBytes(block: Block): Uint8Array {
+        const blockBytes = callUtilsMethod({
+            name: 'blockBytes',
+            data: {
+                block,
+            },
+        });
+        return new Uint8Array(blockBytes);
     }
 }

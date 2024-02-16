@@ -12,7 +12,7 @@ const NUM_NFTS_MINTED_PER_TRANSACTION = 50;
 // In this example we will mint the issuer NFT for the NFT collection.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts_and_addresses/create-wallet` example!
+// running the `how_tos/wallet/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nfts/01_mint_collection_nft.ts <issuer_nft_id>
@@ -40,7 +40,7 @@ async function run() {
             process.env.STRONGHOLD_PASSWORD as string,
         );
 
-        // Get the wallet we generated with `how_tos/accounts_and_addresses/create-wallet`
+        // Get the wallet we generated with `how_tos/wallet/create-wallet`
         await wallet.sync();
         console.log(`Wallet synced!`);
 
@@ -79,12 +79,12 @@ async function run() {
             );
             const transaction = await wallet.mintNfts(chunk);
 
-            // Wait for transaction to get included
-            const blockId = await wallet.reissueTransactionUntilIncluded(
+            // Wait for transaction to get accepted
+            const blockId = await wallet.waitForTransactionAcceptance(
                 transaction.transactionId,
             );
             console.log(
-                `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+                `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
             );
 
             // Sync so the new outputs are available again for new transactions

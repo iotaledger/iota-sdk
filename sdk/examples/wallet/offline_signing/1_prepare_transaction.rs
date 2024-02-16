@@ -28,9 +28,8 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    #[allow(clippy::single_element_loop)]
     for var in ["NODE_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let params = [SendParams::new(SEND_AMOUNT, RECV_ADDRESS)?];
@@ -45,7 +44,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
-        .with_address_provider((address, Bip44::new(SHIMMER_COIN_TYPE).into()))
+        .with_address((address, Bip44::new(SHIMMER_COIN_TYPE).into()))
         .finish()
         .await?;
 

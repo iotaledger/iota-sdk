@@ -4,14 +4,9 @@
 import type { OutputData } from './output';
 import { InclusionState } from './transaction';
 import { InputSigningData, Remainder } from '../client';
-import { Transaction, SignedTransactionPayload } from '../block';
+import { Transaction, SignedTransactionPayload, TransactionId } from '../block';
 import { OutputResponse } from '../models';
 import { HexEncodedString } from '../utils';
-
-/**
- * A Transaction ID represented as hex-encoded string.
- */
-export type TransactionId = string;
 
 /**
  * All of the wallet event types.
