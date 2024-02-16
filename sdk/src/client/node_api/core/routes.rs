@@ -391,9 +391,8 @@ impl ClientInner {
 
 impl Client {
     /// GET /api/core/v3/info endpoint
-    pub(crate) async fn get_permanode_info(node: &Node) -> Result<PermanodeInfoResponse> {
+    pub(crate) async fn get_permanode_info(mut node: Node) -> Result<PermanodeInfoResponse> {
         log::debug!("get_permanode_info");
-        let mut node = node.clone();
         if let Some(auth) = &node.auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
                 node.url

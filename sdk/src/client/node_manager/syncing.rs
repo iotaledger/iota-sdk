@@ -74,7 +74,7 @@ impl ClientInner {
         for node in nodes {
             // Put the healthy node url into the network_nodes
             if node.permanode {
-                match crate::client::Client::get_permanode_info(node).await {
+                match crate::client::Client::get_permanode_info(node.clone()).await {
                     Ok(info) => {
                         if info.is_healthy || ignore_node_health {
                             // Unwrap: We should always have parameters for this version. If we don't we can't recover.
