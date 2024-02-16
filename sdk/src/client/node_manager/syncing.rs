@@ -164,9 +164,7 @@ impl ClientInner {
                 network_info.protocol_parameters = parameters.clone();
             }
 
-            for (_info, node_url, _tangle_time) in nodes {
-                healthy_nodes.insert(node_url.clone());
-            }
+            healthy_nodes.extend(nodes.iter().map(|(_info, node_url, _time)| node_url).cloned())
         }
 
         // Update the sync list.

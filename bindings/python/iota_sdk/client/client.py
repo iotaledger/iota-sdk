@@ -32,8 +32,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     # pylint: disable=unused-argument
     def __init__(
         self,
-        nodes: Optional[Union[str, List[str]]] = None,
-        primary_nodes: Optional[Union[str, List[str]]] = None,
+        primary_nodes: Optional[Union[Union[str, Node],
+                                      List[Union[str, Node]]]] = None,
+        nodes: Optional[Union[Union[str, Node],
+                              List[Union[str, Node]]]] = None,
         ignore_node_health: Optional[bool] = None,
         api_timeout: Optional[timedelta] = None,
         node_sync_interval: Optional[timedelta] = None,
@@ -47,10 +49,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Initialize the IOTA Client.
 
         **Arguments**
-        nodes :
-            A single Node URL or an array of URLs.
         primary_nodes :
             Nodes which will be tried first for all requests.
+        nodes :
+            A single Node URL or an array of URLs.
         ignore_node_health :
             If the node health should be ignored.
         api_timeout :
@@ -76,6 +78,16 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         # serialized.
         if "client_handle" in client_config:
             del client_config["client_handle"]
+
+        if isinstance(primary_nodes, list):
+            primary_nodes = [primary_node.to_dict() if isinstance(primary_node, Node)
+                             else primary_node for primary_node in primary_nodes]
+        elif primary_nodes:
+            if isinstance(primary_nodes, Node):
+                primary_nodes = [primary_nodes.to_dict()]
+            else:
+                primary_nodes = [primary_nodes]
+        client_config['primaryNodes'] = primary_nodes
 
         if isinstance(nodes, list):
             nodes = [node.to_dict() if isinstance(node, Node)
