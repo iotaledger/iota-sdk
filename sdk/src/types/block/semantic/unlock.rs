@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
+
 use crate::types::block::{
     address::Address,
     output::{Output, OutputId},
@@ -30,9 +32,16 @@ impl SemanticValidationContext<'_> {
 
                     self.unlocked_addresses.insert(address.clone());
                 }
-                Unlock::Reference(_) => {
-                    // TODO actually check that it was unlocked by the same signature.
+                Unlock::Reference(unlock) => {
                     if !self.unlocked_addresses.contains(address) {
+                        return Err(TransactionFailureReason::DirectUnlockableAddressUnlockInvalid);
+                    }
+
+                    let Signature::Ed25519(signature) = self.unlocks.unwrap()[unlock.index() as usize]
+                        .as_signature()
+                        .signature();
+
+                    if Blake2b256::digest(signature.public_key_bytes()).as_slice() != ed25519_address.as_ref() {
                         return Err(TransactionFailureReason::DirectUnlockableAddressUnlockInvalid);
                     }
                 }
