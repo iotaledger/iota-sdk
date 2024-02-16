@@ -58,12 +58,12 @@ impl OutputData {
         &self,
         wallet_address: &Bech32Address,
         wallet_bip_path: Option<Bip44>,
-        slot_index: impl Into<SlotIndex>,
+        commitment_slot_index: impl Into<SlotIndex>,
         committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output
-            .required_address(slot_index.into(), committable_age_range)?
+            .required_address(commitment_slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {

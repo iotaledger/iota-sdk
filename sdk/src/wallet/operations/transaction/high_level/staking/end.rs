@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        context_input::{ContextInput, RewardContextInput},
-        output::{AccountId, AccountOutputBuilder},
-    },
+    types::block::output::{AccountId, AccountOutputBuilder},
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -18,7 +15,7 @@ where
     pub async fn end_staking(&self, account_id: AccountId) -> crate::wallet::Result<TransactionWithMetadata> {
         let prepared = self.prepare_end_staking(account_id).await?;
 
-        self.sign_and_submit_transaction(prepared, None, None).await
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Prepares the transaction for [Wallet::end_staking()].
@@ -65,9 +62,10 @@ where
             .with_features(features)
             .finish_output()?;
 
-        let mut options = TransactionOptions::default();
-        options.custom_inputs = Some(vec![account_output_data.output_id]);
-        options.context_inputs = Some(vec![ContextInput::from(RewardContextInput::new(0)?)]);
+        let options = TransactionOptions {
+            required_inputs: [account_output_data.output_id].into(),
+            ..Default::default()
+        };
 
         let transaction = self.prepare_transaction([output], options).await?;
 

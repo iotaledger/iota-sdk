@@ -8,8 +8,8 @@ use super::{
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{
-        AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
-        Output, OutputId,
+        AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder, Output,
+        OutputId,
     },
 };
 
@@ -35,8 +35,7 @@ impl InputSelection {
 
         // Do not create an account output if it already exists.
         if self
-            .outputs
-            .iter()
+            .non_remainder_outputs()
             .any(|output| is_account_with_id_non_null(output, &account_id))
         {
             log::debug!("No transition of {output_id:?}/{account_id:?} as output already exists");
@@ -44,7 +43,7 @@ impl InputSelection {
         }
 
         let mut highest_foundry_serial_number = 0;
-        for output in self.outputs.iter() {
+        for output in self.non_remainder_outputs() {
             if let Output::Foundry(foundry) = output {
                 if *foundry.account_address().account_id() == account_id {
                     highest_foundry_serial_number = u32::max(highest_foundry_serial_number, foundry.serial_number());
@@ -61,17 +60,14 @@ impl InputSelection {
             .with_features(features);
 
         if input.is_block_issuer() {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1918
             builder = builder.with_mana(Output::from(input.clone()).available_mana(
                 &self.protocol_parameters,
                 output_id.transaction_id().slot_index(),
-                self.slot_index,
+                self.creation_slot,
             )?)
         }
 
         let output = builder.finish_output()?;
-
-        self.automatically_transitioned.insert(ChainId::from(account_id));
 
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
@@ -95,8 +91,7 @@ impl InputSelection {
 
         // Do not create an nft output if it already exists.
         if self
-            .outputs
-            .iter()
+            .non_remainder_outputs()
             .any(|output| is_nft_with_id_non_null(output, &nft_id))
         {
             log::debug!("No transition of {output_id:?}/{nft_id:?} as output already exists");
@@ -110,8 +105,6 @@ impl InputSelection {
             .with_nft_id(nft_id)
             .with_features(features)
             .finish_output()?;
-
-        self.automatically_transitioned.insert(ChainId::from(nft_id));
 
         log::debug!("Automatic transition of {output_id:?}/{nft_id:?}");
 
@@ -139,8 +132,7 @@ impl InputSelection {
 
         // Do not create a foundry output if it already exists.
         if self
-            .outputs
-            .iter()
+            .non_remainder_outputs()
             .any(|output| is_foundry_with_id(output, &foundry_id))
         {
             log::debug!("No transition of {output_id:?}/{foundry_id:?} as output already exists");
@@ -148,8 +140,6 @@ impl InputSelection {
         }
 
         let output = FoundryOutputBuilder::from(input).finish_output()?;
-
-        self.automatically_transitioned.insert(ChainId::from(foundry_id));
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
 

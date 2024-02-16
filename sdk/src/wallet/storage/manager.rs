@@ -5,13 +5,12 @@ use zeroize::Zeroizing;
 
 use crate::{
     client::storage::StorageAdapter,
-    types::{block::address::Bech32Address, TryFromDto},
+    types::TryFromDto,
     wallet::{
-        core::{builder::dto::WalletBuilderDto, WalletLedger, WalletLedgerDto},
+        core::{WalletLedger, WalletLedgerDto},
         migration::migrate,
         operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},
-        WalletBuilder,
     },
 };
 
@@ -100,7 +99,7 @@ mod tests {
     use super::*;
     use crate::{
         client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager},
-        types::block::address::Ed25519Address,
+        types::block::address::{Bech32Address, Ed25519Address},
         wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
     };
 

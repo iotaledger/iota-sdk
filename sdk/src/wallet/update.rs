@@ -3,8 +3,6 @@
 
 use std::collections::HashMap;
 
-use crypto::keys::bip44::Bip44;
-
 use crate::{
     client::secret::SecretManage,
     types::block::{

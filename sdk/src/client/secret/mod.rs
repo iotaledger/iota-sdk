@@ -574,7 +574,7 @@ where
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
-    let slot_index = prepared_transaction_data
+    let commitment_slot_index = prepared_transaction_data
         .transaction
         .context_inputs()
         .commitment()
@@ -585,7 +585,7 @@ where
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(slot_index, protocol_parameters.committable_age_range())?
+            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.

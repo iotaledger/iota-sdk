@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_INDEX,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -59,6 +59,7 @@ fn missing_input_account_for_foundry() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -102,9 +103,9 @@ fn missing_input_account_for_foundry() {
 //     .select()
 //     .unwrap();
 
-//     assert!(unsorted_eq(&selected.inputs, &inputs));
+//     assert!(unsorted_eq(&selected.inputs_data, &inputs));
 //     // Account next state + foundry
-//     assert_eq!(selected.outputs.len(), 2);
+//     assert_eq!(selected.transaction.outputs().len(), 2);
 // }
 
 #[test]
@@ -152,15 +153,16 @@ fn minted_native_tokens_in_new_remainder() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the minted native tokens
             // TODO reenable when ISA supports NTs again
@@ -227,16 +229,17 @@ fn minted_native_tokens_in_provided_output() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.contains(&outputs[1]));
-    assert!(selected.outputs.iter().any(|output| output.is_account()));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert!(selected.transaction.outputs().contains(&outputs[1]));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_account()));
 }
 
 #[test]
@@ -299,15 +302,16 @@ fn melt_native_tokens() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             // TODO reenable when ISA supports NTs again
@@ -358,15 +362,16 @@ fn destroy_foundry_with_account_state_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state
-    assert_eq!(selected.outputs.len(), 1);
+    assert_eq!(selected.transaction.outputs().len(), 1);
 }
 
 #[test]
@@ -414,6 +419,7 @@ fn destroy_foundry_with_account_burn() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(
@@ -424,10 +430,10 @@ fn destroy_foundry_with_account_burn() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -496,14 +502,15 @@ fn prefer_basic_to_foundry() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[2]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[2]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -564,17 +571,18 @@ fn simple_foundry_transition_basic_not_needed() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert!(selected.inputs.contains(&inputs[2]));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert!(selected.inputs_data.contains(&inputs[2]));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 2_000_000);
@@ -647,17 +655,18 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert!(selected.inputs.contains(&inputs[2]));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert!(selected.inputs_data.contains(&inputs[2]));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_account() {
                 assert_eq!(output.amount(), 2_000_000);
@@ -713,11 +722,11 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //         .select()
 //         .unwrap();
 
-//     assert_eq!(selected.inputs.len(), 1);
-//     assert!(selected.inputs.contains(&inputs[2]));
-//     // assert_eq!(selected.outputs.len(), 3);
-//     // assert!(selected.outputs.contains(&outputs[0]));
-//     // selected.outputs.iter().for_each(|output| {
+//     assert_eq!(selected.inputs_data.len(), 1);
+//     assert!(selected.inputs_data.contains(&inputs[2]));
+//     // assert_eq!(selected.transaction.outputs().len(), 3);
+//     // assert!(selected.transaction.outputs().contains(&outputs[0]));
+//     // selected.transaction.outputs().iter().for_each(|output| {
 //     //     if !outputs.contains(output) {
 //     //         if output.is_account() {
 //     //             assert_eq!(output.amount(), 2_000_000);
@@ -796,6 +805,7 @@ fn mint_and_burn_at_the_same_time() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
@@ -868,18 +878,24 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected.outputs.iter().any(|output| output.is_account()));
-    assert!(selected.outputs.iter().any(|output| output.is_foundry()));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_account()));
+    assert!(selected.transaction.outputs().iter().any(|output| output.is_foundry()));
     assert_eq!(
-        selected.outputs.iter().map(|output| output.amount()).sum::<u64>(),
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .map(|output| output.amount())
+            .sum::<u64>(),
         4_000_000
     );
 }
@@ -929,17 +945,18 @@ fn create_native_token_but_burn_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -996,6 +1013,7 @@ fn melted_tokens_not_provided() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -1054,6 +1072,7 @@ fn burned_tokens_not_provided() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
@@ -1111,16 +1130,17 @@ fn foundry_in_outputs_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert_eq!(*output.as_account().account_id(), account_id_2);
         }
@@ -1186,6 +1206,7 @@ fn melt_and_burn_native_tokens() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     // Burn 456 native tokens
@@ -1193,11 +1214,11 @@ fn melt_and_burn_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
-    assert_eq!(selected.outputs.len(), 3);
+    assert_eq!(selected.transaction.outputs().len(), 3);
     // Account state index is increased
-    selected.outputs.iter().for_each(|output| {
+    selected.transaction.outputs().iter().for_each(|output| {
         if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             // TODO reenable when ISA supports NTs again

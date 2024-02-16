@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we use an account as wallet.
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
             1_000_000,
             "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             TransactionOptions {
-                mandatory_inputs: Some(vec![input]),
+                required_inputs: [input].into(),
                 ..Default::default()
             },
         )

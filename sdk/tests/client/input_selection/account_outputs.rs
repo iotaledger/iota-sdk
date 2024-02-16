@@ -4,11 +4,19 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::input_selection::{Burn, Error, InputSelection, Requirement},
+    client::{
+        api::input_selection::{Burn, Error, InputSelection, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
-        output::{AccountId, AccountOutputBuilder, Output},
+        mana::ManaAllotment,
+        output::{
+            feature::SenderFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder,
+            BasicOutputBuilder, Output,
+        },
         protocol::protocol_parameters,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
@@ -17,7 +25,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, SLOT_INDEX,
+    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
@@ -51,13 +59,14 @@ fn input_account_eq_output_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -92,13 +101,14 @@ fn transition_account_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 // #[test]
@@ -230,9 +240,9 @@ fn transition_account_id_zero() {
 //     .select()
 //     .unwrap();
 
-//     assert!(unsorted_eq(&selected.inputs, &inputs));
+//     assert!(unsorted_eq(&selected.inputs_data, &inputs));
 //     // basic output + account remainder
-//     assert_eq!(selected.outputs.len(), 2);
+//     assert_eq!(selected.transaction.outputs().len(), 2);
 // }
 
 #[test]
@@ -268,16 +278,17 @@ fn create_account() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder
-    assert_eq!(selected.outputs.len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 2);
     // Output contains the new minted account id
-    assert!(selected.outputs.iter().any(|output| {
+    assert!(selected.transaction.outputs().iter().any(|output| {
         if let Output::Account(account_output) = output {
             *account_output.account_id() == account_id_0
         } else {
@@ -319,14 +330,15 @@ fn burn_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 // #[test]
@@ -407,6 +419,7 @@ fn missing_input_for_account_output() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -463,6 +476,7 @@ fn missing_input_for_account_output_2() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -506,6 +520,7 @@ fn missing_input_for_account_output_but_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -564,13 +579,14 @@ fn account_in_output_and_sender() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -604,6 +620,7 @@ fn missing_ed25519_sender() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -647,6 +664,7 @@ fn missing_ed25519_issuer_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -688,6 +706,7 @@ fn missing_ed25519_issuer_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -726,6 +745,7 @@ fn missing_account_sender() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -769,6 +789,7 @@ fn missing_account_issuer_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -810,6 +831,7 @@ fn missing_account_issuer_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -848,6 +870,7 @@ fn missing_nft_sender() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -891,6 +914,7 @@ fn missing_nft_issuer_created() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -932,6 +956,7 @@ fn missing_nft_issuer_transition() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select();
@@ -984,13 +1009,14 @@ fn increase_account_amount() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1038,16 +1064,17 @@ fn decrease_account_amount() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1106,14 +1133,15 @@ fn prefer_basic_to_account() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[1]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[1]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -1163,15 +1191,16 @@ fn take_amount_from_account_to_fund_basic() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_800_000);
@@ -1234,17 +1263,18 @@ fn account_burn_should_validate_account_sender() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1303,17 +1333,18 @@ fn account_burn_should_validate_account_address() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1358,15 +1389,16 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
@@ -1428,17 +1460,19 @@ fn two_accounts_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert!(
         selected
-            .outputs
+            .transaction
+            .outputs()
             .iter()
             .any(|output| if let Output::Account(output) = output {
                 output.account_id() == &account_id_1
@@ -1448,7 +1482,8 @@ fn two_accounts_required() {
     );
     assert!(
         selected
-            .outputs
+            .transaction
+            .outputs()
             .iter()
             .any(|output| if let Output::Account(output) = output {
                 output.account_id() == &account_id_2
@@ -1491,14 +1526,15 @@ fn state_controller_sender_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
 }
 
 #[test]
@@ -1543,14 +1579,15 @@ fn state_controller_sender_required_already_selected() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1584,14 +1621,15 @@ fn state_transition_and_required() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1625,15 +1663,16 @@ fn remainder_address_in_state_controller() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,
@@ -1643,4 +1682,392 @@ fn remainder_address_in_state_controller() {
             ));
         }
     });
+}
+
+#[test]
+fn min_allot_account_mana() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let mut inputs = Vec::new();
+    let mana_input_amount = 1_000_000;
+
+    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(mana_input_amount)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 500)
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    let mana_cost = 230_000;
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+    );
+    assert_eq!(
+        selected.transaction.outputs()[1].as_account().mana(),
+        mana_input_amount - mana_cost
+    );
+}
+
+#[test]
+fn min_allot_account_mana_additional() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let additional_allotment = 1000;
+    let txn_required_mana_allotment = 240_000;
+    // The account does not have enough to cover the requirement
+    let account_mana = txn_required_mana_allotment - 100;
+    // But there is additional available mana elsewhere
+    let additional_available_mana = 111;
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(account_mana)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+            .with_mana(additional_available_mana)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_feature(SenderFeature::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .finish_output()
+        .unwrap()];
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 500)
+    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, txn_required_mana_allotment).unwrap()
+    );
+    assert_eq!(
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
+        account_mana + additional_available_mana - txn_required_mana_allotment
+    );
+}
+
+#[test]
+fn min_allot_account_mana_cannot_select_additional() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
+
+    let additional_allotment = 1000;
+    let txn_required_mana_allotment = 271_000;
+    // The account does not have enough to cover the requirement
+    let account_mana = txn_required_mana_allotment - 100;
+    // But there is additional available mana elsewhere
+    let additional_available_mana = additional_allotment + 111;
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(account_mana)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+            .with_mana(additional_available_mana)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 500)
+    .with_mana_allotments(Some((account_id_2, additional_allotment)))
+    .with_required_inputs([*inputs[0].output_id()])
+    .disable_additional_input_selection()
+    .select()
+    .unwrap_err();
+
+    assert!(
+        matches!(selected, Error::AdditionalInputsRequired(_)),
+        "expected AdditionalInputsRequired, found {selected:?}"
+    );
+}
+
+#[test]
+fn min_allot_account_mana_requirement_twice() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(1000)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(100)
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    let mana_cost = 960;
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+    );
+    assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 140);
+}
+
+#[test]
+fn min_allot_account_mana_requirement_covered() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let additional_allotment = 1100;
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(1000)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(100)
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
+    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, additional_allotment).unwrap()
+    );
+    assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 0);
+}
+
+#[test]
+fn min_allot_account_mana_requirement_covered_2() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let additional_allotment = 1100;
+
+    let inputs = [
+        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(100)
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(1000)
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
+    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, additional_allotment).unwrap()
+    );
+    assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 0);
 }

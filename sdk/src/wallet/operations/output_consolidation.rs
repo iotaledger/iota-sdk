@@ -1,4 +1,4 @@
-// Copyright 2021-2024 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::collections::{HashMap, HashSet};
@@ -77,9 +77,7 @@ where
     /// consolidates the amount of outputs that fit into a single transaction.
     pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
-        let consolidation_tx = self
-            .sign_and_submit_transaction(prepared_transaction, None, None)
-            .await?;
+        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
         log::debug!(
             "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
@@ -98,13 +96,14 @@ where
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
         let options = Some(TransactionOptions {
-            custom_inputs: Some(outputs_to_consolidate.into_iter().map(|o| o.output_id).collect()),
+            required_inputs: outputs_to_consolidate.into_iter().map(|o| o.output_id).collect(),
             remainder_value_strategy: RemainderValueStrategy::CustomAddress(
                 params
                     .target_address
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
+            allow_additional_input_selection: false,
             ..Default::default()
         });
 

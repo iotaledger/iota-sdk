@@ -25,7 +25,7 @@ where
             .prepare_delay_delegation_claiming(delegation_id, reclaim_excess)
             .await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, None).await
+        self.sign_and_submit_transaction(prepared_transaction, None).await
     }
 
     /// Prepare to delay a delegation's claiming. The `reclaim_excess` flag indicates whether excess value

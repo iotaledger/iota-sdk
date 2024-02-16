@@ -70,7 +70,7 @@ where
         let options = options.into();
         let prepared = self.prepare_create_delegation_output(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared.transaction, None, options)
+        self.sign_and_submit_transaction(prepared.transaction, options)
             .await
             .map(|transaction| CreateDelegationTransaction {
                 delegation_id: prepared.delegation_id,
