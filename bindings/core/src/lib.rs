@@ -98,8 +98,7 @@ impl WalletOptions {
         } else if let Some(bip_path) = self.bip_path {
             builder = builder.with_address(bip_path);
         } else {
-            // TODO: return error
-            todo!("return error")
+            return Err(iota_sdk::wallet::Error::MissingParameter("address or bip path"));
         };
 
         #[cfg(feature = "storage")]

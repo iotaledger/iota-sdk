@@ -251,15 +251,13 @@ where
                             if backing_ed25519_address == &generated_ed25519_address {
                                 (address.clone(), Some(*bip_path))
                             } else {
-                                // TODO: Error::InvalidParameter("backing ed25519 address mismatch")
-                                return Err(crate::wallet::Error::MissingParameter("address mismatch"));
+                                return Err(crate::wallet::Error::InvalidParameter("address/bip-path mismatch"));
                             }
                         } else {
                             return Err(crate::wallet::Error::MissingParameter("secret manager"));
                         }
                     } else {
-                        // TODO: Error::InvalidParameter("non ed25519 address with BIP path provided")
-                        return Err(crate::wallet::Error::MissingParameter("non ed25519 address"));
+                        return Err(crate::wallet::Error::InvalidParameter("address/bip path mismatch"));
                     }
                 } else {
                     // the wallet only provides a view into that address

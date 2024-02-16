@@ -79,6 +79,9 @@ pub enum Error {
     /// Missing parameter.
     #[error("missing parameter: {0}")]
     MissingParameter(&'static str),
+    /// Invalid parameter.
+    #[error("invalid parameter: {0}")]
+    InvalidParameter(&'static str),
     /// Nft not found in unspent outputs
     #[error("nft not found in unspent outputs")]
     NftNotFoundInUnspentOutputs,
