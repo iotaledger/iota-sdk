@@ -66,7 +66,8 @@ impl From<(Bech32Address, Option<Bip44>)> for AddressProvider {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
-    pub(crate) address: Option<AddressProvider>,
+    pub(crate) address: Option<Bech32Address>,
+    pub(crate) bip_path: Option<Bip44>,
     pub(crate) alias: Option<String>,
     pub(crate) client_options: Option<ClientOptions>,
     #[cfg(feature = "storage")]
@@ -79,6 +80,7 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
     fn default() -> Self {
         Self {
             address: Default::default(),
+            bip_path: Default::default(),
             alias: Default::default(),
             client_options: Default::default(),
             #[cfg(feature = "storage")]
@@ -99,7 +101,13 @@ where
 
     /// Set the address provider of the wallet.
     pub fn with_address(mut self, provider: impl Into<AddressProvider>) -> Self {
-        self.address = Some(provider.into());
+        match provider.into() {
+            AddressProvider::Manual { address, bip_path } => {
+                self.address = Some(address);
+                self.bip_path = bip_path;
+            }
+            AddressProvider::Chain(bip_path) => self.bip_path = Some(bip_path),
+        }
         self
     }
 
@@ -225,61 +233,60 @@ where
 
         let hrp = client.get_bech32_hrp().await?;
 
-        let (wallet_address, wallet_bip_path) = if let Some(ref address_provider) = self.address {
-            match address_provider {
-                AddressProvider::Manual { address, bip_path } => {
-                    if let Some(bip_path) = bip_path {
-                        if let Some(backing_ed25519_address) = address.inner.backing_ed25519() {
-                            // we need to verify that the address is derived from the provided bip path
-                            if let Some(ref secret_manager) = self.secret_manager {
-                                let secret_manager = &*secret_manager.read().await;
-                                let generated_ed25519_address = secret_manager
-                                    .generate_ed25519_addresses(
-                                        bip_path.coin_type,
-                                        bip_path.account,
-                                        bip_path.address_index..bip_path.address_index + 1,
-                                        None,
-                                    )
-                                    .await?[0];
-                                if backing_ed25519_address == &generated_ed25519_address {
-                                    (address.clone(), Some(*bip_path))
-                                } else {
-                                    // TODO: Error::InvalidParameter("backing ed25519 address mismatch")
-                                    return Err(crate::wallet::Error::MissingParameter("address mismatch"));
-                                }
+        let (wallet_address, wallet_bip_path) = match (self.address.as_ref(), self.bip_path.as_ref()) {
+            (Some(address), bip_path) => {
+                if let Some(bip_path) = bip_path {
+                    if let Some(backing_ed25519_address) = address.inner.backing_ed25519() {
+                        // we need to verify that the address is derived from the provided bip path
+                        if let Some(ref secret_manager) = self.secret_manager {
+                            let secret_manager = &*secret_manager.read().await;
+                            let generated_ed25519_address = secret_manager
+                                .generate_ed25519_addresses(
+                                    bip_path.coin_type,
+                                    bip_path.account,
+                                    bip_path.address_index..bip_path.address_index + 1,
+                                    None,
+                                )
+                                .await?[0];
+                            if backing_ed25519_address == &generated_ed25519_address {
+                                (address.clone(), Some(*bip_path))
                             } else {
-                                return Err(crate::wallet::Error::MissingParameter("secret manager"));
+                                // TODO: Error::InvalidParameter("backing ed25519 address mismatch")
+                                return Err(crate::wallet::Error::MissingParameter("address mismatch"));
                             }
                         } else {
-                            // TODO: Error::InvalidParameter("non ed25519 address with BIP path provided")
-                            return Err(crate::wallet::Error::MissingParameter("non ed25519 address"));
+                            return Err(crate::wallet::Error::MissingParameter("secret manager"));
                         }
                     } else {
-                        // the wallet only provides a view into that address
-                        (address.clone(), None)
+                        // TODO: Error::InvalidParameter("non ed25519 address with BIP path provided")
+                        return Err(crate::wallet::Error::MissingParameter("non ed25519 address"));
                     }
-                }
-                AddressProvider::Chain(bip_path) => {
-                    if let Some(ref secret_manager) = self.secret_manager {
-                        let secret_manager = &*secret_manager.read().await;
-                        let generated_ed25519_address = secret_manager
-                            .generate_ed25519_addresses(
-                                bip_path.coin_type,
-                                bip_path.account,
-                                bip_path.address_index..bip_path.address_index + 1,
-                                None,
-                            )
-                            .await?[0];
-
-                        // provided_client_options.
-                        (Bech32Address::new(hrp, generated_ed25519_address), Some(*bip_path))
-                    } else {
-                        return Err(crate::wallet::Error::MissingParameter("secret manager"));
-                    }
+                } else {
+                    // the wallet only provides a view into that address
+                    (address.clone(), None)
                 }
             }
-        } else {
-            return Err(crate::wallet::Error::MissingParameter("address provider"));
+            (None, Some(bip_path)) => {
+                if let Some(ref secret_manager) = self.secret_manager {
+                    let secret_manager = &*secret_manager.read().await;
+                    let generated_ed25519_address = secret_manager
+                        .generate_ed25519_addresses(
+                            bip_path.coin_type,
+                            bip_path.account,
+                            bip_path.address_index..bip_path.address_index + 1,
+                            None,
+                        )
+                        .await?[0];
+
+                    // provided_client_options.
+                    (Bech32Address::new(hrp, generated_ed25519_address), Some(*bip_path))
+                } else {
+                    return Err(crate::wallet::Error::MissingParameter("secret manager"));
+                }
+            }
+            (None, None) => {
+                return Err(crate::wallet::Error::MissingParameter("address/bip_path"));
+            }
         };
 
         #[cfg(feature = "storage")]
@@ -372,7 +379,8 @@ where
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
-            address: Some((wallet.address().await, wallet.bip_path().await).into()),
+            address: Some(wallet.address().await),
+            bip_path: wallet.bip_path().await,
             alias: wallet.alias().await,
             client_options: Some(wallet.client_options().await),
             storage_options: Some(wallet.storage_options.clone()),
@@ -413,9 +421,8 @@ pub(crate) mod dto {
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct WalletBuilderDto {
-        // TODO: 1941: revert this change, bc AddressProvider::SecretManager should transition to (Address, Some(Bip44)
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub(crate) address_provider: Option<AddressProvider>,
+        pub(crate) address: Option<Bech32Address>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) bip_path: Option<Bip44>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -430,7 +437,8 @@ pub(crate) mod dto {
     impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
         fn from(value: WalletBuilderDto) -> Self {
             Self {
-                address: value.address_provider,
+                address: value.address,
+                bip_path: value.bip_path,
                 alias: value.alias,
                 client_options: value.client_options,
                 #[cfg(feature = "storage")]

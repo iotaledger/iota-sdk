@@ -168,13 +168,8 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert_eq!(
-            restored_wallet_builder.address,
-            Some(AddressProvider::Manual {
-                address: wallet_address,
-                bip_path: Some(wallet_bip_path)
-            })
-        );
+        assert_eq!(restored_wallet_builder.address, Some(wallet_address));
+        assert_eq!(restored_wallet_builder.bip_path, Some(wallet_bip_path));
         assert_eq!(restored_wallet_builder.alias, Some(wallet_alias));
     }
 }
