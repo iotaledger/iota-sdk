@@ -6,70 +6,75 @@
  */
 export enum TransactionFailureReason {
     None = 0,
-    TypeInvalid = 1,
-    Conflicting = 2,
-    InputAlreadySpent = 3,
-    InputCreationAfterTxCreation = 4,
-    UnlockSignatureInvalid = 5,
-    CommitmentInputMissing = 6,
-    CommitmentInputReferenceInvalid = 7,
-    BicInputReferenceInvalid = 8,
-    RewardInputReferenceInvalid = 9,
-    StakingRewardCalculationFailure = 10,
-    DelegationRewardCalculationFailure = 11,
-    InputOutputBaseTokenMismatch = 12,
-    ManaOverflow = 13,
-    InputOutputManaMismatch = 14,
-    ManaDecayCreationIndexExceedsTargetIndex = 15,
-    NativeTokenAmountLessThanZero = 16,
-    NativeTokenSumExceedsUint256 = 17,
-    NativeTokenSumUnbalanced = 18,
-    MultiAddressLengthUnlockLengthMismatch = 19,
-    MultiAddressUnlockThresholdNotReached = 20,
-    NestedMultiUnlock = 21,
-    SenderFeatureNotUnlocked = 22,
-    IssuerFeatureNotUnlocked = 23,
-    StakingRewardInputMissing = 24,
-    StakingBlockIssuerFeatureMissing = 25,
-    StakingCommitmentInputMissing = 26,
-    StakingRewardClaimingInvalid = 27,
-    StakingFeatureRemovedBeforeUnbonding = 28,
-    StakingFeatureModifiedBeforeUnbonding = 29,
-    StakingStartEpochInvalid = 30,
-    StakingEndEpochTooEarly = 31,
-    BlockIssuerCommitmentInputMissing = 32,
-    BlockIssuanceCreditInputMissing = 33,
-    BlockIssuerNotExpired = 34,
-    BlockIssuerExpiryTooEarly = 35,
-    ManaMovedOffBlockIssuerAccount = 36,
-    AccountLocked = 37,
-    TimelockCommitmentInputMissing = 38,
-    TimelockNotExpired = 39,
-    ExpirationCommitmentInputMissing = 40,
-    ExpirationNotUnlockable = 41,
-    ReturnAmountNotFulFilled = 42,
-    NewChainOutputHasNonZeroedId = 43,
-    ChainOutputImmutableFeaturesChanged = 44,
-    ImplicitAccountDestructionDisallowed = 45,
-    MultipleImplicitAccountCreationAddresses = 46,
-    AccountInvalidFoundryCounter = 47,
-    FoundryTransitionWithoutAccount = 48,
-    FoundrySerialInvalid = 49,
-    DelegationCommitmentInputMissing = 50,
-    DelegationRewardInputMissing = 51,
-    DelegationRewardsClaimingInvalid = 52,
-    DelegationOutputTransitionedTwice = 53,
-    DelegationModified = 54,
-    DelegationStartEpochInvalid = 55,
-    DelegationAmountMismatch = 56,
-    DelegationEndEpochNotZero = 57,
-    DelegationEndEpochInvalid = 58,
-    CapabilitiesNativeTokenBurningNotAllowed = 59,
-    CapabilitiesManaBurningNotAllowed = 60,
-    CapabilitiesAccountDestructionNotAllowed = 61,
-    CapabilitiesAnchorDestructionNotAllowed = 62,
-    CapabilitiesFoundryDestructionNotAllowed = 63,
-    CapabilitiesNftDestructionNotAllowed = 64,
+    ConflictRejected = 1,
+    InputAlreadySpent = 2,
+    InputCreationAfterTxCreation = 3,
+    UnlockSignatureInvalid = 4,
+    ChainAddressUnlockInvalid = 5,
+    DirectUnlockableAddressUnlockInvalid = 6,
+    MultiAddressUnlockInvalid = 7,
+    CommitmentInputReferenceInvalid = 8,
+    BicInputReferenceInvalid = 9,
+    RewardInputReferenceInvalid = 10,
+    StakingRewardCalculationFailure = 11,
+    DelegationRewardCalculationFailure = 12,
+    InputOutputBaseTokenMismatch = 13,
+    ManaOverflow = 14,
+    InputOutputManaMismatch = 15,
+    ManaDecayCreationIndexExceedsTargetIndex = 16,
+    NativeTokenSumUnbalanced = 17,
+    SimpleTokenSchemeMintedMeltedTokenDecrease = 18,
+    SimpleTokenSchemeMintingInvalid = 19,
+    SimpleTokenSchemeMeltingInvalid = 20,
+    SimpleTokenSchemeMaximumSupplyChanged = 21,
+    SimpleTokenSchemeGenesisInvalid = 22,
+    MultiAddressLengthUnlockLengthMismatch = 23,
+    MultiAddressUnlockThresholdNotReached = 24,
+    SenderFeatureNotUnlocked = 25,
+    IssuerFeatureNotUnlocked = 26,
+    StakingRewardInputMissing = 27,
+    StakingBlockIssuerFeatureMissing = 28,
+    StakingCommitmentInputMissing = 29,
+    StakingRewardClaimingInvalid = 30,
+    StakingFeatureRemovedBeforeUnbonding = 31,
+    StakingFeatureModifiedBeforeUnbonding = 32,
+    StakingStartEpochInvalid = 33,
+    StakingEndEpochTooEarly = 34,
+    BlockIssuerCommitmentInputMissing = 35,
+    BlockIssuanceCreditInputMissing = 36,
+    BlockIssuerNotExpired = 37,
+    BlockIssuerExpiryTooEarly = 38,
+    ManaMovedOffBlockIssuerAccount = 39,
+    AccountLocked = 40,
+    TimelockCommitmentInputMissing = 41,
+    TimelockNotExpired = 42,
+    ExpirationCommitmentInputMissing = 43,
+    ExpirationNotUnlockable = 44,
+    ReturnAmountNotFulFilled = 45,
+    NewChainOutputHasNonZeroedId = 46,
+    ChainOutputImmutableFeaturesChanged = 47,
+    ImplicitAccountDestructionDisallowed = 48,
+    MultipleImplicitAccountCreationAddresses = 49,
+    AccountInvalidFoundryCounter = 50,
+    AnchorInvalidStateTransition = 51,
+    AnchorInvalidGovernanceTransition = 52,
+    FoundryTransitionWithoutAccount = 53,
+    FoundrySerialInvalid = 54,
+    DelegationCommitmentInputMissing = 55,
+    DelegationRewardInputMissing = 56,
+    DelegationRewardsClaimingInvalid = 57,
+    DelegationOutputTransitionedTwice = 58,
+    DelegationModified = 59,
+    DelegationStartEpochInvalid = 60,
+    DelegationAmountMismatch = 61,
+    DelegationEndEpochNotZero = 62,
+    DelegationEndEpochInvalid = 63,
+    CapabilitiesNativeTokenBurningNotAllowed = 64,
+    CapabilitiesManaBurningNotAllowed = 65,
+    CapabilitiesAccountDestructionNotAllowed = 66,
+    CapabilitiesAnchorDestructionNotAllowed = 67,
+    CapabilitiesFoundryDestructionNotAllowed = 68,
+    CapabilitiesNftDestructionNotAllowed = 69,
     SemanticValidationFailed = 255,
 }
 
@@ -80,15 +85,19 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [key in TransactionFailureReason]: string;
 } = {
     [TransactionFailureReason.None]: 'None.',
-    [TransactionFailureReason.TypeInvalid]: 'Transaction type is invalid.',
-    [TransactionFailureReason.Conflicting]: 'Transaction is conflicting.',
+    [TransactionFailureReason.ConflictRejected]:
+        'Transaction was conflicting and was rejected.',
     [TransactionFailureReason.InputAlreadySpent]: 'Input already spent.',
     [TransactionFailureReason.InputCreationAfterTxCreation]:
         'Input creation slot after tx creation slot.',
     [TransactionFailureReason.UnlockSignatureInvalid]:
         'Signature in unlock is invalid.',
-    [TransactionFailureReason.CommitmentInputMissing]:
-        'Commitment input required with reward or BIC input.',
+    [TransactionFailureReason.ChainAddressUnlockInvalid]:
+        'invalid unlock for chain address.',
+    [TransactionFailureReason.DirectUnlockableAddressUnlockInvalid]:
+        'invalid unlock for direct unlockable address.',
+    [TransactionFailureReason.MultiAddressUnlockInvalid]:
+        'invalid unlock for multi address.',
     [TransactionFailureReason.CommitmentInputReferenceInvalid]:
         'Commitment input references an invalid or non-existent commitment.',
     [TransactionFailureReason.BicInputReferenceInvalid]:
@@ -107,18 +116,22 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
         'Inputs and outputs do not contain the same amount of Mana.',
     [TransactionFailureReason.ManaDecayCreationIndexExceedsTargetIndex]:
         'Mana decay creation slot/epoch index exceeds target slot/epoch index.',
-    [TransactionFailureReason.NativeTokenAmountLessThanZero]:
-        'Native token amount must be greater than zero.',
-    [TransactionFailureReason.NativeTokenSumExceedsUint256]:
-        'Native token sum exceeds max value of a uint256.',
     [TransactionFailureReason.NativeTokenSumUnbalanced]:
         'Native token sums are unbalanced.',
+    [TransactionFailureReason.SimpleTokenSchemeMintedMeltedTokenDecrease]:
+        "Simple token scheme's minted or melted tokens decreased.",
+    [TransactionFailureReason.SimpleTokenSchemeMintingInvalid]:
+        "Simple token scheme's minted tokens did not increase by the minted amount or melted tokens changed.",
+    [TransactionFailureReason.SimpleTokenSchemeMeltingInvalid]:
+        "Simple token scheme's melted tokens did not increase by the melted amount or minted tokens changed.",
+    [TransactionFailureReason.SimpleTokenSchemeMaximumSupplyChanged]:
+        "Simple token scheme's maximum supply cannot change during transition.",
+    [TransactionFailureReason.SimpleTokenSchemeGenesisInvalid]:
+        "Newly created simple token scheme's melted tokens are not zero or minted tokens do not equal native token amount in transaction.",
     [TransactionFailureReason.MultiAddressLengthUnlockLengthMismatch]:
         'Multi address length and multi unlock length do not match.',
     [TransactionFailureReason.MultiAddressUnlockThresholdNotReached]:
         'Multi address unlock threshold not reached.',
-    [TransactionFailureReason.NestedMultiUnlock]:
-        "Multi unlocks can't be nested.",
     [TransactionFailureReason.SenderFeatureNotUnlocked]:
         'Sender feature is not unlocked.',
     [TransactionFailureReason.IssuerFeatureNotUnlocked]:
@@ -170,6 +183,10 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
         'Multiple implicit account creation addresses on the input side.',
     [TransactionFailureReason.AccountInvalidFoundryCounter]:
         'Foundry counter in account decreased or did not increase by the number of new foundries.',
+    [TransactionFailureReason.AnchorInvalidStateTransition]:
+        'Invalid anchor state transition.',
+    [TransactionFailureReason.AnchorInvalidGovernanceTransition]:
+        'Invalid anchor governance transition.',
     [TransactionFailureReason.FoundryTransitionWithoutAccount]:
         'Foundry output transitioned without accompanying account on input or output side.',
     [TransactionFailureReason.FoundrySerialInvalid]:
@@ -185,7 +202,7 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.DelegationModified]:
         'Delegated amount, validator ID and start epoch cannot be modified.',
     [TransactionFailureReason.DelegationStartEpochInvalid]:
-        'Invalid start epoch.',
+        'Delegation output has invalid start epoch.',
     [TransactionFailureReason.DelegationAmountMismatch]:
         'Delegated amount does not match amount.',
     [TransactionFailureReason.DelegationEndEpochNotZero]:

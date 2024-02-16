@@ -1,18 +1,13 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
-use std::collections::HashSet;
 
 use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{input::INPUT_COUNT_RANGE, output::Output},
-    wallet::{
-        operations::transaction::{RemainderValueStrategy, TransactionOptions},
-        Wallet,
-    },
+    types::block::{input::INPUT_COUNT_MAX, output::Output},
+    wallet::{operations::transaction::TransactionOptions, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -27,7 +22,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
-        let options = options.into();
+        let options = options.into().unwrap_or_default();
         let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
@@ -37,56 +32,13 @@ where
             output.verify_storage_deposit(storage_score_params)?;
         }
 
-        if let Some(custom_inputs) = options.as_ref().and_then(|options| options.custom_inputs.as_ref()) {
-            // validate inputs amount
-            if !INPUT_COUNT_RANGE.contains(&(custom_inputs.len() as u16)) {
-                return Err(crate::types::block::Error::InvalidInputCount(
-                    TryIntoBoundedU16Error::Truncated(custom_inputs.len()),
-                ))?;
-            }
+        if options.required_inputs.len() as u16 > INPUT_COUNT_MAX {
+            return Err(crate::types::block::Error::InvalidInputCount(
+                TryIntoBoundedU16Error::Truncated(options.required_inputs.len()),
+            ))?;
         }
 
-        if let Some(mandatory_inputs) = options.as_ref().and_then(|options| options.mandatory_inputs.as_ref()) {
-            // validate inputs amount
-            if !INPUT_COUNT_RANGE.contains(&(mandatory_inputs.len() as u16)) {
-                return Err(crate::types::block::Error::InvalidInputCount(
-                    TryIntoBoundedU16Error::Truncated(mandatory_inputs.len()),
-                ))?;
-            }
-        }
-
-        let remainder_address = options
-            .as_ref()
-            .and_then(|options| match &options.remainder_value_strategy {
-                RemainderValueStrategy::ReuseAddress => None,
-                RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
-            });
-
-        let selected_transaction_data = self
-            .select_inputs(
-                outputs,
-                options
-                    .as_ref()
-                    .and_then(|options| options.custom_inputs.as_ref())
-                    .map(|inputs| HashSet::from_iter(inputs.clone())),
-                options
-                    .as_ref()
-                    .and_then(|options| options.mandatory_inputs.as_ref())
-                    .map(|inputs| HashSet::from_iter(inputs.clone())),
-                remainder_address,
-                options.as_ref().and_then(|options| options.burn.as_ref()),
-                options.as_ref().and_then(|options| options.mana_allotments.clone()),
-            )
-            .await?;
-
-        let prepared_transaction_data = match self.build_transaction(selected_transaction_data.clone(), options).await {
-            Ok(res) => res,
-            Err(err) => {
-                // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(&selected_transaction_data.inputs).await?;
-                return Err(err);
-            }
-        };
+        let prepared_transaction_data = self.select_inputs(outputs, options).await?;
 
         log::debug!(
             "[TRANSACTION] finished prepare_transaction in {:.2?}",

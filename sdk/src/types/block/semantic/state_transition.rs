@@ -118,8 +118,7 @@ impl BasicOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if next_state.account_id().is_null() {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::ImplicitAccountDestructionDisallowed);
         }
 
         if let Some(_block_issuer) = next_state.features().block_issuer() {
@@ -128,8 +127,7 @@ impl BasicOutput {
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
         } else {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::BlockIssuerNotExpired);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
@@ -152,6 +150,16 @@ impl StateTransitionVerifier for AccountOutput {
             return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
+        if let Some(block_issuer) = next_state.features().block_issuer() {
+            let past_bounded_slot_index = context
+                .protocol_parameters
+                .past_bounded_slot(context.commitment_context_input.unwrap());
+
+            if block_issuer.expiry_slot() < past_bounded_slot_index {
+                return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
+            }
+        }
+
         if let Some(issuer) = next_state.immutable_features().issuer() {
             if !context.unlocked_addresses.contains(issuer.address()) {
                 return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
@@ -168,6 +176,43 @@ impl StateTransitionVerifier for AccountOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
+        match (
+            current_state.features().block_issuer(),
+            next_state.features().block_issuer(),
+        ) {
+            (None, Some(block_issuer_output)) => {
+                let past_bounded_slot_index = context
+                    .protocol_parameters
+                    .past_bounded_slot(context.commitment_context_input.unwrap());
+
+                if block_issuer_output.expiry_slot() < past_bounded_slot_index {
+                    return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
+                }
+            }
+            (Some(block_issuer_input), None) => {
+                let commitment_index = context.commitment_context_input.unwrap();
+
+                if block_issuer_input.expiry_slot() >= commitment_index.slot_index() {
+                    return Err(TransactionFailureReason::BlockIssuerNotExpired);
+                }
+            }
+            (Some(block_issuer_input), Some(block_issuer_output)) => {
+                let commitment_index = context.commitment_context_input.unwrap();
+                let past_bounded_slot_index = context.protocol_parameters.past_bounded_slot(commitment_index);
+
+                if block_issuer_input.expiry_slot() >= commitment_index.slot_index() {
+                    if block_issuer_input.expiry_slot() != block_issuer_output.expiry_slot()
+                        && block_issuer_input.expiry_slot() < past_bounded_slot_index
+                    {
+                        return Err(TransactionFailureReason::BlockIssuerNotExpired);
+                    }
+                } else if block_issuer_output.expiry_slot() < past_bounded_slot_index {
+                    return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
+                }
+            }
+            _ => {}
+        }
+
         Self::transition_inner(
             current_state,
             next_state,
@@ -178,15 +223,22 @@ impl StateTransitionVerifier for AccountOutput {
 
     fn destruction(
         _output_id: &OutputId,
-        _current_state: &Self,
+        current_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
         {
-            return Err(TransactionFailureReason::CapabilitiesAccountDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesAccountDestructionNotAllowed);
         }
+
+        if let Some(block_issuer) = current_state.features().block_issuer() {
+            if block_issuer.expiry_slot() >= context.commitment_context_input.unwrap().slot_index() {
+                return Err(TransactionFailureReason::BlockIssuerNotExpired);
+            }
+        }
+
         Ok(())
     }
 }
@@ -235,8 +287,9 @@ impl StateTransitionVerifier for AnchorOutput {
             .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
         {
-            return Err(TransactionFailureReason::CapabilitiesAnchorDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesAnchorDestructionNotAllowed);
         }
+
         Ok(())
     }
 }
@@ -303,7 +356,7 @@ impl StateTransitionVerifier for FoundryOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
         {
-            return Err(TransactionFailureReason::CapabilitiesFoundryDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesFoundryDestructionNotAllowed);
         }
 
         let token_id = current_state.token_id();
@@ -364,8 +417,9 @@ impl StateTransitionVerifier for NftOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
         {
-            return Err(TransactionFailureReason::CapabilitiesNftDestructionNotAllowed)?;
+            return Err(TransactionFailureReason::CapabilitiesNftDestructionNotAllowed);
         }
+
         Ok(())
     }
 }
@@ -392,7 +446,6 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let slot_commitment_id = context
             .commitment_context_input
-            .map(|c| c.slot_commitment_id())
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.start_epoch() != protocol_parameters.delegation_start_epoch(slot_commitment_id) {
@@ -415,7 +468,6 @@ impl StateTransitionVerifier for DelegationOutput {
 
         let slot_commitment_id = context
             .commitment_context_input
-            .map(|c| c.slot_commitment_id())
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
         if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {

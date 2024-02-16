@@ -67,8 +67,8 @@ impl TransactionBuilder {
     }
 
     /// Sets the inputs of a [`TransactionBuilder`].
-    pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
-        self.inputs = inputs.into();
+    pub fn with_inputs(mut self, inputs: impl IntoIterator<Item = Input>) -> Self {
+        self.inputs = inputs.into_iter().collect();
         self
     }
 
@@ -96,8 +96,8 @@ impl TransactionBuilder {
         self
     }
 
-    pub fn with_capabilities(mut self, capabilities: TransactionCapabilities) -> Self {
-        self.capabilities = capabilities;
+    pub fn with_capabilities(mut self, capabilities: impl Into<TransactionCapabilities>) -> Self {
+        self.capabilities = capabilities.into();
         self
     }
 
@@ -113,8 +113,8 @@ impl TransactionBuilder {
     }
 
     /// Sets the outputs of a [`TransactionBuilder`].
-    pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
-        self.outputs = outputs.into();
+    pub fn with_outputs(mut self, outputs: impl IntoIterator<Item = Output>) -> Self {
+        self.outputs = outputs.into_iter().collect();
         self
     }
 
@@ -256,7 +256,7 @@ impl Transaction {
     }
 
     /// Returns the [`ManaAllotment`]s of a [`Transaction`].
-    pub fn allotments(&self) -> &[ManaAllotment] {
+    pub fn allotments(&self) -> &ManaAllotments {
         &self.allotments
     }
 

@@ -11,12 +11,11 @@ import * as protocol_parameters_json from '../../../../sdk/tests/types/fixtures/
 import { Block, BlockId, parseBlock, ProtocolParameters } from '../../';
 
 describe('Block tests', () => {
-
     it('compares basic block tagged data payload from a fixture', async () => {
         const block = parseBlock(basic_block_tagged_data_payload_json.block);
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
-        const expected_id = basic_block_tagged_data_payload_json.id as BlockId;
+        const expected_id: BlockId = basic_block_tagged_data_payload_json.id;
         expect(Block.id(block, params)).toEqual(expected_id);
     });
 
@@ -24,7 +23,7 @@ describe('Block tests', () => {
         const block = parseBlock(basic_block_transaction_payload_json.block);
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
-        const expected_id = basic_block_transaction_payload_json.id as BlockId;
+        const expected_id: BlockId = basic_block_transaction_payload_json.id;
         expect(Block.id(block, params)).toEqual(expected_id);
     });
 
@@ -32,7 +31,7 @@ describe('Block tests', () => {
         const block = parseBlock(validation_block_json.block);
         expect(block).toBeInstanceOf(Block);
         const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
-        const expected_id = validation_block_json.id as BlockId;
+        const expected_id: BlockId = validation_block_json.id;
         expect(Block.id(block, params)).toEqual(expected_id);
     });
 });

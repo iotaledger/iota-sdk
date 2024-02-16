@@ -102,7 +102,7 @@ impl Default for ManaParameters {
     fn default() -> Self {
         // TODO: use actual values
         Self {
-            bits_count: 10,
+            bits_count: 63,
             generation_rate: Default::default(),
             generation_rate_exponent: Default::default(),
             decay_factors: Default::default(),

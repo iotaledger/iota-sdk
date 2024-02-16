@@ -71,11 +71,11 @@ async function run() {
             },
         ];
         const options = {
-            mandatoryInputs: [input],
+            requiredInputs: [input],
             allowMicroAmount: false,
         };
         const transaction = await wallet.sendWithParams(params, options);
-        await wallet.reissueTransactionUntilIncluded(transaction.transactionId);
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
         console.log(
             `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,
         );

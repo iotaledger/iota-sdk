@@ -356,13 +356,13 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         //     let events = wallet.register_participation_events(&options).await?;
         //     Response::ParticipationEvents(events)
         // }
-        WalletMethod::ReissueTransactionUntilIncluded {
+        WalletMethod::WaitForTransactionAcceptance {
             transaction_id,
             interval,
             max_attempts,
         } => {
             let block_id = wallet
-                .reissue_transaction_until_included(&transaction_id, interval, max_attempts)
+                .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
             Response::BlockId(block_id)
         }
@@ -400,7 +400,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                         &wallet.client().get_protocol_parameters().await?,
                     )?,
                     None,
-                    None,
                 )
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
@@ -421,7 +420,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 &wallet.client().get_protocol_parameters().await?,
             )?;
             let transaction = wallet
-                .submit_and_store_transaction(signed_transaction_data, None, None)
+                .submit_and_store_transaction(signed_transaction_data, None)
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }

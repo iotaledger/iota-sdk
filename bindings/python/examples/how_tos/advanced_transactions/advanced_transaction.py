@@ -50,7 +50,7 @@ basic_output = Client().build_basic_output(
 transaction = wallet.send_outputs([basic_output])
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = wallet.reissue_transaction_until_included(
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 
 print(

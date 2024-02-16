@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use primitive_types::U256;
@@ -41,7 +41,7 @@ where
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())
             .await?;
-        let transaction = self.sign_and_submit_transaction(prepared, None, options).await?;
+        let transaction = self.sign_and_submit_transaction(prepared, options).await?;
 
         Ok(transaction)
     }
