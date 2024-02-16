@@ -145,7 +145,7 @@ interface RewardsParameters {
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
-    initialTargetRewards_rate: u64;
+    initialTargetRewardsRate: u64;
     /**
      * The rate of Mana rewards after the bootstrapping phase.
      */
