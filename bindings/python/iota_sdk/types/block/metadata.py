@@ -56,29 +56,27 @@ class BlockFailureReason(IntEnum):
         TooOldToIssue (1): The block is too old to issue.
         ParentTooOld (2): One of the block's parents is too old.
         ParentDoesNotExist (3): One of the block's parents does not exist.
-        ParentInvalid (4): One of the block's parents is invalid.
-        IssuerAccountNotFound (5): The block's issuer account could not be found.
-        VersionInvalid (6): The block's protocol version is invalid.
-        ManaCostCalculationFailed (7): The mana cost could not be calculated.
-        BurnedInsufficientMana (8): The block's issuer account burned insufficient Mana for a block.
-        AccountInvalid (9): The account is invalid.
-        SignatureInvalid (10): The block's signature is invalid.
-        DroppedDueToCongestion (11): The block is dropped due to congestion.
-        PayloadInvalid (12): The block payload is invalid.
+        IssuerAccountNotFound (4): The block's issuer account could not be found.
+        ManaCostCalculationFailed (5): The mana cost could not be calculated.
+        BurnedInsufficientMana (6): The block's issuer account burned insufficient Mana for a block.
+        AccountLocked (7): The account is locked.
+        AccountExpired (8): The account is expired.
+        SignatureInvalid (9): The block's signature is invalid.
+        DroppedDueToCongestion (10): The block is dropped due to congestion.
+        PayloadInvalid (11): The block payload is invalid.
         Invalid (255): The block is invalid.
     """
     TooOldToIssue = 1
     ParentTooOld = 2
     ParentDoesNotExist = 3
-    ParentInvalid = 4
-    IssuerAccountNotFound = 5
-    VersionInvalid = 6
-    ManaCostCalculationFailed = 7
-    BurnedInsufficientMana = 8
-    AccountInvalid = 9
-    SignatureInvalid = 10
-    DroppedDueToCongestion = 11
-    PayloadInvalid = 12
+    IssuerAccountNotFound = 4
+    ManaCostCalculationFailed = 5
+    BurnedInsufficientMana = 6
+    AccountLocked = 7
+    AccountExpired = 8
+    SignatureInvalid = 9
+    DroppedDueToCongestion = 10
+    PayloadInvalid = 11
     Invalid = 255
 
     def __str__(self):
@@ -86,14 +84,13 @@ class BlockFailureReason(IntEnum):
             1: "The block is too old to issue.",
             2: "One of the block's parents is too old.",
             3: "One of the block's parents does not exist.",
-            4: "One of the block's parents is invalid.",
-            5: "The block's issuer account could not be found.",
-            6: "The block's protocol version is invalid.",
-            7: "The mana cost could not be calculated.",
-            8: "The block's issuer account burned insufficient Mana for a block.",
-            9: "The account is invalid.",
-            10: "The block's signature is invalid.",
-            11: "The block is dropped due to congestion.",
-            12: "The block payload is invalid.",
+            4: "The block's issuer account could not be found.",
+            5: "The mana cost could not be calculated.",
+            6: "The block's issuer account burned insufficient Mana for a block.",
+            7: "The account is locked.",
+            8: "The account is expired.",
+            9: "The block's signature is invalid.",
+            10: "The block is dropped due to congestion.",
+            11: "The block payload is invalid.",
             255: "The block is invalid."
         }[self.value]

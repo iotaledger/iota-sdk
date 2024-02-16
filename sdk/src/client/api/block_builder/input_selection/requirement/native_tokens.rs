@@ -23,66 +23,6 @@ pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -
     Ok(required_native_tokens)
 }
 
-pub(crate) fn get_minted_and_melted_native_tokens(
-    inputs: &[InputSigningData],
-    outputs: &[Output],
-) -> Result<(NativeTokensBuilder, NativeTokensBuilder), Error> {
-    let mut minted_native_tokens = NativeTokensBuilder::new();
-    let mut melted_native_tokens = NativeTokensBuilder::new();
-
-    for output in outputs {
-        if let Output::Foundry(output_foundry) = output {
-            let TokenScheme::Simple(output_foundry_simple_ts) = output_foundry.token_scheme();
-            let mut initial_creation = true;
-
-            for input in inputs {
-                if let Output::Foundry(input_foundry) = &input.output {
-                    let token_id = output_foundry.token_id();
-
-                    if output_foundry.id() == input_foundry.id() {
-                        initial_creation = false;
-                        let TokenScheme::Simple(input_foundry_simple_ts) = input_foundry.token_scheme();
-
-                        match output_foundry_simple_ts
-                            .circulating_supply()
-                            .cmp(&input_foundry_simple_ts.circulating_supply())
-                        {
-                            Ordering::Greater => {
-                                let minted_native_token_amount = output_foundry_simple_ts.circulating_supply()
-                                    - input_foundry_simple_ts.circulating_supply();
-
-                                minted_native_tokens
-                                    .add_native_token(NativeToken::new(token_id, minted_native_token_amount)?)?;
-                            }
-                            Ordering::Less => {
-                                let melted_native_token_amount = input_foundry_simple_ts.circulating_supply()
-                                    - output_foundry_simple_ts.circulating_supply();
-
-                                melted_native_tokens
-                                    .add_native_token(NativeToken::new(token_id, melted_native_token_amount)?)?;
-                            }
-                            Ordering::Equal => {}
-                        }
-                    }
-                }
-            }
-
-            // If we created the foundry with this transaction, then we need to add the circulating supply as minted
-            // tokens
-            if initial_creation {
-                let circulating_supply = output_foundry_simple_ts.circulating_supply();
-
-                if !circulating_supply.is_zero() {
-                    minted_native_tokens
-                        .add_native_token(NativeToken::new(output_foundry.token_id(), circulating_supply)?)?;
-                }
-            }
-        }
-    }
-
-    Ok((minted_native_tokens, melted_native_tokens))
-}
-
 // TODO only handles one side
 pub(crate) fn get_native_tokens_diff(
     inputs: &NativeTokensBuilder,
@@ -113,9 +53,8 @@ pub(crate) fn get_native_tokens_diff(
 impl InputSelection {
     pub(crate) fn fulfill_native_tokens_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.outputs.iter())?;
-        let (minted_native_tokens, melted_native_tokens) =
-            get_minted_and_melted_native_tokens(&self.selected_inputs, &self.outputs)?;
+        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
+        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
         input_native_tokens.merge(minted_native_tokens)?;
         output_native_tokens.merge(melted_native_tokens)?;
@@ -180,5 +119,64 @@ impl InputSelection {
 
             Ok(Vec::new())
         }
+    }
+
+    pub(crate) fn get_minted_and_melted_native_tokens(
+        &self,
+    ) -> Result<(NativeTokensBuilder, NativeTokensBuilder), Error> {
+        let mut minted_native_tokens = NativeTokensBuilder::new();
+        let mut melted_native_tokens = NativeTokensBuilder::new();
+
+        for output in self.non_remainder_outputs() {
+            if let Output::Foundry(output_foundry) = output {
+                let TokenScheme::Simple(output_foundry_simple_ts) = output_foundry.token_scheme();
+                let mut initial_creation = true;
+
+                for input in &self.selected_inputs {
+                    if let Output::Foundry(input_foundry) = &input.output {
+                        let token_id = output_foundry.token_id();
+
+                        if output_foundry.id() == input_foundry.id() {
+                            initial_creation = false;
+                            let TokenScheme::Simple(input_foundry_simple_ts) = input_foundry.token_scheme();
+
+                            match output_foundry_simple_ts
+                                .circulating_supply()
+                                .cmp(&input_foundry_simple_ts.circulating_supply())
+                            {
+                                Ordering::Greater => {
+                                    let minted_native_token_amount = output_foundry_simple_ts.circulating_supply()
+                                        - input_foundry_simple_ts.circulating_supply();
+
+                                    minted_native_tokens
+                                        .add_native_token(NativeToken::new(token_id, minted_native_token_amount)?)?;
+                                }
+                                Ordering::Less => {
+                                    let melted_native_token_amount = input_foundry_simple_ts.circulating_supply()
+                                        - output_foundry_simple_ts.circulating_supply();
+
+                                    melted_native_tokens
+                                        .add_native_token(NativeToken::new(token_id, melted_native_token_amount)?)?;
+                                }
+                                Ordering::Equal => {}
+                            }
+                        }
+                    }
+                }
+
+                // If we created the foundry with this transaction, then we need to add the circulating supply as minted
+                // tokens
+                if initial_creation {
+                    let circulating_supply = output_foundry_simple_ts.circulating_supply();
+
+                    if !circulating_supply.is_zero() {
+                        minted_native_tokens
+                            .add_native_token(NativeToken::new(output_foundry.token_id(), circulating_supply)?)?;
+                    }
+                }
+            }
+        }
+
+        Ok((minted_native_tokens, melted_native_tokens))
     }
 }

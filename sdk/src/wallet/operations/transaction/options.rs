@@ -1,5 +1,7 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
+use alloc::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -8,36 +10,56 @@ use crate::{
     types::block::{
         address::Address,
         context_input::ContextInput,
-        mana::ManaAllotment,
-        output::OutputId,
+        output::{AccountId, OutputId},
         payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
     },
 };
 
 /// Options for transactions
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct TransactionOptions {
-    #[serde(default)]
+    /// The strategy applied for base coin remainders.
     pub remainder_value_strategy: RemainderValueStrategy,
-    #[serde(default)]
+    /// An optional tagged data payload.
     pub tagged_data_payload: Option<TaggedDataPayload>,
-    #[serde(default)]
-    pub context_inputs: Option<Vec<ContextInput>>,
-    // If custom inputs are provided only they are used. If also other additional inputs should be used,
-    // `mandatory_inputs` should be used instead.
-    #[serde(default)]
-    pub custom_inputs: Option<Vec<OutputId>>,
-    #[serde(default)]
-    pub mandatory_inputs: Option<Vec<OutputId>>,
+    /// Transaction context inputs to include.
+    pub context_inputs: Vec<ContextInput>,
+    /// Inputs that must be used for the transaction.
+    pub required_inputs: BTreeSet<OutputId>,
+    /// Specifies what needs to be burned during input selection.
     pub burn: Option<Burn>,
+    /// A string attached to the transaction.
     pub note: Option<String>,
-    #[serde(default)]
+    /// Whether to allow sending a micro amount.
     pub allow_micro_amount: bool,
-    #[serde(default)]
+    /// Whether to allow the selection of additional inputs for this transaction.
+    pub allow_additional_input_selection: bool,
+    /// Transaction capabilities.
     pub capabilities: Option<TransactionCapabilities>,
-    #[serde(default)]
-    pub mana_allotments: Option<Vec<ManaAllotment>>,
+    /// Mana allotments for the transaction.
+    pub mana_allotments: BTreeMap<AccountId, u64>,
+    /// Optional block issuer to which the transaction will have required mana allotted.
+    pub issuer_id: Option<AccountId>,
+}
+
+impl Default for TransactionOptions {
+    fn default() -> Self {
+        Self {
+            remainder_value_strategy: Default::default(),
+            tagged_data_payload: Default::default(),
+            context_inputs: Default::default(),
+            required_inputs: Default::default(),
+            burn: Default::default(),
+            note: Default::default(),
+            allow_micro_amount: false,
+            allow_additional_input_selection: true,
+            capabilities: Default::default(),
+            mana_allotments: Default::default(),
+            issuer_id: Default::default(),
+        }
+    }
 }
 
 #[allow(clippy::enum_variant_names)]

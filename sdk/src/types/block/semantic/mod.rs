@@ -255,6 +255,14 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
+        // Add allotted mana
+        for mana_allotment in self.transaction.allotments().iter() {
+            self.output_mana = self
+                .output_mana
+                .checked_add(mana_allotment.mana())
+                .ok_or(Error::CreatedManaOverflow)?;
+        }
+
         // Validation of outputs.
         for (index, created_output) in self.transaction.outputs().iter().enumerate() {
             let (amount, mana, created_native_token, features) = match created_output {
@@ -341,14 +349,6 @@ impl<'a> SemanticValidationContext<'a> {
 
             // Add stored mana
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
-
-            // Add allotted mana
-            for mana_allotment in self.transaction.allotments().iter() {
-                self.output_mana = self
-                    .output_mana
-                    .checked_add(mana_allotment.mana())
-                    .ok_or(Error::CreatedManaOverflow)?;
-            }
 
             if let Some(created_native_token) = created_native_token {
                 let native_token_amount = self

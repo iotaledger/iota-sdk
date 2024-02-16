@@ -7,8 +7,11 @@ use crate::types::block::Error;
 
 /// Describes the reason of a transaction failure.
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable, strum::FromRepr)]
+#[derive(
+    Debug, Copy, Clone, Eq, PartialEq, packable::Packable, strum::FromRepr, strum::EnumString, strum::AsRefStr,
+)]
 #[cfg_attr(feature = "serde", derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr))]
+#[strum(serialize_all = "camelCase")]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTransactionFailureReason)]
 #[non_exhaustive]
