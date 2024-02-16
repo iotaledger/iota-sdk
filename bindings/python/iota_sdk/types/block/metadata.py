@@ -30,6 +30,7 @@ class BlockMetadata:
     transaction_failure_reason: Optional[TransactionFailureReason] = None
 
 
+# TODO: change to_dict so it's not <BlockState.Pending: 'pending'>
 class BlockState(Enum):
     """Describes the state of a block.
 
@@ -41,7 +42,7 @@ class BlockState(Enum):
         Rejected: Rejected by the node, and user should reissue payload if it contains one.
         Failed: Not successfully issued due to failure reason.
     """
-    Pending = 0
+    Pending = 'pending'  # TODO change all to str?
     Accepted = 1
     Confirmed = 2
     Finalized = 3

@@ -279,6 +279,7 @@ class ProtocolParameters:
     bech32_hrp: str
     storage_score_parameters: StorageScoreParameters
     work_score_parameters: WorkScoreParameters
+    mana_parameters: ManaParameters
     token_supply: int = field(metadata=config(
         encoder=str
     ))
@@ -288,7 +289,6 @@ class ProtocolParameters:
     ))
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
-    mana_parameters: ManaParameters
     staking_unbonding_period: int
     validation_blocks_per_slot: int
     punishment_epochs: int
