@@ -120,7 +120,7 @@ mod tests {
         client::constants::IOTA_BECH32_HRP,
         types::block::{
             address::ToBech32Ext,
-            rand::address::{rand_account_address, rand_address},
+            rand::address::{rand_account_address, rand_base_address},
         },
     };
 
@@ -137,7 +137,7 @@ mod tests {
         assert_eq!(params_none_1, params_none_2);
 
         let params_some_1 = CreateDelegationParams {
-            address: Some(rand_address().to_bech32(IOTA_BECH32_HRP)),
+            address: Some(rand_base_address().to_bech32(IOTA_BECH32_HRP)),
             delegated_amount: 200,
             validator_address: rand_account_address(),
         };
