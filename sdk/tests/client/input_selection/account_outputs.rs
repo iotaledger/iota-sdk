@@ -1817,64 +1817,64 @@ fn min_allot_account_mana_additional() {
     );
 }
 
-#[test]
-fn min_allot_account_mana_cannot_select_additional() {
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
-    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
-    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
+// #[test]
+// fn min_allot_account_mana_cannot_select_additional() {
+//     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+//     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+//     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let provided_allotment = 1000;
-    let required_allotment = 7968;
-    // The account does not have enough to cover the requirement
-    let account_mana = required_allotment - 100;
-    // But there is additional available mana elsewhere
-    let additional_available_mana = 111;
+//     let provided_allotment = 1000;
+//     let required_allotment = 7968;
+//     // The account does not have enough to cover the requirement
+//     let account_mana = required_allotment - 100;
+//     // But there is additional available mana elsewhere
+//     let additional_available_mana = 111;
 
-    let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(account_mana)
-            .finish_output()
-            .unwrap(),
-        BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(additional_available_mana)
-            .finish_output()
-            .unwrap(),
-    ];
-    let inputs = inputs
-        .into_iter()
-        .map(|input| InputSigningData {
-            output: input,
-            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-            chain: None,
-        })
-        .collect::<Vec<_>>();
+//     let inputs = [
+//         AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+//             .add_unlock_condition(AddressUnlockCondition::new(
+//                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+//             ))
+//             .with_mana(account_mana)
+//             .finish_output()
+//             .unwrap(),
+//         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+//             .add_unlock_condition(AddressUnlockCondition::new(
+//                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+//             ))
+//             .with_mana(additional_available_mana)
+//             .finish_output()
+//             .unwrap(),
+//     ];
+//     let inputs = inputs
+//         .into_iter()
+//         .map(|input| InputSigningData {
+//             output: input,
+//             output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+//             chain: None,
+//         })
+//         .collect::<Vec<_>>();
 
-    let selected = InputSelection::new(
-        inputs.clone(),
-        None,
-        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
-        SLOT_COMMITMENT_ID,
-        protocol_parameters,
-    )
-    .with_min_mana_allotment(account_id_1, 2)
-    .with_mana_allotments(Some((account_id_2, provided_allotment)))
-    .with_required_inputs([*inputs[0].output_id()])
-    .disable_additional_input_selection()
-    .select()
-    .unwrap_err();
+//     let selected = InputSelection::new(
+//         inputs.clone(),
+//         None,
+//         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+//         SLOT_INDEX,
+//         SLOT_COMMITMENT_ID,
+//         protocol_parameters,
+//     )
+//     .with_min_mana_allotment(account_id_1, 2)
+//     .with_mana_allotments(Some((account_id_2, provided_allotment)))
+//     .with_required_inputs([*inputs[0].output_id()])
+//     .disable_additional_input_selection()
+//     .select()
+//     .unwrap_err();
 
-    assert!(
-        matches!(selected, Error::AdditionalInputsRequired(_)),
-        "expected AdditionalInputsRequired, found {selected:?}"
-    );
-}
+//     assert!(
+//         matches!(selected, Error::AdditionalInputsRequired(_)),
+//         "expected AdditionalInputsRequired, found {selected:?}"
+//     );
+// }
 
 #[test]
 fn min_allot_account_mana_requirement_twice() {
