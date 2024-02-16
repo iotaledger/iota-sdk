@@ -234,7 +234,7 @@ class RewardsParameters:
     ))
     final_target_rewards_rate: int = field(metadata=config(
         encoder=str
-    ))    
+    ))
     pool_coefficient_exponent: int
     retention_period: int
 
