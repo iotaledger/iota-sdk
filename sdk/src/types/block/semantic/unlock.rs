@@ -37,6 +37,7 @@ impl SemanticValidationContext<'_> {
                         return Err(TransactionFailureReason::DirectUnlockableAddressUnlockInvalid);
                     }
 
+                    // Unwrapping and indexing is fine as this has all been verified syntactically already.
                     let Signature::Ed25519(signature) = self.unlocks.unwrap()[unlock.index() as usize]
                         .as_signature()
                         .signature();
