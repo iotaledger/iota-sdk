@@ -71,30 +71,6 @@ impl NodeManagerBuilder {
         Default::default()
     }
 
-    pub(crate) fn with_node(mut self, url: &str) -> Result<Self> {
-        let url = validate_url(Url::parse(url)?)?;
-        self.nodes.insert(NodeDto::Node(Node {
-            url,
-            auth: None,
-            disabled: false,
-            permanode: false,
-        }));
-        Ok(self)
-    }
-
-    pub(crate) fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
-        for url in urls {
-            let url = validate_url(Url::parse(url)?)?;
-            self.primary_nodes.push(NodeDto::Node(Node {
-                url,
-                auth: None,
-                disabled: false,
-                permanode: false,
-            }));
-        }
-        Ok(self)
-    }
-
     pub(crate) fn with_primary_node(mut self, mut node: Node) -> Result<Self> {
         let mut url = validate_url(node.url.clone())?;
         if let Some(auth) = &node.auth {
@@ -109,10 +85,28 @@ impl NodeManagerBuilder {
         self.primary_nodes.push(NodeDto::Node(node));
         Ok(self)
     }
+    pub(crate) fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
+        for url in urls {
+            let url = validate_url(Url::parse(url)?)?;
+            self.primary_nodes.push(NodeDto::Node(Node {
+                url,
+                auth: None,
+                disabled: false,
+                permanode: false,
+            }));
+        }
+        Ok(self)
+    }
 
-    pub(crate) fn with_ignore_node_health(mut self) -> Self {
-        self.ignore_node_health = true;
-        self
+    pub(crate) fn with_node(mut self, url: &str) -> Result<Self> {
+        let url = validate_url(Url::parse(url)?)?;
+        self.nodes.insert(NodeDto::Node(Node {
+            url,
+            auth: None,
+            disabled: false,
+            permanode: false,
+        }));
+        Ok(self)
     }
 
     pub(crate) fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
@@ -146,6 +140,11 @@ impl NodeManagerBuilder {
             }));
         }
         Ok(self)
+    }
+
+    pub(crate) fn with_ignore_node_health(mut self) -> Self {
+        self.ignore_node_health = true;
+        self
     }
 
     pub(crate) fn with_node_sync_interval(mut self, node_sync_interval: Duration) -> Self {
