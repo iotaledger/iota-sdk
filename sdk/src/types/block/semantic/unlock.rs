@@ -15,7 +15,7 @@ impl SemanticValidationContext<'_> {
         match (address, unlock) {
             (Address::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
                 if self.unlocked_addresses.contains(address) {
-                    return Err(TransactionFailureReason::SemanticValidationFailed);
+                    return Err(TransactionFailureReason::DirectUnlockableAddressUnlockInvalid);
                 }
 
                 let Signature::Ed25519(signature) = unlock.signature();
@@ -32,39 +32,33 @@ impl SemanticValidationContext<'_> {
             (Address::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !self.unlocked_addresses.contains(address) {
-                    return Err(TransactionFailureReason::SemanticValidationFailed);
+                    return Err(TransactionFailureReason::DirectUnlockableAddressUnlockInvalid);
                 }
             }
             (Address::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Account(account_output)) = self.inputs[unlock.index() as usize] {
                     if &account_output.account_id_non_null(output_id) != account_address.account_id() {
-                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                        return Err(TransactionFailureReason::SemanticValidationFailed);
+                        return Err(TransactionFailureReason::ChainAddressUnlockInvalid);
                     }
                     if !self.unlocked_addresses.contains(address) {
-                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                        return Err(TransactionFailureReason::SemanticValidationFailed);
+                        return Err(TransactionFailureReason::ChainAddressUnlockInvalid);
                     }
                 } else {
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                    return Err(TransactionFailureReason::SemanticValidationFailed);
+                    return Err(TransactionFailureReason::ChainAddressUnlockInvalid);
                 }
             }
             (Address::Nft(nft_address), Unlock::Nft(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
                 if let (output_id, Output::Nft(nft_output)) = self.inputs[unlock.index() as usize] {
                     if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
-                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                        return Err(TransactionFailureReason::SemanticValidationFailed);
+                        return Err(TransactionFailureReason::ChainAddressUnlockInvalid);
                     }
                     if !self.unlocked_addresses.contains(address) {
-                        // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                        return Err(TransactionFailureReason::SemanticValidationFailed);
+                        return Err(TransactionFailureReason::ChainAddressUnlockInvalid);
                     }
                 } else {
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1954
-                    return Err(TransactionFailureReason::SemanticValidationFailed);
+                    return Err(TransactionFailureReason::ChainAddressUnlockInvalid);
                 }
             }
             (Address::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
@@ -95,7 +89,6 @@ impl SemanticValidationContext<'_> {
             (Address::Restricted(restricted_address), _) => {
                 return self.address_unlock(restricted_address.address(), unlock);
             }
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1954
             _ => return Err(TransactionFailureReason::SemanticValidationFailed),
         }
 
