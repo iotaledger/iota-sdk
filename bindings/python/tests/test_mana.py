@@ -1,8 +1,8 @@
 # Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-import json
-from iota_sdk import Utils, ProtocolParameters, deserialize_output
+# import json
+# from iota_sdk import Utils, ProtocolParameters, deserialize_output
 
 
 # https://github.com/iotaledger/tips/blob/tip45/tips/TIP-0045/tip-0045.md#potential-and-stored-mana

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-from iota_sdk import Block, ProtocolParameters
+# from iota_sdk import Block, ProtocolParameters
 
 protocol_params_json = {}
 with open('../../sdk/tests/types/fixtures/protocol_parameters.json', "r", encoding="utf-8") as params:

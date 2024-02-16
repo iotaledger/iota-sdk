@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-from iota_sdk import ProtocolParameters, Utils
+# from iota_sdk import ProtocolParameters, Utils
 
 
 protocol_params_json = {}
