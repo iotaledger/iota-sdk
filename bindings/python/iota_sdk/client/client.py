@@ -79,25 +79,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if "client_handle" in client_config:
             del client_config["client_handle"]
 
-        if isinstance(primary_nodes, list):
-            primary_nodes = [primary_node.to_dict() if isinstance(primary_node, Node)
-                             else primary_node for primary_node in primary_nodes]
-        elif primary_nodes:
-            if isinstance(primary_nodes, Node):
-                primary_nodes = [primary_nodes.to_dict()]
-            else:
-                primary_nodes = [primary_nodes]
-        client_config['primaryNodes'] = primary_nodes
-
-        if isinstance(nodes, list):
-            nodes = [node.to_dict() if isinstance(node, Node)
-                     else node for node in nodes]
-        elif nodes:
-            if isinstance(nodes, Node):
-                nodes = [nodes.to_dict()]
-            else:
-                nodes = [nodes]
-        client_config['nodes'] = nodes
+        client_config['primary_nodes'] = convert_nodes(primary_nodes)
+        client_config['nodes'] = convert_nodes(nodes)
 
         client_config = {
             k: v for k,
@@ -322,3 +305,17 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         return self._call_method('clearListeners', {
             'topics': topics
         })
+
+
+def convert_nodes(
+        nodes: Optional[Union[Union[str, Node], List[Union[str, Node]]]] = None):
+    """Helper function to convert provided nodes to a list for the client options.
+    """
+    if isinstance(nodes, list):
+        return [node.to_dict() if isinstance(node, Node)
+                else node for node in nodes]
+    if isinstance(nodes, Node):
+        return [nodes.to_dict()]
+    if nodes is not None:
+        return [nodes]
+    return None
