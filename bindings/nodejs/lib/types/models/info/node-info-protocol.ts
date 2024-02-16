@@ -141,15 +141,15 @@ interface RewardsParameters {
     /**
      * The rate of Mana rewards at the start of the bootstrapping phase.
      */
-    reward_to_generation_ratio: number;
+    rewardToGenerationRatio: number;
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
-    initial_target_rewards_rate: u64;
+    initialTargetRewards_rate: u64;
     /**
      * The rate of Mana rewards after the bootstrapping phase.
      */
-    final_target_rewards_rate: u64;
+    finalTargetRewardsRate: u64;
     /**
      * Pool Coefficient Exponent is the exponent used for shifting operation
      * in the pool rewards calculations.
