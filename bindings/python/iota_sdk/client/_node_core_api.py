@@ -4,7 +4,7 @@
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 
-from iota_sdk.client.responses import NodeInfoWrapper, InfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
@@ -52,18 +52,23 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'url': url
         })
 
-    # TODO #1928: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_info(self) -> NodeInfoWrapper:
-        """Returns general information about the node together with its URL.
-        GET /api/core/v3/info
+    def get_routes(self) -> RoutesResponse:
+        """Returns the available API route groups of the node.
+        GET /api/routes
         """
-        return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
+        return RoutesResponse.from_dict(self._call_method('getRoutes'))
 
-    # TODO #1928: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_node_info(self, url: str, auth=None) -> InfoResponse:
+    def get_info(self) -> InfoResponse:
         """Returns general information about the node.
+        GET /api/core/v3/info
+
+        Returns:
+            The node info.
+        """
+        return InfoResponse.from_dict(self._call_method('getInfo'))
+
+    def get_node_info(self, url: str, auth=None) -> NodeInfoResponse:
+        """Returns general information about a node together with its URL.
         GET /api/core/v3/info
 
         Args:
@@ -71,40 +76,12 @@ class NodeCoreAPI(metaclass=ABCMeta):
             auth: A JWT or username/password authentication object.
 
         Returns:
-            The node info.
+            The node info with its URL.
         """
-        return InfoResponse.from_dict(self._call_method('getNodeInfo', {
+        return NodeInfoResponse.from_dict(self._call_method('getNodeInfo', {
             'url': url,
             'auth': auth
         }))
-
-    # TODO #1928: this should made be available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_routes(self) -> RoutesResponse:
-        """Returns the available API route groups of the node.
-        GET /api/routes
-        """
-
-    def call_plugin_route(self, base_plugin_path: str, method: str,
-                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
-        """Extension method which provides request methods for plugins.
-
-        Args:
-            base_plugin_path: The base path of the routes provided by the plugin.
-            method: The HTTP method.
-            endpoint: The endpoint to query provided by the plugin.
-            query_params: The parameters of the query.
-            request: The request object sent to the endpoint of the plugin.
-        """
-        if query_params is None:
-            query_params = []
-        return self._call_method('callPluginRoute', {
-            'basePluginPath': base_plugin_path,
-            'method': method,
-            'endpoint': endpoint,
-            'queryParams': query_params,
-            'request': request,
-        })
 
     # Accounts routes.
 
@@ -458,3 +435,26 @@ class NodeCoreAPI(metaclass=ABCMeta):
         return UtxoChangesFullResponse.from_dict(self._call_method('getUtxoChangesFullBySlot', {
             'slot': slot
         }))
+
+    # Plugin routes.
+
+    def call_plugin_route(self, base_plugin_path: str, method: str,
+                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
+        """Extension method which provides request methods for plugins.
+
+        Args:
+            base_plugin_path: The base path of the routes provided by the plugin.
+            method: The HTTP method.
+            endpoint: The endpoint to query provided by the plugin.
+            query_params: The parameters of the query.
+            request: The request object sent to the endpoint of the plugin.
+        """
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'endpoint': endpoint,
+            'queryParams': query_params,
+            'request': request,
+        })

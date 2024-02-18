@@ -24,6 +24,16 @@ use crate::{
     utils::serde::{option_string, string},
 };
 
+/// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct NodeInfoResponse {
+    /// The returned node info
+    pub node_info: InfoResponse,
+    /// The url from the node which returned the node info
+    pub url: String,
+}
+
 /// Response of GET /api/core/v3/info.
 /// General information about the node.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

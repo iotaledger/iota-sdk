@@ -10,7 +10,10 @@ use {
 };
 
 use super::{Node, NodeManager};
-use crate::client::{Client, ClientInner, Error, Result};
+use crate::{
+    client::{Client, ClientInner, Error, Result},
+    types::api::core::NodeInfoResponse,
+};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
@@ -72,7 +75,7 @@ impl ClientInner {
         for node in nodes {
             // Put the healthy node url into the network_nodes
             match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
-                Ok(info) => {
+                Ok(NodeInfoResponse { node_info: info, .. }) => {
                     if info.status.is_healthy || ignore_node_health {
                         // Unwrap: We should always have parameters for this version. If we don't we can't recover.
                         let network_name = info

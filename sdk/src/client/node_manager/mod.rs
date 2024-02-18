@@ -28,7 +28,7 @@ use crate::{
         error::{Error, Result},
         node_manager::builder::NodeManagerBuilder,
     },
-    types::api::core::InfoResponse,
+    types::api::core::{InfoResponse, NodeInfoResponse},
 };
 
 // The node manager takes care of selecting node(s) for requests until a result is returned or if quorum is enabled it
@@ -241,7 +241,7 @@ impl NodeManager {
                         // Handle node_info extra because we also want to return the url
                         if path == crate::client::node_api::core::routes::INFO_PATH {
                             let node_info: InfoResponse = res.into_json().await?;
-                            let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
+                            let wrapper = NodeInfoResponse {
                                 node_info,
                                 url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
                             };

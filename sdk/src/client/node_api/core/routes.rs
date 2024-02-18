@@ -17,9 +17,9 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
-            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-            ValidatorsResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, NodeInfoResponse, OutputResponse, RoutesResponse,
+            SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
+            ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -34,16 +34,6 @@ use crate::{
 
 /// Info path is the exact path extension for node APIs to request their info.
 pub(crate) static INFO_PATH: &str = "api/core/v3/info";
-
-/// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub struct NodeInfoWrapper {
-    /// The returned node info
-    pub node_info: InfoResponse,
-    /// The url from the node which returned the node info
-    pub url: String,
-}
 
 impl ClientInner {
     // Node routes.
@@ -83,7 +73,7 @@ impl ClientInner {
 
     /// Returns general information about the node.
     /// GET /api/core/v3/info
-    pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
+    pub async fn get_info(&self) -> Result<InfoResponse> {
         self.get_request(INFO_PATH, None, false, false).await
     }
 
@@ -390,7 +380,7 @@ impl ClientInner {
 
 impl Client {
     /// GET /api/core/v3/info endpoint
-    pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
+    pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<NodeInfoResponse> {
         let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
         if let Some(auth) = &auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
@@ -407,7 +397,7 @@ impl Client {
             url.set_path(&format!("{}/{}", url.path(), INFO_PATH));
         }
 
-        let resp: InfoResponse =
+        let resp: NodeInfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
                 .get(
                     Node {

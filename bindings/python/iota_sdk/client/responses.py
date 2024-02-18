@@ -214,7 +214,6 @@ class ProtocolParametersResponse:
     parameters: ProtocolParameters
 
 
-# TODO: rename sdk-wide to `NodeInfoResponse`?
 @json
 @dataclass
 class InfoResponse:
@@ -237,10 +236,9 @@ class InfoResponse:
     base_token: NodeInfoBaseToken
 
 
-# TODO: rename sdk-wide to `NodeInfoResponseWithUrl`?
 @json
 @dataclass
-class NodeInfoWrapper:
+class NodeInfoResponse:
     """General information about the node and its URL.
     GET /api/core/v3/info.
 

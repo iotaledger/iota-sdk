@@ -11,15 +11,15 @@ use iota_sdk::{
     client::{
         api::{PreparedTransactionData, SignedTransactionDataDto},
         node_manager::node::Node,
-        NetworkInfo, NodeInfoWrapper,
+        NetworkInfo,
     },
     types::{
         api::{
             core::{
-                BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
-                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse,
-                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-                ValidatorResponse, ValidatorsResponse,
+                BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, NodeInfoResponse, OutputResponse, RoutesResponse,
+                TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+                ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -102,11 +102,11 @@ pub enum Response {
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),
     /// Response for:
-    /// - [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
-    NodeInfo(NodeInfo),
-    /// Response for:
     /// - [`GetInfo`](crate::method::ClientMethod::GetInfo)
-    Info(NodeInfoWrapper),
+    Info(InfoResponse),
+    /// Response for:
+    /// - [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
+    NodeInfo(NodeInfoResponse),
     /// Response for:
     /// - [`GetRoutes`](crate::method::ClientMethod::GetRoutes)
     Routes(RoutesResponse),
@@ -226,8 +226,6 @@ pub enum Response {
     /// Response for:
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
     Hash(String),
-    /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
-    NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
     /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)

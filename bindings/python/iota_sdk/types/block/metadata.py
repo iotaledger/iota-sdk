@@ -1,7 +1,6 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# from __future__ import annotations
 from enum import Enum, IntEnum
 
 
