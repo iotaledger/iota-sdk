@@ -76,8 +76,7 @@ async fn update_client_options() -> Result<()> {
 // }
 
 #[cfg(feature = "storage")]
-// #[tokio::test]
-#[ignore = "currently failing, but will be fixed with #1941"]
+#[tokio::test]
 async fn changed_bip_path() -> Result<()> {
     use iota_sdk::crypto::keys::bip44::Bip44;
 
