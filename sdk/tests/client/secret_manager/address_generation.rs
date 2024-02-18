@@ -15,14 +15,14 @@ use iota_sdk::{
         api::GetAddressesOptions,
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Error as ClientError,
+        Error, Result,
     },
     types::block::address::{Hrp, ToBech32Ext},
-    wallet::{ClientOptions, Error, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
+use crate::client::common::{setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
 
 #[tokio::test]
 async fn address_generation_mnemonic() -> Result<()> {

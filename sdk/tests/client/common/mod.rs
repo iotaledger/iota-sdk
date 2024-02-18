@@ -8,9 +8,9 @@ mod constants;
 //     api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
 //     request_funds_from_faucet, secret::SecretManager, Client, Result,
 // };
-use iota_sdk::client::Client;
+use iota_sdk::client::{Client, Result};
 
-pub use self::constants::{FAUCET_URL, NODE_LOCAL};
+pub use self::constants::*;
 
 /// Sets up a Client with node health ignored.
 pub async fn setup_client_with_node_health_ignored() -> Client {
@@ -62,3 +62,15 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 //     }
 //     panic!("Faucet no longer wants to hand over coins");
 // }
+
+#[allow(dead_code)]
+pub(crate) fn setup(path: &str) -> Result<()> {
+    std::fs::remove_dir_all(path).ok();
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub(crate) fn tear_down(path: &str) -> Result<()> {
+    std::fs::remove_dir_all(path).ok();
+    Ok(())
+}

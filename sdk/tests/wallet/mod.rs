@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod address_generation;
 #[cfg(all(feature = "stronghold", feature = "storage"))]
 mod backup_restore;
 mod balance;
