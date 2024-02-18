@@ -70,8 +70,7 @@ async fn address_generation_stronghold() -> Result<()> {
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
-    tear_down(storage_path)?;
-    Ok(())
+    tear_down(storage_path)
 }
 
 #[tokio::test]
@@ -99,30 +98,16 @@ async fn address_generation_ledger() -> Result<()> {
     Ok(())
 }
 
-// #[tokio::test]
-// async fn address_generation_placeholder() -> Result<()> {
-//     let storage_path = "test-storage/wallet_address_generation_placeholder";
-//     setup(storage_path)?;
+#[tokio::test]
+async fn address_generation_placeholder() -> Result<()> {
+    let secret_manager = SecretManager::Placeholder;
 
-//     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+    assert!(matches!(
+        secret_manager
+            .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+            .await,
+        Err(iota_sdk::client::Error::PlaceholderSecretManager)
+    ));
 
-//     #[allow(unused_mut)]
-//     let mut wallet_builder = Wallet::builder()
-//         .with_secret_manager(Secress_generation_stronghold ... FAILEDetManager::Placeholder)
-//         .with_client_options(client_options)
-//         .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
-
-//     #[cfg(feature = "storage")]
-//     {
-//         wallet_builder = wallet_builder.with_storage_path(storage_path);
-//     }
-//     let wallet = wallet_builder.finish().await?;
-
-//     if let Err(Error::Client(error)) = wallet.generate_ed25519_address(0, 0, None).await {
-//         assert!(matches!(*error, ClientError::PlaceholderSecretManager))
-//     } else {
-//         panic!("expected PlaceholderSecretManager")
-//     }
-
-//     tear_down(storage_path)
-// }
+    Ok(())
+}
