@@ -3,7 +3,8 @@
 
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+
+from iota_sdk.types.common import HexStr, IdWithSlotIndex, json
 
 
 @json
@@ -30,3 +31,8 @@ class SlotCommitment:
     reference_mana_cost: int = field(metadata=config(
         encoder=str
     ))
+
+
+class SlotCommitmentId(IdWithSlotIndex):
+    """Represents a slot commitment ID.
+    """

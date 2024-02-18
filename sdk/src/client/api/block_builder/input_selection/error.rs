@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! Error handling for input selection.
@@ -14,15 +14,27 @@ use crate::types::block::output::{ChainId, OutputId, TokenId};
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
+    #[error("additional inputs required for {0:?}, but additional input selection is disabled")]
+    AdditionalInputsRequired(Requirement),
     /// Block error.
     #[error("{0}")]
     Block(#[from] crate::types::block::Error),
     /// Can't burn and transition an output at the same time.
     #[error("can't burn and transition an output at the same time, chain ID: {0}")]
     BurnAndTransition(ChainId),
+    #[error("mana rewards provided without an associated burn or custom input, output ID: {0}")]
+    ExtraManaRewards(OutputId),
     /// Insufficient amount provided.
     #[error("insufficient amount: found {found}, required {required}")]
     InsufficientAmount {
+        /// The amount found.
+        found: u64,
+        /// The required amount.
+        required: u64,
+    },
+    /// Insufficient mana provided.
+    #[error("insufficient mana: found {found}, required {required}")]
+    InsufficientMana {
         /// The amount found.
         found: u64,
         /// The required amount.

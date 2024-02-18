@@ -19,8 +19,8 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry, Nft},
-    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2, SLOT_INDEX,
-    TOKEN_ID_1, TOKEN_ID_2,
+    ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2,
+    SLOT_COMMITMENT_ID, SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
 };
 
 #[test]
@@ -30,52 +30,56 @@ fn burn_account_present() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -85,43 +89,47 @@ fn burn_account_present_and_required() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -129,9 +137,9 @@ fn burn_account_present_and_required() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -141,39 +149,42 @@ fn burn_account_id_zero() {
 
     let inputs = build_inputs(
         [
-            Nft(
-                1_000_000,
-                nft_id_0,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_0,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
     let nft_id = NftId::from(inputs[0].output_id());
 
     let selected = InputSelection::new(
@@ -181,15 +192,16 @@ fn burn_account_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -198,34 +210,36 @@ fn burn_account_absent() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
+        [(
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
             None,
         )],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -245,59 +259,65 @@ fn burn_accounts_present() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-            ),
-            Account(
-                1_000_000,
-                account_id_2,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_2,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
-                None,
-                None,
-                None,
-                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        3_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 3_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_accounts(HashSet::from([account_id_1, account_id_2])))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -307,46 +327,48 @@ fn burn_account_in_outputs() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account {
+            amount: 1_000_000,
+            account_id: account_id_1,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            sender: None,
+            issuer: None,
+        },
+        Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
 
     let selected = InputSelection::new(
@@ -354,6 +376,7 @@ fn burn_account_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -372,54 +395,58 @@ fn burn_nft_present() {
 
     let inputs = build_inputs(
         [
-            Nft(
-                1_000_000,
-                nft_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -429,45 +456,49 @@ fn burn_nft_present_and_required() {
 
     let inputs = build_inputs(
         [
-            Nft(
-                1_000_000,
-                nft_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -475,9 +506,9 @@ fn burn_nft_present_and_required() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -487,37 +518,40 @@ fn burn_nft_id_zero() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_0,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_0,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
     let account_id = AccountId::from(inputs[0].output_id());
 
     let selected = InputSelection::new(
@@ -525,15 +559,16 @@ fn burn_nft_id_zero() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[0]);
-    assert_eq!(selected.outputs, outputs);
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[0]);
+    assert_eq!(selected.transaction.outputs(), outputs);
 }
 
 #[test]
@@ -542,34 +577,36 @@ fn burn_nft_absent() {
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
+        [(
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
             None,
         )],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -589,63 +626,69 @@ fn burn_nfts_present() {
 
     let inputs = build_inputs(
         [
-            Nft(
-                1_000_000,
-                nft_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
-            ),
-            Nft(
-                1_000_000,
-                nft_id_2,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_2,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 None,
-                None,
-                None,
-                None,
-                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        3_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 3_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_nfts(HashSet::from([nft_id_1, nft_id_2])))
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -655,50 +698,52 @@ fn burn_nft_in_outputs() {
 
     let inputs = build_inputs(
         [
-            Nft(
-                1_000_000,
-                nft_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
+            (
+                Nft {
+                    amount: 1_000_000,
+                    nft_id: nft_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                    sdruc: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
-        Nft(
-            1_000_000,
-            nft_id_1,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Nft {
+            amount: 1_000_000,
+            nft_id: nft_id_1,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            sender: None,
+            issuer: None,
+            sdruc: None,
+            expiration: None,
+        },
+        Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
 
     let selected = InputSelection::new(
@@ -706,6 +751,7 @@ fn burn_nft_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -724,62 +770,69 @@ fn burn_foundry_present() {
 
     let inputs = build_inputs(
         [
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(0, 0, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        500_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 500_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[0].output.as_foundry().id()))
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(selected.inputs.contains(&inputs[1]));
-    assert_eq!(selected.outputs.len(), 3);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[1]));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_basic() {
                 assert!(is_remainder_or_return(
@@ -810,11 +863,14 @@ fn burn_foundry_absent() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id_1 = build_inputs(
-        [Foundry(
-            1_000_000,
-            account_id_1,
-            1,
-            SimpleTokenScheme::new(0, 0, 10).unwrap(),
+        [(
+            Foundry {
+                amount: 1_000_000,
+                account_id: account_id_1,
+                serial_number: 1,
+                token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                native_token: None,
+            },
             None,
         )],
         Some(SLOT_INDEX),
@@ -825,43 +881,47 @@ fn burn_foundry_absent() {
 
     let inputs = build_inputs(
         [
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
@@ -880,47 +940,55 @@ fn burn_foundries_present() {
 
     let inputs = build_inputs(
         [
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(0, 0, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
-            Foundry(
-                1_000_000,
-                account_id_1,
-                2,
-                SimpleTokenScheme::new(0, 0, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 2,
+                    token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_foundries(HashSet::from([
@@ -930,10 +998,10 @@ fn burn_foundries_present() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
@@ -956,44 +1024,48 @@ fn burn_foundry_in_outputs() {
 
     let inputs = build_inputs(
         [
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(0, 0, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
-        Foundry(
-            1_000_000,
-            account_id_1,
-            1,
-            SimpleTokenScheme::new(0, 0, 10).unwrap(),
-            None,
-        ),
-        Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Foundry {
+            amount: 1_000_000,
+            account_id: account_id_1,
+            serial_number: 1,
+            token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+            native_token: None,
+        },
+        Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        },
     ]);
     let foundry_id_1 = inputs[0].output.as_foundry().id();
 
@@ -1002,6 +1074,7 @@ fn burn_foundry_in_outputs() {
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
@@ -1019,24 +1092,28 @@ fn burn_native_tokens() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                Some((TOKEN_ID_1, 100)),
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: Some((TOKEN_ID_1, 100)),
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                Some((TOKEN_ID_2, 100)),
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: Some((TOKEN_ID_2, 100)),
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
@@ -1045,9 +1122,10 @@ fn burn_native_tokens() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        Vec::new(),
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(Burn::new().set_native_tokens(HashMap::from([
@@ -1057,17 +1135,17 @@ fn burn_native_tokens() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert_eq!(selected.outputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
     let nt_remainder_output_amount = 106000;
     assert!(
         is_remainder_or_return(
-            &selected.outputs[0],
+            &selected.transaction.outputs()[0],
             nt_remainder_output_amount,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Some((TOKEN_ID_1, 80))
         ) && is_remainder_or_return(
-            &selected.outputs[1],
+            &selected.transaction.outputs()[1],
             2_000_000 - nt_remainder_output_amount,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Some((TOKEN_ID_2, 70))
@@ -1082,50 +1160,57 @@ fn burn_foundry_and_its_account() {
 
     let inputs = build_inputs(
         [
-            Foundry(
-                1_000_000,
-                account_id_1,
-                1,
-                SimpleTokenScheme::new(0, 0, 10).unwrap(),
+            (
+                Foundry {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(0, 0, 10).unwrap(),
+                    native_token: None,
+                },
                 None,
             ),
-            Account(
-                1_000_000,
-                account_id_1,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
+            (
+                Account {
+                    amount: 1_000_000,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
                 None,
             ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        500_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 500_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_burn(
@@ -1136,13 +1221,13 @@ fn burn_foundry_and_its_account() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert!(selected.inputs.contains(&inputs[0]));
-    assert!(selected.inputs.contains(&inputs[1]));
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[1]));
     // One output should be added for the remainder.
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
-    selected.outputs.iter().for_each(|output| {
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(is_remainder_or_return(
                 output,

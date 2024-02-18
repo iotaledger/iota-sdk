@@ -3,7 +3,11 @@
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{address::Address, protocol::protocol_parameters, slot::SlotIndex},
+    types::block::{
+        address::Address,
+        protocol::protocol_parameters,
+        slot::{SlotCommitmentHash, SlotIndex},
+    },
 };
 use pretty_assertions::assert_eq;
 
@@ -16,34 +20,36 @@ fn one_output_timelock_not_expired() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs(
-        [Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            Some(200),
-            None,
+        [(
+            Basic {
+                amount: 2_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: Some(200),
+                expiration: None,
+            },
             None,
         )],
         None,
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select();
@@ -56,41 +62,43 @@ fn timelock_equal_timestamp() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs(
-        [Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            Some(200),
-            None,
+        [(
+            Basic {
+                amount: 2_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: Some(200),
+                expiration: None,
+            },
             None,
         )],
         Some(SlotIndex::from(200)),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         200,
+        SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -99,53 +107,57 @@ fn two_outputs_one_timelock_expired() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                2_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                Some(200),
-                None,
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: Some(200),
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                2_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                Some(50),
-                None,
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: Some(50),
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SlotIndex::from(100)),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[1]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[1]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -154,53 +166,57 @@ fn two_outputs_one_timelocked_one_missing() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                2_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                Some(200),
-                None,
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: Some(200),
+                    expiration: None,
+                },
                 None,
             ),
-            Basic(
-                2_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 2_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 None,
             ),
         ],
         Some(SlotIndex::from(100)),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 1);
-    assert_eq!(selected.inputs[0], inputs[1]);
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert_eq!(selected.inputs_data.len(), 1);
+    assert_eq!(selected.inputs_data[0], inputs[1]);
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -208,39 +224,41 @@ fn one_output_timelock_expired() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs(
-        [Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            Some(50),
-            None,
+        [(
+            Basic {
+                amount: 2_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: Some(50),
+                expiration: None,
+            },
             None,
         )],
         Some(SlotIndex::from(100)),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
+        SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs, &inputs));
-    assert!(unsorted_eq(&selected.outputs, &outputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }

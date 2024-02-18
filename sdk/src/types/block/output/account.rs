@@ -22,7 +22,7 @@ use crate::types::block::{
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::StateTransitionError,
+    semantic::TransactionFailureReason,
     Error,
 };
 
@@ -247,6 +247,8 @@ impl AccountOutputBuilder {
             OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
+        verify_staked_amount(output.amount, &output.features)?;
+
         Ok(output)
     }
 
@@ -388,15 +390,20 @@ impl AccountOutput {
         self.features.block_issuer().is_some()
     }
 
+    /// Returns whether the output can claim rewards based on its current and next state in a transaction.
+    pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
+        self.features().staking().is_some() && next_state.map_or(true, |o| o.features().staking().is_none())
+    }
+
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_chains: &HashMap<ChainId, &Output>,
+        input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
         outputs: &[Output],
-    ) -> Result<(), StateTransitionError> {
+    ) -> Result<(), TransactionFailureReason> {
         if current_state.immutable_features != next_state.immutable_features {
-            return Err(StateTransitionError::MutatedImmutableField);
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
         }
 
         // TODO update when TIP is updated
@@ -432,12 +439,12 @@ impl AccountOutput {
             created_foundries_count += 1;
 
             if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                return Err(StateTransitionError::UnsortedCreatedFoundries);
+                return Err(TransactionFailureReason::FoundrySerialInvalid);
             }
         }
 
         if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-            return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
+            return Err(TransactionFailureReason::AccountInvalidFoundryCounter);
         }
 
         Ok(())
@@ -510,6 +517,7 @@ impl Packable for AccountOutput {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
+            verify_staked_amount(amount, &features).map_err(UnpackError::Packable)?;
         }
 
         let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
@@ -543,7 +551,7 @@ fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
     if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Account(account_address) = unlock_condition.address() {
-            if account_address.account_id() == account_id {
+            if !account_id.is_null() && account_address.account_id() == account_id {
                 return Err(Error::SelfDepositAccount(*account_id));
             }
         }
@@ -552,6 +560,16 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     }
 
     verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
+}
+
+fn verify_staked_amount(amount: u64, features: &Features) -> Result<(), Error> {
+    if let Some(staking) = features.staking() {
+        if amount < staking.staked_amount() {
+            return Err(Error::InvalidStakedAmount);
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(feature = "serde")]

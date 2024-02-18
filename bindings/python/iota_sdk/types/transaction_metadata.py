@@ -2,9 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import Enum
-from typing import Optional
-from dataclasses import dataclass
-from iota_sdk.types.common import HexStr, json
 
 
 class TransactionState(Enum):
@@ -25,107 +22,145 @@ class TransactionState(Enum):
 
 
 class TransactionFailureReason(Enum):
-    """Represents the possible reasons for a conflicting transaction.
-
-    Attributes:
-        InputUtxoAlreadySpent: The referenced UTXO was already spent.
-        ConflictingWithAnotherTx: The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason.
-        InvalidReferencedUtxo: The referenced UTXO is invalid.
-        InvalidTransaction: The transaction is invalid.
-        SumInputsOutputsAmountMismatch: The sum of the inputs and output base token amount does not match.
-        InvalidUnlockBlockSignature: The unlock block signature is invalid.
-        TimelockNotExpired: The configured timelock is not yet expired.
-        InvalidNativeTokens: The given native tokens are invalid.
-        StorageDepositReturnUnfulfilled: The return amount in a transaction is not fulfilled by the output side.
-        InvalidInputUnlock: An input unlock was invalid.
-        SenderNotUnlocked: The output contains a Sender with an ident (address) which is not unlocked.
-        InvalidChainStateTransition: The chain state transition is invalid.
-        InvalidTransactionIssuingTime: The referenced input is created after the transaction issuing time.
-        InvalidManaAmount: The mana amount is invalid.
-        InvalidBlockIssuanceCreditsAmount: The Block Issuance Credits amount is invalid.
-        InvalidRewardContextInput: Reward Context Input is invalid.
-        InvalidCommitmentContextInput: Commitment Context Input is invalid.
-        MissingStakingFeature: Staking Feature is not provided in account output when claiming rewards.
-        FailedToClaimStakingReward: Failed to claim staking reward.
-        FailedToClaimDelegationReward: Failed to claim delegation reward.
-        TransactionCapabilityNativeTokenBurningNotAllowed: Burning of native tokens is not allowed in the transaction capabilities.
-        TransactionCapabilityManaBurningNotAllowed: Burning of mana is not allowed in the transaction capabilities.
-        TransactionCapabilityAccountDestructionNotAllowed: Destruction of accounts is not allowed in the transaction capabilities.
-        TransactionCapabilityAnchorDestructionNotAllowed: Destruction of anchors is not allowed in the transaction capabilities.
-        TransactionCapabilityFoundryDestructionNotAllowed: Destruction of foundries is not allowed in the transaction capabilities.
-        TransactionCapabilityNftDestructionNotAllowed: Destruction of nfts is not allowed in the transaction capabilities.
-        SemanticValidationFailed: The semantic validation failed for a reason not covered by the previous variants.
+    """Represents the possible reasons for a failing transaction.
     """
-    InputUtxoAlreadySpent = 1
-    ConflictingWithAnotherTx = 2
-    InvalidReferencedUtxo = 3
-    InvalidTransaction = 4
-    SumInputsOutputsAmountMismatch = 5
-    InvalidUnlockBlockSignature = 6
-    TimelockNotExpired = 7
-    InvalidNativeTokens = 8
-    StorageDepositReturnUnfulfilled = 9
-    InvalidInputUnlock = 10
-    SenderNotUnlocked = 11
-    InvalidChainStateTransition = 12
-    InvalidTransactionIssuingTime = 13
-    InvalidManaAmount = 14
-    InvalidBlockIssuanceCreditsAmount = 15
-    InvalidRewardContextInput = 16
-    InvalidCommitmentContextInput = 17
-    MissingStakingFeature = 18
-    FailedToClaimStakingReward = 19
-    FailedToClaimDelegationReward = 20
-    TransactionCapabilityNativeTokenBurningNotAllowed = 21
-    TransactionCapabilityManaBurningNotAllowed = 22
-    TransactionCapabilityAccountDestructionNotAllowed = 23
-    TransactionCapabilityAnchorDestructionNotAllowed = 24
-    TransactionCapabilityFoundryDestructionNotAllowed = 25
-    TransactionCapabilityNftDestructionNotAllowed = 26
+    Null = 0
+    ConflictRejected = 1
+    InputAlreadySpent = 2
+    InputCreationAfterTxCreation = 3
+    UnlockSignatureInvalid = 4
+    CommitmentInputReferenceInvalid = 5
+    BicInputReferenceInvalid = 6
+    RewardInputReferenceInvalid = 7
+    StakingRewardCalculationFailure = 8
+    DelegationRewardCalculationFailure = 9
+    InputOutputBaseTokenMismatch = 10
+    ManaOverflow = 11
+    InputOutputManaMismatch = 12
+    ManaDecayCreationIndexExceedsTargetIndex = 13
+    NativeTokenSumUnbalanced = 14
+    SimpleTokenSchemeMintedMeltedTokenDecrease = 15
+    SimpleTokenSchemeMintingInvalid = 16
+    SimpleTokenSchemeMeltingInvalid = 17
+    SimpleTokenSchemeMaximumSupplyChanged = 18
+    SimpleTokenSchemeGenesisInvalid = 19
+    MultiAddressLengthUnlockLengthMismatch = 20
+    MultiAddressUnlockThresholdNotReached = 21
+    SenderFeatureNotUnlocked = 22
+    IssuerFeatureNotUnlocked = 23
+    StakingRewardInputMissing = 24
+    StakingBlockIssuerFeatureMissing = 25
+    StakingCommitmentInputMissing = 26
+    StakingRewardClaimingInvalid = 27
+    StakingFeatureRemovedBeforeUnbonding = 28
+    StakingFeatureModifiedBeforeUnbonding = 29
+    StakingStartEpochInvalid = 30
+    StakingEndEpochTooEarly = 31
+    BlockIssuerCommitmentInputMissing = 32
+    BlockIssuanceCreditInputMissing = 33
+    BlockIssuerNotExpired = 34
+    BlockIssuerExpiryTooEarly = 35
+    ManaMovedOffBlockIssuerAccount = 36
+    AccountLocked = 37
+    TimelockCommitmentInputMissing = 38
+    TimelockNotExpired = 39
+    ExpirationCommitmentInputMissing = 40
+    ExpirationNotUnlockable = 41
+    ReturnAmountNotFulFilled = 42
+    NewChainOutputHasNonZeroedId = 43
+    ChainOutputImmutableFeaturesChanged = 44
+    ImplicitAccountDestructionDisallowed = 45
+    MultipleImplicitAccountCreationAddresses = 46
+    AccountInvalidFoundryCounter = 47
+    AnchorInvalidStateTransition = 48
+    AnchorInvalidGovernanceTransition = 49
+    FoundryTransitionWithoutAccount = 50
+    FoundrySerialInvalid = 51
+    DelegationCommitmentInputMissing = 52
+    DelegationRewardInputMissing = 53
+    DelegationRewardsClaimingInvalid = 54
+    DelegationOutputTransitionedTwice = 55
+    DelegationModified = 56
+    DelegationStartEpochInvalid = 57
+    DelegationAmountMismatch = 58
+    DelegationEndEpochNotZero = 59
+    DelegationEndEpochInvalid = 60
+    CapabilitiesNativeTokenBurningNotAllowed = 61
+    CapabilitiesManaBurningNotAllowed = 62
+    CapabilitiesAccountDestructionNotAllowed = 63
+    CapabilitiesAnchorDestructionNotAllowed = 64
+    CapabilitiesFoundryDestructionNotAllowed = 65
+    CapabilitiesNftDestructionNotAllowed = 66
     SemanticValidationFailed = 255
 
     def __str__(self):
         return {
-            1: "The referenced UTXO was already spent.",
-            2: "The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason.",
-            3: "The referenced UTXO is invalid.",
-            4: "The transaction is invalid.",
-            5: "The sum of the inputs and output base token amount does not match.",
-            6: "The unlock block signature is invalid.",
-            7: "The configured timelock is not yet expired.",
-            8: "The given native tokens are invalid.",
-            9: "The return amount in a transaction is not fulfilled by the output side.",
-            10: "An input unlock was invalid.",
-            11: "The output contains a Sender with an ident (address) which is not unlocked.",
-            12: "The chain state transition is invalid.",
-            13: "The referenced input is created after the transaction issuing time.",
-            14: "The mana amount is invalid.",
-            15: "The Block Issuance Credits amount is invalid.",
-            16: "Reward Context Input is invalid.",
-            17: "Commitment Context Input is invalid.",
-            18: "Staking Feature is not provided in account output when claiming rewards.",
-            19: "Failed to claim staking reward.",
-            20: "Failed to claim delegation reward.",
-            21: "Burning of native tokens is not allowed in the transaction capabilities.",
-            22: "Burning of mana is not allowed in the transaction capabilities.",
-            23: "Destruction of accounts is not allowed in the transaction capabilities.",
-            24: "Destruction of anchors is not allowed in the transaction capabilities.",
-            25: "Destruction of foundries is not allowed in the transaction capabilities.",
-            26: "Destruction of nfts is not allowed in the transaction capabilities.",
-            255: "The semantic validation failed for a reason not covered by the previous variants."
+            0: "Null.",
+            1: "Transaction was conflicting and was rejected.",
+            2: "Input already spent.",
+            3: "Input creation slot after tx creation slot.",
+            4: "Signature in unlock is invalid.",
+            5: "Commitment input required with reward or BIC input.",
+            6: "BIC input reference cannot be loaded.",
+            7: "Reward input does not reference a staking account or a delegation output.",
+            8: "Staking rewards could not be calculated due to storage issues or overflow.",
+            9: "Delegation rewards could not be calculated due to storage issues or overflow.",
+            10: "Inputs and outputs do not spend/deposit the same amount of base tokens.",
+            11: "Under- or overflow in Mana calculations.",
+            12: "Inputs and outputs do not contain the same amount of Mana.",
+            13: "Mana decay creation slot/epoch index exceeds target slot/epoch index.",
+            14: "Native token sums are unbalanced.",
+            15: "Simple token scheme minted/melted value decreased.",
+            16: "Simple token scheme minting invalid.",
+            17: "Simple token scheme melting invalid.",
+            18: "Simple token scheme maximum supply changed.",
+            19: "Simple token scheme genesis invalid.",
+            20: "Multi address length and multi unlock length do not match.",
+            21: "Multi address unlock threshold not reached.",
+            22: "Sender feature is not unlocked.",
+            23: "Issuer feature is not unlocked.",
+            24: "Staking feature removal or resetting requires a reward input.",
+            25: "Block issuer feature missing for account with staking feature.",
+            26: "Staking feature validation requires a commitment input.",
+            27: "Staking feature must be removed or reset in order to claim rewards.",
+            28: "Staking feature can only be removed after the unbonding period.",
+            29: "Staking start epoch, fixed cost and staked amount cannot be modified while bonded.",
+            30: "Staking start epoch must be the epoch of the transaction.",
+            31: "Staking end epoch must be set to the transaction epoch plus the unbonding period.",
+            32: "Commitment input missing for block issuer feature.",
+            33: "Block issuance credit input missing for account with block issuer feature.",
+            34: "Block issuer feature has not expired.",
+            35: "Block issuer feature expiry set too early.",
+            36: "Mana cannot be moved off block issuer accounts except with manalocks.",
+            37: "Account is locked due to negative block issuance credits.",
+            38: "Transaction's containing a timelock condition require a commitment input.",
+            39: "Timelock not expired.",
+            40: "Transaction's containing an expiration condition require a commitment input.",
+            41: "Expiration unlock condition cannot be unlocked.",
+            42: "Return amount not fulfilled.",
+            43: "New chain output has non-zeroed ID.",
+            44: "Immutable features in chain output modified during transition.",
+            45: "Cannot destroy implicit account; must be transitioned to account.",
+            46: "Multiple implicit account creation addresses on the input side.",
+            47: "Foundry counter in account decreased or did not increase by the number of new foundries.",
+            48: "Anchor has an invalid state transition.",
+            49: "Anchor has an invalid governance transition.",
+            50: "Foundry output transitioned without accompanying account on input or output side.",
+            51: "Foundry output serial number is invalid.",
+            52: "Delegation output validation requires a commitment input.",
+            53: "Delegation output cannot be destroyed without a reward input.",
+            54: "Invalid delegation mana rewards claiming.",
+            55: "Delegation output attempted to be transitioned twice.",
+            56: "Delegated amount, validator ID and start epoch cannot be modified.",
+            57: "Invalid start epoch.",
+            58: "Delegated amount does not match amount.",
+            59: "End epoch must be set to zero at output genesis.",
+            60: "Delegation end epoch does not match current epoch.",
+            61: "Native token burning is not allowed by the transaction capabilities.",
+            62: "Mana burning is not allowed by the transaction capabilities.",
+            63: "Account destruction is not allowed by the transaction capabilities.",
+            64: "Anchor destruction is not allowed by the transaction capabilities.",
+            65: "Foundry destruction is not allowed by the transaction capabilities.",
+            66: "NFT destruction is not allowed by the transaction capabilities.",
+            255: "Semantic validation failed.",
         }[self.value]
-
-
-@json
-@dataclass
-class TransactionMetadata:
-    """Response of a GET transaction metadata REST API call.
-
-    Attributes:
-        transaction_id: The identifier of the transaction. Hex-encoded with 0x prefix.
-        transaction_state: If 'pending', the transaction is not included yet. If 'accepted', the transaction is included. If 'confirmed' means transaction is included and its included block is confirmed. If 'finalized' means transaction is included, its included block is finalized and cannot be reverted anymore. If 'failed' means transaction is issued but failed due to the transaction failure reason.
-        transaction_failure_reason: The optional transaction failure reason.
-    """
-    transaction_id: HexStr
-    transaction_state: TransactionState
-    transaction_failure_reason: Optional[TransactionFailureReason] = None

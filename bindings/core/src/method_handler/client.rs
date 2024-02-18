@@ -184,8 +184,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
         ClientMethod::GetRoutes => Response::Routes(client.get_routes().await?),
-        ClientMethod::GetAccountCongestion { account_id } => {
-            Response::Congestion(client.get_account_congestion(&account_id).await?)
+        ClientMethod::GetAccountCongestion { account_id, work_score } => {
+            Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)
         }
         ClientMethod::GetRewards { output_id, slot_index } => {
             Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
@@ -252,12 +252,18 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .get_utxo_changes_full_by_slot_commitment_id(&commitment_id)
                 .await?,
         ),
+        // TODO: this should be renamed to `GetCommitmentBySlot`
+        // https://github.com/iotaledger/iota-sdk/issues/1921
         ClientMethod::GetCommitmentByIndex { slot } => {
             Response::SlotCommitment(client.get_slot_commitment_by_slot(slot).await?)
         }
+        // TODO: this should be renamed to `GetUtxoChangesBySlot`
+        // https://github.com/iotaledger/iota-sdk/issues/1921
         ClientMethod::GetUtxoChangesByIndex { slot } => {
             Response::UtxoChanges(client.get_utxo_changes_by_slot(slot).await?)
         }
+        // TODO: this should be renamed to `GetUtxoChangesFullBySlot`
+        // https://github.com/iotaledger/iota-sdk/issues/1921
         ClientMethod::GetUtxoChangesFullByIndex { slot } => {
             Response::UtxoChangesFull(client.get_utxo_changes_full_by_slot(slot).await?)
         }

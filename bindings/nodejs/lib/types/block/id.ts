@@ -29,6 +29,11 @@ export type BlockId = HexEncodedString;
 export type TokenId = HexEncodedString;
 
 /**
+ * A Transaction ID represented as hex-encoded string.
+ */
+export type TransactionId = HexEncodedString;
+
+/**
  * A Foundry ID represented as hex-encoded string.
  */
 export type FoundryId = HexEncodedString;

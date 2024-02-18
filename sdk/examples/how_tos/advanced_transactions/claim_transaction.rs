@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "EXPLORER_URL", "STRONGHOLD_PASSWORD"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Get the wallet we generated with `create_wallet`.
@@ -43,9 +43,9 @@ async fn main() -> Result<()> {
     let transaction = wallet.claim_outputs(output_ids).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for transaction to get included
+    // Wait for transaction to get accepted
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block sent: {}/block/{}",

@@ -33,10 +33,10 @@ outputs = [SendNativeTokenParams(
 transaction = wallet.send_native_tokens(outputs, None)
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get included
-block_id = wallet.reissue_transaction_until_included(
+# Wait for transaction to get accepted
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+print(f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = wallet.sync()
 available_balance = balance.native_tokens[token_id].available

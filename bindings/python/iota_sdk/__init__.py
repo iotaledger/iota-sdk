@@ -6,6 +6,7 @@ from .external import *
 from .common import custom_encoder
 from .client.client import Client, NodeIndexerAPI
 from .client.common import ClientError
+from .client.responses import *
 from .client._high_level_api import GenerateAddressesOptions, GenerateAddressOptions
 from .utils import Utils
 from .wallet.wallet import Wallet, WalletOptions
@@ -20,6 +21,7 @@ from .types.block.body.basic import *
 from .types.block.body.type import *
 from .types.block.body.validation import *
 from .types.block.metadata import *
+from .types.block.id import *
 from .types.block_builder_options import *
 from .types.block_issuer_key import *
 from .types.burn import *
@@ -41,17 +43,18 @@ from .types.node_info import *
 from .types.output import *
 from .types.output_data import *
 from .types.output_id import *
+from .types.output_id_proof import *
 from .types.output_metadata import *
 from .types.output_params import *
 from .types.payload import *
 from .types.send_params import *
 from .types.slot import *
 from .types.token_scheme import *
-from .types.transaction_metadata import *
-from .types.transaction_with_metadata import *
 from .types.transaction_data import *
+from .types.transaction_id import *
+from .types.transaction_metadata import *
 from .types.transaction_options import *
+from .types.transaction_with_metadata import *
 from .types.unlock import *
 from .types.unlock_condition import *
-from .types.utxo_changes import *
 from .types.consolidation_params import *

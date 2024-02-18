@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use getset::Getters;
@@ -114,8 +114,8 @@ where
 {
     /// Mints NFTs.
     ///
-    /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy or custom inputs.
-    /// Note that addresses need to be bech32-encoded.
+    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally. The options may
+    /// define the remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?
@@ -145,8 +145,7 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_mint_nfts(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, None, options)
-            .await
+        self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::mint_nfts()].

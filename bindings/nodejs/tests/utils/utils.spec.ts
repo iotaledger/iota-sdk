@@ -5,7 +5,7 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { BasicOutput, Utils } from '../../out';
+import { BasicOutput, BlockId, OutputId, TransactionId, Utils } from '../../out';
 import '../customMatchers';
 import { SlotCommitment } from '../../out/types/block/slot';
 import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
@@ -80,6 +80,25 @@ describe('Utils methods', () => {
         expect(id).toBe(
             '0x1d1470e10ed1c498c88002d57d6eaa0db38a31347e1aa5e957300a48967f0ca40a000000'
         );
+    });
+
+    it('compute slot index from block or transaction id', async () => {
+        const blockId: BlockId = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
+        expect(Utils.computeSlotIndex(blockId)).toEqual(0);
+        const transactionId: TransactionId = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64901000000";
+        expect(Utils.computeSlotIndex(transactionId)).toEqual(1);
+    });
+
+    it('compute output index from an output id', async () => {
+        const outputId: OutputId = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00";
+        const outputIndex = Utils.outputIndexFromOutputId(outputId);
+        expect(outputIndex).toEqual(42);
+    });
+
+    it('compute transaction id from an output id', async () => {
+        const outputId: OutputId = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00";
+        const transactionId = Utils.transactionIdFromOutputId(outputId);
+        expect(transactionId).toEqual("0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000");
     });
 
     it('decayed mana', () => {

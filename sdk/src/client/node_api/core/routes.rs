@@ -89,11 +89,16 @@ impl ClientInner {
 
     /// Checks if the account is ready to issue a block.
     /// GET /api/core/v3/accounts/{bech32Address}/congestion
-    pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
+    pub async fn get_account_congestion(
+        &self,
+        account_id: &AccountId,
+        work_score: impl Into<Option<u32>> + Send,
+    ) -> Result<CongestionResponse> {
         let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
         let path = &format!("api/core/v3/accounts/{bech32_address}/congestion");
+        let query = query_tuples_to_query_string([work_score.into().map(|i| ("workScore", i.to_string()))]);
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, query.as_deref(), false, false).await
     }
 
     // Rewards routes.
@@ -111,7 +116,6 @@ impl ClientInner {
         slot_index: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
-
         let query = query_tuples_to_query_string([slot_index.into().map(|i| ("slotIndex", i.to_string()))]);
 
         self.get_request(path, query.as_deref(), false, false).await
@@ -124,7 +128,6 @@ impl ClientInner {
     /// GET /api/core/v3/committee/?epochIndex
     pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>> + Send) -> Result<CommitteeResponse> {
         const PATH: &str = "api/core/v3/committee";
-
         let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
 
         self.get_request(PATH, query.as_deref(), false, false).await
@@ -140,7 +143,6 @@ impl ClientInner {
         cursor: impl Into<Option<String>> + Send,
     ) -> Result<ValidatorsResponse> {
         const PATH: &str = "api/core/v3/validators";
-
         let query = query_tuples_to_query_string([
             page_size.into().map(|i| ("pageSize", i.to_string())),
             cursor.into().map(|i| ("cursor", i)),
@@ -307,6 +309,8 @@ impl ClientInner {
 
     // Commitments routes.
 
+    // TODO: rename this to `get_commitment`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Finds a slot commitment by its ID and returns it as object.
     /// GET /api/core/v3/commitments/{commitmentId}
     pub async fn get_slot_commitment_by_id(&self, slot_commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
@@ -315,6 +319,8 @@ impl ClientInner {
         self.get_request(path, None, false, true).await
     }
 
+    // TODO: rename this to `get_commitment_raw`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Finds a slot commitment by its ID and returns it as raw bytes.
     /// GET /api/core/v3/commitments/{commitmentId}
     pub async fn get_slot_commitment_by_id_raw(&self, slot_commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
@@ -323,6 +329,8 @@ impl ClientInner {
         self.get_request_bytes(path, None).await
     }
 
+    // TODO: rename this to `get_utxo_changes`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Get all UTXO changes of a given slot by slot commitment ID.
     /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes
     pub async fn get_utxo_changes_by_slot_commitment_id(
@@ -331,9 +339,11 @@ impl ClientInner {
     ) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes");
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, None, false, true).await
     }
 
+    // TODO: rename this to `get_utxo_changes_full`
+    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Get all full UTXO changes of a given slot by slot commitment ID.
     /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
     pub async fn get_utxo_changes_full_by_slot_commitment_id(
@@ -366,7 +376,7 @@ impl ClientInner {
     pub async fn get_utxo_changes_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes");
 
-        self.get_request(path, None, false, false).await
+        self.get_request(path, None, false, true).await
     }
 
     /// Get all full UTXO changes of a given slot by its index.

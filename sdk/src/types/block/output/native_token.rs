@@ -173,7 +173,7 @@ impl From<NativeTokens> for NativeTokensBuilder {
     }
 }
 
-pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
+pub(crate) type NativeTokenCount = BoundedU8<0, 255>;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
@@ -211,9 +211,6 @@ impl IntoIterator for NativeTokens {
 }
 
 impl NativeTokens {
-    /// Maximum number of different native tokens that can be referenced in one transaction.
-    pub const COUNT_MAX: u8 = 64;
-
     /// Creates a new [`NativeTokens`] from a vec.
     pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, Error> {
         let mut native_tokens =

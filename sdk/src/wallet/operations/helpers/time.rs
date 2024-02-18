@@ -10,18 +10,18 @@ use crate::{
 pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
     output_data: &OutputData,
-    slot_index: impl Into<SlotIndex> + Copy,
+    commitment_slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
-        if unlock_conditions.is_timelocked(slot_index, committable_age_range.min) {
+        if unlock_conditions.is_timelocked(commitment_slot_index, committable_age_range.min) {
             return Ok(false);
         }
     }
 
     let required_address = output_data
         .output
-        .required_address(slot_index.into(), committable_age_range)?;
+        .required_address(commitment_slot_index.into(), committable_age_range)?;
 
     // In case of `None` the output can currently not be unlocked because of expiration unlock condition
     Ok(required_address.map_or_else(|| false, |required_address| wallet_address == &required_address))

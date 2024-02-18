@@ -28,7 +28,7 @@ use crate::types::block::{
 };
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidBlockIssuerKeyKind)]
 pub enum BlockIssuerKey {
@@ -332,4 +332,6 @@ mod dto {
     }
 
     crate::impl_serde_typed_dto!(BlockIssuerFeature, BlockIssuerFeatureDto, "block issuer feature");
+
+    crate::impl_deserialize_untagged!(BlockIssuerKey: Ed25519PublicKeyHash);
 }

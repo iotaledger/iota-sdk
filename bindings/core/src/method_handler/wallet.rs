@@ -1,18 +1,16 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::time::Duration;
 
 use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
-    client::api::{
-        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
-    },
+    client::api::{PreparedTransactionData, SignedTransactionData, SignedTransactionDataDto},
     types::{
         block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
         TryFromDto,
     },
-    wallet::{types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
+    wallet::{types::TransactionWithMetadataDto, Wallet},
 };
 
 use crate::{method::WalletMethod, response::Response};
@@ -226,7 +224,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                     .prepare_implicit_account_transition(&output_id, BlockIssuerKeySource::ImplicitAccountAddress)
                     .await?
             };
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::ImplicitAccounts => {
             Response::OutputsData(wallet.data().await.implicit_accounts().cloned().collect())
@@ -258,19 +256,19 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         ),
         WalletMethod::PrepareBurn { burn, options } => {
             let data = wallet.prepare_burn(burn, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareClaimOutputs { output_ids_to_claim } => {
             let data = wallet.prepare_claim_outputs(output_ids_to_claim).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareConsolidateOutputs { params } => {
             let data = wallet.prepare_consolidate_outputs(params).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareCreateAccountOutput { params, options } => {
             let data = wallet.prepare_create_account_output(params, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareMeltNativeToken {
             token_id,
@@ -278,12 +276,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             options,
         } => {
             let data = wallet.prepare_melt_native_token(token_id, melt_amount, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareDecreaseVotingPower { amount } => {
         //     let data = wallet.prepare_decrease_voting_power(amount).await?;
-        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        //     Response::PreparedTransaction(data)
         // }
         WalletMethod::PrepareMintNativeToken {
             token_id,
@@ -291,20 +289,20 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             options,
         } => {
             let data = wallet.prepare_mint_native_token(token_id, mint_amount, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareIncreaseVotingPower { amount } => {
         //     let data = wallet.prepare_increase_voting_power(amount).await?;
-        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        //     Response::PreparedTransaction(data)
         // }
         WalletMethod::PrepareMintNfts { params, options } => {
             let data = wallet.prepare_mint_nfts(params, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareCreateNativeToken { params, options } => {
             let data = wallet.prepare_create_native_token(params, options).await?;
-            Response::PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto::from(&data))
+            Response::PreparedCreateNativeTokenTransaction(data)
         }
         WalletMethod::PrepareOutput {
             params,
@@ -315,42 +313,73 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::PrepareSend { params, options } => {
             let data = wallet.prepare_send(params, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareSendNativeTokens { params, options } => {
             let data = wallet.prepare_send_native_tokens(params.clone(), options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareSendNft { params, options } => {
             let data = wallet.prepare_send_nft(params.clone(), options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareCreateDelegation { params, options } => {
+            let data = wallet.prepare_create_delegation_output(params, options).await?;
+            Response::PreparedCreateDelegationTransaction(data)
+        }
+        WalletMethod::PrepareDelayDelegationClaiming {
+            delegation_id,
+            reclaim_excess,
+        } => {
+            let data = wallet
+                .prepare_delay_delegation_claiming(delegation_id, reclaim_excess)
+                .await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareBeginStaking { params, options } => {
+            let data = wallet.prepare_begin_staking(params, options).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareExtendStaking {
+            account_id,
+            additional_epochs,
+        } => {
+            let data = wallet.prepare_extend_staking(account_id, additional_epochs).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::PrepareEndStaking { account_id } => {
+            let data = wallet.prepare_end_staking(account_id).await?;
+            Response::PreparedTransaction(data)
+        }
+        WalletMethod::AnnounceCandidacy { account_id } => {
+            Response::BlockId(wallet.announce_candidacy(account_id).await?)
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareStopParticipating { event_id } => {
         //     let data = wallet.prepare_stop_participating(event_id).await?;
-        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        //     Response::PreparedTransaction(data)
         // }
         WalletMethod::PrepareTransaction { outputs, options } => {
             let data = wallet.prepare_transaction(outputs, options).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            Response::PreparedTransaction(data)
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::PrepareVote { event_id, answers } => {
         //     let data = wallet.prepare_vote(event_id, answers).await?;
-        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        //     Response::PreparedTransaction(data)
         // }
         // #[cfg(feature = "participation")]
         // WalletMethod::RegisterParticipationEvents { options } => {
         //     let events = wallet.register_participation_events(&options).await?;
         //     Response::ParticipationEvents(events)
         // }
-        WalletMethod::ReissueTransactionUntilIncluded {
+        WalletMethod::WaitForTransactionAcceptance {
             transaction_id,
             interval,
             max_attempts,
         } => {
             let block_id = wallet
-                .reissue_transaction_until_included(&transaction_id, interval, max_attempts)
+                .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
             Response::BlockId(block_id)
         }
@@ -388,7 +417,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                         &wallet.client().get_protocol_parameters().await?,
                     )?,
                     None,
-                    None,
                 )
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
@@ -409,7 +437,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 &wallet.client().get_protocol_parameters().await?,
             )?;
             let transaction = wallet
-                .submit_and_store_transaction(signed_transaction_data, None, None)
+                .submit_and_store_transaction(signed_transaction_data, None)
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }

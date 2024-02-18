@@ -1,17 +1,18 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 from dataclasses_json import config
+from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
 
 @json
 @dataclass
-class SendParams():
+class SendParams:
     """Parameters for sending base coins.
 
     Attributes:
@@ -32,7 +33,7 @@ class SendParams():
 
 @json
 @dataclass
-class SendNativeTokenParams():
+class SendNativeTokenParams:
     """Parameters for sending a native token
 
     Attributes:
@@ -49,7 +50,7 @@ class SendNativeTokenParams():
 
 @json
 @dataclass
-class SendNftParams():
+class SendNftParams:
     """Parameters for sending NFTs.
 
     Attributes:
@@ -62,7 +63,7 @@ class SendNftParams():
 
 @json
 @dataclass
-class CreateNativeTokenParams():
+class CreateNativeTokenParams:
     """Parameters for creating native tokens.
 
     Attributes:
@@ -85,7 +86,41 @@ class CreateNativeTokenParams():
 
 @json
 @dataclass
-class MintNftParams():
+class CreateDelegationParams:
+    """Parameters for creating a delegation output.
+
+    Attributes:
+        delegated_amount: The amount to delegate.
+        validator_address: The Account Address of the validator to which this output will delegate.
+        address: Bech32 encoded address which will control the delegation. By default, the ed25519 wallet address will be used.
+    """
+    delegated_amount: int = field(metadata=config(
+        encoder=str
+    ))
+    validator_address: AccountAddress
+    address: Optional[str] = None
+
+
+@json
+@dataclass
+class BeginStakingParams:
+    """Parameters for beginning staking.
+
+    Attributes:
+        account_id: The account id which will become a validator.
+        staked_amount: The amount of tokens to stake.
+        fixed_cost: The fixed cost of the validator, which it receives as part of its Mana rewards.
+        staking_period: The staking period (in epochs). Will default to the staking unbonding period.
+    """
+    account_id: HexStr
+    staked_amount: int
+    fixed_cost: int
+    staking_period: Optional[int] = None
+
+
+@json
+@dataclass
+class MintNftParams:
     """Parameters for minting NFTs.
 
     Attributes:
@@ -106,7 +141,7 @@ class MintNftParams():
 
 @json
 @dataclass
-class CreateAccountOutputParams():
+class CreateAccountOutputParams:
     """Parameters for creating accounts.
 
     Attributes:

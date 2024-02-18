@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// Address types used in the wallet
@@ -41,23 +41,26 @@ pub struct OutputData {
     pub output: Output,
     /// The output ID proof
     pub output_id_proof: OutputIdProof,
-    /// If an output is spent
-    pub is_spent: bool,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
 }
 
 impl OutputData {
+    /// Returns whether the [`OutputMetadata`] is spent or not.
+    pub fn is_spent(&self) -> bool {
+        self.metadata.is_spent()
+    }
+
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
-        slot_index: impl Into<SlotIndex>,
+        commitment_slot_index: impl Into<SlotIndex>,
         committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output
-            .required_address(slot_index.into(), committable_age_range)?
+            .required_address(commitment_slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {
@@ -171,12 +174,23 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
     }
 }
 
+impl Serialize for TransactionWithMetadata {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        TransactionWithMetadataDto::from(self).serialize(serializer)
+    }
+}
+
 /// Possible InclusionStates for transactions
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum InclusionState {
     Pending,
+    Accepted,
     Confirmed,
+    Finalized,
     Conflicting,
     UnknownPruned,
 }

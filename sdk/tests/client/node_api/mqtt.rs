@@ -19,17 +19,14 @@ async fn test_mqtt() {
 
     client
         .subscribe(
-            [
-                Topic::new("milestone-info/latest").unwrap(),
-                Topic::new("blocks").unwrap(),
-            ],
+            [Topic::new("commitments/latest").unwrap(), Topic::new("blocks").unwrap()],
             move |evt| {
                 match &evt.payload {
                     MqttPayload::Block(_) => {
                         assert_eq!(evt.topic, "blocks");
                     }
                     MqttPayload::Json(_) => {
-                        assert_eq!(evt.topic, "milestone-info/latest");
+                        assert_eq!(evt.topic, "commitments/latest");
                     }
                     _ => panic!("unexpected mqtt payload type: {:?}", evt),
                 }

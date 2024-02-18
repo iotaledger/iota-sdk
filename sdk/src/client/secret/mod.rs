@@ -22,7 +22,7 @@ pub mod types;
 
 #[cfg(feature = "stronghold")]
 use std::time::Duration;
-use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
+use std::{collections::HashMap, fmt, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
@@ -139,7 +139,7 @@ pub trait SecretManage: Send + Sync {
 }
 
 pub trait SecretManagerConfig: SecretManage {
-    type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
+    type Config: Serialize + DeserializeOwned + fmt::Debug + Send + Sync;
 
     fn to_config(&self) -> Option<Self::Config>;
 
@@ -202,8 +202,8 @@ impl From<PrivateKeySecretManager> for SecretManager {
     }
 }
 
-impl Debug for SecretManager {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for SecretManager {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(_) => f.debug_tuple("Stronghold").field(&"...").finish(),
@@ -213,6 +213,27 @@ impl Debug for SecretManager {
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(_) => f.debug_tuple("PrivateKey").field(&"...").finish(),
             Self::Placeholder => f.debug_struct("Placeholder").finish(),
+        }
+    }
+}
+
+impl fmt::Display for SecretManager {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            #[cfg(feature = "stronghold")]
+            Self::Stronghold(_) => write!(f, "Stronghold"),
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(l) => {
+                if l.is_simulator {
+                    write!(f, "LedgerNano Simulator")
+                } else {
+                    write!(f, "LedgerNano")
+                }
+            }
+            Self::Mnemonic(_) => write!(f, "Mnemonic"),
+            #[cfg(feature = "private_key_secret_manager")]
+            Self::PrivateKey(_) => write!(f, "PrivateKey"),
+            Self::Placeholder => write!(f, "Placeholder"),
         }
     }
 }
@@ -553,18 +574,18 @@ where
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
-    let slot_index = prepared_transaction_data
+    let commitment_slot_index = prepared_transaction_data
         .transaction
         .context_inputs()
-        .iter()
-        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+        .commitment()
+        .map(|c| c.slot_index());
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(slot_index, protocol_parameters.committable_age_range())?
+            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
@@ -643,13 +664,14 @@ where
     let PreparedTransactionData {
         transaction,
         inputs_data,
+        mana_rewards,
         ..
     } = prepared_transaction_data;
     let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, protocol_parameters.clone())?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone())?;
 
     if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

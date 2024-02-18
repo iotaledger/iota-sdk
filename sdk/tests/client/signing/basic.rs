@@ -42,29 +42,30 @@ async fn single_ed25519_unlock() -> Result<()> {
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
+        [(
+            Basic {
+                amount: 1_000_000,
+                address: address_0.clone(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         )],
         Some(slot_index),
     );
 
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        address_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: address_0,
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -81,6 +82,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -94,7 +96,12 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -122,50 +129,55 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     let inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                address_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: address_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(
-                1_000_000,
-                address_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: address_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(
-                1_000_000,
-                address_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: address_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
         ],
         Some(slot_index),
     );
 
-    let outputs = build_outputs([Basic(
-        3_000_000,
-        address_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 3_000_000,
+        address: address_0,
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -182,6 +194,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -207,7 +220,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
@@ -244,40 +262,43 @@ async fn two_signature_unlocks() -> Result<()> {
 
     let inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                address_0.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: address_0.clone(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE)),
             ),
-            Basic(
-                1_000_000,
-                address_1,
-                None,
-                None,
-                None,
-                None,
-                None,
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: address_1,
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
                 Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
             ),
         ],
         Some(slot_index),
     );
 
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        address_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: address_0,
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -294,6 +315,7 @@ async fn two_signature_unlocks() -> Result<()> {
         transaction,
         inputs_data: inputs,
         remainders: Vec::new(),
+        mana_rewards: Default::default(),
     };
 
     let unlocks = secret_manager
@@ -308,7 +330,12 @@ async fn two_signature_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
+    let conflict = verify_semantic(
+        &prepared_transaction_data.inputs_data,
+        &tx_payload,
+        prepared_transaction_data.mana_rewards,
+        protocol_parameters,
+    )?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

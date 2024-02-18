@@ -4,7 +4,7 @@
 //! In this example we will send native tokens.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
+//! running the `./how_tos/wallet/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let wallet = Wallet::builder()
@@ -64,12 +64,12 @@ async fn main() -> Result<()> {
         let transaction = wallet.send_native_tokens(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get included
+        // Wait for transaction to get accepted
         let block_id = wallet
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+            .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Block included: {}/block/{}",
+            "Tx accepted in block: {}/block/{}",
             std::env::var("EXPLORER_URL").unwrap(),
             block_id
         );

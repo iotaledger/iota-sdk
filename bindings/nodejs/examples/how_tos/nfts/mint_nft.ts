@@ -27,7 +27,7 @@ const NFT2_AMOUNT = '1000000';
 // In this example we will mint a new nft.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts_and_addresses/create-wallet` example!
+// running the `how_tos/wallet/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nfts/mint_nft.ts
@@ -73,13 +73,13 @@ async function run() {
         let transaction = await wallet.mintNfts([params]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get included
-        let blockId = await wallet.reissueTransactionUntilIncluded(
+        // Wait for transaction to get accepted
+        let blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 
         console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
         console.log('Minted NFT 1');
 
@@ -104,13 +104,13 @@ async function run() {
         transaction = await wallet.sendOutputs([output]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get included
-        blockId = await wallet.reissueTransactionUntilIncluded(
+        // Wait for transaction to get accepted
+        blockId = await wallet.waitForTransactionAcceptance(
             transaction.transactionId,
         );
 
         console.log(
-            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         console.log('Minted NFT 2');

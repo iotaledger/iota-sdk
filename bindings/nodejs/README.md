@@ -8,8 +8,6 @@
     - [Windows](#windows)
   - [Getting Started](#getting-started)
     - [Installation Using a Package Manager](#installation-using-a-package-manager)
-      - [npm](#npm)
-      - [Yarn](#yarn)
     - [Install the Binding from Source](#install-the-binding-from-source)
       - [Build nodejs bindings](#build-nodejs-bindings)
   - [Client Usage](#client-usage)
@@ -17,10 +15,10 @@
   - [Examples](#examples)
   - [API Reference](#api-reference)
   - [Available Scripts](#available-scripts)
-    - [`npm install` or `yarn install`](#npm-install-or-yarn-install)
-    - [`npm run build` or `yarn build`](#npm-run-build-or-yarn-build)
-    - [`npm run test` or `yarn test`](#npm-run-test-or-yarn-test)
-    - [`npm run create-api-docs` or `yarn create-api-docs`](#npm-run-create-api-docs-or-yarn-create-api-docs)
+    - [`yarn install`](#yarn-install)
+    - [`yarn build`](#yarn-build)
+    - [`yarn test`](#yarn-test)
+    - [`yarn create-api-docs`](#yarn-create-api-docs)
   - [Important Files and Directories](#important-files-and-directories)
   - [Learn More](#learn-more)
 
@@ -44,15 +42,7 @@ an environment variable `RUSTFLAGS` to `-C target-feature=+crt-static`.
 
 ### Installation Using a Package Manager
 
-To install the library from your package manager of choice, you only need to run the following:
-
-#### npm
-
-```sh
-npm i @iota/sdk
-```
-
-#### Yarn:
+To install the library with yarn, you only need to run the following:
 
 ```sh
 yarn add @iota/sdk
@@ -70,7 +60,7 @@ This will guide you in any dependencies and running the build.
 If you have already installed the project and only want to run the build, run the following:
 
 ```sh
-npm run build
+yarn run build
 ```
 
 This command uses the napi build utility to run the Rust build and copy the built library into `./build/Release/index.node`.
@@ -157,21 +147,21 @@ You can find the API reference for the Node.js bindings in the
 
 In the project directory, you can run the following:
 
-### `npm install` or `yarn install`
+### `yarn install`
 
-Installs the project, including running `npm run build`.
+Installs the project, including running `yarn run build`.
 
-### `npm run build` or `yarn build`
+### `yarn build`
 
 Builds the Node addon (`index.node`) from source.
 
-### `npm run test` or `yarn test`
+### `yarn test`
 
 Runs the unit tests by calling `cargo test`. You can learn more
 about [adding tests to your Rust code](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) from
 the [Rust book](https://doc.rust-lang.org/book/).
 
-### `npm run create-api-docs` or `yarn create-api-docs`
+### `yarn create-api-docs`
 
 This is mainly just used to create the API docs in the [Wiki](https://github.com/iota-wiki/iota-wiki). Executed locally it will generate a `docs` folder in the current working directory with the API docs.
 
@@ -195,7 +185,7 @@ This is mainly just used to create the API docs in the [Wiki](https://github.com
 
 - `package.json`
 
-  The npm [manifest file](https://docs.npmjs.com/cli/v7/configuring-npm/package-json), which informs the `npm` command.
+  The npm [manifest file](https://docs.npmjs.com/cli/v7/configuring-npm/package-json), which informs the `yarn` command.
 
 - `src/`
 

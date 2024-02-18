@@ -26,10 +26,11 @@ if not balance.accounts:
     transaction = wallet.create_account_output(None, None)
     print(f'Transaction sent: {transaction.transaction_id}')
 
-    # Wait for transaction to get included
-    block_id = wallet.reissue_transaction_until_included(
+    # Wait for transaction to get accepted
+    block_id = wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
-    print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    print(
+        f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     wallet.sync()
     print("Wallet synced")
@@ -50,12 +51,12 @@ prepared_transaction = wallet.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get included
-block_id = wallet.reissue_transaction_until_included(
+# Wait for transaction to get accepted
+block_id = wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
-print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+print(f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-print(f'Created token: {prepared_transaction.token_id()}')
+print(f'Created token: {transaction.token_id}')
 
 # Ensure the wallet is synced after creating the native token.
 wallet.sync()

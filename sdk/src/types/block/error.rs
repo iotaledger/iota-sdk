@@ -15,7 +15,7 @@ use primitive_types::U256;
 use super::slot::EpochIndex;
 use crate::types::block::{
     address::{AddressCapabilityFlag, WeightedAddressCount},
-    context_input::RewardContextInputIndex,
+    context_input::{ContextInputCount, RewardContextInputIndex},
     input::UtxoInput,
     mana::ManaAllotmentCount,
     output::{
@@ -26,7 +26,7 @@ use crate::types::block::{
     },
     payload::{
         tagged_data::{TagLength, TaggedDataLength},
-        ContextInputCount, InputCount, OutputCount,
+        InputCount, OutputCount,
     },
     protocol::ProtocolParametersHash,
     unlock::{UnlockCount, UnlockIndex, UnlocksCount},
@@ -158,6 +158,7 @@ pub enum Error {
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
+    InvalidStakedAmount,
     MissingAddressUnlockCondition,
     MissingGovernorUnlockCondition,
     MissingStateControllerUnlockCondition,
@@ -381,6 +382,7 @@ impl fmt::Display for Error {
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
+            Self::InvalidStakedAmount => write!(f, "invalid staked amount"),
             Self::MissingAddressUnlockCondition => write!(f, "missing address unlock condition"),
             Self::MissingGovernorUnlockCondition => write!(f, "missing governor unlock condition"),
             Self::MissingStateControllerUnlockCondition => write!(f, "missing state controller unlock condition"),

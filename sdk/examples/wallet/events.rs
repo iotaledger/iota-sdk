@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC", "WALLET_DB_PATH", "EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
@@ -66,11 +66,11 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = wallet
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
 
     println!(
-        "Block included: {}/block/{}",
+        "Tx accepted in block: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         block_id
     );
