@@ -97,7 +97,31 @@ impl Default for GetAddressesOptions {
 }
 
 impl SecretManager {
-    /// Get a vector of public bech32 addresses
+    /// Generates a single Ed25519 backed Bech32 address.
+    pub async fn generate_ed25519_address(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_index: u32,
+        bech32_hrp: impl ConvertTo<Hrp>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Bech32Address> {
+        let hrp = bech32_hrp.convert()?;
+        Ok(SecretManage::generate_ed25519_addresses(
+            self,
+            coin_type,
+            account_index,
+            address_index..address_index + 1,
+            options,
+        )
+        .await?
+        .pop()
+        // Panic: if the secret manager hasn't failed then there must be an address.
+        .unwrap()
+        .to_bech32(hrp))
+    }
+
+    /// Generates a vector of Ed25519 backed Bech32 addresses.
     pub async fn generate_ed25519_addresses(
         &self,
         GetAddressesOptions {
@@ -117,7 +141,31 @@ impl SecretManager {
         )
     }
 
-    /// Get a vector of EVM address strings
+    /// Generates a single EVM address hex string.
+    pub async fn generate_evm_address(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_index: u32,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<String> {
+        Ok(prefix_hex::encode(
+            SecretManage::generate_evm_addresses(
+                self,
+                coin_type,
+                account_index,
+                address_index..address_index + 1,
+                options,
+            )
+            .await?
+            .pop()
+            // Panic: if the secret manager hasn't failed then there must be an address.
+            .unwrap()
+            .as_ref(),
+        ))
+    }
+
+    /// Generates a vector of EVM address hex strings.
     pub async fn generate_evm_addresses(
         &self,
         GetAddressesOptions {

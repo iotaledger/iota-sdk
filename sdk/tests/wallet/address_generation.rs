@@ -17,7 +17,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Error as ClientError,
     },
-    types::block::address::ToBech32Ext,
+    types::block::address::{Hrp, ToBech32Ext},
     wallet::{ClientOptions, Error, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -30,13 +30,11 @@ async fn address_generation_mnemonic() -> Result<()> {
         SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?);
 
     let address = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::default().with_coin_type(IOTA_COIN_TYPE))
-        .await?
-        .pop()
-        .unwrap();
+        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+        .await?;
 
     assert_eq!(
-        address.to_bech32_unchecked("smr"),
+        address,
         // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
@@ -47,11 +45,15 @@ async fn address_generation_mnemonic() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn address_generation_stronghold() -> Result<()> {
+    let storage_path = "test-storage/address_generation_stronghold";
+    setup(storage_path)?;
+
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     let secret_manager = StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password".to_owned())
-        .build("test-storage/wallet_address_generation_stronghold/test.stronghold")?;
+        .build(format!("{}/test.stronghold", storage_path))?;
+
     secret_manager
         .store_mnemonic(Mnemonic::from(DEFAULT_MNEMONIC.to_string()))
         .await?;
@@ -59,17 +61,16 @@ async fn address_generation_stronghold() -> Result<()> {
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
     let address = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::default().with_coin_type(IOTA_COIN_TYPE))
-        .await?
-        .pop()
-        .unwrap();
+        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+        .await?;
 
     assert_eq!(
-        address.to_bech32_unchecked("smr"),
+        address,
         // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
+    tear_down(storage_path)?;
     Ok(())
 }
 
@@ -83,10 +84,8 @@ async fn address_generation_ledger() -> Result<()> {
     let secret_manager = SecretManager::LedgerNano(secret_manager);
 
     let address = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::default().with_coin_type(IOTA_COIN_TYPE))
-        .await?
-        .pop()
-        .unwrap();
+        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+        .await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -109,7 +108,7 @@ async fn address_generation_ledger() -> Result<()> {
 
 //     #[allow(unused_mut)]
 //     let mut wallet_builder = Wallet::builder()
-//         .with_secret_manager(SecretManager::Placeholder)
+//         .with_secret_manager(Secress_generation_stronghold ... FAILEDetManager::Placeholder)
 //         .with_client_options(client_options)
 //         .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
 
