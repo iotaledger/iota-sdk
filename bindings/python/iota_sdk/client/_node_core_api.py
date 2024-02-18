@@ -4,7 +4,7 @@
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 
-from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
@@ -219,10 +219,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # UTXO routes.
 
-    # TODO #1928: this should return `OutputResponse`, not OutputWithMetadataResponse
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadataResponse:
+            self, output_id: Union[OutputId, HexStr]) -> OutputResponse:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -231,12 +229,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputWithMetadataResponse.from_dict(self._call_method('getOutput', {
+        return OutputResponse.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
-    # TODO # 1928: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output_raw(
             self, output_id: Union[OutputId, HexStr]) -> List[int]:
         """Finds an output by its ID and returns it as raw bytes.

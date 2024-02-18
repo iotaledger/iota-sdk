@@ -222,15 +222,15 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetOutput { output_id } => Response::OutputResponse(client.get_output(&output_id).await?),
         ClientMethod::GetOutputRaw { output_id } => Response::Raw(client.get_output_raw(&output_id).await?),
-        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(&output_ids).await?),
-        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
-            Response::Outputs(client.get_outputs_ignore_not_found(&output_ids).await?)
-        }
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
         ClientMethod::GetOutputWithMetadata { output_id } => {
             Response::OutputWithMetadata(client.get_output_with_metadata(&output_id).await?)
+        }
+        ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(&output_ids).await?),
+        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
+            Response::Outputs(client.get_outputs_ignore_not_found(&output_ids).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))

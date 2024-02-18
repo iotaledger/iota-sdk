@@ -24,6 +24,14 @@ use crate::{
     utils::serde::{option_string, string},
 };
 
+/// Response of GET /api/routes.
+/// The available API route groups of the node.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RoutesResponse {
+    pub routes: Vec<String>,
+}
+
 /// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -476,8 +484,6 @@ pub struct BlockWithMetadataResponse {
     pub metadata: BlockMetadataResponse,
 }
 
-// TODO #1928: needs to be aligned with TIP-48.
-// https://github.com/iotaledger/iota-sdk/issues/1921
 /// Response of GET /api/core/v3/outputs/{output_id}.
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -486,12 +492,6 @@ pub struct OutputResponse {
     pub output: Output,
     pub output_id_proof: OutputIdProof,
 }
-
-// TODO #1928: remove?
-// pub struct OutputWithMetadataResponse {
-//     pub output: Output,
-//     pub metadata: OutputMetadata,
-// }
 
 impl From<&OutputWithMetadata> for OutputResponse {
     fn from(value: &OutputWithMetadata) -> Self {
@@ -509,14 +509,6 @@ impl From<OutputWithMetadata> for OutputResponse {
             output_id_proof: value.output_id_proof,
         }
     }
-}
-
-/// Response of GET /api/routes.
-/// The available API route groups of the node.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RoutesResponse {
-    pub routes: Vec<String>,
 }
 
 /// Response of
