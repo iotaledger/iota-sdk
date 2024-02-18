@@ -160,6 +160,7 @@ pub enum Response {
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
     /// - [`GetOutputRaw`](crate::method::ClientMethod::GetOutputRaw)
+    /// - [`GetIncludedBlockRaw`](crate::method::ClientMethod::GetIncludedBlockRaw)
     /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:

@@ -213,13 +213,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
+        ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockWithMetadata { block_id } => {
             Response::BlockWithMetadata(client.get_block_with_metadata(&block_id).await?)
         }
-        ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetOutput { output_id } => Response::OutputResponse(client.get_output(&output_id).await?),
         ClientMethod::GetOutputRaw { output_id } => Response::Raw(client.get_output_raw(&output_id).await?),
         ClientMethod::GetOutputMetadata { output_id } => {
@@ -234,6 +234,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
+        }
+        ClientMethod::GetIncludedBlockRaw { transaction_id } => {
+            Response::Raw(client.get_included_block_raw(&transaction_id).await?)
         }
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)

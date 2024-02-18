@@ -262,6 +262,12 @@ pub enum ClientMethod {
         /// Transaction ID
         transaction_id: TransactionId,
     },
+    /// Returns the raw bytes of the included block of a transaction.
+    #[serde(rename_all = "camelCase")]
+    GetIncludedBlockRaw {
+        /// Transaction ID
+        transaction_id: TransactionId,
+    },
     /// Returns the included block metadata of the transaction.
     #[serde(rename_all = "camelCase")]
     GetIncludedBlockMetadata {
