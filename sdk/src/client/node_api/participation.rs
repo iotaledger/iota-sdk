@@ -27,14 +27,14 @@ impl ClientInner {
 
         let query = query_tuples_to_query_string([event_type.map(|t| ("type", (t as u8).to_string()))]);
 
-        self.get_request(route, query.as_deref(), false, false).await
+        self.get_request(route, query.as_deref(), false).await
     }
 
     /// RouteParticipationEvent is the route to access a single participation by its ID.
     pub async fn event(&self, event_id: &ParticipationEventId) -> Result<ParticipationEventData> {
         let route = format!("api/participation/v1/events/{event_id}");
 
-        self.get_request(&route, None, false, false).await
+        self.get_request(&route, None, false).await
     }
 
     /// RouteParticipationEventStatus is the route to access the status of a single participation by its ID.
@@ -47,14 +47,14 @@ impl ClientInner {
 
         let query = query_tuples_to_query_string([milestone_index.map(|i| ("milestoneIndex", i.to_string()))]);
 
-        self.get_request(&route, query.as_deref(), false, false).await
+        self.get_request(&route, query.as_deref(), false).await
     }
 
     /// RouteOutputStatus is the route to get the vote status for a given output ID.
     pub async fn output_status(&self, output_id: &OutputId) -> Result<OutputStatusResponse> {
         let route = format!("api/participation/v1/outputs/{output_id}");
 
-        self.get_request(&route, None, false, false).await
+        self.get_request(&route, None, false).await
     }
 
     /// RouteAddressBech32Status is the route to get the staking rewards for the given bech32 address.
@@ -64,7 +64,7 @@ impl ClientInner {
     ) -> Result<AddressStakingStatus> {
         let route = format!("api/participation/v1/addresses/{}", bech32_address.convert()?);
 
-        self.get_request(&route, None, false, false).await
+        self.get_request(&route, None, false).await
     }
 
     /// RouteAddressBech32Outputs is the route to get the outputs for the given bech32 address.
@@ -74,6 +74,6 @@ impl ClientInner {
     ) -> Result<AddressOutputsResponse> {
         let route = format!("api/participation/v1/addresses/{}/outputs", bech32_address.convert()?);
 
-        self.get_request(&route, None, false, false).await
+        self.get_request(&route, None, false).await
     }
 }

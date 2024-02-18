@@ -3,19 +3,21 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
-    crate::types::api::core::InfoResponse,
     crate::types::block::PROTOCOL_VERSION,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
 
 use super::{Node, NodeManager};
-use crate::client::{Client, ClientInner, Error, Result};
+use crate::{
+    client::{Client, ClientInner, Error, Result},
+    types::block::protocol::ProtocolParameters,
+};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
     pub async fn get_node(&self) -> Result<Node> {
-        if let Some(primary_node) = &self.node_manager.read().await.primary_node {
+        if let Some(primary_node) = self.node_manager.read().await.primary_nodes.first() {
             return Ok(primary_node.clone());
         }
 
@@ -36,7 +38,7 @@ impl ClientInner {
                 node_manager
                     .nodes
                     .iter()
-                    .filter(|node| !healthy_nodes.contains_key(node))
+                    .filter(|node| !healthy_nodes.contains(node))
                     .cloned()
                     .collect()
             })
@@ -66,64 +68,96 @@ impl ClientInner {
         use std::collections::HashMap;
 
         log::debug!("sync_nodes");
-        let mut healthy_nodes = HashMap::new();
-        let mut network_nodes: HashMap<String, Vec<(InfoResponse, Node)>> = HashMap::new();
+        let mut healthy_nodes = HashSet::new();
+        let mut network_nodes: HashMap<String, Vec<(ProtocolParameters, Node, Option<u64>)>> = HashMap::new();
 
         for node in nodes {
             // Put the healthy node url into the network_nodes
-            match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
-                Ok(info) => {
-                    if info.status.is_healthy || ignore_node_health {
-                        // Unwrap: We should always have parameters for this version. If we don't we can't recover.
-                        let network_name = info
-                            .protocol_parameters_by_version(PROTOCOL_VERSION)
-                            .expect("missing v3 protocol parameters")
-                            .parameters
-                            .network_name();
-                        match network_nodes.get_mut(network_name) {
-                            Some(network_node_entry) => {
-                                network_node_entry.push((info, node.clone()));
+            if node.permanode {
+                match crate::client::Client::get_permanode_info(node.clone()).await {
+                    Ok(info) => {
+                        if info.is_healthy || ignore_node_health {
+                            // Unwrap: We should always have parameters for this version. If we don't we can't recover.
+                            let protocol_parameters = info
+                                .protocol_parameters_by_version(PROTOCOL_VERSION)
+                                .expect("missing v3 protocol parameters")
+                                .parameters
+                                .clone();
+                            let network_name = protocol_parameters.network_name();
+                            match network_nodes.get_mut(network_name) {
+                                Some(network_node_entry) => {
+                                    network_node_entry.push((protocol_parameters, node.clone(), None));
+                                }
+                                None => {
+                                    network_nodes.insert(
+                                        network_name.to_owned(),
+                                        vec![(protocol_parameters, node.clone(), None)],
+                                    );
+                                }
                             }
-                            None => {
-                                network_nodes.insert(network_name.to_owned(), vec![(info, node.clone())]);
-                            }
+                        } else {
+                            log::warn!("{} is not healthy: {:?}", node.url, info);
                         }
-                    } else {
-                        log::warn!("{} is not healthy: {:?}", node.url, info);
+                    }
+                    Err(err) => {
+                        log::error!("Couldn't get node info: {err}");
                     }
                 }
-                Err(err) => {
-                    log::error!("Couldn't get node info: {err}");
+            } else {
+                match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
+                    Ok(info) => {
+                        if info.status.is_healthy || ignore_node_health {
+                            // Unwrap: We should always have parameters for this version. If we don't we can't recover.
+                            let protocol_parameters = info
+                                .protocol_parameters_by_version(PROTOCOL_VERSION)
+                                .expect("missing v3 protocol parameters")
+                                .parameters
+                                .clone();
+                            let network_name = protocol_parameters.network_name();
+                            match network_nodes.get_mut(network_name) {
+                                Some(network_node_entry) => {
+                                    network_node_entry.push((
+                                        protocol_parameters,
+                                        node.clone(),
+                                        info.status.relative_accepted_tangle_time,
+                                    ));
+                                }
+                                None => {
+                                    network_nodes.insert(
+                                        network_name.to_owned(),
+                                        vec![(
+                                            protocol_parameters,
+                                            node.clone(),
+                                            info.status.relative_accepted_tangle_time,
+                                        )],
+                                    );
+                                }
+                            }
+                        } else {
+                            log::warn!("{} is not healthy: {:?}", node.url, info);
+                        }
+                    }
+                    Err(err) => {
+                        log::error!("Couldn't get node info: {err}");
+                    }
                 }
             }
         }
 
-        // Get network_id with the most nodes
-        let mut most_nodes = ("network_id", 0);
-        for (network_id, node) in &network_nodes {
-            if node.len() > most_nodes.1 {
-                most_nodes.0 = network_id;
-                most_nodes.1 = node.len();
-            }
-        }
-
-        if let Some(nodes) = network_nodes.get(most_nodes.0) {
-            if let Some((info, _node_url)) = nodes.first() {
+        // Get the nodes of which the most are in the same network
+        if let Some((_network_name, nodes)) = network_nodes.iter().max_by_key(|a| a.1.len()) {
+            // Set the protocol_parameters to the parameters that most nodes have in common and only use these nodes as
+            // healthy_nodes
+            if let Some((parameters, _node_url, tangle_time)) = nodes.first() {
                 let mut network_info = self.network_info.write().await;
 
-                network_info.tangle_time = info.status.relative_accepted_tangle_time;
+                network_info.tangle_time = *tangle_time;
                 // Unwrap: We should always have parameters for this version. If we don't we can't recover.
-                network_info.protocol_parameters = info
-                    .protocol_parameters_by_version(PROTOCOL_VERSION)
-                    .expect("missing v3 protocol parameters")
-                    .parameters
-                    .clone();
+                network_info.protocol_parameters = parameters.clone();
             }
 
-            for (info, node_url) in nodes {
-                healthy_nodes.insert(node_url.clone(), info.clone());
-            }
-        }
+            healthy_nodes.extend(nodes.iter().map(|(_info, node_url, _time)| node_url).cloned())
+        };
 
         // Update the sync list.
         *self
@@ -144,7 +178,7 @@ impl Client {
         let node_sync_interval = node_manager.node_sync_interval;
         let ignore_node_health = node_manager.ignore_node_health;
         let nodes = node_manager
-            .primary_node
+            .primary_nodes
             .iter()
             .chain(node_manager.nodes.iter())
             .cloned()
