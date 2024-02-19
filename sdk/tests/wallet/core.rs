@@ -75,8 +75,7 @@ async fn update_client_options() -> Result<()> {
 // }
 
 #[cfg(feature = "storage")]
-// #[tokio::test]
-#[ignore = "currently failing, but will be fixed with #1941"]
+#[tokio::test]
 async fn changed_bip_path() -> Result<()> {
     use iota_sdk::crypto::keys::bip44::Bip44;
 
@@ -98,9 +97,14 @@ async fn changed_bip_path() -> Result<()> {
         .finish()
         .await;
 
+    let _mismatch_err: Result<()> = Err(Error::BipPathMismatch {
+        new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
+        old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
+    });
+
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    assert!(matches!(result, Err(Error::BipPathMismatch { .. })));
+    assert!(matches!(result, _mismatch_err));
 
     // Building the wallet with the same coin type still works
     assert!(

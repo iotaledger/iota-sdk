@@ -27,7 +27,7 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible incoming transactions.
-    pub(crate) async fn update_wallet_address_hrp(&self) -> crate::wallet::Result<()> {
+    pub(crate) async fn update_address_hrp(&self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         log::debug!("updating wallet with new bech32 hrp: {}", bech32_hrp);
 

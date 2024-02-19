@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::Error as ClientError,
-    types::block::address::Bech32Address,
+    types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{Error, OutputParams, Result, SendParams},
 };
 use pretty_assertions::assert_eq;
@@ -56,7 +56,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let error = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: wallet.address().await,
+                recipient_address: wallet.address().await.to_bech32_unchecked("wronghrp"),
                 amount: 1_000_000,
                 assets: None,
                 features: None,

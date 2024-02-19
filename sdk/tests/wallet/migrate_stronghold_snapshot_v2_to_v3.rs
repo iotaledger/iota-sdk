@@ -84,7 +84,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
         ]
     );
 
-    let mut restore_manager = Wallet::builder()
+    let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/stronghold_snapshot_v2_v3_migration")
         .with_secret_manager(stronghold_secret_manager)
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
