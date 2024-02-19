@@ -3,17 +3,19 @@
 
 import type {
     __GetInfoMethod__,
+    __GetRoutesMethod__,
     __GetOutputIdsMethod__,
     __GetBasicOutputIdsMethod__,
     __GetOutputMethod__,
     __GetOutputsMethod__,
     __PostBlockMethod__,
-    __GetTipsMethod__,
     __GetNetworkInfoMethod__,
     __GetAccountCongestionMethod__,
     __GetRewardsMethod__,
+    __GetCommitteeMethod__,
     __GetValidatorsMethod__,
     __GetValidatorMethod__,
+    __GetIssuanceMethod__,
     __GetBlockMethod__,
     __GetBlockMetadataMethod__,
     __GetBlockWithMetadataMethod__,
@@ -34,9 +36,9 @@ import type {
     __GetCommitmentMethod__,
     __GetUtxoChangesMethod__,
     __GetUtxoChangesFullMethod__,
-    __GetCommitmentByIndexMethod__,
-    __GetUtxoChangesByIndexMethod__,
-    __GetUtxoChangesFullByIndexMethod__,
+    __GetCommitmentBySlotMethod__,
+    __GetUtxoChangesBySlotMethod__,
+    __GetUtxoChangesFullBySlotMethod__,
     __HexToBech32Method__,
     __AccountIdToBech32Method__,
     __NftIdToBech32Method__,
@@ -68,17 +70,19 @@ import type {
 
 export type __ClientMethods__ =
     | __GetInfoMethod__
+    | __GetRoutesMethod__
     | __GetOutputMethod__
     | __GetOutputIdsMethod__
     | __GetBasicOutputIdsMethod__
     | __GetOutputsMethod__
     | __PostBlockMethod__
-    | __GetTipsMethod__
     | __GetNetworkInfoMethod__
     | __GetAccountCongestionMethod__
     | __GetRewardsMethod__
+    | __GetCommitteeMethod__
     | __GetValidatorsMethod__
     | __GetValidatorMethod__
+    | __GetIssuanceMethod__
     | __GetBlockMethod__
     | __GetBlockMetadataMethod__
     | __GetBlockWithMetadataMethod__
@@ -100,9 +104,9 @@ export type __ClientMethods__ =
     | __GetCommitmentMethod__
     | __GetUtxoChangesMethod__
     | __GetUtxoChangesFullMethod__
-    | __GetCommitmentByIndexMethod__
-    | __GetUtxoChangesByIndexMethod__
-    | __GetUtxoChangesFullByIndexMethod__
+    | __GetCommitmentBySlotMethod__
+    | __GetUtxoChangesBySlotMethod__
+    | __GetUtxoChangesFullBySlotMethod__
     | __HexToBech32Method__
     | __AccountIdToBech32Method__
     | __NftIdToBech32Method__

@@ -8,7 +8,7 @@ import type { INodeInfoStatus } from './node-info-status';
 /**
  * Response from the /info endpoint.
  */
-export interface INodeInfo {
+export interface IInfoResponse {
     /**
      * The name of the node.
      */

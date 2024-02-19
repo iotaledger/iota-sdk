@@ -52,12 +52,13 @@ describe.skip('Client info methods', () => {
         expect(unhealthyNodes).toBeDefined();
     });
 
-    it('gets tips', async () => {
-        const client = await makeClient();
-        const tips = await client.getTips();
+    // TODO: replace .getTips()
+    // it('gets tips', async () => {
+    //     const client = await makeClient();
+    //     const tips = await client.getTips();
 
-        expect(tips.length).toBeGreaterThan(0);
-    });
+    //     expect(tips.length).toBeGreaterThan(0);
+    // });
 
     it('gets networkInfo', async () => {
         const client = await makeClient();

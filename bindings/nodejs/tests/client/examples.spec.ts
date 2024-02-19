@@ -49,7 +49,7 @@ describe.skip('Main examples', () => {
         const info = await client.getInfo();
 
         expect(
-            info.nodeInfo.protocolParameters[0].parameters.bech32Hrp,
+            info.protocolParameters[0].parameters.bech32Hrp,
         ).toBe('rms');
     });
 
@@ -170,7 +170,7 @@ describe.skip('Main examples', () => {
 
     it('gets block data', async () => {
         const client = await makeClient();
-        const tips = await client.getTips();
+        const tips = (await client.getIssuance()).strongParents[0];
         const params = await client.getProtocolParameters();
 
         const blockData = await client.getBlock(tips[0]);
