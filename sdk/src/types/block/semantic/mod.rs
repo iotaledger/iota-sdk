@@ -306,8 +306,13 @@ impl<'a> SemanticValidationContext<'a> {
                                 .ok_or(Error::CreatedManaOverflow)?;
                         }
                     }
-                    if output.features().staking().is_some() && self.commitment_context_input.is_none() {
-                        return Ok(Some(TransactionFailureReason::StakingCommitmentInputMissing));
+                    if output.features().staking().is_some() {
+                        if self.commitment_context_input.is_none() {
+                            return Ok(Some(TransactionFailureReason::StakingCommitmentInputMissing));
+                        }
+                        if output.features().block_issuer().is_none() {
+                            return Ok(Some(TransactionFailureReason::StakingBlockIssuerFeatureMissing));
+                        }
                     }
 
                     (output.amount(), output.mana(), None, Some(output.features()))
