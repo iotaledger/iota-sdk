@@ -659,12 +659,15 @@ class Wallet:
         ))
         return PreparedTransaction(self, prepared)
 
-    def extend_staking(self, account_id: HexStr, additional_epochs: int) -> TransactionWithMetadata:
+    def extend_staking(self, account_id: HexStr,
+                       additional_epochs: int) -> TransactionWithMetadata:
         """Extend staking by additional epochs.
         """
-        return self.prepare_extend_staking(account_id, additional_epochs).send()
+        return self.prepare_extend_staking(
+            account_id, additional_epochs).send()
 
-    def prepare_extend_staking(self, account_id: HexStr, additional_epochs: int) -> PreparedTransaction:
+    def prepare_extend_staking(self, account_id: HexStr,
+                               additional_epochs: int) -> PreparedTransaction:
         """Prepare to extend staking by additional epochs.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(

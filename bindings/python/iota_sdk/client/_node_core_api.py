@@ -146,7 +146,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Returns information that is ideal for attaching a block in the network.
         GET /api/core/v3/blocks/issuance
         """
-        return IssuanceBlockHeaderResponse.from_dict(self._call_method('getIssuance'))
+        return IssuanceBlockHeaderResponse.from_dict(
+            self._call_method('getIssuance'))
 
     def post_block(self, block: Block) -> BlockId:
         """Returns the BlockId of the submitted block.
@@ -206,7 +207,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         }))
 
-    def get_block_with_metadata(self, block_id: BlockId) -> BlockWithMetadataResponse:
+    def get_block_with_metadata(
+            self, block_id: BlockId) -> BlockWithMetadataResponse:
         """Returns a block with its metadata.
         GET /api/core/v2/blocks/{blockId}/full
 
