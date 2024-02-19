@@ -374,8 +374,7 @@ where
         self.address.read().await.clone()
     }
 
-    /// Get the wallet address config mutably.
-    pub async fn address_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Bech32Address> {
+    pub(crate) async fn address_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Bech32Address> {
         self.address.write().await
     }
 
@@ -389,8 +388,7 @@ where
         *self.bip_path.read().await
     }
 
-    /// Get the wallet's configured bip path mutably.
-    pub async fn bip_path_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<Bip44>> {
+    pub(crate) async fn bip_path_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<Bip44>> {
         self.bip_path.write().await
     }
 
@@ -399,11 +397,11 @@ where
         self.alias.read().await.clone()
     }
 
-    /// Get the alias of the wallet if one was set mutably.
-    pub async fn alias_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<String>> {
+    pub(crate) async fn alias_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<String>> {
         self.alias.write().await
     }
 
+    /// Get the wallet's ledger state.
     pub async fn ledger(&self) -> tokio::sync::RwLockReadGuard<'_, WalletLedger> {
         self.ledger.read().await
     }

@@ -5,7 +5,7 @@ pub(crate) mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf};
 
-use self::stronghold_snapshot::restore_wallet_from_stronghold_snapshot;
+use self::stronghold_snapshot::restore_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
@@ -35,7 +35,7 @@ impl Wallet {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
                 stronghold.set_password(stronghold_password).await?;
-                self.backup_wallet_to_stronghold_snapshot(stronghold).await?;
+                self.backup_to_stronghold_snapshot(stronghold).await?;
                 // Write snapshot to backup path
                 stronghold.write_stronghold_snapshot(Some(&backup_path)).await?;
             }
@@ -46,7 +46,7 @@ impl Wallet {
                     .password(stronghold_password)
                     .build(backup_path)?;
 
-                self.backup_wallet_to_stronghold_snapshot(&backup_stronghold).await?;
+                self.backup_to_stronghold_snapshot(&backup_stronghold).await?;
 
                 // Write snapshot to backup path
                 backup_stronghold.write_stronghold_snapshot(None).await?;
@@ -101,7 +101,7 @@ impl Wallet {
             .build(backup_path.clone())?;
 
         let (read_address, read_bip_path, read_alias, read_client_options, read_secret_manager, read_wallet_ledger) =
-            restore_wallet_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
+            restore_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the bip path is not matching the current one, we may ignore the backup
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
@@ -215,7 +215,7 @@ impl Wallet<StrongholdSecretManager> {
 
         secret_manager.set_password(stronghold_password).await?;
 
-        self.backup_wallet_to_stronghold_snapshot(&secret_manager).await?;
+        self.backup_to_stronghold_snapshot(&secret_manager).await?;
 
         // Write snapshot to backup path
         secret_manager.write_stronghold_snapshot(Some(&backup_path)).await?;
@@ -268,7 +268,7 @@ impl Wallet<StrongholdSecretManager> {
             .build(backup_path.clone())?;
 
         let (read_address, read_bip_path, read_alias, read_client_options, read_secret_manager, read_wallet_ledger) =
-            restore_wallet_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
+            restore_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
         // If the bip path is not matching the current one, we may ignore the backup
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
