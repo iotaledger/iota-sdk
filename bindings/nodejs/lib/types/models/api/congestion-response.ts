@@ -23,5 +23,5 @@ export class CongestionResponse {
     /**
      * BIC of the account in the slot. This balance needs to be non-negative, otherwise account is locked.
      */
-    blockIssuanceCredits!: u64;
+    blockIssuanceCredits!: bigint;
 }
