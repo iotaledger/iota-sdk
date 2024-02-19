@@ -1591,9 +1591,9 @@ dependencies = [
 
 [[package]]
 name = "iota-ledger-nano"
-version = "1.0.3"
+version = "1.0.4-alpha.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "434abd10cd26c00345c19290f87d0e66104c6ce3069a5b7e1eb6c09a47ea18ca"
+checksum = "1fadfb424bcaaa964ffe05dd9d2eab8b1b7617f79c5c0d54912547b07368a981"
 dependencies = [
  "arrayref",
  "byteorder",
