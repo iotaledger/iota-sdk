@@ -16,8 +16,9 @@ use crypto::{
     },
 };
 use iota_ledger_nano::{
-    api::constants::Protocols, api::errors::APIError, get_app_config, get_buffer_size, get_ledger, get_opened_app,
-    LedgerBIP32Index, Packable as LedgerNanoPackable, TransportTypes,
+    api::{constants::Protocols, errors::APIError},
+    get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
+    TransportTypes,
 };
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
