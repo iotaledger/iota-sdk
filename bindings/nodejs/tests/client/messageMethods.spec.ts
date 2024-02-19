@@ -54,22 +54,20 @@ describe.skip('Block methods', () => {
         expect(blockId).toBeValidBlockId();
     });
 
-    // TODO: replace .getTips()
-    // it('finds blocks by block IDs', async () => {
-    //     const client = await makeClient();
-    //     const blockIds = await client.getTips();
-    //     const blocks = await client.findBlocks(blockIds);
+    it('finds blocks by block IDs', async () => {
+        const client = await makeClient();
+        const blockIds = (await client.getIssuance()).strongParents;
+        const blocks = await client.findBlocks(blockIds);
 
-    //     expect(blocks.length).toBe(blockIds.length);
-    // });
+        expect(blocks.length).toBe(blockIds.length);
+    });
 
-    // TODO: replace .getTips()
-    // it('gets block as raw bytes', async () => {
-    //     const client = await makeClient();
-    //     const tips = await client.getTips();
+    it('gets block as raw bytes', async () => {
+        const client = await makeClient();
+        const tips = (await client.getIssuance()).strongParents;
 
-    //     const blockRaw = await client.getBlockRaw(tips[0]);
+        const blockRaw = await client.getBlockRaw(tips[0]);
 
-    //     expect(blockRaw).toBeDefined();
-    // });
+        expect(blockRaw).toBeDefined();
+    });
 });

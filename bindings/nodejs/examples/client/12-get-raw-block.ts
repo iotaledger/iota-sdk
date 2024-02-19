@@ -23,7 +23,7 @@ async function run() {
 
     try {
         // Get a random block ID.
-        const blockId = (await client.getTips())[0];
+        const blockId = (await client.getIssuance()).strongParents[0];
 
         const rawBytes = await client.getBlockRaw(blockId);
         console.log('Block bytes: ', rawBytes);
