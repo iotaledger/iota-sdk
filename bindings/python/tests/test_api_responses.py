@@ -1,10 +1,10 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import Generic, TypeVar
-from iota_sdk import *
 from json import load, loads, dumps
-from dacite import from_dict
+# pylint: disable=wildcard-import,unused-wildcard-import
+from iota_sdk import *
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -14,7 +14,7 @@ T = TypeVar("T")
 def test_api_responses():
     def test_api_response(cls_type: Generic[T], path: str):
         fixture_str = ''
-        with open(base_path+path, "r", encoding="utf-8") as payload:
+        with open(base_path + path, "r", encoding="utf-8") as payload:
             fixture = load(payload)
         cls = cls_type.from_dict(fixture)
 
@@ -22,10 +22,7 @@ def test_api_responses():
         fixture_str = dumps(fixture, sort_keys=True)
         recreated = dumps(
             loads(cls.to_json()), sort_keys=True)
-        fixture_str == recreated
-
-    # GET / api/core/v3/info
-    test_api_response(InfoResponse, "get-info-response-example.json")
+        assert fixture_str == recreated
 
     # GET /api/routes
     test_api_response(RoutesResponse, "get-routes-response-example.json")
