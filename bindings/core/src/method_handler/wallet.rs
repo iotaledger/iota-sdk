@@ -21,7 +21,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
-            wallet.backup_to_stronghold(destination, password).await?;
+            wallet.backup(destination, password).await?;
             Response::Ok
         }
         #[cfg(feature = "stronghold")]

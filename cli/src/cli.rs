@@ -383,9 +383,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
 }
 
 pub async fn backup_command_stronghold(wallet: &Wallet, password: &Password, backup_path: &Path) -> Result<(), Error> {
-    wallet
-        .backup_to_stronghold(backup_path.into(), password.clone())
-        .await?;
+    wallet.backup(backup_path.into(), password.clone()).await?;
 
     println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 

@@ -21,7 +21,7 @@ impl Wallet {
     /// Backup the wallet in a Stronghold snapshot file.
     ///
     /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup_to_stronghold(
+    pub async fn backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
@@ -205,7 +205,7 @@ impl Wallet<StrongholdSecretManager> {
     /// Backup the wallet in a Stronghold snapshot file.
     ///
     /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup_to_stronghold_snapshot(
+    pub async fn backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
