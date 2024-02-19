@@ -75,6 +75,25 @@ impl core::fmt::Display for InfoResponse {
     }
 }
 
+/// Response of GET /api/core/v3/info.
+/// General information about the node.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PermanodeInfoResponse {
+    pub name: String,
+    pub version: String,
+    pub is_healthy: bool,
+    pub latest_commitment_id: SlotCommitmentId,
+    pub protocol_parameters: ProtocolParametersMap,
+    pub base_token: BaseTokenResponse,
+}
+
+impl PermanodeInfoResponse {
+    pub(crate) fn protocol_parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
+        self.protocol_parameters.by_version(protocol_version)
+    }
+}
+
 /// Returned in [`InfoResponse`].
 /// Status information about the node.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

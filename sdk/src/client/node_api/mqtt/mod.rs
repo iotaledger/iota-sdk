@@ -68,7 +68,7 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
                     .healthy_nodes
                     .read()
                     .map_or(node_manager.nodes.clone(), |healthy_nodes| {
-                        healthy_nodes.iter().map(|(node, _)| node.clone()).collect()
+                        healthy_nodes.iter().cloned().collect()
                     })
             }
             #[cfg(target_family = "wasm")]

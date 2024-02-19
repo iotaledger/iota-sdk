@@ -34,12 +34,11 @@ use crate::{
 // The node manager takes care of selecting node(s) for requests until a result is returned or if quorum is enabled it
 // will send the requests for some endpoints to multiple nodes and compares the results.
 pub struct NodeManager {
-    pub(crate) primary_node: Option<Node>,
+    pub(crate) primary_nodes: Vec<Node>,
     pub(crate) nodes: HashSet<Node>,
-    permanodes: HashSet<Node>,
     pub(crate) ignore_node_health: bool,
     node_sync_interval: Duration,
-    pub(crate) healthy_nodes: RwLock<HashMap<Node, InfoResponse>>,
+    pub(crate) healthy_nodes: RwLock<HashSet<Node>>,
     quorum: bool,
     min_quorum_size: usize,
     quorum_threshold: usize,
@@ -49,9 +48,8 @@ pub struct NodeManager {
 impl Debug for NodeManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut d = f.debug_struct("NodeManager");
-        d.field("primary_node", &self.primary_node);
+        d.field("primary_nodes", &self.primary_nodes);
         d.field("nodes", &self.nodes);
-        d.field("permanodes", &self.permanodes);
         d.field("ignore_node_health", &self.ignore_node_health);
         d.field("node_sync_interval", &self.node_sync_interval);
         d.field("healthy_nodes", &self.healthy_nodes);
@@ -67,10 +65,9 @@ impl ClientInner {
         path: &str,
         query: Option<&str>,
         need_quorum: bool,
-        prefer_permanode: bool,
     ) -> Result<T> {
         let node_manager = self.node_manager.read().await;
-        let request = node_manager.get_request(path, query, self.get_timeout().await, need_quorum, prefer_permanode);
+        let request = node_manager.get_request(path, query, self.get_timeout().await, need_quorum);
         #[cfg(not(target_family = "wasm"))]
         let request = request.rate_limit(&self.request_pool);
         request.await
@@ -106,18 +103,11 @@ impl NodeManager {
         NodeManagerBuilder::new()
     }
 
-    fn get_nodes(&self, path: &str, query: Option<&str>, prefer_permanode: bool) -> Result<Vec<Node>> {
+    fn get_nodes(&self, path: &str, query: Option<&str>) -> Result<Vec<Node>> {
         let mut nodes_with_modified_url: Vec<Node> = Vec::new();
 
-        if prefer_permanode || (path == "api/core/v3/blocks" && query.is_some()) {
-            for permanode in &self.permanodes {
-                if !nodes_with_modified_url.iter().any(|n| n.url == permanode.url) {
-                    nodes_with_modified_url.push(permanode.clone());
-                }
-            }
-        }
-
-        if let Some(primary_node) = &self.primary_node {
+        // Set primary nodes first, so they will also be used first for requests.
+        for primary_node in &self.primary_nodes {
             if !nodes_with_modified_url.iter().any(|n| n.url == primary_node.url) {
                 nodes_with_modified_url.push(primary_node.clone());
             }
@@ -131,7 +121,7 @@ impl NodeManager {
                     .read()
                     .map_err(|_| crate::client::Error::PoisonError)?
                     .iter()
-                    .map(|(n, _info)| n.clone())
+                    .cloned()
                     .collect()
             }
             #[cfg(target_family = "wasm")]
@@ -185,11 +175,10 @@ impl NodeManager {
         query: Option<&str>,
         timeout: Duration,
         need_quorum: bool,
-        prefer_permanode: bool,
     ) -> Result<T> {
         let mut result: HashMap<String, usize> = HashMap::new();
         // Get node urls and set path
-        let nodes = self.get_nodes(path, query, prefer_permanode)?;
+        let nodes = self.get_nodes(path, query)?;
         if self.quorum && need_quorum && nodes.len() < self.min_quorum_size {
             return Err(Error::QuorumPoolSizeError {
                 available_nodes: nodes.len(),
@@ -212,7 +201,7 @@ impl NodeManager {
                 for (index, node) in nodes.into_iter().enumerate() {
                     if index < self.min_quorum_size {
                         let client_ = self.http_client.clone();
-                        tasks.push(async move { tokio::spawn(async move { client_.get(node, timeout).await }).await });
+                        tasks.push(async move { tokio::spawn(async move { client_.get(&node, timeout).await }).await });
                     }
                 }
                 for res in futures::future::try_join_all(tasks).await? {
@@ -235,8 +224,8 @@ impl NodeManager {
             }
         } else {
             // Send requests
-            for node in nodes {
-                match self.http_client.get(node.clone(), timeout).await {
+            for node in &nodes {
+                match self.http_client.get(node, timeout).await {
                     Ok(res) => {
                         // Handle node_info extra because we also want to return the url
                         if path == crate::client::node_api::core::routes::INFO_PATH {
@@ -304,7 +293,7 @@ impl NodeManager {
         timeout: Duration,
     ) -> Result<Vec<u8>> {
         // Get node urls and set path
-        let nodes = self.get_nodes(path, query, false)?;
+        let nodes = self.get_nodes(path, query)?;
         let mut error = None;
         // Send requests
         for node in nodes {
@@ -331,7 +320,7 @@ impl NodeManager {
         timeout: Duration,
         body: &[u8],
     ) -> Result<T> {
-        let nodes = self.get_nodes(path, None, false)?;
+        let nodes = self.get_nodes(path, None)?;
         let mut error = None;
         // Send requests
         for node in nodes {
@@ -358,7 +347,7 @@ impl NodeManager {
         timeout: Duration,
         json: Value,
     ) -> Result<T> {
-        let nodes = self.get_nodes(path, None, false)?;
+        let nodes = self.get_nodes(path, None)?;
         let mut error = None;
         // Send requests
         for node in nodes {

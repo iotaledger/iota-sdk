@@ -6,7 +6,6 @@ use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{request_funds_from_faucet, Client},
     types::{
-        api::core::OutputResponse,
         block::{
             output::{
                 AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder,

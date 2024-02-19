@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Builder of the Client Instance
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
@@ -81,15 +81,11 @@ impl ClientBuilder {
     pub fn from_json(mut self, client_config: &str) -> Result<Self> {
         self = serde_json::from_str::<Self>(client_config)?;
         // validate URLs
-        if let Some(node_dto) = &self.node_manager_builder.primary_node {
+        for node_dto in &self.node_manager_builder.primary_nodes {
             let node: Node = node_dto.into();
             validate_url(node.url)?;
         }
         for node_dto in &self.node_manager_builder.nodes {
-            let node: Node = node_dto.into();
-            validate_url(node.url)?;
-        }
-        for node_dto in &self.node_manager_builder.permanodes {
             let node: Node = node_dto.into();
             validate_url(node.url)?;
         }
@@ -102,15 +98,15 @@ impl ClientBuilder {
         Ok(self)
     }
 
-    /// Adds an IOTA node by its URL to be used as primary node, with optional jwt and or basic authentication
-    pub fn with_primary_node(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
-        self.node_manager_builder = self.node_manager_builder.with_primary_node(url, auth)?;
+    // Adds a node as primary node.
+    pub fn with_primary_node(mut self, node: Node) -> Result<Self> {
+        self.node_manager_builder = self.node_manager_builder.with_primary_node(node)?;
         Ok(self)
     }
 
-    /// Adds a permanode by its URL, with optional jwt and or basic authentication
-    pub fn with_permanode(mut self, url: &str, auth: Option<NodeAuth>) -> Result<Self> {
-        self.node_manager_builder = self.node_manager_builder.with_permanode(url, auth)?;
+    /// Adds a list of IOTA nodes by their URLs to the primary nodes list.
+    pub fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
+        self.node_manager_builder = self.node_manager_builder.with_primary_nodes(urls)?;
         Ok(self)
     }
 
@@ -195,7 +191,7 @@ impl ClientBuilder {
         let ignore_node_health = self.node_manager_builder.ignore_node_health;
         let nodes = self
             .node_manager_builder
-            .primary_node
+            .primary_nodes
             .iter()
             .chain(self.node_manager_builder.nodes.iter())
             .map(|node| node.clone().into())
@@ -205,7 +201,7 @@ impl ClientBuilder {
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
 
         let client_inner = Arc::new(ClientInner {
-            node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
+            node_manager: RwLock::new(self.node_manager_builder.build(HashSet::new())),
             network_info: RwLock::new(self.network_info),
             api_timeout: RwLock::new(self.api_timeout),
             #[cfg(feature = "mqtt")]
@@ -246,7 +242,7 @@ impl ClientBuilder {
 
         let client = Client {
             inner: Arc::new(ClientInner {
-                node_manager: RwLock::new(self.node_manager_builder.build(HashMap::new())),
+                node_manager: RwLock::new(self.node_manager_builder.build(HashSet::new())),
                 network_info: RwLock::new(self.network_info),
                 api_timeout: RwLock::new(self.api_timeout),
                 #[cfg(feature = "mqtt")]

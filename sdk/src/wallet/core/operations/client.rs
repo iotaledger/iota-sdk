@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use url::Url;
 
@@ -49,7 +49,7 @@ where
         let change_in_node_manager = self.client_options().await.node_manager_builder != node_manager_builder;
 
         self.client
-            .update_node_manager(node_manager_builder.build(HashMap::new()))
+            .update_node_manager(node_manager_builder.build(HashSet::new()))
             .await?;
         *self.client.api_timeout.write().await = api_timeout;
         #[cfg(not(target_family = "wasm"))]
@@ -85,28 +85,13 @@ where
         log::debug!("[update_node_auth]");
         let mut node_manager_builder = NodeManagerBuilder::from(&*self.client.node_manager.read().await);
 
-        if let Some(primary_node) = &node_manager_builder.primary_node {
-            let (node_url, disabled) = match &primary_node {
-                NodeDto::Url(node_url) => (node_url, false),
-                NodeDto::Node(node) => (&node.url, node.disabled),
-            };
-
-            if node_url == &url {
-                node_manager_builder.primary_node = Some(NodeDto::Node(Node {
-                    url: url.clone(),
-                    auth: auth.clone(),
-                    disabled,
-                }));
-            }
-        }
-
-        node_manager_builder.permanodes = node_manager_builder
-            .permanodes
+        node_manager_builder.primary_nodes = node_manager_builder
+            .primary_nodes
             .into_iter()
             .map(|node| {
-                let (node_url, disabled) = match &node {
-                    NodeDto::Url(node_url) => (node_url, false),
-                    NodeDto::Node(node) => (&node.url, node.disabled),
+                let (node_url, disabled, permanode) = match &node {
+                    NodeDto::Url(node_url) => (node_url, false, false),
+                    NodeDto::Node(node) => (&node.url, node.disabled, node.permanode),
                 };
 
                 if node_url == &url {
@@ -114,6 +99,7 @@ where
                         url: url.clone(),
                         auth: auth.clone(),
                         disabled,
+                        permanode,
                     })
                 } else {
                     node
@@ -123,9 +109,9 @@ where
 
         let mut new_nodes = HashSet::new();
         for node in node_manager_builder.nodes.iter() {
-            let (node_url, disabled) = match &node {
-                NodeDto::Url(node_url) => (node_url, false),
-                NodeDto::Node(node) => (&node.url, node.disabled),
+            let (node_url, disabled, permanode) = match &node {
+                NodeDto::Url(node_url) => (node_url, false, false),
+                NodeDto::Node(node) => (&node.url, node.disabled, node.permanode),
             };
 
             if node_url == &url {
@@ -133,6 +119,7 @@ where
                     url: url.clone(),
                     auth: auth.clone(),
                     disabled,
+                    permanode,
                 }));
             } else {
                 new_nodes.insert(node.clone());
@@ -149,7 +136,7 @@ where
         }
 
         self.client
-            .update_node_manager(node_manager_builder.build(HashMap::new()))
+            .update_node_manager(node_manager_builder.build(HashSet::new()))
             .await?;
 
         self.update_bech32_hrp().await?;
