@@ -27,7 +27,8 @@ def test_api_responses():
     # GET /api/routes
     test_api_response(RoutesResponse, "get-routes-response-example.json")
     # GET /api/core/v3/info
-    test_api_response(InfoResponse, "get-info-response-example.json")
+    # TODO: enable when the fixture is updated https://github.com/iotaledger/iota-sdk/issues/2015
+    # test_api_response(InfoResponse, "get-info-response-example.json")
     # GET /api/core/v3/accounts/{bech32Address}/congestion
     test_api_response(CongestionResponse,
                       "get-congestion-estimate-response-example.json")
@@ -42,8 +43,6 @@ def test_api_responses():
     # GET /api/core/v3/blocks/issuance
     test_api_response(IssuanceBlockHeaderResponse,
                       "get-buildingBlock-response-example.json")
-    # POST / api/core/v3/blocks
-    # test_api_response(SubmitBlockResponse, "post-blocks-response-example.json")
     # GET /api/core/v3/blocks/{blockId}
     test_api_response(Block, "get-block-by-id-empty-response-example.json")
     test_api_response(Block, "tagged-data-block-example.json")
@@ -51,7 +50,7 @@ def test_api_responses():
     test_api_response(
         Block, "get-block-by-id-validation-response-example.json")
     # GET /api/core/v3/blocks/{blockId}/metadata
-    # TODO enable when Block and Tx State enums are fixed
+    # TODO enable when Block and Tx State enums are fixed https://github.com/iotaledger/iota-sdk/issues/2019
     # test_api_response(BlockMetadataResponse,
     #                   "get-block-by-id-response-example-new-transaction.json")
     # test_api_response(BlockMetadataResponse,
@@ -62,7 +61,7 @@ def test_api_responses():
     #                   "get-block-by-id-response-example-confirmed.json")
     # test_api_response(BlockMetadataResponse,
     #                   "get-block-by-id-response-example-conflicting-transaction.json")
-    # GET /api/core/v3/blocks/{blockId}/full
+    # # GET /api/core/v3/blocks/{blockId}/full
     # test_api_response(BlockWithMetadataResponse,
     #                   "get-full-block-by-id-tagged-data-response-example.json")
     # GET /api/core/v3/outputs/{outputId}
@@ -79,17 +78,15 @@ def test_api_responses():
     # test_api_response(OutputWithMetadata,
     #                   "get-full-output-metadata-example.json")
     # GET /api/core/v3/transactions/{transactionId}/metadata
-    # TODO enable when Tx State enum is fixed
+    # TODO enable when Tx State enum is fixed https://github.com/iotaledger/iota-sdk/issues/2019
     # test_api_response(TransactionMetadataResponse,
     #                   "get-transaction-metadata-by-id-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}
     test_api_response(SlotCommitment, "get-commitment-response-example.json")
-    # binary_response:: < SlotCommitment, "get-commitment-response-binary-example", & ())
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-    # TODO: OutputId results in AttributeError: 'str' object has no attribute 'keys'
+    # TODO: enable when https://github.com/iotaledger/iota-sdk/issues/2020 is fixed
     # test_api_response(UtxoChangesResponse,
     #                   "get-utxo-changes-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
-    # TODO: OutputId results in AttributeError: 'str' object has no attribute 'keys'
     # test_api_response(UtxoChangesFullResponse,
     #   "get-utxo-changes-full-response-example.json")

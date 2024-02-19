@@ -14,7 +14,7 @@ class TransactionState(Enum):
         Finalized: Included, its included block is finalized and cannot be reverted anymore.
         Failed: Not successfully issued due to failure reason.
     """
-    Pending = 'pending'  # TODO change all to str?
+    Pending = 0
     Accepted = 1
     Confirmed = 2
     Finalized = 3
