@@ -9,19 +9,19 @@ import { u64 } from '../../utils';
  */
 export class CongestionResponse {
     /**
-     * The slot index for which the congestion estimate is provided.
+     * Slot for which the estimate is provided.
      */
     slot!: SlotIndex;
     /**
-     * Indicates if a node is ready to issue a block in a current congestion or should wait.
+     * Indicates if a node is ready to schedule a block issued by the specified account, or if the issuer should wait.
      */
     ready!: boolean;
     /**
-     * The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
+     * Mana cost a user needs to burn to issue a block in the slot.
      */
     referenceManaCost!: u64;
     /**
-     * The Block Issuance Credits of the requested account.
+     * BIC of the account in the slot. This balance needs to be non-negative, otherwise account is locked.
      */
-    blockIssuanceCredits!: u64;
+    blockIssuanceCredits!: bigint;
 }
