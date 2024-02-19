@@ -69,19 +69,19 @@ class CommitteeResponse:
     Response of GET /api/core/v3/committee
 
     Attributes:
-        committee: The validators of the committee.
+        epoch: The epoch index of the committee.
         total_stake: The total amount of delegated and staked IOTA coins in the selected committee.
         total_validator_stake: The total amount of staked IOTA coins in the selected committee.
-        epoch: The epoch index of the committee.
+        committee: The validators of the committee.
     """
-    committee: List[CommitteeMember]
+    epoch: EpochIndex
     total_stake: int = field(metadata=config(
         encoder=str
     ))
     total_validator_stake: int = field(metadata=config(
         encoder=str
     ))
-    epoch: EpochIndex
+    committee: List[CommitteeMember]
 
 
 @json
