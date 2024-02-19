@@ -494,10 +494,7 @@ pub async fn restore_command_stronghold(
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    if let Err(e) = wallet
-        .restore_from_stronghold_backup(backup_path.into(), password, None, None)
-        .await
-    {
+    if let Err(e) = wallet.restore_backup(backup_path.into(), password, None, None).await {
         // Clean up the file system after a failed restore (typically produces a wallet without a secret manager).
         // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
         // the restore will be successful. https://github.com/iotaledger/iota-sdk/issues/2018

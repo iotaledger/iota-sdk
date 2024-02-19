@@ -45,7 +45,7 @@ where
         #[cfg(feature = "participation")]
         {
             if let Some(voting_output) = &voting_output {
-                if voting_output.output.as_basic().address() == self.address.read().await.inner() {
+                if voting_output.output.as_basic().address() == wallet_address.inner() {
                     balance.base_coin.voting_power = voting_output.output.amount();
                 }
             }

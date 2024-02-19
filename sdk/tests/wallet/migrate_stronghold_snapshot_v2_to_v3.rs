@@ -96,7 +96,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
     let error = restore_manager
-        .restore_from_stronghold_backup(
+        .restore_backup(
             PathBuf::from("./tests/wallet/fixtures/v3.stronghold"),
             "wrong_password".to_owned(),
             Some(false),

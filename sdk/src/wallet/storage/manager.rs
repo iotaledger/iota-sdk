@@ -67,6 +67,8 @@ impl StorageManager {
         self.set(&key, &sync_options).await
     }
 
+    // TODO: call this method in wallet builder: https://github.com/iotaledger/iota-sdk/issues/2022
+    #[allow(dead_code)]
     pub(crate) async fn get_default_sync_options(&self) -> crate::wallet::Result<Option<SyncOptions>> {
         let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.get(&key).await
@@ -142,12 +144,10 @@ mod tests {
     #[tokio::test]
     async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_none());
 
         let wallet_address = Bech32Address::new("rms".parse().unwrap(), Ed25519Address::null());
         let wallet_bip_path = Bip44::new(SHIMMER_COIN_TYPE);

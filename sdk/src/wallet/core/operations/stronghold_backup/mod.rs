@@ -66,7 +66,7 @@ impl Wallet {
     /// coin type doesn't match
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
-    pub async fn restore_from_stronghold_backup(
+    pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
@@ -233,7 +233,7 @@ impl Wallet<StrongholdSecretManager> {
     /// bip path doesn't match
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
-    pub async fn restore_from_stronghold_backup(
+    pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
