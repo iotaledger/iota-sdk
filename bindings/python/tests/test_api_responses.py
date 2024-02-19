@@ -3,8 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-# pylint: disable=wildcard-import,unused-wildcard-import
-from iota_sdk import *
+from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, ValidatorsResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputResponse, SlotCommitment
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
