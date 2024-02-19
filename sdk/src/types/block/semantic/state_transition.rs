@@ -183,7 +183,7 @@ impl StateTransitionVerifier for AccountOutput {
     }
 
     fn transition(
-        _current_output_id: &OutputId,
+        current_output_id: &OutputId,
         current_state: &Self,
         _next_output_id: &OutputId,
         next_state: &Self,
@@ -275,6 +275,16 @@ impl StateTransitionVerifier for AccountOutput {
                     {
                         return Err(TransactionFailureReason::StakingEndEpochTooEarly);
                     }
+                } else if (staking_input.staked_amount() != staking_output.staked_amount()
+                    || staking_input.start_epoch() != staking_output.start_epoch()
+                    || staking_input.fixed_cost() != staking_output.fixed_cost())
+                    && (staking_input.start_epoch() != past_bounded_epoch_index
+                        || staking_input.end_epoch()
+                            < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
+                        || !context.mana_rewards.contains_key(current_output_id)
+                        || !context.reward_context_inputs.contains_key(current_output_id))
+                {
+                    return Err(TransactionFailureReason::StakingRewardClaimingInvalid);
                 }
             }
             _ => {}
