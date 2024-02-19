@@ -273,6 +273,7 @@ impl StateTransitionVerifier for AccountOutput {
                         && staking_input.end_epoch()
                             < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
                     {
+                        return Err(TransactionFailureReason::StakingEndEpochTooEarly);
                     }
                 }
             }
