@@ -113,7 +113,7 @@ impl ClientInner {
                     return Ok(self.network_info.read().await.clone());
                 }
             }
-            let info = self.get_info().await?.node_info;
+            let info = self.get_info().await?;
             let mut client_network_info = self.network_info.write().await;
             client_network_info.protocol_parameters = info
                 .protocol_parameters_by_version(PROTOCOL_VERSION)

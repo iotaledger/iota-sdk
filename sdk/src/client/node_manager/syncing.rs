@@ -9,11 +9,7 @@ use {
 };
 
 use super::{Node, NodeManager};
-use crate::{
-    client::{Client, ClientInner, Error, Result},
-    types::api::core::NodeInfoResponse,
-    types::block::protocol::ProtocolParameters,
-};
+use crate::client::{Client, ClientInner, Error, Result};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
@@ -67,6 +63,8 @@ impl ClientInner {
 
     pub(crate) async fn sync_nodes(&self, nodes: &HashSet<Node>, ignore_node_health: bool) -> Result<()> {
         use std::collections::HashMap;
+
+        use crate::types::{api::core::NodeInfoResponse, block::protocol::ProtocolParameters};
 
         log::debug!("sync_nodes");
         let mut healthy_nodes = HashSet::new();
