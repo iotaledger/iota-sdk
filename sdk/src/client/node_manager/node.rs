@@ -27,6 +27,9 @@ pub struct Node {
     /// Whether the node is disabled or not.
     #[serde(default)]
     pub disabled: bool,
+    /// Whether the node is a permanode or not.
+    #[serde(default)]
+    pub permanode: bool,
 }
 
 impl From<Url> for Node {
@@ -35,6 +38,7 @@ impl From<Url> for Node {
             url,
             auth: None,
             disabled: false,
+            permanode: false,
         }
     }
 }

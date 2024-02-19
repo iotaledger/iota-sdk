@@ -134,6 +134,10 @@ impl<'a> SemanticValidationContext<'a> {
         let mut has_implicit_account_creation_address = false;
 
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
+            if output_id.transaction_id().slot_index() > self.transaction.creation_slot() {
+                return Ok(Some(TransactionFailureReason::InputCreationAfterTxCreation));
+            }
+
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
                 Output::Account(output) => {
@@ -256,6 +260,14 @@ impl<'a> SemanticValidationContext<'a> {
             }
         }
 
+        // Add allotted mana
+        for mana_allotment in self.transaction.allotments().iter() {
+            self.output_mana = self
+                .output_mana
+                .checked_add(mana_allotment.mana())
+                .ok_or(Error::CreatedManaOverflow)?;
+        }
+
         // Validation of outputs.
         for (index, created_output) in self.transaction.outputs().iter().enumerate() {
             let (amount, mana, created_native_token, features) = match created_output {
@@ -347,14 +359,6 @@ impl<'a> SemanticValidationContext<'a> {
 
             // Add stored mana
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
-
-            // Add allotted mana
-            for mana_allotment in self.transaction.allotments().iter() {
-                self.output_mana = self
-                    .output_mana
-                    .checked_add(mana_allotment.mana())
-                    .ok_or(Error::CreatedManaOverflow)?;
-            }
 
             if let Some(created_native_token) = created_native_token {
                 let native_token_amount = self

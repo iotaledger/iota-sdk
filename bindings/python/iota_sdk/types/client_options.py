@@ -47,12 +47,10 @@ class ClientOptions:
     """Client options.
 
         Attributes:
-        primary_node (str):
-            Node which will be tried first for all requests.
+        primary_nodes (List[str]):
+            Nodes which will be tried first for all requests.
         nodes (List[str]):
             Array of Node URLs.
-        permanode (str):
-            Permanode URL.
         ignore_node_health (bool):
             If the node health should be ignored.
         node_sync_interval (Duration):
@@ -75,9 +73,8 @@ class ClientOptions:
         max_parallel_api_requests (int):
             The maximum parallel API requests.
     """
-    primary_node: Optional[str] = None
+    primary_nodes: Optional[List[str]] = None
     nodes: Optional[List[str]] = None
-    permanodes: Optional[List[str]] = None
     ignore_node_health: Optional[bool] = None
     node_sync_interval: Optional[Duration] = None
     quorum: Optional[bool] = None

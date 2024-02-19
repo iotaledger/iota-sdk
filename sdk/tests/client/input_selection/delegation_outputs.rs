@@ -22,7 +22,7 @@ use iota_sdk::{
 };
 use pretty_assertions::assert_eq;
 
-use crate::client::{BECH32_ADDRESS_ED25519_0, SLOT_INDEX};
+use crate::client::{BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX};
 
 #[test]
 fn remainder_needed_for_mana() {
@@ -79,6 +79,7 @@ fn remainder_needed_for_mana() {
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
         protocol_parameters.clone(),
     )
     .with_burn(Burn::from(delegation_id))
@@ -86,19 +87,19 @@ fn remainder_needed_for_mana() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
-    assert_eq!(selected.outputs.len(), 2);
-    assert!(selected.outputs.contains(&outputs[0]));
+    assert_eq!(selected.inputs_data.len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert_eq!(
         mana_rewards
             + selected
-                .inputs
+                .inputs_data
                 .iter()
                 .map(|i| i
                     .output
                     .available_mana(&protocol_parameters, SlotIndex(0), SLOT_INDEX)
                     .unwrap())
                 .sum::<u64>(),
-        selected.outputs.iter().map(|o| o.mana()).sum::<u64>()
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>()
     );
 }

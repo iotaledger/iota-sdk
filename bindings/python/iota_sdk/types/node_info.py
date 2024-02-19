@@ -220,19 +220,19 @@ class RewardsParameters:
     Attributes:
         profit_margin_exponent: Used for shift operation during calculation of profit margin.
         bootstrapping_duration: The length of the bootstrapping phase in epochs.
-        mana_share_coefficient: The coefficient used for calculation of initial rewards.
-        decay_balancing_constant_exponent: The exponent used for calculation of the initial reward.
-        decay_balancing_constant: An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
+        reward_to_generation_ratio: The ratio of the final rewards rate to the generation rate of Mana.
+        initial_target_rewards_rate: The rate of Mana rewards at the start of the bootstrapping phase.
+        final_target_rewards_rate: The rate of Mana rewards after the bootstrapping phase.
         pool_coefficient_exponent: The exponent used for shifting operation during the pool rewards calculations.
         retention_period: The number of epochs for which rewards are retained.
     """
     profit_margin_exponent: int
     bootstrapping_duration: int
-    mana_share_coefficient: int = field(metadata=config(
+    reward_to_generation_ratio: int
+    initial_target_rewards_rate: int = field(metadata=config(
         encoder=str
     ))
-    decay_balancing_constant_exponent: int
-    decay_balancing_constant: int = field(metadata=config(
+    final_target_rewards_rate: int = field(metadata=config(
         encoder=str
     ))
     pool_coefficient_exponent: int
