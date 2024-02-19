@@ -71,7 +71,7 @@ async function run() {
             },
         ];
         const options = {
-            mandatoryInputs: [input],
+            requiredInputs: [input],
             allowMicroAmount: false,
         };
         const transaction = await wallet.sendWithParams(params, options);

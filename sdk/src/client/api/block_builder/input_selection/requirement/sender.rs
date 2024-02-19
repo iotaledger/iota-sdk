@@ -50,7 +50,10 @@ impl InputSelection {
                     for input in self.selected_inputs.iter() {
                         let required_address = input
                             .output
-                            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
+                            .required_address(
+                                self.latest_slot_commitment_id.slot_index(),
+                                self.protocol_parameters.committable_age_range(),
+                            )?
                             .expect("expiration unlockable outputs already filtered out");
 
                         if &required_address == weight_address.address() {

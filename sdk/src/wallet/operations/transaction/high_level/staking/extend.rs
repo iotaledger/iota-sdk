@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        context_input::{ContextInput, RewardContextInput},
-        output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
-    },
+    types::block::output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -22,7 +19,7 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let prepared = self.prepare_extend_staking(account_id, additional_epochs).await?;
 
-        self.sign_and_submit_transaction(prepared, None, None).await
+        self.sign_and_submit_transaction(prepared, None).await
     }
 
     /// Prepares the transaction for [Wallet::extend_staking()].
@@ -83,8 +80,7 @@ where
                 past_bounded_epoch,
                 end_epoch,
             ));
-            options.custom_inputs = Some(vec![account_output_data.output_id]);
-            options.context_inputs = Some(vec![ContextInput::from(RewardContextInput::new(0)?)]);
+            options.required_inputs = [account_output_data.output_id].into();
         }
 
         let output = output_builder.finish_output()?;

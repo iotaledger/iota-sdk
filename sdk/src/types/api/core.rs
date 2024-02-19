@@ -57,6 +57,25 @@ impl core::fmt::Display for InfoResponse {
     }
 }
 
+/// Response of GET /api/core/v3/info.
+/// General information about the node.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PermanodeInfoResponse {
+    pub name: String,
+    pub version: String,
+    pub is_healthy: bool,
+    pub latest_commitment_id: SlotCommitmentId,
+    pub protocol_parameters: ProtocolParametersMap,
+    pub base_token: BaseTokenResponse,
+}
+
+impl PermanodeInfoResponse {
+    pub(crate) fn protocol_parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
+        self.protocol_parameters.by_version(protocol_version)
+    }
+}
+
 /// Returned in [`InfoResponse`].
 /// Status information about the node.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -370,8 +389,20 @@ pub enum TransactionState {
 }
 
 /// Describes the reason of a block failure.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, serde_repr::Serialize_repr, serde_repr::Deserialize_repr)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    PartialEq,
+    serde_repr::Serialize_repr,
+    serde_repr::Deserialize_repr,
+    strum::FromRepr,
+    strum::EnumString,
+    strum::AsRefStr,
+)]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
 #[repr(u8)]
 pub enum BlockFailureReason {
@@ -381,24 +412,22 @@ pub enum BlockFailureReason {
     ParentTooOld = 2,
     /// One of the block's parents does not exist.
     ParentDoesNotExist = 3,
-    /// One of the block's parents is invalid.
-    ParentInvalid = 4,
     /// The block's issuer account could not be found.
-    IssuerAccountNotFound = 5,
-    /// The block's protocol version is invalid.
-    VersionInvalid = 6,
+    IssuerAccountNotFound = 4,
     /// The mana cost could not be calculated.
-    ManaCostCalculationFailed = 7,
+    ManaCostCalculationFailed = 5,
     // The block's issuer account burned insufficient Mana for a block.
-    BurnedInsufficientMana = 8,
-    /// The account is invalid.
-    AccountInvalid = 9,
+    BurnedInsufficientMana = 6,
+    /// The account is locked.
+    AccountLocked = 7,
+    /// The account is locked.
+    AccountExpired = 8,
     /// The block's signature is invalid.
-    SignatureInvalid = 10,
+    SignatureInvalid = 9,
     /// The block is dropped due to congestion.
-    DroppedDueToCongestion = 11,
+    DroppedDueToCongestion = 10,
     /// The block payload is invalid.
-    PayloadInvalid = 12,
+    PayloadInvalid = 11,
     /// The block is invalid.
     Invalid = 255,
 }
@@ -409,14 +438,13 @@ impl core::fmt::Display for BlockFailureReason {
             Self::TooOldToIssue => write!(f, "The block is too old to issue."),
             Self::ParentTooOld => write!(f, "One of the block's parents is too old."),
             Self::ParentDoesNotExist => write!(f, "One of the block's parents does not exist."),
-            Self::ParentInvalid => write!(f, "One of the block's parents is invalid."),
             Self::IssuerAccountNotFound => write!(f, "The block's issuer account could not be found."),
-            Self::VersionInvalid => write!(f, "The block's protocol version is invalid."),
             Self::ManaCostCalculationFailed => write!(f, "The mana cost could not be calculated."),
             Self::BurnedInsufficientMana => {
                 write!(f, "The block's issuer account burned insufficient Mana for a block.")
             }
-            Self::AccountInvalid => write!(f, "The account is invalid."),
+            Self::AccountLocked => write!(f, "The account is locked."),
+            Self::AccountExpired => write!(f, "The account is expired."),
             Self::SignatureInvalid => write!(f, "The block's signature is invalid."),
             Self::DroppedDueToCongestion => write!(f, "The block is dropped due to congestion."),
             Self::PayloadInvalid => write!(f, "The block payload is invalid."),

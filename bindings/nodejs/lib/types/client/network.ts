@@ -49,6 +49,8 @@ export interface INode {
     auth?: IAuth;
     /** Whether the node is disabled or not. */
     disabled?: boolean;
+    /** Whether the node is a permanode or not. */
+    permanode?: boolean;
 }
 
 /**
