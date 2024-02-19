@@ -14,20 +14,14 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{
-        core::{
-            builder::{dto::WalletBuilderDto, AddressProvider},
-            WalletLedgerDto,
-        },
-        Wallet,
-    },
+    wallet::{core::WalletLedgerDto, Wallet},
 };
 
 impl Wallet {
     /// Backup the wallet in a Stronghold snapshot file.
     ///
     /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup_to_stronghold(
+    pub async fn backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
@@ -72,7 +66,7 @@ impl Wallet {
     /// coin type doesn't match
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
-    pub async fn restore_from_stronghold_backup(
+    pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
@@ -210,7 +204,7 @@ impl Wallet<StrongholdSecretManager> {
     /// Backup the wallet in a Stronghold snapshot file.
     ///
     /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
-    pub async fn backup_to_stronghold_snapshot(
+    pub async fn backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
@@ -238,7 +232,7 @@ impl Wallet<StrongholdSecretManager> {
     /// bip path doesn't match
     /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
     /// the wallet will not be restored.
-    pub async fn restore_from_stronghold_backup(
+    pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,

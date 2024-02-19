@@ -21,7 +21,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
-            wallet.backup_to_stronghold(destination, password).await?;
+            wallet.backup(destination, password).await?;
             Response::Ok
         }
         #[cfg(feature = "stronghold")]
@@ -52,7 +52,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_from_stronghold_backup(
+                .restore_backup(
                     source,
                     password,
                     ignore_if_coin_type_mismatch,
@@ -396,11 +396,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let transaction = wallet.send_outputs(outputs, options).await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
-        // TODO #1934: create issue
-        // WalletMethod::SetBipPath { bip_path: String } => {
-        //     wallet.update_wallet_bip_path(...).await?;
-        //     Response::Ok
-        // }
         WalletMethod::SetAlias { alias } => {
             wallet.update_wallet_alias(&alias).await?;
             Response::Ok

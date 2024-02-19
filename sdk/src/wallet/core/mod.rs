@@ -46,7 +46,6 @@ use crate::{
 /// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
-    // TODO: should we maybe group the next 3 fields into a `WalletDetails` struct?
     pub(crate) address: Arc<RwLock<Bech32Address>>,
     pub(crate) bip_path: Arc<RwLock<Option<Bip44>>>,
     pub(crate) alias: Arc<RwLock<Option<String>>>,
@@ -345,42 +344,6 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    // TODO: Is this method needed? It calls `get_default_sync_options` which the builder does not.
-    /// Create a new wallet.
-    pub(crate) async fn new(
-        address: Bech32Address,
-        bip_path: impl Into<Option<Bip44>> + Send,
-        alias: impl Into<Option<String>> + Send,
-        inner: Arc<WalletInner<S>>,
-        ledger: WalletLedger,
-    ) -> Result<Self> {
-        #[cfg(feature = "storage")]
-        let default_sync_options = inner
-            .storage_manager
-            .get_default_sync_options()
-            .await?
-            .unwrap_or_default();
-
-        #[cfg(not(feature = "storage"))]
-        let default_sync_options = Default::default();
-
-        // TODO: maybe move this into a `reset` fn or smth to avoid this kinda-weird block.
-        {
-            let mut last_synced = inner.last_synced.lock().await;
-            *last_synced = Default::default();
-            let mut sync_options = inner.default_sync_options.lock().await;
-            *sync_options = default_sync_options;
-        }
-
-        Ok(Self {
-            address: Arc::new(RwLock::new(address)),
-            bip_path: Arc::new(RwLock::new(bip_path.into())),
-            alias: Arc::new(RwLock::new(alias.into())),
-            inner,
-            ledger: Arc::new(RwLock::new(ledger)),
-        })
-    }
-
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
     /// from the wallet, if it isn't in the wallet try to get it from the node
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output> {

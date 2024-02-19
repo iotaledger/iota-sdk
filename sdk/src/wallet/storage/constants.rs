@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO: can we remove the slight inconsistencies in this file?
-
 /// The default storage path.
 pub const DEFAULT_STORAGE_PATH: &str = "./storage";
 

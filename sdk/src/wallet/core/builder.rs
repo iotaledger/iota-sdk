@@ -212,8 +212,23 @@ where
             self.secret_manager = secret_manager;
         }
 
-        // TODO if address and/or bip path were provided we should check whether they might
+        // TODO: if address and/or bip path were provided we should check whether they might
         // conflict with stored data in the wallet db.
+        // You might want uncomment below lines when addressing: https://github.com/iotaledger/iota-sdk/issues/2016
+        // let restored_bip_path = loaded_wallet_builder.as_ref().and_then(|builder| builder.bip_path);
+        // // May use a previously stored BIP path if it wasn't provided
+        // if let Some(bip_path) = self.bip_path {
+        //     if let Some(restored_bip_path) = restored_bip_path {
+        //         if bip_path != restored_bip_path {
+        //             return Err(crate::wallet::Error::BipPathMismatch {
+        //                 new_bip_path: Some(bip_path),
+        //                 old_bip_path: Some(restored_bip_path),
+        //             });
+        //         }
+        //     }
+        // } else {
+        //     self.bip_path = restored_bip_path;
+        // }
 
         // Create the node client.
         let client = self
@@ -353,7 +368,7 @@ where
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if provided_client_options {
-            wallet.update_wallet_address_hrp().await?;
+            wallet.update_address_hrp().await?;
         }
 
         Ok(wallet)

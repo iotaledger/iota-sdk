@@ -383,9 +383,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
 }
 
 pub async fn backup_command_stronghold(wallet: &Wallet, password: &Password, backup_path: &Path) -> Result<(), Error> {
-    wallet
-        .backup_to_stronghold(backup_path.into(), password.clone())
-        .await?;
+    wallet.backup(backup_path.into(), password.clone()).await?;
 
     println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 
@@ -498,14 +496,10 @@ pub async fn restore_command_stronghold(
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    if let Err(e) = wallet
-        .restore_from_stronghold_backup(backup_path.into(), password, None, None)
-        .await
-    {
+    if let Err(e) = wallet.restore_backup(backup_path.into(), password, None, None).await {
         // Clean up the file system after a failed restore (typically produces a wallet without a secret manager).
         // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
-        // the restore will be successful.
-        // TODO #1934: create issue for this ^
+        // the restore will be successful. https://github.com/iotaledger/iota-sdk/issues/2018
         if storage_path.is_dir() && !restore_into_existing_wallet {
             std::fs::remove_dir_all(storage_path)?;
         }
