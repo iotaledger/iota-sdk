@@ -164,10 +164,10 @@ class CongestionResponse:
     Response of GET /api/core/v3/accounts/{accountId}/congestion.
 
     Attributes:
-        slot: The slot index for which the congestion estimate is provided.
-        ready: Indicates if a node is ready to issue a block in a current congestion or should wait.
-        reference_mana_cost: The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
-        block_issuance_credits: The Block Issuance Credits of the requested account.
+        slot: Slot for which the estimate is provided.
+        ready: Indicates if a node is ready to schedule a block issued by the specified account, or if the issuer should wait.
+        reference_mana_cost: Mana cost a user needs to burn to issue a block in the slot.
+        block_issuance_credits: BIC of the account in the slot. This balance needs to be non-negative, otherwise account is locked.
     """
     slot: SlotIndex
     ready: bool
