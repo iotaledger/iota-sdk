@@ -16,7 +16,7 @@ use crypto::{
     },
 };
 use iota_ledger_nano::{
-    api::{constants::Protocols, errors::APIError},
+    api::{constants::Protocol, errors::APIError},
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
 };
@@ -160,7 +160,7 @@ impl SecretManage for LedgerSecretManager {
         let lock = self.mutex.lock().await;
 
         // get ledger
-        let ledger = get_ledger(coin_type, Protocols::Nova, bip32_account, self.is_simulator).map_err(Error::from)?;
+        let ledger = get_ledger(Protocol::Nova, coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
         if ledger.is_debug_app() {
             ledger
                 .set_non_interactive_mode(self.non_interactive)
@@ -207,7 +207,7 @@ impl SecretManage for LedgerSecretManager {
         // Lock the mutex to prevent multiple simultaneous requests to a ledger.
         let lock = self.mutex.lock().await;
 
-        let ledger = get_ledger(coin_type, Protocols::Nova, account_index, self.is_simulator).map_err(Error::from)?;
+        let ledger = get_ledger(Protocol::Nova, coin_type, account_index, self.is_simulator).map_err(Error::from)?;
         if ledger.is_debug_app() {
             ledger
                 .set_non_interactive_mode(self.non_interactive)
@@ -288,7 +288,7 @@ impl SecretManage for LedgerSecretManager {
         // lock the mutex to prevent multiple simultaneous requests to a ledger
         let lock = self.mutex.lock().await;
 
-        let ledger = get_ledger(coin_type, Protocols::Nova, bip32_account, self.is_simulator).map_err(Error::from)?;
+        let ledger = get_ledger(Protocol::Nova, coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
         if ledger.is_debug_app() {
             ledger
                 .set_non_interactive_mode(self.non_interactive)
