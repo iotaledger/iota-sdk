@@ -250,6 +250,10 @@ impl StateTransitionVerifier for AccountOutput {
 
                 if staking_input.end_epoch() >= future_bounded_epoch_index {
                     return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
+                } else if !context.mana_rewards.contains_key(current_output_id)
+                    || !context.reward_context_inputs.contains_key(current_output_id)
+                {
+                    return Err(TransactionFailureReason::StakingRewardClaimingInvalid);
                 }
             }
             (Some(staking_input), Some(staking_output)) => {
@@ -299,7 +303,7 @@ impl StateTransitionVerifier for AccountOutput {
     }
 
     fn destruction(
-        _output_id: &OutputId,
+        output_id: &OutputId,
         current_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
@@ -323,6 +327,10 @@ impl StateTransitionVerifier for AccountOutput {
 
             if staking.end_epoch() >= future_bounded_epoch_index {
                 return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
+            } else if !context.mana_rewards.contains_key(output_id)
+                || !context.reward_context_inputs.contains_key(output_id)
+            {
+                return Err(TransactionFailureReason::StakingRewardClaimingInvalid);
             }
         }
 
