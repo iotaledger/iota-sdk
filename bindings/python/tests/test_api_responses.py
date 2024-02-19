@@ -67,13 +67,13 @@ def test_api_responses():
     test_api_response(
         OutputResponse, "get-outputs-by-id-response-example.json")
     # GET /api/core/v3/outputs/{outputId}/metadata
-    # TODO: OutputId results in AttributeError: 'str' object has no attribute 'keys'
+    # TODO: enable when https://github.com/iotaledger/iota-sdk/issues/2020 is fixed
     # test_api_response(
     #     OutputMetadata, "get-output-metadata-by-id-response-unspent-example.json")
     # test_api_response(
     #     OutputMetadata, "get-output-metadata-by-id-response-spent-example.json")
     # GET /api/core/v3/outputs/{outputId}/full
-    # TODO: dataclasses_json/undefined.py:71: UndefinedParameterError
+    # TODO: enable when OutputWithMetadata is updated with OutputIdProof https://github.com/iotaledger/iota-sdk/issues/2021
     # test_api_response(OutputWithMetadata,
     #                   "get-full-output-metadata-example.json")
     # GET /api/core/v3/transactions/{transactionId}/metadata
