@@ -147,7 +147,8 @@ class Utils:
         })
 
     @staticmethod
-    def compute_output_id(transaction_id: TransactionId, index: int) -> OutputId:
+    def compute_output_id(transaction_id: TransactionId,
+                          index: int) -> OutputId:
         """Compute the output id from transaction id and output index.
         """
         return OutputId.from_string(_call_method('computeOutputId', {

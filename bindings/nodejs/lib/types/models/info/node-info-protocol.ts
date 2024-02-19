@@ -139,17 +139,17 @@ interface RewardsParameters {
      */
     bootstrappingDuration: number;
     /**
-     * Mana Share Coefficient is the coefficient used for calculation of initial rewards.
+     * The rate of Mana rewards at the start of the bootstrapping phase.
      */
-    manaShareCoefficient: u64;
+    rewardToGenerationRatio: number;
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
-    decayBalancingConstantExponent: number;
+    initialTargetRewardsRate: u64;
     /**
-     * Decay Balancing Constant is an integer approximation calculated based on chosen Decay Balancing Constant Exponent.
+     * The rate of Mana rewards after the bootstrapping phase.
      */
-    decayBalancingConstant: u64;
+    finalTargetRewardsRate: u64;
     /**
      * Pool Coefficient Exponent is the exponent used for shifting operation
      * in the pool rewards calculations.
