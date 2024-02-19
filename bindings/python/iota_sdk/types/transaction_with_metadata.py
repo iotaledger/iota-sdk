@@ -7,7 +7,7 @@ from typing import List, Optional
 from enum import Enum
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output_metadata import OutputWithMetadata
+from iota_sdk.types.output_metadata import OutputAndMetadata
 from iota_sdk.types.payload import SignedTransactionPayload
 from iota_sdk.types.transaction_id import TransactionId
 
@@ -53,7 +53,7 @@ class TransactionWithMetadata:
     transaction_id: TransactionId
     network_id: int
     incoming: bool
-    inputs = List[OutputWithMetadata]
+    inputs = List[OutputAndMetadata]
     note: Optional[str] = None
     block_id: Optional[BlockId] = None
 

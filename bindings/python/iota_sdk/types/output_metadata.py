@@ -18,7 +18,7 @@ from iota_sdk.types.transaction_id import TransactionId
 @dataclass
 class OutputMetadata:
     """Metadata about an output.
-    Response of GET /api/core/v3/outputs/{output_id}/metadata.
+    Response of GET /api/core/v3/outputs/{outputId}/metadata.
 
     Attributes:
         output_id: The ID of the output.
@@ -36,13 +36,12 @@ class OutputMetadata:
 
 @json
 @dataclass
-class OutputWithMetadata:
+class OutputAndMetadata:
     """An output and its metadata.
-    Response of GET /api/core/v3/outputs/{output_id}.
 
     Attributes:
-        metadata: The `OutputMetadata` object that belongs to `output`.
         output: An `Output` object.
+        metadata: The `OutputMetadata` object that belongs to `output`.
     """
     output: Output = field(metadata=config(
         decoder=deserialize_output
@@ -50,17 +49,17 @@ class OutputWithMetadata:
     metadata: OutputMetadata
 
     @classmethod
-    def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
+    def from_dict(cls, data_dict: Dict) -> OutputAndMetadata:
         """Creates an output with metadata instance from the dict object.
         """
         obj = cls.__new__(cls)
-        super(OutputWithMetadata, obj).__init__()
+        super(OutputAndMetadata, obj).__init__()
         for k, v in data_dict.items():
             setattr(obj, k, v)
         return obj
 
     def as_dict(self):
-        """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
+        """Returns a dictionary representation of OutputAndMetadata, with the fields metadata and output.
         """
         d = {}
 

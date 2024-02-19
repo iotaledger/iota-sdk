@@ -266,7 +266,7 @@ class RoutesResponse:
 @dataclass
 class OutputResponse:
     """An output with its output id proof.
-    Response of GET /api/core/v3/outputs/{output_id}.
+    Response of GET /api/core/v3/outputs/{outputId}.
 
     Attributes:
         output: One of the possible outputs.
@@ -282,7 +282,7 @@ class OutputResponse:
 @dataclass
 class OutputWithMetadataResponse:
     """An output with its output id proof and its metadata.
-    Response of GET /api/core/v3/outputs/{output_id}/full.
+    Response of GET /api/core/v3/outputs/{outputId}/full.
 
     Attributes:
         output: One of the possible outputs.
