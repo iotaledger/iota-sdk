@@ -46,7 +46,6 @@ use crate::{
 /// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
-    // TODO: should we maybe group the next 3 fields into a `WalletDetails` struct?
     pub(crate) address: Arc<RwLock<Bech32Address>>,
     pub(crate) bip_path: Arc<RwLock<Option<Bip44>>>,
     pub(crate) alias: Arc<RwLock<Option<String>>>,

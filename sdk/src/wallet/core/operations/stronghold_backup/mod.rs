@@ -14,10 +14,7 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{
-        core::{builder::dto::WalletBuilderDto, WalletLedgerDto},
-        Wallet,
-    },
+    wallet::{core::WalletLedgerDto, Wallet},
 };
 
 impl Wallet {
