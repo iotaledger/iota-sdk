@@ -161,6 +161,8 @@ pub enum Response {
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
     /// - [`GetOutputRaw`](crate::method::ClientMethod::GetOutputRaw)
     /// - [`GetIncludedBlockRaw`](crate::method::ClientMethod::GetIncludedBlockRaw)
+    /// - [`GetCommitmentRaw`](crate::method::ClientMethod::GetCommitmentRaw)
+    /// - [`GetCommitmentBySlotRaw`](crate::method::ClientMethod::GetCommitmentBySlotRaw)
     /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:

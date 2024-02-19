@@ -335,8 +335,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'commitmentId': commitment_id
         }))
 
-    # TODO #1928: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_commitment_raw(
             self, commitment_id: SlotCommitmentId) -> List[int]:
         """Finds a slot commitment by its ID and returns it as raw bytes.
@@ -348,8 +346,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
         return self._call_method('getCommitmentRaw', {
             'commitmentId': commitment_id
         })
-
-    # UTXO routes.
 
     def get_utxo_changes(
             self, commitment_id: SlotCommitmentId) -> UtxoChangesResponse:
@@ -375,9 +371,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'commitmentId': commitment_id
         }))
 
-    # TODO #1928: call method name needs to be changed to `getCommitmentBySlot`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_slot_commitment_by_slot(
+    def get_commitment_by_slot(
             self, slot: SlotIndex) -> SlotCommitment:
         """Finds a slot commitment by slot index and returns it as object.
         GET /api/core/v3/commitments/by-slot/{slot}
@@ -385,13 +379,11 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The corresponding slot commitment.
         """
-        return SlotCommitment.from_dict(self._call_method('getSlotCommitmentBySlot', {
+        return SlotCommitment.from_dict(self._call_method('getCommitmentBySlot', {
             'slot': slot
         }))
 
-    # TODO #1928: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_slot_commitment_by_slot_raw(
+    def get_commitment_by_slot_raw(
             self, slot: SlotIndex) -> List[int]:
         """Finds a slot commitment by slot index and returns it as raw bytes.
         GET /api/core/v3/commitments/by-slot/{slot}
@@ -399,12 +391,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The raw bytes of the corresponding slot commitment.
         """
-        return self._call_method('getSlotCommitmentBySlotRaw', {
+        return self._call_method('getCommitmentBySlotRaw', {
             'slot': slot
         })
 
-    # TODO #1928: call method name needs to be changed to `getUxoChangesBySlot`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_utxo_changes_by_slot(self, slot: SlotIndex) -> UtxoChangesResponse:
         """Get all UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
@@ -416,8 +406,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slot': slot
         }))
 
-    # TODO #1928: call method name needs to be changed to `getUxoChangesFullBySlot`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_utxo_changes_full_by_slot(
             self, slot: SlotIndex) -> UtxoChangesFullResponse:
         """Get all full UTXO changes of a given slot by its index.

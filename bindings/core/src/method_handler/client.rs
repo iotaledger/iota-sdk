@@ -245,29 +245,25 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::TransactionMetadata(client.get_transaction_metadata(&transaction_id).await?)
         }
         ClientMethod::GetCommitment { commitment_id } => {
-            Response::SlotCommitment(client.get_slot_commitment_by_id(&commitment_id).await?)
+            Response::SlotCommitment(client.get_commitment(&commitment_id).await?)
+        }
+        ClientMethod::GetCommitmentRaw { commitment_id } => {
+            Response::Raw(client.get_commitment_raw(&commitment_id).await?)
         }
         ClientMethod::GetUtxoChanges { commitment_id } => {
-            Response::UtxoChanges(client.get_utxo_changes_by_slot_commitment_id(&commitment_id).await?)
+            Response::UtxoChanges(client.get_utxo_changes(&commitment_id).await?)
         }
-        ClientMethod::GetUtxoChangesFull { commitment_id } => Response::UtxoChangesFull(
-            client
-                .get_utxo_changes_full_by_slot_commitment_id(&commitment_id)
-                .await?,
-        ),
-        // TODO: this should be renamed to `GetCommitmentBySlot`
-        // https://github.com/iotaledger/iota-sdk/issues/1921
-        ClientMethod::GetCommitmentByIndex { slot } => {
-            Response::SlotCommitment(client.get_slot_commitment_by_slot(slot).await?)
+        ClientMethod::GetUtxoChangesFull { commitment_id } => {
+            Response::UtxoChangesFull(client.get_utxo_changes_full(&commitment_id).await?)
         }
-        // TODO: this should be renamed to `GetUtxoChangesBySlot`
-        // https://github.com/iotaledger/iota-sdk/issues/1921
-        ClientMethod::GetUtxoChangesByIndex { slot } => {
+        ClientMethod::GetCommitmentBySlot { slot } => {
+            Response::SlotCommitment(client.get_commitment_by_slot(slot).await?)
+        }
+        ClientMethod::GetCommitmentBySlotRaw { slot } => Response::Raw(client.get_commitment_by_slot_raw(slot).await?),
+        ClientMethod::GetUtxoChangesBySlot { slot } => {
             Response::UtxoChanges(client.get_utxo_changes_by_slot(slot).await?)
         }
-        // TODO: this should be renamed to `GetUtxoChangesFullBySlot`
-        // https://github.com/iotaledger/iota-sdk/issues/1921
-        ClientMethod::GetUtxoChangesFullByIndex { slot } => {
+        ClientMethod::GetUtxoChangesFullBySlot { slot } => {
             Response::UtxoChangesFull(client.get_utxo_changes_full_by_slot(slot).await?)
         }
         ClientMethod::OutputIds { query_parameters } => {

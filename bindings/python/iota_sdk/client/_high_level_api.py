@@ -82,8 +82,6 @@ class HighLevelAPI(metaclass=ABCMeta):
         no payload.
         """
 
-    # TODO: this should return `List[OutputResponse]`, not `List[OutputWithMetadata]`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_outputs(
             self, output_ids: List[OutputId]) -> List[OutputResponse]:
         """Fetch OutputResponse from provided OutputIds (requests are sent in parallel).
@@ -99,8 +97,6 @@ class HighLevelAPI(metaclass=ABCMeta):
         })
         return [OutputResponse.from_dict(o) for o in outputs]
 
-    # TODO: this should return `List[OutputResponse]`, not `List[OutputWithMetadata]`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_outputs_ignore_errors(
             self, output_ids: List[OutputId]) -> List[OutputResponse]:
         """Try to get OutputResponse from provided OutputIds.

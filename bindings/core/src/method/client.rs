@@ -286,6 +286,12 @@ pub enum ClientMethod {
         /// Commitment ID of the commitment to look up.
         commitment_id: SlotCommitmentId,
     },
+    /// Look up a commitment by a given commitment ID and return its raw bytes.
+    #[serde(rename_all = "camelCase")]
+    GetCommitmentRaw {
+        /// Commitment ID of the commitment to look up.
+        commitment_id: SlotCommitmentId,
+    },
     /// Get all UTXO changes of a given slot by Commitment ID.
     #[serde(rename_all = "camelCase")]
     GetUtxoChanges {
@@ -299,17 +305,22 @@ pub enum ClientMethod {
         commitment_id: SlotCommitmentId,
     },
     /// Look up a commitment by a given commitment index.
-    GetCommitmentByIndex {
+    GetCommitmentBySlot {
+        /// Index of the commitment to look up.
+        slot: SlotIndex,
+    },
+    /// Look up a commitment by a given commitment index and return its raw bytes.
+    GetCommitmentBySlotRaw {
         /// Index of the commitment to look up.
         slot: SlotIndex,
     },
     /// Get all UTXO changes of a given slot by commitment index.
-    GetUtxoChangesByIndex {
+    GetUtxoChangesBySlot {
         /// Index of the commitment to look up.
         slot: SlotIndex,
     },
     /// Get all full UTXO changes of a given slot by commitment index.
-    GetUtxoChangesFullByIndex {
+    GetUtxoChangesFullBySlot {
         /// Index of the commitment to look up.
         slot: SlotIndex,
     },
