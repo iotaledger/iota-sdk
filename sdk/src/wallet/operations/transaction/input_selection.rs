@@ -4,6 +4,8 @@
 use alloc::collections::BTreeSet;
 use std::collections::HashMap;
 
+use crypto::keys::bip44::Bip44;
+
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
@@ -12,12 +14,13 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
+        address::Bech32Address,
         output::{Output, OutputId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
     wallet::{
-        core::WalletData, operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData,
+        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData,
         RemainderValueStrategy, TransactionOptions, Wallet,
     },
 };
@@ -41,7 +44,7 @@ where
         let creation_slot = self.client().get_slot_index().await?;
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         if options.issuer_id.is_none() {
-            options.issuer_id = self.data().await.first_account_id();
+            options.issuer_id = self.ledger().await.first_account_id();
         }
         let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
             Some(
@@ -58,7 +61,7 @@ where
             RemainderValueStrategy::CustomAddress(address) => Some(address),
         };
         // lock so the same inputs can't be selected in multiple transactions
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -67,7 +70,7 @@ where
         .await;
 
         #[allow(unused_mut)]
-        let mut forbidden_inputs = wallet_data.locked_outputs.clone();
+        let mut forbidden_inputs = wallet_ledger.locked_outputs.clone();
 
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
@@ -80,8 +83,9 @@ where
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_outputs_signing_data = filter_inputs(
-            &wallet_data,
-            wallet_data.unspent_outputs.values(),
+            &self.address().await,
+            self.bip_path().await,
+            wallet_ledger.unspent_outputs.values(),
             creation_slot,
             protocol_parameters.committable_age_range(),
             &options.required_inputs,
@@ -91,7 +95,7 @@ where
 
         if let Some(burn) = &options.burn {
             for delegation_id in burn.delegations() {
-                if let Some(output) = wallet_data.unspent_delegation_output(delegation_id) {
+                if let Some(output) = wallet_ledger.unspent_delegation_output(delegation_id) {
                     mana_rewards.insert(
                         output.output_id,
                         self.client()
@@ -105,12 +109,12 @@ where
 
         // Check that no input got already locked
         for output_id in &options.required_inputs {
-            if wallet_data.locked_outputs.contains(output_id) {
+            if wallet_ledger.locked_outputs.contains(output_id) {
                 return Err(crate::wallet::Error::CustomInput(format!(
                     "provided custom input {output_id} is already used in another transaction",
                 )));
             }
-            if let Some(input) = wallet_data.outputs.get(output_id) {
+            if let Some(input) = wallet_ledger.outputs.get(output_id) {
                 if input.output.can_claim_rewards(outputs.iter().find(|o| {
                     input
                         .output
@@ -132,7 +136,7 @@ where
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
             outputs,
-            Some(wallet_data.address.clone().into_inner()),
+            Some(self.address().await.into_inner()),
             creation_slot,
             slot_commitment_id,
             protocol_parameters.clone(),
@@ -165,7 +169,7 @@ where
         // lock outputs so they don't get used by another transaction
         for output in &prepared_transaction_data.inputs_data {
             log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            wallet_data.locked_outputs.insert(*output.output_id());
+            wallet_ledger.locked_outputs.insert(*output.output_id());
         }
 
         Ok(prepared_transaction_data)
@@ -177,7 +181,8 @@ where
 /// `claim_outputs` or providing their OutputId's in the custom_inputs
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs<'a>(
-    wallet_data: &WalletData,
+    wallet_address: &Bech32Address,
+    wallet_bip_path: Option<Bip44>,
     available_outputs: impl IntoIterator<Item = &'a OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
@@ -190,7 +195,7 @@ fn filter_inputs<'a>(
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
-                &wallet_data.address.inner,
+                wallet_address.inner(),
                 &output_data.output,
                 slot_index,
                 committable_age_range,
@@ -202,7 +207,9 @@ fn filter_inputs<'a>(
             }
         }
 
-        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index, committable_age_range)? {
+        if let Some(available_input) =
+            output_data.input_signing_data(wallet_address, wallet_bip_path, slot_index, committable_age_range)?
+        {
             available_outputs_signing_data.push(available_input);
         }
     }

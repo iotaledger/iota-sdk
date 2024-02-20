@@ -31,7 +31,7 @@ where
         log::debug!("[wait_for_transaction_acceptance]");
 
         let transaction = self
-            .data()
+            .ledger()
             .await
             .transactions
             .get(transaction_id)
