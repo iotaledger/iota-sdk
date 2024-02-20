@@ -1723,7 +1723,7 @@ fn min_allot_account_mana() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 500, true)
     .select()
     .unwrap();
 
@@ -1797,7 +1797,7 @@ fn min_allot_account_mana_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 500, true)
     .with_mana_allotments(Some((account_id_1, additional_allotment)))
     .select()
     .unwrap();
@@ -1830,14 +1830,22 @@ fn min_allot_account_mana_cannot_select_additional() {
     // But there is additional available mana elsewhere
     let additional_available_mana = additional_allotment + 111;
 
+    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(account_mana)
+        .finish_output()
+        .unwrap();
+
+    // Must manually add account output with mana reduced for the manual allotment
+    let account_output = AccountOutputBuilder::from(account_input.as_account())
+        .with_mana(account_mana - additional_allotment)
+        .finish_output()
+        .unwrap();
+
     let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(account_mana)
-            .finish_output()
-            .unwrap(),
+        account_input,
         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
             .with_mana(additional_available_mana)
             .add_unlock_condition(AddressUnlockCondition::new(
@@ -1857,13 +1865,13 @@ fn min_allot_account_mana_cannot_select_additional() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
+        [account_output],
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 500, true)
     .with_mana_allotments(Some((account_id_2, additional_allotment)))
     .with_required_inputs([*inputs[0].output_id()])
     .disable_additional_input_selection()
@@ -1924,7 +1932,7 @@ fn min_allot_account_mana_requirement_twice() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2)
+    .with_min_mana_allotment(account_id_1, 2, true)
     .select()
     .unwrap();
 
@@ -1947,14 +1955,22 @@ fn min_allot_account_mana_requirement_covered() {
 
     let additional_allotment = 1100;
 
+    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(1000)
+        .finish_output()
+        .unwrap();
+
+    // Must manually add account output with mana reduced for the manual allotment
+    let account_output = AccountOutputBuilder::from(account_input.as_account())
+        .with_mana(0)
+        .finish_output()
+        .unwrap();
+
     let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(1000)
-            .finish_output()
-            .unwrap(),
+        account_input,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1972,7 +1988,7 @@ fn min_allot_account_mana_requirement_covered() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = build_outputs([Basic {
+    let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
@@ -1981,6 +1997,7 @@ fn min_allot_account_mana_requirement_covered() {
         timelock: None,
         expiration: None,
     }]);
+    outputs.push(account_output);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -1990,7 +2007,7 @@ fn min_allot_account_mana_requirement_covered() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2)
+    .with_min_mana_allotment(account_id_1, 2, true)
     .with_mana_allotments(Some((account_id_1, additional_allotment)))
     .select()
     .unwrap();
@@ -2013,14 +2030,22 @@ fn min_allot_account_mana_requirement_covered_2() {
 
     let additional_allotment = 1100;
 
+    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(100)
+        .finish_output()
+        .unwrap();
+
+    // Must manually add account output with mana reduced for the manual allotment
+    let account_output = AccountOutputBuilder::from(account_input.as_account())
+        .with_mana(0)
+        .finish_output()
+        .unwrap();
+
     let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(100)
-            .finish_output()
-            .unwrap(),
+        account_input,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -2038,7 +2063,7 @@ fn min_allot_account_mana_requirement_covered_2() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = build_outputs([Basic {
+    let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
@@ -2047,6 +2072,7 @@ fn min_allot_account_mana_requirement_covered_2() {
         timelock: None,
         expiration: None,
     }]);
+    outputs.push(account_output);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -2056,7 +2082,7 @@ fn min_allot_account_mana_requirement_covered_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2)
+    .with_min_mana_allotment(account_id_1, 2, true)
     .with_mana_allotments(Some((account_id_1, additional_allotment)))
     .select()
     .unwrap();

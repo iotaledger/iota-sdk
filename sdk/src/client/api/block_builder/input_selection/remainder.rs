@@ -142,15 +142,13 @@ impl InputSelection {
             .ok_or(Error::MissingInputWithEd25519Address)?;
 
         // If there is a mana remainder, try to fit it in an existing output
-        if input_mana > output_mana {
-            if self.output_for_added_mana_exists(&remainder_address) {
-                log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
-                self.remainders.added_mana = std::mem::take(&mut mana_diff);
-                // If we have no other remainders, we are done
-                if input_amount == output_amount && native_tokens_diff.is_none() {
-                    log::debug!("No more remainder required");
-                    return Ok((storage_deposit_returns, Vec::new()));
-                }
+        if input_mana > output_mana && self.output_for_added_mana_exists(&remainder_address) {
+            log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
+            self.remainders.added_mana = std::mem::take(&mut mana_diff);
+            // If we have no other remainders, we are done
+            if input_amount == output_amount && native_tokens_diff.is_none() {
+                log::debug!("No more remainder required");
+                return Ok((storage_deposit_returns, Vec::new()));
             }
         }
 

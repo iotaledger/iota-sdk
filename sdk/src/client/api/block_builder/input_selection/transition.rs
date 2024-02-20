@@ -60,7 +60,7 @@ impl InputSelection {
             .with_features(features);
 
         if input.is_block_issuer() {
-            builder = builder.with_mana(Output::from(input.clone()).available_mana(
+            builder = builder.with_mana(input.available_mana(
                 &self.protocol_parameters,
                 output_id.transaction_id().slot_index(),
                 self.creation_slot,
