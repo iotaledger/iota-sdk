@@ -16,7 +16,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::secret::{SecretManage, SecretManager},
+    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Bech32Address, Ed25519Address},
     wallet::{
         core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletInner, WalletLedger},
@@ -212,7 +212,7 @@ where
             self.secret_manager = secret_manager;
         }
 
-        // TODO: if address and/or bip path were provided we should check whether they might
+        // TODO #2016: if address and/or bip path were provided we should check whether they might
         // conflict with stored data in the wallet db.
         // You might want uncomment below lines when addressing: https://github.com/iotaledger/iota-sdk/issues/2016
         // let restored_bip_path = loaded_wallet_builder.as_ref().and_then(|builder| builder.bip_path);
@@ -284,7 +284,10 @@ where
                                 bip_path.coin_type,
                                 bip_path.account,
                                 bip_path.address_index..bip_path.address_index + 1,
-                                None,
+                                GenerateAddressOptions {
+                                    internal: bip_path.change != 0,
+                                    ledger_nano_prompt: false,
+                                },
                             )
                             .await?[0];
 
@@ -398,40 +401,6 @@ where
             Err(crate::wallet::Error::MissingParameter("secret manager"))
         }
     }
-
-    // TODO #1941: remove!
-    // /// Generate the wallet address.
-    // pub(crate) async fn create_default_wallet_address(&self) -> crate::wallet::Result<Bech32Address> {
-    //     let bech32_hrp = self
-    //         .client_options
-    //         .as_ref()
-    //         .unwrap()
-    //         .network_info
-    //         .protocol_parameters
-    //         .bech32_hrp;
-    //     let bip_path = self.bip_path.as_ref().unwrap();
-    //
-    //     Ok(Bech32Address::new(
-    //         bech32_hrp,
-    //         Address::Ed25519(
-    //             self.secret_manager
-    //                 .as_ref()
-    //                 .unwrap()
-    //                 .read()
-    //                 .await
-    //                 .generate_ed25519_addresses(
-    //                     bip_path.coin_type,
-    //                     bip_path.account,
-    //                     bip_path.address_index..bip_path.address_index + 1,
-    //                     GenerateAddressOptions {
-    //                         internal: bip_path.change != 0,
-    //                         ledger_nano_prompt: false,
-    //                     },
-    //                 )
-    //                 .await?[0],
-    //         ),
-    //     ))
-    // }
 
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {

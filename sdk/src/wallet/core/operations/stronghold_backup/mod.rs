@@ -185,6 +185,13 @@ impl Wallet {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
+                // TODO #1941: think about this again as it introduces some inconvenience,
+                // and we can only really deal with the different scenarios in the `finish`
+                // method.
+                // So eventually we might want to have it separeted again:
+                // .with_address(self.address().await)
+                // .with_bip_path(self.bip_path().await)
+                //
                 .with_address((self.address().await, self.bip_path().await))
                 .with_alias(self.alias().await);
 
@@ -340,6 +347,10 @@ impl Wallet<StrongholdSecretManager> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
+                // TODO #1941: See comment above. It might make sense to keep the builder
+                // as it is.
+                // .with_address(self.address().await)
+                // .with_bip_path(self.bip_path().await)
                 .with_address((self.address().await, self.bip_path().await))
                 .with_alias(self.alias().await);
 

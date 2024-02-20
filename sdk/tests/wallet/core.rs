@@ -97,7 +97,7 @@ async fn changed_bip_path() -> Result<()> {
         .finish()
         .await;
 
-    // Uncomment below lines when addressing: https://github.com/iotaledger/iota-sdk/issues/2016
+    // TODO #2016: Uncomment below lines when addressing: https://github.com/iotaledger/iota-sdk/issues/2016
     // let _mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
     //     new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
     //     old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
@@ -110,16 +110,14 @@ async fn changed_bip_path() -> Result<()> {
     assert!(matches!(result, Err(Error::InvalidParameter(..))));
 
     // Building the wallet with the same coin type still works
-    assert!(
-        Wallet::builder()
-            .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
-                mnemonic,
-            )?))
-            .with_storage_path(storage_path)
-            .finish()
-            .await
-            .is_ok()
-    );
+    assert!(Wallet::builder()
+        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+            mnemonic,
+        )?))
+        .with_storage_path(storage_path)
+        .finish()
+        .await
+        .is_ok());
 
     tear_down(storage_path)
 }
