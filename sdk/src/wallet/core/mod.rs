@@ -383,7 +383,7 @@ where
         self.address.read().await.hrp
     }
 
-    /// Get the wallet's configured bip path.
+    /// Get the wallet's bip path.
     pub async fn bip_path(&self) -> Option<Bip44> {
         *self.bip_path.read().await
     }
