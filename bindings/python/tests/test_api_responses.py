@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, ValidatorsResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputResponse, SlotCommitment
+from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputResponse, SlotCommitment
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
