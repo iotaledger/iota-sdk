@@ -9,14 +9,19 @@
 //! ```
 
 use iota_sdk::{
-    client::{api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager},
+    client::{
+        api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager,
+        stronghold::StrongholdAdapter,
+    },
     crypto::keys::bip44::Bip44,
+    types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
 const PROTOCOL_PARAMETERS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.protocol_parameters.json";
+const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
 // Address to which we want to send the amount.
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount to send.
@@ -40,6 +45,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
+        .with_address(read_address_from_file().await?)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
@@ -64,6 +70,16 @@ async fn main() -> Result<()> {
     .await?;
 
     Ok(())
+}
+
+async fn read_address_from_file() -> Result<Bech32Address> {
+    use tokio::io::AsyncReadExt;
+
+    let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESS_FILE_PATH).await?);
+    let mut json = String::new();
+    file.read_to_string(&mut json).await?;
+
+    Ok(serde_json::from_str(&json)?)
 }
 
 async fn write_data_to_file(data: impl serde::Serialize, path: &str) -> Result<()> {
