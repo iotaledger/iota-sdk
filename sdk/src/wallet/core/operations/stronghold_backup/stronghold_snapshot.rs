@@ -26,7 +26,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub(crate) async fn backup_wallet_to_stronghold_snapshot(
+    pub(crate) async fn backup_to_stronghold_snapshot(
         &self,
         stronghold: &StrongholdAdapter,
     ) -> crate::wallet::Result<()> {
@@ -52,7 +52,7 @@ where
         // Store the wallet bip path
         stronghold.set(WALLET_BIP_PATH_KEY, &self.bip_path().await).await?;
 
-        // Store the wallet alias)
+        // Store the wallet alias
         stronghold.set(WALLET_ALIAS_KEY, &self.alias().await).await?;
 
         let serialized_wallet_ledger = serde_json::to_value(&WalletLedgerDto::from(&*self.ledger.read().await))?;
@@ -62,7 +62,7 @@ where
     }
 }
 
-pub(crate) async fn restore_wallet_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
+pub(crate) async fn restore_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Bech32Address,

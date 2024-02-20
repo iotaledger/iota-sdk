@@ -397,7 +397,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SetAlias { alias } => {
-            wallet.update_wallet_alias(&alias).await?;
+            wallet.set_alias(&alias).await?;
             Response::Ok
         }
         WalletMethod::SetDefaultSyncOptions { options } => {
