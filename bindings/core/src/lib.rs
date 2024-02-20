@@ -33,7 +33,6 @@ pub use self::{
     method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };
-use crate::iota_sdk::wallet::core::AddressProvider;
 
 pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error> {
     let output_config: LoggerOutputConfigBuilder = serde_json::from_str(&config).expect("invalid logger config");
@@ -46,9 +45,9 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
     pub address: Option<Bech32Address>,
-    pub alias: Option<String>,
     #[serde(with = "option_bip44", default)]
     pub bip_path: Option<Bip44>,
+    pub alias: Option<String>,
     pub client_options: Option<ClientOptions>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
@@ -90,16 +89,10 @@ impl WalletOptions {
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
+            .with_address(self.address)
+            .with_bip_path(self.bip_path)
             .with_alias(self.alias)
             .with_client_options(self.client_options);
-
-        if let Some(address) = self.address {
-            builder = builder.with_address((address, self.bip_path));
-        } else if let Some(bip_path) = self.bip_path {
-            builder = builder.with_address(bip_path);
-        } else {
-            return Err(iota_sdk::wallet::Error::MissingParameter("address or bip path"));
-        };
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {

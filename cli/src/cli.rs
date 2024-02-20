@@ -13,7 +13,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
-    wallet::{core::AddressProvider, ClientOptions, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
 
@@ -423,7 +423,8 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_address((address, init_params.bip_path))
+        .with_address(address)
+        .with_bip_path(init_params.bip_path)
         .with_alias(alias)
         .finish()
         .await?)
@@ -491,7 +492,7 @@ pub async fn restore_command_stronghold(
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         // Will be overwritten by the backup's value.
-        .with_address(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

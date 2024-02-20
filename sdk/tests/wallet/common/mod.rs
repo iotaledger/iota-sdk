@@ -43,7 +43,7 @@ pub(crate) async fn make_wallet(
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_address(Bip44::new(SHIMMER_COIN_TYPE));
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -64,7 +64,7 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_client_options(client_options)
-        .with_address(Bip44::new(SHIMMER_COIN_TYPE));
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);

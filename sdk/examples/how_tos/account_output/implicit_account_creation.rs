@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_storage_path("implicit_account_creation")
-        .with_address(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

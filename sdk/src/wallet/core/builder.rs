@@ -18,6 +18,7 @@ use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Bech32Address, Ed25519Address},
+    utils::ConvertTo,
     wallet::{
         core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletInner, WalletLedger},
         operations::syncing::SyncOptions,
@@ -25,42 +26,42 @@ use crate::{
     },
 };
 
-/// An address provider for the wallet builder.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub enum AddressProvider {
-    /// The address will be provided manually. If `bip_path` is set, then address must be an Ed25519 address. If
-    /// `address` is anything other than an Ed25519 address, `bip_path` must be `None`.
-    Manual {
-        address: Bech32Address,
-        bip_path: Option<Bip44>,
-    },
-    /// The address will be generated using a configured secret manager.
-    Chain(Bip44),
-}
+// /// An address provider for the wallet builder.
+// #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+// pub enum AddressProvider {
+//     /// The address will be provided manually. If `bip_path` is set, then address must be an Ed25519 address. If
+//     /// `address` is anything other than an Ed25519 address, `bip_path` must be `None`.
+//     Manual {
+//         address: Bech32Address,
+//         bip_path: Option<Bip44>,
+//     },
+//     /// The address will be generated using a configured secret manager.
+//     Chain(Bip44),
+// }
 
-impl From<Bech32Address> for AddressProvider {
-    fn from(value: Bech32Address) -> Self {
-        Self::Manual {
-            address: value,
-            bip_path: None,
-        }
-    }
-}
+// impl From<Bech32Address> for AddressProvider {
+//     fn from(value: Bech32Address) -> Self {
+//         Self::Manual {
+//             address: value,
+//             bip_path: None,
+//         }
+//     }
+// }
 
-impl From<Bip44> for AddressProvider {
-    fn from(value: Bip44) -> Self {
-        Self::Chain(value)
-    }
-}
+// impl From<Bip44> for AddressProvider {
+//     fn from(value: Bip44) -> Self {
+//         Self::Chain(value)
+//     }
+// }
 
-impl From<(Bech32Address, Option<Bip44>)> for AddressProvider {
-    fn from(value: (Bech32Address, Option<Bip44>)) -> Self {
-        Self::Manual {
-            address: value.0,
-            bip_path: value.1,
-        }
-    }
-}
+// impl From<(Bech32Address, Option<Bip44>)> for AddressProvider {
+//     fn from(value: (Bech32Address, Option<Bip44>)) -> Self {
+//         Self::Manual {
+//             address: value.0,
+//             bip_path: value.1,
+//         }
+//     }
+// }
 
 /// Builder for the wallet.
 #[derive(Debug, Serialize)]
@@ -99,15 +100,15 @@ where
         Self::default()
     }
 
-    /// Set the address provider of the wallet.
-    pub fn with_address(mut self, provider: impl Into<AddressProvider>) -> Self {
-        match provider.into() {
-            AddressProvider::Manual { address, bip_path } => {
-                self.address = Some(address);
-                self.bip_path = bip_path;
-            }
-            AddressProvider::Chain(bip_path) => self.bip_path = Some(bip_path),
-        }
+    /// Set the address of the wallet.
+    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.address = address.into();
+        self
+    }
+
+    /// Set the BIP44 path of the wallet.
+    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
+        self.bip_path = bip_path.into();
         self
     }
 
