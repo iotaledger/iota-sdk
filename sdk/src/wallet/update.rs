@@ -48,9 +48,9 @@ where
         Ok(())
     }
 
-    /// Update the alias for the wallet.
+    /// Set the wallet alias.
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
-        log::debug!("setting wallet to new alias: {}", alias);
+        log::debug!("setting wallet alias to: {}", alias);
 
         *self.alias_mut().await = Some(alias.to_string());
 

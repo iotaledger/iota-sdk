@@ -369,7 +369,7 @@ where
         self.inner.emit(wallet_event).await
     }
 
-    /// Get the wallet address config.
+    /// Get the wallet address.
     pub async fn address(&self) -> Bech32Address {
         self.address.read().await.clone()
     }
