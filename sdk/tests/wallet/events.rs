@@ -53,7 +53,7 @@ fn wallet_events_serde() {
         output_id_proof: OutputIdProof {
             slot: SlotIndex(1),
             output_index: 0,
-            transaction_commitment: "0x".to_string(),
+            transaction_commitment: [0u8; 32],
             output_commitment_proof: OutputCommitmentProof::LeafHash(LeafHash {
                 kind: 1,
                 hash: [0u8; 32],
