@@ -101,10 +101,8 @@ impl InputSelection {
             }
 
             self.reduce_account_output()?;
-        } else {
-            if !self.requirements.contains(&Requirement::Mana) {
-                self.requirements.push(Requirement::Mana);
-            }
+        } else if !self.requirements.contains(&Requirement::Mana) {
+            self.requirements.push(Requirement::Mana);
         }
 
         // Remainders can only be calculated when the input mana is >= the output mana
