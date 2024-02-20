@@ -151,24 +151,23 @@ impl StateTransitionVerifier for AccountOutput {
         }
 
         if let Some(block_issuer) = next_state.features().block_issuer() {
-            let past_bounded_slot_index = context
+            let past_bounded_slot = context
                 .protocol_parameters
                 .past_bounded_slot(context.commitment_context_input.unwrap());
 
-            if block_issuer.expiry_slot() < past_bounded_slot_index {
+            if block_issuer.expiry_slot() < past_bounded_slot {
                 return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
             }
         }
         if let Some(staking) = next_state.features().staking() {
-            let past_bounded_slot_index = context
+            let past_bounded_epoch = context
                 .protocol_parameters
-                .past_bounded_slot(context.commitment_context_input.unwrap());
-            let past_bounded_epoch_index = context.protocol_parameters.epoch_index_of(past_bounded_slot_index);
+                .past_bounded_epoch(context.commitment_context_input.unwrap());
 
-            if staking.start_epoch() != past_bounded_epoch_index {
+            if staking.start_epoch() != past_bounded_epoch {
                 return Err(TransactionFailureReason::StakingStartEpochInvalid);
             }
-            if staking.end_epoch() < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period {
+            if staking.end_epoch() < past_bounded_epoch + context.protocol_parameters.staking_unbonding_period {
                 return Err(TransactionFailureReason::StakingEndEpochTooEarly);
             }
         }
@@ -194,11 +193,11 @@ impl StateTransitionVerifier for AccountOutput {
             next_state.features().block_issuer(),
         ) {
             (None, Some(block_issuer_output)) => {
-                let past_bounded_slot_index = context
+                let past_bounded_slot = context
                     .protocol_parameters
                     .past_bounded_slot(context.commitment_context_input.unwrap());
 
-                if block_issuer_output.expiry_slot() < past_bounded_slot_index {
+                if block_issuer_output.expiry_slot() < past_bounded_slot {
                     return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
                 }
             }
@@ -211,15 +210,15 @@ impl StateTransitionVerifier for AccountOutput {
             }
             (Some(block_issuer_input), Some(block_issuer_output)) => {
                 let commitment_index = context.commitment_context_input.unwrap();
-                let past_bounded_slot_index = context.protocol_parameters.past_bounded_slot(commitment_index);
+                let past_bounded_slot = context.protocol_parameters.past_bounded_slot(commitment_index);
 
                 if block_issuer_input.expiry_slot() >= commitment_index.slot_index() {
                     if block_issuer_input.expiry_slot() != block_issuer_output.expiry_slot()
-                        && block_issuer_input.expiry_slot() < past_bounded_slot_index
+                        && block_issuer_input.expiry_slot() < past_bounded_slot
                     {
                         return Err(TransactionFailureReason::BlockIssuerNotExpired);
                     }
-                } else if block_issuer_output.expiry_slot() < past_bounded_slot_index {
+                } else if block_issuer_output.expiry_slot() < past_bounded_slot {
                     return Err(TransactionFailureReason::BlockIssuerExpiryTooEarly);
                 }
             }
@@ -228,27 +227,25 @@ impl StateTransitionVerifier for AccountOutput {
 
         match (current_state.features().staking(), next_state.features().staking()) {
             (None, Some(staking_output)) => {
-                let past_bounded_slot_index = context
+                let past_bounded_epoch = context
                     .protocol_parameters
-                    .past_bounded_slot(context.commitment_context_input.unwrap());
-                let past_bounded_epoch_index = context.protocol_parameters.epoch_index_of(past_bounded_slot_index);
+                    .past_bounded_epoch(context.commitment_context_input.unwrap());
 
-                if staking_output.start_epoch() != past_bounded_epoch_index {
+                if staking_output.start_epoch() != past_bounded_epoch {
                     return Err(TransactionFailureReason::StakingStartEpochInvalid);
                 }
                 if staking_output.end_epoch()
-                    < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
+                    < past_bounded_epoch + context.protocol_parameters.staking_unbonding_period
                 {
                     return Err(TransactionFailureReason::StakingEndEpochTooEarly);
                 }
             }
             (Some(staking_input), None) => {
-                let future_bounded_slot_index = context
+                let future_bounded_epoch = context
                     .protocol_parameters
-                    .future_bounded_slot(context.commitment_context_input.unwrap());
-                let future_bounded_epoch_index = context.protocol_parameters.epoch_index_of(future_bounded_slot_index);
+                    .future_bounded_epoch(context.commitment_context_input.unwrap());
 
-                if staking_input.end_epoch() >= future_bounded_epoch_index {
+                if staking_input.end_epoch() >= future_bounded_epoch {
                     return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
                 } else if !context.mana_rewards.contains_key(current_output_id)
                     || !context.reward_context_inputs.contains_key(current_output_id)
@@ -257,16 +254,14 @@ impl StateTransitionVerifier for AccountOutput {
                 }
             }
             (Some(staking_input), Some(staking_output)) => {
-                let past_bounded_slot_index = context
+                let past_bounded_epoch = context
                     .protocol_parameters
-                    .past_bounded_slot(context.commitment_context_input.unwrap());
-                let past_bounded_epoch_index = context.protocol_parameters.epoch_index_of(past_bounded_slot_index);
-                let future_bounded_slot_index = context
+                    .past_bounded_epoch(context.commitment_context_input.unwrap());
+                let future_bounded_epoch = context
                     .protocol_parameters
-                    .future_bounded_slot(context.commitment_context_input.unwrap());
-                let future_bounded_epoch_index = context.protocol_parameters.epoch_index_of(future_bounded_slot_index);
+                    .future_bounded_epoch(context.commitment_context_input.unwrap());
 
-                if staking_input.end_epoch() >= future_bounded_epoch_index {
+                if staking_input.end_epoch() >= future_bounded_epoch {
                     if staking_input.staked_amount() != staking_output.staked_amount()
                         || staking_input.start_epoch() != staking_output.start_epoch()
                         || staking_input.fixed_cost() != staking_output.fixed_cost()
@@ -275,16 +270,16 @@ impl StateTransitionVerifier for AccountOutput {
                     }
                     if staking_input.end_epoch() != staking_output.end_epoch()
                         && staking_input.end_epoch()
-                            < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
+                            < past_bounded_epoch + context.protocol_parameters.staking_unbonding_period
                     {
                         return Err(TransactionFailureReason::StakingEndEpochTooEarly);
                     }
                 } else if (staking_input.staked_amount() != staking_output.staked_amount()
                     || staking_input.start_epoch() != staking_output.start_epoch()
                     || staking_input.fixed_cost() != staking_output.fixed_cost())
-                    && (staking_input.start_epoch() != past_bounded_epoch_index
+                    && (staking_input.start_epoch() != past_bounded_epoch
                         || staking_input.end_epoch()
-                            < past_bounded_epoch_index + context.protocol_parameters.staking_unbonding_period
+                            < past_bounded_epoch + context.protocol_parameters.staking_unbonding_period
                         || !context.mana_rewards.contains_key(current_output_id)
                         || !context.reward_context_inputs.contains_key(current_output_id))
                 {
@@ -320,12 +315,11 @@ impl StateTransitionVerifier for AccountOutput {
             }
         }
         if let Some(staking) = current_state.features().staking() {
-            let future_bounded_slot_index = context
+            let future_bounded_epoch = context
                 .protocol_parameters
-                .future_bounded_slot(context.commitment_context_input.unwrap());
-            let future_bounded_epoch_index = context.protocol_parameters.epoch_index_of(future_bounded_slot_index);
+                .future_bounded_epoch(context.commitment_context_input.unwrap());
 
-            if staking.end_epoch() >= future_bounded_epoch_index {
+            if staking.end_epoch() >= future_bounded_epoch {
                 return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
             } else if !context.mana_rewards.contains_key(output_id)
                 || !context.reward_context_inputs.contains_key(output_id)

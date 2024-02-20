@@ -334,11 +334,11 @@ impl<'a> SemanticValidationContext<'a> {
                     if let Address::Account(account_address) = address.address() {
                         if let Some(entry) = self.block_issuer_mana.get_mut(account_address.account_id()) {
                             if let Some(commitment_context_input) = self.commitment_context_input {
-                                let past_bounded_slot_index =
+                                let past_bounded_slot =
                                     self.protocol_parameters.past_bounded_slot(commitment_context_input);
 
                                 if timelock.slot_index()
-                                    >= past_bounded_slot_index + self.protocol_parameters.max_committable_age()
+                                    >= past_bounded_slot + self.protocol_parameters.max_committable_age()
                                 {
                                     entry.1 = entry
                                         .1
