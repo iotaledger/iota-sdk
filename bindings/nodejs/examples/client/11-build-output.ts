@@ -55,7 +55,9 @@ async function run() {
         const basicOutputWithMetadata = await client.buildBasicOutput({
             amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
-            features: [new MetadataFeature(utf8ToHex('Hello World!'))],
+            features: [
+                new MetadataFeature({ data: utf8ToHex('Hello World!') }),
+            ],
         });
 
         console.log(JSON.stringify(basicOutputWithMetadata, null, 2));
