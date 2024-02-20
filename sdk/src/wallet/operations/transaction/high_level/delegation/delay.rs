@@ -39,7 +39,7 @@ where
         reclaim_excess: bool,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         let delegation_output = self
-            .data()
+            .ledger()
             .await
             .unspent_delegation_output(&delegation_id)
             .ok_or(crate::wallet::Error::MissingDelegation(delegation_id))?

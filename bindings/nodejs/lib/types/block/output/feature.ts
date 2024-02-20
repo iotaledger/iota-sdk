@@ -14,6 +14,11 @@ import { NativeToken } from '../../models/native-token';
 import { HexEncodedString } from '../../utils/hex-encoding';
 
 /**
+ * Printable ASCII characters.
+ */
+export declare type PrintableASCII = string;
+
+/**
  * All of the feature block types.
  */
 enum FeatureType {
@@ -88,14 +93,30 @@ class IssuerFeature extends Feature {
  */
 class MetadataFeature extends Feature {
     /** Defines metadata (arbitrary binary data) that will be stored in the output. */
-    readonly data: string;
+    readonly entries: { [key: PrintableASCII]: HexEncodedString };
 
     /**
-     * @param data The metadata stored with the feature.
+     * @param entries The metadata stored with the feature.
      */
-    constructor(data: string) {
+    constructor(entries: { [key: PrintableASCII]: HexEncodedString }) {
         super(FeatureType.Metadata);
-        this.data = data;
+        this.entries = entries;
+    }
+}
+
+/**
+ * A Metadata Feature that can only be changed by the State Controller.
+ */
+class StateMetadataFeature extends Feature {
+    /** Defines metadata (arbitrary binary data) that will be stored in the output. */
+    readonly entries: { [key: PrintableASCII]: HexEncodedString };
+
+    /**
+     * @param entries The metadata stored with the feature.
+     */
+    constructor(entries: { [key: PrintableASCII]: HexEncodedString }) {
+        super(FeatureType.StateMetadata);
+        this.entries = entries;
     }
 }
 
@@ -213,6 +234,7 @@ const FeatureDiscriminator = {
         { value: SenderFeature, name: FeatureType.Sender as any },
         { value: IssuerFeature, name: FeatureType.Issuer as any },
         { value: MetadataFeature, name: FeatureType.Metadata as any },
+        { value: StateMetadataFeature, name: FeatureType.StateMetadata as any },
         { value: TagFeature, name: FeatureType.Tag as any },
         { value: NativeTokenFeature, name: FeatureType.NativeToken as any },
         { value: BlockIssuerFeature, name: FeatureType.BlockIssuer as any },
@@ -227,6 +249,7 @@ export {
     SenderFeature,
     IssuerFeature,
     MetadataFeature,
+    StateMetadataFeature,
     TagFeature,
     NativeTokenFeature,
     BlockIssuerFeature,

@@ -98,7 +98,7 @@
 //     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
 //     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-//     assert_eq!(wallet.address().await, restored_wallet.address().await);
+//     assert_eq!(wallet.address().clone(), restored_wallet.address().clone());
 
 //     // secret manager is the same
 //     assert_eq!(
@@ -196,7 +196,7 @@
 
 //     // Get wallet
 //     let recovered_wallet = restore_wallet;
-//     assert_eq!(wallet.address().await, recovered_wallet.address().await);
+//     assert_eq!(wallet.address().clone(), recovered_wallet.address().clone());
 
 //     // secret manager is the same
 //     assert_eq!(
@@ -269,14 +269,14 @@
 //     // Validate restored data
 
 //     // No wallet restored, because the coin type was different
-//     assert!(restore_wallet.get_wallet_data().await?.is_empty());
+//     assert!(restore_wallet.get_wallet_ledger().await?.is_empty());
 
 //     // Restored coin type is not used and it's still the same one
 //     let new_wallet = restore_wallet;
 //     assert_eq!(new_wallet.data().await.coin_type(), &IOTA_COIN_TYPE);
 //     // secret manager is the same
 //     assert_eq!(
-//         new_wallet.address().await,
+//         new_wallet.address().clone(),
 //         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
 //     );
 
@@ -352,13 +352,13 @@
 //     // Validate restored data
 
 //     // The wallet is restored, because the coin type is the same
-//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     let restored_wallet = restore_wallet.get_wallet_ledger().await?;
 //     assert!(restored_wallet.is_some());
 
 //     // addresses are still there
 //     assert_eq!(
-//         restored_wallet.address().await,
-//         wallet_before_backup.address().await
+//         restored_wallet.address().clone(),
+//         wallet_before_backup.address().clone()
 //     );
 
 //     // compare client options, they are not restored
@@ -431,10 +431,10 @@
 //     // Validate restored data
 
 //     // No wallet restored, because the coin type was different
-//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     let restored_wallet = restore_wallet.get_wallet_ledger().await?;
 //     assert_eq!(
-//         wallet.address().await,
-//         restored_wallet.address().await,
+//         wallet.address().clone(),
+//         restored_wallet.address().clone(),
 //     );
 
 //     // TODO: Restored coin type is used
@@ -442,7 +442,7 @@
 //     assert_eq!(new_wallet.data().await.coin_type(), &SHIMMER_COIN_TYPE);
 //     // secret manager is restored
 //     assert_eq!(
-//         new_wallet.address().await,
+//         new_wallet.address().clone(),
 //         "smr1qzvjvjyqxgfx4f0m3xhn2rj24e03dwsmjz082735y3wx88v2gudu2afedhu"
 //     );
 
@@ -520,7 +520,7 @@
 //     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
 //     // No restored wallet because the bech32 hrp was different
-//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     let restored_wallet = restore_wallet.get_wallet_ledger().await?;
 //     assert!(restored_wallet.is_empty());
 
 //     // Restored coin type is used

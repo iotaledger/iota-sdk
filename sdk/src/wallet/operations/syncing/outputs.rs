@@ -30,14 +30,14 @@ where
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         Ok(outputs_with_meta
             .into_iter()
             .map(|output_with_meta| {
                 // check if we know the transaction that created this output and if we created it (if we store incoming
                 // transactions separated, then this check wouldn't be required)
-                let remainder = wallet_data
+                let remainder = wallet_ledger
                     .transactions
                     .get(output_with_meta.metadata().output_id().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
@@ -65,10 +65,10 @@ where
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
         for output_id in output_ids {
-            match wallet_data.outputs.get_mut(&output_id) {
+            match wallet_ledger.outputs.get_mut(&output_id) {
                 // set unspent if not already
                 Some(output_data) => {
                     if output_data.is_spent() {
@@ -88,10 +88,10 @@ where
         // known output is unspent, so insert it to the unspent outputs again, because if it was an
         // account/nft/foundry output it could have been removed when syncing without them
         for (output_id, output_data) in unspent_outputs {
-            wallet_data.unspent_outputs.insert(output_id, output_data);
+            wallet_ledger.unspent_outputs.insert(output_id, output_data);
         }
 
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         if !unknown_outputs.is_empty() {
             outputs.extend(self.client().get_outputs_with_metadata(&unknown_outputs).await?);
@@ -114,13 +114,15 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_incoming_transaction_data");
 
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
         transaction_ids.retain(|transaction_id| {
-            !(wallet_data.transactions.contains_key(transaction_id)
-                || wallet_data.incoming_transactions.contains_key(transaction_id)
-                || wallet_data.inaccessible_incoming_transactions.contains(transaction_id))
+            !(wallet_ledger.transactions.contains_key(transaction_id)
+                || wallet_ledger.incoming_transactions.contains_key(transaction_id)
+                || wallet_ledger
+                    .inaccessible_incoming_transactions
+                    .contains(transaction_id))
         });
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         // Limit parallel requests to 100, to avoid timeouts
         let results =
@@ -176,15 +178,15 @@ where
             .await?;
 
         // Update account with new transactions
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
         for (transaction_id, txn) in results.into_iter().flatten() {
             if let Some(transaction) = txn {
-                wallet_data.incoming_transactions.insert(transaction_id, transaction);
+                wallet_ledger.incoming_transactions.insert(transaction_id, transaction);
             } else {
                 log::debug!("[SYNC] adding {transaction_id} to inaccessible_incoming_transactions");
                 // Save transactions that weren't found by the node to avoid requesting them endlessly.
                 // Will be cleared when new client options are provided.
-                wallet_data.inaccessible_incoming_transactions.insert(transaction_id);
+                wallet_ledger.inaccessible_incoming_transactions.insert(transaction_id);
             }
         }
 
