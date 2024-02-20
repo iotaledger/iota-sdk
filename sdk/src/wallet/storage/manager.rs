@@ -7,7 +7,7 @@ use crate::{
     client::storage::StorageAdapter,
     types::TryFromDto,
     wallet::{
-        core::{WalletData, WalletDataDto},
+        core::{WalletLedger, WalletLedgerDto},
         migration::migrate,
         operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},
@@ -49,25 +49,28 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub(crate) async fn load_wallet_data(&self) -> crate::wallet::Result<Option<WalletData>> {
-        if let Some(dto) = self.get::<WalletDataDto>(WALLET_DATA_KEY).await? {
-            Ok(Some(WalletData::try_from_dto(dto)?))
+    pub(crate) async fn load_wallet_ledger(&self) -> crate::wallet::Result<Option<WalletLedger>> {
+        if let Some(dto) = self.get::<WalletLedgerDto>(WALLET_LEDGER_KEY).await? {
+            Ok(Some(WalletLedger::try_from_dto(dto)?))
         } else {
             Ok(None)
         }
     }
 
-    pub(crate) async fn save_wallet_data(&self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
-        self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
+    pub(crate) async fn save_wallet_ledger(&self, wallet_ledger: &WalletLedgerDto) -> crate::wallet::Result<()> {
+        self.set(WALLET_LEDGER_KEY, wallet_ledger).await?;
+        Ok(())
     }
 
     pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
-        let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
+        let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
     }
 
+    // TODO: call this method in wallet builder: https://github.com/iotaledger/iota-sdk/issues/2022
+    #[allow(dead_code)]
     pub(crate) async fn get_default_sync_options(&self) -> crate::wallet::Result<Option<SyncOptions>> {
-        let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
+        let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.get(&key).await
     }
 }
@@ -91,12 +94,14 @@ impl StorageAdapter for StorageManager {
 
 #[cfg(test)]
 mod tests {
+    use crypto::keys::bip44::Bip44;
     use pretty_assertions::assert_eq;
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        client::secret::SecretManager,
+        client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager},
+        types::block::address::{Bech32Address, Ed25519Address},
         wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
     };
 
@@ -122,15 +127,18 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn save_load_wallet_data() {
+    async fn save_load_wallet_ledger() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
+        assert!(storage_manager.load_wallet_ledger().await.unwrap().is_none());
 
-        let wallet_data = WalletData::mock();
+        let wallet_ledger = WalletLedger::test_instance();
 
-        storage_manager.save_wallet_data(&wallet_data).await.unwrap();
-        let wallet = storage_manager.load_wallet_data().await.unwrap();
-        assert!(matches!(wallet, Some(data) if data.alias == Some("Alice".to_string())));
+        storage_manager
+            .save_wallet_ledger(&WalletLedgerDto::from(&wallet_ledger))
+            .await
+            .unwrap();
+
+        assert_eq!(storage_manager.load_wallet_ledger().await.unwrap(), Some(wallet_ledger));
     }
 
     #[tokio::test]
@@ -143,14 +151,24 @@ mod tests {
                 .is_none()
         );
 
-        let wallet_builder = WalletBuilder::<SecretManager>::new();
+        let wallet_address = Bech32Address::new("rms".parse().unwrap(), Ed25519Address::null());
+        let wallet_bip_path = Bip44::new(SHIMMER_COIN_TYPE);
+        let wallet_alias = "savings".to_string();
+
+        let wallet_builder = WalletBuilder::<SecretManager>::new()
+            .with_address(wallet_address.clone())
+            .with_bip_path(wallet_bip_path)
+            .with_alias(wallet_alias.clone());
+
         wallet_builder.save(&storage_manager).await.unwrap();
 
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_some()
-        );
+        let restored_wallet_builder = WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(restored_wallet_builder.address, Some(wallet_address));
+        assert_eq!(restored_wallet_builder.bip_path, Some(wallet_bip_path));
+        assert_eq!(restored_wallet_builder.alias, Some(wallet_alias));
     }
 }

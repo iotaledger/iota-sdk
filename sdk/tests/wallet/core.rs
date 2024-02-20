@@ -88,7 +88,7 @@ async fn changed_bip_path() -> Result<()> {
 
     drop(wallet);
 
-    let err = Wallet::builder()
+    let result = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic.clone(),
         )?))
@@ -99,7 +99,7 @@ async fn changed_bip_path() -> Result<()> {
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    assert!(matches!(err, Err(Error::BipPathMismatch {
+    assert!(matches!(result, Err(Error::BipPathMismatch {
         new_bip_path: Some(new_bip_path),
         old_bip_path: Some(old_bip_path),
     }) if new_bip_path == Bip44::new(IOTA_COIN_TYPE) && old_bip_path == Bip44::new(SHIMMER_COIN_TYPE)));

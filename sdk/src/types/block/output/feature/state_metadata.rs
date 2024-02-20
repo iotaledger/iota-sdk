@@ -23,7 +23,7 @@ use super::{
 };
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
 
-/// Defines metadata, arbitrary binary data, that will be stored in the output.
+/// A Metadata Feature that can only be changed by the State Controller.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct StateMetadataFeature(pub(crate) MetadataBTreeMapPrefix);
 

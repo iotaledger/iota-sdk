@@ -19,14 +19,14 @@ pub struct RewardsParameters {
     pub(crate) profit_margin_exponent: u8,
     /// The length of the bootstrapping phase in epochs.
     pub(crate) bootstrapping_duration: u32,
-    /// The coefficient used for calculation of initial rewards.
+    /// The ratio of the final rewards rate to the generation rate of Mana.
+    pub(crate) reward_to_generation_ratio: u8,
+    /// The rate of Mana rewards at the start of the bootstrapping phase.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) mana_share_coefficient: u64,
-    /// The exponent used for calculation of the initial reward.
-    pub(crate) decay_balancing_constant_exponent: u8,
-    /// An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
+    pub(crate) initial_target_rewards_rate: u64,
+    /// The rate of Mana rewards after the bootstrapping phase.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) decay_balancing_constant: u64,
+    pub(crate) final_target_rewards_rate: u64,
     /// The exponent used for shifting operation during the pool rewards calculations.
     pub(crate) pool_coefficient_exponent: u8,
     // The number of epochs for which rewards are retained.

@@ -391,8 +391,8 @@ impl FromStr for OutputSelector {
 
 // `accounts` command
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
-    let accounts = wallet_data.accounts();
+    let wallet_ledger = wallet.ledger().await;
+    let accounts = wallet_ledger.accounts();
     let hrp = wallet.client().get_bech32_hrp().await?;
 
     println_log_info!("Accounts:\n");
@@ -430,9 +430,9 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
     let account_id = {
-        let wallet_data = wallet.data().await;
+        let wallet_ledger = wallet.ledger().await;
         account_id
-            .or_else(|| wallet_data.first_account_id())
+            .or_else(|| wallet_ledger.first_account_id())
             .ok_or(WalletError::AccountNotFound)?
     };
 
@@ -565,9 +565,9 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
 /// `claimable-outputs` command
 pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     for output_id in wallet.claimable_outputs(OutputsToClaim::All).await? {
-        let wallet_data = wallet.data().await;
+        let wallet_ledger = wallet.ledger().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output = &wallet_data.get_output(&output_id).unwrap().output;
+        let output = &wallet_ledger.get_output(&output_id).unwrap().output;
         let kind = match output {
             Output::Nft(_) => "Nft",
             Output::Basic(_) => "Basic",
@@ -613,9 +613,9 @@ pub async fn congestion_command(
     work_score: Option<u32>,
 ) -> Result<(), Error> {
     let account_id = {
-        let wallet_data = wallet.data().await;
+        let wallet_ledger = wallet.ledger().await;
         account_id
-            .or_else(|| wallet_data.first_account_id())
+            .or_else(|| wallet_ledger.first_account_id())
             .ok_or(WalletError::AccountNotFound)?
     };
 
@@ -868,8 +868,8 @@ pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: Out
 
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
-    let implicit_accounts = wallet_data.implicit_accounts();
+    let wallet_ledger = wallet.ledger().await;
+    let implicit_accounts = wallet_ledger.implicit_accounts();
     let hrp = wallet.client().get_bech32_hrp().await?;
 
     println_log_info!("Implicit accounts:\n");
@@ -974,11 +974,11 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `output` command
 pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata: bool) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_ledger = wallet.ledger().await;
     let output = match selector {
-        OutputSelector::Id(id) => wallet_data.get_output(&id),
+        OutputSelector::Id(id) => wallet_ledger.get_output(&id),
         OutputSelector::Index(index) => {
-            let mut outputs = wallet_data.outputs().values().collect::<Vec<_>>();
+            let mut outputs = wallet_ledger.outputs().values().collect::<Vec<_>>();
             outputs.sort_unstable_by_key(|o| o.output_id);
             outputs.into_iter().nth(index)
         }
@@ -999,7 +999,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata:
 
 /// `outputs` command
 pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.data().await.outputs().values().cloned().collect(), "Outputs:")
+    print_outputs(wallet.ledger().await.outputs().values().cloned().collect(), "Outputs:")
 }
 
 // `send` command
@@ -1104,11 +1104,11 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `transaction` command
 pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
+    let wallet_ledger = wallet.ledger().await;
     let transaction = match selector {
-        TransactionSelector::Id(id) => wallet_data.get_transaction(&id),
+        TransactionSelector::Id(id) => wallet_ledger.get_transaction(&id),
         TransactionSelector::Index(index) => {
-            let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
+            let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
             transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
             transactions.into_iter().nth(index)
         }
@@ -1125,8 +1125,8 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 
 /// `transactions` command
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
-    let wallet_data = wallet.data().await;
-    let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
+    let wallet_ledger = wallet.ledger().await;
+    let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
     transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
     if transactions.is_empty() {
@@ -1150,7 +1150,7 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     print_outputs(
-        wallet.data().await.unspent_outputs().values().cloned().collect(),
+        wallet.ledger().await.unspent_outputs().values().cloned().collect(),
         "Unspent outputs:",
     )
 }
@@ -1253,7 +1253,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let mut delegations = Vec::new();
     let mut anchors = Vec::new();
 
-    for output_data in wallet.data().await.unspent_outputs().values() {
+    for output_data in wallet.ledger().await.unspent_outputs().values() {
         let output_id = output_data.output_id;
         output_ids.push(output_id);
 

@@ -56,8 +56,10 @@ pub fn iota_mainnet_protocol_parameters() -> &'static ProtocolParameters {
                 bits_count: 63,
                 generation_rate: 1,
                 generation_rate_exponent: 17,
+                // Derived
                 decay_factors: Default::default(),
                 decay_factors_exponent: 32,
+                // Derived
                 decay_factor_epochs_sum: Default::default(),
                 decay_factor_epochs_sum_exponent: 21,
                 annual_decay_factor_percentage: 70,
@@ -86,17 +88,20 @@ pub fn iota_mainnet_protocol_parameters() -> &'static ProtocolParameters {
             },
             rewards_parameters: RewardsParameters {
                 profit_margin_exponent: 8,
+                // Derived
                 bootstrapping_duration: Default::default(),
-                mana_share_coefficient: 2,
-                decay_balancing_constant_exponent: 8,
-                decay_balancing_constant: 1,
+                reward_to_generation_ratio: 2,
+                // Derived
+                initial_target_rewards_rate: Default::default(),
+                // Derived
+                final_target_rewards_rate: Default::default(),
                 pool_coefficient_exponent: 11,
                 retention_period: 384,
             },
             target_committee_size: 32,
             chain_switching_threshold: 3,
         }
-        .init()
+        .with_derived_values()
     })
 }
 
@@ -145,8 +150,10 @@ pub fn shimmer_mainnet_protocol_parameters() -> &'static ProtocolParameters {
                 bits_count: 63,
                 generation_rate: 1,
                 generation_rate_exponent: 17,
+                // Derived
                 decay_factors: Default::default(),
                 decay_factors_exponent: 32,
+                // Derived
                 decay_factor_epochs_sum: Default::default(),
                 decay_factor_epochs_sum_exponent: 21,
                 annual_decay_factor_percentage: 70,
@@ -175,25 +182,29 @@ pub fn shimmer_mainnet_protocol_parameters() -> &'static ProtocolParameters {
             },
             rewards_parameters: RewardsParameters {
                 profit_margin_exponent: 8,
+                // Derived
                 bootstrapping_duration: Default::default(),
-                mana_share_coefficient: 2,
-                decay_balancing_constant_exponent: 8,
-                decay_balancing_constant: 1,
+                reward_to_generation_ratio: 2,
+                // Derived
+                initial_target_rewards_rate: Default::default(),
+                // Derived
+                final_target_rewards_rate: Default::default(),
                 pool_coefficient_exponent: 11,
                 retention_period: 384,
             },
             target_committee_size: 32,
             chain_switching_threshold: 3,
         }
-        .init()
+        .with_derived_values()
     })
 }
 
 impl ProtocolParameters {
-    pub(crate) fn init(mut self) -> Self {
+    pub(crate) fn with_derived_values(mut self) -> Self {
         self.derive_mana_decay_factors();
         self.derive_mana_decay_factors_epochs_sum();
         self.derive_bootstrapping_duration();
+        self.derive_target_rewards_rates();
         self
     }
 
@@ -225,5 +236,17 @@ impl ProtocolParameters {
     pub(crate) fn derive_bootstrapping_duration(&mut self) {
         self.rewards_parameters.bootstrapping_duration =
             (self.epochs_per_year() / -self.mana_parameters().annual_decay_factor().ln()).floor() as _;
+    }
+
+    pub(crate) fn derive_target_rewards_rates(&mut self) {
+        self.rewards_parameters.final_target_rewards_rate = (self.token_supply()
+            * self.rewards_parameters().reward_to_generation_ratio() as u64
+            * self.mana_parameters().generation_rate() as u64)
+            >> self.mana_parameters().generation_rate_exponent() - self.slots_per_epoch_exponent();
+        let bootstrapping_duration_years =
+            self.rewards_parameters().bootstrapping_duration() as f64 * self.epochs_per_year().exp();
+        self.rewards_parameters.initial_target_rewards_rate = (self.rewards_parameters.final_target_rewards_rate as f64
+            * (self.mana_parameters().annual_decay_factor() * bootstrapping_duration_years).exp())
+        .floor() as _;
     }
 }

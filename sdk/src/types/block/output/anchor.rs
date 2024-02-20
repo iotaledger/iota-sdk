@@ -473,8 +473,7 @@ impl AnchorOutput {
         } else if next_state.state_index == current_state.state_index {
             // Governance transition.
             if current_state.amount != next_state.amount
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1650
-            // || current_state.state_metadata != next_state.state_metadata
+                || current_state.features().state_metadata() != next_state.features().state_metadata()
             {
                 return Err(TransactionFailureReason::AnchorInvalidGovernanceTransition);
             }

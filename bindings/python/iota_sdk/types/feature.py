@@ -83,6 +83,20 @@ class MetadataFeature:
 
 @json
 @dataclass
+class StateMetadataFeature:
+    """A Metadata Feature that can only be changed by the State Controller.
+    Attributes:
+        entries: A key-value map where the keys are graphic ASCII strings and the values hex-encoded binary data.
+    """
+    type: int = field(
+        default_factory=lambda: int(
+            FeatureType.StateMetadata),
+        init=False)
+    entries: Dict[str, HexStr]
+
+
+@json
+@dataclass
 class TagFeature:
     """Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
     Attributes:
@@ -149,7 +163,7 @@ class StakingFeature:
 
 
 Feature: TypeAlias = Union[SenderFeature, IssuerFeature,
-                           MetadataFeature, TagFeature, NativeTokenFeature, BlockIssuerFeature, StakingFeature]
+                           MetadataFeature, StateMetadataFeature, TagFeature, NativeTokenFeature, BlockIssuerFeature, StakingFeature]
 
 
 # pylint: disable=too-many-return-statements
@@ -167,6 +181,8 @@ def deserialize_feature(d: Dict[str, Any]) -> Feature:
         return IssuerFeature.from_dict(d)
     if feature_type == FeatureType.Metadata:
         return MetadataFeature.from_dict(d)
+    if feature_type == FeatureType.StateMetadata:
+        return StateMetadataFeature.from_dict(d)
     if feature_type == FeatureType.Tag:
         return TagFeature.from_dict(d)
     if feature_type == FeatureType.NativeToken:

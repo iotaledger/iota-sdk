@@ -8,7 +8,7 @@ use crate::{
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::{
-        core::WalletData,
+        core::WalletLedger,
         types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },
@@ -30,13 +30,13 @@ where
     /// be synced again
     pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
         log::debug!("[SYNC] sync pending transactions");
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
         // (transaction_output.is_none())
         let mut confirmed_unknown_output = false;
 
-        if wallet_data.pending_transactions.is_empty() {
+        if wallet_ledger.pending_transactions.is_empty() {
             return Ok(confirmed_unknown_output);
         }
 
@@ -48,9 +48,9 @@ where
         // are available again
         let mut output_ids_to_unlock = Vec::new();
 
-        for transaction_id in &wallet_data.pending_transactions {
+        for transaction_id in &wallet_ledger.pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
-            let mut transaction = wallet_data
+            let mut transaction = wallet_ledger
                 .transactions
                 .get(transaction_id)
                 // panic during development to easier detect if something is wrong, should be handled different later
@@ -64,14 +64,14 @@ where
 
             // check if we have an output (remainder, if not sending to an own address) that got created by this
             // transaction, if that's the case, then the transaction got confirmed
-            let transaction_output = wallet_data
+            let transaction_output = wallet_ledger
                 .outputs
                 .keys()
                 .find(|o| o.transaction_id() == transaction_id);
 
             if let Some(transaction_output) = transaction_output {
                 // Save to unwrap, we just got the output
-                let confirmed_output_data = wallet_data.outputs.get(transaction_output).expect("output exists");
+                let confirmed_output_data = wallet_ledger.outputs.get(transaction_output).expect("output exists");
                 log::debug!(
                     "[SYNC] confirmed transaction {transaction_id} in block {}",
                     confirmed_output_data.metadata.block_id()
@@ -90,7 +90,7 @@ where
             let mut input_got_spent = false;
             for input in transaction.payload.transaction().inputs() {
                 let Input::Utxo(input) = input;
-                if let Some(input) = wallet_data.outputs.get(input.output_id()) {
+                if let Some(input) = wallet_ledger.outputs.get(input.output_id()) {
                     if input.metadata.is_spent() {
                         input_got_spent = true;
                     }
@@ -152,7 +152,7 @@ where
                             }
                         } else if input_got_spent {
                             process_transaction_with_unknown_state(
-                                &wallet_data,
+                                &wallet_ledger,
                                 transaction,
                                 &mut updated_transactions,
                                 &mut output_ids_to_unlock,
@@ -162,7 +162,7 @@ where
                     Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                         if input_got_spent {
                             process_transaction_with_unknown_state(
-                                &wallet_data,
+                                &wallet_ledger,
                                 transaction,
                                 &mut updated_transactions,
                                 &mut output_ids_to_unlock,
@@ -173,7 +173,7 @@ where
                 }
             } else if input_got_spent {
                 process_transaction_with_unknown_state(
-                    &wallet_data,
+                    &wallet_ledger,
                     transaction,
                     &mut updated_transactions,
                     &mut output_ids_to_unlock,
@@ -188,7 +188,7 @@ where
                 updated_transactions.push(transaction);
             }
         }
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         // updates account with balances, output ids, outputs
         self.update_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)
@@ -219,7 +219,7 @@ fn updated_transaction_and_outputs(
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
-    wallet_data: &WalletData,
+    wallet_ledger: &WalletLedger,
     mut transaction: TransactionWithMetadata,
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,
@@ -227,7 +227,7 @@ fn process_transaction_with_unknown_state(
     let mut all_inputs_spent = true;
     for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;
-        if let Some(output_data) = wallet_data.outputs.get(input.output_id()) {
+        if let Some(output_data) = wallet_ledger.outputs.get(input.output_id()) {
             if !output_data.is_spent() {
                 // unspent output needs to be made available again
                 output_ids_to_unlock.push(*input.output_id());

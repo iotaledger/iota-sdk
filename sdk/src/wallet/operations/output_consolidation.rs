@@ -91,7 +91,7 @@ where
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
-        let wallet_address = self.data().await.address.clone();
+        let wallet_address = self.address().await;
 
         let outputs_to_consolidate = self.get_outputs_to_consolidate(&params).await?;
 
@@ -160,24 +160,24 @@ where
         // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
         let storage_score_parameters = self.client().get_protocol_parameters().await?.storage_score_parameters;
-        let wallet_data = self.data().await;
-        let wallet_address = wallet_data.address.clone();
+        let wallet_ledger = self.ledger().await;
+        let wallet_address = self.address().await;
 
         let mut outputs_to_consolidate = Vec::new();
         let mut native_token_inputs = HashMap::new();
 
-        for (output_id, output_data) in &wallet_data.unspent_outputs {
+        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
             // #[cfg(feature = "participation")]
             // if let Some(ref voting_output) = voting_output {
             //     // Remove voting output from inputs, because we want to keep its features and not consolidate it.
             //     if output_data.output_id == voting_output.output_id {
             //         continue;
-            //     }
+            //     }.await
             // }
 
-            let is_locked_output = wallet_data.locked_outputs.contains(output_id);
+            let is_locked_output = wallet_ledger.locked_outputs.contains(output_id);
             let should_consolidate_output = self
-                .should_consolidate_output(output_data, slot_index, &wallet_address)
+                .should_consolidate_output(output_data, slot_index, wallet_address.as_ref())
                 .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
@@ -210,7 +210,7 @@ where
             })
         });
 
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         let output_threshold = self.get_output_consolidation_threshold(params).await?;
 
