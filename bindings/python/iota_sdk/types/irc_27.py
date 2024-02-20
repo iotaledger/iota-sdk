@@ -70,4 +70,4 @@ class Irc27Metadata:
     def as_feature(self):
         """Turns this schema into a MetadataFeature type
         """
-        MetadataFeature(self.as_hex())
+        MetadataFeature({'irc-27': self.as_hex()})

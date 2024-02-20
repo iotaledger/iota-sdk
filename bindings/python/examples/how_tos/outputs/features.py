@@ -57,7 +57,7 @@ nft_output = client.build_nft_output(
         address_unlock_condition,
     ],
     features=[
-        MetadataFeature(utf8_to_hex('Hello, World!'))
+        MetadataFeature({'data': utf8_to_hex('Hello, World!')})
     ],
 )
 outputs.append(nft_output)
@@ -69,7 +69,7 @@ nft_output = client.build_nft_output(
         address_unlock_condition,
     ],
     immutable_features=[
-        MetadataFeature(utf8_to_hex('Hello, World!'))
+        MetadataFeature({'data': utf8_to_hex('Hello, World!')})
     ],
 )
 outputs.append(nft_output)

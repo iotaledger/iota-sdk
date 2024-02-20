@@ -24,11 +24,11 @@ unlock_conditions = [
 ]
 features = [
     SenderFeature(Ed25519Address(hexAddress)),
-    MetadataFeature(utf8_to_hex('Hello, World!'))
+    MetadataFeature({'data': utf8_to_hex('Hello, World!')})
 ]
 immutable_features = [
     IssuerFeature(Ed25519Address(hexAddress)),
-    MetadataFeature(utf8_to_hex('Hello, World!'))
+    MetadataFeature({'data': utf8_to_hex('Hello, World!')})
 ]
 
 # Build account output
