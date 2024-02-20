@@ -19,30 +19,6 @@ class Duration:
 
 @json
 @dataclass
-class MqttBrokerOptions:
-    """Options for the MQTT broker.
-
-        Attributes:
-        automatic_disconnect (bool):
-            Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not.
-        timeout (Duration):
-            Sets the timeout used for the MQTT operations.
-        use_ws (bool):
-            Sets the use_ws used for the MQTT operations.
-        port (int):
-            Sets the port used for the MQTT operations.
-        max_reconnection_attempts (int):
-            Sets the maximum number of reconnection attempts. 0 is unlimited.
-    """
-    automatic_disconnect: Optional[bool] = None
-    timeout: Optional[Duration] = None
-    use_ws: Optional[bool] = None
-    port: Optional[int] = None
-    max_reconnection_attempts: Optional[int] = None
-
-
-@json
-@dataclass
 class ClientOptions:
     """Client options.
 
@@ -64,10 +40,20 @@ class ClientOptions:
             % of nodes that have to return the same response so it gets accepted.
         user_agent (str):
             The User-Agent header for requests.
-        broker_options (MqttBrokerOptions):
-            Options for the MQTT broker.
+        automatic_disconnect (bool):
+            Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not.
+        timeout (Duration):
+            Sets the timeout used for the MQTT operations.
+        use_ws (bool):
+            Sets the use_ws used for the MQTT operations.
+        port (int):
+            Sets the port used for the MQTT operations.
+        max_reconnection_attempts (int):
+            Sets the maximum number of reconnection attempts. 0 is unlimited.
         protocol_parameters (ProtocolParameters):
             Protocol parameters.
+        tangle_time (int):
+            The current tangle time.
         api_timeout (Duration):
             Timeout for API requests.
         max_parallel_api_requests (int):
@@ -81,7 +67,12 @@ class ClientOptions:
     min_quorum_size: Optional[int] = None
     quorum_threshold: Optional[int] = None
     user_agent: Optional[str] = None
-    broker_options: Optional[MqttBrokerOptions] = None
+    automatic_disconnect: Optional[bool] = None
+    timeout: Optional[Duration] = None
+    use_ws: Optional[bool] = None
+    port: Optional[int] = None
+    max_reconnection_attempts: Optional[int] = None
     protocol_parameters: Optional[ProtocolParameters] = None
+    tangle_time: Optional[int] = None
     api_timeout: Optional[Duration] = None
     max_parallel_api_requests: Optional[int] = None

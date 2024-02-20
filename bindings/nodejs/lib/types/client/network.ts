@@ -24,22 +24,6 @@ export interface IAuth {
 }
 
 /**
- * Options for the MQTT broker.
- */
-export interface IMqttBrokerOptions {
-    /** Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not. */
-    automaticDisconnect?: boolean;
-    /** Sets the timeout in seconds used for the MQTT operations. */
-    timeout?: number;
-    /** Sets whether websockets should be used instead of regular TCP for the MQTT operations. */
-    useWs?: boolean;
-    /** Sets the port used for the MQTT operations. */
-    port?: number;
-    /** Sets the maximum number of reconnection attempts. 0 is unlimited. */
-    maxReconnectionAttempts?: number;
-}
-
-/**
  * A node object for the client.
  */
 export interface INode {
@@ -59,4 +43,6 @@ export interface INode {
 export interface INetworkInfo {
     /** Protocol parameters */
     protocolParameters: ProtocolParameters;
+    /** The current tangle time */
+    tangleTime: number;
 }

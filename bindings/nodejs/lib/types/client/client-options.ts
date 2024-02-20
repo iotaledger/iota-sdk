@@ -1,6 +1,8 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import type { IMqttBrokerOptions, INetworkInfo, INode } from './network';
+
+import { ProtocolParameters } from '../models/info/node-info-protocol';
+import type { INode } from './network';
 
 /** Options for the client builder */
 export interface IClientOptions {
@@ -20,10 +22,23 @@ export interface IClientOptions {
     minQuorumSize?: number;
     /** % of nodes that have to return the same response so it gets accepted */
     quorumThreshold?: number;
-    /** Data related to the used network */
-    networkInfo?: INetworkInfo;
-    /** Options for the MQTT broker */
-    brokerOptions?: IMqttBrokerOptions;
+    /** The User-Agent header for requests */
+    userAgent?: string;
+    /** Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not. */
+    automaticDisconnect?: boolean;
+    /** Sets the timeout in seconds used for the MQTT operations. */
+    timeout?: number;
+    /** Sets whether websockets should be used instead of regular TCP for the MQTT operations. */
+    useWs?: boolean;
+    /** Sets the port used for the MQTT operations. */
+    port?: number;
+    /** Sets the maximum number of reconnection attempts. 0 is unlimited. */
+    maxReconnectionAttempts?: number;
+    // NetworkInfo
+    /** Protocol parameters */
+    protocolParameters?: ProtocolParameters;
+    /** The current tangle time */
+    tangleTime?: number;
     /** Timeout for API requests */
     apiTimeout?: IDuration;
     /** The maximum parallel API requests. */
