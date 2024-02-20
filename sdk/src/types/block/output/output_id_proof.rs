@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::boxed::Box;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::Packable;
@@ -53,38 +53,32 @@ impl OutputCommitmentProof {
     }
 
     /// Get the merkle tree hash for a list of output ids
-    fn hash(output_ids: &[OutputId]) -> Self {
+    fn hash(output_ids: &[OutputId]) -> LeafHash {
         match output_ids {
-            [] => Self::empty_leaf(),
-            [id] => Self::leaf(id),
+            [] => LeafHash::empty(),
+            [id] => LeafHash::new(id),
             _ => {
                 let pivot = largest_power_of_two(output_ids.len() as _);
                 let (left, right) = output_ids.split_at(pivot as _);
+                let left = Self::hash(left).0;
+                let right = Self::hash(right).0;
 
                 let mut hasher = Blake2b256::default();
 
                 hasher.update([NODE_HASH_PREFIX]);
-                hasher.update(left.into_iter().flat_map(OutputId::to_bytes).collect::<Vec<_>>());
-                hasher.update(right.into_iter().flat_map(OutputId::to_bytes).collect::<Vec<_>>());
-                Self::Leaf(LeafHash(hasher.finalize().into()))
+                hasher.update(left);
+                hasher.update(right);
+                LeafHash(hasher.finalize().into())
             }
         }
     }
 
-    fn node(left: Self, right: Self) -> Self {
+    fn node(left: impl Into<Self>, right: impl Into<Self>) -> Self {
         Self::Node(HashableNode::new(left, right))
     }
 
     fn value(output_id: &OutputId) -> Self {
         Self::Value(ValueHash::new(output_id))
-    }
-
-    fn leaf(output_id: &OutputId) -> Self {
-        Self::Leaf(LeafHash::new(output_id))
-    }
-
-    fn empty_leaf() -> Self {
-        Self::Leaf(LeafHash::empty())
     }
 }
 
@@ -98,7 +92,7 @@ fn verify_output_commitment_type<const VERIFY: bool>(proof: &OutputCommitmentPro
     Ok(())
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, derive_more::From, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
@@ -123,10 +117,10 @@ pub struct HashableNode {
 impl HashableNode {
     const KIND: u8 = 0;
 
-    pub fn new(left: OutputCommitmentProof, right: OutputCommitmentProof) -> Self {
+    pub fn new(left: impl Into<OutputCommitmentProof>, right: impl Into<OutputCommitmentProof>) -> Self {
         Self {
-            l: left.into(),
-            r: right.into(),
+            l: Box::new(left.into()),
+            r: Box::new(right.into()),
         }
     }
 }
