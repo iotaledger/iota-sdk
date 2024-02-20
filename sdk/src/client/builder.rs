@@ -291,7 +291,6 @@ impl ClientBuilder {
 }
 
 /// Struct containing network related information
-// TODO do we really want a default?
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NetworkInfo {
