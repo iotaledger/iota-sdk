@@ -378,7 +378,7 @@ where
         self.address.write().await
     }
 
-    /// Get the wallet's configured Bech32 HRP.
+    /// Get the wallet's Bech32 HRP.
     pub async fn bech32_hrp(&self) -> Hrp {
         self.address.read().await.hrp
     }
