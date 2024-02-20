@@ -110,7 +110,7 @@ where
     ) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
         let account_id = account_id.into();
-        self.data()
+        self.ledger()
             .await
             .unspent_outputs
             .values()

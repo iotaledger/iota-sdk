@@ -273,6 +273,11 @@ impl ProtocolParameters {
         slot_commitment_id.past_bounded_slot(self.max_committable_age())
     }
 
+    /// Calculates the past bounded epoch for the given slot of the SlotCommitment.
+    pub fn past_bounded_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
+        self.epoch_index_of(self.past_bounded_slot(slot_commitment_id))
+    }
+
     /// Calculates the future bounded slot for the given slot of the SlotCommitment.
     /// Given any slot index of a commitment input, the result of this function is a slot index
     /// that is at most equal to the slot of the block in which it was issued, or lower.
@@ -280,6 +285,11 @@ impl ProtocolParameters {
     /// hence the future is bounded.
     pub fn future_bounded_slot(&self, slot_commitment_id: SlotCommitmentId) -> SlotIndex {
         slot_commitment_id.future_bounded_slot(self.min_committable_age())
+    }
+
+    /// Calculates the future bounded epoch for the given slot of the SlotCommitment.
+    pub fn future_bounded_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
+        self.epoch_index_of(self.future_bounded_slot(slot_commitment_id))
     }
 
     /// Returns the slot at the end of which the validator and delegator registration ends and the voting power
@@ -294,29 +304,29 @@ impl ProtocolParameters {
 
     /// Gets the start epoch for a delegation with the given slot commitment id.
     pub fn delegation_start_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
-        let past_bounded_slot_index = self.past_bounded_slot(slot_commitment_id);
-        let past_bounded_epoch_index = self.epoch_index_of(past_bounded_slot_index);
+        let past_bounded_slot = self.past_bounded_slot(slot_commitment_id);
+        let past_bounded_epoch = self.epoch_index_of(past_bounded_slot);
 
-        let registration_slot = self.registration_slot(past_bounded_epoch_index + 1);
+        let registration_slot = self.registration_slot(past_bounded_epoch + 1);
 
-        if past_bounded_slot_index <= registration_slot {
-            past_bounded_epoch_index + 1
+        if past_bounded_slot <= registration_slot {
+            past_bounded_epoch + 1
         } else {
-            past_bounded_epoch_index + 2
+            past_bounded_epoch + 2
         }
     }
 
     /// Gets the end epoch for a delegation with the given slot commitment id
     pub fn delegation_end_epoch(&self, slot_commitment_id: SlotCommitmentId) -> EpochIndex {
-        let future_bounded_slot_index = self.future_bounded_slot(slot_commitment_id);
-        let future_bounded_epoch_index = self.epoch_index_of(future_bounded_slot_index);
+        let future_bounded_slot = self.future_bounded_slot(slot_commitment_id);
+        let future_bounded_epoch = self.epoch_index_of(future_bounded_slot);
 
-        let registration_slot = self.registration_slot(future_bounded_epoch_index + 1);
+        let registration_slot = self.registration_slot(future_bounded_epoch + 1);
 
-        if future_bounded_slot_index <= registration_slot {
-            future_bounded_epoch_index
+        if future_bounded_slot <= registration_slot {
+            future_bounded_epoch
         } else {
-            future_bounded_epoch_index + 1
+            future_bounded_epoch + 1
         }
     }
 
