@@ -33,17 +33,18 @@ where
 
         self.address_mut().await.hrp = bech32_hrp;
 
+        let mut wallet_ledger = self.ledger_mut().await;
+        wallet_ledger.inaccessible_incoming_transactions.clear();
+
         #[cfg(feature = "storage")]
         {
-            let wallet_ledger = {
-                let mut wallet_ledger = self.ledger_mut().await;
-                wallet_ledger.inaccessible_incoming_transactions.clear();
-                WalletLedgerDto::from(&*wallet_ledger)
-            };
-
             log::debug!("[save] wallet ledger with updated bech32 hrp",);
-            self.storage_manager().save_wallet_ledger(&wallet_ledger).await?;
+            self.storage_manager()
+                .save_wallet_ledger(&WalletLedgerDto::from(&*wallet_ledger))
+                .await?;
         }
+
+        drop(wallet_ledger);
 
         Ok(())
     }
