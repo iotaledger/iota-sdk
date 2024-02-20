@@ -52,7 +52,7 @@ where
         // Store the wallet bip path
         stronghold.set(WALLET_BIP_PATH_KEY, &self.bip_path().await).await?;
 
-        // Store the wallet alias)
+        // Store the wallet alias
         stronghold.set(WALLET_ALIAS_KEY, &self.alias().await).await?;
 
         let serialized_wallet_ledger = serde_json::to_value(&WalletLedgerDto::from(&*self.ledger.read().await))?;
