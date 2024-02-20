@@ -272,6 +272,13 @@ pub enum WalletCommand {
         #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
+    /// Send mana.
+    SendMana {
+        /// Address to send mana to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        address: Bech32Address,
+        /// Amount of mana to send, e.g. 1000000.
+        mana: u64,
+    },
     /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
@@ -1033,6 +1040,23 @@ pub async fn send_command(
     Ok(())
 }
 
+// `send-mana` command
+pub async fn send_mana_command(
+    wallet: &Wallet,
+    address: impl ConvertTo<Bech32Address>,
+    mana: u64,
+) -> Result<(), Error> {
+    let transaction = wallet.send_mana(mana, address, None).await?;
+
+    println_log_info!(
+        "Transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `send-native-token` command
 pub async fn send_native_token_command(
     wallet: &Wallet,
@@ -1556,6 +1580,10 @@ pub async fn prompt_internal(
                                 allow_micro_amount
                             };
                             send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
+                        }
+                        WalletCommand::SendMana { address, mana } => {
+                            ensure_password(wallet).await?;
+                            send_mana_command(wallet, address, mana).await
                         }
                         WalletCommand::SendNativeToken {
                             address,
