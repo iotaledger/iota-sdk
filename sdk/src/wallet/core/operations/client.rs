@@ -67,7 +67,7 @@ where
             }
             *self.client.network_info.write().await = network_info;
 
-            self.update_bech32_hrp().await?;
+            self.update_address_hrp().await?;
         }
 
         #[cfg(feature = "storage")]
@@ -139,7 +139,7 @@ where
             .update_node_manager(node_manager_builder.build(HashSet::new()))
             .await?;
 
-        self.update_bech32_hrp().await?;
+        self.update_address_hrp().await?;
 
         Ok(())
     }

@@ -61,7 +61,7 @@ class Irc30Metadata {
     }
 
     asFeature(): MetadataFeature {
-        return new MetadataFeature(this.asHex());
+        return new MetadataFeature({ 'irc-30': this.asHex() });
     }
 }
 

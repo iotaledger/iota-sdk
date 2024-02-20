@@ -37,7 +37,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
     ],
     features=[
-        MetadataFeature(utf8_to_hex('Hello, World!'))
+        MetadataFeature({'data': utf8_to_hex('Hello, World!')})
     ],
     amount=1000000,
 )

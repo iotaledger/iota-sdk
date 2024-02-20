@@ -44,11 +44,11 @@ async function run() {
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),
-                new MetadataFeature(utf8ToHex('hello')),
+                new MetadataFeature({ data: utf8ToHex('hello') }),
             ],
             immutableFeatures: [
                 new IssuerFeature(new Ed25519Address(hexAddress)),
-                new MetadataFeature(utf8ToHex('hello')),
+                new MetadataFeature({ data: utf8ToHex('hello') }),
             ],
         });
 
