@@ -32,7 +32,8 @@ impl InputSelection {
         }) = self.min_mana_allotment
         else {
             // If there is no min allotment calculation needed, just check mana
-            return self.get_inputs_for_mana_balance();
+            self.get_inputs_for_mana_balance()?;
+            return Ok(Vec::new());
         };
 
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
@@ -117,11 +118,10 @@ impl InputSelection {
         let additional_inputs = self.get_inputs_for_mana_balance()?;
         // If we needed more inputs to cover the additional allotment mana
         // then update remainders and re-run this requirement
-        if !additional_inputs.is_empty() {
+        if additional_inputs {
             if !self.requirements.contains(&Requirement::Mana) {
                 self.requirements.push(Requirement::Mana);
             }
-            return Ok(additional_inputs);
         }
 
         Ok(Vec::new())
@@ -236,11 +236,12 @@ impl InputSelection {
         Ok(Unlocks::new(blocks)?)
     }
 
-    pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<bool, Error> {
         let (mut selected_mana, mut required_mana) = self.mana_sums(true)?;
 
         log::debug!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
 
+        let mut added_inputs = false;
         if selected_mana >= required_mana {
             log::debug!("Mana requirement already fulfilled");
         } else {
@@ -253,19 +254,14 @@ impl InputSelection {
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();
                 }
+                added_inputs = true;
 
                 if selected_mana >= required_mana {
                     break;
                 }
             }
-            if selected_mana < required_mana {
-                return Err(Error::InsufficientMana {
-                    found: selected_mana,
-                    required: required_mana,
-                });
-            }
         }
-        Ok(Vec::new())
+        Ok(added_inputs)
     }
 
     pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {

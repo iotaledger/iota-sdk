@@ -234,6 +234,15 @@ impl InputSelection {
             }
         }
 
+        let (input_mana, output_mana) = self.mana_sums(false)?;
+
+        if input_mana < output_mana {
+            return Err(Error::InsufficientMana {
+                found: input_mana,
+                required: output_mana,
+            });
+        }
+
         // If there is no min allotment calculation, then we should update the remainders as the last step
         if self.min_mana_allotment.is_none() {
             self.update_remainders()?;

@@ -1914,38 +1914,35 @@ fn min_allot_account_mana_requirement_twice() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = build_outputs([Basic {
-        amount: 1_000_000,
-        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        native_token: None,
-        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
-        sdruc: None,
-        timelock: None,
-        expiration: None,
-    }]);
-
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_min_mana_allotment(account_id_1, 2, true)
+    .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
-    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id_1)
+        .unwrap();
     assert_eq!(selected.transaction.allotments().len(), 1);
     let mana_cost = 960;
     assert_eq!(
         selected.transaction.allotments()[0],
         ManaAllotment::new(account_id_1, mana_cost).unwrap()
     );
-    assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 140);
+    assert_eq!(account_output.mana(), 140);
 }
 
 #[test]
