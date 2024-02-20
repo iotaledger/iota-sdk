@@ -31,7 +31,7 @@ where
         log::debug!("[TRANSACTION] prepare_extend_staking");
 
         let account_output_data = self
-            .data()
+            .ledger()
             .await
             .unspent_account_output(&account_id)
             .cloned()

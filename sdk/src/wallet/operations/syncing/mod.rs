@@ -96,7 +96,7 @@ where
 
         let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
             address: self.address().await,
-            output_ids: self.data().await.unspent_outputs().keys().copied().collect(),
+            output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
             internal: false,
             key_index: 0,
         };

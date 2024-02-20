@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::{Address, Ed25519Address},
+        address::{Address, Bech32Address, Ed25519Address},
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutput, NftOutputBuilder, Output, OutputId, UnlockCondition,
         },
@@ -16,7 +16,7 @@ use crate::{
         slot::SlotIndex,
     },
     wallet::{
-        core::WalletData,
+        core::WalletLedger,
         operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Wallet,
@@ -34,7 +34,7 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl WalletData {
+impl WalletLedger {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) or
@@ -43,6 +43,7 @@ impl WalletData {
     /// additional inputs
     pub(crate) fn claimable_outputs(
         &self,
+        wallet_address: &Bech32Address,
         outputs_to_claim: OutputsToClaim,
         slot_index: SlotIndex,
         protocol_parameters: &ProtocolParameters,
@@ -66,7 +67,7 @@ impl WalletData {
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            self.address.inner(),
+                            wallet_address.inner(),
                             output_data,
                             slot_index,
                             protocol_parameters.committable_age_range(),
@@ -142,12 +143,17 @@ where
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
     pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         let slot_index = self.client().get_slot_index().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        wallet_data.claimable_outputs(outputs_to_claim, slot_index, &protocol_parameters)
+        wallet_ledger.claimable_outputs(
+            &self.address().await,
+            outputs_to_claim,
+            slot_index,
+            &protocol_parameters,
+        )
     }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
@@ -156,11 +162,11 @@ where
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
         let mut basic_outputs: Vec<OutputData> = Vec::new();
-        for (output_id, output_data) in &wallet_data.unspent_outputs {
+        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
                 // Remove voting output from inputs, because we don't want to spent it to claim something else.
@@ -169,8 +175,8 @@ where
                 }
             }
             // Don't use outputs that are locked for other transactions
-            if !wallet_data.locked_outputs.contains(output_id) {
-                if let Some(output) = wallet_data.outputs.get(output_id) {
+            if !wallet_ledger.locked_outputs.contains(output_id) {
+                if let Some(output) = wallet_ledger.outputs.get(output_id) {
                     if let Output::Basic(basic_output) = &output.output {
                         if let [UnlockCondition::Address(a)] = basic_output.unlock_conditions().as_ref() {
                             // Implicit accounts can't be used
@@ -239,12 +245,12 @@ where
 
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         let mut outputs_to_claim = Vec::new();
         for output_id in output_ids_to_claim {
-            if let Some(output_data) = wallet_data.unspent_outputs.get(&output_id) {
-                if !wallet_data.locked_outputs.contains(&output_id) {
+            if let Some(output_data) = wallet_ledger.unspent_outputs.get(&output_id) {
+                if !wallet_ledger.locked_outputs.contains(&output_id) {
                     outputs_to_claim.push(output_data.clone());
                 }
             }
@@ -256,8 +262,8 @@ where
             ));
         }
 
-        let wallet_address = wallet_data.address.clone();
-        drop(wallet_data);
+        let wallet_address = self.address().await;
+        drop(wallet_ledger);
 
         let mut nft_outputs_to_send = Vec::new();
 
@@ -279,13 +285,13 @@ where
                     // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
+                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
+                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
                         .finish_output()?
                 };
 

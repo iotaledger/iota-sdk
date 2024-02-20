@@ -56,8 +56,8 @@ where
         log::debug!("[TRANSACTION] mint_native_token");
 
         let mint_amount = mint_amount.into();
-        let wallet_data = self.data().await;
-        let existing_foundry_output = wallet_data.unspent_outputs.values().find(|output_data| {
+        let wallet_ledger = self.ledger().await;
+        let existing_foundry_output = wallet_ledger.unspent_outputs.values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {
                 TokenId::new(*output.id()) == token_id
             } else {
@@ -80,7 +80,7 @@ where
             }
 
             // Get the account output that controls the foundry output
-            let existing_account_output = wallet_data.unspent_outputs.values().find(|output_data| {
+            let existing_account_output = wallet_ledger.unspent_outputs.values().find(|output_data| {
                 if let Output::Account(output) = &output_data.output {
                     output.account_id_non_null(&output_data.output_id) == **foundry_output.account_address()
                 } else {
@@ -94,7 +94,7 @@ where
             return Err(Error::MintingFailed("account output is not available".to_string()));
         };
 
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         let account_output = if let Output::Account(account_output) = existing_account_output.output {
             account_output
