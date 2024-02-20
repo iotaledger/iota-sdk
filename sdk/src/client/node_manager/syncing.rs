@@ -3,8 +3,7 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
-    crate::client::NetworkInfo,
-    crate::types::block::PROTOCOL_VERSION,
+    crate::{client::NetworkInfo, types::block::PROTOCOL_VERSION},
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };

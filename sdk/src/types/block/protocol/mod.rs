@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "samples")]
+#[cfg(feature = "protocol_parameter_samples")]
 mod samples;
 mod work_score;
 
@@ -10,7 +10,7 @@ use core::borrow::Borrow;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
-#[cfg(feature = "samples")]
+#[cfg(feature = "protocol_parameter_samples")]
 pub use samples::{iota_mainnet_protocol_parameters, shimmer_mainnet_protocol_parameters};
 
 pub use self::work_score::{WorkScore, WorkScoreParameters};
