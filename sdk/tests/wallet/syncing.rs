@@ -51,7 +51,7 @@
 //     let wallet_0 = create_wallet_with_funds(storage_path_0, None, None, 1).await?;
 //     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-//     let wallet_1_address = wallet_1.address().await;
+//     let wallet_1_address = wallet_1.address().clone();
 
 //     let token_supply = wallet_0.client().get_token_supply().await?;
 //     // Only one basic output without further unlock conditions
@@ -154,7 +154,7 @@
 //     let wallet_0 = create_wallet_with_funds(storage_path_0, None, None, 1).await?;
 //     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-//     let wallet_1_address = wallet_1.address().await;
+//     let wallet_1_address = wallet_1.address().clone();
 
 //     let token_supply = wallet_0.client().get_token_supply().await?;
 
@@ -203,7 +203,7 @@
 
 //     iota_sdk::client::request_funds_from_faucet(
 //         crate::wallet::common::FAUCET_URL,
-//         &wallet.address().await,
+//         &wallet.address().clone(),
 //     )
 //     .await?;
 

@@ -1,10 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{MintNftParams, Result, SendNftParams, SendParams, TransactionOptions};
-use pretty_assertions::assert_eq;
+// use iota_sdk::wallet::{MintNftParams, Result, SendNftParams, SendParams, TransactionOptions};
+// use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
+// use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 // #[ignore]
 // #[tokio::test]
@@ -21,7 +21,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 //     let amount = 1_000_000;
 //     let tx = wallet_0
-//         .send_with_params([SendParams::new(amount, wallet_1.address().await)?], None)
+//         .send_with_params([SendParams::new(amount, wallet_1.address().clone())?], None)
 //         .await?;
 
 //     wallet_0
@@ -53,7 +53,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //             vec![
 //                 SendParams::new(
 //                     amount,
-//                     wallet_1.address().await,
+//                     wallet_1.address().clone(),
 //                 )?;
 //                 // Only 127, because we need one remainder
 //                 127
@@ -133,7 +133,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
 //     let nft_options = [MintNftParams::new()
-//         .with_address(wallet_0.address().await)
+//         .with_address(wallet_0.address().clone())
 //         .with_metadata(b"some nft metadata".to_vec())
 //         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
@@ -146,7 +146,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //     // Send to wallet 1
 //     let transaction = wallet_0
 //         .send_nft(
-//             [SendNftParams::new(wallet_1.address().await, nft_id)?],
+//             [SendNftParams::new(wallet_1.address().clone(), nft_id)?],
 //             None,
 //         )
 //         .await
@@ -178,7 +178,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //     let amount = 1_000_000;
 //     let tx = wallet_0
 //         .send_with_params(
-//             [SendParams::new(amount, wallet_1.address().await)?],
+//             [SendParams::new(amount, wallet_1.address().clone())?],
 //             Some(TransactionOptions {
 //                 note: Some(String::from("send_with_note")),
 //                 ..Default::default()
@@ -213,7 +213,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .send_with_params(
 //             [SendParams::new(
 //                 1_000_000,
-//                 wallet_0.address().await,
+//                 wallet_0.address().clone(),
 //             )?],
 //             None,
 //         )
@@ -228,7 +228,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //                 // Something in the transaction must be different than in the first one, otherwise it will be the
 // same                 // one
 //                 2_000_000,
-//                 wallet_0.address().await,
+//                 wallet_0.address().clone(),
 //             )?],
 //             None,
 //         )
@@ -297,7 +297,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .await;
 
 //     let tx = wallet_0
-//         .send_with_params([SendParams::new(amount, wallet_1.address().await)?], None)
+//         .send_with_params([SendParams::new(amount, wallet_1.address().clone())?], None)
 //         .await?;
 
 //     let data = receiver.recv().await.expect("never received event");

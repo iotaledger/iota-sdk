@@ -25,7 +25,7 @@ use crate::{
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
-    wallet::{core::WalletData, types::OutputData, Result, Wallet},
+    wallet::{core::WalletLedger, types::OutputData, Result, Wallet},
 };
 
 /// An object containing an account's entire participation overview.
@@ -66,8 +66,8 @@ where
     //     "[get_participation_overview] restored_spent_cached_outputs_len: {}",
     //     restored_spent_cached_outputs_len
     // );
-    // let wallet_data = self.data().await;
-    // let participation_outputs = wallet_data.outputs().values().filter(|output_data| {
+    // let wallet_ledger = self.data().await;
+    // let participation_outputs = wallet_ledger.outputs().values().filter(|output_data| {
     //     is_valid_participation_output(&output_data.output)
     //         // Check that the metadata exists, because otherwise we aren't participating for anything
     //             && output_data.output.features().and_then(|f| f.metadata()).is_some()
@@ -218,7 +218,7 @@ where
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
     pub async fn get_voting_output(&self) -> Result<Option<OutputData>> {
-        self.data().await.get_voting_output()
+        self.ledger().await.get_voting_output()
     }
 
     // /// Gets client for an event.
@@ -271,7 +271,7 @@ where
     // }
 }
 
-impl WalletData {
+impl WalletLedger {
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.

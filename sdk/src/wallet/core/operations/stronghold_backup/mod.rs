@@ -5,7 +5,7 @@ pub(crate) mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf};
 
-use self::stronghold_snapshot::read_wallet_data_from_stronghold_snapshot;
+use self::stronghold_snapshot::restore_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::wallet::WalletBuilder;
 use crate::{
@@ -14,11 +14,12 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::Wallet,
+    wallet::{core::WalletLedgerDto, Wallet},
 };
 
 impl Wallet {
-    /// Backup the wallet data in a Stronghold file.
+    /// Backup the wallet in a Stronghold snapshot file.
+    ///
     /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(
         &self,
@@ -34,7 +35,7 @@ impl Wallet {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
                 stronghold.set_password(stronghold_password).await?;
-                self.store_data_to_stronghold(stronghold).await?;
+                self.backup_to_stronghold_snapshot(stronghold).await?;
                 // Write snapshot to backup path
                 stronghold.write_stronghold_snapshot(Some(&backup_path)).await?;
             }
@@ -45,7 +46,7 @@ impl Wallet {
                     .password(stronghold_password)
                     .build(backup_path)?;
 
-                self.store_data_to_stronghold(&backup_stronghold).await?;
+                self.backup_to_stronghold_snapshot(&backup_stronghold).await?;
 
                 // Write snapshot to backup path
                 backup_stronghold.write_stronghold_snapshot(None).await?;
@@ -55,7 +56,8 @@ impl Wallet {
         Ok(())
     }
 
-    /// Restore a backup from a Stronghold file
+    /// Restore a backup from a Stronghold snapshot file.
+    ///
     /// Replaces client_options, bip_path, secret_manager and wallet. Returns an error if the wallet was already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
@@ -79,34 +81,32 @@ impl Wallet {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         // We don't want to overwrite a possible existing wallet
-        if !wallet_data.outputs.is_empty() {
+        if !wallet_ledger.outputs.is_empty() {
             return Err(crate::wallet::Error::Backup(
                 "can't restore backup when there is already a wallet",
             ));
         }
 
-        let curr_bip_path = wallet_data.bip_path;
+        let curr_bip_path = self.bip_path().await;
 
         // Explicitly drop the data to avoid contention
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_secret_manager, read_wallet_data) =
-            read_wallet_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
-
-        let read_bip_path = read_wallet_data.as_ref().and_then(|data| data.bip_path);
+        let (read_address, read_bip_path, read_alias, read_client_options, read_secret_manager, read_wallet_ledger) =
+            restore_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the bip path is not matching the current one, we may ignore the backup
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
-                // TODO: #1279 okay that if both are none we always load the backup values?
+                // TODO: is it okay that if both are none we always load the backup values?
                 curr_bip_path != read_bip_path
             } else {
                 false
@@ -114,7 +114,7 @@ impl Wallet {
         });
 
         if !ignore_backup_values {
-            self.data_mut().await.bip_path = read_bip_path;
+            *self.bip_path_mut().await = read_bip_path;
         }
 
         // Get the current snapshot path if set
@@ -154,14 +154,17 @@ impl Wallet {
         }
 
         if !ignore_backup_values {
-            if let Some(read_wallet_data) = read_wallet_data {
+            if let Some(read_wallet_ledger) = read_wallet_ledger {
                 let restore_wallet = ignore_if_bech32_hrp_mismatch.map_or(true, |expected_bech32_hrp| {
                     // Only restore if bech32 hrps match
-                    read_wallet_data.address.hrp() == &expected_bech32_hrp
+                    read_address.hrp() == &expected_bech32_hrp
                 });
 
                 if restore_wallet {
-                    *self.data_mut().await = read_wallet_data;
+                    *self.address_mut().await = read_address;
+                    *self.bip_path_mut().await = read_bip_path;
+                    *self.alias_mut().await = read_alias;
+                    *self.ledger_mut().await = read_wallet_ledger;
                 }
             }
         }
@@ -182,12 +185,16 @@ impl Wallet {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.data().await.bip_path);
+                .with_address(self.address().await)
+                .with_bip_path(self.bip_path().await)
+                .with_alias(self.alias().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet data to db
-            self.storage_manager().save_wallet_data(&*self.data().await).await?;
+            // also save wallet ledger to db
+            self.storage_manager()
+                .save_wallet_ledger(&WalletLedgerDto::from(&*self.ledger().await))
+                .await?;
         }
 
         Ok(())
@@ -195,8 +202,9 @@ impl Wallet {
 }
 
 impl Wallet<StrongholdSecretManager> {
-    /// Backup the wallet data in a Stronghold file
-    /// stronghold_password must be the current one when Stronghold is used as SecretManager.
+    /// Backup the wallet in a Stronghold snapshot file.
+    ///
+    /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(
         &self,
         backup_path: PathBuf,
@@ -207,7 +215,7 @@ impl Wallet<StrongholdSecretManager> {
 
         secret_manager.set_password(stronghold_password).await?;
 
-        self.store_data_to_stronghold(&secret_manager).await?;
+        self.backup_to_stronghold_snapshot(&secret_manager).await?;
 
         // Write snapshot to backup path
         secret_manager.write_stronghold_snapshot(Some(&backup_path)).await?;
@@ -215,7 +223,8 @@ impl Wallet<StrongholdSecretManager> {
         Ok(())
     }
 
-    /// Restore a backup from a Stronghold file
+    /// Restore a backup from a Stronghold file.
+    ///
     /// Replaces client_options, bip path, secret_manager and wallet. Returns an error if the wallet was already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
@@ -239,34 +248,32 @@ impl Wallet<StrongholdSecretManager> {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let wallet_data = self.data().await;
+        let wallet_ledger = self.ledger().await;
 
         // We don't want to overwrite a possible existing wallet
-        if !wallet_data.outputs.is_empty() {
+        if !wallet_ledger.outputs.is_empty() {
             return Err(crate::wallet::Error::Backup(
                 "can't restore backup when there is already a wallet",
             ));
         }
 
-        let curr_bip_path = wallet_data.bip_path;
+        let curr_bip_path = self.bip_path().await;
 
         // Explicitly drop the data to avoid contention
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_secret_manager, read_wallet_data) =
-            read_wallet_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
-
-        let read_bip_path = read_wallet_data.as_ref().and_then(|data| data.bip_path);
+        let (read_address, read_bip_path, read_alias, read_client_options, read_secret_manager, read_wallet_ledger) =
+            restore_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
         // If the bip path is not matching the current one, we may ignore the backup
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
-                // TODO: #1279 okay that if both are none we always load the backup values?
+                // TODO: is it okay that if both are none we always load the backup values?
                 curr_bip_path != read_bip_path
             } else {
                 false
@@ -274,7 +281,7 @@ impl Wallet<StrongholdSecretManager> {
         });
 
         if !ignore_backup_values {
-            self.data_mut().await.bip_path = read_bip_path;
+            *self.bip_path_mut().await = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
@@ -303,14 +310,17 @@ impl Wallet<StrongholdSecretManager> {
         }
 
         if !ignore_backup_values {
-            if let Some(read_wallet_data) = read_wallet_data {
+            if let Some(read_wallet_ledger) = read_wallet_ledger {
                 let restore_wallet = ignore_if_bech32_hrp_mismatch.map_or(true, |expected_bech32_hrp| {
                     // Only restore if bech32 hrps match
-                    read_wallet_data.address.hrp() == &expected_bech32_hrp
+                    read_address.hrp() == &expected_bech32_hrp
                 });
 
                 if restore_wallet {
-                    *self.data_mut().await = read_wallet_data;
+                    *self.address_mut().await = read_address;
+                    *self.bip_path_mut().await = read_bip_path;
+                    *self.alias_mut().await = read_alias;
+                    *self.ledger_mut().await = read_wallet_ledger;
                 }
             }
         }
@@ -331,12 +341,16 @@ impl Wallet<StrongholdSecretManager> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_bip_path(self.data().await.bip_path);
+                .with_address(self.address().await)
+                .with_bip_path(self.bip_path().await)
+                .with_alias(self.alias().await);
 
             wallet_builder.save(self.storage_manager()).await?;
 
-            // also save wallet data to db
-            self.storage_manager().save_wallet_data(&*self.data().await).await?;
+            // also save wallet ledger to db
+            self.storage_manager()
+                .save_wallet_ledger(&WalletLedgerDto::from(&*self.ledger().await))
+                .await?;
         }
 
         Ok(())

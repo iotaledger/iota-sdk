@@ -22,7 +22,7 @@ where
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = match issuer_id.into() {
             Some(id) => id,
-            None => self.data().await.first_account_id().ok_or(Error::AccountNotFound)?,
+            None => self.ledger().await.first_account_id().ok_or(Error::AccountNotFound)?,
         };
 
         let unsigned_block = self.client().build_basic_block(issuer_id, payload).await?;

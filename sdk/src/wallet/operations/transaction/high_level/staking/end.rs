@@ -23,7 +23,7 @@ where
         log::debug!("[TRANSACTION] prepare_end_staking");
 
         let account_output_data = self
-            .data()
+            .ledger()
             .await
             .unspent_account_output(&account_id)
             .cloned()
@@ -38,8 +38,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
-        let future_bounded_epoch =
-            protocol_parameters.epoch_index_of(protocol_parameters.future_bounded_slot(slot_commitment_id));
+        let future_bounded_epoch = protocol_parameters.future_bounded_epoch(slot_commitment_id);
 
         if future_bounded_epoch <= staking_feature.end_epoch() {
             let end_epoch = protocol_parameters.epoch_index_of(slot_commitment_id.slot_index())

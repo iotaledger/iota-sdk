@@ -31,7 +31,7 @@ where
         log::debug!("[TRANSACTION] prepare_extend_staking");
 
         let account_output_data = self
-            .data()
+            .ledger()
             .await
             .unspent_account_output(&account_id)
             .cloned()
@@ -41,8 +41,7 @@ where
 
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
 
-        let future_bounded_epoch =
-            protocol_parameters.epoch_index_of(protocol_parameters.future_bounded_slot(slot_commitment_id));
+        let future_bounded_epoch = protocol_parameters.future_bounded_epoch(slot_commitment_id);
 
         let staking_feature = account_output_data
             .output
@@ -71,8 +70,7 @@ where
                     protocol_parameters.staking_unbonding_period()
                 )));
             }
-            let past_bounded_epoch =
-                protocol_parameters.epoch_index_of(protocol_parameters.past_bounded_slot(slot_commitment_id));
+            let past_bounded_epoch = protocol_parameters.past_bounded_epoch(slot_commitment_id);
             let end_epoch = past_bounded_epoch.saturating_add(additional_epochs);
             output_builder = output_builder.replace_feature(StakingFeature::new(
                 staking_feature.staked_amount(),

@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     // output.
     println!("Outputs BEFORE consolidation:");
     wallet
-        .data()
+        .ledger()
         .await
         .unspent_outputs()
         .values()
@@ -89,7 +89,7 @@ async fn main() -> Result<()> {
     // Outputs after consolidation
     println!("Outputs AFTER consolidation:");
     wallet
-        .data()
+        .ledger()
         .await
         .unspent_outputs()
         .values()

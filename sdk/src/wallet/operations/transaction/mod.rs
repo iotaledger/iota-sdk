@@ -22,6 +22,7 @@ use crate::{
         block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
     },
     wallet::{
+        core::WalletLedgerDto,
         types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },
@@ -172,16 +173,18 @@ where
             inputs,
         };
 
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
 
-        wallet_data.transactions.insert(transaction_id, transaction.clone());
-        wallet_data.pending_transactions.insert(transaction_id);
+        wallet_ledger.transactions.insert(transaction_id, transaction.clone());
+        wallet_ledger.pending_transactions.insert(transaction_id);
 
         #[cfg(feature = "storage")]
         {
             // TODO: maybe better to use the wallet address as identifier now?
-            log::debug!("[TRANSACTION] storing wallet");
-            self.storage_manager().save_wallet_data(&wallet_data).await?;
+            log::debug!("[TRANSACTION] storing wallet ledger");
+            self.storage_manager()
+                .save_wallet_ledger(&WalletLedgerDto::from(&*wallet_ledger))
+                .await?;
         }
 
         Ok(transaction)
@@ -189,10 +192,10 @@ where
 
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut wallet_data = self.data_mut().await;
+        let mut wallet_ledger = self.ledger_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();
-            wallet_data.locked_outputs.remove(output_id);
+            wallet_ledger.locked_outputs.remove(output_id);
             log::debug!(
                 "[TRANSACTION] Unlocked output {} because of transaction error",
                 output_id

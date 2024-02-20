@@ -52,8 +52,8 @@ where
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let wallet_data = self.data().await;
-        let implicit_account_data = wallet_data
+        let wallet_ledger = self.ledger().await;
+        let implicit_account_data = wallet_ledger
             .unspent_outputs
             .get(output_id)
             .ok_or(Error::ImplicitAccountNotFound)?;
@@ -95,7 +95,7 @@ where
             )?])
             .finish_output()?;
 
-        drop(wallet_data);
+        drop(wallet_ledger);
 
         let transaction_options = TransactionOptions {
             required_inputs: [*output_id].into(),

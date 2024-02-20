@@ -114,11 +114,9 @@ impl SecretManager {
             address_index..address_index + 1,
             options,
         )
-        .await?
-        .pop()
         // Panic: if the secret manager hasn't failed then there must be an address.
-        .unwrap()
-        .to_bech32(hrp))
+        .await?[0]
+            .to_bech32(hrp))
     }
 
     /// Generates a vector of Ed25519 backed Bech32 addresses.

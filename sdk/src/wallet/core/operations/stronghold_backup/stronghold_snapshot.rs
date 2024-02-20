@@ -1,11 +1,14 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
+
 use crate::{
     client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
-    types::TryFromDto,
+    types::{block::address::Bech32Address, TryFromDto},
     wallet::{
-        core::{WalletData, WalletDataDto},
+        self,
+        core::{WalletLedger, WalletLedgerDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
         ClientOptions, Wallet,
     },
@@ -13,61 +16,95 @@ use crate::{
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
-pub(crate) const WALLET_DATA_KEY: &str = "wallet_data";
+pub(crate) const WALLET_LEDGER_KEY: &str = "wallet_ledger";
+pub(crate) const WALLET_ADDRESS_KEY: &str = "wallet_address";
+pub(crate) const WALLET_BIP_PATH_KEY: &str = "wallet_bip_path";
+pub(crate) const WALLET_ALIAS_KEY: &str = "wallet_alias";
 
-impl<S: 'static + SecretManagerConfig> Wallet<S> {
-    pub(crate) async fn store_data_to_stronghold(&self, stronghold: &StrongholdAdapter) -> crate::wallet::Result<()> {
+impl<S: 'static + SecretManagerConfig> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
+{
+    pub(crate) async fn backup_to_stronghold_snapshot(
+        &self,
+        stronghold: &StrongholdAdapter,
+    ) -> crate::wallet::Result<()> {
         // Set migration version
         stronghold
             .set(MIGRATION_VERSION_KEY, &latest_backup_migration_version())
             .await?;
 
+        // Store the client options
         let client_options = self.client_options().await;
         stronghold.set(CLIENT_OPTIONS_KEY, &client_options).await?;
 
+        // Store the secret manager
         if let Some(secret_manager_dto) = self.secret_manager.read().await.to_config() {
             stronghold.set(SECRET_MANAGER_KEY, &secret_manager_dto).await?;
         }
 
-        let serialized_wallet_data = serde_json::to_value(&WalletDataDto::from(&*self.data.read().await))?;
-        stronghold.set(WALLET_DATA_KEY, &serialized_wallet_data).await?;
+        // Store the wallet address
+        stronghold
+            .set(WALLET_ADDRESS_KEY, self.address().await.as_ref())
+            .await?;
+
+        // Store the wallet bip path
+        stronghold.set(WALLET_BIP_PATH_KEY, &self.bip_path().await).await?;
+
+        // Store the wallet alias
+        stronghold.set(WALLET_ALIAS_KEY, &self.alias().await).await?;
+
+        let serialized_wallet_ledger = serde_json::to_value(&WalletLedgerDto::from(&*self.ledger.read().await))?;
+        stronghold.set(WALLET_LEDGER_KEY, &serialized_wallet_ledger).await?;
 
         Ok(())
     }
 }
 
-pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
+pub(crate) async fn restore_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
-) -> crate::wallet::Result<(Option<ClientOptions>, Option<S::Config>, Option<WalletData>)> {
+) -> crate::wallet::Result<(
+    Bech32Address,
+    Option<Bip44>,
+    Option<String>,
+    Option<ClientOptions>,
+    Option<S::Config>,
+    Option<WalletLedger>,
+)> {
     migrate(stronghold).await?;
 
     // Get client_options
     let client_options = stronghold.get(CLIENT_OPTIONS_KEY).await?;
 
-    // TODO #1279: remove
-    // // Get coin_type
-    // let coin_type_bytes = stronghold.get_bytes(COIN_TYPE_KEY).await?;
-    // let coin_type = if let Some(coin_type_bytes) = coin_type_bytes {
-    //     let coin_type = u32::from_le_bytes(
-    //         coin_type_bytes
-    //             .try_into()
-    //             .map_err(|_| WalletError::Backup("invalid coin_type"))?,
-    //     );
-    //     log::debug!("[restore_backup] restored coin_type: {coin_type}");
-    //     Some(coin_type)
-    // } else {
-    //     None
-    // };
-
     // Get secret_manager
-    let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
+    let secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
 
-    // Get wallet data
-    let restored_wallet_data = stronghold
-        .get::<WalletDataDto>(WALLET_DATA_KEY)
+    // Get the wallet address
+    let wallet_address = stronghold
+        .get(WALLET_ADDRESS_KEY)
         .await?
-        .map(WalletData::try_from_dto)
+        .ok_or(wallet::Error::Backup("missing non-optional wallet address"))?;
+
+    // Get the wallet bip path
+    let wallet_bip_path = stronghold.get(WALLET_BIP_PATH_KEY).await?;
+
+    // Get the wallet alias
+    let wallet_alias = stronghold.get(WALLET_ALIAS_KEY).await?;
+
+    // Get wallet ledger
+    let wallet_ledger = stronghold
+        .get::<WalletLedgerDto>(WALLET_LEDGER_KEY)
+        .await?
+        .map(WalletLedger::try_from_dto)
         .transpose()?;
 
-    Ok((client_options, restored_secret_manager, restored_wallet_data))
+    Ok((
+        wallet_address,
+        wallet_bip_path,
+        wallet_alias,
+        client_options,
+        secret_manager,
+        wallet_ledger,
+    ))
 }
