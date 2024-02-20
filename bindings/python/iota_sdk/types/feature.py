@@ -84,7 +84,7 @@ class MetadataFeature:
 @json
 @dataclass
 class StateMetadataFeature:
-    """Defines metadata, arbitrary binary data, that will be stored in the output.
+    """A Metadata Feature that can only be changed by the State Controller.
     Attributes:
         entries: A key-value map where the keys are graphic ASCII strings and the values hex-encoded binary data.
     """

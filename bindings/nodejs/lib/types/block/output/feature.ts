@@ -105,7 +105,7 @@ class MetadataFeature extends Feature {
 }
 
 /**
- * A State Metadata feature.
+ * A Metadata Feature that can only be changed by the State Controller.
  */
 class StateMetadataFeature extends Feature {
     /** Defines metadata (arbitrary binary data) that will be stored in the output. */
