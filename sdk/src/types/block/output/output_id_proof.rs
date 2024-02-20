@@ -35,10 +35,11 @@ impl OutputCommitmentProof {
         match output_ids {
             [id] => Self::value(id),
             _ => {
-                let n = output_ids.len();
-                debug_assert!(n > 0 && index < n as u16, "n={n}, index={index}");
+                let num_outputs = output_ids.len() as u16;
+                debug_assert!(num_outputs > 0 && index < num_outputs, "n={num_outputs}, index={index}");
+
                 // Select a `pivot` element to split `data` into two slices `left` and `right`.
-                let pivot = largest_power_of_two(n as _) as u16;
+                let pivot = largest_power_of_two(num_outputs as _) as u16;
                 let (left, right) = output_ids.split_at(pivot as _);
 
                 if index < pivot {
@@ -163,6 +164,8 @@ impl ValueHash {
 
 #[cfg(feature = "serde")]
 mod serialization {
+    use alloc::format;
+
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
 
@@ -245,15 +248,15 @@ mod serialization {
                     .ok_or_else(|| serde::de::Error::custom("invalid output commitment proof type"))?
                     as u8
                 {
-                    0 => Self::Node(
+                    HashableNode::KIND => Self::Node(
                         serde_json::from_value::<HashableNode>(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize hashable node: {e}")))?,
                     ),
-                    1 => Self::Leaf(
+                    LeafHash::KIND => Self::Leaf(
                         serde_json::from_value::<LeafHash>(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize leaf hash: {e}")))?,
                     ),
-                    2 => Self::Value(
+                    ValueHash::KIND => Self::Value(
                         serde_json::from_value::<ValueHash>(value)
                             .map_err(|e| serde::de::Error::custom(format!("cannot deserialize value hash: {e}")))?,
                     ),
