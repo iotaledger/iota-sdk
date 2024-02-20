@@ -52,7 +52,7 @@ where
 
         let account_id = params.account_id;
         let account_output_data = self
-            .data()
+            .ledger()
             .await
             .unspent_account_output(&account_id)
             .cloned()
