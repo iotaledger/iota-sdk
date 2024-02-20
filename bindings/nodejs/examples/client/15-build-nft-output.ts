@@ -56,7 +56,9 @@ async function run() {
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),
-                new MetadataFeature(utf8ToHex('mutable metadata')),
+                new MetadataFeature({
+                    data: utf8ToHex('mutable metadata'),
+                }),
                 new TagFeature(utf8ToHex('my tag')),
             ],
         });
