@@ -209,6 +209,7 @@ pub enum Error {
     },
     TrailingCapabilityBytes,
     RestrictedAddressCapability(AddressCapabilityFlag),
+    InvalidOutputProofKind(u8),
 }
 
 #[cfg(feature = "std")]
@@ -450,6 +451,7 @@ impl fmt::Display for Error {
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
             Self::RestrictedAddressCapability(cap) => write!(f, "restricted address capability: {cap:?}"),
+            Self::InvalidOutputProofKind(k) => write!(f, "invalid output proof kind: {k}"),
         }
     }
 }

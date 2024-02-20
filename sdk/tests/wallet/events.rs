@@ -54,10 +54,7 @@ fn wallet_events_serde() {
             slot: SlotIndex(1),
             output_index: 0,
             transaction_commitment: [0u8; 32],
-            output_commitment_proof: OutputCommitmentProof::LeafHash(LeafHash {
-                kind: 1,
-                hash: [0u8; 32],
-            }),
+            output_commitment_proof: OutputCommitmentProof::Leaf(LeafHash([0u8; 32])),
         },
         network_id: 42,
         remainder: true,

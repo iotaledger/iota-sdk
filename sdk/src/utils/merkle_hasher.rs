@@ -4,9 +4,9 @@
 use crypto::hashes::{Digest, Output};
 
 /// Leaf domain separation prefix.
-const LEAF_HASH_PREFIX: u8 = 0x00;
+pub(crate) const LEAF_HASH_PREFIX: u8 = 0x00;
 /// Node domain separation prefix.
-const NODE_HASH_PREFIX: u8 = 0x01;
+pub(crate) const NODE_HASH_PREFIX: u8 = 0x01;
 
 /// A Merkle hasher based on a digest function.
 pub(crate) struct MerkleHasher;
