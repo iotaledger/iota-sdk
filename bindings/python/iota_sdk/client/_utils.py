@@ -52,6 +52,14 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
+    def anchor_id_to_bech32(self, anchor_id: HexStr, bech32_hrp: str) -> str:
+        """Transforms an anchor id to a bech32 encoded address.
+        """
+        return self._call_method('anchorIdToBech32', {
+            'anchorId': anchor_id,
+            'bech32Hrp': bech32_hrp
+        })
+
     def nft_id_to_bech32(self, nft_id: HexStr, bech32_hrp: str) -> str:
         """Transforms an nft id to a bech32 encoded address.
         """
