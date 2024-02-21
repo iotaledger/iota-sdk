@@ -224,7 +224,7 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
     /// List of registered validators ready for the next epoch.
-    stakers: Vec<ValidatorResponse>,
+    validators: Vec<ValidatorResponse>,
     /// The number of validators returned per one API request with pagination.
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the

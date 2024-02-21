@@ -13,6 +13,7 @@ import type {
     __Bech32ToHexMethod__,
     __HexToBech32Method__,
     __AccountIdToBech32Method__,
+    __AnchorIdToBech32Method__,
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
     __IsAddressValidMethod__,
@@ -48,6 +49,7 @@ export type __UtilsMethods__ =
     | __Bech32ToHexMethod__
     | __HexToBech32Method__
     | __AccountIdToBech32Method__
+    | __AnchorIdToBech32Method__
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__

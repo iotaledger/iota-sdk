@@ -9,7 +9,7 @@ use iota_sdk::{
         secret::types::InputSigningData,
     },
     types::block::{
-        address::Address,
+        address::{Address, ImplicitAccountCreationAddress},
         mana::ManaAllotment,
         output::{
             feature::SenderFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder,
@@ -2070,4 +2070,63 @@ fn min_allot_account_mana_requirement_covered_2() {
         ManaAllotment::new(account_id_1, additional_allotment).unwrap()
     );
     assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 0);
+}
+
+#[test]
+fn implicit_account_transition() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(Address::ImplicitAccountCreation(
+            ImplicitAccountCreationAddress::new(
+                **Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().as_ed25519(),
+            ),
+        )))
+        .with_mana(961)
+        .finish_output()
+        .unwrap()];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let input_output_id = *inputs[0].output_id();
+    let account_id = AccountId::from(&input_output_id);
+    let outputs = vec![
+        AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_required_inputs(vec![input_output_id])
+    .with_min_mana_allotment(account_id_1, 2)
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    assert!(selected.transaction.outputs()[0].is_account());
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, 960).unwrap()
+    );
+    // One remainder Mana
+    assert_eq!(selected.transaction.outputs()[0].mana(), 1);
 }
