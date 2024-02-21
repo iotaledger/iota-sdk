@@ -202,8 +202,8 @@ impl InputSelection {
         if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
-            if !(self.provided_outputs.is_empty()
-                && (self.burn.is_some() || !self.mana_allotments.is_empty() || !self.required_inputs.is_empty()))
+            if !self.provided_outputs.is_empty()
+                || self.burn.is_none() && self.mana_allotments.is_empty() && self.required_inputs.is_empty()
             {
                 return Err(Error::InvalidOutputCount(self.provided_outputs.len()));
             }

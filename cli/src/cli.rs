@@ -411,17 +411,18 @@ pub async fn init_command(
     } else {
         None
     };
-    let address = init_params
-        .address
-        .map(|addr| Bech32Address::from_str(&addr))
-        .transpose()?;
 
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .with_address(
+            init_params
+                .address
+                .map(|addr| Bech32Address::from_str(&addr))
+                .transpose()?,
+        )
         .with_bip_path(init_params.bip_path)
-        .with_address(address)
         .with_alias(alias)
         .finish()
         .await?)
