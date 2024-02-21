@@ -5,7 +5,7 @@
 use std::collections::HashSet;
 use std::sync::Arc;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tokio::sync::{Mutex, RwLock};
 
 use super::operations::storage::SaveLoadWallet;
@@ -316,6 +316,19 @@ where
         Ok(wallet)
     }
 
+    #[cfg(feature = "storage")]
+    pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
+        Self {
+            address: Some(wallet.address().await),
+            bip_path: wallet.bip_path().await,
+            alias: wallet.alias().await,
+            client_options: Some(wallet.client_options().await),
+            storage_options: Some(wallet.storage_options.clone()),
+            secret_manager: Some(wallet.secret_manager.clone()),
+        }
+    }
+
+    #[inline(always)]
     async fn verify_ed25519_address(
         &self,
         ed25519_address: &Ed25519Address,
@@ -338,18 +351,6 @@ where
             }
         } else {
             Err(crate::wallet::Error::MissingParameter("secret_manager"))
-        }
-    }
-
-    #[cfg(feature = "storage")]
-    pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
-        Self {
-            address: Some(wallet.address().await),
-            bip_path: wallet.bip_path().await,
-            alias: wallet.alias().await,
-            client_options: Some(wallet.client_options().await),
-            storage_options: Some(wallet.storage_options.clone()),
-            secret_manager: Some(wallet.secret_manager.clone()),
         }
     }
 }
@@ -379,6 +380,8 @@ fn unlock_unused_inputs(wallet_ledger: &mut WalletLedger) -> crate::wallet::Resu
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use serde::Deserialize;
+
     use super::*;
     #[cfg(feature = "storage")]
     use crate::{client::secret::SecretManage, wallet::storage::StorageOptions};

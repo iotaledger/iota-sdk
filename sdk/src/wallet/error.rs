@@ -56,6 +56,9 @@ pub enum Error {
     /// Invalid output kind.
     #[error("invalid output kind: {0}")]
     InvalidOutputKind(String),
+    /// Invalid parameter.
+    #[error("invalid parameter: {0}")]
+    InvalidParameter(&'static str),
     /// Invalid Voting Power
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
@@ -79,9 +82,6 @@ pub enum Error {
     /// Missing parameter.
     #[error("missing parameter: {0}")]
     MissingParameter(&'static str),
-    /// Invalid parameter.
-    #[error("invalid parameter: {0}")]
-    InvalidParameter(&'static str),
     /// Nft not found in unspent outputs
     #[error("nft not found in unspent outputs")]
     NftNotFoundInUnspentOutputs,
