@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, ValidatorsResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputResponse, SlotCommitment
+from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputResponse, SlotCommitment
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -34,7 +34,8 @@ def test_api_responses():
     # GET /api/core/v3/rewards/{outputId}
     test_api_response(ManaRewardsResponse, "get-mana-rewards-example.json")
     # GET /api/core/v3/validators
-    test_api_response(ValidatorsResponse, "get-validators-example.json")
+    # TODO: enable when TIP is updated
+    # test_api_response(ValidatorsResponse, "get-validators-example.json")
     # GET /api/core/v3/validators/{bech32Address}
     test_api_response(ValidatorResponse, "get-validator-example.json")
     # GET /api/core/v3/committee
