@@ -175,6 +175,7 @@ where
             self.secret_manager = secret_manager;
         }
 
+        let mut skip_verification = true;
         let loaded_address = loaded_wallet_builder
             .as_ref()
             .and_then(|builder| builder.address.clone());
@@ -185,6 +186,8 @@ where
                 if address != loaded_address {
                     return Err(crate::wallet::Error::WalletAddressMismatch(address.clone()));
                 }
+            } else {
+                skip_verification = false;
             }
         } else {
             self.address = loaded_address;
@@ -201,6 +204,8 @@ where
                         old_bip_path: Some(loaded_bip_path),
                     });
                 }
+            } else {
+                skip_verification = false;
             }
         } else {
             self.bip_path = loaded_bip_path;
@@ -216,14 +221,16 @@ where
 
         match (self.address.as_ref(), self.bip_path.as_ref()) {
             (Some(address), Some(bip_path)) => {
-                // verify that the address is derived from the provided bip path.
-                if let Some(backing_ed25519_address) = address.inner.backing_ed25519() {
-                    self.verify_ed25519_address(backing_ed25519_address, bip_path).await?;
-                    self.address.replace(address.clone());
-                    self.bip_path = Some(*bip_path);
-                } else {
-                    return Err(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"));
+                if !skip_verification {
+                    // verify that the address is derived from the provided bip path.
+                    if let Some(backing_ed25519_address) = address.inner.backing_ed25519() {
+                        self.verify_ed25519_address(backing_ed25519_address, bip_path).await?;
+                    } else {
+                        return Err(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"));
+                    }
                 }
+                self.address.replace(address.clone());
+                self.bip_path = Some(*bip_path);
             }
             (Some(address), None) => {
                 self.address.replace(address.clone());
