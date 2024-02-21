@@ -18,7 +18,7 @@ class BaseCoinBalance:
     Attributes:
         total: The total balance.
         available: The available amount of the total balance.
-        voting_power: The voting power of the wallet.
+        # voting_power: The voting power of the wallet.
     """
     total: int = field(metadata=config(
         encoder=str
@@ -26,9 +26,10 @@ class BaseCoinBalance:
     available: int = field(metadata=config(
         encoder=str
     ))
-    voting_power: int = field(metadata=config(
-        encoder=str
-    ))
+    # TODO https://github.com/iotaledger/iota-sdk/issues/1822
+    # voting_power: int = field(metadata=config(
+    # encoder=str
+    # ))
 
 
 @json
@@ -39,9 +40,13 @@ class ManaBalance:
     Attributes:
         total: The total balance.
         available: The available amount of the total balance.
+        rewards: Mana rewards of account and delegation outputs.
     """
     total: DecayedMana
     available: DecayedMana
+    rewards: int = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json
