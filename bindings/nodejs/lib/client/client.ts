@@ -710,6 +710,28 @@ export class Client {
     }
 
     /**
+     * Transforms an anchor id to a bech32 encoded address.
+     *
+     * @param anchorId An anchor ID.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
+     * @returns The corresponding Bech32 address.
+     */
+    async anchorIdToBech32(
+        anchorId: AnchorId,
+        bech32Hrp?: string,
+    ): Promise<Bech32Address> {
+        const response = await this.methodHandler.callMethod({
+            name: 'anchorIdToBech32',
+            data: {
+                anchorId,
+                bech32Hrp,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Convert an NFT ID to a Bech32 encoded address.
      *
      * @param nftId An NFT ID.
