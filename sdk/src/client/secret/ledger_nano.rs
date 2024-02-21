@@ -20,7 +20,11 @@ use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
 };
-use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
+use packable::{
+    error::{UnexpectedEOF, UnpackErrorExt},
+    unpacker::SliceUnpacker,
+    Packable, PackableExt,
+};
 use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
@@ -36,7 +40,7 @@ use crate::{
         protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError,
+        BlockError,
     },
 };
 
@@ -64,7 +68,7 @@ pub enum Error {
     UnsupportedOperation,
     /// Block error
     #[error("{0}")]
-    Block(Box<crate::types::block::Error>),
+    Block(#[from] BlockError),
     /// Missing input with ed25519 address
     #[error("missing input with ed25519 address")]
     MissingInputWithEd25519Address,
@@ -76,19 +80,13 @@ pub enum Error {
     Bip32ChainMismatch,
     /// Unpack error
     #[error("{0}")]
-    Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),
+    Unpack(#[from] packable::error::UnpackError<BlockError, UnexpectedEOF>),
     /// No available inputs provided
     #[error("No available inputs provided")]
     NoAvailableInputsProvided,
     /// Output not unlockable due to deadzone in expiration unlock condition.
     #[error("output not unlockable due to deadzone in expiration unlock condition")]
     ExpirationDeadzone,
-}
-
-impl From<crate::types::block::Error> for Error {
-    fn from(error: crate::types::block::Error) -> Self {
-        Self::Block(Box::new(error))
-    }
 }
 
 // map most errors to a single error but there are some errors that
@@ -233,7 +231,7 @@ impl SecretManage for LedgerSecretManager {
         let mut unpacker = SliceUnpacker::new(&signature_bytes);
 
         // Unpack and return signature.
-        return match Unlock::unpack::<_, true>(&mut unpacker, &())? {
+        return match Unlock::unpack::<_, true>(&mut unpacker, &()).coerce()? {
             Unlock::Signature(s) => match *s {
                 SignatureUnlock(Signature::Ed25519(signature)) => Ok(signature),
             },
@@ -393,7 +391,7 @@ impl SecretManage for LedgerSecretManager {
         // unpack signature to unlocks
         let mut unlocks = Vec::new();
         for _ in 0..input_len {
-            let unlock = Unlock::unpack::<_, true>(&mut unpacker, &())?;
+            let unlock = Unlock::unpack::<_, true>(&mut unpacker, &()).coerce()?;
             // The ledger nano can return the same SignatureUnlocks multiple times, so only insert it once
             match unlock {
                 Unlock::Signature(_) => {
@@ -412,7 +410,7 @@ impl SecretManage for LedgerSecretManager {
             unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), protocol_parameters)?;
         }
 
-        Ok(Unlocks::new(unlocks)?)
+        Ok(Unlocks::new(unlocks).map_err(BlockError::from)?)
     }
 
     async fn sign_transaction(
@@ -540,7 +538,8 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())?
+            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())
+            .map_err(BlockError::from)?
             // Time in which no address can unlock the output because of an expiration unlock condition
             .ok_or(Error::ExpirationDeadzone)?;
 
@@ -556,10 +555,16 @@ fn merge_unlocks(
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
-                    merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
+                    merged_unlocks.push(Unlock::Reference(
+                        ReferenceUnlock::new(*block_index as u16).map_err(BlockError::from)?,
+                    ));
                 }
-                Address::Account(_) => merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
-                Address::Nft(_) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                Address::Account(_) => merged_unlocks.push(Unlock::Account(
+                    AccountUnlock::new(*block_index as u16).map_err(BlockError::from)?,
+                )),
+                Address::Nft(_) => merged_unlocks.push(Unlock::Nft(
+                    NftUnlock::new(*block_index as u16).map_err(BlockError::from)?,
+                )),
                 _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
             },
             None => {
@@ -579,7 +584,9 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature.validate(transaction_signing_hash.as_ref(), &ed25519_address)?;
+                    ed25519_signature
+                        .validate(transaction_signing_hash.as_ref(), &ed25519_address)
+                        .map_err(BlockError::from)?;
                 }
 
                 merged_unlocks.push(unlock);

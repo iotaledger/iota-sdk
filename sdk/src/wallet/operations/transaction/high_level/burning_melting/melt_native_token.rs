@@ -5,9 +5,12 @@ use primitive_types::U256;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::output::{
-        AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
-        TokenScheme,
+    types::block::{
+        output::{
+            AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
+            TokenScheme,
+        },
+        BlockError,
     },
     wallet::{
         operations::transaction::TransactionOptions,
@@ -64,18 +67,23 @@ where
             // Create the new account output with updated amount.
             let account_output = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .finish_output()?;
+                .finish_output()
+                .map_err(BlockError::from)?;
 
             let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
             let outputs = [
                 account_output,
                 FoundryOutputBuilder::from(&existing_foundry_output)
-                    .with_token_scheme(TokenScheme::Simple(SimpleTokenScheme::new(
-                        token_scheme.minted_tokens(),
-                        token_scheme.melted_tokens() + melt_amount,
-                        token_scheme.maximum_supply(),
-                    )?))
-                    .finish_output()?,
+                    .with_token_scheme(TokenScheme::Simple(
+                        SimpleTokenScheme::new(
+                            token_scheme.minted_tokens(),
+                            token_scheme.melted_tokens() + melt_amount,
+                            token_scheme.maximum_supply(),
+                        )
+                        .map_err(BlockError::from)?,
+                    ))
+                    .finish_output()
+                    .map_err(BlockError::from)?,
             ];
             // Input selection will detect that we're melting native tokens and add the required inputs if available
             self.prepare_transaction(outputs, options).await

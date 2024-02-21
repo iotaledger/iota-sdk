@@ -11,7 +11,7 @@ use iota_sdk::{
         secret::{DowncastSecretManager, SecretManage, SignBlock},
     },
     types::{
-        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, BlockDto},
+        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, BlockDto, BlockError},
         TryFromDto,
     },
 };
@@ -82,7 +82,7 @@ where
         } => {
             let transaction = &secret_manager
                 .sign_transaction(
-                    PreparedTransactionData::try_from_dto(prepared_transaction_data)?,
+                    PreparedTransactionData::try_from_dto(prepared_transaction_data).map_err(BlockError::from)?,
                     &protocol_parameters,
                 )
                 .await

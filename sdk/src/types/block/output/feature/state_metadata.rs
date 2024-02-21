@@ -21,7 +21,10 @@ use super::{
     metadata::{verify_keys, verify_packed_len, MetadataBTreeMap, MetadataBTreeMapPrefix},
     MetadataFeatureKeyLength, MetadataFeatureValueLength,
 };
-use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
+use crate::types::block::{
+    output::{feature::FeatureError, StorageScore},
+    protocol::WorkScore,
+};
 
 /// A Metadata Feature that can only be changed by the State Controller.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -35,7 +38,7 @@ impl StateMetadataFeature {
 
     /// Creates a new [`StateMetadataFeature`].
     #[inline(always)]
-    pub fn new(data: impl IntoIterator<Item = (String, Vec<u8>)>) -> Result<Self, Error> {
+    pub fn new(data: impl IntoIterator<Item = (String, Vec<u8>)>) -> Result<Self, FeatureError> {
         let mut builder = Self::build();
         builder.extend(data);
         builder.finish()
@@ -95,7 +98,7 @@ impl StateMetadataFeatureMap {
         self
     }
 
-    pub fn finish(self) -> Result<StateMetadataFeature, Error> {
+    pub fn finish(self) -> Result<StateMetadataFeature, FeatureError> {
         let res = StateMetadataFeature(
             MetadataBTreeMapPrefix::try_from(
                 self.0
@@ -105,14 +108,14 @@ impl StateMetadataFeatureMap {
                             BoxedSlicePrefix::<u8, MetadataFeatureKeyLength>::try_from(
                                 k.as_bytes().to_vec().into_boxed_slice(),
                             )
-                            .map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
+                            .map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
                             BoxedSlicePrefix::<u8, MetadataFeatureValueLength>::try_from(v.clone().into_boxed_slice())
-                                .map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
+                                .map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
                         ))
                     })
-                    .collect::<Result<MetadataBTreeMap, Error>>()?,
+                    .collect::<Result<MetadataBTreeMap, FeatureError>>()?,
             )
-            .map_err(Error::InvalidMetadataFeatureEntryCount)?,
+            .map_err(FeatureError::InvalidMetadataFeatureEntryCount)?,
         );
 
         verify_keys::<true>(&res.0)?;
@@ -141,7 +144,7 @@ impl StorageScore for StateMetadataFeature {}
 impl WorkScore for StateMetadataFeature {}
 
 impl Packable for StateMetadataFeature {
-    type UnpackError = Error;
+    type UnpackError = FeatureError;
     type UnpackVisitor = ();
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -155,7 +158,7 @@ impl Packable for StateMetadataFeature {
         let mut unpacker = CounterUnpacker::new(unpacker);
         let res = Self(
             MetadataBTreeMapPrefix::unpack::<_, VERIFY>(&mut unpacker, visitor)
-                .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
+                .map_packable_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
         );
 
         verify_keys::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
@@ -166,17 +169,17 @@ impl Packable for StateMetadataFeature {
 }
 
 impl TryFrom<Vec<(String, Vec<u8>)>> for StateMetadataFeature {
-    type Error = Error;
+    type Error = FeatureError;
 
-    fn try_from(data: Vec<(String, Vec<u8>)>) -> Result<Self, Error> {
+    fn try_from(data: Vec<(String, Vec<u8>)>) -> Result<Self, Self::Error> {
         Self::new(data)
     }
 }
 
 impl TryFrom<BTreeMap<String, Vec<u8>>> for StateMetadataFeature {
-    type Error = Error;
+    type Error = FeatureError;
 
-    fn try_from(data: BTreeMap<String, Vec<u8>>) -> Result<Self, Error> {
+    fn try_from(data: BTreeMap<String, Vec<u8>>) -> Result<Self, Self::Error> {
         Self::new(data)
     }
 }

@@ -12,6 +12,7 @@ use crate::{
             feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId,
             AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
+        BlockError,
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
@@ -116,16 +117,15 @@ where
             let token_id = TokenId::from(foundry_id);
 
             let outputs = [
-                new_account_output_builder.finish_output()?,
+                new_account_output_builder.finish_output().map_err(BlockError::from)?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
                         storage_score_params,
                         account_output.foundry_counter() + 1,
-                        TokenScheme::Simple(SimpleTokenScheme::new(
-                            params.circulating_supply,
-                            0,
-                            params.maximum_supply,
-                        )?),
+                        TokenScheme::Simple(
+                            SimpleTokenScheme::new(params.circulating_supply, 0, params.maximum_supply)
+                                .map_err(BlockError::from)?,
+                        ),
                     )
                     .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
                         account_id,
@@ -135,7 +135,7 @@ where
                         foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
                     }
 
-                    foundry_builder.finish_output()?
+                    foundry_builder.finish_output().map_err(BlockError::from)?
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
             ];
 

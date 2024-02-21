@@ -8,7 +8,7 @@ pub mod signed_transaction;
 pub mod tagged_data;
 
 use alloc::boxed::Box;
-use core::ops::Deref;
+use core::{convert::Infallible, ops::Deref};
 
 use derive_more::From;
 use packable::{
@@ -24,15 +24,89 @@ pub use self::{
     tagged_data::TaggedDataPayload,
 };
 use crate::types::block::{
+    capabilities::CapabilityError,
+    context_input::ContextInputError,
+    input::{InputError, UtxoInput},
+    mana::ManaError,
+    output::{
+        feature::FeatureError, unlock_condition::UnlockConditionError, ChainId, NativeTokenError, OutputError,
+        TokenSchemeError,
+    },
+    payload::tagged_data::{TagLength, TaggedDataLength},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    Error,
+    unlock::UnlockError,
 };
+
+#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum PayloadError {
+    #[strum(to_string = "invalid payload kind: {0}")]
+    InvalidPayloadKind(u8),
+    #[strum(to_string = "invalid payload length: expected {expected} but got {actual}")]
+    InvalidPayloadLength { expected: usize, actual: usize },
+    #[strum(to_string = "invalid timestamp: {0}")]
+    InvalidTimestamp(String),
+    #[strum(to_string = "invalid network id: {0}")]
+    InvalidNetworkId(String),
+    #[strum(to_string = "network ID mismatch: expected {expected} but got {actual}")]
+    NetworkIdMismatch { expected: u64, actual: u64 },
+    #[strum(to_string = "invalid tagged data length: {0}")]
+    InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
+    #[strum(to_string = "invalid tag length: {0}")]
+    InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
+    #[strum(to_string = "invalid input count: {0}")]
+    InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
+    #[strum(to_string = "invalid output count: {0}")]
+    InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
+    #[strum(to_string = "invalid transaction amount sum: {value}")]
+    InvalidTransactionAmountSum(u128),
+    #[strum(to_string = "duplicate output chain: {0}")]
+    DuplicateOutputChain(ChainId),
+    #[strum(to_string = "duplicate UTXO {0} in inputs")]
+    DuplicateUtxo(UtxoInput),
+    #[strum(to_string = "missing creation slot")]
+    MissingCreationSlot,
+    #[strum(to_string = "input count and unlock count mismatch: {input_count} != {unlock_count}")]
+    InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
+    #[from]
+    Input(InputError),
+    #[from]
+    Output(OutputError),
+    #[from]
+    Unlock(UnlockError),
+    #[from]
+    ContextInput(ContextInputError),
+    #[from]
+    Capabilities(CapabilityError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for PayloadError {}
+
+macro_rules! impl_from_error_via {
+    ($via:ident: $($err:ident),+$(,)?) => {
+        $(
+        impl From<$err> for PayloadError {
+            fn from(error: $err) -> Self {
+                Self::from($via::from(error))
+            }
+        }
+        )+
+    };
+}
+impl_from_error_via!(OutputError: NativeTokenError, ManaError, UnlockConditionError, FeatureError, TokenSchemeError);
+
+impl From<Infallible> for PayloadError {
+    fn from(value: Infallible) -> Self {
+        match value {}
+    }
+}
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq, From, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = PayloadError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = Error::InvalidPayloadKind)]
+#[packable(tag_type = u8, with_error = PayloadError::InvalidPayloadKind)]
 pub enum Payload {
     /// A tagged data payload.
     #[packable(tag = TaggedDataPayload::KIND)]
@@ -123,7 +197,7 @@ impl Deref for OptionalPayload {
 }
 
 impl Packable for OptionalPayload {
-    type UnpackError = Error;
+    type UnpackError = PayloadError;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -153,7 +227,7 @@ impl Packable for OptionalPayload {
             };
 
             if len != actual_len {
-                Err(UnpackError::Packable(Error::InvalidPayloadLength {
+                Err(UnpackError::Packable(PayloadError::InvalidPayloadLength {
                     expected: len,
                     actual: actual_len,
                 }))
@@ -172,7 +246,7 @@ pub mod dto {
 
     pub use super::signed_transaction::dto::SignedTransactionPayloadDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::TryFromDto;
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -239,7 +313,7 @@ pub mod dto {
     }
 
     impl TryFromDto<PayloadDto> for Payload {
-        type Error = Error;
+        type Error = PayloadError;
 
         fn try_from_dto_with_params_inner(
             dto: PayloadDto,

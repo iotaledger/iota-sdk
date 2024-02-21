@@ -7,11 +7,8 @@ use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    types::{
-        self,
-        block::{address::Bech32Address, output::OutputId},
-    },
-    utils::ConvertTo,
+    types::block::{address::Bech32Address, output::OutputId},
+    utils::{ConversionError, ConvertTo},
 };
 
 /// A BIP44 address.
@@ -36,7 +33,7 @@ impl Bip44Address {
 }
 
 impl ConvertTo<Bech32Address> for Bip44Address {
-    fn convert(self) -> Result<Bech32Address, types::block::Error> {
+    fn convert(self) -> Result<Bech32Address, ConversionError> {
         Ok(self.address)
     }
 

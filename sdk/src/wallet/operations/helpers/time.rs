@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex},
+    types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex, BlockError},
     wallet::types::OutputData,
 };
 
@@ -21,7 +21,8 @@ pub(crate) fn can_output_be_unlocked_now(
 
     let required_address = output_data
         .output
-        .required_address(commitment_slot_index.into(), committable_age_range)?;
+        .required_address(commitment_slot_index.into(), committable_age_range)
+        .map_err(BlockError::from)?;
 
     // In case of `None` the output can currently not be unlocked because of expiration unlock condition
     Ok(required_address.map_or_else(|| false, |required_address| wallet_address == &required_address))

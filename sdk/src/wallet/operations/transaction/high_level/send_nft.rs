@@ -7,8 +7,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Bech32Address,
+        address::{AddressError, Bech32Address},
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
+        BlockError,
     },
     utils::ConvertTo,
     wallet::{
@@ -36,8 +37,11 @@ impl SendNftParams {
         nft_id: impl ConvertTo<NftId>,
     ) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
-            address: address.convert()?,
-            nft_id: nft_id.convert()?,
+            address: address
+                .convert()
+                .map_err(AddressError::from)
+                .map_err(crate::client::Error::from)?,
+            nft_id: nft_id.convert().map_err(crate::client::Error::from)?,
         })
     }
 }
@@ -102,7 +106,7 @@ where
                     let nft_builder = NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_id)
                         .with_unlock_conditions([AddressUnlockCondition::new(address)]);
-                    outputs.push(nft_builder.finish_output()?);
+                    outputs.push(nft_builder.finish_output().map_err(BlockError::from)?);
                 }
             } else {
                 return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);

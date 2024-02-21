@@ -19,7 +19,7 @@ use crate::{
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-        BlockDto, BlockId,
+        BlockDto, BlockError, BlockId,
     },
     utils::serde::{option_string, string},
 };
@@ -312,19 +312,15 @@ pub struct IssuanceBlockHeaderResponse {
 }
 
 impl IssuanceBlockHeaderResponse {
-    pub fn strong_parents<const MIN: u8, const MAX: u8>(
-        &self,
-    ) -> Result<Parents<MIN, MAX>, crate::types::block::Error> {
+    pub fn strong_parents<const MIN: u8, const MAX: u8>(&self) -> Result<Parents<MIN, MAX>, BlockError> {
         Parents::from_set(self.strong_parents.clone())
     }
 
-    pub fn weak_parents<const MIN: u8, const MAX: u8>(&self) -> Result<Parents<MIN, MAX>, crate::types::block::Error> {
+    pub fn weak_parents<const MIN: u8, const MAX: u8>(&self) -> Result<Parents<MIN, MAX>, BlockError> {
         Parents::from_set(self.weak_parents.clone())
     }
 
-    pub fn shallow_like_parents<const MIN: u8, const MAX: u8>(
-        &self,
-    ) -> Result<Parents<MIN, MAX>, crate::types::block::Error> {
+    pub fn shallow_like_parents<const MIN: u8, const MAX: u8>(&self) -> Result<Parents<MIN, MAX>, BlockError> {
         Parents::from_set(self.shallow_like_parents.clone())
     }
 }

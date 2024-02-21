@@ -11,7 +11,7 @@ use iota_sdk::types::{
             parents::rand_strong_parents,
             payload::rand_tagged_data_payload,
         },
-        Block, BlockDto,
+        Block, BlockDto, BlockError,
     },
     TryFromDto,
 };
@@ -157,7 +157,7 @@ fn dto_mismatch_version() {
 
     assert_eq!(
         block_res,
-        Err(iota_sdk::types::block::Error::ProtocolVersionMismatch {
+        Err(BlockError::ProtocolVersionMismatch {
             expected: protocol_parameters.version(),
             actual: protocol_version
         })
@@ -200,7 +200,7 @@ fn dto_mismatch_network_id() {
 
     assert_eq!(
         block_res,
-        Err(iota_sdk::types::block::Error::NetworkIdMismatch {
+        Err(BlockError::NetworkIdMismatch {
             expected: protocol_parameters.network_id(),
             actual: network_id
         })

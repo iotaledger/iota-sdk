@@ -8,7 +8,10 @@ use std::fmt::Debug;
 use primitive_types::U256;
 
 use super::Requirement;
-use crate::types::block::output::{ChainId, OutputId, TokenId};
+use crate::types::block::{
+    output::{ChainId, OutputId, TokenId},
+    BlockError,
+};
 
 /// Errors related to input selection.
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
@@ -18,7 +21,7 @@ pub enum Error {
     AdditionalInputsRequired(Requirement),
     /// Block error.
     #[error("{0}")]
-    Block(#[from] crate::types::block::Error),
+    Block(#[from] BlockError),
     /// Can't burn and transition an output at the same time.
     #[error("can't burn and transition an output at the same time, chain ID: {0}")]
     BurnAndTransition(ChainId),

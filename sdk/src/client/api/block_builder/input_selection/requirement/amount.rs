@@ -14,6 +14,7 @@ use crate::{
             MinimumOutputAmount, NftOutputBuilder, Output, OutputId, TokenId,
         },
         slot::SlotIndex,
+        BlockError,
     },
 };
 
@@ -184,8 +185,9 @@ impl AmountSelection {
     }
 
     pub(crate) fn remainder_amount(&self, input_selection: &InputSelection) -> Result<(u64, bool, bool), Error> {
-        let input_native_tokens =
-            get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish()?;
+        let input_native_tokens = get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?
+            .finish()
+            .map_err(BlockError::from)?;
 
         input_selection.required_remainder_amount(Some(input_native_tokens))
     }
@@ -270,13 +272,16 @@ impl InputSelection {
             let new_output = match output {
                 Output::Account(output) => AccountOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output()?,
+                    .finish_output()
+                    .map_err(BlockError::from)?,
                 Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output()?,
+                    .finish_output()
+                    .map_err(BlockError::from)?,
                 Output::Nft(output) => NftOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output()?,
+                    .finish_output()
+                    .map_err(BlockError::from)?,
                 _ => panic!("only account, nft and foundry can be automatically created"),
             };
 

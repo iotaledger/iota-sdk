@@ -7,6 +7,7 @@ use crate::{
     types::block::{
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
         output::{AccountId, DelegationOutputBuilder, Output},
+        BlockError,
     },
 };
 
@@ -49,7 +50,8 @@ impl InputSelection {
 
             if self.mana_rewards.get(input.output_id()).is_some() {
                 log::debug!("Adding reward and commitment context input for output claiming mana rewards");
-                self.context_inputs.insert(RewardContextInput::new(idx as _)?.into());
+                self.context_inputs
+                    .insert(RewardContextInput::new(idx as _).map_err(BlockError::from)?.into());
                 needs_commitment_context = true;
             }
         }
@@ -67,7 +69,8 @@ impl InputSelection {
                 log::debug!("Setting created delegation start epoch to {start_epoch}");
                 *output = DelegationOutputBuilder::from(output.as_delegation())
                     .with_start_epoch(start_epoch)
-                    .finish_output()?;
+                    .finish_output()
+                    .map_err(BlockError::from)?;
             } else {
                 let end_epoch = self
                     .protocol_parameters
@@ -75,7 +78,8 @@ impl InputSelection {
                 log::debug!("Setting delayed delegation end epoch to {end_epoch}");
                 *output = DelegationOutputBuilder::from(output.as_delegation())
                     .with_end_epoch(end_epoch)
-                    .finish_output()?;
+                    .finish_output()
+                    .map_err(BlockError::from)?;
             }
             log::debug!("Adding commitment context input for delegation output");
             needs_commitment_context = true;

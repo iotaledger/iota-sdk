@@ -106,10 +106,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     match error {
         Err(WalletError::Client(err)) => {
-            assert!(matches!(
-                *err,
-                ClientError::Stronghold(StrongholdError::InvalidPassword)
-            ));
+            assert!(matches!(err, ClientError::Stronghold(StrongholdError::InvalidPassword)));
         }
         _ => panic!("unexpected error"),
     }

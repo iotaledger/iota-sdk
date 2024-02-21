@@ -18,7 +18,7 @@ use iota_sdk::{
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic
     // `NON_SECURE_USE_DEVELOPMENT_MNEMONIC_1` must contain non-zero balance.

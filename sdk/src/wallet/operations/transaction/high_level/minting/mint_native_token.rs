@@ -5,8 +5,9 @@ use primitive_types::U256;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::output::{
-        AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+    types::block::{
+        output::{AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
+        BlockError,
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet},
 };
@@ -114,18 +115,21 @@ where
 
         let TokenScheme::Simple(token_scheme) = foundry_output.token_scheme();
 
-        let updated_token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(
-            token_scheme.minted_tokens() + mint_amount,
-            token_scheme.melted_tokens(),
-            token_scheme.maximum_supply(),
-        )?);
+        let updated_token_scheme = TokenScheme::Simple(
+            SimpleTokenScheme::new(
+                token_scheme.minted_tokens() + mint_amount,
+                token_scheme.melted_tokens(),
+                token_scheme.maximum_supply(),
+            )
+            .map_err(BlockError::from)?,
+        );
 
         let new_foundry_output_builder =
             FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
 
         let outputs = [
-            new_account_output_builder.finish_output()?,
-            new_foundry_output_builder.finish_output()?,
+            new_account_output_builder.finish_output().map_err(BlockError::from)?,
+            new_foundry_output_builder.finish_output().map_err(BlockError::from)?,
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
 

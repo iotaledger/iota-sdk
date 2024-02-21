@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{unlock::ReferenceUnlock, Error};
+use iota_sdk::types::block::unlock::{ReferenceUnlock, UnlockError};
 use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
 use pretty_assertions::assert_eq;
 
@@ -24,7 +24,7 @@ fn new_valid_max_index() {
 fn new_invalid_more_than_max_index() {
     assert!(matches!(
         ReferenceUnlock::new(128),
-        Err(Error::InvalidReferenceIndex(InvalidBoundedU16(128)))
+        Err(UnlockError::InvalidReferenceIndex(InvalidBoundedU16(128)))
     ));
 }
 
@@ -37,7 +37,7 @@ fn try_from_valid() {
 fn try_from_invalid() {
     assert!(matches!(
         ReferenceUnlock::try_from(128),
-        Err(Error::InvalidReferenceIndex(InvalidBoundedU16(128)))
+        Err(UnlockError::InvalidReferenceIndex(InvalidBoundedU16(128)))
     ));
 }
 
@@ -61,8 +61,8 @@ fn pack_unpack_valid() {
 fn pack_unpack_invalid_index() {
     assert!(matches!(
         ReferenceUnlock::unpack_verified([0x2a, 0x2a], &()),
-        Err(UnpackError::Packable(Error::InvalidReferenceIndex(InvalidBoundedU16(
-            10794
-        ))))
+        Err(UnpackError::Packable(UnlockError::InvalidReferenceIndex(
+            InvalidBoundedU16(10794)
+        )))
     ));
 }

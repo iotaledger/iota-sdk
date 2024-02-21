@@ -12,12 +12,12 @@
 //! ```
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::AccountOutputQueryParameters, Client, Result},
+    client::{node_api::indexer::query_parameters::AccountOutputQueryParameters, Client},
     types::block::address::Bech32Address,
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

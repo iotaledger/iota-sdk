@@ -24,12 +24,13 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
-use core::ops::RangeInclusive;
+use core::{convert::Infallible, ops::RangeInclusive};
 
 use derive_more::From;
 use getset::Getters;
 use packable::Packable;
 
+pub(crate) use self::unlock_condition::AddressUnlockCondition;
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder},
     anchor::{AnchorId, AnchorOutput, AnchorOutputBuilder, AnchorTransition},
@@ -39,28 +40,79 @@ pub use self::{
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
     metadata::{OutputConsumptionMetadata, OutputInclusionMetadata, OutputMetadata},
-    native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
+    native_token::{NativeToken, NativeTokenError, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
     storage_score::{StorageScore, StorageScoreParameters},
-    token_scheme::{SimpleTokenScheme, TokenScheme},
+    token_scheme::{SimpleTokenScheme, TokenScheme, TokenSchemeError},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-pub(crate) use self::{
-    feature::{MetadataFeatureEntryCount, MetadataFeatureKeyLength, MetadataFeatureValueLength, TagFeatureLength},
-    native_token::NativeTokenCount,
-    output_id::OutputIndex,
-    unlock_condition::AddressUnlockCondition,
-};
 use crate::types::block::{
-    address::Address,
+    address::{Address, AddressError},
+    mana::ManaError,
+    output::{feature::FeatureError, unlock_condition::UnlockConditionError},
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
     slot::SlotIndex,
-    Error,
 };
 #[cfg(feature = "serde")]
 use crate::utils::serde::string;
+
+#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum OutputError {
+    #[strum(to_string = "invalid output kind: {0}")]
+    InvalidOutputKind(u8),
+    #[strum(to_string = "invalid output amount: {0}")]
+    InvalidOutputAmount(u64),
+    #[strum(to_string = "consumed mana overflow")]
+    ConsumedManaOverflow,
+    #[strum(to_string = "the return deposit ({deposit}) must be greater than the minimum output amount ({required})")]
+    InsufficientStorageDepositReturnAmount {
+        deposit: u64,
+        required: u64,
+    },
+    #[strum(to_string = "insufficient output amount: {amount} (should be at least {required})")]
+    AmountLessThanMinimum {
+        amount: u64,
+        required: u64,
+    },
+    #[strum(to_string = "storage deposit return of {deposit} exceeds the original output amount of {amount}")]
+    StorageDepositReturnExceedsOutputAmount {
+        deposit: u64,
+        amount: u64,
+    },
+    MissingAddressUnlockCondition,
+    MissingGovernorUnlockCondition,
+    MissingStateControllerUnlockCondition,
+    NullDelegationValidatorId,
+    SelfDepositNft(NftId),
+    InvalidFoundryZeroSerialNumber,
+    NonZeroStateIndexOrFoundryCounter,
+    InvalidStakedAmount,
+    ValidatorAddress(AddressError),
+    SelfControlledAnchorOutput(AnchorId),
+    SelfDepositAccount(AccountId),
+    #[from]
+    UnlockCondition(UnlockConditionError),
+    #[from]
+    Feature(FeatureError),
+    #[from]
+    Mana(ManaError),
+    #[from]
+    NativeToken(NativeTokenError),
+    #[from]
+    TokenScheme(TokenSchemeError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for OutputError {}
+
+impl From<Infallible> for OutputError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -134,9 +186,9 @@ impl OutputWithMetadata {
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = OutputError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
+#[packable(tag_type = u8, with_error = OutputError::InvalidOutputKind)]
 pub enum Output {
     /// A basic output.
     #[packable(tag = BasicOutput::KIND)]
@@ -226,13 +278,13 @@ impl Output {
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
         target_index: SlotIndex,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, OutputError> {
         let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
 
         decayed_mana
             .stored
             .checked_add(decayed_mana.potential)
-            .ok_or(Error::ConsumedManaOverflow)
+            .ok_or(OutputError::ConsumedManaOverflow)
     }
 
     /// Returns the decayed stored and potential mana of the output.
@@ -241,7 +293,7 @@ impl Output {
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
         target_index: SlotIndex,
-    ) -> Result<DecayedMana, Error> {
+    ) -> Result<DecayedMana, OutputError> {
         let (amount, mana) = match self {
             Self::Basic(output) => (output.amount(), output.mana()),
             Self::Account(output) => (output.amount(), output.mana()),
@@ -352,14 +404,14 @@ impl Output {
         &self,
         commitment_slot_index: impl Into<Option<SlotIndex>>,
         committable_age_range: CommittableAgeRange,
-    ) -> Result<Option<Address>, Error> {
+    ) -> Result<Option<Address>, OutputError> {
         Ok(match self {
             Self::Basic(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), commitment_slot_index, committable_age_range)?
                 .cloned(),
             Self::Account(output) => Some(output.address().clone()),
-            Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+            Self::Anchor(_) => return Err(OutputError::InvalidOutputKind(AnchorOutput::KIND)),
             Self::Foundry(output) => Some(Address::Account(*output.account_address())),
             Self::Nft(output) => output
                 .unlock_conditions()
@@ -373,12 +425,12 @@ impl Output {
     /// Each [`Output`] has to have an amount that covers its associated byte cost, given by [`StorageScoreParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
+    pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), OutputError> {
         let minimum_storage_deposit = self.minimum_amount(params);
 
         // For any created `Output` in a transaction, it must hold that `Output::Amount >= Minimum Storage Deposit`.
         if self.amount() < minimum_storage_deposit {
-            return Err(Error::InsufficientStorageDepositAmount {
+            return Err(OutputError::AmountLessThanMinimum {
                 amount: self.amount(),
                 required: minimum_storage_deposit,
             });
@@ -391,7 +443,7 @@ impl Output {
             // We can't return more tokens than were originally contained in the output.
             // `Return Amount` ≤ `Amount`.
             if return_condition.amount() > self.amount() {
-                return Err(Error::StorageDepositReturnExceedsOutputAmount {
+                return Err(OutputError::StorageDepositReturnExceedsOutputAmount {
                     deposit: return_condition.amount(),
                     amount: self.amount(),
                 });
@@ -401,7 +453,7 @@ impl Output {
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_storage_deposit {
-                return Err(Error::InsufficientStorageDepositReturnAmount {
+                return Err(OutputError::InsufficientStorageDepositReturnAmount {
                     deposit: return_condition.amount(),
                     required: minimum_storage_deposit,
                 });

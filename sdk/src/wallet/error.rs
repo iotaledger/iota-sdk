@@ -6,7 +6,12 @@ use std::fmt::Debug;
 use crypto::keys::bip44::Bip44;
 use serde::{ser::Serializer, Serialize};
 
-use crate::types::block::{address::Bech32Address, output::DelegationId, payload::signed_transaction::TransactionId};
+use crate::{
+    types::block::{
+        address::Bech32Address, output::DelegationId, payload::signed_transaction::TransactionId, BlockError,
+    },
+    utils::ConversionError,
+};
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error, strum::AsRefStr)]
@@ -18,13 +23,13 @@ pub enum Error {
     Backup(&'static str),
     /// Error from block crate.
     #[error("{0}")]
-    Block(Box<crate::types::block::Error>),
+    Block(#[from] BlockError),
     /// Burning or melting failed
     #[error("burning or melting failed: {0}")]
     BurningOrMeltingFailed(String),
     /// Client error.
     #[error("`{0}`")]
-    Client(Box<crate::client::Error>),
+    Client(#[from] crate::client::Error),
     /// BIP44 coin type mismatch
     #[error("BIP44 mismatch: {new_bip_path:?}, existing bip path is: {old_bip_path:?}")]
     BipPathMismatch {
@@ -161,18 +166,6 @@ impl Serialize for Error {
     }
 }
 
-impl From<crate::types::block::Error> for Error {
-    fn from(error: crate::types::block::Error) -> Self {
-        Self::Block(Box::new(error))
-    }
-}
-
-impl From<crate::client::Error> for Error {
-    fn from(error: crate::client::Error) -> Self {
-        Self::Client(Box::new(error))
-    }
-}
-
 impl From<crate::client::api::input_selection::Error> for Error {
     fn from(error: crate::client::api::input_selection::Error) -> Self {
         // Map "same" error so it's easier to handle
@@ -183,7 +176,7 @@ impl From<crate::client::api::input_selection::Error> for Error {
                     required,
                 }
             }
-            _ => Self::Client(Box::new(crate::client::Error::InputSelection(error))),
+            _ => Self::Client(crate::client::Error::InputSelection(error)),
         }
     }
 }
@@ -191,14 +184,14 @@ impl From<crate::client::api::input_selection::Error> for Error {
 #[cfg(feature = "stronghold")]
 impl From<crate::client::stronghold::Error> for Error {
     fn from(error: crate::client::stronghold::Error) -> Self {
-        Self::Client(Box::new(crate::client::Error::Stronghold(error)))
+        Self::Client(crate::client::Error::Stronghold(error))
     }
 }
 
 #[cfg(feature = "ledger_nano")]
 impl From<crate::client::secret::ledger_nano::Error> for Error {
     fn from(error: crate::client::secret::ledger_nano::Error) -> Self {
-        Self::Client(Box::new(crate::client::Error::Ledger(error)))
+        Self::Client(crate::client::Error::Ledger(error))
     }
 }
 

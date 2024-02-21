@@ -11,12 +11,13 @@ use crate::types::block::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
-            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionError, UnlockConditionFlags,
+            UnlockConditions,
         },
-        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputError, StorageScore,
+        StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    Error,
 };
 
 /// Builder for a [`BasicOutput`].
@@ -143,7 +144,7 @@ impl BasicOutputBuilder {
         mut self,
         return_address: impl Into<Address>,
         params: StorageScoreParameters,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, OutputError> {
         Ok(match self.amount {
             OutputBuilderAmount::Amount(amount) => {
                 let return_address = return_address.into();
@@ -185,7 +186,7 @@ impl BasicOutputBuilder {
     }
 
     ///
-    pub fn finish(self) -> Result<BasicOutput, Error> {
+    pub fn finish(self) -> Result<BasicOutput, OutputError> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
@@ -197,7 +198,8 @@ impl BasicOutputBuilder {
             BasicOutput::KIND,
             features.native_token(),
             self.mana,
-        )?;
+        )
+        .map_err(UnlockConditionError::from)?;
         verify_features::<true>(&features)?;
 
         let mut output = BasicOutput {
@@ -216,7 +218,7 @@ impl BasicOutputBuilder {
     }
 
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, OutputError> {
         Ok(Output::Basic(self.finish()?))
     }
 }
@@ -234,7 +236,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 
 /// Describes a basic output with optional features.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = OutputError)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(verify_with = verify_basic_output)]
 pub struct BasicOutput {
@@ -368,12 +370,15 @@ impl WorkScore for BasicOutput {
 
 impl MinimumOutputAmount for BasicOutput {}
 
-fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
+fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), OutputError> {
     if VERIFY {
         if unlock_conditions.address().is_none() {
-            Err(Error::MissingAddressUnlockCondition)
+            Err(OutputError::MissingAddressUnlockCondition)
         } else {
-            verify_allowed_unlock_conditions(unlock_conditions, BasicOutput::ALLOWED_UNLOCK_CONDITIONS)
+            Ok(verify_allowed_unlock_conditions(
+                unlock_conditions,
+                BasicOutput::ALLOWED_UNLOCK_CONDITIONS,
+            )?)
         }
     } else {
         Ok(())
@@ -383,29 +388,33 @@ fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockCondit
 fn verify_unlock_conditions_packable<const VERIFY: bool>(
     unlock_conditions: &UnlockConditions,
     _: &ProtocolParameters,
-) -> Result<(), Error> {
+) -> Result<(), OutputError> {
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
 }
 
-fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), Error> {
+fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), OutputError> {
     if VERIFY {
-        verify_allowed_features(features, BasicOutput::ALLOWED_FEATURES)
+        Ok(verify_allowed_features(features, BasicOutput::ALLOWED_FEATURES)?)
     } else {
         Ok(())
     }
 }
 
-fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
+fn verify_features_packable<const VERIFY: bool>(
+    features: &Features,
+    _: &ProtocolParameters,
+) -> Result<(), OutputError> {
     verify_features::<VERIFY>(features)
 }
 
-fn verify_basic_output<const VERIFY: bool>(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), Error> {
-    verify_restricted_addresses(
+fn verify_basic_output<const VERIFY: bool>(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), OutputError> {
+    Ok(verify_restricted_addresses(
         output.unlock_conditions(),
         BasicOutput::KIND,
         output.features.native_token(),
         output.mana,
     )
+    .map_err(UnlockConditionError::from)?)
 }
 
 #[cfg(feature = "serde")]
@@ -415,10 +424,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{output::unlock_condition::UnlockCondition, Error},
-        utils::serde::string,
-    };
+    use crate::{types::block::output::unlock_condition::UnlockCondition, utils::serde::string};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -447,7 +453,7 @@ mod dto {
     }
 
     impl TryFrom<BasicOutputDto> for BasicOutput {
-        type Error = Error;
+        type Error = OutputError;
 
         fn try_from(dto: BasicOutputDto) -> Result<Self, Self::Error> {
             let mut builder = BasicOutputBuilder::new_with_amount(dto.amount)

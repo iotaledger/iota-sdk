@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::address::{Bech32Address, Hrp};
-use iota_sdk_bindings_core::{call_utils_method, Response, Result, UtilsMethod};
+use iota_sdk_bindings_core::{call_utils_method, Response, UtilsMethod};
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-async fn utils() -> Result<()> {
+async fn utils() -> Result<(), Box<dyn std::error::Error>> {
     let response = call_utils_method(UtilsMethod::GenerateMnemonic);
     match response {
         Response::GeneratedMnemonic(mnemonic) => println!("{:?}", serde_json::to_string(&mnemonic)?),

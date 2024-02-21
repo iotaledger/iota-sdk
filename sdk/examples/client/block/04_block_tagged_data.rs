@@ -13,7 +13,7 @@ use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
         secret::{SecretManager, SignBlock},
-        Client, Result,
+        Client,
     },
     types::block::{
         output::AccountId,
@@ -22,7 +22,7 @@ use iota_sdk::{
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

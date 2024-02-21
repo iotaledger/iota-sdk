@@ -4,7 +4,7 @@
 use getset::CopyGetters;
 use packable::Packable;
 
-use crate::types::block::{slot::EpochIndex, Error};
+use crate::types::block::{mana::ManaError, slot::EpochIndex};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
@@ -12,7 +12,7 @@ use crate::types::block::{slot::EpochIndex, Error};
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ManaError)]
 #[getset(get_copy = "pub")]
 pub struct RewardsParameters {
     /// Used for shift operation during calculation of profit margin.

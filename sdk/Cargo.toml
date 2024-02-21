@@ -89,7 +89,7 @@ rumqttc = { version = "0.23.0", default-features = false, features = [
     "websocket",
 ], optional = true }
 serde_repr = { version = "0.1.18", default-features = false, optional = true }
-thiserror = { version = "1.0.56", default-features = false, optional = true }
+thiserror = { version = "1.0.56", default-features = false }
 time = { version = "0.3.31", default-features = false, features = [
     "serde",
     "macros",
@@ -201,7 +201,6 @@ client = [
     "dep:instant",
     "dep:log",
     "dep:reqwest",
-    "dep:thiserror",
     "dep:tokio",
     "dep:url",
     "dep:zeroize",

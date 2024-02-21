@@ -7,4 +7,4 @@ pub mod merkle_hasher;
 #[cfg(feature = "serde")]
 pub mod serde;
 
-pub use convert::ConvertTo;
+pub use convert::{ConversionError, ConvertTo};

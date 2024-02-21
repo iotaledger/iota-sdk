@@ -7,6 +7,7 @@ mod parent;
 pub mod validation;
 
 use alloc::boxed::Box;
+use core::convert::Infallible;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
@@ -19,15 +20,97 @@ pub use self::{
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
 use crate::types::block::{
+    context_input::ContextInputError,
     core::basic::MaxBurnedManaAmount,
+    input::InputError,
+    mana::ManaError,
+    output::{
+        feature::FeatureError, unlock_condition::UnlockConditionError, NativeTokenError, OutputError, TokenSchemeError,
+    },
+    payload::PayloadError,
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    Error,
+    semantic::SemanticError,
+    signature::SignatureError,
+    unlock::UnlockError,
+    IdentifierError,
 };
 
+#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum BlockError {
+    #[strum(to_string = "invalid block body kind: {0}")]
+    InvalidBlockBodyKind(u8),
+    #[strum(to_string = "invalid block length {length}")]
+    InvalidBlockLength(usize),
+    #[strum(to_string = "remaining bytes after block")]
+    RemainingBytesAfterBlock,
+    #[strum(to_string = "invalid parent count")]
+    InvalidParentCount,
+    #[strum(to_string = "weak parents are not disjoint to strong or shallow like parents")]
+    NonDisjointParents,
+    #[strum(to_string = "parents are not unique and/or sorted")]
+    ParentsNotUniqueSorted,
+    #[strum(to_string = "network ID mismatch: expected {expected} but got {actual}")]
+    NetworkIdMismatch { expected: u64, actual: u64 },
+    #[strum(to_string = "protocol version mismatch: expected {expected} but got {actual}")]
+    ProtocolVersionMismatch { expected: u8, actual: u8 },
+    #[strum(to_string = "invalid protocol parameters hash: expected {expected} but got {actual}")]
+    InvalidProtocolParametersHash {
+        expected: ProtocolParametersHash,
+        actual: ProtocolParametersHash,
+    },
+    #[strum(to_string = "unsupported address kind: {0}")]
+    UnsupportedAddressKind(u8),
+    #[from]
+    #[strum(to_string = "{0}")]
+    Payload(PayloadError),
+    #[from]
+    #[strum(to_string = "{0}")]
+    Signature(SignatureError),
+    #[from]
+    #[strum(to_string = "{0}")]
+    Identifier(IdentifierError),
+    #[from]
+    #[strum(to_string = "{0}")]
+    Semantic(SemanticError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for BlockError {}
+
+macro_rules! impl_from_error_via {
+    ($via:ident: $($err:ident),+$(,)?) => {
+        $(
+        impl From<$err> for BlockError {
+            fn from(error: $err) -> Self {
+                Self::from($via::from(error))
+            }
+        }
+        )+
+    };
+}
+impl_from_error_via!(PayloadError:
+    UnlockError,
+    ContextInputError,
+    NativeTokenError,
+    ManaError,
+    UnlockConditionError,
+    FeatureError,
+    TokenSchemeError,
+    InputError,
+    OutputError
+);
+
+impl From<Infallible> for BlockError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = BlockError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = Error::InvalidBlockBodyKind)]
+#[packable(tag_type = u8, with_error = BlockError::InvalidBlockBodyKind)]
 pub enum BlockBody {
     #[packable(tag = BasicBlockBody::KIND)]
     Basic(Box<BasicBlockBody>),
@@ -48,25 +131,25 @@ impl From<ValidationBlockBody> for BlockBody {
 }
 
 impl TryFrom<BlockBody> for BasicBlockBodyBuilder {
-    type Error = Error;
+    type Error = BlockError;
 
     fn try_from(value: BlockBody) -> Result<Self, Self::Error> {
         if let BlockBody::Basic(block) = value {
             Ok((*block).into())
         } else {
-            Err(Error::InvalidBlockBodyKind(value.kind()))
+            Err(BlockError::InvalidBlockBodyKind(value.kind()))
         }
     }
 }
 
 impl TryFrom<BlockBody> for ValidationBlockBodyBuilder {
-    type Error = Error;
+    type Error = BlockError;
 
     fn try_from(value: BlockBody) -> Result<Self, Self::Error> {
         if let BlockBody::Validation(block) = value {
             Ok((*block).into())
         } else {
-            Err(Error::InvalidBlockBodyKind(value.kind()))
+            Err(BlockError::InvalidBlockBodyKind(value.kind()))
         }
     }
 }
@@ -203,7 +286,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<BlockBodyDto> for BlockBody {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: BlockBodyDto,

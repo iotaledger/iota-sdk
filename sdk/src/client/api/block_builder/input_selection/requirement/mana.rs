@@ -19,7 +19,7 @@ use crate::{
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError,
+        BlockError,
     },
 };
 
@@ -68,9 +68,11 @@ impl InputSelection {
                         .iter()
                         .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
                 )
-                .finish_with_params(&self.protocol_parameters)?;
+                .finish_with_params(&self.protocol_parameters)
+                .map_err(BlockError::from)?;
 
-            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
+            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)
+                .map_err(BlockError::from)?;
 
             let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
                 + self.protocol_parameters.work_score_parameters().block();
@@ -150,7 +152,8 @@ impl InputSelection {
             let output_mana = output.mana();
             *output = AccountOutputBuilder::from(output.as_account())
                 .with_mana(output_mana.saturating_sub(*allotment_debt))
-                .finish_output()?;
+                .finish_output()
+                .map_err(BlockError::from)?;
             *allotment_debt = allotment_debt.saturating_sub(output_mana);
             log::debug!("Allotment debt after reduction: {}", allotment_debt);
         }
@@ -169,7 +172,8 @@ impl InputSelection {
                 .required_address(
                     self.latest_slot_commitment_id.slot_index(),
                     self.protocol_parameters.committable_age_range(),
-                )?
+                )
+                .map_err(BlockError::from)?
                 .expect("expiration deadzone");
 
             // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in
@@ -185,10 +189,16 @@ impl InputSelection {
                 // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
                 Some(block_index) => match required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
-                        blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
+                        blocks.push(Unlock::Reference(
+                            ReferenceUnlock::new(*block_index as u16).map_err(BlockError::from)?,
+                        ));
                     }
-                    Address::Account(_) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
-                    Address::Nft(_) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                    Address::Account(_) => blocks.push(Unlock::Account(
+                        AccountUnlock::new(*block_index as u16).map_err(BlockError::from)?,
+                    )),
+                    Address::Nft(_) => blocks.push(Unlock::Nft(
+                        NftUnlock::new(*block_index as u16).map_err(BlockError::from)?,
+                    )),
                     _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
                 },
                 None => {
@@ -232,7 +242,7 @@ impl InputSelection {
             };
         }
 
-        Ok(Unlocks::new(blocks)?)
+        Ok(Unlocks::new(blocks).map_err(BlockError::from)?)
     }
 
     pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<Vec<InputSigningData>, Error> {
@@ -282,10 +292,13 @@ impl InputSelection {
 
     fn total_mana(&self, input: &InputSigningData) -> Result<u64, Error> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
-            + input.output.available_mana(
-                &self.protocol_parameters,
-                input.output_id().transaction_id().slot_index(),
-                self.creation_slot,
-            )?)
+            + input
+                .output
+                .available_mana(
+                    &self.protocol_parameters,
+                    input.output_id().transaction_id().slot_index(),
+                    self.creation_slot,
+                )
+                .map_err(BlockError::from)?)
     }
 }

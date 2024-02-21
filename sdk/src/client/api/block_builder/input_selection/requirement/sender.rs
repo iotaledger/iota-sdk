@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{Error, InputSelection, Requirement};
-use crate::{client::secret::types::InputSigningData, types::block::address::Address};
+use crate::{
+    client::secret::types::InputSigningData,
+    types::block::{address::Address, BlockError},
+};
 
 impl InputSelection {
     /// Fulfills a sender requirement by selecting an available input that unlocks its address.
@@ -53,7 +56,8 @@ impl InputSelection {
                             .required_address(
                                 self.latest_slot_commitment_id.slot_index(),
                                 self.protocol_parameters.committable_age_range(),
-                            )?
+                            )
+                            .map_err(BlockError::from)?
                             .expect("expiration unlockable outputs already filtered out");
 
                         if &required_address == weight_address.address() {

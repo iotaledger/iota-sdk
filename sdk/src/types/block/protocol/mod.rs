@@ -3,8 +3,8 @@
 
 mod work_score;
 
-use alloc::string::String;
-use core::borrow::Borrow;
+use alloc::string::{FromUtf8Error, String};
+use core::{borrow::Borrow, convert::Infallible};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
@@ -13,19 +13,41 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 pub use self::work_score::{WorkScore, WorkScoreParameters};
 use crate::{
     types::block::{
-        address::Hrp,
+        address::{AddressError, Hrp},
         helper::network_name_to_id,
-        mana::{ManaParameters, RewardsParameters},
+        mana::{ManaError, ManaParameters, RewardsParameters},
         output::{StorageScore, StorageScoreParameters},
         slot::{EpochIndex, SlotCommitmentId, SlotIndex},
-        Error, PROTOCOL_VERSION,
+        PROTOCOL_VERSION,
     },
     utils::ConvertTo,
 };
 
+#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum ProtocolParametersError {
+    #[strum(to_string = "invalid network name: {0}")]
+    InvalidNetworkName(FromUtf8Error),
+    InvalidManaDecayFactors,
+    InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
+    #[from]
+    ManaParameters(ManaError),
+    #[from]
+    Address(AddressError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ProtocolParametersError {}
+
+impl From<Infallible> for ProtocolParametersError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
+
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -39,7 +61,7 @@ pub struct ProtocolParameters {
     /// The version of the protocol running.
     pub(crate) version: u8,
     /// The human friendly name of the network.
-    #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
+    #[packable(unpack_error_with = |err| ProtocolParametersError::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
     #[getset(skip)]
     pub(crate) network_name: StringPrefix<u8>,
@@ -148,11 +170,12 @@ impl ProtocolParameters {
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
         epoch_nearing_threshold: u32,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, ProtocolParametersError> {
         Ok(Self {
             version,
-            network_name: <StringPrefix<u8>>::try_from(network_name.into()).map_err(Error::InvalidStringPrefix)?,
-            bech32_hrp: bech32_hrp.convert()?,
+            network_name: <StringPrefix<u8>>::try_from(network_name.into())
+                .map_err(ProtocolParametersError::InvalidStringPrefix)?,
+            bech32_hrp: bech32_hrp.convert().map_err(AddressError::Convert)?,
             storage_score_parameters,
             token_supply,
             genesis_unix_timestamp,
@@ -358,7 +381,7 @@ pub struct CommittableAgeRange {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
     /// Minimum value of the reference Mana cost.
@@ -404,7 +427,7 @@ impl Default for CongestionControlParameters {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[getset(get_copy = "pub")]
 pub struct VersionSignalingParameters {
     /// The size of the window in epochs that is used to find which version of protocol parameters was

@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use iota_sdk::types::block::BlockError;
 use packable::error::UnexpectedEOF;
 use serde::{Serialize, Serializer};
 
@@ -14,7 +15,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     /// Block errors.
     #[error("{0}")]
-    Block(#[from] iota_sdk::types::block::Error),
+    Block(#[from] BlockError),
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
@@ -29,7 +30,7 @@ pub enum Error {
     SerdeJson(#[from] serde_json::error::Error),
     /// Unpack errors.
     #[error("{0}")]
-    Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),
+    Unpack(#[from] packable::error::UnpackError<BlockError, UnexpectedEOF>),
 }
 
 #[cfg(feature = "stronghold")]

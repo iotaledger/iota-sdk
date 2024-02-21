@@ -3,6 +3,7 @@
 
 use core::convert::{From, Infallible};
 
+use iota_sdk_bindings_core::iota_sdk::types::block::BlockError;
 use pyo3::{exceptions, prelude::*};
 
 /// The `Result` structure to wrap the error type for python binding.
@@ -37,8 +38,8 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<iota_sdk_bindings_core::iota_sdk::types::block::Error> for Error {
-    fn from(err: iota_sdk_bindings_core::iota_sdk::types::block::Error) -> Self {
+impl From<BlockError> for Error {
+    fn from(err: BlockError) -> Self {
         Self {
             error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
         }

@@ -12,7 +12,7 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         context_input::{CommitmentContextInput, RewardContextInput},
@@ -33,7 +33,7 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn valid_creation() -> Result<()> {
+async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -106,22 +106,18 @@ async fn valid_creation() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
-
     Ok(())
 }
 
 #[tokio::test]
-async fn creation_missing_commitment_input() -> Result<()> {
+async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -198,18 +194,19 @@ async fn creation_missing_commitment_input() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
     assert_eq!(
-        conflict,
-        Some(TransactionFailureReason::DelegationCommitmentInputMissing)
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationCommitmentInputMissing
     );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn non_null_id_creation() -> Result<()> {
+async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -286,15 +283,19 @@ async fn non_null_id_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::NewChainOutputHasNonZeroedId));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::NewChainOutputHasNonZeroedId
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn mismatch_amount_creation() -> Result<()> {
+async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -371,15 +372,19 @@ async fn mismatch_amount_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationAmountMismatch));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationAmountMismatch
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn non_zero_end_epoch_creation() -> Result<()> {
+async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -456,15 +461,19 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationEndEpochNotZero));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationEndEpochNotZero
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn invalid_start_epoch_creation() -> Result<()> {
+async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -542,15 +551,19 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationStartEpochInvalid));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationStartEpochInvalid
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_not_null_id() -> Result<()> {
+async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -639,18 +652,19 @@ async fn delay_not_null_id() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
     assert_eq!(
-        conflict,
-        Some(TransactionFailureReason::DelegationOutputTransitionedTwice)
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationOutputTransitionedTwice
     );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_modified_amount() -> Result<()> {
+async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -739,15 +753,19 @@ async fn delay_modified_amount() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationModified
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_modified_validator() -> Result<()> {
+async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -836,15 +854,19 @@ async fn delay_modified_validator() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationModified
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_modified_start_epoch() -> Result<()> {
+async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -933,15 +955,19 @@ async fn delay_modified_start_epoch() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationModified
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
+async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1030,15 +1056,19 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationEndEpochInvalid));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationEndEpochInvalid
+    );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn destroy_null_id() -> Result<()> {
+async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1123,22 +1153,18 @@ async fn destroy_null_id() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
-
     Ok(())
 }
 
 #[tokio::test]
-async fn destroy_reward_missing() -> Result<()> {
+async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1222,9 +1248,13 @@ async fn destroy_reward_missing() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    )
+    .unwrap_err();
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationRewardInputMissing));
+    assert_eq!(
+        conflict.transaction_failure_reason(),
+        TransactionFailureReason::DelegationRewardInputMissing
+    );
 
     Ok(())
 }

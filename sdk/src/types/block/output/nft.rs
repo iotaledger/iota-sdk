@@ -13,17 +13,17 @@ use packable::{
 use crate::types::block::{
     address::{Address, NftAddress},
     output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        feature::{verify_allowed_features, Feature, FeatureError, FeatureFlags, Features},
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
-            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionError, UnlockConditionFlags,
+            UnlockConditions,
         },
-        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
-        StorageScoreParameters,
+        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId,
+        StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::TransactionFailureReason,
-    Error,
 };
 
 crate::impl_id!(
@@ -207,7 +207,7 @@ impl NftOutputBuilder {
         mut self,
         return_address: impl Into<Address>,
         params: StorageScoreParameters,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, OutputError> {
         Ok(match self.amount {
             OutputBuilderAmount::Amount(amount) => {
                 let return_address = return_address.into();
@@ -249,14 +249,15 @@ impl NftOutputBuilder {
     }
 
     ///
-    pub fn finish(self) -> Result<NftOutput, Error> {
+    pub fn finish(self) -> Result<NftOutput, OutputError> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions, &self.nft_id)?;
 
         let features = Features::from_set(self.features)?;
 
-        verify_restricted_addresses(&unlock_conditions, NftOutput::KIND, features.native_token(), self.mana)?;
+        verify_restricted_addresses(&unlock_conditions, NftOutput::KIND, features.native_token(), self.mana)
+            .map_err(UnlockConditionError::from)?;
         verify_allowed_features(&features, NftOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -281,7 +282,7 @@ impl NftOutputBuilder {
     }
 
     /// Finishes the [`NftOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, OutputError> {
         Ok(Output::Nft(self.finish()?))
     }
 }
@@ -439,7 +440,7 @@ impl WorkScore for NftOutput {
 impl MinimumOutputAmount for NftOutput {}
 
 impl Packable for NftOutput {
-    type UnpackError = Error;
+    type UnpackError = OutputError;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -462,25 +463,34 @@ impl Packable for NftOutput {
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let nft_id = NftId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
         if VERIFY {
             verify_unlock_conditions(&unlock_conditions, &nft_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let features = Features::unpack::<_, VERIFY>(unpacker, &())
+            .map_packable_err(FeatureError::from)
+            .coerce()?;
 
         if VERIFY {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
-                .map_err(UnpackError::Packable)?;
-            verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
+                .map_err(UnlockConditionError::from)
+                .map_err(UnpackError::Packable)
+                .coerce()?;
+            verify_allowed_features(&features, Self::ALLOWED_FEATURES)
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())
+            .map_packable_err(FeatureError::from)
+            .coerce()?;
 
         if VERIFY {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
-                .map_err(UnpackError::Packable)?;
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
         Ok(Self {
@@ -494,18 +504,21 @@ impl Packable for NftOutput {
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId) -> Result<(), OutputError> {
     if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Nft(nft_address) = unlock_condition.address() {
             if !nft_id.is_null() && nft_address.nft_id() == nft_id {
-                return Err(Error::SelfDepositNft(*nft_id));
+                return Err(OutputError::SelfDepositNft(*nft_id));
             }
         }
     } else {
-        return Err(Error::MissingAddressUnlockCondition);
+        return Err(OutputError::MissingAddressUnlockCondition);
     }
 
-    verify_allowed_unlock_conditions(unlock_conditions, NftOutput::ALLOWED_UNLOCK_CONDITIONS)
+    Ok(verify_allowed_unlock_conditions(
+        unlock_conditions,
+        NftOutput::ALLOWED_UNLOCK_CONDITIONS,
+    )?)
 }
 
 #[cfg(feature = "serde")]
@@ -515,10 +528,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{output::unlock_condition::UnlockCondition, Error},
-        utils::serde::string,
-    };
+    use crate::{types::block::output::unlock_condition::UnlockCondition, utils::serde::string};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -552,7 +562,7 @@ mod dto {
     }
 
     impl TryFrom<NftOutputDto> for NftOutput {
-        type Error = Error;
+        type Error = OutputError;
 
         fn try_from(dto: NftOutputDto) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)

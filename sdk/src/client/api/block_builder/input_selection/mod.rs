@@ -37,6 +37,7 @@ use crate::{
         },
         protocol::{CommittableAgeRange, ProtocolParameters},
         slot::{SlotCommitmentId, SlotIndex},
+        BlockError,
     },
 };
 
@@ -252,10 +253,22 @@ impl InputSelection {
                 log::debug!("Adding {added_mana} excess input mana to output with address {remainder_address}");
                 let new_mana = output.mana() + added_mana;
                 *output = match output {
-                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
-                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
+                    Output::Basic(b) => BasicOutputBuilder::from(&*b)
+                        .with_mana(new_mana)
+                        .finish_output()
+                        .map_err(BlockError::from)?,
+                    Output::Account(a) => AccountOutputBuilder::from(&*a)
+                        .with_mana(new_mana)
+                        .finish_output()
+                        .map_err(BlockError::from)?,
+                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a)
+                        .with_mana(new_mana)
+                        .finish_output()
+                        .map_err(BlockError::from)?,
+                    Output::Nft(n) => NftOutputBuilder::from(&*n)
+                        .with_mana(new_mana)
+                        .finish_output()
+                        .map_err(BlockError::from)?,
                     _ => unreachable!(),
                 };
             }
@@ -298,7 +311,8 @@ impl InputSelection {
             .mana_allotments
             .into_iter()
             .map(|(account_id, mana)| ManaAllotment::new(account_id, mana))
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(BlockError::from)?;
 
         // Build transaction
 
@@ -314,7 +328,9 @@ impl InputSelection {
             builder = builder.with_payload(payload);
         }
 
-        let transaction = builder.finish_with_params(&self.protocol_parameters)?;
+        let transaction = builder
+            .finish_with_params(&self.protocol_parameters)
+            .map_err(BlockError::from)?;
 
         Ok(PreparedTransactionData {
             transaction,
@@ -446,7 +462,8 @@ impl InputSelection {
             .required_address(
                 self.latest_slot_commitment_id.slot_index(),
                 self.protocol_parameters.committable_age_range(),
-            )?
+            )
+            .map_err(BlockError::from)?
             .expect("expiration unlockable outputs already filtered out");
 
         let required_address = if let Address::Restricted(restricted) = &required_address {
@@ -553,7 +570,8 @@ impl InputSelection {
         for input in account_nft_address_inputs {
             let required_address = input
                 .output
-                .required_address(commitment_slot_index, committable_age_range)?
+                .required_address(commitment_slot_index, committable_age_range)
+                .map_err(BlockError::from)?
                 .expect("expiration unlockable outputs already filtered out");
 
             match sorted_inputs
@@ -632,7 +650,9 @@ impl InputSelection {
 
         for input in inputs {
             if let Some(native_token) = input.output.native_token() {
-                input_native_tokens_builder.add_native_token(*native_token)?;
+                input_native_tokens_builder
+                    .add_native_token(*native_token)
+                    .map_err(BlockError::from)?;
             }
             match &input.output {
                 Output::Basic(basic) => {
@@ -656,7 +676,9 @@ impl InputSelection {
 
         for output in outputs {
             if let Some(native_token) = output.native_token() {
-                output_native_tokens_builder.add_native_token(*native_token)?;
+                output_native_tokens_builder
+                    .add_native_token(*native_token)
+                    .map_err(BlockError::from)?;
             }
         }
 

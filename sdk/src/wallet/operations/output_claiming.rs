@@ -14,6 +14,7 @@ use crate::{
         },
         protocol::ProtocolParameters,
         slot::SlotIndex,
+        BlockError,
     },
     wallet::{
         core::WalletLedger,
@@ -204,22 +205,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
-        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await.map_err(|error| {
-            // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
-            // case and then easier to handle
-            match error {
-                crate::wallet::Error::Block(block_error) => match *block_error {
-                    crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
-                        crate::wallet::Error::InsufficientFunds {
-                            available: amount,
-                            required,
-                        }
-                    }
-                    _ => crate::wallet::Error::Block(block_error),
-                },
-                _ => error,
-            }
-        })?;
+        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await?;
 
         let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
@@ -286,13 +272,15 @@ where
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
-                        .finish_output()?
+                        .finish_output()
+                        .map_err(BlockError::from)?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
-                        .finish_output()?
+                        .finish_output()
+                        .map_err(BlockError::from)?
                 };
 
                 nft_outputs_to_send.push(nft_output);

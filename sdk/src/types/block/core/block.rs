@@ -7,7 +7,7 @@ use core::mem::size_of;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{
-    error::{UnexpectedEOF, UnpackError},
+    error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
     packer::{Packer, SlicePacker},
     unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
     Packable, PackableExt,
@@ -15,12 +15,12 @@ use packable::{
 
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
-    core::{BasicBlockBody, ValidationBlockBody},
+    core::{BasicBlockBody, BlockError, ValidationBlockBody},
     output::AccountId,
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    BlockBody, Error,
+    BlockBody,
 };
 
 /// Block without a signature. Can be finished into a [`Block`].
@@ -56,13 +56,13 @@ impl UnsignedBlock {
         [self.header.hash(), self.body.hash()].concat()
     }
 
-    pub fn finish(self, signature: impl Into<Signature>) -> Result<Block, Error> {
+    pub fn finish(self, signature: impl Into<Signature>) -> Result<Block, BlockError> {
         Ok(Block::new(self.header, self.body, signature))
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, CopyGetters, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = BlockError)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[getset(get_copy = "pub")]
 pub struct BlockHeader {
@@ -116,9 +116,9 @@ impl BlockHeader {
 fn verify_protocol_version<const VERIFY: bool>(
     protocol_version: &u8,
     params: &ProtocolParameters,
-) -> Result<(), Error> {
+) -> Result<(), BlockError> {
     if VERIFY && *protocol_version != params.version() {
-        return Err(Error::ProtocolVersionMismatch {
+        return Err(BlockError::ProtocolVersionMismatch {
             expected: params.version(),
             actual: *protocol_version,
         });
@@ -127,9 +127,9 @@ fn verify_protocol_version<const VERIFY: bool>(
     Ok(())
 }
 
-fn verify_network_id<const VERIFY: bool>(network_id: &u64, params: &ProtocolParameters) -> Result<(), Error> {
+fn verify_network_id<const VERIFY: bool>(network_id: &u64, params: &ProtocolParameters) -> Result<(), BlockError> {
     if VERIFY && *network_id != params.network_id() {
-        return Err(Error::NetworkIdMismatch {
+        return Err(BlockError::NetworkIdMismatch {
             expected: params.network_id(),
             actual: *network_id,
         });
@@ -234,7 +234,7 @@ impl Block {
 
         // When parsing the block is complete, there should not be any trailing bytes left that were not parsed.
         if u8::unpack::<_, true>(&mut unpacker, &()).is_ok() {
-            return Err(UnpackError::Packable(Error::RemainingBytesAfterBlock));
+            return Err(UnpackError::Packable(BlockError::RemainingBytesAfterBlock.into()));
         }
 
         Ok(block)
@@ -264,7 +264,7 @@ impl Block {
 }
 
 impl Packable for Block {
-    type UnpackError = Error;
+    type UnpackError = BlockError;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -283,7 +283,7 @@ impl Packable for Block {
 
         let header = BlockHeader::unpack::<_, VERIFY>(unpacker, protocol_params)?;
         let body = BlockBody::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-        let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+        let signature = Signature::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let block = Self {
             header,
@@ -299,7 +299,7 @@ impl Packable for Block {
             };
 
             if block_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
+                return Err(UnpackError::Packable(BlockError::InvalidBlockLength(block_len).into()));
             }
         }
 
@@ -347,7 +347,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<BlockDto> for Block {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: BlockDto,
@@ -355,14 +355,14 @@ pub(crate) mod dto {
         ) -> Result<Self, Self::Error> {
             if let Some(protocol_params) = params {
                 if dto.inner.header.protocol_version != protocol_params.version() {
-                    return Err(Error::ProtocolVersionMismatch {
+                    return Err(BlockError::ProtocolVersionMismatch {
                         expected: protocol_params.version(),
                         actual: dto.inner.header.protocol_version,
                     });
                 }
 
                 if dto.inner.header.network_id != protocol_params.network_id() {
-                    return Err(Error::NetworkIdMismatch {
+                    return Err(BlockError::NetworkIdMismatch {
                         expected: protocol_params.network_id(),
                         actual: dto.inner.header.network_id,
                     });
@@ -404,7 +404,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<BlockHeaderDto> for BlockHeader {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: BlockHeaderDto,
@@ -412,14 +412,14 @@ pub(crate) mod dto {
         ) -> Result<Self, Self::Error> {
             if let Some(protocol_params) = params {
                 if dto.protocol_version != protocol_params.version() {
-                    return Err(Error::ProtocolVersionMismatch {
+                    return Err(BlockError::ProtocolVersionMismatch {
                         expected: protocol_params.version(),
                         actual: dto.protocol_version,
                     });
                 }
 
                 if dto.network_id != protocol_params.network_id() {
-                    return Err(Error::NetworkIdMismatch {
+                    return Err(BlockError::NetworkIdMismatch {
                         expected: protocol_params.network_id(),
                         actual: dto.network_id,
                     });
@@ -454,7 +454,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<UnsignedBlockDto> for UnsignedBlock {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: UnsignedBlockDto,

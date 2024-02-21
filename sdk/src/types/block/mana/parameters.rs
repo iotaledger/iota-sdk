@@ -5,9 +5,9 @@ use getset::CopyGetters;
 use packable::{prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{
-    protocol::ProtocolParameters,
+    mana::ManaError,
+    protocol::{ProtocolParameters, ProtocolParametersError},
     slot::{EpochIndex, SlotIndex},
-    Error,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
@@ -16,7 +16,7 @@ use crate::types::block::{
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[getset(get_copy = "pub")]
 pub struct ManaParameters {
     /// The number of bits used to represent Mana.
@@ -28,7 +28,7 @@ pub struct ManaParameters {
     pub(crate) generation_rate_exponent: u8,
     /// A lookup table of epoch index diff to mana decay factor.
     /// The actual decay factor is given by decay_factors\[epoch_diff\] * 2^(-decay_factors_exponent).
-    #[packable(unpack_error_with = |_| Error::InvalidManaDecayFactors)]
+    #[packable(unpack_error_with = |_| ProtocolParametersError::InvalidManaDecayFactors)]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::boxed_slice_prefix"))]
     #[getset(skip)]
     pub(crate) decay_factors: BoxedSlicePrefix<u32, u16>,
@@ -121,14 +121,14 @@ impl ProtocolParameters {
         mana: u64,
         slot_index_created: impl Into<SlotIndex>,
         slot_index_target: impl Into<SlotIndex>,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, ManaError> {
         let (epoch_index_created, epoch_index_target) = (
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
 
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDiff {
+            return Err(ManaError::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -145,11 +145,11 @@ impl ProtocolParameters {
         reward: u64,
         reward_epoch: impl Into<EpochIndex>,
         claimed_epoch: impl Into<EpochIndex>,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, ManaError> {
         let (reward_epoch, claimed_epoch) = (reward_epoch.into(), claimed_epoch.into());
 
         if reward_epoch > claimed_epoch {
-            return Err(Error::InvalidEpochDiff {
+            return Err(ManaError::InvalidEpochDiff {
                 created: reward_epoch,
                 target: claimed_epoch,
             });
@@ -165,7 +165,7 @@ impl ProtocolParameters {
         amount: u64,
         slot_index_created: impl Into<SlotIndex>,
         slot_index_target: impl Into<SlotIndex>,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, ManaError> {
         let (slot_index_created, slot_index_target) = (slot_index_created.into(), slot_index_target.into());
         let (epoch_index_created, epoch_index_target) = (
             self.epoch_index_of(slot_index_created),
@@ -173,7 +173,7 @@ impl ProtocolParameters {
         );
 
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDiff {
+            return Err(ManaError::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -286,7 +286,7 @@ mod test {
         stored_mana: u64,
         created_slot: SlotIndex,
         target_slot: SlotIndex,
-        err: Option<Error>,
+        err: Option<ManaError>,
     }
 
     #[test]
@@ -311,7 +311,7 @@ mod test {
                 stored_mana: 0,
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
-                err: Some(Error::InvalidEpochDiff {
+                err: Some(ManaError::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
                 }),
@@ -373,7 +373,7 @@ mod test {
         created_slot: SlotIndex,
         target_slot: SlotIndex,
         potential_mana: Option<u64>,
-        err: Option<Error>,
+        err: Option<ManaError>,
     }
 
     #[test]
@@ -401,7 +401,7 @@ mod test {
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
                 potential_mana: None,
-                err: Some(Error::InvalidEpochDiff {
+                err: Some(ManaError::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
                 }),

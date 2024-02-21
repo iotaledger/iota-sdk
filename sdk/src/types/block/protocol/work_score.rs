@@ -4,15 +4,12 @@
 use getset::CopyGetters;
 use packable::Packable;
 
-use crate::types::block::Error;
-
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct WorkScoreParameters {
     /// Accounts for the network traffic per byte.

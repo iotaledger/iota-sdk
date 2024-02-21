@@ -7,12 +7,13 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::{Bech32Address, ToBech32Ext},
+        address::{AddressError, Bech32Address, ToBech32Ext},
         output::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
             BasicOutputBuilder, MinimumOutputAmount,
         },
         slot::SlotIndex,
+        BlockError,
     },
     utils::{serde::string, ConvertTo},
     wallet::{
@@ -48,7 +49,10 @@ impl SendParams {
     pub fn new(amount: u64, address: impl ConvertTo<Bech32Address>) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
             amount,
-            address: address.convert()?,
+            address: address
+                .convert()
+                .map_err(AddressError::from)
+                .map_err(crate::client::Error::from)?,
             return_address: None,
             expiration: None,
         })
@@ -58,7 +62,12 @@ impl SendParams {
         mut self,
         address: impl ConvertTo<Bech32Address>,
     ) -> Result<Self, crate::wallet::Error> {
-        self.return_address = Some(address.convert()?);
+        self.return_address = Some(
+            address
+                .convert()
+                .map_err(AddressError::from)
+                .map_err(crate::client::Error::from)?,
+        );
         Ok(self)
     }
 
@@ -168,7 +177,8 @@ where
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish()?;
+                .finish()
+                .map_err(BlockError::from)?;
 
             if amount >= output.minimum_amount(storage_score_params) {
                 outputs.push(output.into())
@@ -180,12 +190,14 @@ where
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let output = BasicOutputBuilder::from(&output)
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        return_address.clone(),
-                        expiration_slot_index,
-                    )?)
-                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
-                    .finish_output()?;
+                    .add_unlock_condition(
+                        ExpirationUnlockCondition::new(return_address.clone(), expiration_slot_index)
+                            .map_err(BlockError::from)?,
+                    )
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)
+                    .map_err(BlockError::from)?
+                    .finish_output()
+                    .map_err(BlockError::from)?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
                     return Err(Error::InsufficientFunds {

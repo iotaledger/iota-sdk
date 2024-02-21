@@ -11,11 +11,11 @@
 use iota_sdk::client::{
     api::GetAddressesOptions,
     secret::{GenerateAddressOptions, SecretManager},
-    Client, Result,
+    Client,
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

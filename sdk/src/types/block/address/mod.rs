@@ -11,6 +11,7 @@ mod nft;
 mod restricted;
 
 use alloc::boxed::Box;
+use core::convert::Infallible;
 
 use derive_more::{Display, From};
 use packable::Packable;
@@ -28,16 +29,59 @@ pub use self::{
 };
 use crate::{
     types::block::{
+        capabilities::CapabilityError,
         output::{StorageScore, StorageScoreParameters},
-        Error,
+        IdentifierError,
     },
-    utils::ConvertTo,
+    utils::{ConversionError, ConvertTo},
 };
+
+#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum AddressError {
+    #[strum(to_string = "invalid address provided")]
+    InvalidAddress,
+    #[strum(to_string = "invalid address kind: {0}")]
+    InvalidAddressKind(u8),
+    #[strum(to_string = "invalid address weight: {0}")]
+    InvalidAddressWeight(u8),
+    #[strum(to_string = "invalid multi address threshold: {0}")]
+    InvalidMultiAddressThreshold(u16),
+    #[strum(to_string = "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}")]
+    InvalidMultiAddressCumulativeWeight { cumulative_weight: u16, threshold: u16 },
+    #[strum(to_string = "invalid weighted address count: {count}")]
+    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
+    #[strum(to_string = "weighted addresses are not unique and/or sorted")]
+    WeightedAddressesNotUniqueSorted,
+    #[strum(to_string = "restricted address capability: {0:?}")]
+    RestrictedAddressCapability(AddressCapabilityFlag),
+    #[from]
+    InvalidBech32Hrp(::bech32::primitives::hrp::Error),
+    #[from]
+    #[strum(to_string = "{0}")]
+    Hex(prefix_hex::Error),
+    #[from]
+    Identifier(IdentifierError),
+    #[from]
+    Convert(ConversionError),
+    #[from]
+    #[strum(to_string = "{0}")]
+    Capability(CapabilityError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for AddressError {}
+
+impl From<Infallible> for AddressError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
 
 /// A generic address supporting different address kinds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
-#[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
-#[packable(unpack_error = Error)]
+#[packable(tag_type = u8, with_error = AddressError::InvalidAddressKind)]
+#[packable(unpack_error = AddressError)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Address {
     /// An Ed25519 address.
@@ -133,7 +177,7 @@ impl Address {
     }
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
-    pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
+    pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, AddressError> {
         Bech32Address::try_from_str(address).map(|res| res.inner)
     }
 
@@ -160,7 +204,7 @@ impl StorageScore for Address {
 
 pub trait ToBech32Ext: Sized {
     /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
-    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error>;
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, AddressError>;
 
     /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
     fn to_bech32(self, hrp: Hrp) -> Bech32Address;
@@ -171,7 +215,7 @@ pub trait ToBech32Ext: Sized {
 }
 
 impl<T: Into<Address>> ToBech32Ext for T {
-    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error> {
+    fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, AddressError> {
         Bech32Address::try_new(hrp, self)
     }
 

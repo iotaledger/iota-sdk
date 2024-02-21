@@ -15,11 +15,10 @@ use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
         secret::{types::InputSigningData, SecretManage},
-        Error,
     },
     types::{
         api::core::OutputWithMetadataResponse,
-        block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
+        block::{output::Output, payload::signed_transaction::SignedTransactionPayload, BlockError},
     },
     wallet::{
         core::WalletLedgerDto,
@@ -72,7 +71,9 @@ where
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
+            output
+                .verify_storage_deposit(protocol_parameters.storage_score_parameters())
+                .map_err(BlockError::from)?;
         }
 
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
@@ -115,21 +116,19 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let conflict = verify_semantic(
+        if let Err(conflict) = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.payload,
             signed_transaction_data.mana_rewards,
             self.client().get_protocol_parameters().await?,
-        )?;
-
-        if let Some(conflict) = conflict {
+        ) {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload
             );
             // unlock outputs so they are available for a new transaction
             self.unlock_inputs(&signed_transaction_data.inputs_data).await?;
-            return Err(Error::TransactionSemantic(conflict).into());
+            return Err(BlockError::from(conflict).into());
         }
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]

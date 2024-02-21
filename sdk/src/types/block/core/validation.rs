@@ -4,9 +4,8 @@
 use packable::Packable;
 
 use crate::types::block::{
-    core::{parent::verify_parents_sets, BlockBody, Parents},
+    core::{parent::verify_parents_sets, BlockBody, BlockError, Parents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    Error,
 };
 
 pub type StrongParents = Parents<1, 50>;
@@ -75,7 +74,7 @@ impl ValidationBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`ValidationBlockBody`].
-    pub fn finish(self) -> Result<ValidationBlockBody, Error> {
+    pub fn finish(self) -> Result<ValidationBlockBody, BlockError> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
         Ok(ValidationBlockBody {
@@ -88,7 +87,7 @@ impl ValidationBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`BlockBody`].
-    pub fn finish_block_body(self) -> Result<BlockBody, Error> {
+    pub fn finish_block_body(self) -> Result<BlockBody, BlockError> {
         Ok(BlockBody::from(self.finish()?))
     }
 }
@@ -109,7 +108,7 @@ impl From<ValidationBlockBody> for ValidationBlockBodyBuilder {
 /// by the Congestion Control of the IOTA 2.0 protocol and can be issued without burning Mana within the constraints of
 /// the allowed validator throughput. It is allowed to reference more parent blocks than a normal Basic Block Body.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = BlockError)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(verify_with = verify_validation_block_body)]
 pub struct ValidationBlockBody {
@@ -163,12 +162,12 @@ impl ValidationBlockBody {
 fn verify_protocol_parameters_hash<const VERIFY: bool>(
     hash: &ProtocolParametersHash,
     params: &ProtocolParameters,
-) -> Result<(), Error> {
+) -> Result<(), BlockError> {
     if VERIFY {
         let params_hash = params.hash();
 
         if hash != &params_hash {
-            return Err(Error::InvalidProtocolParametersHash {
+            return Err(BlockError::InvalidProtocolParametersHash {
                 expected: params_hash,
                 actual: *hash,
             });
@@ -181,7 +180,7 @@ fn verify_protocol_parameters_hash<const VERIFY: bool>(
 fn verify_validation_block_body<const VERIFY: bool>(
     validation_block_body: &ValidationBlockBody,
     _: &ProtocolParameters,
-) -> Result<(), Error> {
+) -> Result<(), BlockError> {
     if VERIFY {
         verify_parents_sets(
             &validation_block_body.strong_parents,
@@ -200,10 +199,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{BlockId, Error},
-        TryFromDto,
-    };
+    use crate::types::{block::BlockId, TryFromDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -233,7 +229,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<ValidationBlockBodyDto> for ValidationBlockBody {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: ValidationBlockBodyDto,

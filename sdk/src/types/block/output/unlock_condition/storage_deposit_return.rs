@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    address::Address,
-    output::storage_score::{StorageScore, StorageScoreParameters},
-    Error,
+    address::{Address, AddressError},
+    output::{
+        storage_score::{StorageScore, StorageScoreParameters},
+        unlock_condition::UnlockConditionError,
+    },
 };
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
+#[packable(unpack_error = UnlockConditionError)]
 pub struct StorageDepositReturnUnlockCondition {
     // The [`Address`] to return the amount to.
     #[packable(verify_with = verify_return_address)]
@@ -24,7 +27,7 @@ impl StorageDepositReturnUnlockCondition {
 
     /// Creates a new [`StorageDepositReturnUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: impl Into<Address>, amount: u64) -> Result<Self, Error> {
+    pub fn new(return_address: impl Into<Address>, amount: u64) -> Result<Self, UnlockConditionError> {
         let return_address = return_address.into();
 
         verify_return_address::<true>(&return_address)?;
@@ -52,9 +55,9 @@ impl StorageScore for StorageDepositReturnUnlockCondition {
 }
 
 #[inline]
-fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result<(), Error> {
+fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result<(), UnlockConditionError> {
     if VERIFY && return_address.is_implicit_account_creation() {
-        Err(Error::InvalidAddressKind(return_address.kind()))
+        Err(AddressError::InvalidAddressKind(return_address.kind()).into())
     } else {
         Ok(())
     }

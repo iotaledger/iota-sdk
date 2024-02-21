@@ -16,14 +16,14 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{
-            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
-            UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionError,
+            UnlockConditionFlags, UnlockConditions,
         },
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
+        StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::TransactionFailureReason,
-    Error,
 };
 
 crate::impl_id!(
@@ -209,7 +209,7 @@ impl AccountOutputBuilder {
     }
 
     ///
-    pub fn finish(self) -> Result<AccountOutput, Error> {
+    pub fn finish(self) -> Result<AccountOutput, OutputError> {
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
         verify_index_counter(&self.account_id, foundry_counter)?;
@@ -225,7 +225,8 @@ impl AccountOutputBuilder {
             AccountOutput::KIND,
             features.native_token(),
             self.mana,
-        )?;
+        )
+        .map_err(UnlockConditionError::from)?;
         verify_allowed_features(&features, AccountOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -253,7 +254,7 @@ impl AccountOutputBuilder {
     }
 
     /// Finishes the [`AccountOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, OutputError> {
         Ok(Output::Account(self.finish()?))
     }
 }
@@ -474,7 +475,7 @@ impl WorkScore for AccountOutput {
 impl MinimumOutputAmount for AccountOutput {}
 
 impl Packable for AccountOutput {
-    type UnpackError = Error;
+    type UnpackError = OutputError;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -505,26 +506,31 @@ impl Packable for AccountOutput {
             verify_index_counter(&account_id, foundry_counter).map_err(UnpackError::Packable)?;
         }
 
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
         if VERIFY {
             verify_unlock_conditions(&unlock_conditions, &account_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let features = Features::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if VERIFY {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
-                .map_err(UnpackError::Packable)?;
-            verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
+                .map_err(UnlockConditionError::from)
+                .map_err(UnpackError::Packable)
+                .coerce()?;
+            verify_allowed_features(&features, Self::ALLOWED_FEATURES)
+                .map_err(UnpackError::Packable)
+                .coerce()?;
             verify_staked_amount(amount, &features).map_err(UnpackError::Packable)?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if VERIFY {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
-                .map_err(UnpackError::Packable)?;
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
         Ok(Self {
@@ -540,32 +546,35 @@ impl Packable for AccountOutput {
 }
 
 #[inline]
-fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<(), Error> {
+fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<(), OutputError> {
     if account_id.is_null() && foundry_counter != 0 {
-        Err(Error::NonZeroStateIndexOrFoundryCounter)
+        Err(OutputError::NonZeroStateIndexOrFoundryCounter)
     } else {
         Ok(())
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), OutputError> {
     if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Account(account_address) = unlock_condition.address() {
             if !account_id.is_null() && account_address.account_id() == account_id {
-                return Err(Error::SelfDepositAccount(*account_id));
+                return Err(OutputError::SelfDepositAccount(*account_id));
             }
         }
     } else {
-        return Err(Error::MissingAddressUnlockCondition);
+        return Err(OutputError::MissingAddressUnlockCondition);
     }
 
-    verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
+    Ok(verify_allowed_unlock_conditions(
+        unlock_conditions,
+        AccountOutput::ALLOWED_UNLOCK_CONDITIONS,
+    )?)
 }
 
-fn verify_staked_amount(amount: u64, features: &Features) -> Result<(), Error> {
+fn verify_staked_amount(amount: u64, features: &Features) -> Result<(), OutputError> {
     if let Some(staking) = features.staking() {
         if amount < staking.staked_amount() {
-            return Err(Error::InvalidStakedAmount);
+            return Err(OutputError::InvalidStakedAmount);
         }
     }
 
@@ -579,10 +588,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{output::unlock_condition::UnlockCondition, Error},
-        utils::serde::string,
-    };
+    use crate::{types::block::output::unlock_condition::UnlockCondition, utils::serde::string};
 
     /// Describes an account in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -619,7 +625,7 @@ mod dto {
     }
 
     impl TryFrom<AccountOutputDto> for AccountOutput {
-        type Error = Error;
+        type Error = OutputError;
 
         fn try_from(dto: AccountOutputDto) -> Result<Self, Self::Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)

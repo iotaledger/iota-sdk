@@ -12,12 +12,15 @@
 //! ```
 
 use iota_sdk::{
-    types::block::output::{
-        feature::{Irc27Metadata, IssuerFeature, MetadataFeature, SenderFeature},
-        unlock_condition::AddressUnlockCondition,
-        NftId, NftOutputBuilder,
+    types::block::{
+        output::{
+            feature::{Irc27Metadata, IssuerFeature, MetadataFeature, SenderFeature},
+            unlock_condition::AddressUnlockCondition,
+            NftId, NftOutputBuilder,
+        },
+        BlockError,
     },
-    wallet::{MintNftParams, Result},
+    wallet::MintNftParams,
     Wallet,
 };
 
@@ -31,7 +34,7 @@ const NFT1_TAG: &str = "some NFT tag";
 const NFT2_AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

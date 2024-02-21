@@ -8,12 +8,13 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::{Bech32Address, ToBech32Ext},
+        address::{AddressError, Bech32Address, ToBech32Ext},
         output::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
             BasicOutputBuilder, NativeToken, TokenId,
         },
         slot::SlotIndex,
+        BlockError,
     },
     utils::ConvertTo,
     wallet::{
@@ -47,7 +48,10 @@ impl SendNativeTokenParams {
     /// Creates a new instance of [`SendNativeTokenParams`]
     pub fn new(address: impl ConvertTo<Bech32Address>, native_token: (TokenId, U256)) -> Result<Self> {
         Ok(Self {
-            address: address.convert()?,
+            address: address
+                .convert()
+                .map_err(AddressError::from)
+                .map_err(crate::client::Error::from)?,
             native_token,
             return_address: None,
             expiration: None,
@@ -56,7 +60,12 @@ impl SendNativeTokenParams {
 
     /// Set the return address and try convert to [`Bech32Address`]
     pub fn try_with_return_address(mut self, return_address: impl ConvertTo<Bech32Address>) -> Result<Self> {
-        self.return_address = Some(return_address.convert()?);
+        self.return_address = Some(
+            return_address
+                .convert()
+                .map_err(AddressError::from)
+                .map_err(crate::client::Error::from)?,
+        );
         Ok(self)
     }
 
@@ -153,7 +162,7 @@ where
                 .transpose()?
                 .unwrap_or_else(|| default_return_address.clone());
 
-            let native_token = NativeToken::new(native_token.0, native_token.1)?;
+            let native_token = NativeToken::new(native_token.0, native_token.1).map_err(BlockError::from)?;
 
             let expiration_slot_index = expiration
                 .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
@@ -164,12 +173,14 @@ where
                 BasicOutputBuilder::new_with_amount(0)
                     .with_native_token(native_token)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        return_address.clone(),
-                        expiration_slot_index,
-                    )?)
-                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
-                    .finish_output()?,
+                    .add_unlock_condition(
+                        ExpirationUnlockCondition::new(return_address.clone(), expiration_slot_index)
+                            .map_err(BlockError::from)?,
+                    )
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)
+                    .map_err(BlockError::from)?
+                    .finish_output()
+                    .map_err(BlockError::from)?,
             )
         }
 

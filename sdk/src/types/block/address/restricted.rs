@@ -10,10 +10,9 @@ use getset::Getters;
 use packable::{Packable, PackableExt};
 
 use crate::types::block::{
-    address::Address,
+    address::{Address, AddressError},
     capabilities::{Capabilities, CapabilityFlag},
     output::{StorageScore, StorageScoreParameters},
-    Error,
 };
 
 /// An [`Address`] that contains another address and allows for configuring its capabilities.
@@ -31,7 +30,7 @@ impl RestrictedAddress {
 
     /// Creates a new [`RestrictedAddress`] address from an [`Address`] with default allowed capabilities.
     #[inline(always)]
-    pub fn new(address: impl Into<Address>) -> Result<Self, Error> {
+    pub fn new(address: impl Into<Address>) -> Result<Self, AddressError> {
         let address = address.into();
 
         verify_address::<true>(&address)?;
@@ -69,7 +68,7 @@ impl StorageScore for RestrictedAddress {
 }
 
 impl TryFrom<Address> for RestrictedAddress {
-    type Error = Error;
+    type Error = AddressError;
 
     fn try_from(value: Address) -> Result<Self, Self::Error> {
         Self::new(value)
@@ -82,14 +81,14 @@ impl core::fmt::Display for RestrictedAddress {
     }
 }
 
-fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
+fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), AddressError> {
     if VERIFY
         && !matches!(
             address,
             Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
         )
     {
-        Err(Error::InvalidAddressKind(address.kind()))
+        Err(AddressError::InvalidAddressKind(address.kind()))
     } else {
         Ok(())
     }
@@ -217,7 +216,7 @@ pub(crate) mod dto {
     }
 
     impl TryFrom<RestrictedAddressDto> for RestrictedAddress {
-        type Error = Error;
+        type Error = AddressError;
 
         fn try_from(value: RestrictedAddressDto) -> Result<Self, Self::Error> {
             Ok(Self::new(value.address)?.with_allowed_capabilities(value.allowed_capabilities))

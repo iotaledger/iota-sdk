@@ -7,13 +7,15 @@ use core::str::FromStr;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{bounded::BoundedU16, PackableExt};
 
-use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId, Error};
+use crate::types::block::{
+    error::IdentifierError, output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId,
+};
 
 pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUTPUT_INDEX_RANGE.end() }>;
 
 /// The identifier of an [`Output`](crate::types::block::output::Output).
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = IdentifierError)]
 pub struct OutputId {
     transaction_id: TransactionId,
     index: u16,
@@ -65,11 +67,11 @@ impl From<[u8; Self::LENGTH]> for OutputId {
 }
 
 impl FromStr for OutputId {
-    type Err = Error;
+    type Err = IdentifierError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(
-            prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(Error::Hex)?,
+            prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(IdentifierError)?,
         ))
     }
 }

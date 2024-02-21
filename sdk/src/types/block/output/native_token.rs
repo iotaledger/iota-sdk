@@ -6,6 +6,7 @@ use alloc::{
     collections::{BTreeMap, BTreeSet},
     vec::Vec,
 };
+use core::convert::Infallible;
 
 use derive_more::{Deref, DerefMut, From};
 use iterator_sorted::is_unique_sorted;
@@ -15,7 +16,6 @@ use primitive_types::U256;
 use crate::types::block::{
     output::FoundryId,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
 };
 
 crate::impl_id!(
@@ -33,10 +33,31 @@ impl From<FoundryId> for TokenId {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, strum::Display)]
+#[allow(missing_docs)]
+pub enum NativeTokenError {
+    #[strum(to_string = "invalid native token count: {0}")]
+    InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
+    NativeTokensNotUniqueSorted,
+    NativeTokensNullAmount,
+    NativeTokensOverflow,
+    ConsumedNativeTokensAmountOverflow,
+    CreatedNativeTokensAmountOverflow,
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for NativeTokenError {}
+
+impl From<Infallible> for NativeTokenError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
+
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = NativeTokenError)]
 pub struct NativeToken {
     // Identifier of the native token.
     #[cfg_attr(feature = "serde", serde(rename = "id"))]
@@ -49,7 +70,7 @@ pub struct NativeToken {
 impl NativeToken {
     /// Creates a new [`NativeToken`].
     #[inline(always)]
-    pub fn new(token_id: TokenId, amount: impl Into<U256>) -> Result<Self, Error> {
+    pub fn new(token_id: TokenId, amount: impl Into<U256>) -> Result<Self, NativeTokenError> {
         let amount = amount.into();
 
         verify_amount::<true>(&amount)?;
@@ -88,9 +109,9 @@ impl Ord for NativeToken {
 }
 
 #[inline]
-fn verify_amount<const VERIFY: bool>(amount: &U256) -> Result<(), Error> {
+fn verify_amount<const VERIFY: bool>(amount: &U256) -> Result<(), NativeTokenError> {
     if VERIFY && amount.is_zero() {
-        Err(Error::NativeTokensNullAmount)
+        Err(NativeTokenError::NativeTokensNullAmount)
     } else {
         Ok(())
     }
@@ -109,17 +130,17 @@ impl NativeTokensBuilder {
     }
 
     /// Adds the given [`NativeToken`].
-    pub fn add_native_token(&mut self, native_token: NativeToken) -> Result<(), Error> {
+    pub fn add_native_token(&mut self, native_token: NativeToken) -> Result<(), NativeTokenError> {
         let entry = self.0.entry(*native_token.token_id()).or_default();
         *entry = entry
             .checked_add(native_token.amount())
-            .ok_or(Error::NativeTokensOverflow)?;
+            .ok_or(NativeTokenError::NativeTokensOverflow)?;
 
         Ok(())
     }
 
     /// Adds the given [`NativeTokens`].
-    pub fn add_native_tokens(&mut self, native_tokens: NativeTokens) -> Result<(), Error> {
+    pub fn add_native_tokens(&mut self, native_tokens: NativeTokens) -> Result<(), NativeTokenError> {
         for native_token in native_tokens {
             self.add_native_token(native_token)?;
         }
@@ -128,7 +149,7 @@ impl NativeTokensBuilder {
     }
 
     /// Merges another [`NativeTokensBuilder`] into this one.
-    pub fn merge(&mut self, other: Self) -> Result<(), Error> {
+    pub fn merge(&mut self, other: Self) -> Result<(), NativeTokenError> {
         for (token_id, amount) in other.0.into_iter() {
             self.add_native_token(NativeToken::new(token_id, amount)?)?;
         }
@@ -137,7 +158,7 @@ impl NativeTokensBuilder {
     }
 
     /// Finishes the [`NativeTokensBuilder`] into [`NativeTokens`].
-    pub fn finish(self) -> Result<NativeTokens, Error> {
+    pub fn finish(self) -> Result<NativeTokens, NativeTokenError> {
         NativeTokens::try_from(
             self.0
                 .into_iter()
@@ -147,7 +168,7 @@ impl NativeTokensBuilder {
     }
 
     /// Finishes the [`NativeTokensBuilder`] into a [`Vec<NativeToken>`].
-    pub fn finish_vec(self) -> Result<Vec<NativeToken>, Error> {
+    pub fn finish_vec(self) -> Result<Vec<NativeToken>, NativeTokenError> {
         self.0
             .into_iter()
             .map(|(token_id, amount)| NativeToken::new(token_id, amount))
@@ -155,7 +176,7 @@ impl NativeTokensBuilder {
     }
 
     /// Finishes the [`NativeTokensBuilder`] into a [`BTreeSet<NativeToken>`].
-    pub fn finish_set(self) -> Result<BTreeSet<NativeToken>, Error> {
+    pub fn finish_set(self) -> Result<BTreeSet<NativeToken>, NativeTokenError> {
         self.0
             .into_iter()
             .map(|(token_id, amount)| NativeToken::new(token_id, amount))
@@ -178,13 +199,13 @@ pub(crate) type NativeTokenCount = BoundedU8<0, 255>;
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidNativeTokenCount(p.into())))]
+#[packable(unpack_error = NativeTokenError, with = |e| e.unwrap_item_err_or_else(|p| NativeTokenError::InvalidNativeTokenCount(p.into())))]
 pub struct NativeTokens(
     #[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<NativeToken, NativeTokenCount>,
 );
 
 impl TryFrom<Vec<NativeToken>> for NativeTokens {
-    type Error = Error;
+    type Error = NativeTokenError;
 
     #[inline(always)]
     fn try_from(native_tokens: Vec<NativeToken>) -> Result<Self, Self::Error> {
@@ -193,7 +214,7 @@ impl TryFrom<Vec<NativeToken>> for NativeTokens {
 }
 
 impl TryFrom<BTreeSet<NativeToken>> for NativeTokens {
-    type Error = Error;
+    type Error = NativeTokenError;
 
     #[inline(always)]
     fn try_from(native_tokens: BTreeSet<NativeToken>) -> Result<Self, Self::Error> {
@@ -212,10 +233,10 @@ impl IntoIterator for NativeTokens {
 
 impl NativeTokens {
     /// Creates a new [`NativeTokens`] from a vec.
-    pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, Error> {
+    pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, NativeTokenError> {
         let mut native_tokens =
             BoxedSlicePrefix::<NativeToken, NativeTokenCount>::try_from(native_tokens.into_boxed_slice())
-                .map_err(Error::InvalidNativeTokenCount)?;
+                .map_err(NativeTokenError::InvalidNativeTokenCount)?;
 
         native_tokens.sort_by(|a, b| a.token_id().cmp(b.token_id()));
         // Sort is obviously fine now but uniqueness still needs to be checked.
@@ -225,13 +246,13 @@ impl NativeTokens {
     }
 
     /// Creates a new [`NativeTokens`] from an ordered set.
-    pub fn from_set(native_tokens: BTreeSet<NativeToken>) -> Result<Self, Error> {
+    pub fn from_set(native_tokens: BTreeSet<NativeToken>) -> Result<Self, NativeTokenError> {
         Ok(Self(
             native_tokens
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(Error::InvalidNativeTokenCount)?,
+                .map_err(NativeTokenError::InvalidNativeTokenCount)?,
         ))
     }
 
@@ -259,9 +280,9 @@ impl NativeTokens {
 }
 
 #[inline]
-fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken]) -> Result<(), Error> {
+fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken]) -> Result<(), NativeTokenError> {
     if VERIFY && !is_unique_sorted(native_tokens.iter().map(NativeToken::token_id)) {
-        Err(Error::NativeTokensNotUniqueSorted)
+        Err(NativeTokenError::NativeTokensNotUniqueSorted)
     } else {
         Ok(())
     }

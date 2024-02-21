@@ -17,7 +17,7 @@ use crate::{
             StorageScoreParameters, UnlockCondition,
         },
         slot::SlotIndex,
-        Error,
+        BlockError,
     },
     utils::serde::string,
     wallet::{
@@ -58,9 +58,10 @@ where
 
         if let Some(features) = params.features {
             if let Some(tag) = features.tag {
-                first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(tag).map_err(|_| Error::InvalidField("tag"))?,
-                )?);
+                first_output_builder = first_output_builder.add_feature(
+                    TagFeature::new(prefix_hex::decode::<Vec<u8>>(tag).map_err(crate::client::Error::PrefixHex)?)
+                        .map_err(BlockError::from)?,
+                );
             }
 
             if let Some(metadata) = features.metadata {
@@ -87,14 +88,14 @@ where
             if let Some(expiration_slot_index) = unlocks.expiration_slot_index {
                 let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
 
-                first_output_builder = first_output_builder.add_unlock_condition(ExpirationUnlockCondition::new(
-                    remainder_address,
-                    expiration_slot_index,
-                )?);
+                first_output_builder = first_output_builder.add_unlock_condition(
+                    ExpirationUnlockCondition::new(remainder_address, expiration_slot_index)
+                        .map_err(BlockError::from)?,
+                );
             }
             if let Some(timelock_slot_index) = unlocks.timelock_slot_index {
-                first_output_builder =
-                    first_output_builder.add_unlock_condition(TimelockUnlockCondition::new(timelock_slot_index)?);
+                first_output_builder = first_output_builder
+                    .add_unlock_condition(TimelockUnlockCondition::new(timelock_slot_index).map_err(BlockError::from)?);
             }
         }
 
@@ -131,12 +132,14 @@ where
                 second_output_builder = second_output_builder.with_amount(min_required_storage_deposit);
             }
             if return_strategy == ReturnStrategy::Return {
-                second_output_builder =
-                    second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                second_output_builder = second_output_builder.add_unlock_condition(
+                    StorageDepositReturnUnlockCondition::new(
                         remainder_address.clone(),
                         // Return minimum amount
                         min_amount_basic_output,
-                    )?);
+                    )
+                    .map_err(BlockError::from)?,
+                );
 
                 // Update output amount, so recipient still gets the provided amount
                 let new_amount = params.amount + min_amount_basic_output;
@@ -152,12 +155,14 @@ where
                     let additional_required_amount = min_storage_deposit_new_amount - new_amount;
                     second_output_builder = second_output_builder.with_amount(new_amount + additional_required_amount);
                     // Add the additional amount to the SDR
-                    second_output_builder =
-                        second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                    second_output_builder = second_output_builder.replace_unlock_condition(
+                        StorageDepositReturnUnlockCondition::new(
                             remainder_address.clone(),
                             // Return minimum amount
                             min_amount_basic_output + additional_required_amount,
-                        )?);
+                        )
+                        .map_err(BlockError::from)?,
+                    );
                 } else {
                     // new_amount is enough
                     second_output_builder = second_output_builder.with_amount(new_amount);
@@ -207,12 +212,14 @@ where
                     {
                         // create a new sdr unlock_condition with the updated amount and replace it
                         let new_sdr_amount = sdr.amount() + remaining_balance;
-                        second_output_builder =
-                            second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                        second_output_builder = second_output_builder.replace_unlock_condition(
+                            StorageDepositReturnUnlockCondition::new(
                                 remainder_address,
                                 // Return minimum amount
                                 new_sdr_amount,
-                            )?);
+                            )
+                            .map_err(BlockError::from)?,
+                        );
                     }
                 } else {
                     // Would leave dust behind, so return what's required for a remainder
@@ -421,10 +428,10 @@ impl OutputBuilder {
 
         self
     }
-    fn finish_output(self) -> Result<Output, crate::types::block::Error> {
-        match self {
-            Self::Basic(b) => b.finish_output(),
-            Self::Nft(b) => b.finish_output(),
-        }
+    fn finish_output(self) -> Result<Output, BlockError> {
+        Ok(match self {
+            Self::Basic(b) => b.finish_output()?,
+            Self::Nft(b) => b.finish_output()?,
+        })
     }
 }
