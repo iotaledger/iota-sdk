@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get node info.
-    let info = client.get_info().await?;
+    let info = client.get_node_info().await?;
 
     println!("{info}");
 

@@ -58,17 +58,17 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return RoutesResponse.from_dict(self._call_method('getRoutes'))
 
-    def get_info(self) -> InfoResponse:
-        """Returns general information about the node.
+    def get_node_info(self) -> NodeInfoResponse:
+        """Returns general information about a node together with its URL.
         GET /api/core/v3/info
 
         Returns:
-            The node info.
+            The node info with its URL.
         """
-        return InfoResponse.from_dict(self._call_method('getInfo'))
+        return NodeInfoResponse.from_dict(self._call_method('getNodeInfo'))
 
-    def get_node_info(self, url: str, auth=None) -> NodeInfoResponse:
-        """Returns general information about a node together with its URL.
+    def get_info(self, url: str, auth=None) -> InfoResponse:
+        """Returns general information about the node.
         GET /api/core/v3/info
 
         Args:
@@ -76,9 +76,9 @@ class NodeCoreAPI(metaclass=ABCMeta):
             auth: A JWT or username/password authentication object.
 
         Returns:
-            The node info with its URL.
+            The node info.
         """
-        return NodeInfoResponse.from_dict(self._call_method('getNodeInfo', {
+        return InfoResponse.from_dict(self._call_method('getInfo', {
             'url': url,
             'auth': auth
         }))

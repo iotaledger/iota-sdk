@@ -180,8 +180,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         #[cfg(not(target_family = "wasm"))]
         ClientMethod::UnhealthyNodes => Response::UnhealthyNodes(client.unhealthy_nodes().await.into_iter().collect()),
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
-        ClientMethod::GetInfo => Response::Info(client.get_info().await?),
-        ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
+        ClientMethod::GetInfo { url, auth } => Response::Info(Client::get_info(&url, auth).await?),
+        ClientMethod::GetNodeInfo => Response::NodeInfo(client.get_node_info().await?),
         ClientMethod::GetRoutes => Response::Routes(client.get_routes().await?),
         ClientMethod::GetAccountCongestion { account_id, work_score } => {
             Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)

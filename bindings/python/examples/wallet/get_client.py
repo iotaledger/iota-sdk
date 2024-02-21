@@ -12,5 +12,5 @@ wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 client = wallet.get_client()
 
-info = client.get_info()
-print(f'{info}')
+node_info = client.get_node_info()
+print(f'{node_info}')

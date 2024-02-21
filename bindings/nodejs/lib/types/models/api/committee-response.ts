@@ -7,7 +7,7 @@ import { u64 } from '../../utils';
 /**
  * Returns information of a validator (committee member).
  */
-export interface CommitteeMember {
+export interface ICommitteeMember {
     /**
      * Account address of the validator.
      */
@@ -29,7 +29,7 @@ export interface CommitteeMember {
 /**
  * Returns the validator information of the committee.
  */
-export interface CommitteeResponse {
+export interface ICommitteeResponse {
     /**
      * The epoch index of the committee.
      */
@@ -45,5 +45,5 @@ export interface CommitteeResponse {
     /**
      * The validators of the committee.
      */
-    committee: CommitteeMember[];
+    committee: ICommitteeMember[];
 }

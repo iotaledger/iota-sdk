@@ -69,8 +69,8 @@ import {
     CongestionResponse,
     UtxoChangesResponse,
     UtxoChangesFullResponse,
-    CommitteeResponse,
-    IssuanceBlockHeaderResponse,
+    ICommitteeResponse,
+    IIssuanceBlockHeaderResponse,
 } from '../types/models/api';
 import { IRoutesResponse } from '../types/models/info/routes-response';
 
@@ -116,7 +116,7 @@ export class Client {
     }
 
     /**
-     * Get the node information together with the url of the used node.
+     * Returns the available API route groups of the node.
      */
     async getRoutes(): Promise<IRoutesResponse> {
         const response = await this.methodHandler.callMethod({
@@ -237,7 +237,7 @@ export class Client {
      * Returns the information of committee members at the given epoch index. If epoch index is not provided, the
      * current committee members are returned.
      */
-    async getCommittee(epochIndex: EpochIndex): Promise<CommitteeResponse> {
+    async getCommittee(epochIndex: EpochIndex): Promise<ICommitteeResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getCommittee',
             data: {
@@ -250,7 +250,7 @@ export class Client {
 
     // Blocks routes.
 
-    async getIssuance(): Promise<IssuanceBlockHeaderResponse> {
+    async getIssuance(): Promise<IIssuanceBlockHeaderResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getIssuance',
         });

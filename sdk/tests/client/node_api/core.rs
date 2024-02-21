@@ -33,7 +33,7 @@ async fn test_get_health() {
 #[ignore]
 #[tokio::test]
 async fn test_get_info() {
-    let r = Client::get_node_info(NODE_LOCAL, None).await.unwrap();
+    let r = Client::get_info(NODE_LOCAL, None).await.unwrap();
     println!("{r:#?}");
 }
 
@@ -201,7 +201,7 @@ async fn test_call_plugin_route() {
         .await
         .unwrap();
 
-    let info = c.get_info().await.unwrap();
+    let info = c.get_node_info().await.unwrap();
 
     // Just check name as info can change between 2 calls
     assert_eq!(plugin_res.node_info.name, info.name);

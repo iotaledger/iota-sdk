@@ -73,7 +73,7 @@ impl ClientInner {
 
     /// Returns general information about the node.
     /// GET /api/core/v3/info
-    pub async fn get_info(&self) -> Result<InfoResponse> {
+    pub async fn get_node_info(&self) -> Result<NodeInfoResponse> {
         self.get_request(INFO_PATH, None, false).await
     }
 
@@ -366,6 +366,42 @@ impl ClientInner {
 
 impl Client {
     /// GET /api/core/v3/info endpoint
+    pub async fn get_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
+        let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
+        if let Some(auth) = &auth {
+            if let Some((name, password)) = &auth.basic_auth_name_pwd {
+                url.set_username(name)
+                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                url.set_password(Some(password))
+                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+            }
+        }
+
+        if url.path().ends_with('/') {
+            url.set_path(&format!("{}{}", url.path(), INFO_PATH));
+        } else {
+            url.set_path(&format!("{}/{}", url.path(), INFO_PATH));
+        }
+
+        let resp: InfoResponse =
+            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
+                .get(
+                    &Node {
+                        url,
+                        auth,
+                        disabled: false,
+                        permanode: false,
+                    },
+                    DEFAULT_API_TIMEOUT,
+                )
+                .await?
+                .into_json()
+                .await?;
+
+        Ok(resp)
+    }
+
+    /// GET /api/core/v3/info endpoint
     pub(crate) async fn get_permanode_info(mut node: Node) -> Result<PermanodeInfoResponse> {
         log::debug!("get_permanode_info");
         if let Some(auth) = &node.auth {
@@ -388,42 +424,6 @@ impl Client {
         let resp: PermanodeInfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
                 .get(&node, DEFAULT_API_TIMEOUT)
-                .await?
-                .into_json()
-                .await?;
-
-        Ok(resp)
-    }
-
-    /// GET /api/core/v3/info endpoint
-    pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<NodeInfoResponse> {
-        let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
-        if let Some(auth) = &auth {
-            if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
-                url.set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
-            }
-        }
-
-        if url.path().ends_with('/') {
-            url.set_path(&format!("{}{}", url.path(), INFO_PATH));
-        } else {
-            url.set_path(&format!("{}/{}", url.path(), INFO_PATH));
-        }
-
-        let resp: NodeInfoResponse =
-            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
-                .get(
-                    &Node {
-                        url,
-                        auth,
-                        disabled: false,
-                        permanode: false,
-                    },
-                    DEFAULT_API_TIMEOUT,
-                )
                 .await?
                 .into_json()
                 .await?;

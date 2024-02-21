@@ -14,5 +14,5 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 # Get the node info
-node_info = client.get_info().node_info
+node_info = client.get_node_info()
 print(f'{json.dumps(dataclasses.asdict(node_info), indent=4)}')

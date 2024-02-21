@@ -64,7 +64,7 @@ impl ClientInner {
     pub(crate) async fn sync_nodes(&self, nodes: &HashSet<Node>, ignore_node_health: bool) -> Result<()> {
         use std::collections::HashMap;
 
-        use crate::types::{api::core::NodeInfoResponse, block::protocol::ProtocolParameters};
+        use crate::types::block::protocol::ProtocolParameters;
 
         log::debug!("sync_nodes");
         let mut healthy_nodes = HashSet::new();
@@ -103,8 +103,8 @@ impl ClientInner {
                     }
                 }
             } else {
-                match crate::client::Client::get_node_info(node.url.as_ref(), node.auth.clone()).await {
-                    Ok(NodeInfoResponse { node_info: info, .. }) => {
+                match crate::client::Client::get_info(node.url.as_ref(), node.auth.clone()).await {
+                    Ok(info) => {
                         if info.status.is_healthy || ignore_node_health {
                             // Unwrap: We should always have parameters for this version. If we don't we can't recover.
                             let protocol_parameters = info
