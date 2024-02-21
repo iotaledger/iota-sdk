@@ -60,13 +60,13 @@ impl WalletOptions {
         self
     }
 
-    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
-        self.bip_path = bip_path.into();
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
-    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
-        self.alias = alias.into();
+    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
+        self.bip_path = bip_path.into();
         self
     }
 
@@ -90,8 +90,8 @@ impl WalletOptions {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
             .with_address(self.address)
-            .with_bip_path(self.bip_path)
             .with_alias(self.alias)
+            .with_bip_path(self.bip_path)
             .with_client_options(self.client_options);
 
         #[cfg(feature = "storage")]
