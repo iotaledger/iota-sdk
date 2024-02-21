@@ -175,7 +175,7 @@ where
             self.secret_manager = secret_manager;
         }
 
-        let mut skip_verification = true;
+        let mut verify_address = false;
         let loaded_address = loaded_wallet_builder
             .as_ref()
             .and_then(|builder| builder.address.clone());
@@ -187,7 +187,7 @@ where
                     return Err(crate::wallet::Error::WalletAddressMismatch(address.clone()));
                 }
             } else {
-                skip_verification = false;
+                verify_address = true;
             }
         } else {
             self.address = loaded_address;
@@ -205,7 +205,7 @@ where
                     });
                 }
             } else {
-                skip_verification = false;
+                verify_address = true;
             }
         } else {
             self.bip_path = loaded_bip_path;
@@ -221,7 +221,7 @@ where
 
         match (self.address.as_ref(), self.bip_path.as_ref()) {
             (Some(address), Some(bip_path)) => {
-                if !skip_verification {
+                if verify_address {
                     // verify that the address is derived from the provided bip path.
                     if let Some(backing_ed25519_address) = address.inner.backing_ed25519() {
                         self.verify_ed25519_address(backing_ed25519_address, bip_path).await?;
@@ -229,37 +229,13 @@ where
                         return Err(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"));
                     }
                 }
-                self.address.replace(address.clone());
-                self.bip_path = Some(*bip_path);
             }
-            (Some(address), None) => {
-                self.address.replace(address.clone());
-                self.bip_path = None;
-            }
+            (Some(address), None) => {}
             (None, Some(bip_path)) => {
-                if let Some(secret_manager) = &self.secret_manager {
-                    let secret_manager = &*secret_manager.read().await;
-                    let generated_ed25519_address = secret_manager
-                        .generate_ed25519_addresses(
-                            bip_path.coin_type,
-                            bip_path.account,
-                            bip_path.address_index..bip_path.address_index + 1,
-                            GenerateAddressOptions {
-                                internal: bip_path.change != 0,
-                                ledger_nano_prompt: false,
-                            },
-                        )
-                        // Panic: if it didn't return an Err, then there must be at least one address
-                        .await?[0];
-
-                    self.address.replace(Bech32Address::new(
-                        client.get_bech32_hrp().await?,
-                        generated_ed25519_address,
-                    ));
-                    self.bip_path = Some(*bip_path);
-                } else {
-                    return Err(crate::wallet::Error::MissingParameter("secret_manager"));
-                }
+                self.address.replace(Bech32Address::new(
+                    client.get_bech32_hrp().await?,
+                    self.generate_ed25519_address(bip_path).await?,
+                ));
             }
             (None, None) => {
                 return Err(crate::wallet::Error::MissingParameter("address, bip_path"));
@@ -343,22 +319,26 @@ where
         ed25519_address: &Ed25519Address,
         bip_path: &Bip44,
     ) -> crate::wallet::Result<()> {
-        if let Some(ref secret_manager) = self.secret_manager {
+        (ed25519_address == &self.generate_ed25519_address(bip_path).await?)
+            .then_some(())
+            .ok_or(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"))
+    }
+
+    async fn generate_ed25519_address(&self, bip_path: &Bip44) -> crate::wallet::Result<Ed25519Address> {
+        if let Some(secret_manager) = &self.secret_manager {
             let secret_manager = &*secret_manager.read().await;
-            let generated_ed25519_address = secret_manager
+            Ok(secret_manager
                 .generate_ed25519_addresses(
                     bip_path.coin_type,
                     bip_path.account,
                     bip_path.address_index..bip_path.address_index + 1,
-                    None,
+                    GenerateAddressOptions {
+                        internal: bip_path.change != 0,
+                        ledger_nano_prompt: false,
+                    },
                 )
                 // Panic: if it didn't return an Err, then there must be at least one address
-                .await?[0];
-            if ed25519_address == &generated_ed25519_address {
-                Ok(())
-            } else {
-                Err(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"))
-            }
+                .await?[0])
         } else {
             Err(crate::wallet::Error::MissingParameter("secret_manager"))
         }
