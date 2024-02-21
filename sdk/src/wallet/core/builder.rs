@@ -334,10 +334,10 @@ where
             if ed25519_address == &generated_ed25519_address {
                 Ok(())
             } else {
-                Err(crate::wallet::Error::InvalidParameter("address/bip-path mismatch"))
+                Err(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"))
             }
         } else {
-            Err(crate::wallet::Error::MissingParameter("secret manager"))
+            Err(crate::wallet::Error::MissingParameter("secret_manager"))
         }
     }
 

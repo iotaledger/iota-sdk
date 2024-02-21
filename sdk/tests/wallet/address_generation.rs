@@ -187,7 +187,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 //     let mut wallet_builder = Wallet::builder()
 //         .with_secret_manager(SecretManager::Placeholder)
 //         .with_client_options(client_options)
-//         .with_address_provider(Bip44::new(IOTA_COIN_TYPE));
+//         .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
 
 //     #[cfg(feature = "storage")]
 //     {
