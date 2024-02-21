@@ -230,7 +230,7 @@ where
                     }
                 }
             }
-            (Some(address), None) => {}
+            (Some(_address), None) => {}
             (None, Some(bip_path)) => {
                 self.address.replace(Bech32Address::new(
                     client.get_bech32_hrp().await?,
@@ -238,7 +238,7 @@ where
                 ));
             }
             (None, None) => {
-                return Err(crate::wallet::Error::MissingParameter("address, bip_path"));
+                return Err(crate::wallet::Error::MissingParameter("address or bip_path"));
             }
         };
 
