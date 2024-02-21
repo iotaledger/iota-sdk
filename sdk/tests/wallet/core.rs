@@ -97,17 +97,14 @@ async fn changed_bip_path() -> Result<()> {
         .finish()
         .await;
 
-    // TODO #2016: Uncomment below lines when addressing: https://github.com/iotaledger/iota-sdk/issues/2016
-    // let _mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
-    //     new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
-    //     old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    // });
+    let _mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
+        new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
+        old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
+    });
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    // Uncomment below assert when addressing: https://github.com/iotaledger/iota-sdk/issues/2016
-    // assert!(matches!(result, _mismatch_err));
-    assert!(matches!(result, Err(Error::InvalidParameter(..))));
+    assert!(matches!(result, _mismatch_err));
 
     // Building the wallet with the same coin type still works
     assert!(
