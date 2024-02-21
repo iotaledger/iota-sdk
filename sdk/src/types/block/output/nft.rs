@@ -571,7 +571,7 @@ mod dto {
     crate::impl_serde_typed_dto!(NftOutput, NftOutputDto, "nft output");
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod tests {
     use pretty_assertions::assert_eq;
 

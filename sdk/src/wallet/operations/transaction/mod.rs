@@ -11,6 +11,8 @@ mod sign_transaction;
 pub(crate) mod submit_transaction;
 
 pub use self::options::{RemainderValueStrategy, TransactionOptions};
+#[cfg(feature = "storage")]
+use crate::wallet::core::WalletLedgerDto;
 use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
@@ -22,7 +24,6 @@ use crate::{
         block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
     },
     wallet::{
-        core::WalletLedgerDto,
         types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },

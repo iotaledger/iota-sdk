@@ -559,7 +559,7 @@ impl From<&WalletLedger> for WalletLedgerDto {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use core::str::FromStr;
 

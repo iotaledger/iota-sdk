@@ -139,7 +139,7 @@ impl std::ops::AddAssign for NativeTokensBalance {
     }
 }
 
-#[cfg(feature = "rand")]
+#[cfg(all(feature = "rand", feature = "protocol_parameters_samples"))]
 impl Balance {
     pub fn rand() -> Self {
         use rand::Rng;

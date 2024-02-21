@@ -2447,7 +2447,7 @@ fn automatic_allotment_provided_in_and_output() {
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
-        .with_mana(881)
+        .with_mana(7577)
         .finish_output()
         .unwrap()];
     let inputs = inputs
@@ -2485,7 +2485,7 @@ fn automatic_allotment_provided_in_and_output() {
     assert_eq!(selected.transaction.outputs().len(), 1);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert_eq!(selected.transaction.allotments().len(), 1);
-    let mana_cost = 880;
+    let mana_cost = 7576;
     assert_eq!(
         selected.transaction.allotments()[0],
         ManaAllotment::new(account_id_1, mana_cost).unwrap()

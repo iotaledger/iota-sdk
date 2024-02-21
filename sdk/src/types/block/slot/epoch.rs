@@ -141,7 +141,7 @@ impl core::ops::SubAssign<u32> for EpochIndex {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 

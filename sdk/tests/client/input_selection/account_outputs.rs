@@ -2086,7 +2086,7 @@ fn implicit_account_transition() {
                 **Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().as_ed25519(),
             ),
         )))
-        .with_mana(961)
+        .with_mana(7871)
         .finish_output()
         .unwrap()];
     let inputs = inputs
@@ -2128,7 +2128,7 @@ fn implicit_account_transition() {
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, 960).unwrap()
+        ManaAllotment::new(account_id_1, 7870).unwrap()
     );
     // One remainder Mana
     assert_eq!(selected.transaction.outputs()[0].mana(), 1);

@@ -124,7 +124,7 @@ impl From<SlotIndex> for u32 {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 

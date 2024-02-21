@@ -18,6 +18,7 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
+#[cfg(feature = "storage")]
 use url::Url;
 
 #[cfg(feature = "storage")]

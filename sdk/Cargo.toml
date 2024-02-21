@@ -156,7 +156,7 @@ irc_30 = ["serde", "dep:url"]
 ledger_nano = ["dep:iota-ledger-nano"]
 mqtt = ["std", "tls", "dep:regex", "dep:rumqttc", "dep:once_cell"]
 participation = ["storage"]
-protocol_parameters_samples = ["std"]
+protocol_parameters_samples = ["std", "dep:time"]
 rocksdb = ["storage", "dep:rocksdb"]
 serde = [
     "hashbrown/serde",

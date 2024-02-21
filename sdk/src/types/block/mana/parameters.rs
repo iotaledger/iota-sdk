@@ -203,7 +203,7 @@ const fn fixed_point_multiply(value: u64, mult_factor: u32, shift_factor: u8) ->
     ((value as u128 * mult_factor as u128) >> shift_factor) as u64
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 
