@@ -127,7 +127,7 @@ export interface __AnchorIdToBech32Method__ {
     name: 'anchorIdToBech32';
     data: {
         anchorId: AnchorId;
-        bech32Hrp?: string;
+        bech32Hrp: string;
     };
 }
 
