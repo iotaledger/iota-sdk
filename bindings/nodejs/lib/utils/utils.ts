@@ -24,6 +24,7 @@ import {
 } from '../types';
 import {
     AccountId,
+    AnchorId,
     BlockId,
     FoundryId,
     NftId,
@@ -308,6 +309,26 @@ export class Utils {
             name: 'accountIdToBech32',
             data: {
                 accountId,
+                bech32Hrp,
+            },
+        });
+    }
+
+    /**
+     * Transforms an anchor id to a bech32 encoded address.
+     *
+     * @param anchorId An anchor ID.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
+     */
+    static anchorIdToBech32(
+        anchorId: AnchorId,
+        bech32Hrp: string,
+    ): Bech32Address {
+        return callUtilsMethod({
+            name: 'anchorIdToBech32',
+            data: {
+                anchorId,
                 bech32Hrp,
             },
         });

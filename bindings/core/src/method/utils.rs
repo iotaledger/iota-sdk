@@ -8,7 +8,7 @@ use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{AccountId, NftId, Output, OutputId, StorageScoreParameters},
+        output::{AccountId, AnchorId, NftId, Output, OutputId, StorageScoreParameters},
         payload::signed_transaction::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
             TransactionId,
@@ -39,6 +39,9 @@ pub enum UtilsMethod {
     /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 { account_id: AccountId, bech32_hrp: Hrp },
+    /// Transforms an anchor id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
+    AnchorIdToBech32 { anchor_id: AnchorId, bech32_hrp: Hrp },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     NftIdToBech32 { nft_id: NftId, bech32_hrp: Hrp },

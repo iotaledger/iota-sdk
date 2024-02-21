@@ -17,7 +17,8 @@ def test_api_responses():
             fixture = load(payload)
         cls = cls_type.from_dict(fixture)
 
-        # We need to sort the keys because optional fields in classes must be last in Python
+        # We need to sort the keys because optional fields in classes must be
+        # last in Python
         fixture_str = dumps(fixture, sort_keys=True)
         recreated = dumps(
             loads(cls.to_json()), sort_keys=True)

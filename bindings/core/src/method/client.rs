@@ -425,6 +425,14 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
+    /// Transforms an anchor id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
+    AnchorIdToBech32 {
+        /// Anchor ID
+        anchor_id: AnchorId,
+        /// Human readable part
+        bech32_hrp: Option<Hrp>,
+    },
     /// Transforms an nft id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     NftIdToBech32 {
