@@ -28,6 +28,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
             Response::Bech32Address(account_id.to_bech32(bech32_hrp))
         }
+        UtilsMethod::AnchorIdToBech32 { anchor_id, bech32_hrp } => {
+            Response::Bech32Address(anchor_id.to_bech32(bech32_hrp))
+        }
         UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Response::Bech32Address(nft_id.to_bech32(bech32_hrp)),
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(hex_public_key_to_bech32_address(&hex, bech32_hrp)?)

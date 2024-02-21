@@ -279,6 +279,14 @@ export interface __AccountIdToBech32Method__ {
     };
 }
 
+export interface __AnchorIdToBech32Method__ {
+    name: 'anchorIdToBech32';
+    data: {
+        anchorId: AnchorId;
+        bech32Hrp?: string;
+    };
+}
+
 export interface __NftIdToBech32Method__ {
     name: 'nftIdToBech32';
     data: {
