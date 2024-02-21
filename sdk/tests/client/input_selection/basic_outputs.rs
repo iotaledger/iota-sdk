@@ -4,11 +4,16 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::input_selection::{Error, InputSelection, Requirement},
+    client::{
+        api::input_selection::{Error, InputSelection, Requirement},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::{Address, AddressCapabilities, MultiAddress, RestrictedAddress, WeightedAddress},
-        output::{AccountId, NftId},
+        mana::ManaAllotment,
+        output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, NftId},
         protocol::protocol_parameters,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::assert_eq;
@@ -2431,4 +2436,59 @@ fn ed25519_backed_available_address() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Provided outputs
     assert_eq!(selected.transaction.outputs(), outputs);
+}
+
+#[test]
+fn automatic_allotment_provided_in_and_output() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(881)
+        .finish_output()
+        .unwrap()];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(1)
+            .finish_output()
+            .unwrap(),
+    ];
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    let mana_cost = 880;
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+    );
+    assert_eq!(selected.transaction.outputs()[0].mana(), 1);
 }
