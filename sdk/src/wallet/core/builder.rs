@@ -180,7 +180,7 @@ where
             .as_ref()
             .and_then(|builder| builder.address.clone());
 
-        // May use a previously stored address it wasn't provided
+        // May use a previously stored address if it wasn't provided
         if let Some(address) = &self.address {
             if let Some(loaded_address) = &loaded_address {
                 if address != loaded_address {
