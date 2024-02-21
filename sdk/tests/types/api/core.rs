@@ -62,7 +62,8 @@ fn responses() {
     // GET /api/core/v3/rewards/{outputId}
     json_response::<ManaRewardsResponse>("get-mana-rewards-example.json").unwrap();
     // GET /api/core/v3/validators
-    json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
+    // TODO reenable when TIP is updated
+    // json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
     // GET /api/core/v3/validators/{bech32Address}
     json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
     // GET /api/core/v3/committee
