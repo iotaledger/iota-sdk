@@ -217,14 +217,7 @@ where
         // May create a default Ed25519 wallet address if there's a secret manager.
         if self.address.is_none() {
             if self.secret_manager.is_some() {
-                let bech32_hrp = client
-                    .network_info
-                    .read()
-                    .await
-                    .as_ref()
-                    .ok_or(crate::wallet::Error::MissingParameter("protocol_parameters"))?
-                    .protocol_parameters
-                    .bech32_hrp();
+                let bech32_hrp = client.network_info.read().await.protocol_parameters.bech32_hrp();
                 let address = self.create_default_wallet_address(bech32_hrp).await?;
                 self.address = Some(address);
             } else {

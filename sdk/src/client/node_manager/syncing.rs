@@ -46,7 +46,7 @@ impl ClientInner {
 }
 
 #[cfg(not(target_family = "wasm"))]
-impl ClientInner {
+impl Client {
     /// Sync the node lists per node_sync_interval milliseconds
     pub(crate) async fn start_sync_process(
         &self,
@@ -149,12 +149,11 @@ impl ClientInner {
             // Set the protocol_parameters to the parameters that most nodes have in common and only use these nodes as
             // healthy_nodes
             if let Some((parameters, _node_url, tangle_time)) = nodes.first() {
-                let mut network_info = self.network_info.write().await;
                 // Unwrap: We should always have parameters for this version. If we don't we can't recover.
-                network_info.replace(NetworkInfo {
+                *self.network_info.write().await = NetworkInfo {
                     protocol_parameters: parameters.clone(),
                     tangle_time: *tangle_time,
-                });
+                };
             }
 
             healthy_nodes.extend(nodes.iter().map(|(_info, node_url, _time)| node_url).cloned())
@@ -171,9 +170,7 @@ impl ClientInner {
 
         Ok(())
     }
-}
 
-impl Client {
     #[cfg(not(target_family = "wasm"))]
     pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
         let node_sync_interval = node_manager.node_sync_interval;

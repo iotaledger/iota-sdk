@@ -193,14 +193,8 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                 let event = {
                                     if p.topic.contains("blocks") || p.topic.contains("included-block") {
                                         let payload = &*p.payload;
-                                        let protocol_parameters = client
-                                            .network_info
-                                            .read()
-                                            .await
-                                            .as_ref()
-                                            .unwrap()
-                                            .protocol_parameters
-                                            .clone();
+                                        let protocol_parameters =
+                                            client.network_info.read().await.protocol_parameters.clone();
 
                                         match serde_json::from_slice::<BlockDto>(payload) {
                                             Ok(block_dto) => {
