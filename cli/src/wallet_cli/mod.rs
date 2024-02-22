@@ -278,6 +278,7 @@ pub enum WalletCommand {
         address: Bech32Address,
         /// Amount of mana to send, e.g. 1000000.
         mana: u64,
+        /// Whether to gift the storage deposit or not.
         #[arg(short, long, default_value_t = false)]
         gift: bool,
     },
