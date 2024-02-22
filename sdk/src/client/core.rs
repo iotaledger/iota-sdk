@@ -106,8 +106,17 @@ impl Client {
         // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
         {
+            let current_time = crate::client::unix_timestamp_now().as_secs() as u32;
+            if let Some(last_sync) = *self.last_sync.lock().await {
+                if current_time < last_sync {
+                    return Ok(self.network_info.read().await.clone());
+                }
+            }
             let network_info = self.fetch_network_info().await?;
             *self.network_info.write().await = network_info.clone();
+
+            *self.last_sync.lock().await = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
+
             Ok(network_info)
         }
 
@@ -169,15 +178,6 @@ impl Client {
 
 impl ClientInner {
     pub(crate) async fn fetch_network_info(&self) -> Result<NetworkInfo> {
-        #[cfg(target_family = "wasm")]
-        let current_time = crate::client::unix_timestamp_now().as_secs() as u32;
-        #[cfg(target_family = "wasm")]
-        if let Some(last_sync) = *self.last_sync.lock().await {
-            if current_time < last_sync {
-                return Ok(self.network_info.read().await.as_ref().unwrap().clone());
-            }
-        }
-
         let info = self.get_info().await?.node_info;
         let protocol_parameters = info
             .protocol_parameters_by_version(crate::types::block::PROTOCOL_VERSION)
@@ -189,10 +189,6 @@ impl ClientInner {
             tangle_time: info.status.relative_accepted_tangle_time,
         };
 
-        #[cfg(target_family = "wasm")]
-        {
-            *self.last_sync.lock().await = Some(current_time + CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS);
-        }
         Ok(network_info)
     }
 

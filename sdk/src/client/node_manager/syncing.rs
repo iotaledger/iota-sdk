@@ -9,10 +9,7 @@ use {
 };
 
 use super::{Node, NodeManager};
-use crate::{
-    client::{Client, ClientInner, Error, Result},
-    types::block::protocol::ProtocolParameters,
-};
+use crate::client::{Client, ClientInner, Error, Result};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
@@ -69,7 +66,7 @@ impl Client {
 
         log::debug!("sync_nodes");
         let mut healthy_nodes = HashSet::new();
-        let mut network_nodes: HashMap<String, Vec<(ProtocolParameters, Node, Option<u64>)>> = HashMap::new();
+        let mut network_nodes: HashMap<String, Vec<(_, Node, Option<u64>)>> = HashMap::new();
 
         for node in nodes {
             // Put the healthy node url into the network_nodes
@@ -171,7 +168,6 @@ impl Client {
         Ok(())
     }
 
-    #[cfg(not(target_family = "wasm"))]
     pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
         let node_sync_interval = node_manager.node_sync_interval;
         let ignore_node_health = node_manager.ignore_node_health;
@@ -196,8 +192,10 @@ impl Client {
         *self._sync_handle.write().await = crate::client::SyncHandle(Some(sync_handle));
         Ok(())
     }
+}
 
-    #[cfg(target_family = "wasm")]
+#[cfg(target_family = "wasm")]
+impl Client {
     pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
         *self.node_manager.write().await = node_manager;
         Ok(())

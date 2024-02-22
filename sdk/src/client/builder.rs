@@ -255,24 +255,31 @@ impl ClientBuilder {
         #[cfg(feature = "mqtt")]
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
 
+        let client_inner = ClientInner {
+            node_manager: RwLock::new(self.node_manager_builder.build(HashSet::new())),
+            api_timeout: RwLock::new(self.api_timeout),
+            #[cfg(feature = "mqtt")]
+            mqtt: super::MqttInner {
+                client: Default::default(),
+                topic_handlers: Default::default(),
+                broker_options: RwLock::new(self.broker_options),
+                sender: RwLock::new(mqtt_event_tx),
+                receiver: RwLock::new(mqtt_event_rx),
+            },
+            last_sync: tokio::sync::Mutex::new(None),
+        };
+
+        let network_info = match self.protocol_parameters {
+            Some(protocol_parameters) => NetworkInfo {
+                protocol_parameters,
+                tangle_time: None,
+            },
+            None => client_inner.fetch_network_info().await?,
+        };
+
         let client = Client {
-            inner: Arc::new(ClientInner {
-                node_manager: RwLock::new(self.node_manager_builder.build(HashSet::new())),
-                network_info: RwLock::new(self.protocol_parameters.map(|protocol_parameters| NetworkInfo {
-                    protocol_parameters,
-                    tangle_time: None,
-                })),
-                api_timeout: RwLock::new(self.api_timeout),
-                #[cfg(feature = "mqtt")]
-                mqtt: super::MqttInner {
-                    client: Default::default(),
-                    topic_handlers: Default::default(),
-                    broker_options: RwLock::new(self.broker_options),
-                    sender: RwLock::new(mqtt_event_tx),
-                    receiver: RwLock::new(mqtt_event_rx),
-                },
-                last_sync: tokio::sync::Mutex::new(None),
-            }),
+            inner: Arc::new(client_inner),
+            network_info: Arc::new(RwLock::new(network_info)),
         };
 
         Ok(client)
