@@ -24,8 +24,8 @@ use iota_sdk::{
     utils::ConvertTo,
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        Error as WalletError, MintNftParams, OutputsToClaim, SendManaParams, SendNativeTokenParams, SendNftParams,
-        SendParams, SyncOptions, TransactionOptions, Wallet,
+        Error as WalletError, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
+        SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -278,6 +278,8 @@ pub enum WalletCommand {
         address: Bech32Address,
         /// Amount of mana to send, e.g. 1000000.
         mana: u64,
+        #[arg(short, long, default_value_t = false)]
+        gift: bool,
     },
     /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
@@ -1045,8 +1047,13 @@ pub async fn send_mana_command(
     wallet: &Wallet,
     address: impl ConvertTo<Bech32Address>,
     mana: u64,
+    gift: bool,
 ) -> Result<(), Error> {
-    let params = SendManaParams::new(mana, address.convert()?);
+    let params = SendManaParams::new(mana, address.convert()?).with_return_strategy(if gift {
+        ReturnStrategy::Gift
+    } else {
+        ReturnStrategy::Return
+    });
     let transaction = wallet.send_mana(params, None).await?;
 
     println_log_info!(
@@ -1582,9 +1589,9 @@ pub async fn prompt_internal(
                             };
                             send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
                         }
-                        WalletCommand::SendMana { address, mana } => {
+                        WalletCommand::SendMana { address, mana, gift } => {
                             ensure_password(wallet).await?;
-                            send_mana_command(wallet, address, mana).await
+                            send_mana_command(wallet, address, mana, gift).await
                         }
                         WalletCommand::SendNativeToken {
                             address,
