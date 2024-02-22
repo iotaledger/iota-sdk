@@ -368,7 +368,7 @@ pub struct CongestionResponse {
 /// Returns the block identifier of the submitted block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct SubmitBlockResponse {
+pub struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 
