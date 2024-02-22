@@ -33,7 +33,7 @@ pub struct RoutesResponse {
 }
 
 /// Contains the info and the url from the node (useful when multiple nodes are used)
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NodeInfoResponse {
     /// The returned info
