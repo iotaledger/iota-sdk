@@ -247,9 +247,13 @@ pub enum Response {
     Output(Output),
     /// Response for:
     /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
+    /// - [`AccountIdToBech32`](crate::method::UtilsMethod::AccountIdToBech32)
+    /// - [`AnchorIdToBech32`](crate::method::ClientMethod::AnchorIdToBech32)
+    /// - [`AnchorIdToBech32`](crate::method::UtilsMethod::AnchorIdToBech32)
+    /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
+    /// - [`NftIdToBech32`](crate::method::UtilsMethod::NftIdToBech32)
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
-    /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
     /// - [`ImplicitAccountCreationAddress`](crate::method::WalletMethod::ImplicitAccountCreationAddress)
     Bech32Address(Bech32Address),
     /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)
