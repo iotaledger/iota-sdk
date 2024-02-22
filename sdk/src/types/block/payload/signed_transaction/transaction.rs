@@ -320,15 +320,11 @@ impl Transaction {
         if index >= num_outputs {
             return None;
         }
-        let txn_id = self.id();
-        let output_ids = (0..num_outputs)
-            .map(|idx| txn_id.into_output_id(idx))
-            .collect::<Vec<_>>();
         Some(OutputIdProof {
             slot: self.creation_slot(),
             output_index: index,
             transaction_commitment: self.transaction_commitment(),
-            output_commitment_proof: OutputCommitmentProof::new(&output_ids, index),
+            output_commitment_proof: OutputCommitmentProof::new(&self.outputs, index),
         })
     }
 

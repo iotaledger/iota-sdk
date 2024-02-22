@@ -5,7 +5,7 @@ use alloc::string::ToString;
 use core::str::FromStr;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
-use packable::{bounded::BoundedU16, PackableExt};
+use packable::bounded::BoundedU16;
 
 use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId, Error};
 
@@ -64,11 +64,18 @@ impl OutputId {
 #[cfg(feature = "serde")]
 crate::string_serde_impl!(OutputId);
 
-#[allow(clippy::fallible_impl_from)]
 impl From<[u8; Self::LENGTH]> for OutputId {
     fn from(bytes: [u8; Self::LENGTH]) -> Self {
-        // Unwrap is fine because size is already known and valid.
-        Self::unpack_unverified(bytes).unwrap()
+        #[repr(C)]
+        #[allow(dead_code)]
+        struct Layout {
+            transaction_id: TransactionId,
+            index: [u8; 2],
+        }
+        unsafe {
+            let Layout { transaction_id, index } = core::mem::transmute(bytes);
+            Self::new(transaction_id, u16::from_le_bytes(index))
+        }
     }
 }
 

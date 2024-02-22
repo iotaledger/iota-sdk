@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::boxed::Box;
+use core::convert::Infallible;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
-use packable::Packable;
+use packable::{Packable, PackableExt};
 
 #[cfg(feature = "serde")]
 use crate::utils::serde::prefix_hex_bytes;
 use crate::{
-    types::block::{output::OutputId, slot::SlotIndex, Error},
+    types::block::{output::Output, slot::SlotIndex, Error},
     utils::merkle_hasher::{largest_power_of_two, LEAF_HASH_PREFIX, NODE_HASH_PREFIX},
 };
 
@@ -31,36 +32,35 @@ pub struct OutputIdProof {
 }
 
 impl OutputCommitmentProof {
-    pub fn new(output_ids: &[OutputId], index: u16) -> Self {
-        match output_ids {
-            [id] => Self::value(id),
-            _ => {
-                let num_outputs = output_ids.len() as u16;
-                debug_assert!(num_outputs > 0 && index < num_outputs, "n={num_outputs}, index={index}");
+    pub fn new(outputs: &[Output], index: u16) -> Self {
+        if let [output] = outputs {
+            Self::value(&output.pack_to_vec())
+        } else {
+            let num_outputs = outputs.len() as u16;
+            debug_assert!(num_outputs > 0 && index < num_outputs, "n={num_outputs}, index={index}");
 
-                // Select a `pivot` element to split `data` into two slices `left` and `right`.
-                let pivot = largest_power_of_two(num_outputs as _) as u16;
-                let (left, right) = output_ids.split_at(pivot as _);
+            // Select a `pivot` element to split `data` into two slices `left` and `right`.
+            let pivot = largest_power_of_two(num_outputs as _) as u16;
+            let (left, right) = outputs.split_at(pivot as _);
 
-                if index < pivot {
-                    // `value` is contained in the left subtree, and the `right` subtree can be hashed together.
-                    Self::node(Self::new(left, index), Self::hash(right))
-                } else {
-                    // `value` is contained in the right subtree, and the `left` subtree can be hashed together.
-                    Self::node(Self::hash(left), Self::new(right, index - pivot))
-                }
+            if index < pivot {
+                // `value` is contained in the left subtree, and the `right` subtree can be hashed together.
+                Self::node(Self::new(left, index), Self::hash(right))
+            } else {
+                // `value` is contained in the right subtree, and the `left` subtree can be hashed together.
+                Self::node(Self::hash(left), Self::new(right, index - pivot))
             }
         }
     }
 
-    /// Get the merkle tree hash for a list of output ids
-    fn hash(output_ids: &[OutputId]) -> LeafHash {
-        match output_ids {
+    /// Get the merkle tree hash for a list of outputs
+    fn hash(outputs: &[Output]) -> LeafHash {
+        match outputs {
             [] => LeafHash::empty(),
-            [id] => LeafHash::new(id),
+            [output] => LeafHash::new(&output.pack_to_vec()),
             _ => {
-                let pivot = largest_power_of_two(output_ids.len() as _);
-                let (left, right) = output_ids.split_at(pivot as _);
+                let pivot = largest_power_of_two(outputs.len() as _);
+                let (left, right) = outputs.split_at(pivot as _);
                 let left = Self::hash(left).0;
                 let right = Self::hash(right).0;
 
@@ -78,8 +78,8 @@ impl OutputCommitmentProof {
         Self::Node(HashableNode::new(left, right))
     }
 
-    fn value(output_id: &OutputId) -> Self {
-        Self::Value(ValueHash::new(output_id))
+    fn value(bytes: &[u8]) -> Self {
+        Self::Value(ValueHash::new(bytes))
     }
 }
 
@@ -108,7 +108,6 @@ pub enum OutputCommitmentProof {
 
 /// Node contains the hashes of the left and right children of a node in the tree.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ())]
 pub struct HashableNode {
     pub l: Box<OutputCommitmentProof>,
@@ -127,17 +126,17 @@ impl HashableNode {
 }
 
 /// Leaf Hash contains the hash of a leaf in the tree.
-#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct LeafHash(pub [u8; 32]);
 
 impl LeafHash {
     const KIND: u8 = 1;
 
-    pub fn new(output_id: &OutputId) -> Self {
+    pub fn new(bytes: &[u8]) -> Self {
         let mut hasher = Blake2b256::default();
 
         hasher.update([LEAF_HASH_PREFIX]);
-        hasher.update(output_id.to_bytes());
+        hasher.update(bytes);
         Self(hasher.finalize().into())
     }
 
@@ -146,19 +145,59 @@ impl LeafHash {
     }
 }
 
+impl Packable for LeafHash {
+    type UnpackError = Infallible;
+    type UnpackVisitor = ();
+
+    fn pack<P: packable::packer::Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        32_u8.pack(packer)?;
+        self.0.pack(packer)?;
+        Ok(())
+    }
+
+    fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
+        let _len = u8::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let bytes = Packable::unpack::<_, VERIFY>(unpacker, visitor)?;
+        Ok(Self(bytes))
+    }
+}
+
 /// Value Hash contains the hash of the value for which the proof is being computed.
-#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct ValueHash(pub [u8; 32]);
 
 impl ValueHash {
     const KIND: u8 = 2;
 
-    pub fn new(output_id: &OutputId) -> Self {
+    pub fn new(bytes: &[u8]) -> Self {
         let mut hasher = Blake2b256::default();
 
         hasher.update([LEAF_HASH_PREFIX]);
-        hasher.update(output_id.to_bytes());
+        hasher.update(bytes);
         Self(hasher.finalize().into())
+    }
+}
+
+impl Packable for ValueHash {
+    type UnpackError = Infallible;
+    type UnpackVisitor = ();
+
+    fn pack<P: packable::packer::Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        32_u8.pack(packer)?;
+        self.0.pack(packer)?;
+        Ok(())
+    }
+
+    fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
+        let _len = u8::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let bytes = Packable::unpack::<_, VERIFY>(unpacker, visitor)?;
+        Ok(Self(bytes))
     }
 }
 

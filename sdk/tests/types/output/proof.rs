@@ -14,8 +14,7 @@ struct ProofFixture {
     #[serde(with = "prefix_hex_bytes")]
     transaction_bytes: Vec<u8>,
     proof: OutputIdProof,
-    #[serde(with = "prefix_hex_bytes")]
-    proof_bytes: Vec<u8>,
+    proof_bytes: String,
 }
 
 fn proof_fixture(filename: &str) -> Result<ProofFixture, Box<dyn std::error::Error>> {
@@ -48,7 +47,7 @@ fn output_proofs() {
             "proof mismatch for {filename}"
         );
         assert_eq!(
-            fixture.proof.pack_to_vec(),
+            prefix_hex::encode(fixture.proof.pack_to_vec()),
             fixture.proof_bytes,
             "byte mismatch for {filename}"
         );
