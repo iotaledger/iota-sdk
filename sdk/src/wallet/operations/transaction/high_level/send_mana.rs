@@ -58,16 +58,19 @@ where
             .with_mana(params.mana)
             .add_unlock_condition(AddressUnlockCondition::new(params.address));
 
-        if let ReturnStrategy::Return = return_strategy {
-            output_builder = output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                self.address().await.inner().clone(),
-                1,
-            )?);
-            let return_amount = output_builder.clone().finish()?.amount();
-            output_builder = output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                self.address().await.inner().clone(),
-                return_amount,
-            )?);
+        match return_strategy {
+            ReturnStrategy::Return => {
+                output_builder = output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                    self.address().await.inner().clone(),
+                    1,
+                )?);
+                let return_amount = output_builder.clone().finish()?.amount();
+                output_builder = output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                    self.address().await.inner().clone(),
+                    return_amount,
+                )?);
+            }
+            ReturnStrategy::Gift => {}
         }
 
         let output = output_builder.finish_output()?;
