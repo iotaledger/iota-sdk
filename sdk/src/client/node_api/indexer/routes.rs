@@ -10,7 +10,7 @@ use crate::{
             DelegationOutputQueryParameters, FoundryOutputQueryParameters, NftOutputQueryParameters,
             OutputQueryParameters,
         },
-        ClientInner, Error, Result,
+        Client, Error, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-impl ClientInner {
+impl Client {
     /// Get account, anchor, basic, delegation, nft and foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Returns Err(Node(NotFound) if no results are found.

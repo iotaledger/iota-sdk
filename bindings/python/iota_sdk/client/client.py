@@ -16,6 +16,7 @@ from iota_sdk.types.block.block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.network_info import NetworkInfo
+from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
@@ -36,6 +37,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                                       List[Union[str, Node]]]] = None,
         nodes: Optional[Union[Union[str, Node],
                               List[Union[str, Node]]]] = None,
+        protocol_parameters: Optional[ProtocolParameters] = None,
         ignore_node_health: Optional[bool] = None,
         api_timeout: Optional[timedelta] = None,
         node_sync_interval: Optional[timedelta] = None,
@@ -81,6 +83,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         client_config['primary_nodes'] = convert_nodes(primary_nodes)
         client_config['nodes'] = convert_nodes(nodes)
+        if protocol_parameters is not None:
+            client_config['protocol_parameters'] = protocol_parameters.to_dict()
 
         client_config = {
             k: v for k,

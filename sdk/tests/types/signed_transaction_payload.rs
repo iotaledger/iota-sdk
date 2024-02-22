@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
-    protocol::protocol_parameters,
+    protocol::iota_mainnet_protocol_parameters,
     rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -28,7 +28,7 @@ fn kind() {
 // Validate that attempting to construct a `SignedTransactionPayload` with too few unlocks is an error.
 #[test]
 fn builder_too_few_unlocks() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -46,7 +46,7 @@ fn builder_too_few_unlocks() {
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     // Construct a list with a single unlock, whereas we have 2 tx inputs.
@@ -65,7 +65,7 @@ fn builder_too_few_unlocks() {
 // Validate that attempting to construct a `SignedTransactionPayload` with too many unlocks is an error.
 #[test]
 fn builder_too_many_unlocks() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     // Construct a transaction with one input and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -82,7 +82,7 @@ fn builder_too_many_unlocks() {
         .add_input(input1)
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
@@ -104,7 +104,7 @@ fn builder_too_many_unlocks() {
 #[test]
 fn pack_unpack_valid() {
     // Construct a transaction with two inputs and one output.
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -121,7 +121,7 @@ fn pack_unpack_valid() {
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
@@ -138,13 +138,13 @@ fn pack_unpack_valid() {
     assert_eq!(packed_tx_payload.len(), tx_payload.packed_len());
     assert_eq!(
         tx_payload,
-        PackableExt::unpack_verified(packed_tx_payload.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed_tx_payload.as_slice(), protocol_parameters).unwrap()
     );
 }
 
 #[test]
 fn getters() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -162,7 +162,7 @@ fn getters() {
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.

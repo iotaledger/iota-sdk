@@ -156,7 +156,7 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        Ed25519Address::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        Ed25519Address::unpack_bytes_verified(packed_address.as_slice(), &()).unwrap()
     );
 
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
@@ -164,6 +164,6 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        Address::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        Address::unpack_bytes_verified(packed_address.as_slice(), &()).unwrap()
     );
 }

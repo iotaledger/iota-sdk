@@ -6,7 +6,7 @@ pub mod transaction;
 
 pub use self::transaction::verify_semantic;
 use crate::{
-    client::{constants::FIVE_MINUTES_IN_NANOSECONDS, ClientInner, Error, Result},
+    client::{constants::FIVE_MINUTES_IN_NANOSECONDS, Client, Error, Result},
     types::block::{
         core::{BlockHeader, UnsignedBlock},
         output::AccountId,
@@ -15,7 +15,7 @@ use crate::{
     },
 };
 
-impl ClientInner {
+impl Client {
     pub async fn build_basic_block(
         &self,
         issuer_id: AccountId,

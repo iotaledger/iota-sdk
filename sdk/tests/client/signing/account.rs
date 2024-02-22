@@ -18,8 +18,11 @@ use iota_sdk::{
         address::{AccountAddress, Address},
         input::{Input, UtxoInput},
         output::AccountId,
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
-        protocol::protocol_parameters,
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilityFlag},
+            SignedTransactionPayload,
+        },
+        protocol::iota_mainnet_protocol_parameters,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -46,7 +49,7 @@ async fn sign_account_state_transition() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let slot_index = SlotIndex::from(10);
 
@@ -81,6 +84,7 @@ async fn sign_account_state_transition() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -129,7 +133,7 @@ async fn account_reference_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_address = Address::Account(AccountAddress::new(account_id));
     let slot_index = SlotIndex::from(10);
@@ -202,6 +206,7 @@ async fn account_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {

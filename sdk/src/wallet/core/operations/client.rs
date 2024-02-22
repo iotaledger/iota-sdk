@@ -13,7 +13,7 @@ use crate::{
             node::{Node, NodeAuth, NodeDto},
         },
         secret::SecretManage,
-        Client, ClientBuilder,
+        Client, ClientBuilder, NetworkInfo,
     },
     wallet::{Wallet, WalletBuilder},
 };
@@ -39,7 +39,7 @@ where
             node_manager_builder,
             #[cfg(feature = "mqtt")]
             broker_options,
-            mut network_info,
+            protocol_parameters,
             api_timeout,
             #[cfg(not(target_family = "wasm"))]
             max_parallel_api_requests,
@@ -60,12 +60,19 @@ where
         }
 
         if change_in_node_manager {
-            // Update the protocol of the network_info to not have the default data, which can be wrong
-            // Ignore errors, because there might be no node at all and then it should still not error
             if let Ok(info) = self.client.get_info().await {
-                network_info.protocol_parameters = info.node_info.latest_protocol_parameters().parameters.clone();
+                let params = &info.node_info.latest_protocol_parameters().parameters;
+
+                *self.client.network_info.write().await = NetworkInfo {
+                    protocol_parameters: params.clone(),
+                    tangle_time: info.node_info.status.relative_accepted_tangle_time,
+                };
+            } else if let Some(protocol_parameters) = protocol_parameters {
+                *self.client.network_info.write().await = NetworkInfo {
+                    protocol_parameters,
+                    tangle_time: None,
+                };
             }
-            *self.client.network_info.write().await = network_info;
 
             self.update_address_hrp().await?;
         }

@@ -11,21 +11,21 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
 fn no_inputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = Vec::new();
     let outputs = build_outputs([Basic {
@@ -53,7 +53,7 @@ fn no_inputs() {
 
 #[test]
 fn no_outputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -87,7 +87,7 @@ fn no_outputs() {
 
 #[test]
 fn no_outputs_but_required_input() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -121,17 +121,17 @@ fn no_outputs_but_required_input() {
     assert_eq!(selected.inputs_data, inputs);
     // Just a remainder
     assert_eq!(selected.transaction.outputs().len(), 1);
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[0],
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None
-    ));
+        None,
+    );
 }
 
 #[test]
 fn no_outputs_but_burn() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -163,17 +163,17 @@ fn no_outputs_but_burn() {
 
     assert_eq!(selected.inputs_data, inputs);
     assert_eq!(selected.transaction.outputs().len(), 1);
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[0],
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None
-    ));
+        None,
+    );
 }
 
 #[test]
 fn no_address_provided() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -215,7 +215,7 @@ fn no_address_provided() {
 
 #[test]
 fn no_matching_address_provided() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -257,7 +257,7 @@ fn no_matching_address_provided() {
 
 #[test]
 fn two_addresses_one_missing() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -319,7 +319,7 @@ fn two_addresses_one_missing() {
 
 #[test]
 fn two_addresses() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -380,34 +380,34 @@ fn two_addresses() {
 
 #[test]
 fn consolidate_with_min_allotment() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = [
         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .with_mana(1000)
+            .with_mana(9860)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
             .finish_output()
             .unwrap(),
         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .with_mana(2000)
+            .with_mana(9860)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
             .finish_output()
             .unwrap(),
         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .with_mana(1000)
+            .with_mana(9860)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
             .finish_output()
             .unwrap(),
         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .with_mana(1000)
+            .with_mana(9860)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
@@ -438,6 +438,6 @@ fn consolidate_with_min_allotment() {
 
     assert_eq!(selected.transaction.outputs().len(), 1);
     assert_eq!(selected.transaction.allotments().len(), 1);
-    assert_eq!(selected.transaction.allotments()[0].mana(), 5000);
+    assert_eq!(selected.transaction.allotments()[0].mana(), 39440);
     assert_eq!(selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(), 0);
 }

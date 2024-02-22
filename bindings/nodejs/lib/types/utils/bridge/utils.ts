@@ -280,3 +280,11 @@ export interface __BlockBytes__ {
         block: Block;
     };
 }
+
+export interface __IotaMainnetProtocolParameters__ {
+    name: 'iotaMainnetProtocolParameters';
+}
+
+export interface __ShimmerMainnetProtocolParameters__ {
+    name: 'shimmerMainnetProtocolParameters';
+}

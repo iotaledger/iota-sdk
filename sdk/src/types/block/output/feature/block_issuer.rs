@@ -107,13 +107,11 @@ impl Packable for Ed25519PublicKeyHashBlockIssuerKey {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(Self(
-            <[u8; Self::LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?,
-        ))
+        Ok(Self(<[u8; Self::LENGTH]>::unpack(unpacker, visitor).coerce()?))
     }
 }
 
@@ -127,8 +125,8 @@ pub struct BlockIssuerKeys(
     #[packable(verify_with = verify_block_issuer_keys)] BoxedSlicePrefix<BlockIssuerKey, BlockIssuerKeyCount>,
 );
 
-fn verify_block_issuer_keys<const VERIFY: bool>(block_issuer_keys: &[BlockIssuerKey]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(block_issuer_keys.iter()) {
+fn verify_block_issuer_keys(block_issuer_keys: &[BlockIssuerKey]) -> Result<(), Error> {
+    if !is_unique_sorted(block_issuer_keys.iter()) {
         return Err(Error::BlockIssuerKeysNotUniqueSorted);
     }
 
@@ -179,7 +177,7 @@ impl BlockIssuerKeys {
         block_issuer_keys.sort();
 
         // Still need to verify the duplicate block issuer keys.
-        verify_block_issuer_keys::<true>(&block_issuer_keys)?;
+        verify_block_issuer_keys(&block_issuer_keys)?;
 
         Ok(Self(block_issuer_keys))
     }

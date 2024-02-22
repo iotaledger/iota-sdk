@@ -8,14 +8,14 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{AccountId, NftId},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         slot::{SlotCommitmentHash, SlotIndex},
     },
 };
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_ED25519_2, NFT_ID_1,
@@ -23,7 +23,7 @@ use crate::client::{
 
 #[test]
 fn one_output_expiration_not_expired() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -65,7 +65,7 @@ fn one_output_expiration_not_expired() {
 
 #[test]
 fn expiration_equal_timestamp() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -109,7 +109,7 @@ fn expiration_equal_timestamp() {
 
 #[test]
 fn one_output_expiration_expired() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -153,7 +153,7 @@ fn one_output_expiration_expired() {
 
 #[test]
 fn two_outputs_one_expiration_expired() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -212,7 +212,7 @@ fn two_outputs_one_expiration_expired() {
 
 #[test]
 fn two_outputs_one_unexpired_one_missing() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -271,7 +271,7 @@ fn two_outputs_one_unexpired_one_missing() {
 
 #[test]
 fn two_outputs_two_expired() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -342,7 +342,7 @@ fn two_outputs_two_expired() {
 
 #[test]
 fn two_outputs_two_expired_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -403,7 +403,7 @@ fn two_outputs_two_expired_2() {
 
 #[test]
 fn expiration_expired_with_sdr() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -447,7 +447,7 @@ fn expiration_expired_with_sdr() {
 
 #[test]
 fn expiration_expired_with_sdr_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -491,7 +491,7 @@ fn expiration_expired_with_sdr_2() {
 
 #[test]
 fn expiration_expired_with_sdr_and_timelock() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -535,7 +535,7 @@ fn expiration_expired_with_sdr_and_timelock() {
 
 #[test]
 fn expiration_expired_with_sdr_and_timelock_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -579,7 +579,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
 
 #[test]
 fn sender_in_expiration() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -677,7 +677,7 @@ fn sender_in_expiration() {
 
 #[test]
 fn sender_in_expiration_already_selected() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -725,7 +725,7 @@ fn sender_in_expiration_already_selected() {
 
 #[test]
 fn remainder_in_expiration() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -771,19 +771,19 @@ fn remainder_in_expiration() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-                None
-            ));
+                None,
+            );
         }
     });
 }
 
 #[test]
 fn expiration_expired_non_ed25519_in_address_unlock_condition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -827,7 +827,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 
 #[test]
 fn expiration_expired_only_account_addresses() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -885,7 +885,7 @@ fn expiration_expired_only_account_addresses() {
 
 #[test]
 fn one_nft_output_expiration_unexpired() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -930,7 +930,7 @@ fn one_nft_output_expiration_unexpired() {
 
 #[test]
 fn one_nft_output_expiration_expired() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(

@@ -113,11 +113,8 @@ impl BlockHeader {
     }
 }
 
-fn verify_protocol_version<const VERIFY: bool>(
-    protocol_version: &u8,
-    params: &ProtocolParameters,
-) -> Result<(), Error> {
-    if VERIFY && *protocol_version != params.version() {
+fn verify_protocol_version(protocol_version: &u8, params: &ProtocolParameters) -> Result<(), Error> {
+    if *protocol_version != params.version() {
         return Err(Error::ProtocolVersionMismatch {
             expected: params.version(),
             actual: *protocol_version,
@@ -127,8 +124,8 @@ fn verify_protocol_version<const VERIFY: bool>(
     Ok(())
 }
 
-fn verify_network_id<const VERIFY: bool>(network_id: &u64, params: &ProtocolParameters) -> Result<(), Error> {
-    if VERIFY && *network_id != params.network_id() {
+fn verify_network_id(network_id: &u64, params: &ProtocolParameters) -> Result<(), Error> {
+    if *network_id != params.network_id() {
         return Err(Error::NetworkIdMismatch {
             expected: params.network_id(),
             actual: *network_id,
@@ -230,10 +227,10 @@ impl Block {
         visitor: &<Self as Packable>::UnpackVisitor,
     ) -> Result<Self, UnpackError<<Self as Packable>::UnpackError, UnexpectedEOF>> {
         let mut unpacker = CounterUnpacker::new(SliceUnpacker::new(bytes.as_ref()));
-        let block = Self::unpack::<_, true>(&mut unpacker, visitor)?;
+        let block = Self::unpack_verified(&mut unpacker, visitor)?;
 
         // When parsing the block is complete, there should not be any trailing bytes left that were not parsed.
-        if u8::unpack::<_, true>(&mut unpacker, &()).is_ok() {
+        if u8::unpack_inner(&mut unpacker, Some(visitor)).is_ok() {
             return Err(UnpackError::Packable(Error::RemainingBytesAfterBlock));
         }
 
@@ -275,15 +272,15 @@ impl Packable for Block {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        protocol_params: &Self::UnpackVisitor,
+        protocol_params: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let start_opt = unpacker.read_bytes();
 
-        let header = BlockHeader::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-        let body = BlockBody::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-        let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
+        let header = BlockHeader::unpack(unpacker, protocol_params)?;
+        let body = BlockBody::unpack(unpacker, protocol_params)?;
+        let signature = Signature::unpack_inner(unpacker, protocol_params)?;
 
         let block = Self {
             header,
@@ -291,7 +288,7 @@ impl Packable for Block {
             signature,
         };
 
-        if VERIFY {
+        if protocol_params.is_some() {
             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
             } else {

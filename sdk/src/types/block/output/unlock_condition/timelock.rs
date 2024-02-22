@@ -19,7 +19,7 @@ impl TimelockUnlockCondition {
     pub fn new(slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
         let slot_index = slot_index.into();
 
-        verify_slot_index::<true>(&slot_index)?;
+        verify_slot_index(&slot_index)?;
 
         Ok(Self(slot_index))
     }
@@ -39,8 +39,8 @@ impl TimelockUnlockCondition {
 impl StorageScore for TimelockUnlockCondition {}
 
 #[inline]
-fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex) -> Result<(), Error> {
-    if VERIFY && *slot_index == 0 {
+fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), Error> {
+    if *slot_index == 0 {
         Err(Error::TimelockUnlockConditionZero)
     } else {
         Ok(())
