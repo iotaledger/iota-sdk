@@ -38,7 +38,7 @@ pub const UNLOCK_INDEX_RANGE: RangeInclusive<u16> = 0..=UNLOCK_INDEX_MAX; // [0.
 
 pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNLOCK_INDEX_RANGE.end() }>;
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum UnlockError {
     InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),

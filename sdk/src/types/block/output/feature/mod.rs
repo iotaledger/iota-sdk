@@ -45,25 +45,37 @@ use crate::types::block::{
     protocol::{WorkScore, WorkScoreParameters},
 };
 
-#[derive(Debug, PartialEq, Eq, strum::Display)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub enum FeatureError {
-    #[strum(to_string = "invalid feature kind: {0}")]
+    #[display(fmt = "invalid feature kind: {_0}")]
     InvalidFeatureKind(u8),
+    #[display(fmt = "invalid feature count: {_0}")]
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid tag feature length {_0}")]
     InvalidTagFeatureLength(<TagFeatureLength as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid metadata feature: {_0}")]
     InvalidMetadataFeature(String),
+    #[display(fmt = "invalid metadata feature entry count: {_0}")]
     InvalidMetadataFeatureEntryCount(<MetadataFeatureEntryCount as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid metadata feature key length: {_0}")]
     InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid metadata feature value length: {_0}")]
     InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
+    #[display(fmt = "features are not unique and/or sorted")]
     FeaturesNotUniqueSorted,
+    #[display(fmt = "disallowed feature at index {index} with kind {kind}")]
     DisallowedFeature {
         index: usize,
         kind: u8,
     },
+    #[display(fmt = "non graphic ASCII key: {_0:?}")]
     NonGraphicAsciiMetadataKey(Vec<u8>),
+    #[display(fmt = "invalid block issuer key kind: {_0}")]
     InvalidBlockIssuerKeyKind(u8),
+    #[display(fmt = "invalid block issuer key count: {_0}")]
     InvalidBlockIssuerKeyCount(<BlockIssuerKeyCount as TryFrom<usize>>::Error),
+    #[display(fmt = "block issuer keys are not unique and/or sorted")]
     BlockIssuerKeysNotUniqueSorted,
     NativeToken(NativeTokenError),
     Address(AddressError),

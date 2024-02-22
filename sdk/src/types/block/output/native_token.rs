@@ -33,10 +33,10 @@ impl From<FoundryId> for TokenId {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, strum::Display)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub enum NativeTokenError {
-    #[strum(to_string = "invalid native token count: {0}")]
+    #[display(fmt = "invalid native token count: {_0}")]
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     NativeTokensNotUniqueSorted,
     NativeTokensNullAmount,

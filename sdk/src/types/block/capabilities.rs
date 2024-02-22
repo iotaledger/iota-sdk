@@ -11,11 +11,14 @@ use packable::{
     Packable,
 };
 
-#[derive(Debug, PartialEq, Eq, strum::Display)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub enum CapabilityError {
+    #[display(fmt = "invalid capabilities count: {_0}")]
     InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid capability byte at index {index}: {byte:x}")]
     InvalidCapabilityByte { index: usize, byte: u8 },
+    #[display(fmt = "capability bytes have trailing zeroes")]
     TrailingCapabilityBytes,
 }
 

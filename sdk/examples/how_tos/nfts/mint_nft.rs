@@ -12,13 +12,10 @@
 //! ```
 
 use iota_sdk::{
-    types::block::{
-        output::{
-            feature::{Irc27Metadata, IssuerFeature, MetadataFeature, SenderFeature},
-            unlock_condition::AddressUnlockCondition,
-            NftId, NftOutputBuilder,
-        },
-        BlockError,
+    types::block::output::{
+        feature::{Irc27Metadata, IssuerFeature, MetadataFeature, SenderFeature},
+        unlock_condition::AddressUnlockCondition,
+        NftId, NftOutputBuilder,
     },
     wallet::MintNftParams,
     Wallet,

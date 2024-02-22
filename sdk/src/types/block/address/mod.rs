@@ -36,36 +36,34 @@ use crate::{
     utils::{ConversionError, ConvertTo},
 };
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum AddressError {
-    #[strum(to_string = "invalid address provided")]
+    #[display(fmt = "invalid address provided")]
     InvalidAddress,
-    #[strum(to_string = "invalid address kind: {0}")]
+    #[display(fmt = "invalid address kind: {_0}")]
     InvalidAddressKind(u8),
-    #[strum(to_string = "invalid address weight: {0}")]
+    #[display(fmt = "invalid address weight: {_0}")]
     InvalidAddressWeight(u8),
-    #[strum(to_string = "invalid multi address threshold: {0}")]
+    #[display(fmt = "invalid multi address threshold: {_0}")]
     InvalidMultiAddressThreshold(u16),
-    #[strum(to_string = "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}")]
+    #[display(fmt = "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}")]
     InvalidMultiAddressCumulativeWeight { cumulative_weight: u16, threshold: u16 },
-    #[strum(to_string = "invalid weighted address count: {count}")]
+    #[display(fmt = "invalid weighted address count: {_0}")]
     InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
-    #[strum(to_string = "weighted addresses are not unique and/or sorted")]
+    #[display(fmt = "weighted addresses are not unique and/or sorted")]
     WeightedAddressesNotUniqueSorted,
-    #[strum(to_string = "restricted address capability: {0:?}")]
+    #[display(fmt = "restricted address capability: {_0:?}")]
     RestrictedAddressCapability(AddressCapabilityFlag),
     #[from]
     InvalidBech32Hrp(::bech32::primitives::hrp::Error),
     #[from]
-    #[strum(to_string = "{0}")]
     Hex(prefix_hex::Error),
     #[from]
     Identifier(IdentifierError),
     #[from]
     Convert(ConversionError),
     #[from]
-    #[strum(to_string = "{0}")]
     Capability(CapabilityError),
 }
 

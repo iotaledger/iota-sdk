@@ -10,10 +10,12 @@ use primitive_types::U256;
 pub use self::simple::SimpleTokenScheme;
 use crate::types::block::protocol::{WorkScore, WorkScoreParameters};
 
-#[derive(Debug, PartialEq, Eq, strum::Display)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub enum TokenSchemeError {
+    #[display(fmt = "invalid token scheme kind {_0}")]
     InvalidTokenSchemeKind(u8),
+    #[display(fmt = "invalid foundry output supply: minted {minted}, melted {melted} max {max}")]
     InvalidFoundryOutputSupply { minted: U256, melted: U256, max: U256 },
 }
 

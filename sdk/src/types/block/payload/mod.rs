@@ -37,36 +37,36 @@ use crate::types::block::{
     unlock::UnlockError,
 };
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum PayloadError {
-    #[strum(to_string = "invalid payload kind: {0}")]
+    #[display(fmt = "invalid payload kind: {_0}")]
     InvalidPayloadKind(u8),
-    #[strum(to_string = "invalid payload length: expected {expected} but got {actual}")]
+    #[display(fmt = "invalid payload length: expected {expected} but got {actual}")]
     InvalidPayloadLength { expected: usize, actual: usize },
-    #[strum(to_string = "invalid timestamp: {0}")]
+    #[display(fmt = "invalid timestamp: {_0}")]
     InvalidTimestamp(String),
-    #[strum(to_string = "invalid network id: {0}")]
+    #[display(fmt = "invalid network id: {_0}")]
     InvalidNetworkId(String),
-    #[strum(to_string = "network ID mismatch: expected {expected} but got {actual}")]
+    #[display(fmt = "network ID mismatch: expected {expected} but got {actual}")]
     NetworkIdMismatch { expected: u64, actual: u64 },
-    #[strum(to_string = "invalid tagged data length: {0}")]
+    #[display(fmt = "invalid tagged data length: {_0}")]
     InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
-    #[strum(to_string = "invalid tag length: {0}")]
+    #[display(fmt = "invalid tag length: {_0}")]
     InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
-    #[strum(to_string = "invalid input count: {0}")]
+    #[display(fmt = "invalid input count: {_0}")]
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
-    #[strum(to_string = "invalid output count: {0}")]
+    #[display(fmt = "invalid output count: {_0}")]
     InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
-    #[strum(to_string = "invalid transaction amount sum: {value}")]
+    #[display(fmt = "invalid transaction amount sum: {_0}")]
     InvalidTransactionAmountSum(u128),
-    #[strum(to_string = "duplicate output chain: {0}")]
+    #[display(fmt = "duplicate output chain: {_0}")]
     DuplicateOutputChain(ChainId),
-    #[strum(to_string = "duplicate UTXO {0} in inputs")]
+    #[display(fmt = "duplicate UTXO {_0} in inputs")]
     DuplicateUtxo(UtxoInput),
-    #[strum(to_string = "missing creation slot")]
+    #[display(fmt = "missing creation slot")]
     MissingCreationSlot,
-    #[strum(to_string = "input count and unlock count mismatch: {input_count} != {unlock_count}")]
+    #[display(fmt = "input count and unlock count mismatch: {input_count} != {unlock_count}")]
     InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
     #[from]
     Input(InputError),

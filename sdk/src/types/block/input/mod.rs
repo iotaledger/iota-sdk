@@ -23,12 +23,12 @@ pub const INPUT_INDEX_MAX: u16 = INPUT_COUNT_MAX - 1; // 127
 /// The range of valid indices of inputs of a transaction.
 pub const INPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=INPUT_INDEX_MAX; // [0..127]
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum InputError {
-    #[strum(to_string = "invalid input kind: {0}")]
+    #[display(fmt = "invalid input kind: {_0}")]
     InvalidInputKind(u8),
-    #[strum(to_string = "invalid input count: {0}")]
+    #[display(fmt = "invalid input count: {_0}")]
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     #[from]
     Identifier(IdentifierError),

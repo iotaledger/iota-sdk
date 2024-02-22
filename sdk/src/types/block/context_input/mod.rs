@@ -27,19 +27,18 @@ pub const CONTEXT_INPUT_COUNT_MAX: u16 = 128;
 /// The range of valid numbers of context inputs of a transaction.
 pub const CONTEXT_INPUT_COUNT_RANGE: RangeInclusive<u16> = 0..=CONTEXT_INPUT_COUNT_MAX; // [0..128]
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum ContextInputError {
-    #[strum(to_string = "context inputs are not unique and/or sorted")]
+    #[display(fmt = "context inputs are not unique and/or sorted")]
     ContextInputsNotUniqueSorted,
-    #[strum(to_string = "invalid reward input index: {0}")]
+    #[display(fmt = "invalid reward input index: {_0}")]
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
-    #[strum(to_string = "invalid context input kind: {0}")]
+    #[display(fmt = "invalid context input kind: {_0}")]
     InvalidContextInputKind(u8),
-    #[strum(to_string = "invalid context input count: {0}")]
+    #[display(fmt = "invalid context input count: {_0}")]
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     #[from]
-    #[strum(to_string = "{0}")]
     Identifier(IdentifierError),
 }
 

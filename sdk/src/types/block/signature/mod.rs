@@ -10,19 +10,18 @@ use derive_more::From;
 pub use self::ed25519::Ed25519Signature;
 use crate::types::block::protocol::{WorkScore, WorkScoreParameters};
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum SignatureError {
-    #[strum(to_string = "invalid signature kind: {0}")]
+    #[display(fmt = "invalid signature kind: {_0}")]
     InvalidSignatureKind(u8),
-    SignaturePublicKeyMismatch {
-        expected: String,
-        actual: String,
-    },
+    #[display(fmt = "signature public key mismatch: expected {expected} but got {actual}")]
+    SignaturePublicKeyMismatch { expected: String, actual: String },
+    #[display(fmt = "invalid public key")]
     InvalidPublicKey,
+    #[display(fmt = "invalid signature")]
     InvalidSignature,
     #[from]
-    #[strum(to_string = "{0}")]
     Crypto(crypto::Error),
 }
 

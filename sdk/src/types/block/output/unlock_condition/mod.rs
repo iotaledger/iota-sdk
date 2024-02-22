@@ -34,19 +34,22 @@ use crate::types::block::{
     slot::SlotIndex,
 };
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum UnlockConditionError {
-    #[strum(to_string = "invalid unlock condition kind: {0}")]
+    #[display(fmt = "invalid unlock condition kind: {_0}")]
     InvalidUnlockConditionKind(u8),
+    #[display(fmt = "invalid unlock condition count: {_0}")]
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
+    #[display(fmt = "expiration unlock condition with milestone index and timestamp set to 0")]
     ExpirationUnlockConditionZero,
+    #[display(fmt = "timelock unlock condition with milestone index and timestamp set to 0")]
     TimelockUnlockConditionZero,
+    #[display(fmt = "unlock conditions are not unique and/or sorted")]
     UnlockConditionsNotUniqueSorted,
-    DisallowedUnlockCondition {
-        index: usize,
-        kind: u8,
-    },
+    #[display(fmt = "disallowed unlock condition at index {index} with kind {kind}")]
+    DisallowedUnlockCondition { index: usize, kind: u8 },
+    #[display(fmt = "missing slot index")]
     MissingSlotIndex,
     #[from]
     Address(AddressError),

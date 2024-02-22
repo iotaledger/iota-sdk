@@ -23,10 +23,10 @@ use crate::{
     utils::ConvertTo,
 };
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum ProtocolParametersError {
-    #[strum(to_string = "invalid network name: {0}")]
+    #[display(fmt = "invalid network name: {_0}")]
     InvalidNetworkName(FromUtf8Error),
     InvalidManaDecayFactors,
     InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),

@@ -58,26 +58,26 @@ use crate::types::block::{
 #[cfg(feature = "serde")]
 use crate::utils::serde::string;
 
-#[derive(Debug, PartialEq, Eq, strum::Display, derive_more::From)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum OutputError {
-    #[strum(to_string = "invalid output kind: {0}")]
+    #[display(fmt = "invalid output kind: {_0}")]
     InvalidOutputKind(u8),
-    #[strum(to_string = "invalid output amount: {0}")]
+    #[display(fmt = "invalid output amount: {_0}")]
     InvalidOutputAmount(u64),
-    #[strum(to_string = "consumed mana overflow")]
+    #[display(fmt = "consumed mana overflow")]
     ConsumedManaOverflow,
-    #[strum(to_string = "the return deposit ({deposit}) must be greater than the minimum output amount ({required})")]
+    #[display(fmt = "the return deposit ({deposit}) must be greater than the minimum output amount ({required})")]
     InsufficientStorageDepositReturnAmount {
         deposit: u64,
         required: u64,
     },
-    #[strum(to_string = "insufficient output amount: {amount} (should be at least {required})")]
+    #[display(fmt = "insufficient output amount: {amount} (should be at least {required})")]
     AmountLessThanMinimum {
         amount: u64,
         required: u64,
     },
-    #[strum(to_string = "storage deposit return of {deposit} exceeds the original output amount of {amount}")]
+    #[display(fmt = "storage deposit return of {deposit} exceeds the original output amount of {amount}")]
     StorageDepositReturnExceedsOutputAmount {
         deposit: u64,
         amount: u64,

@@ -15,24 +15,19 @@ pub use self::{
 };
 use crate::types::block::slot::EpochIndex;
 
-#[derive(Debug, PartialEq, Eq, strum::Display)]
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub enum ManaError {
-    #[strum(to_string = "invalid mana value: {0}")]
+    #[display(fmt = "invalid mana value: {_0}")]
     InvalidManaValue(u64),
-    #[strum(to_string = "invalid mana allotment count: {0}")]
+    #[display(fmt = "invalid mana allotment count: {_0}")]
     InvalidManaAllotmentCount(<ManaAllotmentCount as TryFrom<usize>>::Error),
-    #[strum(to_string = "invalid mana allotment sum: {sum} greater than max of {max}")]
-    InvalidManaAllotmentSum {
-        max: u64,
-        sum: u128,
-    },
-    #[strum(to_string = "mana allotments are not unique and/or sorted")]
+    #[display(fmt = "invalid mana allotment sum: {sum} greater than max of {max}")]
+    InvalidManaAllotmentSum { max: u64, sum: u128 },
+    #[display(fmt = "mana allotments are not unique and/or sorted")]
     ManaAllotmentsNotUniqueSorted,
-    InvalidEpochDiff {
-        created: EpochIndex,
-        target: EpochIndex,
-    },
+    #[display(fmt = "invalid epoch diff: created {created}, target {target}")]
+    InvalidEpochDiff { created: EpochIndex, target: EpochIndex },
 }
 
 #[cfg(feature = "std")]
