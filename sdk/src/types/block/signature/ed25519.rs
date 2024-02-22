@@ -152,12 +152,12 @@ impl Packable for Ed25519Signature {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack(unpacker, visitor).coerce()?;
+        let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack(unpacker, visitor).coerce()?;
 
         Ok(Self::from_bytes(public_key, signature))
     }

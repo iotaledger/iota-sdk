@@ -235,7 +235,7 @@ impl UnlockConditions {
 
         unlock_conditions.sort_by_key(UnlockCondition::kind);
         // Sort is obviously fine now but uniqueness still needs to be checked.
-        verify_unique_sorted::<true>(&unlock_conditions)?;
+        verify_unique_sorted(&unlock_conditions)?;
 
         Ok(Self(unlock_conditions))
     }
@@ -372,8 +372,8 @@ impl StorageScore for UnlockConditions {
 }
 
 #[inline]
-fn verify_unique_sorted<const VERIFY: bool>(unlock_conditions: &[UnlockCondition]) -> Result<(), UnlockConditionError> {
-    if VERIFY && !is_unique_sorted(unlock_conditions.iter().map(UnlockCondition::kind)) {
+fn verify_unique_sorted(unlock_conditions: &[UnlockCondition]) -> Result<(), UnlockConditionError> {
+    if !is_unique_sorted(unlock_conditions.iter().map(UnlockCondition::kind)) {
         Err(UnlockConditionError::UnlockConditionsNotUniqueSorted)
     } else {
         Ok(())
@@ -381,11 +381,11 @@ fn verify_unique_sorted<const VERIFY: bool>(unlock_conditions: &[UnlockCondition
 }
 
 #[inline]
-fn verify_unique_sorted_packable<const VERIFY: bool>(
+fn verify_unique_sorted_packable(
     unlock_conditions: &[UnlockCondition],
     _: &ProtocolParameters,
 ) -> Result<(), UnlockConditionError> {
-    verify_unique_sorted::<VERIFY>(unlock_conditions)
+    verify_unique_sorted(unlock_conditions)
 }
 
 pub(crate) fn verify_allowed_unlock_conditions(

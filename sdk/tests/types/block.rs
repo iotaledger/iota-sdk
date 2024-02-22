@@ -5,7 +5,7 @@ use iota_sdk::types::{
     block::{
         helper::network_name_to_id,
         payload::Payload,
-        protocol::{protocol_parameters, ProtocolParameters},
+        protocol::iota_mainnet_protocol_parameters,
         rand::{
             block::{rand_basic_block_body_builder_with_strong_parents, rand_block, rand_block_with_block_body},
             parents::rand_strong_parents,
@@ -92,20 +92,20 @@ use pretty_assertions::assert_eq;
 // Validate that a `unpack` ∘ `pack` round-trip results in the original block.
 #[test]
 fn pack_unpack_valid() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let block = rand_block(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
     assert_eq!(
         block,
-        PackableExt::unpack_verified(packed_block.as_slice(), &protocol_parameters).unwrap()
+        PackableExt::unpack_bytes_verified(packed_block.as_slice(), protocol_parameters).unwrap()
     );
 }
 
 #[test]
 fn getters() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
@@ -122,7 +122,7 @@ fn getters() {
 
 #[test]
 fn dto_mismatch_version() {
-    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
     let issuing_time = protocol_parameters.genesis_unix_timestamp()
@@ -166,7 +166,7 @@ fn dto_mismatch_version() {
 
 #[test]
 fn dto_mismatch_network_id() {
-    let protocol_parameters = ProtocolParameters::default();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
     let issuing_time = protocol_parameters.genesis_unix_timestamp()

@@ -162,11 +162,11 @@ impl DelegationOutputBuilder {
     pub fn finish(self) -> Result<DelegationOutput, OutputError> {
         let validator_address = Address::from(self.validator_address);
 
-        verify_validator_address::<true>(&validator_address)?;
+        verify_validator_address(&validator_address)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
-        verify_unlock_conditions::<true>(&unlock_conditions)?;
+        verify_unlock_conditions(&unlock_conditions)?;
         verify_restricted_addresses(&unlock_conditions, DelegationOutput::KIND, None, 0)
             .map_err(UnlockConditionError::from)?;
 
@@ -367,55 +367,43 @@ impl WorkScore for DelegationOutput {
 
 impl MinimumOutputAmount for DelegationOutput {}
 
-fn verify_validator_address<const VERIFY: bool>(validator_address: &Address) -> Result<(), OutputError> {
-    if VERIFY {
-        if let Address::Account(validator_address) = validator_address {
-            if validator_address.is_null() {
-                return Err(OutputError::NullDelegationValidatorId);
-            }
-        } else {
-            return Err(OutputError::ValidatorAddress(AddressError::InvalidAddressKind(
-                validator_address.kind(),
-            )));
+fn verify_validator_address(validator_address: &Address) -> Result<(), OutputError> {
+    if let Address::Account(validator_address) = validator_address {
+        if validator_address.is_null() {
+            return Err(OutputError::NullDelegationValidatorId);
         }
+    } else {
+        return Err(OutputError::ValidatorAddress(AddressError::InvalidAddressKind(
+            validator_address.kind(),
+        )));
     }
 
     Ok(())
 }
 
-fn verify_validator_address_packable<const VERIFY: bool>(
-    validator_address: &Address,
-    _: &ProtocolParameters,
-) -> Result<(), OutputError> {
-    verify_validator_address::<VERIFY>(validator_address)
+fn verify_validator_address_packable(validator_address: &Address, _: &ProtocolParameters) -> Result<(), OutputError> {
+    verify_validator_address(validator_address)
 }
 
-fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), OutputError> {
-    if VERIFY {
-        if unlock_conditions.address().is_none() {
-            Err(OutputError::MissingAddressUnlockCondition)
-        } else {
-            Ok(verify_allowed_unlock_conditions(
-                unlock_conditions,
-                DelegationOutput::ALLOWED_UNLOCK_CONDITIONS,
-            )?)
-        }
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), OutputError> {
+    if unlock_conditions.address().is_none() {
+        Err(OutputError::MissingAddressUnlockCondition)
     } else {
-        Ok(())
+        Ok(verify_allowed_unlock_conditions(
+            unlock_conditions,
+            DelegationOutput::ALLOWED_UNLOCK_CONDITIONS,
+        )?)
     }
 }
 
-fn verify_unlock_conditions_packable<const VERIFY: bool>(
+fn verify_unlock_conditions_packable(
     unlock_conditions: &UnlockConditions,
     _: &ProtocolParameters,
 ) -> Result<(), OutputError> {
-    verify_unlock_conditions::<VERIFY>(unlock_conditions)
+    verify_unlock_conditions(unlock_conditions)
 }
 
-fn verify_delegation_output<const VERIFY: bool>(
-    output: &DelegationOutput,
-    _: &ProtocolParameters,
-) -> Result<(), OutputError> {
+fn verify_delegation_output(output: &DelegationOutput, _: &ProtocolParameters) -> Result<(), OutputError> {
     Ok(
         verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
             .map_err(UnlockConditionError::from)?,

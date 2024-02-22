@@ -525,32 +525,32 @@ impl Packable for FoundryOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let serial_number = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let token_scheme = TokenScheme::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let serial_number = u32::unpack_inner(unpacker, visitor).coerce()?;
+        let token_scheme = TokenScheme::unpack_inner(unpacker, visitor).coerce()?;
 
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&features, Self::ALLOWED_FEATURES)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
@@ -643,18 +643,19 @@ mod dto {
     crate::impl_serde_typed_dto!(FoundryOutput, FoundryOutputDto, "foundry output");
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::block::{
-        output::foundry::dto::FoundryOutputDto, protocol::protocol_parameters, rand::output::rand_foundry_output,
+        output::foundry::dto::FoundryOutputDto, protocol::iota_mainnet_protocol_parameters,
+        rand::output::rand_foundry_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let foundry_output = rand_foundry_output(protocol_parameters.token_supply());
         let dto = FoundryOutputDto::from(&foundry_output);
         let output = Output::Foundry(FoundryOutput::try_from(dto).unwrap());

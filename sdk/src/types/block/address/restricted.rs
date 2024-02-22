@@ -33,7 +33,7 @@ impl RestrictedAddress {
     pub fn new(address: impl Into<Address>) -> Result<Self, AddressError> {
         let address = address.into();
 
-        verify_address::<true>(&address)?;
+        verify_address(&address)?;
 
         Ok(Self {
             address,
@@ -81,13 +81,11 @@ impl core::fmt::Display for RestrictedAddress {
     }
 }
 
-fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), AddressError> {
-    if VERIFY
-        && !matches!(
-            address,
-            Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
-        )
-    {
+fn verify_address(address: &Address) -> Result<(), AddressError> {
+    if !matches!(
+        address,
+        Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
+    ) {
         Err(AddressError::InvalidAddressKind(address.kind()))
     } else {
         Ok(())

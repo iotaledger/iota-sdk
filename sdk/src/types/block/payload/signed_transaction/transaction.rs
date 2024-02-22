@@ -184,7 +184,7 @@ impl TransactionBuilder {
             .map_err(PayloadError::InvalidOutputCount)?;
 
         if let Some(protocol_parameters) = params {
-            verify_outputs::<true>(&outputs, protocol_parameters)?;
+            verify_outputs(&outputs, protocol_parameters)?;
         }
 
         Ok(Transaction {
@@ -349,16 +349,14 @@ impl WorkScore for Transaction {
     }
 }
 
-fn verify_network_id<const VERIFY: bool>(network_id: &u64, visitor: &ProtocolParameters) -> Result<(), PayloadError> {
-    if VERIFY {
-        let expected = visitor.network_id();
+fn verify_network_id(network_id: &u64, visitor: &ProtocolParameters) -> Result<(), PayloadError> {
+    let expected = visitor.network_id();
 
-        if *network_id != expected {
-            return Err(PayloadError::NetworkIdMismatch {
-                expected,
-                actual: *network_id,
-            });
-        }
+    if *network_id != expected {
+        return Err(PayloadError::NetworkIdMismatch {
+            expected,
+            actual: *network_id,
+        });
     }
 
     Ok(())
@@ -377,13 +375,8 @@ fn verify_inputs(inputs: &[Input]) -> Result<(), PayloadError> {
     Ok(())
 }
 
-fn verify_inputs_packable<const VERIFY: bool>(
-    inputs: &[Input],
-    _visitor: &ProtocolParameters,
-) -> Result<(), PayloadError> {
-    if VERIFY {
-        verify_inputs(inputs)?;
-    }
+fn verify_inputs_packable(inputs: &[Input], _visitor: &ProtocolParameters) -> Result<(), PayloadError> {
+    verify_inputs(inputs)?;
     Ok(())
 }
 
@@ -394,50 +387,43 @@ fn verify_payload(payload: &OptionalPayload) -> Result<(), PayloadError> {
     }
 }
 
-fn verify_payload_packable<const VERIFY: bool>(
-    payload: &OptionalPayload,
-    _visitor: &ProtocolParameters,
-) -> Result<(), PayloadError> {
-    if VERIFY {
-        verify_payload(payload)?;
-    }
+fn verify_payload_packable(payload: &OptionalPayload, _visitor: &ProtocolParameters) -> Result<(), PayloadError> {
+    verify_payload(payload)?;
     Ok(())
 }
 
-fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), PayloadError> {
-    if VERIFY {
-        let mut amount_sum: u64 = 0;
-        let mut chain_ids = HashSet::new();
+fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), PayloadError> {
+    let mut amount_sum: u64 = 0;
+    let mut chain_ids = HashSet::new();
 
-        for output in outputs.iter() {
-            let (amount, chain_id) = match output {
-                Output::Basic(output) => (output.amount(), None),
-                Output::Account(output) => (output.amount(), Some(output.chain_id())),
-                Output::Anchor(output) => (output.amount(), Some(output.chain_id())),
-                Output::Foundry(output) => (output.amount(), Some(output.chain_id())),
-                Output::Nft(output) => (output.amount(), Some(output.chain_id())),
-                Output::Delegation(output) => (output.amount(), Some(output.chain_id())),
-            };
+    for output in outputs.iter() {
+        let (amount, chain_id) = match output {
+            Output::Basic(output) => (output.amount(), None),
+            Output::Account(output) => (output.amount(), Some(output.chain_id())),
+            Output::Anchor(output) => (output.amount(), Some(output.chain_id())),
+            Output::Foundry(output) => (output.amount(), Some(output.chain_id())),
+            Output::Nft(output) => (output.amount(), Some(output.chain_id())),
+            Output::Delegation(output) => (output.amount(), Some(output.chain_id())),
+        };
 
-            amount_sum = amount_sum
-                .checked_add(amount)
-                .ok_or(PayloadError::InvalidTransactionAmountSum(
-                    amount_sum as u128 + amount as u128,
-                ))?;
+        amount_sum = amount_sum
+            .checked_add(amount)
+            .ok_or(PayloadError::InvalidTransactionAmountSum(
+                amount_sum as u128 + amount as u128,
+            ))?;
 
-            // Accumulated output balance must not exceed the total supply of tokens.
-            if amount_sum > visitor.token_supply() {
-                return Err(PayloadError::InvalidTransactionAmountSum(amount_sum as u128));
-            }
-
-            if let Some(chain_id) = chain_id {
-                if !chain_id.is_null() && !chain_ids.insert(chain_id) {
-                    return Err(PayloadError::DuplicateOutputChain(chain_id));
-                }
-            }
-
-            output.verify_storage_deposit(visitor.storage_score_parameters())?;
+        // Accumulated output balance must not exceed the total supply of tokens.
+        if amount_sum > visitor.token_supply() {
+            return Err(PayloadError::InvalidTransactionAmountSum(amount_sum as u128));
         }
+
+        if let Some(chain_id) = chain_id {
+            if !chain_id.is_null() && !chain_ids.insert(chain_id) {
+                return Err(PayloadError::DuplicateOutputChain(chain_id));
+            }
+        }
+
+        output.verify_storage_deposit(visitor.storage_score_parameters())?;
     }
 
     Ok(())

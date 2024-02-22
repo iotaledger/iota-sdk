@@ -65,11 +65,11 @@ impl Packable for Hrp {
     }
 
     #[inline]
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let len = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()? as usize;
+        let len = u8::unpack(unpacker, visitor).coerce()? as usize;
 
         let mut bytes = alloc::vec![0u8; len];
         unpacker.unpack_bytes(&mut bytes)?;
@@ -125,7 +125,7 @@ impl FromStr for Bech32Address {
 
     fn from_str(address: &str) -> Result<Self, Self::Err> {
         match bech32::decode(address) {
-            Ok((hrp, bytes)) => Address::unpack_verified(bytes.as_slice(), &())
+            Ok((hrp, bytes)) => Address::unpack_bytes_verified(bytes.as_slice(), &())
                 .map_err(|_| AddressError::InvalidAddress)
                 .map(|address| Self {
                     hrp: Hrp(hrp),

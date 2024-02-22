@@ -36,7 +36,7 @@ impl SignedTransactionPayload {
     pub fn new(transaction: Transaction, unlocks: Unlocks) -> Result<Self, PayloadError> {
         let payload = Self { transaction, unlocks };
 
-        verify_signed_transaction_payload::<true>(&payload)?;
+        verify_signed_transaction_payload(&payload)?;
 
         Ok(payload)
     }
@@ -61,9 +61,7 @@ impl WorkScore for SignedTransactionPayload {
     }
 }
 
-fn verify_signed_transaction_payload<const VERIFY: bool>(
-    payload: &SignedTransactionPayload,
-) -> Result<(), PayloadError> {
+fn verify_signed_transaction_payload(payload: &SignedTransactionPayload) -> Result<(), PayloadError> {
     if payload.transaction.inputs().len() != payload.unlocks.len() {
         return Err(PayloadError::InputUnlockCountMismatch {
             input_count: payload.transaction.inputs().len(),

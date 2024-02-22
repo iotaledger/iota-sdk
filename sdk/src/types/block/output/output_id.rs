@@ -62,7 +62,7 @@ crate::string_serde_impl!(OutputId);
 impl From<[u8; Self::LENGTH]> for OutputId {
     fn from(bytes: [u8; Self::LENGTH]) -> Self {
         // Unwrap is fine because size is already known and valid.
-        Self::unpack_unverified(bytes).unwrap()
+        Self::unpack_bytes_unverified(bytes).unwrap()
     }
 }
 

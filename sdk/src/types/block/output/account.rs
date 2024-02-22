@@ -490,31 +490,31 @@ impl Packable for AccountOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let mana = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let account_id = AccountId::unpack_inner(unpacker, visitor).coerce()?;
 
-        let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let foundry_counter = u32::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_index_counter(&account_id, foundry_counter).map_err(UnpackError::Packable)?;
         }
 
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions, &account_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnlockConditionError::from)
                 .map_err(UnpackError::Packable)
@@ -525,9 +525,9 @@ impl Packable for AccountOutput {
             verify_staked_amount(amount, &features).map_err(UnpackError::Packable)?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
@@ -645,18 +645,19 @@ mod dto {
     crate::impl_serde_typed_dto!(AccountOutput, AccountOutputDto, "account output");
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::block::{
-        output::account::dto::AccountOutputDto, protocol::protocol_parameters, rand::output::rand_account_output,
+        output::account::dto::AccountOutputDto, protocol::iota_mainnet_protocol_parameters,
+        rand::output::rand_account_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let account_output = rand_account_output(protocol_parameters.token_supply());
         let dto = AccountOutputDto::from(&account_output);
         let output = Output::Account(AccountOutput::try_from(dto).unwrap());

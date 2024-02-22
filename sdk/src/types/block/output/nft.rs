@@ -13,7 +13,7 @@ use packable::{
 use crate::types::block::{
     address::{Address, NftAddress},
     output::{
-        feature::{verify_allowed_features, Feature, FeatureError, FeatureFlags, Features},
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
             StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionError, UnlockConditionFlags,
@@ -454,26 +454,24 @@ impl Packable for NftOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let mana = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let nft_id = NftId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        let nft_id = NftId::unpack_inner(unpacker, visitor).coerce()?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions, &nft_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())
-            .map_packable_err(FeatureError::from)
-            .coerce()?;
+        let features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnlockConditionError::from)
                 .map_err(UnpackError::Packable)
@@ -483,11 +481,9 @@ impl Packable for NftOutput {
                 .coerce()?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())
-            .map_packable_err(FeatureError::from)
-            .coerce()?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
@@ -581,18 +577,18 @@ mod dto {
     crate::impl_serde_typed_dto!(NftOutput, NftOutputDto, "nft output");
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::block::{
-        output::nft::dto::NftOutputDto, protocol::protocol_parameters, rand::output::rand_nft_output,
+        output::nft::dto::NftOutputDto, protocol::iota_mainnet_protocol_parameters, rand::output::rand_nft_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let nft_output = rand_nft_output(protocol_parameters.token_supply());
         let dto = NftOutputDto::from(&nft_output);
         let output = Output::Nft(NftOutput::try_from(dto).unwrap());

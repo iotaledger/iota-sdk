@@ -161,7 +161,7 @@ impl Unlocks {
         let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> =
             unlocks.into().try_into().map_err(UnlockError::InvalidUnlockCount)?;
 
-        verify_unlocks::<true>(&unlocks)?;
+        verify_unlocks(&unlocks)?;
 
         Ok(Self(unlocks))
     }
@@ -221,19 +221,17 @@ fn verify_non_multi_unlock<'a>(
     Ok(())
 }
 
-fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), UnlockError> {
-    if VERIFY {
-        let mut seen_signatures = HashSet::new();
+fn verify_unlocks(unlocks: &[Unlock]) -> Result<(), UnlockError> {
+    let mut seen_signatures = HashSet::new();
 
-        for (index, unlock) in (0u16..).zip(unlocks.iter()) {
-            match unlock {
-                Unlock::Multi(multi) => {
-                    for unlock in multi.unlocks() {
-                        verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?
-                    }
+    for (index, unlock) in (0u16..).zip(unlocks.iter()) {
+        match unlock {
+            Unlock::Multi(multi) => {
+                for unlock in multi.unlocks() {
+                    verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?
                 }
-                _ => verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?,
             }
+            _ => verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?,
         }
     }
 

@@ -28,7 +28,7 @@ impl MultiUnlock {
     pub fn new(unlocks: impl IntoIterator<Item = Unlock>) -> Result<Self, UnlockError> {
         let unlocks = unlocks.into_iter().collect::<Box<[_]>>();
 
-        verify_unlocks::<true>(&unlocks)?;
+        verify_unlocks(&unlocks)?;
 
         Ok(Self(
             BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks)
@@ -49,8 +49,8 @@ impl WorkScore for MultiUnlock {
     }
 }
 
-fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), UnlockError> {
-    if VERIFY && unlocks.iter().any(Unlock::is_multi) {
+fn verify_unlocks(unlocks: &[Unlock]) -> Result<(), UnlockError> {
+    if unlocks.iter().any(Unlock::is_multi) {
         Err(UnlockError::MultiUnlockRecursion)
     } else {
         Ok(())

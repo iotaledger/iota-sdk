@@ -192,17 +192,12 @@ impl WorkScore for BasicBlockBody {
     }
 }
 
-fn verify_basic_block_body<const VERIFY: bool>(
-    basic_block_body: &BasicBlockBody,
-    _: &ProtocolParameters,
-) -> Result<(), BlockError> {
-    if VERIFY {
-        verify_parents_sets(
-            &basic_block_body.strong_parents,
-            &basic_block_body.weak_parents,
-            &basic_block_body.shallow_like_parents,
-        )?;
-    }
+fn verify_basic_block_body(basic_block_body: &BasicBlockBody, _: &ProtocolParameters) -> Result<(), BlockError> {
+    verify_parents_sets(
+        &basic_block_body.strong_parents,
+        &basic_block_body.weak_parents,
+        &basic_block_body.shallow_like_parents,
+    )?;
 
     Ok(())
 }

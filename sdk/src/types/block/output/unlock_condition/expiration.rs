@@ -36,8 +36,8 @@ impl ExpirationUnlockCondition {
         let slot_index = slot_index.into();
         let return_address = return_address.into();
 
-        verify_slot_index::<true>(&slot_index)?;
-        verify_return_address::<true>(&return_address)?;
+        verify_slot_index(&slot_index)?;
+        verify_return_address(&return_address)?;
 
         Ok(Self {
             return_address,
@@ -98,8 +98,8 @@ impl StorageScore for ExpirationUnlockCondition {
 }
 
 #[inline]
-fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result<(), UnlockConditionError> {
-    if VERIFY && return_address.is_implicit_account_creation() {
+fn verify_return_address(return_address: &Address) -> Result<(), UnlockConditionError> {
+    if return_address.is_implicit_account_creation() {
         Err(AddressError::InvalidAddressKind(return_address.kind()).into())
     } else {
         Ok(())
@@ -107,8 +107,8 @@ fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result
 }
 
 #[inline]
-fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex) -> Result<(), UnlockConditionError> {
-    if VERIFY && *slot_index == 0 {
+fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), UnlockConditionError> {
+    if *slot_index == 0 {
         Err(UnlockConditionError::ExpirationUnlockConditionZero)
     } else {
         Ok(())

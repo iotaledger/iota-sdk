@@ -169,7 +169,7 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_address.as_slice(), &()).unwrap()
     );
 
     let address = Address::from(AccountAddress::from_str(ACCOUNT_ID).unwrap());
@@ -177,6 +177,6 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_address.as_slice(), &()).unwrap()
     );
 }
