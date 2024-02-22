@@ -7,7 +7,7 @@ pub mod candidacy_announcement;
 pub mod signed_transaction;
 pub mod tagged_data;
 
-use alloc::boxed::Box;
+use alloc::{boxed::Box, string::String};
 use core::{convert::Infallible, ops::Deref};
 
 use derive_more::From;

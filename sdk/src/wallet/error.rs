@@ -6,11 +6,8 @@ use std::fmt::Debug;
 use crypto::keys::bip44::Bip44;
 use serde::{ser::Serializer, Serialize};
 
-use crate::{
-    types::block::{
-        address::Bech32Address, output::DelegationId, payload::signed_transaction::TransactionId, BlockError,
-    },
-    utils::ConversionError,
+use crate::types::block::{
+    address::Bech32Address, output::DelegationId, payload::signed_transaction::TransactionId, BlockError,
 };
 
 /// The wallet error type.

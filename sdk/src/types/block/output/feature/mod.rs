@@ -10,7 +10,7 @@ mod staking;
 mod state_metadata;
 mod tag;
 
-use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeSet, string::String, vec::Vec};
 use core::convert::Infallible;
 
 use bitflags::bitflags;

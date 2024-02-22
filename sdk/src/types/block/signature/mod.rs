@@ -3,6 +3,7 @@
 
 mod ed25519;
 
+use alloc::string::String;
 use core::convert::Infallible;
 
 use derive_more::From;

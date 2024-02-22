@@ -1,6 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(not(feature = "std"))]
+use alloc::string::{String, ToString};
+
 #[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub struct ConversionError(String);
