@@ -80,6 +80,7 @@ pub enum WalletCommand {
         /// The staking period (in epochs). Will default to the staking unbonding period.
         staking_period: Option<u32>,
         /// Whether to allot mana from the account output.
+        #[arg(long, default_value_t = true)]
         allot_from_account: bool,
     },
     /// Burn an amount of native token.
@@ -167,6 +168,7 @@ pub enum WalletCommand {
         /// The Account ID of the staking account.
         account_id: AccountId,
         /// Whether to allot mana from the account output.
+        #[arg(long, default_value_t = true)]
         allot_from_account: bool,
     },
     /// Exit the CLI wallet.
@@ -178,6 +180,7 @@ pub enum WalletCommand {
         /// The number of additional epochs to add to the staking period.
         additional_epochs: u32,
         /// Whether to allot mana from the account output.
+        #[arg(long, default_value_t = true)]
         allot_from_account: bool,
     },
     /// Request funds from the faucet.
