@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
-
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.output import Output
 from iota_sdk.types.transaction_id import TransactionId

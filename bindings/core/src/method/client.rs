@@ -226,7 +226,7 @@ pub enum ClientMethod {
         /// Block ID
         block_id: BlockId,
     },
-    /// Get block raw
+    /// Get block as raw bytes.
     #[serde(rename_all = "camelCase")]
     GetBlockRaw {
         /// Block ID
@@ -238,7 +238,7 @@ pub enum ClientMethod {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output raw
+    /// Get output as raw bytes.
     #[serde(rename_all = "camelCase")]
     GetOutputRaw {
         /// Output ID
@@ -404,14 +404,14 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // High level API
     //////////////////////////////////////////////////////////////////////
-    /// Fetch OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel)
+    /// Fetch outputs with associated output ID proofs from provided OutputIds (requests are sent in parallel)
     #[serde(rename_all = "camelCase")]
     GetOutputs {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },
-    /// Try to get OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel and errors are
-    /// ignored, can be useful for spent outputs)
+    /// Try to get outputs with associated output ID proofs from provided OutputIds (requests are sent in parallel and
+    /// errors are ignored, can be useful for spent outputs)
     #[serde(rename_all = "camelCase")]
     GetOutputsIgnoreErrors {
         /// Output IDs

@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
 from dataclasses_json import config
-
 from iota_sdk.types.common import EpochIndex, json, SlotIndex
 from iota_sdk.types.slot import SlotCommitmentId
 

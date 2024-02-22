@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, List, Optional
 from iota_sdk.common import custom_encoder
-
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address

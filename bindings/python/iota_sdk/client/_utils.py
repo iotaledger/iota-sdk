@@ -3,7 +3,6 @@
 
 from typing import Optional
 from abc import ABCMeta, abstractmethod
-
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr

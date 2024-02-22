@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Dict, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
-
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import SlotIndex, json
 from iota_sdk.types.output import Output, deserialize_output

@@ -62,8 +62,8 @@ where
         if change_in_node_manager {
             // Update the protocol of the network_info to not have the default data, which can be wrong
             // Ignore errors, because there might be no node at all and then it should still not error
-            if let Ok(info) = self.client.get_node_info().await {
-                network_info.protocol_parameters = info.info.latest_protocol_parameters().parameters.clone();
+            if let Ok(node_info) = self.client.get_node_info().await {
+                network_info.protocol_parameters = node_info.info.latest_protocol_parameters().parameters.clone();
             }
             *self.client.network_info.write().await = network_info;
 

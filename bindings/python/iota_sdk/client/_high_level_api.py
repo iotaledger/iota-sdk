@@ -4,7 +4,6 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
-
 from iota_sdk.client.responses import OutputResponse
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId

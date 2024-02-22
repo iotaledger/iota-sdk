@@ -8,7 +8,6 @@ import os
 import threading
 
 from dotenv import load_dotenv
-
 from iota_sdk import Client
 
 load_dotenv()

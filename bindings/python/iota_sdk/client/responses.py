@@ -6,7 +6,6 @@ from typing import Dict, List, Optional
 from enum import Enum, IntEnum
 from dataclasses import dataclass, field
 from dataclasses_json import config
-
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
