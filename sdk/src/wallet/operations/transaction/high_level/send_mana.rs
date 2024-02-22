@@ -29,6 +29,21 @@ pub struct SendManaParams {
     return_strategy: Option<ReturnStrategy>,
 }
 
+impl SendManaParams {
+    pub fn new(mana: u64, address: Bech32Address) -> Self {
+        Self {
+            mana,
+            address,
+            return_strategy: None,
+        }
+    }
+
+    pub fn with_return_strategy(mut self, return_strategy: ReturnStrategy) -> Self {
+        self.return_strategy.replace(return_strategy);
+        self
+    }
+}
+
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,

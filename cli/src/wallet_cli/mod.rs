@@ -24,8 +24,8 @@ use iota_sdk::{
     utils::ConvertTo,
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        Error as WalletError, MintNftParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams,
-        SyncOptions, TransactionOptions, Wallet,
+        Error as WalletError, MintNftParams, OutputsToClaim, SendManaParams, SendNativeTokenParams, SendNftParams,
+        SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -1046,7 +1046,8 @@ pub async fn send_mana_command(
     address: impl ConvertTo<Bech32Address>,
     mana: u64,
 ) -> Result<(), Error> {
-    let transaction = wallet.send_mana(mana, address, None).await?;
+    let params = SendManaParams::new(mana, address.convert()?);
+    let transaction = wallet.send_mana(params, None).await?;
 
     println_log_info!(
         "Transaction sent:\n{:?}\n{:?}",
