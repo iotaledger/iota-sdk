@@ -62,15 +62,15 @@ class TransactionOptions:
         issuer_id: Optional block issuer to which the transaction will have required mana allotted.
     """
     remainder_value_strategy: Optional[Union[RemainderValueStrategy,
-                                             RemainderValueStrategyCustomAddress]] = None,
-    tagged_data_payload: Optional[TaggedDataPayload] = None,
-    context_inputs: Optional[List[ContextInput]] = None,
-    required_inputs: Optional[List[OutputId]] = None,
-    burn: Optional[Burn] = None,
-    note: Optional[str] = None,
-    allow_micro_amount: Optional[bool] = None,
-    allow_additional_input_selection: Optional[bool] = None,
-    allow_allotting_from_account_mana: Optional[bool] = None,
-    capabilities: Optional[HexStr] = None,
-    mana_allotments: Optional[dict[HexStr, int]] = None,
+                                             RemainderValueStrategyCustomAddress]] = None
+    tagged_data_payload: Optional[TaggedDataPayload] = None
+    context_inputs: Optional[List[ContextInput]] = None
+    required_inputs: Optional[List[OutputId]] = None
+    burn: Optional[Burn] = None
+    note: Optional[str] = None
+    allow_micro_amount: Optional[bool] = None
+    allow_additional_input_selection: Optional[bool] = None
+    allow_allotting_from_account_mana: Optional[bool] = None
+    capabilities: Optional[HexStr] = None
+    mana_allotments: Optional[dict[HexStr, int]] = None
     issuer_id: Optional[HexStr] = None
