@@ -247,21 +247,6 @@ where
             self.alias = loaded_wallet_builder.as_ref().and_then(|builder| builder.alias.clone());
         }
 
-        // May use a previously stored wallet address if it wasn't provided
-        if self.address.is_none() {
-            self.address = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.address.clone());
-        }
-
-        // Create the node client.
-        let client = self
-            .client_options
-            .clone()
-            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
-            .finish()
-            .await?;
-
         #[cfg(feature = "storage")]
         let mut wallet_ledger = storage_manager.load_wallet_ledger().await?;
 
