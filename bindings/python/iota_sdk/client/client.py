@@ -4,7 +4,6 @@
 from json import dumps
 from datetime import timedelta
 from typing import Any, Dict, List, Optional, Union
-from bindings.python.iota_sdk.types.node_info import ProtocolParameters
 import humps
 
 from iota_sdk.external import create_client, listen_mqtt
@@ -17,6 +16,7 @@ from iota_sdk.types.block.block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.network_info import NetworkInfo
+from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
