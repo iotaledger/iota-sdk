@@ -4,6 +4,7 @@
 from json import dumps
 from datetime import timedelta
 from typing import Any, Dict, List, Optional, Union
+from bindings.python.iota_sdk.types.node_info import ProtocolParameters
 import humps
 
 from iota_sdk.external import create_client, listen_mqtt
@@ -36,6 +37,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                                       List[Union[str, Node]]]] = None,
         nodes: Optional[Union[Union[str, Node],
                               List[Union[str, Node]]]] = None,
+        protocol_parameters: Optional[ProtocolParameters] = None,
         ignore_node_health: Optional[bool] = None,
         api_timeout: Optional[timedelta] = None,
         node_sync_interval: Optional[timedelta] = None,
