@@ -11,6 +11,7 @@ use crate::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutputBuilder,
         },
+        BlockError,
     },
     utils::serde::string,
     wallet::{
@@ -75,20 +76,20 @@ where
 
         match return_strategy {
             ReturnStrategy::Return => {
-                output_builder = output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                    self.address().await.inner().clone(),
-                    1,
-                )?);
-                let return_amount = output_builder.clone().finish()?.amount();
-                output_builder = output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                    self.address().await.inner().clone(),
-                    return_amount,
-                )?);
+                output_builder = output_builder.add_unlock_condition(
+                    StorageDepositReturnUnlockCondition::new(self.address().await.inner().clone(), 1)
+                        .map_err(BlockError::from)?,
+                );
+                let return_amount = output_builder.clone().finish().map_err(BlockError::from)?.amount();
+                output_builder = output_builder.replace_unlock_condition(
+                    StorageDepositReturnUnlockCondition::new(self.address().await.inner().clone(), return_amount)
+                        .map_err(BlockError::from)?,
+                );
             }
             ReturnStrategy::Gift => {}
         }
 
-        let output = output_builder.finish_output()?;
+        let output = output_builder.finish_output().map_err(BlockError::from)?;
 
         self.prepare_transaction(vec![output], options).await
     }
