@@ -113,7 +113,7 @@ where
         let min_amount_basic_output =
             BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
-        let min_required_storage_deposit = first_output.minimum_amount(storage_score_params);
+        let min_required_storage_deposit = first_output.amount();
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
