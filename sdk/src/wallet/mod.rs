@@ -62,6 +62,7 @@ pub use self::{
                     mint_nfts::MintNftParams,
                 },
                 send::SendParams,
+                send_mana::SendManaParams,
                 send_native_tokens::SendNativeTokenParams,
                 send_nft::SendNftParams,
                 staking::begin::BeginStakingParams,
