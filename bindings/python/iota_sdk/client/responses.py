@@ -124,11 +124,11 @@ class ValidatorsResponse:
     Response of GET /api/core/v3/validators
 
     Attributes:
-        stakers: List of registered validators ready for the next epoch.
+        validators: List of registered validators ready for the next epoch.
         page_size: The number of validators returned per one API request with pagination.
         cursor: The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the last page.
     """
-    stakers: List[ValidatorResponse]
+    validators: List[ValidatorResponse]
     page_size: int
     cursor: Optional[str] = None
 

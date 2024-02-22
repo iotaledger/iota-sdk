@@ -32,13 +32,13 @@ pub struct RoutesResponse {
     pub routes: Vec<String>,
 }
 
-/// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
+/// Contains the info and the url from the node (useful when multiple nodes are used)
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct NodeInfoResponse {
-    /// The returned node info
-    pub node_info: InfoResponse,
-    /// The url from the node which returned the node info
+    /// The returned info
+    pub info: InfoResponse,
+    /// The url from the node which returned the info
     pub url: String,
 }
 
@@ -242,7 +242,7 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
     /// List of registered validators ready for the next epoch.
-    stakers: Vec<ValidatorResponse>,
+    validators: Vec<ValidatorResponse>,
     /// The number of validators returned per one API request with pagination.
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the

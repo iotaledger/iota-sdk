@@ -201,10 +201,10 @@ async fn test_call_plugin_route() {
         .await
         .unwrap();
 
-    let info = c.get_node_info().await.unwrap();
+    let node_info = c.get_node_info().await.unwrap();
 
     // Just check name as info can change between 2 calls
-    assert_eq!(plugin_res.node_info.name, info.name);
+    assert_eq!(plugin_res.info.name, node_info.info.name);
 }
 
 #[ignore]

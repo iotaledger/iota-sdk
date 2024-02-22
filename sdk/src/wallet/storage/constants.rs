@@ -15,14 +15,16 @@ pub const fn default_storage_path() -> &'static str {
     DEFAULT_STORAGE_PATH
 }
 
+// wallet db schema
 pub(crate) const DATABASE_SCHEMA_VERSION: u8 = 1;
 pub(crate) const DATABASE_SCHEMA_VERSION_KEY: &str = "database-schema-version";
 
-pub(crate) const WALLET_DATA_KEY: &str = "wallet-data";
+// wallet db keys
+pub(crate) const WALLET_LEDGER_KEY: &str = "wallet-ledger";
 pub(crate) const WALLET_BUILDER_KEY: &str = "wallet-builder";
-pub(crate) const WALLET_SYNC_OPTIONS: &str = "wallet-sync-options";
-
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret-manager";
+
+pub(crate) const WALLET_SYNC_OPTIONS: &str = "wallet-sync-options";
 
 // #[cfg(feature = "participation")]
 // pub(crate) const PARTICIPATION_EVENTS: &str = "participation-events";

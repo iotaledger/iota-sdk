@@ -411,17 +411,18 @@ pub async fn init_command(
     } else {
         None
     };
-    let address = init_params
-        .address
-        .map(|addr| Bech32Address::from_str(&addr))
-        .transpose()?;
 
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .with_address(
+            init_params
+                .address
+                .map(|addr| Bech32Address::from_str(&addr))
+                .transpose()?,
+        )
         .with_bip_path(init_params.bip_path)
-        .with_address(address)
         .with_alias(alias)
         .finish()
         .await?)
@@ -497,7 +498,7 @@ pub async fn restore_command_stronghold(
     if let Err(e) = wallet.restore_backup(backup_path.into(), password, None, None).await {
         // Clean up the file system after a failed restore (typically produces a wallet without a secret manager).
         // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
-        // the restore will be successful.
+        // the restore will be successful. https://github.com/iotaledger/iota-sdk/issues/2018
         if storage_path.is_dir() && !restore_into_existing_wallet {
             std::fs::remove_dir_all(storage_path)?;
         }

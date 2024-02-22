@@ -25,7 +25,7 @@ impl Wallet {
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::wallet::Result<Ed25519Address> {
-        // TODO #1279: not sure yet whether we also should allow this method to generate addresses for different bip
+        // TODO: not sure yet whether we also should allow this method to generate addresses for different bip
         // paths.
         let coin_type = self.bip_path().await.ok_or(Error::MissingBipPath)?.coin_type;
 

@@ -93,7 +93,7 @@ where
         let mut existing_account_output_data = None;
         let mut existing_foundry_output = None;
 
-        for (output_id, output_data) in self.data().await.unspent_outputs.iter() {
+        for (output_id, output_data) in self.ledger().await.unspent_outputs.iter() {
             match &output_data.output {
                 Output::Account(output) => {
                     if output.account_id_non_null(output_id) == account_id {

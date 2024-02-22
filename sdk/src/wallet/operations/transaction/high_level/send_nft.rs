@@ -96,7 +96,7 @@ where
             self.client().bech32_hrp_matches(address.hrp()).await?;
 
             // Find nft output from the inputs
-            if let Some(nft_output_data) = self.data().await.unspent_nft_output(&nft_id) {
+            if let Some(nft_output_data) = self.ledger().await.unspent_nft_output(&nft_id) {
                 if let Output::Nft(nft_output) = &nft_output_data.output {
                     // Set the nft id and new address unlock condition
                     let nft_builder = NftOutputBuilder::from(nft_output)

@@ -19,7 +19,7 @@ use crate::{
     client::{Error, Result},
     types::block::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-        output::{AccountId, NftId},
+        output::{AccountId, AnchorId, NftId},
         payload::TaggedDataPayload,
         Block, BlockId,
     },
@@ -126,6 +126,18 @@ impl ClientInner {
         match bech32_hrp {
             Some(hrp) => Ok(account_id.to_bech32(hrp.convert()?)),
             None => Ok(account_id.to_bech32(self.get_bech32_hrp().await?)),
+        }
+    }
+
+    /// Transforms an anchor id to a bech32 encoded address
+    pub async fn anchor_id_to_bech32(
+        &self,
+        anchor_id: AnchorId,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
+    ) -> crate::client::Result<Bech32Address> {
+        match bech32_hrp {
+            Some(hrp) => Ok(anchor_id.to_bech32(hrp.convert()?)),
+            None => Ok(anchor_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 

@@ -18,7 +18,7 @@ use crate::{method::WalletMethod, response::Response};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
-        WalletMethod::Accounts => Response::OutputsData(wallet.data().await.accounts().cloned().collect()),
+        WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
@@ -144,17 +144,14 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         //     wallet.deregister_participation_event(&event_id).await?;
         //     Response::Ok
         // }
-        WalletMethod::GetAddress => {
-            let address = wallet.address().await;
-            Response::Address(address)
-        }
+        WalletMethod::GetAddress => Response::Address(wallet.address().await),
         WalletMethod::GetBalance => Response::Balance(wallet.balance().await?),
         WalletMethod::GetFoundryOutput { token_id } => {
             let output = wallet.get_foundry_output(token_id).await?;
             Response::Output(output)
         }
         WalletMethod::GetIncomingTransaction { transaction_id } => wallet
-            .data()
+            .ledger()
             .await
             .get_incoming_transaction(&transaction_id)
             .map_or_else(
@@ -162,7 +159,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(transaction)))),
             ),
         WalletMethod::GetOutput { output_id } => {
-            Response::OutputData(wallet.data().await.get_output(&output_id).cloned().map(Box::new))
+            Response::OutputData(wallet.ledger().await.get_output(&output_id).cloned().map(Box::new))
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::GetParticipationEvent { event_id } => {
@@ -191,7 +188,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         // }
         WalletMethod::GetTransaction { transaction_id } => Response::Transaction(
             wallet
-                .data()
+                .ledger()
                 .await
                 .get_transaction(&transaction_id)
                 .map(TransactionWithMetadataDto::from)
@@ -227,11 +224,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::PreparedTransaction(data)
         }
         WalletMethod::ImplicitAccounts => {
-            Response::OutputsData(wallet.data().await.implicit_accounts().cloned().collect())
+            Response::OutputsData(wallet.ledger().await.implicit_accounts().cloned().collect())
         }
         WalletMethod::IncomingTransactions => Response::Transactions(
             wallet
-                .data()
+                .ledger()
                 .await
                 .incoming_transactions()
                 .values()
@@ -239,16 +236,16 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .collect(),
         ),
         WalletMethod::Outputs { filter_options } => {
-            let wallet_data = wallet.data().await;
+            let wallet_ledger = wallet.ledger().await;
             Response::OutputsData(if let Some(filter) = filter_options {
-                wallet_data.filtered_outputs(filter).cloned().collect()
+                wallet_ledger.filtered_outputs(filter).cloned().collect()
             } else {
-                wallet_data.outputs().values().cloned().collect()
+                wallet_ledger.outputs().values().cloned().collect()
             })
         }
         WalletMethod::PendingTransactions => Response::Transactions(
             wallet
-                .data()
+                .ledger()
                 .await
                 .pending_transactions()
                 .map(TransactionWithMetadataDto::from)
@@ -444,7 +441,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::Sync { options } => Response::Balance(wallet.sync(options).await?),
         WalletMethod::Transactions => Response::Transactions(
             wallet
-                .data()
+                .ledger()
                 .await
                 .transactions()
                 .values()
@@ -452,11 +449,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .collect(),
         ),
         WalletMethod::UnspentOutputs { filter_options } => {
-            let wallet_data = wallet.data().await;
+            let wallet_ledger = wallet.ledger().await;
             Response::OutputsData(if let Some(filter) = filter_options {
-                wallet_data.filtered_unspent_outputs(filter).cloned().collect()
+                wallet_ledger.filtered_unspent_outputs(filter).cloned().collect()
             } else {
-                wallet_data.unspent_outputs().values().cloned().collect()
+                wallet_ledger.unspent_outputs().values().cloned().collect()
             })
         }
     };

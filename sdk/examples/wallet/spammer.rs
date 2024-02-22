@@ -60,8 +60,8 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(bip_path)
         .with_address(address)
+        .with_bip_path(bip_path)
         .finish()
         .await?;
 
@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
     // We make sure that for all threads there are always inputs available to
     // fund the transaction, otherwise we create enough unspent outputs.
     let num_unspent_basic_outputs_with_send_amount = wallet
-        .data()
+        .ledger()
         .await
         .filtered_unspent_outputs(FilterOptions {
             output_types: Some(vec![BasicOutput::KIND]),

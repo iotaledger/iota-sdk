@@ -9,6 +9,7 @@ pub mod participation;
 
 use std::str::FromStr;
 
+use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 pub use self::{
@@ -19,6 +20,7 @@ use crate::{
     client::secret::types::InputSigningData,
     types::{
         block::{
+            address::Bech32Address,
             output::{Output, OutputAndMetadata, OutputId, OutputIdProof, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             protocol::{CommittableAgeRange, ProtocolParameters},
@@ -27,7 +29,6 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::core::WalletData,
 };
 
 /// An output with metadata
@@ -54,7 +55,8 @@ impl OutputData {
 
     pub fn input_signing_data(
         &self,
-        wallet_data: &WalletData,
+        wallet_address: &Bech32Address,
+        wallet_bip_path: Option<Bip44>,
         commitment_slot_index: impl Into<SlotIndex>,
         committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
@@ -64,9 +66,9 @@ impl OutputData {
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {
-            if let Some(backing_ed25519) = wallet_data.address.inner().backing_ed25519() {
+            if let Some(backing_ed25519) = wallet_address.inner().backing_ed25519() {
                 if required_ed25519 == backing_ed25519 {
-                    wallet_data.bip_path
+                    wallet_bip_path
                 } else {
                     // Different ed25519 chain than the wallet one.
                     None

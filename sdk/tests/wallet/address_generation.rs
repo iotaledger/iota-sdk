@@ -14,10 +14,9 @@ use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Error as ClientError,
     },
     types::block::address::ToBech32Ext,
-    wallet::{ClientOptions, Error, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
 

@@ -30,7 +30,8 @@ async fn update_client_options() -> Result<()> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
+    let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
+    let wallet = make_wallet(storage_path, mnemonic.clone(), Some(NODE_OTHER)).await?;
 
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
@@ -49,7 +50,7 @@ async fn update_client_options() -> Result<()> {
 
     // The client options are also updated in the database and available the next time
     drop(wallet);
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, mnemonic, None).await?;
     let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
@@ -83,12 +84,11 @@ async fn changed_bip_path() -> Result<()> {
     setup(storage_path)?;
 
     let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
-
-    let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None).await?;
+    let wallet = make_wallet(storage_path, mnemonic.clone(), None).await?;
 
     drop(wallet);
 
-    let err = Wallet::builder()
+    let result = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic.clone(),
         )?))
@@ -97,13 +97,14 @@ async fn changed_bip_path() -> Result<()> {
         .finish()
         .await;
 
-    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
-    // the existing account
-    let mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
+    let _mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
         new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
         old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
     });
-    assert!(matches!(err, mismatch_err));
+
+    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
+    // the existing account
+    assert!(matches!(result, _mismatch_err));
 
     // Building the wallet with the same coin type still works
     assert!(

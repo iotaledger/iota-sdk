@@ -26,6 +26,6 @@ fn method_interface_secrets_debug() {
     let wallet_options = WalletOptions::default().with_secret_manager(SecretManagerDto::Placeholder);
     assert_eq!(
         format!("{:?}", wallet_options),
-        "WalletOptions { address: None, alias: None, bip_path: None, client_options: None, secret_manager: Some(<omitted>), storage_path: None }"
+        "WalletOptions { address: None, bip_path: None, alias: None, client_options: None, secret_manager: Some(<omitted>), storage_path: None }"
     );
 }

@@ -231,7 +231,7 @@ impl NodeManager {
                         if path == crate::client::node_api::core::routes::INFO_PATH {
                             let node_info: InfoResponse = res.into_json().await?;
                             let wrapper = NodeInfoResponse {
-                                node_info,
+                                info: node_info,
                                 url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
                             };
                             let serde_res = serde_json::to_string(&wrapper)?;
