@@ -83,6 +83,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         client_config['primary_nodes'] = convert_nodes(primary_nodes)
         client_config['nodes'] = convert_nodes(nodes)
+        if protocol_parameters is not None:
+            client_config['protocol_parameters'] = protocol_parameters.to_dict()
 
         client_config = {
             k: v for k,
