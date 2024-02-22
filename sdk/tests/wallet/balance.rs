@@ -13,6 +13,7 @@ use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
+#[cfg(all(feature = "rand", feature = "protocol_parameters_samples"))]
 #[test]
 fn rand_balance_add_assign() {
     use iota_sdk::U256;

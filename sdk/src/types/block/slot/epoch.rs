@@ -141,20 +141,17 @@ impl core::ops::SubAssign<u32> for EpochIndex {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::block::protocol::ProtocolParameters;
+    use crate::types::block::protocol::iota_mainnet_protocol_parameters;
 
     #[test]
     fn epoch_index_to_from_slot() {
-        let params = ProtocolParameters {
-            version: 3,
-            slots_per_epoch_exponent: 10,
-            ..Default::default()
-        };
+        let mut params = iota_mainnet_protocol_parameters().clone();
+        params.slots_per_epoch_exponent = 10;
         let slot_index = SlotIndex(3000);
         let epoch_index =
             EpochIndex::from_slot_index(slot_index, params.genesis_slot, params.slots_per_epoch_exponent());

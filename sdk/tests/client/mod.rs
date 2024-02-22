@@ -39,6 +39,7 @@ use iota_sdk::{
         slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
     },
 };
+use pretty_assertions::assert_ne;
 
 const ACCOUNT_ID_0: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const ACCOUNT_ID_1: &str = "0x1111111111111111111111111111111111111111111111111111111111111111";
@@ -278,37 +279,26 @@ where
     count(a) == count(b)
 }
 
-fn is_remainder_or_return(output: &Output, amount: u64, address: Address, native_token: Option<(&str, u64)>) -> bool {
-    if let Output::Basic(output) = output {
-        if output.amount() != amount {
-            return false;
-        }
+fn assert_remainder_or_return(output: &Output, amount: u64, address: Address, native_token: Option<(&str, u64)>) {
+    let output = output.as_basic();
+    assert_eq!(amount, output.amount());
 
-        if let [UnlockCondition::Address(address_unlock_condition)] = output.unlock_conditions().as_ref() {
-            if address_unlock_condition.address() != &address {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        match output.features().as_ref() {
-            [] | [Feature::NativeToken(_)] => {}
-            _ => return false,
-        }
-
-        if let Some((token_id, amount)) = native_token {
-            let native_token = NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap();
-
-            if output.native_token().unwrap() != &native_token {
-                return false;
-            }
-        } else if output.native_token().is_some() {
-            return false;
-        }
-
-        true
+    if let [UnlockCondition::Address(address_unlock_condition)] = output.unlock_conditions().as_ref() {
+        assert_eq!(&address, address_unlock_condition.address());
     } else {
-        false
+        panic!("no address unlock condition");
+    }
+
+    match output.features().as_ref() {
+        [] | [Feature::NativeToken(_)] => {}
+        _ => panic!("incorrect features"),
+    }
+
+    if let Some((token_id, amount)) = native_token {
+        let native_token = NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap();
+
+        assert_eq!(&native_token, output.native_token().unwrap());
+    } else if output.native_token().is_some() {
+        panic!("no native token provided but native token exists on output");
     }
 }

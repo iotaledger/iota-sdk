@@ -99,7 +99,7 @@ fn packed_len() {
 #[test]
 fn pack_unpack_valid() {
     let parents_1 = basic::StrongParents::from_vec(rand_block_ids(8)).unwrap();
-    let parents_2 = basic::StrongParents::unpack_verified(parents_1.pack_to_vec().as_slice(), &()).unwrap();
+    let parents_2 = basic::StrongParents::unpack_bytes_verified(parents_1.pack_to_vec().as_slice(), &()).unwrap();
 
     assert_eq!(parents_1, parents_2);
 }
@@ -120,7 +120,7 @@ fn pack_unpack_invalid_less_than_min() {
     //     )))
     // ));
     assert!(matches!(
-        basic::StrongParents::unpack_verified(bytes.as_slice(), &()),
+        basic::StrongParents::unpack_bytes_verified(bytes.as_slice(), &()),
         Err(UnpackError::Packable(Error::InvalidParentCount))
     ));
 }
@@ -141,7 +141,7 @@ fn pack_unpack_invalid_more_than_max() {
     //     )))
     // ));
     assert!(matches!(
-        basic::StrongParents::unpack_verified(bytes.as_slice(), &()),
+        basic::StrongParents::unpack_bytes_verified(bytes.as_slice(), &()),
         Err(UnpackError::Packable(Error::InvalidParentCount))
     ));
 }
@@ -153,7 +153,7 @@ fn unpack_invalid_not_sorted() {
     let inner = VecPrefix::<_, u8>::try_from(inner).unwrap();
 
     let packed = inner.pack_to_vec();
-    let parents = basic::StrongParents::unpack_verified(packed.as_slice(), &());
+    let parents = basic::StrongParents::unpack_bytes_verified(packed.as_slice(), &());
 
     assert!(matches!(
         parents,
@@ -168,7 +168,7 @@ fn unpack_invalid_not_unique() {
     let inner = VecPrefix::<_, u8>::try_from(inner).unwrap();
 
     let packed = inner.pack_to_vec();
-    let parents = basic::StrongParents::unpack_verified(packed.as_slice(), &());
+    let parents = basic::StrongParents::unpack_bytes_verified(packed.as_slice(), &());
 
     assert!(matches!(
         parents,
