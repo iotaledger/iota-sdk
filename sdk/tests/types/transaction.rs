@@ -17,7 +17,7 @@ use iota_sdk::types::block::{
         },
         Payload,
     },
-    protocol::protocol_parameters,
+    protocol::iota_mainnet_protocol_parameters,
     rand::{mana::rand_mana_allotment, payload::rand_tagged_data_payload},
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -34,7 +34,7 @@ const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99
 
 #[test]
 fn build_valid() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -50,15 +50,15 @@ fn build_valid() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
 
 #[test]
 fn build_valid_with_payload() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -75,15 +75,15 @@ fn build_valid_with_payload() {
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
 
 #[test]
 fn build_valid_add_inputs_outputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -99,15 +99,15 @@ fn build_valid_add_inputs_outputs() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
 
 #[test]
 fn build_invalid_payload_kind() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -123,8 +123,8 @@ fn build_invalid_payload_kind() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1.clone(), input2.clone()])
         .add_output(output.clone())
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     // Construct a list of two unlocks, whereas we only have 1 tx input.
@@ -141,15 +141,15 @@ fn build_invalid_payload_kind() {
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .with_payload(tx_payload)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(transaction, Err(Error::InvalidPayloadKind(1))));
 }
 
 #[test]
 fn build_invalid_input_count_low() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
@@ -161,8 +161,8 @@ fn build_invalid_input_count_low() {
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -172,7 +172,7 @@ fn build_invalid_input_count_low() {
 
 #[test]
 fn build_invalid_input_count_high() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
@@ -187,8 +187,8 @@ fn build_invalid_input_count_high() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 129])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -198,14 +198,14 @@ fn build_invalid_input_count_high() {
 
 #[test]
 fn build_invalid_output_count_low() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -215,7 +215,7 @@ fn build_invalid_output_count_low() {
 
 #[test]
 fn build_invalid_output_count_high() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
@@ -230,8 +230,8 @@ fn build_invalid_output_count_high() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs(vec![output; 129])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -241,7 +241,7 @@ fn build_invalid_output_count_high() {
 
 #[test]
 fn build_invalid_duplicate_utxo() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
@@ -256,15 +256,15 @@ fn build_invalid_duplicate_utxo() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(transaction, Err(Error::DuplicateUtxo(_))));
 }
 
 #[test]
 fn build_invalid_accumulated_output() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
 
@@ -291,15 +291,15 @@ fn build_invalid_accumulated_output() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs([output1, output2])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(transaction, Err(Error::InvalidTransactionAmountSum(_))));
 }
 
 #[test]
 fn getters() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -317,8 +317,8 @@ fn getters() {
         .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters)
         .unwrap();
 
     assert_eq!(transaction.outputs(), outputs.as_slice());
@@ -327,7 +327,7 @@ fn getters() {
 
 #[test]
 fn duplicate_output_nft() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -346,8 +346,8 @@ fn duplicate_output_nft() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -357,7 +357,7 @@ fn duplicate_output_nft() {
 
 #[test]
 fn duplicate_output_nft_null() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -376,15 +376,15 @@ fn duplicate_output_nft_null() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(transaction.is_ok());
 }
 
 #[test]
 fn duplicate_output_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -403,8 +403,8 @@ fn duplicate_output_account() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, account.clone(), account])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -414,7 +414,7 @@ fn duplicate_output_account() {
 
 #[test]
 fn duplicate_output_foundry() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -439,8 +439,8 @@ fn duplicate_output_foundry() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, foundry.clone(), foundry])
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters);
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters);
 
     assert!(matches!(
         transaction,
@@ -450,7 +450,7 @@ fn duplicate_output_foundry() {
 
 #[test]
 fn transactions_capabilities() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -465,8 +465,8 @@ fn transactions_capabilities() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(&protocol_parameters)
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+        .finish_with_params(protocol_parameters)
         .unwrap();
     let mut capabilities = transaction.capabilities().clone();
 

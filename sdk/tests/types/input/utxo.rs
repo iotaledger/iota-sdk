@@ -96,11 +96,14 @@ fn pack_unpack() {
 
     assert_eq!(
         utxo_input,
-        UtxoInput::unpack_verified(packed_input.as_slice(), &()).unwrap()
+        UtxoInput::unpack_bytes_verified(packed_input.as_slice(), &()).unwrap()
     );
 
     let input = Input::from(utxo_input);
     let packed_input = input.pack_to_vec();
 
-    assert_eq!(input, Input::unpack_verified(packed_input.as_slice(), &()).unwrap());
+    assert_eq!(
+        input,
+        Input::unpack_bytes_verified(packed_input.as_slice(), &()).unwrap()
+    );
 }

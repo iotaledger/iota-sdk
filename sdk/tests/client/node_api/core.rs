@@ -157,7 +157,7 @@ async fn test_get_output_raw() {
     let output_id = OutputId::new(transaction_id, 0);
 
     let output = client.get_output(&output_id).await.unwrap();
-    let output_raw = Output::unpack_verified(
+    let output_raw = Output::unpack_bytes_verified(
         client.get_output_raw(&output_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
@@ -184,7 +184,7 @@ async fn test_get_included_block_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
-    let block_raw = Block::unpack_verified(
+    let block_raw = Block::unpack_bytes_verified(
         client.get_included_block_raw(&transaction_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )

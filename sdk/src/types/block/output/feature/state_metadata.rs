@@ -115,8 +115,8 @@ impl StateMetadataFeatureMap {
             .map_err(Error::InvalidMetadataFeatureEntryCount)?,
         );
 
-        verify_keys::<true>(&res.0)?;
-        verify_packed_len::<true>(res.packed_len(), StateMetadataFeature::BYTE_LENGTH_RANGE)?;
+        verify_keys(&res.0)?;
+        verify_packed_len(res.packed_len(), StateMetadataFeature::BYTE_LENGTH_RANGE)?;
 
         Ok(res)
     }
@@ -148,18 +148,20 @@ impl Packable for StateMetadataFeature {
         self.0.pack(packer)
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let mut unpacker = CounterUnpacker::new(unpacker);
         let res = Self(
-            MetadataBTreeMapPrefix::unpack::<_, VERIFY>(&mut unpacker, visitor)
+            MetadataBTreeMapPrefix::unpack(&mut unpacker, visitor)
                 .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
         );
 
-        verify_keys::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
-        verify_packed_len::<VERIFY>(unpacker.counter(), Self::BYTE_LENGTH_RANGE).map_err(UnpackError::Packable)?;
+        if visitor.is_some() {
+            verify_keys(&res.0).map_err(UnpackError::Packable)?;
+            verify_packed_len(unpacker.counter(), Self::BYTE_LENGTH_RANGE).map_err(UnpackError::Packable)?;
+        }
 
         Ok(res)
     }

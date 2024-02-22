@@ -87,7 +87,7 @@ pub(crate) type ContextInputCount =
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidContextInputCount(p.into())))]
 pub struct ContextInputs(
-    #[packable(verify_with = verify_context_inputs_packable)] BoxedSlicePrefix<ContextInput, ContextInputCount>,
+    #[packable(verify_with = verify_context_inputs)] BoxedSlicePrefix<ContextInput, ContextInputCount>,
 );
 
 impl TryFrom<Vec<ContextInput>> for ContextInputs {
@@ -136,13 +136,6 @@ impl ContextInputs {
     pub fn rewards(&self) -> impl Iterator<Item = &RewardContextInput> {
         self.iter().filter_map(|c| c.as_reward_opt())
     }
-}
-
-fn verify_context_inputs_packable<const VERIFY: bool>(context_inputs: &[ContextInput]) -> Result<(), Error> {
-    if VERIFY {
-        verify_context_inputs(context_inputs)?;
-    }
-    Ok(())
 }
 
 fn context_inputs_cmp(a: &ContextInput, b: &ContextInput) -> Ordering {

@@ -43,7 +43,7 @@ impl SimpleTokenScheme {
             maximum_supply,
         };
 
-        verify_simple_token_scheme::<true>(&token_scheme)?;
+        verify_simple_token_scheme(&token_scheme)?;
 
         Ok(token_scheme)
     }
@@ -80,11 +80,10 @@ impl WorkScore for SimpleTokenScheme {
 }
 
 #[inline]
-fn verify_simple_token_scheme<const VERIFY: bool>(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {
-    if VERIFY
-        && (token_scheme.maximum_supply.is_zero()
-            || token_scheme.melted_tokens > token_scheme.minted_tokens
-            || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply)
+fn verify_simple_token_scheme(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {
+    if token_scheme.maximum_supply.is_zero()
+        || token_scheme.melted_tokens > token_scheme.minted_tokens
+        || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply
     {
         return Err(Error::InvalidFoundryOutputSupply {
             minted: token_scheme.minted_tokens,

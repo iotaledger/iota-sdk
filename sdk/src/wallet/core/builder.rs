@@ -284,7 +284,7 @@ where
         let wallet_ledger = WalletLedger::default();
 
         let wallet = Wallet {
-            // Panic: it's invalid to build a wallet without an address.
+            // Unwrap: The address is always set above (or we already returned)
             address: Arc::new(RwLock::new(self.address.unwrap())),
             bip_path: Arc::new(RwLock::new(self.bip_path)),
             alias: Arc::new(RwLock::new(self.alias)),

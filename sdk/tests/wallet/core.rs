@@ -14,10 +14,11 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    types::block::address::Bech32Address,
+    types::block::{address::Bech32Address, protocol::iota_mainnet_protocol_parameters},
     wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
+#[cfg(feature = "storage")]
 use url::Url;
 
 #[cfg(feature = "storage")]
@@ -97,14 +98,12 @@ async fn changed_bip_path() -> Result<()> {
         .finish()
         .await;
 
-    let _mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
-        new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
-        old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    });
-
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    assert!(matches!(result, _mismatch_err));
+    assert!(matches!(result, Err(Error::BipPathMismatch {
+        new_bip_path: Some(new_bip_path),
+        old_bip_path: Some(old_bip_path),
+    }) if new_bip_path == Bip44::new(IOTA_COIN_TYPE) && old_bip_path == Bip44::new(SHIMMER_COIN_TYPE)));
 
     // Building the wallet with the same coin type still works
     assert!(
@@ -143,7 +142,9 @@ async fn iota_coin_type() -> Result<()> {
     let storage_path = "test-storage/iota_coin_type";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+    let client_options = ClientOptions::new()
+        .with_node(NODE_LOCAL)?
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]

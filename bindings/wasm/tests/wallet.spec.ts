@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, CoinType, SecretManager } from '../node/lib';
+import { Wallet, CoinType, SecretManager, Utils } from '../node/lib';
 
 describe('wallet tests', () => {
     jest.setTimeout(100000);
@@ -30,6 +30,7 @@ describe('wallet tests', () => {
             },
             clientOptions: {
                 nodes: ['http://localhost:8050'],
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             secretManager: mnemonicSecretManager,
         });

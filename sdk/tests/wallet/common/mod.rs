@@ -11,6 +11,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         Client,
     },
+    types::block::protocol::iota_mainnet_protocol_parameters,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -34,7 +35,9 @@ pub(crate) async fn make_wallet(
     mnemonic: impl Into<Option<Mnemonic>>,
     node: Option<&str>,
 ) -> Result<Wallet> {
-    let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
+    let client_options = ClientOptions::new()
+        .with_node(node.unwrap_or(NODE_LOCAL))?
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
         mnemonic.into().unwrap_or_else(|| Client::generate_mnemonic().unwrap()),
     )?;

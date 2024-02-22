@@ -18,13 +18,6 @@ use crate::types::block::{
     BlockId,
 };
 
-const DEFAULT_STORAGE_COST: u64 = 100;
-const DEFAULT_FACTOR_DATA: u8 = 1;
-const DEFAULT_OFFSET_OUTPUT_OVERHEAD: u64 = 10;
-const DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY: u64 = 100;
-const DEFAULT_OFFSET_STAKING_FEATURE: u64 = 100;
-const DEFAULT_OFFSET_DELEGATION: u64 = 100;
-
 // Parameters of storage score calculations on objects which take node resources.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
 #[cfg_attr(
@@ -35,34 +28,21 @@ const DEFAULT_OFFSET_DELEGATION: u64 = 100;
 pub struct StorageScoreParameters {
     /// Number of IOTA tokens required per unit of storage score.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    storage_cost: u64,
+    pub(crate) storage_cost: u64,
     /// Factor to be used for data only fields.
-    factor_data: u8,
+    pub(crate) factor_data: u8,
     /// Offset to be applied to all outputs for the overhead of handling them in storage.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    offset_output_overhead: u64,
+    pub(crate) offset_output_overhead: u64,
     /// Offset to be used for Ed25519-based block issuer keys.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    offset_ed25519_block_issuer_key: u64,
+    pub(crate) offset_ed25519_block_issuer_key: u64,
     /// Offset to be used for staking feature.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    offset_staking_feature: u64,
+    pub(crate) offset_staking_feature: u64,
     /// Offset to be used for delegation.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    offset_delegation: u64,
-}
-
-impl Default for StorageScoreParameters {
-    fn default() -> Self {
-        Self {
-            storage_cost: DEFAULT_STORAGE_COST,
-            factor_data: DEFAULT_FACTOR_DATA,
-            offset_output_overhead: DEFAULT_OFFSET_OUTPUT_OVERHEAD,
-            offset_ed25519_block_issuer_key: DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY,
-            offset_staking_feature: DEFAULT_OFFSET_STAKING_FEATURE,
-            offset_delegation: DEFAULT_OFFSET_DELEGATION,
-        }
-    }
+    pub(crate) offset_delegation: u64,
 }
 
 impl StorageScoreParameters {
