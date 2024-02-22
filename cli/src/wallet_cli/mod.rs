@@ -274,7 +274,7 @@ pub enum WalletCommand {
     },
     /// Send mana.
     SendMana {
-        /// Address to send mana to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        /// Recipient address, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Bech32Address,
         /// Amount of mana to send, e.g. 1000000.
         mana: u64,
