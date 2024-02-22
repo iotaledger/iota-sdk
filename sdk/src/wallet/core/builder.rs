@@ -263,13 +263,15 @@ where
             .await?;
 
         // May create a default Ed25519 wallet address if there's a secret manager.
-        let wallet_address = if self.address.is_none() && self.secret_manager.is_some() {
+        if self.address.is_none() && self.secret_manager.is_some() {
             let bech32_hrp = client.network_info.read().await.protocol_parameters.bech32_hrp();
-            let address = self.create_default_wallet_address(bech32_hrp).await?;
-            address
-        } else {
-            return Err(crate::wallet::Error::MissingParameter("address"));
-        };
+            self.address
+                .replace(self.create_default_wallet_address(bech32_hrp).await?);
+        }
+        let wallet_address = self
+            .address
+            .clone()
+            .ok_or(crate::wallet::Error::MissingParameter("address"))?;
 
         #[cfg(feature = "storage")]
         let mut wallet_ledger = storage_manager.load_wallet_ledger().await?;
