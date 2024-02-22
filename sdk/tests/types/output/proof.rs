@@ -36,7 +36,7 @@ fn output_proofs() {
     ] {
         let fixture = proof_fixture(filename).unwrap_or_else(|e| panic!("failed to deserialize {filename}: {e}"));
 
-        let payload = Payload::unpack_unverified(&fixture.transaction_bytes).unwrap();
+        let payload = Payload::unpack_bytes_unverified(&fixture.transaction_bytes).unwrap();
         let transaction = payload.as_signed_transaction().transaction();
         assert_eq!(
             transaction

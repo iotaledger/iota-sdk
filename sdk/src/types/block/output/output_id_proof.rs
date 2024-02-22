@@ -83,14 +83,11 @@ impl OutputCommitmentProof {
     }
 }
 
-fn verify_output_commitment_type<const VERIFY: bool>(proof: &OutputCommitmentProof) -> Result<(), Error> {
-    if VERIFY {
-        match proof {
-            OutputCommitmentProof::Leaf(_) => return Err(Error::InvalidOutputProofKind(LeafHash::KIND)),
-            _ => (),
-        }
+fn verify_output_commitment_type(proof: &OutputCommitmentProof) -> Result<(), Error> {
+    match proof {
+        OutputCommitmentProof::Leaf(_) => Err(Error::InvalidOutputProofKind(LeafHash::KIND)),
+        _ => Ok(()),
     }
-    Ok(())
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, derive_more::From, Packable)]
@@ -155,12 +152,12 @@ impl Packable for LeafHash {
         Ok(())
     }
 
-    fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
+    fn unpack<U: packable::unpacker::Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        let _len = u8::unpack::<_, VERIFY>(unpacker, visitor)?;
-        let bytes = Packable::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let _len = u8::unpack(unpacker, visitor)?;
+        let bytes = Packable::unpack(unpacker, visitor)?;
         Ok(Self(bytes))
     }
 }
@@ -191,12 +188,12 @@ impl Packable for ValueHash {
         Ok(())
     }
 
-    fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
+    fn unpack<U: packable::unpacker::Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        let _len = u8::unpack::<_, VERIFY>(unpacker, visitor)?;
-        let bytes = Packable::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let _len = u8::unpack(unpacker, visitor)?;
+        let bytes = Packable::unpack(unpacker, visitor)?;
         Ok(Self(bytes))
     }
 }
