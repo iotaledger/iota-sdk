@@ -329,6 +329,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
             Response::Bech32Address(client.account_id_to_bech32(account_id, bech32_hrp).await?)
         }
+        ClientMethod::AnchorIdToBech32 { anchor_id, bech32_hrp } => {
+            Response::Bech32Address(client.anchor_id_to_bech32(anchor_id, bech32_hrp).await?)
+        }
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
             Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)
         }
