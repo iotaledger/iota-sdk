@@ -59,6 +59,15 @@ class Utils:
         })
 
     @staticmethod
+    def anchor_id_to_bech32(anchor_id: HexStr, bech32_hrp: str) -> str:
+        """Convert an anchor id to a Bech32 encoded address.
+        """
+        return _call_method('anchorIdToBech32', {
+            'anchorId': anchor_id,
+            'bech32Hrp': bech32_hrp
+        })
+
+    @staticmethod
     def nft_id_to_bech32(nft_id: HexStr, bech32_hrp: str) -> str:
         """Convert an NFT ID to a Bech32 encoded address.
         """

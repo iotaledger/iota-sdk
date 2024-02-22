@@ -14,7 +14,7 @@ import {
     Bech32Address,
     Unlock,
 } from '../../';
-import { AccountId } from '../../block/id';
+import { AccountId, AnchorId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
 import { InputSigningData } from '../../client';
 import { NumericString } from '../numeric';
@@ -120,6 +120,14 @@ export interface __AccountIdToBech32Method__ {
     data: {
         accountId: AccountId;
         bech32Hrp?: string;
+    };
+}
+
+export interface __AnchorIdToBech32Method__ {
+    name: 'anchorIdToBech32';
+    data: {
+        anchorId: AnchorId;
+        bech32Hrp: string;
     };
 }
 

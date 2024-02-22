@@ -39,6 +39,7 @@ import type {
     __GetUtxoChangesFullByIndexMethod__,
     __HexToBech32Method__,
     __AccountIdToBech32Method__,
+    __AnchorIdToBech32Method__,
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
@@ -105,6 +106,7 @@ export type __ClientMethods__ =
     | __GetUtxoChangesFullByIndexMethod__
     | __HexToBech32Method__
     | __AccountIdToBech32Method__
+    | __AnchorIdToBech32Method__
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
