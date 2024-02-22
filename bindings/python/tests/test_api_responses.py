@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputResponse, SlotCommitment
+from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputMetadata, OutputResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -69,11 +69,10 @@ def test_api_responses():
     test_api_response(
         OutputResponse, "get-outputs-by-id-response-example.json")
     # GET /api/core/v3/outputs/{outputId}/metadata
-    # TODO: enable when https://github.com/iotaledger/iota-sdk/issues/2020 is fixed
-    # test_api_response(
-    #     OutputMetadata, "get-output-metadata-by-id-response-unspent-example.json")
-    # test_api_response(
-    #     OutputMetadata, "get-output-metadata-by-id-response-spent-example.json")
+    test_api_response(
+        OutputMetadata, "get-output-metadata-by-id-response-unspent-example.json")
+    test_api_response(
+        OutputMetadata, "get-output-metadata-by-id-response-spent-example.json")
     # GET /api/core/v3/outputs/{outputId}/full
     # TODO: enable when OutputWithMetadata is updated with OutputIdProof https://github.com/iotaledger/iota-sdk/issues/2021
     # test_api_response(OutputWithMetadata,
@@ -85,9 +84,8 @@ def test_api_responses():
     # GET /api/core/v3/commitments/{commitmentId}
     test_api_response(SlotCommitment, "get-commitment-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-    # TODO: enable when https://github.com/iotaledger/iota-sdk/issues/2020 is fixed
-    # test_api_response(UtxoChangesResponse,
-    #                   "get-utxo-changes-response-example.json")
+    test_api_response(UtxoChangesResponse,
+                      "get-utxo-changes-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
-    # test_api_response(UtxoChangesFullResponse,
-    #   "get-utxo-changes-full-response-example.json")
+    test_api_response(UtxoChangesFullResponse,
+                      "get-utxo-changes-full-response-example.json")

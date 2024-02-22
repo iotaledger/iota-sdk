@@ -35,7 +35,7 @@ class OutputIdsResponse:
         self.committed_slot = output_dict["committedSlot"]
         self.page_size = output_dict["pageSize"]
         self.cursor = output_dict["cursor"]
-        self.items = [OutputId.from_string(
+        self.items = [OutputId(
             output_id) for output_id in output_dict["items"]]
 
 

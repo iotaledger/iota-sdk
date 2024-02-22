@@ -279,7 +279,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         Returns:
             The output ID of the account output.
         """
-        return OutputId.from_string(self._call_method('accountOutputId', {
+        return OutputId(self._call_method('accountOutputId', {
             'accountId': account_id
         }))
 
@@ -302,7 +302,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         Returns:
             The output ID of the anchor output.
         """
-        return OutputId.from_string(self._call_method('anchorOutputId', {
+        return OutputId(self._call_method('anchorOutputId', {
             'anchorId': anchor_id
         }))
 
@@ -325,7 +325,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         Returns:
             The output ID of the delegation output.
         """
-        return OutputId.from_string(self._call_method('delegationOutputId', {
+        return OutputId(self._call_method('delegationOutputId', {
             'delegationId': delegation_id
         }))
 
@@ -348,7 +348,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         Returns:
             The output ID of the foundry output.
         """
-        return OutputId.from_string(self._call_method('foundryOutputId', {
+        return OutputId(self._call_method('foundryOutputId', {
             'foundryId': foundry_id
         }))
 
@@ -371,6 +371,6 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         Returns:
             The output ID of the NFT output.
         """
-        return OutputId.from_string(self._call_method('nftOutputId', {
+        return OutputId(self._call_method('nftOutputId', {
             'nftId': nft_id
         }))
