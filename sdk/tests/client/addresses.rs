@@ -65,7 +65,11 @@ async fn evm_addresses() {
 
 #[tokio::test]
 async fn public_key_to_address() {
-    let client = Client::builder().finish().await.unwrap();
+    let client = Client::builder()
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone())
+        .finish()
+        .await
+        .unwrap();
     let hex_public_key = "0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a";
 
     let public_key_address = client

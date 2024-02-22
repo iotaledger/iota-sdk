@@ -163,7 +163,6 @@ pub enum UtilsMethod {
         slot_commitment: SlotCommitment,
     },
     /// Returns the hex representation of the serialized output bytes.
-    #[serde(rename_all = "camelCase")]
     OutputHexBytes {
         output: Output,
     },
