@@ -17,7 +17,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address, Ed25519Address, Hrp},
+    types::block::address::{Bech32Address, Ed25519Address},
     wallet::{
         core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletInner, WalletLedger},
         operations::syncing::SyncOptions,
@@ -262,17 +262,6 @@ where
             .finish()
             .await?;
 
-        // May create a default Ed25519 wallet address if there's a secret manager.
-        if self.address.is_none() && self.secret_manager.is_some() {
-            let bech32_hrp = client.network_info.read().await.protocol_parameters.bech32_hrp();
-            self.address
-                .replace(self.create_default_wallet_address(bech32_hrp).await?);
-        }
-        let wallet_address = self
-            .address
-            .clone()
-            .ok_or(crate::wallet::Error::MissingParameter("address"))?;
-
         #[cfg(feature = "storage")]
         let mut wallet_ledger = storage_manager.load_wallet_ledger().await?;
 
@@ -310,7 +299,8 @@ where
         let wallet_ledger = WalletLedger::default();
 
         let wallet = Wallet {
-            address: Arc::new(RwLock::new(wallet_address)),
+            // Unwrap: The address is always set above (or we already returned)
+            address: Arc::new(RwLock::new(self.address.unwrap())),
             bip_path: Arc::new(RwLock::new(self.bip_path)),
             alias: Arc::new(RwLock::new(self.alias)),
             inner: Arc::new(wallet_inner),
@@ -324,32 +314,6 @@ where
         }
 
         Ok(wallet)
-    }
-
-    /// Generate the wallet address.
-    pub(crate) async fn create_default_wallet_address(&self, bech32_hrp: Hrp) -> crate::wallet::Result<Bech32Address> {
-        let bip_path = self.bip_path.as_ref().unwrap();
-
-        Ok(Bech32Address::new(
-            bech32_hrp,
-            Address::Ed25519(
-                self.secret_manager
-                    .as_ref()
-                    .unwrap()
-                    .read()
-                    .await
-                    .generate_ed25519_addresses(
-                        bip_path.coin_type,
-                        bip_path.account,
-                        bip_path.address_index..bip_path.address_index + 1,
-                        GenerateAddressOptions {
-                            internal: bip_path.change != 0,
-                            ledger_nano_prompt: false,
-                        },
-                    )
-                    .await?[0],
-            ),
-        ))
     }
 
     #[cfg(feature = "storage")]
