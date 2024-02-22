@@ -1,4 +1,4 @@
-# Copyright 2023 IOTA Stiftung
+# Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
@@ -52,8 +52,6 @@ class ClientOptions:
             Sets the maximum number of reconnection attempts. 0 is unlimited.
         protocol_parameters (ProtocolParameters):
             Protocol parameters.
-        tangle_time (int):
-            The current tangle time.
         api_timeout (Duration):
             Timeout for API requests.
         max_parallel_api_requests (int):
@@ -73,6 +71,5 @@ class ClientOptions:
     port: Optional[int] = None
     max_reconnection_attempts: Optional[int] = None
     protocol_parameters: Optional[ProtocolParameters] = None
-    tangle_time: Optional[int] = None
     api_timeout: Optional[Duration] = None
     max_parallel_api_requests: Optional[int] = None

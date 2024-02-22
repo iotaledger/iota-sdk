@@ -1,4 +1,4 @@
-// Copyright 2021-2023 IOTA Stiftung
+// Copyright 2021-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { ProtocolParameters } from '../models/info';
@@ -43,6 +43,4 @@ export interface INode {
 export interface INetworkInfo {
     /** Protocol parameters */
     protocolParameters: ProtocolParameters;
-    /** The current tangle time */
-    tangleTime: number;
 }
