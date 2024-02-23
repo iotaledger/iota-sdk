@@ -671,9 +671,9 @@ where
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone())?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone());
 
-    if let Some(conflict) = conflict {
+    if let Err(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
         return Err(Error::TransactionSemantic(conflict));
     }

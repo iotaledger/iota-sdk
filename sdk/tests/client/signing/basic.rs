@@ -105,9 +105,9 @@ async fn single_ed25519_unlock() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    if let Some(conflict) = conflict {
+    if let Err(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
@@ -230,9 +230,9 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    if let Some(conflict) = conflict {
+    if let Err(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
@@ -341,9 +341,9 @@ async fn two_signature_unlocks() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    if let Some(conflict) = conflict {
+    if let Err(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 

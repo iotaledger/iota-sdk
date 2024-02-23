@@ -164,9 +164,9 @@ async fn nft_reference_unlocks() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    if let Some(conflict) = conflict {
+    if let Err(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");
     }
 
