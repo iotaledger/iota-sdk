@@ -34,7 +34,6 @@ export interface IClientOptions {
     port?: number;
     /** Sets the maximum number of reconnection attempts. 0 is unlimited. */
     maxReconnectionAttempts?: number;
-    // NetworkInfo
     /** Protocol parameters */
     protocolParameters?: ProtocolParameters;
     /** Timeout for API requests */
