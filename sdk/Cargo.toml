@@ -596,6 +596,16 @@ name = "build_basic_output"
 path = "examples/client/output/build_basic_output.rs"
 required-features = ["client"]
 
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = ["client"]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
+required-features = ["client"]
+
 ### Wallet
 
 [[example]]
