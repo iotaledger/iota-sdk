@@ -559,7 +559,7 @@ impl From<&WalletLedger> for WalletLedgerDto {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use core::str::FromStr;
 
@@ -570,9 +570,9 @@ mod test {
         types::block::{
             address::{Address, Ed25519Address},
             input::{Input, UtxoInput},
-            output::{AddressUnlockCondition, BasicOutput, Output, StorageScoreParameters},
+            output::{AddressUnlockCondition, BasicOutput, Output},
             payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
-            protocol::ProtocolParameters,
+            protocol::iota_mainnet_protocol_parameters,
             rand::mana::rand_mana_allotment,
             signature::{Ed25519Signature, Signature},
             unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -587,17 +587,7 @@ mod test {
 
     #[test]
     fn serialize() {
-        let protocol_parameters = ProtocolParameters::new(
-            2,
-            "testnet",
-            "rms",
-            StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
-            1_813_620_509_061_365,
-            1582328545,
-            10,
-            20,
-        )
-        .unwrap();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
 
         let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
         let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
@@ -614,8 +604,8 @@ mod test {
         let transaction = Transaction::builder(protocol_parameters.network_id())
             .with_inputs([input1, input2])
             .add_output(output)
-            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-            .finish_with_params(&protocol_parameters)
+            .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+            .finish_with_params(protocol_parameters)
             .unwrap();
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();

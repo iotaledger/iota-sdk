@@ -160,35 +160,28 @@ impl ValidationBlockBody {
     }
 }
 
-fn verify_protocol_parameters_hash<const VERIFY: bool>(
-    hash: &ProtocolParametersHash,
-    params: &ProtocolParameters,
-) -> Result<(), Error> {
-    if VERIFY {
-        let params_hash = params.hash();
+fn verify_protocol_parameters_hash(hash: &ProtocolParametersHash, params: &ProtocolParameters) -> Result<(), Error> {
+    let params_hash = params.hash();
 
-        if hash != &params_hash {
-            return Err(Error::InvalidProtocolParametersHash {
-                expected: params_hash,
-                actual: *hash,
-            });
-        }
+    if hash != &params_hash {
+        return Err(Error::InvalidProtocolParametersHash {
+            expected: params_hash,
+            actual: *hash,
+        });
     }
 
     Ok(())
 }
 
-fn verify_validation_block_body<const VERIFY: bool>(
+fn verify_validation_block_body(
     validation_block_body: &ValidationBlockBody,
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
-    if VERIFY {
-        verify_parents_sets(
-            &validation_block_body.strong_parents,
-            &validation_block_body.weak_parents,
-            &validation_block_body.shallow_like_parents,
-        )?;
-    }
+    verify_parents_sets(
+        &validation_block_body.strong_parents,
+        &validation_block_body.weak_parents,
+        &validation_block_body.shallow_like_parents,
+    )?;
 
     Ok(())
 }
@@ -239,8 +232,8 @@ pub(crate) mod dto {
             dto: ValidationBlockBodyDto,
             params: Option<&ProtocolParameters>,
         ) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params {
-                verify_protocol_parameters_hash::<true>(&dto.protocol_parameters_hash, protocol_params)?;
+            if let Some(params) = params {
+                verify_protocol_parameters_hash(&dto.protocol_parameters_hash, params)?;
             }
 
             ValidationBlockBodyBuilder::new(

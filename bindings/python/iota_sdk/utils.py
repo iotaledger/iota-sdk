@@ -160,7 +160,7 @@ class Utils:
                           index: int) -> OutputId:
         """Compute the output id from transaction id and output index.
         """
-        return OutputId.from_string(_call_method('computeOutputId', {
+        return OutputId(_call_method('computeOutputId', {
             'id': transaction_id,
             'index': index,
         }))
@@ -302,6 +302,18 @@ class Utils:
         return bytes(_call_method('blockBytes', {
             'block': block.as_dict(),
         }))
+
+    @staticmethod
+    def iota_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for IOTA mainnet.
+        """
+        return ProtocolParameters.from_dict(_call_method('iotaMainnetProtocolParameters'))
+
+    @staticmethod
+    def shimmer_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for Shimmer mainnet.
+        """
+        return ProtocolParameters.from_dict(_call_method('shimmerMainnetProtocolParameters'))
 
 
 class UtilsError(Exception):
