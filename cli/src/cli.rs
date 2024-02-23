@@ -1,6 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::str::FromStr;
 use std::path::Path;
 
 use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
@@ -12,6 +13,7 @@ use iota_sdk::{
         utils::Password,
     },
     crypto::keys::bip44::Bip44,
+    types::block::address::Bech32Address,
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
@@ -69,6 +71,9 @@ pub struct InitParameters {
     /// Set the BIP path, `4219/0/0/0` if not provided.
     #[arg(short, long, value_parser = parse_bip_path, default_value = "4219/0/0/0")]
     pub bip_path: Option<Bip44>,
+    /// Set the Bech32-encoded wallet address.
+    #[arg(short, long)]
+    pub address: Option<String>,
 }
 
 impl Default for InitParameters {
@@ -79,6 +84,7 @@ impl Default for InitParameters {
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),
             bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            address: None,
         }
     }
 }
@@ -411,6 +417,12 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .with_address(
+            init_params
+                .address
+                .map(|addr| Bech32Address::from_str(&addr))
+                .transpose()?,
+        )
         .with_bip_path(init_params.bip_path)
         .with_alias(alias)
         .finish()

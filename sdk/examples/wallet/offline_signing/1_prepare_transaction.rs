@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
-        .with_address(read_address_from_file().await?)
+        .with_address(read_wallet_address_from_file().await?)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
@@ -72,7 +72,8 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_address_from_file() -> Result<Bech32Address> {
+// Recover wallet address from example `0_address_generation`.
+async fn read_wallet_address_from_file() -> Result<Bech32Address> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESS_FILE_PATH).await?);

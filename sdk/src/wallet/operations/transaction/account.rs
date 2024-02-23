@@ -100,7 +100,6 @@ where
         let transaction_options = TransactionOptions {
             required_inputs: [*output_id].into(),
             issuer_id: Some(account_id),
-            allow_additional_input_selection: false,
             ..Default::default()
         };
 

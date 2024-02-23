@@ -45,9 +45,9 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
     pub address: Option<Bech32Address>,
-    pub alias: Option<String>,
     #[serde(with = "option_bip44", default)]
     pub bip_path: Option<Bip44>,
+    pub alias: Option<String>,
     pub client_options: Option<ClientOptions>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
@@ -60,13 +60,13 @@ impl WalletOptions {
         self
     }
 
-    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
-        self.alias = alias.into();
+    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
+        self.bip_path = bip_path.into();
         self
     }
 
-    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
-        self.bip_path = bip_path.into();
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
@@ -90,8 +90,8 @@ impl WalletOptions {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
             .with_address(self.address)
-            .with_alias(self.alias)
             .with_bip_path(self.bip_path)
+            .with_alias(self.alias)
             .with_client_options(self.client_options);
 
         #[cfg(feature = "storage")]
