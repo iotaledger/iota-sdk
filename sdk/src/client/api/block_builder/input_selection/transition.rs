@@ -67,7 +67,9 @@ impl InputSelection {
             )?)
         }
 
-        let output = builder.finish_output()?;
+        let output = builder
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
+            .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
@@ -104,6 +106,7 @@ impl InputSelection {
         let output = NftOutputBuilder::from(input)
             .with_nft_id(nft_id)
             .with_features(features)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
             .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{nft_id:?}");
@@ -139,7 +142,9 @@ impl InputSelection {
             return Ok(None);
         }
 
-        let output = FoundryOutputBuilder::from(input).finish_output()?;
+        let output = FoundryOutputBuilder::from(input)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
+            .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
 
