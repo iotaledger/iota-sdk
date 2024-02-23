@@ -11,6 +11,7 @@ publish = false
 [dependencies]
 iota-sdk = { path = "../../sdk", default-features = false, features = [
     "wallet",
+    "protocol_parameters_samples",
     "tls",
 ] }
 
@@ -23,12 +24,14 @@ iota-crypto = { version = "0.23.1", default-features = false, features = [
     "bip44",
 ] }
 log = { version = "0.4.20", default-features = false }
-packable = { version = "0.10.1", default-features = false }
+packable = { version = "0.11.0", default-features = false, features = [
+    "primitive-types",
+] }
 prefix-hex = { version = "0.7.1", default-features = false }
 primitive-types = { version = "0.12.2", default-features = false }
 serde = { version = "1.0.196", default-features = false }
 serde_json = { version = "1.0.113", default-features = false }
-strum = { version = "0.25.0", default-features = false, features = ["derive"] }
+strum = { version = "0.26.1", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.56", default-features = false }
 tokio = { version = "1.35.1", default-features = false }
 url = { version = "2.4.1", default-features = false, features = ["serde"] }

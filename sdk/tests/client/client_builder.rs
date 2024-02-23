@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::{Client, ClientBuilder},
-    types::block::protocol::ProtocolParameters,
+    types::block::protocol::iota_mainnet_protocol_parameters,
 };
 
 #[tokio::test]
@@ -36,7 +36,7 @@ async fn client_builder() {
         "minQuorumSize": 3,
         "quorumThreshold": 66,
         "userAgent": "iota-client/2.0.1-rc.3",
-        "protocolParameters": ProtocolParameters::default(),
+        "protocolParameters": iota_mainnet_protocol_parameters(),
         "apiTimeout": {
             "secs": 15,
             "nanos": 0

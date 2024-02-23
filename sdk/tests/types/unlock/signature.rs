@@ -27,7 +27,7 @@ fn packed_len() {
 fn pack_unpack_valid_ed25519() {
     let signature_1 = SignatureUnlock::from(rand_signature());
     let signature_bytes = signature_1.pack_to_vec();
-    let signature_2 = SignatureUnlock::unpack_verified(signature_bytes.as_slice(), &()).unwrap();
+    let signature_2 = SignatureUnlock::unpack_bytes_verified(signature_bytes.as_slice(), &()).unwrap();
 
     assert_eq!(signature_bytes[0], 0);
     assert_eq!(signature_1, signature_2);
@@ -36,7 +36,7 @@ fn pack_unpack_valid_ed25519() {
 #[test]
 fn pack_unpack_invalid_kind() {
     assert!(matches!(
-        SignatureUnlock::unpack_verified(
+        SignatureUnlock::unpack_bytes_verified(
             [
                 1, 111, 225, 221, 28, 247, 253, 234, 110, 187, 52, 129, 153, 130, 84, 26, 7, 226, 27, 212, 145, 96,
                 151, 196, 124, 135, 176, 31, 48, 0, 213, 200, 82, 227, 169, 21, 179, 253, 115, 184, 209, 107, 138, 0,
