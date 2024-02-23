@@ -159,7 +159,7 @@ class Utils:
                           index: int) -> OutputId:
         """Compute the output id from transaction id and output index.
         """
-        return OutputId.from_string(_call_method('computeOutputId', {
+        return OutputId(_call_method('computeOutputId', {
             'id': transaction_id,
             'index': index,
         }))
