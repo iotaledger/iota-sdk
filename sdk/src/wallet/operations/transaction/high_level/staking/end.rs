@@ -12,14 +12,23 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub async fn end_staking(&self, account_id: AccountId) -> crate::wallet::Result<TransactionWithMetadata> {
-        let prepared = self.prepare_end_staking(account_id).await?;
+    pub async fn end_staking(
+        &self,
+        account_id: AccountId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
+        let options = options.into();
+        let prepared = self.prepare_end_staking(account_id, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, options).await
     }
 
     /// Prepares the transaction for [Wallet::end_staking()].
-    pub async fn prepare_end_staking(&self, account_id: AccountId) -> crate::wallet::Result<PreparedTransactionData> {
+    pub async fn prepare_end_staking(
+        &self,
+        account_id: AccountId,
+        options: impl Into<Option<TransactionOptions>> + Send,
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_end_staking");
 
         let account_output_data = self
@@ -60,11 +69,6 @@ where
             .with_account_id(account_id)
             .with_features(features)
             .finish_output()?;
-
-        let options = TransactionOptions {
-            required_inputs: [account_output_data.output_id].into(),
-            ..Default::default()
-        };
 
         let transaction = self.prepare_transaction([output], options).await?;
 

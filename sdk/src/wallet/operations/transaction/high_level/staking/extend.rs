@@ -16,10 +16,14 @@ where
         &self,
         account_id: AccountId,
         additional_epochs: u32,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
-        let prepared = self.prepare_extend_staking(account_id, additional_epochs).await?;
+        let options = options.into();
+        let prepared = self
+            .prepare_extend_staking(account_id, additional_epochs, options.clone())
+            .await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, options).await
     }
 
     /// Prepares the transaction for [Wallet::extend_staking()].
@@ -27,6 +31,7 @@ where
         &self,
         account_id: AccountId,
         additional_epochs: u32,
+        options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_extend_staking");
 
@@ -52,8 +57,6 @@ where
         let mut output_builder =
             AccountOutputBuilder::from(account_output_data.output.as_account()).with_account_id(account_id);
 
-        let mut options = TransactionOptions::default();
-
         // Just extend the end epoch if it's still possible
         if future_bounded_epoch <= staking_feature.end_epoch() {
             output_builder = output_builder.replace_feature(StakingFeature::new(
@@ -78,7 +81,6 @@ where
                 past_bounded_epoch,
                 end_epoch,
             ));
-            options.required_inputs = [account_output_data.output_id].into();
         }
 
         let output = output_builder.finish_output()?;
