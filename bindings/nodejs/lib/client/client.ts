@@ -609,56 +609,6 @@ export class Client {
     }
 
     /**
-     * Sign a transaction.
-     *
-     * @param secretManager One of the supported secret managers.
-     * @param preparedTransactionData An instance of `PreparedTransactionData`.
-     * @returns The corresponding signed transaction payload.
-     */
-    async signTransaction(
-        secretManager: SecretManagerType,
-        preparedTransactionData: PreparedTransactionData,
-    ): Promise<SignedTransactionPayload> {
-        const response = await this.methodHandler.callMethod({
-            name: 'signTransaction',
-            data: {
-                secretManager,
-                preparedTransactionData,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<SignedTransactionPayload>;
-        return plainToInstance(SignedTransactionPayload, parsed.payload);
-    }
-
-    /**
-     * Create a signature unlock using the given secret manager.
-     *
-     * @param secretManager One of the supported secret managers.
-     * @param transactionSigningHash The signing hash of the transaction.
-     * @param chain A BIP44 chain
-     * @returns The corresponding unlock condition.
-     */
-    async signatureUnlock(
-        secretManager: SecretManagerType,
-        transactionSigningHash: HexEncodedString,
-        chain: Bip44,
-    ): Promise<UnlockCondition> {
-        const response = await this.methodHandler.callMethod({
-            name: 'signatureUnlock',
-            data: {
-                secretManager,
-                transactionSigningHash,
-                chain,
-            },
-        });
-
-        return UnlockCondition.parse(JSON.parse(response).payload);
-    }
-
-    /**
      * Build an unsigned block.
      *
      * @param issuerId The identifier of the block issuer account.

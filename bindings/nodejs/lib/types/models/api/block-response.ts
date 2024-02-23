@@ -1,17 +1,7 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { BlockId, SlotCommitment, SlotIndex } from '../../block';
-
-/**
- * Block id response.
- */
-export interface IBlockIdResponse {
-    /**
-     * The block id.
-     */
-    blockId: BlockId;
-}
 
 /**
  * Information that is used to attach a block in the network.
