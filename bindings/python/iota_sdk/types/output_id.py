@@ -22,6 +22,8 @@ class OutputId(str):
                 'output_id length must be 78 characters with 0x prefix')
         if not output_id.startswith('0x'):
             raise ValueError('output_id must start with 0x')
+        # Validate that it has only valid hex characters
+        int(output_id[2:], 16)
         instance = super().__new__(cls, output_id)
         return instance
 

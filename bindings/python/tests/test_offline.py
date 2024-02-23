@@ -63,7 +63,7 @@ class TestTypes(unittest.TestCase):
         output_id = OutputId.from_transaction_id_and_output_index(
             transaction_id, output_index)
         assert str(output_id
-                   ) == "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00" + ""
+                   ) == "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00"
 
         new_output_id = OutputId(
             '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00')
@@ -71,6 +71,10 @@ class TestTypes(unittest.TestCase):
                    ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
         assert new_output_id.transaction_id() == transaction_id
         assert new_output_id.output_index() == output_index
+
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
+        with self.assertRaises(ValueError):
+            OutputId(output_id_invalid_hex_char)
 
         transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
