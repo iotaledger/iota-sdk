@@ -57,8 +57,26 @@ impl UnsignedBlock {
         [self.header.hash(), self.body.hash()].concat()
     }
 
+    /// Finishes an [`UnsignedBlock`] into a [`Block`].
+    pub fn finish_with_params<'a>(
+        self,
+        signature: impl Into<Signature>,
+        params: impl Into<Option<&'a ProtocolParameters>>,
+    ) -> Result<Block, Error> {
+        if let Some(params) = params.into() {
+            verify_block_slot(&self.header, &self.body, params)?;
+        }
+
+        Ok(Block {
+            header: self.header,
+            body: self.body,
+            signature: signature.into(),
+        })
+    }
+
+    /// Finishes an [`UnsignedBlock`] into a [`Block`] without protocol validation.
     pub fn finish(self, signature: impl Into<Signature>) -> Result<Block, Error> {
-        Block::new(self.header, self.body, signature)
+        self.finish_with_params(signature, None)
     }
 }
 
@@ -155,19 +173,18 @@ impl Block {
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
 
-    /// Creates a new [`Block`].
-    #[inline(always)]
-    pub fn new(header: BlockHeader, body: BlockBody, signature: impl Into<Signature>) -> Result<Self, Error> {
-        // verify_block_slot(&header, &body)?;
+    // /// Creates a new [`Block`].
+    // #[inline(always)]
+    // pub fn new(
+    //     header: BlockHeader,
+    //     body: BlockBody,
+    //     signature: impl Into<Signature>,
+    //     params: &ProtocolParameters,
+    // ) -> Result<Self, Error> {
 
-        let signature = signature.into();
+    // }
 
-        Ok(Self {
-            header,
-            body,
-            signature,
-        })
-    }
+    // TODO add new_unverified
 
     /// Creates a new [`UnsignedBlock`].
     #[inline(always)]
@@ -400,11 +417,11 @@ pub(crate) mod dto {
                 }
             }
 
-            Self::new(
+            UnsignedBlock::new(
                 BlockHeader::try_from_dto_with_params_inner(dto.inner.header, params)?,
                 BlockBody::try_from_dto_with_params_inner(dto.inner.body, params)?,
-                dto.signature,
             )
+            .finish_with_params(dto.signature, params)
         }
     }
 
