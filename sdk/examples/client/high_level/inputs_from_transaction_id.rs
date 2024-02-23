@@ -10,10 +10,7 @@
 //! cargo run --release --example inputs_from_transaction_id <TRANSACTION_ID>
 //! ```
 
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::payload::transaction::TransactionId,
-};
+use iota_sdk::{client::Client, types::block::payload::signed_transaction::TransactionId};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

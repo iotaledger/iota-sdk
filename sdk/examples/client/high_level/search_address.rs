@@ -12,7 +12,7 @@ use iota_sdk::client::{
     api::{search_address, GetAddressesOptions},
     constants::SHIMMER_COIN_TYPE,
     secret::SecretManager,
-    Client, Result,
+    Client,
 };
 
 #[tokio::main]
@@ -40,6 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         secret_manager
             .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
             .await?[0]
+            .clone()
     };
     println!("Search address: {address:#?}");
 
