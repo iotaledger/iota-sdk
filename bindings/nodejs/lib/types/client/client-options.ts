@@ -37,8 +37,6 @@ export interface IClientOptions {
     // NetworkInfo
     /** Protocol parameters */
     protocolParameters?: ProtocolParameters;
-    /** The current tangle time */
-    tangleTime?: number;
     /** Timeout for API requests */
     apiTimeout?: IDuration;
     /** The maximum parallel API requests. */
