@@ -405,82 +405,81 @@ async fn all_combined() -> Result<()> {
         .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
         .await?;
 
-    assert_eq!(unlocks.len(), 15);
+    assert_eq!(unlocks.len(), 13);
+    println!("{unlocks:#?}");
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Reference(a) => {
             assert_eq!(a.index(), 0);
         }
-        _ => panic!("Invalid unlock 1"),
+        _ => panic!("Invalid unlock 2"),
     }
-    assert_eq!((*unlocks).get(2).unwrap().kind(), SignatureUnlock::KIND);
-    assert_eq!((*unlocks).get(3).unwrap().kind(), SignatureUnlock::KIND);
-    match (*unlocks).get(4).unwrap() {
-        Unlock::Reference(a) => {
-            assert_eq!(a.index(), 3);
+    match (*unlocks).get(2).unwrap() {
+        Unlock::Account(a) => {
+            assert_eq!(a.index(), 1);
+        }
+        _ => panic!("Invalid unlock 3"),
+    }
+    match (*unlocks).get(3).unwrap() {
+        Unlock::Account(a) => {
+            assert_eq!(a.index(), 1);
         }
         _ => panic!("Invalid unlock 4"),
     }
-    match (*unlocks).get(5).unwrap() {
+    match (*unlocks).get(4).unwrap() {
         Unlock::Reference(a) => {
-            assert_eq!(a.index(), 3);
+            assert_eq!(a.index(), 0);
         }
         _ => panic!("Invalid unlock 5"),
+    }
+
+    match (*unlocks).get(5).unwrap() {
+        Unlock::Nft(a) => {
+            assert_eq!(a.index(), 4);
+        }
+        _ => panic!("Invalid unlock 6"),
     }
     match (*unlocks).get(6).unwrap() {
         Unlock::Account(a) => {
             assert_eq!(a.index(), 5);
         }
-        _ => panic!("Invalid unlock 6"),
+        _ => panic!("Invalid unlock 7"),
     }
     match (*unlocks).get(7).unwrap() {
         Unlock::Account(a) => {
             assert_eq!(a.index(), 5);
         }
-        _ => panic!("Invalid unlock 7"),
-    }
-    match (*unlocks).get(8).unwrap() {
-        Unlock::Reference(a) => {
-            assert_eq!(a.index(), 3);
-        }
         _ => panic!("Invalid unlock 8"),
     }
-
-    match (*unlocks).get(9).unwrap() {
-        Unlock::Nft(a) => {
-            assert_eq!(a.index(), 8);
+    match (*unlocks).get(8).unwrap() {
+        Unlock::Account(a) => {
+            assert_eq!(a.index(), 5);
         }
         _ => panic!("Invalid unlock 9"),
     }
-    match (*unlocks).get(10).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 9);
+    match (*unlocks).get(9).unwrap() {
+        Unlock::Nft(a) => {
+            assert_eq!(a.index(), 7);
         }
         _ => panic!("Invalid unlock 10"),
     }
-    match (*unlocks).get(11).unwrap() {
+    match (*unlocks).get(10).unwrap() {
         Unlock::Account(a) => {
-            assert_eq!(a.index(), 9);
+            assert_eq!(a.index(), 5);
         }
         _ => panic!("Invalid unlock 11"),
     }
-    match (*unlocks).get(12).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 9);
+    match (*unlocks).get(11).unwrap() {
+        Unlock::Nft(a) => {
+            assert_eq!(a.index(), 6);
         }
         _ => panic!("Invalid unlock 12"),
     }
-    match (*unlocks).get(13).unwrap() {
+    match (*unlocks).get(12).unwrap() {
         Unlock::Nft(a) => {
             assert_eq!(a.index(), 11);
         }
         _ => panic!("Invalid unlock 13"),
-    }
-    match (*unlocks).get(14).unwrap() {
-        Unlock::Nft(a) => {
-            assert_eq!(a.index(), 10);
-        }
-        _ => panic!("Invalid unlock 14"),
     }
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;

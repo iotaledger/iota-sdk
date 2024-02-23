@@ -9,7 +9,7 @@ pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, VecDeque};
 use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
@@ -43,7 +43,7 @@ use crate::{
 /// Working state for the input selection algorithm.
 #[derive(Debug)]
 pub struct InputSelection {
-    available_inputs: Vec<InputSigningData>,
+    available_inputs: VecDeque<InputSigningData>,
     required_inputs: HashSet<OutputId>,
     forbidden_inputs: HashSet<OutputId>,
     selected_inputs: Vec<InputSigningData>,
@@ -92,7 +92,7 @@ impl InputSelection {
         latest_slot_commitment_id: SlotCommitmentId,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
-        let available_inputs = available_inputs.into_iter().collect::<Vec<_>>();
+        let available_inputs = available_inputs.into_iter().collect::<VecDeque<_>>();
 
         let mut addresses = HashSet::from_iter(addresses.into_iter().map(|a| {
             // Get a potential Ed25519 address directly since we're only interested in that
@@ -178,7 +178,7 @@ impl InputSelection {
             {
                 Some(index) => {
                     // Removes required input from available inputs.
-                    let input = self.available_inputs.swap_remove(index);
+                    let input = self.available_inputs.remove(index).unwrap();
 
                     // Selects required input.
                     self.select_input(input)?;

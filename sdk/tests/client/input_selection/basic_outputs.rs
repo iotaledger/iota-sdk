@@ -1582,14 +1582,14 @@ fn two_inputs_remainder_3() {
     .select()
     .unwrap();
 
-    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.inputs_data, &inputs[1..]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert_remainder_or_return(
                 output,
-                1_250_000,
+                250_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
             );
@@ -1754,7 +1754,7 @@ fn too_many_inputs() {
             )
         })
         .take(129),
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic {
         amount: 129_000_000,
@@ -1803,7 +1803,7 @@ fn more_than_max_inputs_only_one_needed() {
             )
         })
         .take(1000),
-        None,
+        Some(SLOT_INDEX),
     );
     // Add the needed input
     let needed_input = build_inputs(

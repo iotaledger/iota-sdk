@@ -15,7 +15,10 @@ use crate::{
         address::Address,
         input::{Input, UtxoInput},
         mana::ManaAllotment,
-        output::{AccountOutputBuilder, Output},
+        output::{
+            AccountOutput, AccountOutputBuilder, AnchorOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput,
+            Output,
+        },
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -248,8 +251,11 @@ impl InputSelection {
             if !self.allow_additional_input_selection {
                 return Err(Error::AdditionalInputsRequired(Requirement::Mana));
             }
-            // TODO we should do as for the amount and have preferences on which inputs to pick.
-            while let Some(input) = self.available_inputs.pop() {
+            loop {
+                self.sort_available_inputs_for_mana(required_mana - selected_mana);
+                let Some(input) = self.available_inputs.pop_front() else {
+                    break;
+                };
                 selected_mana += self.total_mana(&input)?;
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();
@@ -288,5 +294,40 @@ impl InputSelection {
                 input.output_id().transaction_id().slot_index(),
                 self.creation_slot,
             )?)
+    }
+
+    fn sort_available_inputs_for_mana(&mut self, missing_mana: u64) {
+        // Establish the order in which we want to pick an input
+        let sort_order_type = [
+            BasicOutput::KIND,
+            AccountOutput::KIND,
+            NftOutput::KIND,
+            FoundryOutput::KIND,
+            AnchorOutput::KIND,
+            DelegationOutput::KIND,
+        ]
+        .into_iter()
+        .zip(0..)
+        .collect::<HashMap<_, _>>();
+        let mana_sort = |mana: u64| {
+            // If the mana is greater than the missing mana, we want the smallest ones first
+            if mana >= missing_mana {
+                (false, mana)
+            // Otherwise, we want the biggest first
+            } else {
+                (true, u64::MAX - mana)
+            }
+        };
+        // The sort order is by native tokens, type, then amount
+        let sort_order = |output: &Output| {
+            (
+                output.native_token().is_some(),
+                sort_order_type[&output.kind()],
+                mana_sort(output.mana()),
+            )
+        };
+        self.available_inputs
+            .make_contiguous()
+            .sort_unstable_by(|v1, v2| sort_order(&v1.output).cmp(&sort_order(&v2.output)));
     }
 }

@@ -70,8 +70,8 @@ impl InputSelection {
 
         match found {
             Some(index) => {
-                // Remove the input from the available inputs, swap to make it O(1).
-                let input = self.available_inputs.swap_remove(index);
+                // Remove the input from the available inputs.
+                let input = self.available_inputs.remove(index).unwrap();
 
                 log::debug!("{address:?} sender requirement fulfilled by {:?}", input.output_id(),);
 
