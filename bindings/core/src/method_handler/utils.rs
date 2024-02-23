@@ -12,7 +12,7 @@ use iota_sdk::{
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
             semantic::SemanticValidationContext,
             signature::SignatureError,
-            Block, BlockError,
+            Block,
         },
         TryFromDto,
     },
@@ -51,7 +51,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
-            let payload = SignedTransactionPayload::try_from_dto(payload).map_err(BlockError::from)?;
+            let payload = SignedTransactionPayload::try_from_dto(payload)?;
             Response::TransactionId(payload.transaction().id())
         }
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
@@ -77,12 +77,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ProtocolParametersHash { protocol_parameters } => {
             Response::Hash(protocol_parameters.hash().to_string())
         }
-        UtilsMethod::TransactionSigningHash { transaction } => Response::Hash(
-            Transaction::try_from_dto(transaction)
-                .map_err(BlockError::from)?
-                .signing_hash()
-                .to_string(),
-        ),
+        UtilsMethod::TransactionSigningHash { transaction } => {
+            Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
+        }
         UtilsMethod::ComputeMinimumOutputAmount {
             output,
             storage_score_parameters: storage_params,
@@ -103,13 +100,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         } => {
             use crypto::signatures::secp256k1_ecdsa;
             let public_key = prefix_hex::decode(public_key)?;
-            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)
-                .map_err(SignatureError::from)
-                .map_err(BlockError::from)?;
+            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(SignatureError::from)?;
             let signature = prefix_hex::decode(signature)?;
-            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)
-                .map_err(SignatureError::from)
-                .map_err(BlockError::from)?;
+            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(SignatureError::from)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
@@ -123,7 +116,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             mana_rewards,
             protocol_parameters,
         } => {
-            let transaction = Transaction::try_from_dto(transaction).map_err(BlockError::from)?;
+            let transaction = Transaction::try_from_dto(transaction)?;
             let inputs = inputs
                 .iter()
                 .map(|input| (input.output_id(), &input.output))
@@ -136,7 +129,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 mana_rewards,
                 protocol_parameters,
             );
-            context.validate().map_err(BlockError::from)?;
+            context.validate()?;
 
             Response::Ok
         }
@@ -145,36 +138,28 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             slot_index_created,
             slot_index_target,
             protocol_parameters,
-        } => Response::Amount(
-            protocol_parameters
-                .mana_with_decay(mana, slot_index_created, slot_index_target)
-                .map_err(BlockError::from)?,
-        ),
+        } => Response::Amount(protocol_parameters.mana_with_decay(mana, slot_index_created, slot_index_target)?),
         UtilsMethod::GenerateManaWithDecay {
             amount,
             slot_index_created,
             slot_index_target,
             protocol_parameters,
-        } => Response::Amount(
-            protocol_parameters
-                .generate_mana_with_decay(amount, slot_index_created, slot_index_target)
-                .map_err(BlockError::from)?,
-        ),
+        } => Response::Amount(protocol_parameters.generate_mana_with_decay(
+            amount,
+            slot_index_created,
+            slot_index_target,
+        )?),
         UtilsMethod::OutputManaWithDecay {
             output,
             slot_index_created,
             slot_index_target,
             protocol_parameters,
-        } => Response::DecayedMana(
-            output
-                .decayed_mana(&protocol_parameters, slot_index_created, slot_index_target)
-                .map_err(BlockError::from)?,
-        ),
+        } => Response::DecayedMana(output.decayed_mana(&protocol_parameters, slot_index_created, slot_index_target)?),
         UtilsMethod::VerifyTransactionSyntax {
             transaction,
             protocol_parameters,
         } => {
-            Transaction::try_from_dto_with_params(transaction, &protocol_parameters).map_err(BlockError::from)?;
+            Transaction::try_from_dto_with_params(transaction, &protocol_parameters)?;
             Response::Ok
         }
         UtilsMethod::BlockBytes { block } => {

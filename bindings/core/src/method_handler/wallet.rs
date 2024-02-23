@@ -7,7 +7,7 @@ use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
     client::api::{PreparedTransactionData, SignedTransactionData, SignedTransactionDataDto},
     types::{
-        block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource, BlockError},
+        block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
         TryFromDto,
     },
     wallet::{types::TransactionWithMetadataDto, Wallet},
@@ -412,8 +412,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                     PreparedTransactionData::try_from_dto_with_params(
                         prepared_transaction_data,
                         &wallet.client().get_protocol_parameters().await?,
-                    )
-                    .map_err(BlockError::from)?,
+                    )?,
                     None,
                 )
                 .await?;
@@ -423,9 +422,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             prepared_transaction_data,
         } => {
             let signed_transaction_data = wallet
-                .sign_transaction(
-                    &PreparedTransactionData::try_from_dto(prepared_transaction_data).map_err(BlockError::from)?,
-                )
+                .sign_transaction(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
         }
@@ -435,8 +432,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let signed_transaction_data = SignedTransactionData::try_from_dto_with_params(
                 signed_transaction_data,
                 &wallet.client().get_protocol_parameters().await?,
-            )
-            .map_err(BlockError::from)?;
+            )?;
             let transaction = wallet
                 .submit_and_store_transaction(signed_transaction_data, None)
                 .await?;

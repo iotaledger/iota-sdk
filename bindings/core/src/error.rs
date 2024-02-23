@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::BlockError;
+use iota_sdk::types::block::{
+    mana::ManaError, output::OutputError, payload::PayloadError, semantic::SemanticError, signature::SignatureError,
+    BlockError,
+};
 use packable::error::UnexpectedEOF;
 use serde::{Serialize, Serializer};
 
@@ -16,6 +19,21 @@ pub enum Error {
     /// Block errors.
     #[error("{0}")]
     Block(#[from] BlockError),
+    /// Output errors.
+    #[error("{0}")]
+    Output(#[from] OutputError),
+    /// Payload errors.
+    #[error("{0}")]
+    Payload(#[from] PayloadError),
+    /// Signature errors.
+    #[error("{0}")]
+    Signature(#[from] SignatureError),
+    /// Mana errors.
+    #[error("{0}")]
+    Mana(#[from] ManaError),
+    /// Semantic errors.
+    #[error("{0}")]
+    Semantic(#[from] SemanticError),
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),

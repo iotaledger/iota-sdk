@@ -12,7 +12,7 @@ use iota_sdk::{
                 AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, MinimumOutputAmount, NftOutputBuilder,
             },
             payload::Payload,
-            Block, BlockDto, BlockError, UnsignedBlockDto,
+            Block, BlockDto, UnsignedBlockDto,
         },
         TryFromDto,
     },
@@ -80,7 +80,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 output_builder = output_builder.with_immutable_features(immutable_features)
             }
 
-            Response::Output(output_builder.finish_output().map_err(BlockError::from)?)
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildBasicOutput {
             amount,
@@ -100,7 +100,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 output_builder = output_builder.with_features(features);
             }
 
-            Response::Output(output_builder.finish_output().map_err(BlockError::from)?)
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildFoundryOutput {
             amount,
@@ -128,7 +128,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 output_builder = output_builder.with_immutable_features(immutable_features)
             }
 
-            Response::Output(output_builder.finish_output().map_err(BlockError::from)?)
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildNftOutput {
             amount,
@@ -153,14 +153,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 output_builder = output_builder.with_immutable_features(immutable_features)
             }
 
-            Response::Output(output_builder.finish_output().map_err(BlockError::from)?)
+            Response::Output(output_builder.finish_output()?)
         }
         ClientMethod::BuildBasicBlock { issuer_id, payload } => {
             let payload = if let Some(payload) = payload {
-                Some(
-                    Payload::try_from_dto_with_params(payload, &client.get_protocol_parameters().await?)
-                        .map_err(BlockError::from)?,
-                )
+                Some(Payload::try_from_dto_with_params(
+                    payload,
+                    &client.get_protocol_parameters().await?,
+                )?)
             } else {
                 None
             };
