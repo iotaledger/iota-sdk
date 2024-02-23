@@ -297,7 +297,7 @@ impl InputSelection {
 
         let inputs_data = Self::sort_input_signing_data(
             self.selected_inputs,
-            self.creation_slot,
+            self.latest_slot_commitment_id.slot_index(),
             self.protocol_parameters.committable_age_range(),
         )?;
 

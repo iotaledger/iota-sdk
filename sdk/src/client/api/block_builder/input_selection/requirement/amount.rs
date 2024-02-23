@@ -46,7 +46,8 @@ impl InputSelection {
         for selected_input in &self.selected_inputs {
             inputs_sum += selected_input.output.amount();
 
-            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.creation_slot) {
+            if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.latest_slot_commitment_id.slot_index())
+            {
                 *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
         }
@@ -140,7 +141,9 @@ impl AmountSelection {
                 continue;
             }
 
-            if let Some(sdruc) = sdruc_not_expired(&input.output, input_selection.creation_slot) {
+            if let Some(sdruc) =
+                sdruc_not_expired(&input.output, input_selection.latest_slot_commitment_id.slot_index())
+            {
                 // Skip if no additional amount is made available
                 if input.output.amount() == sdruc.amount() {
                     continue;
@@ -203,9 +206,11 @@ impl InputSelection {
         base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
         amount_selection: &mut AmountSelection,
     ) -> Result<bool, Error> {
+        let slot_index = self.latest_slot_commitment_id.slot_index();
+
         // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.creation_slot).is_none()
+            input.output.native_token().is_none() && sdruc_not_expired(&input.output, slot_index).is_none()
         });
 
         if amount_selection.fulfil(self, inputs)? {
@@ -214,7 +219,7 @@ impl InputSelection {
 
         // No native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.creation_slot).is_some()
+            input.output.native_token().is_none() && sdruc_not_expired(&input.output, slot_index).is_some()
         });
 
         if amount_selection.fulfil(self, inputs)? {
@@ -223,7 +228,7 @@ impl InputSelection {
 
         // Native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.creation_slot).is_none()
+            input.output.native_token().is_some() && sdruc_not_expired(&input.output, slot_index).is_none()
         });
 
         if amount_selection.fulfil(self, inputs)? {
@@ -232,7 +237,7 @@ impl InputSelection {
 
         // Native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.creation_slot).is_some()
+            input.output.native_token().is_some() && sdruc_not_expired(&input.output, slot_index).is_some()
         });
 
         if amount_selection.fulfil(self, inputs)? {
@@ -369,13 +374,15 @@ impl InputSelection {
         &mut self,
         amount_selection: &mut AmountSelection,
     ) -> Result<Option<Vec<InputSigningData>>, Error> {
+        let slot_index = self.latest_slot_commitment_id.slot_index();
+
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {
             if let Output::Basic(output) = &input.output {
                 output
                     .unlock_conditions()
                     .locked_address(
                         output.address(),
-                        self.creation_slot,
+                        slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
                     .expect("slot index was provided")
@@ -396,7 +403,7 @@ impl InputSelection {
                     .unlock_conditions()
                     .locked_address(
                         output.address(),
-                        self.creation_slot,
+                        slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
                     .expect("slot index was provided")
