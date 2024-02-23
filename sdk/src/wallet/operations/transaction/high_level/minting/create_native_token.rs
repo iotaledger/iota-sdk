@@ -9,8 +9,8 @@ use crate::{
     types::block::{
         address::AccountAddress,
         output::{
-            feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId,
-            AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+            feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, FoundryId,
+            FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
@@ -101,12 +101,17 @@ where
             .await
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
-        if let Output::Account(account_output) = &account_output_data.output {
-            // Create the new account output with the same features, just updated mana and foundry_counter.
-            let new_account_output_builder = AccountOutputBuilder::from(account_output)
-                .with_account_id(account_id)
-                .with_foundry_counter(account_output.foundry_counter() + 1);
+        let mut options = options.into();
+        if let Some(options) = options.as_mut() {
+            options.required_inputs.insert(account_output_data.output_id);
+        } else {
+            options.replace(TransactionOptions {
+                required_inputs: [account_output_data.output_id].into(),
+                ..Default::default()
+            });
+        }
 
+        if let Output::Account(account_output) = &account_output_data.output {
             // create foundry output with minted native tokens
             let foundry_id = FoundryId::build(
                 &AccountAddress::new(account_id),
@@ -116,7 +121,6 @@ where
             let token_id = TokenId::from(foundry_id);
 
             let outputs = [
-                new_account_output_builder.finish_output()?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
                         storage_score_params,

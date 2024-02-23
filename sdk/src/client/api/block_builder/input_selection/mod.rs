@@ -69,6 +69,7 @@ pub struct InputSelection {
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
+    allow_allotting_from_account_mana: bool,
     reference_mana_cost: u64,
     allotment_debt: u64,
 }
@@ -180,7 +181,7 @@ impl InputSelection {
                     let input = self.available_inputs.swap_remove(index);
 
                     // Selects required input.
-                    self.select_input(input)?
+                    self.select_input(input)?;
                 }
                 None => return Err(Error::RequiredInputIsNotAvailable(required_input)),
             }
@@ -203,7 +204,7 @@ impl InputSelection {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
             if !self.provided_outputs.is_empty()
-                || self.burn.is_none() && self.mana_allotments.is_empty() && self.required_inputs.is_empty()
+                || (self.burn.is_none() && self.mana_allotments.is_empty() && self.required_inputs.is_empty())
             {
                 return Err(Error::InvalidOutputCount(self.provided_outputs.len()));
             }
@@ -231,6 +232,15 @@ impl InputSelection {
             for input in inputs {
                 self.select_input(input)?;
             }
+        }
+
+        let (input_mana, output_mana) = self.mana_sums(false)?;
+
+        if input_mana < output_mana {
+            return Err(Error::InsufficientMana {
+                found: input_mana,
+                required: output_mana,
+            });
         }
 
         // If there is no min allotment calculation, then we should update the remainders as the last step
@@ -284,7 +294,7 @@ impl InputSelection {
 
         let inputs_data = Self::sort_input_signing_data(
             self.selected_inputs,
-            self.creation_slot,
+            self.latest_slot_commitment_id.slot_index(),
             self.protocol_parameters.committable_age_range(),
         )?;
 
@@ -324,9 +334,10 @@ impl InputSelection {
         })
     }
 
-    fn select_input(&mut self, input: InputSigningData) -> Result<(), Error> {
+    fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, Error> {
         log::debug!("Selecting input {:?}", input.output_id());
 
+        let mut added_output = None;
         if let Some(output) = self.transition_input(&input)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
@@ -334,6 +345,7 @@ impl InputSelection {
             // - input doesn't need to be checked for as we just transitioned it
             // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
             self.added_outputs.push(output);
+            added_output = self.added_outputs.last();
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
@@ -348,7 +360,7 @@ impl InputSelection {
             self.requirements.push(Requirement::ContextInputs);
         }
 
-        Ok(())
+        Ok(added_output)
     }
 
     /// Sets the required inputs of an [`InputSelection`].
@@ -406,9 +418,15 @@ impl InputSelection {
     }
 
     /// Specifies an account to which the minimum required mana allotment will be added.
-    pub fn with_min_mana_allotment(mut self, account_id: AccountId, reference_mana_cost: u64) -> Self {
+    pub fn with_min_mana_allotment(
+        mut self,
+        account_id: AccountId,
+        reference_mana_cost: u64,
+        allow_allotting_from_account_mana: bool,
+    ) -> Self {
         self.min_mana_allotment.replace(MinManaAllotment {
             issuer_id: account_id,
+            allow_allotting_from_account_mana,
             reference_mana_cost,
             allotment_debt: 0,
         });
@@ -431,13 +449,19 @@ impl InputSelection {
     }
 
     pub(crate) fn all_outputs(&self) -> impl Iterator<Item = &Output> {
-        self.non_remainder_outputs()
-            .chain(self.remainders.data.iter().map(|r| &r.output))
-            .chain(&self.remainders.storage_deposit_returns)
+        self.non_remainder_outputs().chain(self.remainder_outputs())
     }
 
     pub(crate) fn non_remainder_outputs(&self) -> impl Iterator<Item = &Output> {
         self.provided_outputs.iter().chain(&self.added_outputs)
+    }
+
+    pub(crate) fn remainder_outputs(&self) -> impl Iterator<Item = &Output> {
+        self.remainders
+            .data
+            .iter()
+            .map(|r| &r.output)
+            .chain(&self.remainders.storage_deposit_returns)
     }
 
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {

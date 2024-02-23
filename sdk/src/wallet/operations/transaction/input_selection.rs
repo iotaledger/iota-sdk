@@ -86,7 +86,7 @@ where
             &self.address().await,
             self.bip_path().await,
             wallet_ledger.unspent_outputs.values(),
-            creation_slot,
+            slot_commitment_id.slot_index(),
             protocol_parameters.committable_age_range(),
             &options.required_inputs,
         )?;
@@ -125,7 +125,7 @@ where
                     mana_rewards.insert(
                         *output_id,
                         self.client()
-                            .get_output_mana_rewards(output_id, creation_slot)
+                            .get_output_mana_rewards(output_id, slot_commitment_id.slot_index())
                             .await?
                             .rewards,
                     );
@@ -151,7 +151,11 @@ where
         .with_burn(options.burn);
 
         if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
-            input_selection = input_selection.with_min_mana_allotment(account_id, reference_mana_cost);
+            input_selection = input_selection.with_min_mana_allotment(
+                account_id,
+                reference_mana_cost,
+                options.allow_allotting_from_account_mana,
+            );
         }
 
         if !options.allow_additional_input_selection {
