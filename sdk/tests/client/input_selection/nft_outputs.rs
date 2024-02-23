@@ -1431,7 +1431,7 @@ fn changed_immutable_metadata() {
 #[test]
 fn auto_transition_nft_less_than_min() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
-    let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let small_amount = 5;
 
@@ -1439,7 +1439,7 @@ fn auto_transition_nft_less_than_min() {
         [(
             Nft {
                 amount: small_amount,
-                nft_id: nft_id_0,
+                nft_id: nft_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
                 issuer: None,
@@ -1481,7 +1481,7 @@ fn auto_transition_nft_less_than_min() {
 #[test]
 fn auto_transition_nft_less_than_min_additional() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
-    let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let small_amount = 5;
 
@@ -1490,7 +1490,7 @@ fn auto_transition_nft_less_than_min_additional() {
             (
                 Nft {
                     amount: small_amount,
-                    nft_id: nft_id_0,
+                    nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
                     issuer: None,
@@ -1529,4 +1529,17 @@ fn auto_transition_nft_less_than_min_additional() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
+    let min_amount = NftOutputBuilder::from(inputs[0].output.as_nft())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let nft_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_nft_opt)
+        .find(|o| o.nft_id() == &nft_id_1)
+        .unwrap();
+    assert_eq!(nft_output.amount(), min_amount);
 }

@@ -1358,4 +1358,25 @@ fn auto_transition_foundry_less_than_min_additional() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 3);
+    let min_amount_foundry = FoundryOutputBuilder::from(inputs[0].output.as_foundry())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let foundry_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_foundry_opt)
+        .find(|o| o.id() == foundry_id)
+        .unwrap();
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id)
+        .unwrap();
+    assert_eq!(foundry_output.amount(), min_amount_foundry);
+    assert_eq!(account_output.amount(), 1_000_000);
 }

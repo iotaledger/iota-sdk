@@ -2146,7 +2146,7 @@ fn implicit_account_transition() {
 #[test]
 fn auto_transition_account_less_than_min() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
-    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let small_amount = 5;
 
@@ -2154,7 +2154,7 @@ fn auto_transition_account_less_than_min() {
         [(
             Account {
                 amount: small_amount,
-                account_id: account_id_0,
+                account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
                 issuer: None,
@@ -2194,7 +2194,7 @@ fn auto_transition_account_less_than_min() {
 #[test]
 fn auto_transition_account_less_than_min_additional() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
-    let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let small_amount = 5;
 
@@ -2203,7 +2203,7 @@ fn auto_transition_account_less_than_min_additional() {
             (
                 Account {
                     amount: small_amount,
-                    account_id: account_id_0,
+                    account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
                     issuer: None,
@@ -2240,4 +2240,17 @@ fn auto_transition_account_less_than_min_additional() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
+    let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id_1)
+        .unwrap();
+    assert_eq!(account_output.amount(), min_amount);
 }
