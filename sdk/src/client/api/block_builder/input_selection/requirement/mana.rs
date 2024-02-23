@@ -32,7 +32,8 @@ impl InputSelection {
         }) = self.min_mana_allotment
         else {
             // If there is no min allotment calculation needed, just check mana
-            return self.get_inputs_for_mana_balance();
+            self.get_inputs_for_mana_balance()?;
+            return Ok(Vec::new());
         };
 
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
@@ -68,11 +69,9 @@ impl InputSelection {
                         .iter()
                         .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
                 )
-                .finish_with_params(&self.protocol_parameters)
-                .map_err(BlockError::from)?;
+                .finish_with_params(&self.protocol_parameters)?;
 
-            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)
-                .map_err(BlockError::from)?;
+            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
 
             let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
                 + self.protocol_parameters.work_score_parameters().block();
@@ -82,6 +81,7 @@ impl InputSelection {
             let MinManaAllotment {
                 issuer_id,
                 allotment_debt,
+                allow_allotting_from_account_mana,
                 ..
             } = self
                 .min_mana_allotment
@@ -91,7 +91,7 @@ impl InputSelection {
             // Add the required allotment to the issuing allotment
             if required_allotment_mana > self.mana_allotments[issuer_id] {
                 log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
-                let additional_allotment = required_allotment_mana - self.mana_allotments[&issuer_id];
+                let additional_allotment = required_allotment_mana - self.mana_allotments[issuer_id];
                 log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
                 // Unwrap: safe because we always add the record above
                 *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
@@ -102,7 +102,9 @@ impl InputSelection {
                 *allotment_debt = self.mana_allotments[issuer_id];
             }
 
-            self.reduce_account_output()?;
+            if *allow_allotting_from_account_mana {
+                self.reduce_account_output()?;
+            }
         } else if !self.requirements.contains(&Requirement::Mana) {
             self.requirements.push(Requirement::Mana);
         }
@@ -116,17 +118,16 @@ impl InputSelection {
         let additional_inputs = self.get_inputs_for_mana_balance()?;
         // If we needed more inputs to cover the additional allotment mana
         // then update remainders and re-run this requirement
-        if !additional_inputs.is_empty() {
+        if additional_inputs {
             if !self.requirements.contains(&Requirement::Mana) {
                 self.requirements.push(Requirement::Mana);
             }
-            return Ok(additional_inputs);
         }
 
         Ok(Vec::new())
     }
 
-    pub(crate) fn reduce_account_output(&mut self) -> Result<(), Error> {
+    fn reduce_account_output(&mut self) -> Result<(), Error> {
         let MinManaAllotment {
             issuer_id,
             allotment_debt,
@@ -150,8 +151,7 @@ impl InputSelection {
             let output_mana = output.mana();
             *output = AccountOutputBuilder::from(output.as_account())
                 .with_mana(output_mana.saturating_sub(*allotment_debt))
-                .finish_output()
-                .map_err(BlockError::from)?;
+                .finish_output()?;
             *allotment_debt = allotment_debt.saturating_sub(output_mana);
             log::debug!("Allotment debt after reduction: {}", allotment_debt);
         }
@@ -170,8 +170,7 @@ impl InputSelection {
                 .required_address(
                     self.latest_slot_commitment_id.slot_index(),
                     self.protocol_parameters.committable_age_range(),
-                )
-                .map_err(BlockError::from)?
+                )?
                 .expect("expiration deadzone");
 
             // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in
@@ -187,16 +186,10 @@ impl InputSelection {
                 // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
                 Some(block_index) => match required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
-                        blocks.push(Unlock::Reference(
-                            ReferenceUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                        ));
+                        blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                     }
-                    Address::Account(_) => blocks.push(Unlock::Account(
-                        AccountUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                    )),
-                    Address::Nft(_) => blocks.push(Unlock::Nft(
-                        NftUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                    )),
+                    Address::Account(_) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
+                    Address::Nft(_) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
                     _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
                 },
                 None => {
@@ -240,46 +233,46 @@ impl InputSelection {
             };
         }
 
-        Ok(Unlocks::new(blocks).map_err(BlockError::from)?)
+        Ok(Unlocks::new(blocks)?)
     }
 
-    pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<Vec<InputSigningData>, Error> {
-        let (mut selected_mana, required_mana) = self.mana_sums(true)?;
+    pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<bool, Error> {
+        let (mut selected_mana, mut required_mana) = self.mana_sums(true)?;
 
         log::debug!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
 
+        let mut added_inputs = false;
         if selected_mana >= required_mana {
             log::debug!("Mana requirement already fulfilled");
-            Ok(Vec::new())
         } else {
-            let mut inputs = Vec::new();
-
+            if !self.allow_additional_input_selection {
+                return Err(Error::AdditionalInputsRequired(Requirement::Mana));
+            }
             // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
                 selected_mana += self.total_mana(&input)?;
-                inputs.push(input);
+                if let Some(output) = self.select_input(input)? {
+                    required_mana += output.mana();
+                }
+                added_inputs = true;
 
                 if selected_mana >= required_mana {
                     break;
                 }
             }
-            if selected_mana < required_mana {
-                return Err(Error::InsufficientMana {
-                    found: selected_mana,
-                    required: required_mana,
-                });
-            }
-
-            Ok(inputs)
         }
+        Ok(added_inputs)
     }
 
     pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {
-        let required_mana = if include_remainders {
-            self.all_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana
-        } else {
-            self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>()
-        } + self.mana_allotments.values().sum::<u64>();
+        let mut required_mana =
+            self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
+        if include_remainders {
+            // Add the remainder outputs mana as well as the excess mana we've allocated to add to existing outputs
+            // later.
+            required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana;
+        }
+
         let mut selected_mana = 0;
 
         for input in &self.selected_inputs {
@@ -290,13 +283,10 @@ impl InputSelection {
 
     fn total_mana(&self, input: &InputSigningData) -> Result<u64, Error> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
-            + input
-                .output
-                .available_mana(
-                    &self.protocol_parameters,
-                    input.output_id().transaction_id().slot_index(),
-                    self.creation_slot,
-                )
-                .map_err(BlockError::from)?)
+            + input.output.available_mana(
+                &self.protocol_parameters,
+                input.output_id().transaction_id().slot_index(),
+                self.creation_slot,
+            )?)
     }
 }

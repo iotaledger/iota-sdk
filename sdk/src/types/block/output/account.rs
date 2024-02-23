@@ -19,11 +19,12 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionError,
             UnlockConditionFlags, UnlockConditions,
         },
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
+        ChainId, DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
         StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::TransactionFailureReason,
+    slot::SlotIndex,
 };
 
 crate::impl_id!(
@@ -394,6 +395,40 @@ impl AccountOutput {
     /// Returns whether the output can claim rewards based on its current and next state in a transaction.
     pub fn can_claim_rewards(&self, next_state: Option<&Self>) -> bool {
         self.features().staking().is_some() && next_state.map_or(true, |o| o.features().staking().is_none())
+    }
+
+    /// Returns all the mana held by the output, which is potential + stored, all decayed.
+    pub fn available_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<u64, OutputError> {
+        let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
+
+        decayed_mana
+            .stored
+            .checked_add(decayed_mana.potential)
+            .ok_or(OutputError::ConsumedManaOverflow)
+    }
+
+    /// Returns the decayed stored and potential mana of the output.
+    pub fn decayed_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<DecayedMana, OutputError> {
+        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
+        let generation_amount = self.amount().saturating_sub(min_deposit);
+        let stored_mana = protocol_parameters.mana_with_decay(self.mana(), creation_index, target_index)?;
+        let potential_mana =
+            protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
+
+        Ok(DecayedMana {
+            stored: stored_mana,
+            potential: potential_mana,
+        })
     }
 
     // Transition, just without full SemanticValidationContext

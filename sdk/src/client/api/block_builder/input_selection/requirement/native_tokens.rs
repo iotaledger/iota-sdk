@@ -8,10 +8,7 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::{
-        output::{NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
-        BlockError,
-    },
+    types::block::output::{NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
 };
 
 pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -> Result<NativeTokensBuilder, Error> {
@@ -19,9 +16,7 @@ pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -
 
     for output in outputs {
         if let Some(native_token) = output.native_token() {
-            required_native_tokens
-                .add_native_token(*native_token)
-                .map_err(BlockError::from)?;
+            required_native_tokens.add_native_token(*native_token)?;
         }
     }
 
@@ -51,7 +46,7 @@ pub(crate) fn get_native_tokens_diff(
     if native_tokens_diff.is_empty() {
         Ok(None)
     } else {
-        Ok(Some(native_tokens_diff.finish().map_err(BlockError::from)?))
+        Ok(Some(native_tokens_diff.finish()?))
     }
 }
 
@@ -61,17 +56,11 @@ impl InputSelection {
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
-        input_native_tokens
-            .merge(minted_native_tokens)
-            .map_err(BlockError::from)?;
-        output_native_tokens
-            .merge(melted_native_tokens)
-            .map_err(BlockError::from)?;
+        input_native_tokens.merge(minted_native_tokens)?;
+        output_native_tokens.merge(melted_native_tokens)?;
 
         if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens
-                .merge(NativeTokensBuilder::from(burn.native_tokens.clone()))
-                .map_err(BlockError::from)?;
+            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
         }
 
         // TODO weird that it happens in this direction?
@@ -160,22 +149,14 @@ impl InputSelection {
                                         - input_foundry_simple_ts.circulating_supply();
 
                                     minted_native_tokens
-                                        .add_native_token(
-                                            NativeToken::new(token_id, minted_native_token_amount)
-                                                .map_err(BlockError::from)?,
-                                        )
-                                        .map_err(BlockError::from)?;
+                                        .add_native_token(NativeToken::new(token_id, minted_native_token_amount)?)?;
                                 }
                                 Ordering::Less => {
                                     let melted_native_token_amount = input_foundry_simple_ts.circulating_supply()
                                         - output_foundry_simple_ts.circulating_supply();
 
                                     melted_native_tokens
-                                        .add_native_token(
-                                            NativeToken::new(token_id, melted_native_token_amount)
-                                                .map_err(BlockError::from)?,
-                                        )
-                                        .map_err(BlockError::from)?;
+                                        .add_native_token(NativeToken::new(token_id, melted_native_token_amount)?)?;
                                 }
                                 Ordering::Equal => {}
                             }
@@ -190,11 +171,7 @@ impl InputSelection {
 
                     if !circulating_supply.is_zero() {
                         minted_native_tokens
-                            .add_native_token(
-                                NativeToken::new(output_foundry.token_id(), circulating_supply)
-                                    .map_err(BlockError::from)?,
-                            )
-                            .map_err(BlockError::from)?;
+                            .add_native_token(NativeToken::new(output_foundry.token_id(), circulating_supply)?)?;
                     }
                 }
             }

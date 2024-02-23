@@ -19,7 +19,6 @@ use crate::{
             NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
         },
         semantic::SemanticError,
-        BlockError,
     },
 };
 
@@ -44,8 +43,7 @@ impl InputSelection {
                     .required_address(
                         self.latest_slot_commitment_id.slot_index(),
                         self.protocol_parameters.committable_age_range(),
-                    )
-                    .map_err(BlockError::from)?
+                    )?
                     .expect("expiration unlockable outputs already filtered out");
 
                 if &required_address == remainder_address {
@@ -61,8 +59,7 @@ impl InputSelection {
                 .required_address(
                     self.latest_slot_commitment_id.slot_index(),
                     self.protocol_parameters.committable_age_range(),
-                )
-                .map_err(BlockError::from)?
+                )?
                 .expect("expiration unlockable outputs already filtered out");
 
             if let Some(&required_address) = required_address.backing_ed25519() {
@@ -78,17 +75,11 @@ impl InputSelection {
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
-        input_native_tokens
-            .merge(minted_native_tokens)
-            .map_err(BlockError::from)?;
-        output_native_tokens
-            .merge(melted_native_tokens)
-            .map_err(BlockError::from)?;
+        input_native_tokens.merge(minted_native_tokens)?;
+        output_native_tokens.merge(melted_native_tokens)?;
 
         if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens
-                .merge(NativeTokensBuilder::from(burn.native_tokens.clone()))
-                .map_err(BlockError::from)?;
+            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
         }
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
@@ -109,8 +100,7 @@ impl InputSelection {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)
                     .with_unlock_conditions([AddressUnlockCondition::new(address.clone())])
-                    .finish_output()
-                    .map_err(BlockError::from)?;
+                    .finish_output()?;
 
                 // TODO verify_storage_deposit ?
 
@@ -124,17 +114,11 @@ impl InputSelection {
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
-        input_native_tokens
-            .merge(minted_native_tokens)
-            .map_err(BlockError::from)?;
-        output_native_tokens
-            .merge(melted_native_tokens)
-            .map_err(BlockError::from)?;
+        input_native_tokens.merge(minted_native_tokens)?;
+        output_native_tokens.merge(melted_native_tokens)?;
 
         if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens
-                .merge(NativeTokensBuilder::from(burn.native_tokens.clone()))
-                .map_err(BlockError::from)?;
+            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
         }
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
@@ -148,12 +132,10 @@ impl InputSelection {
 
         let amount_diff = input_amount
             .checked_sub(output_amount)
-            .ok_or(SemanticError::ConsumedAmountOverflow)
-            .map_err(BlockError::from)?;
+            .ok_or(SemanticError::ConsumedAmountOverflow)?;
         let mut mana_diff = input_mana
             .checked_sub(output_mana)
-            .ok_or(SemanticError::ConsumedManaOverflow)
-            .map_err(BlockError::from)?;
+            .ok_or(SemanticError::ConsumedManaOverflow)?;
 
         let (remainder_address, chain) = self
             .get_remainder_address()?
@@ -241,14 +223,13 @@ impl InputSelection {
         let remainder_amount = if let Some(native_tokens) = remainder_native_tokens {
             let nt_remainder_amount = remainder_builder
                 .with_native_token(*native_tokens.first().unwrap())
-                .finish_output()
-                .map_err(BlockError::from)?
+                .finish_output()?
                 .amount();
             // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
             // cost.
             nt_remainder_amount * native_tokens.len() as u64
         } else {
-            remainder_builder.finish_output().map_err(BlockError::from)?.amount()
+            remainder_builder.finish_output()?.amount()
         };
 
         let (selected_mana, required_mana) = self.mana_sums(false)?;
@@ -287,8 +268,7 @@ fn create_remainder_outputs(
                 let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
                     .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
                     .with_native_token(*native_token)
-                    .finish_output()
-                    .map_err(BlockError::from)?;
+                    .finish_output()?;
                 log::debug!(
                     "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
                     output.amount(),
@@ -305,10 +285,8 @@ fn create_remainder_outputs(
     if let Some(native_token) = catchall_native_token {
         catchall = catchall.with_native_token(native_token);
     }
-    let catchall = catchall.finish_output().map_err(BlockError::from)?;
-    catchall
-        .verify_storage_deposit(storage_score_parameters)
-        .map_err(BlockError::from)?;
+    let catchall = catchall.finish_output()?;
+    catchall.verify_storage_deposit(storage_score_parameters)?;
     log::debug!(
         "Created remainder output of amount {}, mana {} and native token {:?} for {remainder_address:?}",
         catchall.amount(),

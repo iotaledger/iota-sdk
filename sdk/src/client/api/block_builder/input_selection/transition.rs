@@ -7,12 +7,9 @@ use super::{
 };
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::{
-        output::{
-            AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
-            Output, OutputId,
-        },
-        BlockError,
+    types::block::output::{
+        AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder, Output,
+        OutputId,
     },
 };
 
@@ -63,18 +60,14 @@ impl InputSelection {
             .with_features(features);
 
         if input.is_block_issuer() {
-            builder = builder.with_mana(
-                Output::from(input.clone())
-                    .available_mana(
-                        &self.protocol_parameters,
-                        output_id.transaction_id().slot_index(),
-                        self.creation_slot,
-                    )
-                    .map_err(BlockError::from)?,
-            )
+            builder = builder.with_mana(input.available_mana(
+                &self.protocol_parameters,
+                output_id.transaction_id().slot_index(),
+                self.creation_slot,
+            )?)
         }
 
-        let output = builder.finish_output().map_err(BlockError::from)?;
+        let output = builder.finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
@@ -111,8 +104,7 @@ impl InputSelection {
         let output = NftOutputBuilder::from(input)
             .with_nft_id(nft_id)
             .with_features(features)
-            .finish_output()
-            .map_err(BlockError::from)?;
+            .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{nft_id:?}");
 
@@ -147,9 +139,7 @@ impl InputSelection {
             return Ok(None);
         }
 
-        let output = FoundryOutputBuilder::from(input)
-            .finish_output()
-            .map_err(BlockError::from)?;
+        let output = FoundryOutputBuilder::from(input).finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
 

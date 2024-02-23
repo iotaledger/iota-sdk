@@ -6,7 +6,7 @@ use primitive_types::U256;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        output::{AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
+        output::{FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
         BlockError,
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet},
@@ -97,19 +97,17 @@ where
 
         drop(wallet_ledger);
 
-        let account_output = if let Output::Account(account_output) = existing_account_output.output {
-            account_output
-        } else {
-            unreachable!("We checked if it's an account output before")
-        };
-        let foundry_output = if let Output::Foundry(foundry_output) = existing_foundry_output.output {
-            foundry_output
-        } else {
-            unreachable!("We checked if it's an foundry output before")
-        };
+        let foundry_output = existing_foundry_output.output.as_foundry();
 
-        // Create the next account output with the same data.
-        let new_account_output_builder = AccountOutputBuilder::from(&account_output);
+        let mut options = options.into();
+        if let Some(options) = options.as_mut() {
+            options.required_inputs.insert(existing_account_output.output_id);
+        } else {
+            options.replace(TransactionOptions {
+                required_inputs: [existing_account_output.output_id].into(),
+                ..Default::default()
+            });
+        }
 
         // Create next foundry output with minted native tokens
 
@@ -125,10 +123,9 @@ where
         );
 
         let new_foundry_output_builder =
-            FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
+            FoundryOutputBuilder::from(foundry_output).with_token_scheme(updated_token_scheme);
 
         let outputs = [
-            new_account_output_builder.finish_output().map_err(BlockError::from)?,
             new_foundry_output_builder.finish_output().map_err(BlockError::from)?,
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
