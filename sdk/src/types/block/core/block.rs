@@ -333,7 +333,7 @@ fn verify_block_slot(header: &BlockHeader, body: &BlockBody, params: &ProtocolPa
             let block_slot = params.slot_index(header.issuing_time / 1_000_000_000);
 
             if block_slot < transaction.creation_slot() {
-                panic!();
+                return Err(Error::BlockSlotBeforeTransactionCreationSlot);
             }
 
             if let Some(commitment) = signed_transaction.transaction().context_inputs().commitment() {
@@ -342,11 +342,11 @@ fn verify_block_slot(header: &BlockHeader, body: &BlockBody, params: &ProtocolPa
                 if !(block_slot - params.max_committable_age()..=block_slot - params.min_committable_age())
                     .contains(&commitment_slot)
                 {
-                    panic!();
+                    return Err(Error::TransactionCommitmentSlotNotInBlockSlotInterval);
                 }
 
                 if commitment_slot > header.slot_commitment_id.slot_index() {
-                    panic!();
+                    return Err(Error::TransactionCommitmentSlotAfterBlockCommitmentSlot);
                 }
             }
         }
