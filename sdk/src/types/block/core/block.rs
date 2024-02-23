@@ -57,7 +57,7 @@ impl UnsignedBlock {
     }
 
     pub fn finish(self, signature: impl Into<Signature>) -> Result<Block, Error> {
-        Ok(Block::new(self.header, self.body, signature))
+        Block::new(self.header, self.body, signature)
     }
 }
 
@@ -156,14 +156,16 @@ impl Block {
 
     /// Creates a new [`Block`].
     #[inline(always)]
-    pub fn new(header: BlockHeader, body: BlockBody, signature: impl Into<Signature>) -> Self {
+    pub fn new(header: BlockHeader, body: BlockBody, signature: impl Into<Signature>) -> Result<Self, Error> {
+        verify_block_slot(&header, &body)?;
+
         let signature = signature.into();
 
-        Self {
+        Ok(Self {
             header,
             body,
             signature,
-        }
+        })
     }
 
     /// Creates a new [`UnsignedBlock`].
@@ -280,6 +282,9 @@ impl Packable for Block {
 
         let header = BlockHeader::unpack(unpacker, protocol_params)?;
         let body = BlockBody::unpack(unpacker, protocol_params)?;
+
+        verify_block_slot(&header, &body).map_err(UnpackError::Packable)?;
+
         let signature = Signature::unpack_inner(unpacker, protocol_params)?;
 
         let block = Self {
@@ -302,6 +307,10 @@ impl Packable for Block {
 
         Ok(block)
     }
+}
+
+fn verify_block_slot(header: &BlockHeader, body: &BlockBody) -> Result<(), Error> {
+    Ok(())
 }
 
 #[cfg(feature = "serde")]
@@ -366,11 +375,11 @@ pub(crate) mod dto {
                 }
             }
 
-            Ok(Self::new(
+            Self::new(
                 BlockHeader::try_from_dto_with_params_inner(dto.inner.header, params)?,
                 BlockBody::try_from_dto_with_params_inner(dto.inner.body, params)?,
                 dto.signature,
-            ))
+            )
         }
     }
 
