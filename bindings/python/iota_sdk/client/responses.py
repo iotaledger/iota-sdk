@@ -83,7 +83,6 @@ class NodeInfoResponse:
 
 # Accounts routes responses
 
-
 @json
 @dataclass
 class CongestionResponse:
@@ -130,7 +129,6 @@ class ManaRewardsResponse:
     ))
 
 # Validators routes responses
-
 
 @json
 @dataclass
@@ -182,7 +180,6 @@ class ValidatorsResponse:
 
 # Committee routes responses
 
-
 @json
 @dataclass
 class CommitteeMember:
@@ -228,7 +225,6 @@ class CommitteeResponse:
     committee: List[CommitteeMember]
 
 # Blocks routes responses
-
 
 @json
 @dataclass
