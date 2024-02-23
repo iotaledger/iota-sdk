@@ -55,6 +55,8 @@ class TransactionOptions:
         note: A string attached to the transaction.
         allow_micro_amount: Whether to allow sending a micro amount.
         allow_additional_input_selection: Whether to allow the selection of additional inputs for this transaction.
+        allow_allotting_from_account_mana: Whether to allow allotting automatically calculated mana from the issuer account.
+            If this flag is disabled, additional inputs will be selected to cover the amount.
         capabilities: Transaction capabilities.
         mana_allotments: Mana allotments for the transaction.
         issuer_id: Optional block issuer to which the transaction will have required mana allotted.
@@ -68,6 +70,7 @@ class TransactionOptions:
     note: Optional[str] = None
     allow_micro_amount: Optional[bool] = None
     allow_additional_input_selection: Optional[bool] = None
+    allow_allotting_from_account_mana: Optional[bool] = None
     capabilities: Optional[HexStr] = None
     mana_allotments: Optional[dict[HexStr, int]] = None
     issuer_id: Optional[HexStr] = None
