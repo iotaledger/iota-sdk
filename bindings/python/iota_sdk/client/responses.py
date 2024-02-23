@@ -18,8 +18,8 @@ from iota_sdk.types.slot import SlotCommitment, SlotCommitmentId
 from iota_sdk.types.transaction_id import TransactionId
 from iota_sdk.types.transaction_metadata import TransactionFailureReason, TransactionState
 
-# Node routes responses
 
+# Node routes responses
 
 @json
 @dataclass
@@ -81,6 +81,7 @@ class NodeInfoResponse:
     info: InfoResponse
     url: str
 
+
 # Accounts routes responses
 
 @json
@@ -127,6 +128,7 @@ class ManaRewardsResponse:
     latest_committed_epoch_pool_rewards: int = field(metadata=config(
         encoder=str
     ))
+
 
 # Validators routes responses
 
@@ -178,6 +180,7 @@ class ValidatorsResponse:
     page_size: int
     cursor: Optional[str] = None
 
+
 # Committee routes responses
 
 @json
@@ -223,6 +226,7 @@ class CommitteeResponse:
         encoder=str
     ))
     committee: List[CommitteeMember]
+
 
 # Blocks routes responses
 
@@ -346,8 +350,9 @@ class BlockWithMetadataResponse:
     """
     block: Block
     metadata: BlockMetadataResponse
-# UTXO routes responses
 
+
+# UTXO routes responses
 
 @json
 @dataclass
