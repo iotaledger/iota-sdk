@@ -45,7 +45,7 @@ fn pack_unpack_valid() {
 
     assert_eq!(
         transaction_id,
-        PackableExt::unpack_verified(packed_transaction_id.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_transaction_id.as_slice(), &()).unwrap()
     );
 }
 

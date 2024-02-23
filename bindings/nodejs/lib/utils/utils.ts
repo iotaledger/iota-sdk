@@ -687,4 +687,18 @@ export class Utils {
         });
         return new Uint8Array(blockBytes);
     }
+
+    static iotaMainnetProtocolParameters(): ProtocolParameters {
+        const params = callUtilsMethod({
+            name: 'iotaMainnetProtocolParameters',
+        });
+        return params;
+    }
+
+    static shimmerMainnetProtocolParameters(): ProtocolParameters {
+        const params = callUtilsMethod({
+            name: 'shimmerMainnetProtocolParameters',
+        });
+        return params;
+    }
 }

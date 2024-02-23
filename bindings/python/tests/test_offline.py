@@ -11,7 +11,7 @@ tv = {}
 with open('../../sdk/tests/client/fixtures/test_vectors.json', "r", encoding="utf-8") as json_file:
     tv = json.load(json_file)
 
-client = Client()
+client = Client(protocol_parameters=Utils.iota_mainnet_protocol_parameters())
 
 
 def test_mnemonic_address_generation():

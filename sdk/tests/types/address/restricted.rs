@@ -43,7 +43,7 @@ fn restricted_ed25519() {
     // Test from https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
 
     // Ed25519 Address (Plain)
-    let address = Address::unpack_verified(
+    let address = Address::unpack_bytes_verified(
         prefix_hex::decode::<Vec<_>>("0x00efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a3").unwrap(),
         &(),
     )
@@ -103,7 +103,7 @@ fn restricted_account() {
     // Test from https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
 
     // Account Address (Plain)
-    let address = Address::unpack_verified(
+    let address = Address::unpack_bytes_verified(
         prefix_hex::decode::<Vec<_>>("0x0860441c013b400f402c317833366f48730610296a09243636343e7b1b7e115409").unwrap(),
         &(),
     )
@@ -163,7 +163,7 @@ fn restricted_nft() {
     // Test from https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
 
     // NFT Address (Plain)
-    let address = Address::unpack_verified(
+    let address = Address::unpack_bytes_verified(
         prefix_hex::decode::<Vec<_>>("0x10140f39267a343f0d650a751250445e40600d133522085d210a2b5f3f69445139").unwrap(),
         &(),
     )

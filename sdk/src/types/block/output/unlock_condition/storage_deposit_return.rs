@@ -27,7 +27,7 @@ impl StorageDepositReturnUnlockCondition {
     pub fn new(return_address: impl Into<Address>, amount: u64) -> Result<Self, Error> {
         let return_address = return_address.into();
 
-        verify_return_address::<true>(&return_address)?;
+        verify_return_address(&return_address)?;
 
         Ok(Self { return_address, amount })
     }
@@ -52,8 +52,8 @@ impl StorageScore for StorageDepositReturnUnlockCondition {
 }
 
 #[inline]
-fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result<(), Error> {
-    if VERIFY && return_address.is_implicit_account_creation() {
+fn verify_return_address(return_address: &Address) -> Result<(), Error> {
+    if return_address.is_implicit_account_creation() {
         Err(Error::InvalidAddressKind(return_address.kind()))
     } else {
         Ok(())

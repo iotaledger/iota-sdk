@@ -1,26 +1,26 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "protocol_parameters_samples")]
+mod samples;
 mod work_score;
 
-use alloc::string::String;
 use core::borrow::Borrow;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
+#[cfg(feature = "protocol_parameters_samples")]
+pub use samples::{iota_mainnet_protocol_parameters, shimmer_mainnet_protocol_parameters};
 
 pub use self::work_score::{WorkScore, WorkScoreParameters};
-use crate::{
-    types::block::{
-        address::Hrp,
-        helper::network_name_to_id,
-        mana::{ManaParameters, RewardsParameters},
-        output::{StorageScore, StorageScoreParameters},
-        slot::{EpochIndex, SlotCommitmentId, SlotIndex},
-        Error, PROTOCOL_VERSION,
-    },
-    utils::ConvertTo,
+use crate::types::block::{
+    address::Hrp,
+    helper::network_name_to_id,
+    mana::{ManaParameters, RewardsParameters},
+    output::{StorageScore, StorageScoreParameters},
+    slot::{EpochIndex, SlotCommitmentId, SlotIndex},
+    Error,
 };
 
 /// Defines the parameters of the protocol at a particular version.
@@ -103,65 +103,7 @@ impl Borrow<()> for ProtocolParameters {
     }
 }
 
-impl Default for ProtocolParameters {
-    fn default() -> Self {
-        Self {
-            kind: 0,
-            version: PROTOCOL_VERSION,
-            // Unwrap: Known to be valid
-            network_name: String::from("iota-core-testnet").try_into().unwrap(),
-            bech32_hrp: Hrp::from_str_unchecked("smr"),
-            storage_score_parameters: Default::default(),
-            work_score_parameters: Default::default(),
-            token_supply: 1_813_620_509_061_365,
-            genesis_slot: 0,
-            genesis_unix_timestamp: 1582328545,
-            slot_duration_in_seconds: 10,
-            epoch_nearing_threshold: 20,
-            slots_per_epoch_exponent: Default::default(),
-            mana_parameters: Default::default(),
-            staking_unbonding_period: 10,
-            validation_blocks_per_slot: 10,
-            punishment_epochs: 9,
-            liveness_threshold_lower_bound: 15,
-            liveness_threshold_upper_bound: 30,
-            min_committable_age: 10,
-            max_committable_age: 20,
-            congestion_control_parameters: Default::default(),
-            version_signaling_parameters: Default::default(),
-            rewards_parameters: Default::default(),
-            target_committee_size: 32,
-            chain_switching_threshold: 3,
-        }
-    }
-}
-
 impl ProtocolParameters {
-    /// Creates a new [`ProtocolParameters`].
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(
-        version: u8,
-        network_name: impl Into<String>,
-        bech32_hrp: impl ConvertTo<Hrp>,
-        storage_score_parameters: StorageScoreParameters,
-        token_supply: u64,
-        genesis_unix_timestamp: u64,
-        slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: u32,
-    ) -> Result<Self, Error> {
-        Ok(Self {
-            version,
-            network_name: <StringPrefix<u8>>::try_from(network_name.into()).map_err(Error::InvalidStringPrefix)?,
-            bech32_hrp: bech32_hrp.convert()?,
-            storage_score_parameters,
-            token_supply,
-            genesis_unix_timestamp,
-            slot_duration_in_seconds,
-            epoch_nearing_threshold,
-            ..Default::default()
-        })
-    }
-
     /// Returns the network name of the [`ProtocolParameters`].
     pub fn network_name(&self) -> &str {
         &self.network_name
@@ -363,38 +305,23 @@ pub struct CommittableAgeRange {
 pub struct CongestionControlParameters {
     /// Minimum value of the reference Mana cost.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    min_reference_mana_cost: u64,
+    pub(crate) min_reference_mana_cost: u64,
     /// Increase step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    increase: u64,
+    pub(crate) increase: u64,
     /// Decrease step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    decrease: u64,
+    pub(crate) decrease: u64,
     /// Threshold for increasing the RMC.
-    increase_threshold: u32,
+    pub(crate) increase_threshold: u32,
     /// Threshold for decreasing the RMC.
-    decrease_threshold: u32,
+    pub(crate) decrease_threshold: u32,
     /// Rate at which the scheduler runs (in workscore units per second).
-    scheduler_rate: u32,
+    pub(crate) scheduler_rate: u32,
     /// Maximum size of the buffer in the scheduler.
-    max_buffer_size: u32,
+    pub(crate) max_buffer_size: u32,
     /// Maximum number of blocks in the validation buffer.
-    max_validation_buffer_size: u32,
-}
-
-impl Default for CongestionControlParameters {
-    fn default() -> Self {
-        Self {
-            min_reference_mana_cost: 500,
-            increase: 500,
-            decrease: 500,
-            increase_threshold: 800000,
-            decrease_threshold: 500000,
-            scheduler_rate: 100000,
-            max_buffer_size: 3276800,
-            max_validation_buffer_size: 100,
-        }
-    }
+    pub(crate) max_validation_buffer_size: u32,
 }
 
 /// Defines the parameters used to signal a protocol parameters upgrade.
@@ -409,37 +336,11 @@ impl Default for CongestionControlParameters {
 pub struct VersionSignalingParameters {
     /// The size of the window in epochs that is used to find which version of protocol parameters was
     /// most signaled, from `current_epoch - window_size` to `current_epoch`.
-    window_size: u8,
+    pub(crate) window_size: u8,
     /// The number of supporters required for a version to win within a `window_size`.
-    window_target_ratio: u8,
+    pub(crate) window_target_ratio: u8,
     /// The offset in epochs required to activate the new version of protocol parameters.
-    activation_offset: u8,
-}
-
-impl Default for VersionSignalingParameters {
-    fn default() -> Self {
-        Self {
-            window_size: 7,
-            window_target_ratio: 5,
-            activation_offset: 7,
-        }
-    }
-}
-
-/// Returns a [`ProtocolParameters`] for testing purposes.
-#[cfg(any(feature = "test", feature = "rand"))]
-pub fn protocol_parameters() -> ProtocolParameters {
-    ProtocolParameters::new(
-        2,
-        "testnet",
-        "rms",
-        crate::types::block::output::StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
-        1_813_620_509_061_365,
-        1582328545,
-        10,
-        20,
-    )
-    .unwrap()
+    pub(crate) activation_offset: u8,
 }
 
 crate::impl_id!(

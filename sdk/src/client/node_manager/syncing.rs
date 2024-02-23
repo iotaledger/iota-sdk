@@ -3,16 +3,13 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
-    crate::types::block::PROTOCOL_VERSION,
+    crate::{client::NetworkInfo, types::block::PROTOCOL_VERSION},
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
 };
 
 use super::{Node, NodeManager};
-use crate::{
-    client::{Client, ClientInner, Error, Result},
-    types::block::protocol::ProtocolParameters,
-};
+use crate::client::{Client, ClientInner, Error, Result};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
@@ -46,7 +43,7 @@ impl ClientInner {
 }
 
 #[cfg(not(target_family = "wasm"))]
-impl ClientInner {
+impl Client {
     /// Sync the node lists per node_sync_interval milliseconds
     pub(crate) async fn start_sync_process(
         &self,
@@ -69,7 +66,7 @@ impl ClientInner {
 
         log::debug!("sync_nodes");
         let mut healthy_nodes = HashSet::new();
-        let mut network_nodes: HashMap<String, Vec<(ProtocolParameters, Node, Option<u64>)>> = HashMap::new();
+        let mut network_nodes: HashMap<String, Vec<(_, Node, Option<u64>)>> = HashMap::new();
 
         for node in nodes {
             // Put the healthy node url into the network_nodes
@@ -149,11 +146,11 @@ impl ClientInner {
             // Set the protocol_parameters to the parameters that most nodes have in common and only use these nodes as
             // healthy_nodes
             if let Some((parameters, _node_url, tangle_time)) = nodes.first() {
-                let mut network_info = self.network_info.write().await;
-
-                network_info.tangle_time = *tangle_time;
                 // Unwrap: We should always have parameters for this version. If we don't we can't recover.
-                network_info.protocol_parameters = parameters.clone();
+                *self.network_info.write().await = NetworkInfo {
+                    protocol_parameters: parameters.clone(),
+                    tangle_time: *tangle_time,
+                };
             }
 
             healthy_nodes.extend(nodes.iter().map(|(_info, node_url, _time)| node_url).cloned())
@@ -170,10 +167,7 @@ impl ClientInner {
 
         Ok(())
     }
-}
 
-impl Client {
-    #[cfg(not(target_family = "wasm"))]
     pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
         let node_sync_interval = node_manager.node_sync_interval;
         let ignore_node_health = node_manager.ignore_node_health;
@@ -198,8 +192,10 @@ impl Client {
         *self._sync_handle.write().await = crate::client::SyncHandle(Some(sync_handle));
         Ok(())
     }
+}
 
-    #[cfg(target_family = "wasm")]
+#[cfg(target_family = "wasm")]
+impl Client {
     pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
         *self.node_manager.write().await = node_manager;
         Ok(())

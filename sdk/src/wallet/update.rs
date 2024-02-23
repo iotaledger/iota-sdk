@@ -3,6 +3,8 @@
 
 use std::collections::HashMap;
 
+#[cfg(feature = "storage")]
+use crate::wallet::core::WalletLedgerDto;
 use crate::{
     client::secret::SecretManage,
     types::block::{
@@ -10,7 +12,6 @@ use crate::{
         payload::signed_transaction::TransactionId,
     },
     wallet::{
-        core::WalletLedgerDto,
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
     },

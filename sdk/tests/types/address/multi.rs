@@ -21,7 +21,7 @@ fn ordered_by_packed_bytes() {
 
     let multi_1 = MultiAddress::new([weighted_1, weighted_2], 2).unwrap();
     let bytes = multi_1.pack_to_vec();
-    let multi_2 = MultiAddress::unpack_verified(bytes, &()).unwrap();
+    let multi_2 = MultiAddress::unpack_bytes_verified(bytes, &()).unwrap();
 
     assert!(multi_2.addresses()[0].address().is_ed25519());
     assert!(multi_2.addresses()[1].address().is_account());
@@ -74,7 +74,7 @@ fn json_packable_bech32() {
     });
     let multi_address = serde_json::from_value::<Address>(multi_address_json).unwrap();
     let multi_address_bytes = multi_address.pack_to_vec();
-    let multi_address_unpacked = Address::unpack_verified(multi_address_bytes, &()).unwrap();
+    let multi_address_unpacked = Address::unpack_bytes_verified(multi_address_bytes, &()).unwrap();
 
     assert_eq!(multi_address, multi_address_unpacked);
     assert_eq!(

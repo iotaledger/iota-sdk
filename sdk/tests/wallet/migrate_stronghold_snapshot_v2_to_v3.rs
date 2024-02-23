@@ -13,6 +13,7 @@ use iota_sdk::{
         Error as ClientError,
     },
     crypto::keys::bip44::Bip44,
+    types::block::protocol::iota_mainnet_protocol_parameters,
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -25,6 +26,7 @@ const PBKDF_ITER: u32 = 100;
 #[tokio::test]
 async fn stronghold_snapshot_v2_v3_migration() {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
 
     let storage_path = "test-storage/stronghold_snapshot_v2_v3_migration";
     setup(storage_path).unwrap();
@@ -87,7 +89,12 @@ async fn stronghold_snapshot_v2_v3_migration() {
     let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/stronghold_snapshot_v2_v3_migration")
         .with_secret_manager(stronghold_secret_manager)
-        .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
+        .with_client_options(
+            ClientOptions::new()
+                .with_node(NODE_LOCAL)
+                .unwrap()
+                .with_protocol_parameters(protocol_parameters.clone()),
+        )
         // Build with a different coin type, to check if it gets replaced by the one from the backup
         .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
         .finish()

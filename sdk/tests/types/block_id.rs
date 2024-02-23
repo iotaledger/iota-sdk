@@ -53,7 +53,7 @@ fn pack_unpack_valid() {
     assert_eq!(packed_block_id.len(), block_id.packed_len());
     assert_eq!(
         block_id,
-        PackableExt::unpack_verified(packed_block_id.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_block_id.as_slice(), &()).unwrap()
     );
 }
 

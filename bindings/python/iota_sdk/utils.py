@@ -303,6 +303,18 @@ class Utils:
             'block': block.as_dict(),
         }))
 
+    @staticmethod
+    def iota_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for IOTA mainnet.
+        """
+        return ProtocolParameters.from_dict(_call_method('iotaMainnetProtocolParameters'))
+
+    @staticmethod
+    def shimmer_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for Shimmer mainnet.
+        """
+        return ProtocolParameters.from_dict(_call_method('shimmerMainnetProtocolParameters'))
+
 
 class UtilsError(Exception):
     """A utils error."""
