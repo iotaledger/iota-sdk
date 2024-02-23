@@ -72,7 +72,10 @@ import {
 
 import { plainToInstance } from 'class-transformer';
 import { ManaRewardsResponse } from '../types/models/api/mana-rewards-response';
-import { ValidatorsResponse } from '../types/models/api/validators-response';
+import {
+    ValidatorResponse,
+    ValidatorsResponse,
+} from '../types/models/api/validators-response';
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -176,7 +179,7 @@ export class Client {
     /**
      * Return information about a validator.
      */
-    async getValidator(accountId: AccountId): Promise<ValidatorsResponse> {
+    async getValidator(accountId: AccountId): Promise<ValidatorResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getValidator',
             data: {
