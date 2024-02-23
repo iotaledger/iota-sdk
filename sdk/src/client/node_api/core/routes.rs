@@ -76,7 +76,9 @@ impl ClientInner {
     pub async fn get_node_info(&self) -> Result<NodeInfoResponse> {
         self.get_request(INFO_PATH, None, false).await
     }
+}
 
+impl Client {
     /// Checks if the account is ready to issue a block.
     /// GET /api/core/v3/accounts/{bech32Address}/congestion
     pub async fn get_account_congestion(

@@ -164,6 +164,12 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let block = Block::try_from_dto(block)?;
             Response::Raw(block.pack_to_vec())
         }
+        UtilsMethod::IotaMainnetProtocolParameters => {
+            Response::ProtocolParameters(iota_sdk::types::block::protocol::iota_mainnet_protocol_parameters().clone())
+        }
+        UtilsMethod::ShimmerMainnetProtocolParameters => Response::ProtocolParameters(
+            iota_sdk::types::block::protocol::shimmer_mainnet_protocol_parameters().clone(),
+        ),
     };
 
     Ok(response)

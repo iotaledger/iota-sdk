@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, MinimumOutputAmount,
         NativeToken, SimpleTokenScheme, TokenId,
     },
-    protocol::protocol_parameters,
+    protocol::iota_mainnet_protocol_parameters,
     rand::{
         address::rand_account_address,
         output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
@@ -17,7 +17,7 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn builder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
     let account_1 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
     let account_2 = ImmutableAccountAddressUnlockCondition::new(rand_account_address());
@@ -65,10 +65,10 @@ fn builder() {
 
 #[test]
 fn pack_unpack() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let output = rand_foundry_output(protocol_parameters.token_supply());
     let bytes = output.pack_to_vec();
-    let output_unpacked = FoundryOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+    let output_unpacked = FoundryOutput::unpack_bytes_verified(bytes, &protocol_parameters).unwrap();
 
     assert_eq!(output, output_unpacked);
 }

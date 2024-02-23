@@ -75,8 +75,8 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     }
 }
 
-fn verify_parents<const VERIFY: bool>(parents: &[BlockId]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(parents.iter().map(AsRef::as_ref)) {
+fn verify_parents(parents: &[BlockId]) -> Result<(), Error> {
+    if !is_unique_sorted(parents.iter().map(AsRef::as_ref)) {
         Err(Error::ParentsNotUniqueSorted)
     } else {
         Ok(())

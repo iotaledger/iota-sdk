@@ -11,7 +11,7 @@ use iota_sdk::{
             OutputIdProof,
         },
         payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
             output::{rand_basic_output, rand_output_metadata},
@@ -90,7 +90,7 @@ fn wallet_events_serde() {
     ));
 
     {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
         let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
         let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
@@ -106,8 +106,8 @@ fn wallet_events_serde() {
         let transaction = Transaction::builder(protocol_parameters.network_id())
             .with_inputs(vec![input1, input2])
             .add_output(output)
-            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-            .finish_with_params(&protocol_parameters)
+            .add_mana_allotment(rand_mana_allotment(protocol_parameters))
+            .finish_with_params(protocol_parameters)
             .unwrap();
 
         assert_serde_eq(WalletEvent::TransactionProgress(

@@ -26,7 +26,7 @@ fn slot_commitment_id_index() {
     assert_eq!(prefix_hex::encode(&commitment_bytes), fixture.bytes);
     assert_eq!(
         fixture.commitment,
-        SlotCommitment::unpack_verified(commitment_bytes, &()).unwrap()
+        SlotCommitment::unpack_bytes_verified(commitment_bytes, &()).unwrap()
     );
     assert_eq!(commitment_id, fixture.id);
     assert_eq!(commitment_id.slot_index(), fixture.commitment.slot());

@@ -37,8 +37,8 @@ impl StorageScore for ImmutableAccountAddressUnlockCondition {
 }
 
 #[inline]
-fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
-    if VERIFY && !address.is_account() {
+fn verify_address(address: &Address) -> Result<(), Error> {
+    if !address.is_account() {
         Err(Error::InvalidAddressKind(address.kind()))
     } else {
         Ok(())

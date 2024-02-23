@@ -37,24 +37,17 @@ pub(crate) type MetadataBTreeMap =
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MetadataFeature(MetadataBTreeMapPrefix);
 
-pub(crate) fn verify_keys<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
-    if VERIFY {
-        for key in map.keys() {
-            if !key.iter().all(|c| c.is_ascii_graphic()) {
-                return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
-            }
+pub(crate) fn verify_keys(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
+    for key in map.keys() {
+        if !key.iter().all(|c| c.is_ascii_graphic()) {
+            return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
         }
     }
     Ok(())
 }
 
-pub(crate) fn verify_packed_len<const VERIFY: bool>(
-    len: usize,
-    bytes_length_range: RangeInclusive<u16>,
-) -> Result<(), Error> {
-    if VERIFY
-        && !bytes_length_range.contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
-    {
+pub(crate) fn verify_packed_len(len: usize, bytes_length_range: RangeInclusive<u16>) -> Result<(), Error> {
+    if !bytes_length_range.contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?) {
         return Err(Error::InvalidMetadataFeature(format!(
             "Out of bounds byte length: {len}"
         )));
@@ -150,8 +143,8 @@ impl MetadataFeatureMap {
             .map_err(Error::InvalidMetadataFeatureEntryCount)?,
         );
 
-        verify_keys::<true>(&res.0)?;
-        verify_packed_len::<true>(res.packed_len(), MetadataFeature::BYTE_LENGTH_RANGE)?;
+        verify_keys(&res.0)?;
+        verify_packed_len(res.packed_len(), MetadataFeature::BYTE_LENGTH_RANGE)?;
 
         Ok(res)
     }
@@ -183,18 +176,20 @@ impl Packable for MetadataFeature {
         self.0.pack(packer)
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let mut unpacker = CounterUnpacker::new(unpacker);
         let res = Self(
-            MetadataBTreeMapPrefix::unpack::<_, VERIFY>(&mut unpacker, visitor)
+            MetadataBTreeMapPrefix::unpack(&mut unpacker, visitor)
                 .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
         );
 
-        verify_keys::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
-        verify_packed_len::<VERIFY>(unpacker.counter(), Self::BYTE_LENGTH_RANGE).map_err(UnpackError::Packable)?;
+        if visitor.is_some() {
+            verify_keys(&res.0).map_err(UnpackError::Packable)?;
+            verify_packed_len(unpacker.counter(), Self::BYTE_LENGTH_RANGE).map_err(UnpackError::Packable)?;
+        }
 
         Ok(res)
     }

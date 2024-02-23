@@ -11,14 +11,14 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Basic, Nft},
     BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, NFT_ID_0,
     NFT_ID_1, NFT_ID_2, SLOT_COMMITMENT_ID, SLOT_INDEX,
@@ -26,7 +26,7 @@ use crate::client::{
 
 #[test]
 fn input_nft_eq_output_nft() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -71,7 +71,7 @@ fn input_nft_eq_output_nft() {
 
 #[test]
 fn transition_nft_id_zero() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -205,7 +205,7 @@ fn transition_nft_id_zero() {
 
 #[test]
 fn mint_nft() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -259,7 +259,7 @@ fn mint_nft() {
 
 #[test]
 fn burn_nft() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -350,7 +350,7 @@ fn burn_nft() {
 
 #[test]
 fn missing_input_for_nft_output() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -396,7 +396,7 @@ fn missing_input_for_nft_output() {
 
 #[test]
 fn missing_input_for_nft_output_but_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -439,7 +439,7 @@ fn missing_input_for_nft_output_but_created() {
 
 #[test]
 fn nft_in_output_and_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -517,7 +517,7 @@ fn nft_in_output_and_sender() {
 
 #[test]
 fn missing_ed25519_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -563,7 +563,7 @@ fn missing_ed25519_sender() {
 
 #[test]
 fn missing_ed25519_issuer_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -609,7 +609,7 @@ fn missing_ed25519_issuer_created() {
 
 #[test]
 fn missing_ed25519_issuer_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -652,7 +652,7 @@ fn missing_ed25519_issuer_transition() {
 
 #[test]
 fn missing_account_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -698,7 +698,7 @@ fn missing_account_sender() {
 
 #[test]
 fn missing_account_issuer_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -744,7 +744,7 @@ fn missing_account_issuer_created() {
 
 #[test]
 fn missing_account_issuer_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -787,7 +787,7 @@ fn missing_account_issuer_transition() {
 
 #[test]
 fn missing_nft_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -833,7 +833,7 @@ fn missing_nft_sender() {
 
 #[test]
 fn missing_nft_issuer_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -879,7 +879,7 @@ fn missing_nft_issuer_created() {
 
 #[test]
 fn missing_nft_issuer_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -922,7 +922,7 @@ fn missing_nft_issuer_transition() {
 
 #[test]
 fn increase_nft_amount() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -981,7 +981,7 @@ fn increase_nft_amount() {
 
 #[test]
 fn decrease_nft_amount() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1040,19 +1040,19 @@ fn decrease_nft_amount() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None
-            ));
+                None,
+            );
         }
     });
 }
 
 #[test]
 fn prefer_basic_to_nft() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1112,7 +1112,7 @@ fn prefer_basic_to_nft() {
 
 #[test]
 fn take_amount_from_nft_to_fund_basic() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1184,7 +1184,7 @@ fn take_amount_from_nft_to_fund_basic() {
 
 #[test]
 fn nft_burn_should_validate_nft_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1244,7 +1244,7 @@ fn nft_burn_should_validate_nft_sender() {
 
 #[test]
 fn nft_burn_should_validate_nft_address() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1304,7 +1304,7 @@ fn nft_burn_should_validate_nft_address() {
 
 #[test]
 fn transitioned_zero_nft_id_no_longer_is_zero() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -1363,7 +1363,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
 
 #[test]
 fn changed_immutable_metadata() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     #[cfg(feature = "irc_27")]
