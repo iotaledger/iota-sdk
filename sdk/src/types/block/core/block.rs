@@ -17,6 +17,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlockBody, ValidationBlockBody},
     output::AccountId,
+    payload::Payload,
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
@@ -157,7 +158,7 @@ impl Block {
     /// Creates a new [`Block`].
     #[inline(always)]
     pub fn new(header: BlockHeader, body: BlockBody, signature: impl Into<Signature>) -> Result<Self, Error> {
-        verify_block_slot(&header, &body)?;
+        // verify_block_slot(&header, &body)?;
 
         let signature = signature.into();
 
@@ -282,9 +283,6 @@ impl Packable for Block {
 
         let header = BlockHeader::unpack(unpacker, protocol_params)?;
         let body = BlockBody::unpack(unpacker, protocol_params)?;
-
-        verify_block_slot(&header, &body).map_err(UnpackError::Packable)?;
-
         let signature = Signature::unpack_inner(unpacker, protocol_params)?;
 
         let block = Self {
@@ -293,7 +291,9 @@ impl Packable for Block {
             signature,
         };
 
-        if protocol_params.is_some() {
+        if let Some(protocol_params) = protocol_params {
+            verify_block_slot(&block.header, &block.body, &protocol_params).map_err(UnpackError::Packable)?;
+
             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
             } else {
@@ -309,7 +309,32 @@ impl Packable for Block {
     }
 }
 
-fn verify_block_slot(header: &BlockHeader, body: &BlockBody) -> Result<(), Error> {
+fn verify_block_slot(header: &BlockHeader, body: &BlockBody, params: &ProtocolParameters) -> Result<(), Error> {
+    if let BlockBody::Basic(basic) = body {
+        if let Some(Payload::SignedTransaction(signed_transaction)) = basic.payload() {
+            let transaction = signed_transaction.transaction();
+            let block_slot = params.slot_index(header.issuing_time / 1_000_000_000);
+
+            if block_slot < transaction.creation_slot() {
+                panic!();
+            }
+
+            if let Some(commitment) = signed_transaction.transaction().context_inputs().commitment() {
+                let commitment_slot = commitment.slot_index();
+
+                if !(block_slot - params.max_committable_age()..=block_slot - params.min_committable_age())
+                    .contains(&commitment_slot)
+                {
+                    panic!();
+                }
+
+                if commitment_slot > header.slot_commitment_id.slot_index() {
+                    panic!();
+                }
+            }
+        }
+    }
+
     Ok(())
 }
 
