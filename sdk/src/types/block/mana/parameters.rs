@@ -98,22 +98,6 @@ impl ManaParameters {
     }
 }
 
-impl Default for ManaParameters {
-    fn default() -> Self {
-        // TODO: use actual values
-        Self {
-            bits_count: 63,
-            generation_rate: Default::default(),
-            generation_rate_exponent: Default::default(),
-            decay_factors: Default::default(),
-            decay_factors_exponent: Default::default(),
-            decay_factor_epochs_sum: Default::default(),
-            decay_factor_epochs_sum_exponent: Default::default(),
-            annual_decay_factor_percentage: Default::default(),
-        }
-    }
-}
-
 impl ProtocolParameters {
     /// Applies mana decay to the given mana.
     pub fn mana_with_decay(
@@ -219,65 +203,23 @@ const fn fixed_point_multiply(value: u64, mult_factor: u32, shift_factor: u8) ->
     ((value as u128 * mult_factor as u128) >> shift_factor) as u64
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
+    use crate::types::block::protocol::iota_mainnet_protocol_parameters;
 
     // Tests from https://github.com/iotaledger/iota.go/blob/develop/mana_decay_provider_test.go
 
     fn params() -> &'static ProtocolParameters {
-        use once_cell::sync::Lazy;
-        static PARAMS: Lazy<ProtocolParameters> = Lazy::new(|| {
-            let mut params = ProtocolParameters {
-                genesis_slot: 0,
-                genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
-                slots_per_epoch_exponent: 13,
-                slot_duration_in_seconds: 10,
-                token_supply: 1813620509061365,
-                mana_parameters: ManaParameters {
-                    bits_count: 63,
-                    generation_rate: 1,
-                    generation_rate_exponent: 17,
-                    decay_factors_exponent: 32,
-                    decay_factor_epochs_sum_exponent: 21,
-                    annual_decay_factor_percentage: 70,
-                    ..Default::default()
-                },
-                ..Default::default()
-            };
-            params.mana_parameters.decay_factors = {
-                let epochs_in_table = (u16::MAX as usize).min(params.epochs_per_year().floor() as usize);
-                let decay_per_epoch = params.decay_per_epoch();
-                (1..=epochs_in_table)
-                    .map(|epoch| {
-                        (decay_per_epoch.powi(epoch as _)
-                            * 2f64.powi(params.mana_parameters().decay_factors_exponent() as _))
-                        .floor() as u32
-                    })
-                    .collect::<Box<[_]>>()
-            }
-            .try_into()
-            .unwrap();
-            params.mana_parameters.decay_factor_epochs_sum = {
-                let delta = params.epochs_per_year().recip();
-                let annual_decay_factor = params.mana_parameters().annual_decay_factor();
-                (annual_decay_factor.powf(delta) / (1.0 - annual_decay_factor.powf(delta))
-                    * (2f64.powi(params.mana_parameters().decay_factor_epochs_sum_exponent() as _)))
-                .floor() as _
-            };
-            params
-        });
-        &PARAMS
+        iota_mainnet_protocol_parameters()
     }
 
     #[test]
     fn mana_decay_no_factors() {
-        let mana_parameters = ManaParameters {
-            decay_factors: Box::<[_]>::default().try_into().unwrap(),
-            ..Default::default()
-        };
+        let mut mana_parameters = params().mana_parameters().clone();
+        mana_parameters.decay_factors = Box::<[_]>::default().try_into().unwrap();
         assert_eq!(mana_parameters.decay(100, 100), 100);
     }
 

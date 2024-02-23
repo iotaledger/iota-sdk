@@ -12,12 +12,11 @@ use iota_sdk::{
             unlock_condition::AddressUnlockCondition, BasicOutputBuilder, DelegationId, DelegationOutputBuilder,
             OutputId,
         },
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::{
             address::rand_account_address, output::rand_output_metadata_with_id,
             transaction::rand_transaction_id_with_slot_index,
         },
-        slot::SlotIndex,
     },
 };
 use pretty_assertions::assert_eq;
@@ -26,7 +25,7 @@ use crate::client::{BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX};
 
 #[test]
 fn remainder_needed_for_mana() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
 
     let delegation_input =
         DelegationOutputBuilder::new_with_amount(1_000_000, DelegationId::null(), rand_account_address())
@@ -97,7 +96,11 @@ fn remainder_needed_for_mana() {
                 .iter()
                 .map(|i| i
                     .output
-                    .available_mana(&protocol_parameters, SlotIndex(0), SLOT_INDEX)
+                    .available_mana(
+                        &protocol_parameters,
+                        i.output_id().transaction_id().slot_index(),
+                        SLOT_INDEX
+                    )
                     .unwrap())
                 .sum::<u64>(),
         selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>()

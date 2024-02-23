@@ -20,7 +20,7 @@ use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
 };
-use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
+use packable::{error::UnexpectedEOF, PackableExt};
 use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
@@ -230,10 +230,8 @@ impl SecretManage for LedgerSecretManager {
         drop(ledger);
         drop(lock);
 
-        let mut unpacker = SliceUnpacker::new(&signature_bytes);
-
         // Unpack and return signature.
-        return match Unlock::unpack::<_, true>(&mut unpacker, &())? {
+        return match Unlock::unpack_bytes_verified(signature_bytes, &())? {
             Unlock::Signature(s) => match *s {
                 SignatureUnlock(Signature::Ed25519(signature)) => Ok(signature),
             },
@@ -388,12 +386,11 @@ impl SecretManage for LedgerSecretManager {
         let signature_bytes = ledger.sign(input_len as u16).map_err(Error::from)?;
         drop(ledger);
         drop(lock);
-        let mut unpacker = SliceUnpacker::new(&signature_bytes);
 
         // unpack signature to unlocks
         let mut unlocks = Vec::new();
         for _ in 0..input_len {
-            let unlock = Unlock::unpack::<_, true>(&mut unpacker, &())?;
+            let unlock = Unlock::unpack_bytes_verified(&signature_bytes, &())?;
             // The ledger nano can return the same SignatureUnlocks multiple times, so only insert it once
             match unlock {
                 Unlock::Signature(_) => {

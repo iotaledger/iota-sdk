@@ -201,12 +201,12 @@ impl<Flag: 'static + CapabilityFlag> Packable for Capabilities<Flag> {
         Ok(())
     }
 
-    fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
+    fn unpack<U: packable::unpacker::Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         Self::from_prefix_box_slice(
-            BoxedSlicePrefix::unpack::<_, VERIFY>(unpacker, visitor)
+            BoxedSlicePrefix::unpack(unpacker, visitor)
                 .map_packable_err(|e| match e {
                     UnpackPrefixError::Item(i) | UnpackPrefixError::Prefix(i) => i,
                 })

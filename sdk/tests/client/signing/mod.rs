@@ -25,7 +25,7 @@ use iota_sdk::{
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
@@ -45,7 +45,7 @@ async fn all_combined() -> Result<()> {
         "mirror add nothing long orphan hat this rough scare gallery fork twelve old shrug voyage job table obscure mimic holiday possible proud giraffe fan".to_owned(),
     )?;
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let ed25519_bech32_addresses = secret_manager
         .generate_ed25519_addresses(

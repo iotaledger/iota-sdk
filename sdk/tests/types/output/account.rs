@@ -3,7 +3,7 @@
 
 use iota_sdk::types::block::{
     output::{AccountOutput, Feature, MinimumOutputAmount},
-    protocol::protocol_parameters,
+    protocol::iota_mainnet_protocol_parameters,
     rand::output::{
         feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
         rand_account_id, rand_account_output,
@@ -15,7 +15,7 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn builder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let account_id = rand_account_id();
     let address_1 = rand_address_unlock_condition_different_from_account_id(&account_id);
     let address_2 = rand_address_unlock_condition_different_from_account_id(&account_id);
@@ -70,10 +70,10 @@ fn builder() {
 
 #[test]
 fn pack_unpack() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let output = rand_account_output(protocol_parameters.token_supply());
     let bytes = output.pack_to_vec();
-    let output_unpacked = AccountOutput::unpack_verified(bytes, &protocol_parameters).unwrap();
+    let output_unpacked = AccountOutput::unpack_bytes_verified(bytes, &protocol_parameters).unwrap();
 
     assert_eq!(output, output_unpacked);
 }
