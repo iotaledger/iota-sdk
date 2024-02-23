@@ -2477,7 +2477,7 @@ fn automatic_allotment_provided_in_and_output() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2)
+    .with_min_mana_allotment(account_id_1, 2, true)
     .select()
     .unwrap();
 
