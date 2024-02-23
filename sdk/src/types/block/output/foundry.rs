@@ -97,7 +97,7 @@ impl FoundryOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), serial_number, token_scheme)
     }
 
-    /// Creates an [`FoundryOutputBuilder`] with a provided amount, unless it is below the minimum.
+    /// Creates a [`FoundryOutputBuilder`] with a provided amount, unless it is below the minimum.
     pub fn new_with_amount_or_minimum(
         amount: u64,
         serial_number: u32,
