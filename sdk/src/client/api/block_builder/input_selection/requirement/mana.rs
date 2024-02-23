@@ -39,7 +39,7 @@ impl InputSelection {
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
             self.selected_inputs = Self::sort_input_signing_data(
                 std::mem::take(&mut self.selected_inputs),
-                self.creation_slot,
+                self.latest_slot_commitment_id.slot_index(),
                 self.protocol_parameters.committable_age_range(),
             )?;
 
