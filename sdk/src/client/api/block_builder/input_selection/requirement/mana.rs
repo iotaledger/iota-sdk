@@ -268,6 +268,8 @@ impl InputSelection {
         let mut required_mana =
             self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
         if include_remainders {
+            // Add the remainder outputs mana as well as the excess mana we've allocated to add to existing outputs
+            // later.
             required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana;
         }
 
