@@ -7,3 +7,4 @@ mod foundry;
 mod nft;
 
 mod feature;
+mod proof;
