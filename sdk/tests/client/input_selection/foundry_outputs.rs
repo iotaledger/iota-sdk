@@ -1228,7 +1228,7 @@ fn melt_and_burn_native_tokens() {
 }
 
 #[test]
-fn auto_transition_nft_less_than_min() {
+fn auto_transition_foundry_less_than_min() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
@@ -1296,7 +1296,7 @@ fn auto_transition_nft_less_than_min() {
 }
 
 #[test]
-fn auto_transition_nft_less_than_min_additional() {
+fn auto_transition_foundry_less_than_min_additional() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
