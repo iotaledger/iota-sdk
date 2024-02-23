@@ -38,7 +38,7 @@ impl BasicOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount))
     }
 
-    /// Creates an [`BasicOutputBuilder`] with a provided amount, unless it is below the minimum.
+    /// Creates a [`BasicOutputBuilder`] with a provided amount, unless it is below the minimum.
     pub fn new_with_amount_or_minimum(amount: u64, params: StorageScoreParameters) -> Self {
         Self::new(OutputBuilderAmount::AmountOrMinimum(amount, params))
     }
