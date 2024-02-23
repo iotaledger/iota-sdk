@@ -13,7 +13,7 @@ use crate::{
         context_input::{ContextInput, ContextInputs},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{Output, OutputCommitmentProof, OutputIdProof, OUTPUT_COUNT_RANGE},
+        output::{Output, OutputCommitmentProof, OutputIdProof, ProofError, OUTPUT_COUNT_RANGE},
         payload::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
             OptionalPayload, Payload,
@@ -315,16 +315,13 @@ impl Transaction {
 
     /// Returns a proof for the output in the transaction at the given index,
     /// if the transaction has an output at that index.
-    pub fn output_id_proof(&self, index: u16) -> Option<OutputIdProof> {
-        let num_outputs = self.outputs().len() as u16;
-        if index >= num_outputs {
-            return None;
-        }
-        Some(OutputIdProof {
+    pub fn output_id_proof(&self, index: u16) -> Result<OutputIdProof, ProofError> {
+        let output_commitment_proof = OutputCommitmentProof::new(&self.outputs, index)?;
+        Ok(OutputIdProof {
             slot: self.creation_slot(),
             output_index: index,
             transaction_commitment: self.transaction_commitment(),
-            output_commitment_proof: OutputCommitmentProof::new(&self.outputs, index),
+            output_commitment_proof,
         })
     }
 

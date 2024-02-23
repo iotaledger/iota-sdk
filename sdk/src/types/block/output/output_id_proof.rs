@@ -10,9 +10,28 @@ use packable::{Packable, PackableExt};
 #[cfg(feature = "serde")]
 use crate::utils::serde::prefix_hex_bytes;
 use crate::{
-    types::block::{output::Output, slot::SlotIndex, Error},
+    types::block::{output::Output, slot::SlotIndex},
     utils::merkle_hasher::{largest_power_of_two, LEAF_HASH_PREFIX, NODE_HASH_PREFIX},
 };
+
+#[derive(Debug, derive_more::Display)]
+pub enum ProofError {
+    #[display(fmt = "invalid output ID proof kind: {_0}")]
+    InvalidProofKind(u8),
+    #[display(fmt = "index {index} is out of range, outputs length {len}")]
+    IndexOutOfRange { index: u16, len: u16 },
+    #[display(fmt = "no outputs provided")]
+    NoOutputs,
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ProofError {}
+
+impl From<Infallible> for ProofError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
 
 /// The proof of the output identifier.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
@@ -21,7 +40,7 @@ use crate::{
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProofError)]
 pub struct OutputIdProof {
     pub slot: SlotIndex,
     pub output_index: u16,
@@ -32,12 +51,25 @@ pub struct OutputIdProof {
 }
 
 impl OutputCommitmentProof {
-    pub fn new(outputs: &[Output], index: u16) -> Self {
+    pub fn new(outputs: &[Output], index: u16) -> Result<Self, ProofError> {
+        let num_outputs = outputs.len() as u16;
+        if num_outputs == 0 {
+            Err(ProofError::NoOutputs)
+        } else if index >= num_outputs {
+            Err(ProofError::IndexOutOfRange {
+                index,
+                len: num_outputs,
+            })
+        } else {
+            Ok(Self::proof(outputs, index))
+        }
+    }
+
+    fn proof(outputs: &[Output], index: u16) -> Self {
         if let [output] = outputs {
             Self::value(&output.pack_to_vec())
         } else {
             let num_outputs = outputs.len() as u16;
-            debug_assert!(num_outputs > 0 && index < num_outputs, "n={num_outputs}, index={index}");
 
             // Select a `pivot` element to split `data` into two slices `left` and `right`.
             let pivot = largest_power_of_two(num_outputs as _) as u16;
@@ -45,10 +77,10 @@ impl OutputCommitmentProof {
 
             if index < pivot {
                 // `value` is contained in the left subtree, and the `right` subtree can be hashed together.
-                Self::node(Self::new(left, index), Self::hash(right))
+                Self::node(Self::proof(left, index), Self::hash(right))
             } else {
                 // `value` is contained in the right subtree, and the `left` subtree can be hashed together.
-                Self::node(Self::hash(left), Self::new(right, index - pivot))
+                Self::node(Self::hash(left), Self::proof(right, index - pivot))
             }
         }
     }
@@ -83,17 +115,17 @@ impl OutputCommitmentProof {
     }
 }
 
-fn verify_output_commitment_type(proof: &OutputCommitmentProof) -> Result<(), Error> {
+fn verify_output_commitment_type(proof: &OutputCommitmentProof) -> Result<(), ProofError> {
     match proof {
-        OutputCommitmentProof::Leaf(_) => Err(Error::InvalidOutputProofKind(LeafHash::KIND)),
+        OutputCommitmentProof::Leaf(_) => Err(ProofError::InvalidProofKind(LeafHash::KIND)),
         _ => Ok(()),
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, derive_more::From, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
-#[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
-#[packable(unpack_error = Error)]
+#[packable(tag_type = u8, with_error = ProofError::InvalidProofKind)]
+#[packable(unpack_error = ProofError)]
 pub enum OutputCommitmentProof {
     #[packable(tag = HashableNode::KIND)]
     Node(HashableNode),
