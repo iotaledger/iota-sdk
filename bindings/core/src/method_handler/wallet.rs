@@ -10,7 +10,7 @@ use iota_sdk::{
         block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
         TryFromDto,
     },
-    wallet::{types::TransactionWithMetadataDto, Wallet},
+    wallet::{types::TransactionWithMetadataDto, ReturnStrategy, SendManaParams, Wallet},
 };
 
 use crate::{method::WalletMethod, response::Response};
@@ -397,6 +397,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::SendOutputs { outputs, options } => {
             let transaction = wallet.send_outputs(outputs, options).await?;
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
+        }
+        WalletMethod::SendMana { params, options } => {
+            let transaction = wallet.send_mana(*params, options).await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SetAlias { alias } => {

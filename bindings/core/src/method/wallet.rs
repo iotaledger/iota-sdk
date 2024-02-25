@@ -28,8 +28,8 @@ use iota_sdk::{
     },
     wallet::{
         BeginStakingParams, ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams,
-        CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendNativeTokenParams,
-        SendNftParams, SendParams, SyncOptions, TransactionOptions,
+        CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendManaParams,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions,
     },
     U256,
 };
@@ -435,6 +435,13 @@ pub enum WalletMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {
         outputs: Vec<Output>,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
+    /// Send mana.
+    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    SendMana {
+        params: Box<SendManaParams>,
         #[serde(default)]
         options: Option<TransactionOptions>,
     },

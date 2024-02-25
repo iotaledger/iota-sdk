@@ -367,6 +367,7 @@ pub enum Response {
     /// - [`ClaimOutputs`](crate::method::WalletMethod::ClaimOutputs)
     /// - [`Send`](crate::method::WalletMethod::Send)
     /// - [`SendOutputs`](crate::method::WalletMethod::SendOutputs)
+    /// - [`SendMana`](crate::method::WalletMethod::SendMana)
     /// - [`SignAndSubmitTransaction`](crate::method::WalletMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::WalletMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionWithMetadataDto),
