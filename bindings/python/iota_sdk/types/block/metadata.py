@@ -30,7 +30,7 @@ class BlockMetadata:
     transaction_failure_reason: Optional[TransactionFailureReason] = None
 
 
-class BlockState(Enum):
+class BlockState(str, Enum):
     """Describes the state of a block.
 
     Attributes:
@@ -41,12 +41,12 @@ class BlockState(Enum):
         Rejected: Rejected by the node, and user should reissue payload if it contains one.
         Failed: Not successfully issued due to failure reason.
     """
-    Pending = 0
-    Accepted = 1
-    Confirmed = 2
-    Finalized = 3
-    Rejected = 4
-    Failed = 5
+    Pending = 'pending'
+    Accepted = 'accepted'
+    Confirmed = 'confirmed'
+    Finalized = 'finalized'
+    Rejected = 'rejected'
+    Failed = 'failed'
 
 
 class BlockFailureReason(IntEnum):
