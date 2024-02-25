@@ -10,7 +10,7 @@ use iota_sdk::{
         block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
         TryFromDto,
     },
-    wallet::{types::TransactionWithMetadataDto, ReturnStrategy, SendManaParams, Wallet},
+    wallet::{types::TransactionWithMetadataDto, Wallet},
 };
 
 use crate::{method::WalletMethod, response::Response};

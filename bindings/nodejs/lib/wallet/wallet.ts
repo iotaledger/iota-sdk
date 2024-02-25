@@ -30,6 +30,7 @@ import {
     ConsolidationParams,
     CreateDelegationTransaction,
     BeginStakingParams,
+    SendManaParams,
 } from '../types/wallet';
 import { Client, INode, Burn, PreparedTransactionData } from '../client';
 import {
@@ -1695,6 +1696,31 @@ export class Wallet {
             name: 'sendOutputs',
             data: {
                 outputs,
+                options: transactionOptions,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
+    }
+
+    /**
+     * Send mana.
+     *
+     * @param params Amount, Address, and Return Strategy.
+     * @param transactionOptions Additional transaction options.
+     * @returns The sent transaction.
+     */
+    async sendMana(
+        params: SendManaParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<TransactionWithMetadata> {
+        const response = await this.methodHandler.callMethod({
+            name: 'sendMana',
+            data: {
+                params,
                 options: transactionOptions,
             },
         });

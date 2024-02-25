@@ -4,6 +4,7 @@
 import { SlotIndex } from '../block/slot';
 import { Bech32Address, NftId, TokenId } from '../block';
 import { NumericString, u256, u64 } from '../utils';
+import { ReturnStrategy } from './output-params';
 
 /** A Bip44 address */
 export interface Bip44Address {
@@ -26,7 +27,7 @@ export interface SendParams {
      * given the provided amount. If a storage deposit is needed and a return address is not provided, it will
      * default to the address of the wallet.
      */
-    returnAddress?: string;
+    returnAddress?: Bech32Address;
     /**
      * Expiration in seconds, after which the output will be available for the sender again, if not spent by the
      * receiver already. The expiration will only be used if one is necessary given the provided amount. If an
@@ -67,4 +68,14 @@ export interface GenerateAddressOptions {
     internal: boolean;
     /** Whether to display the generated address on Ledger Nano devices. */
     ledgerNanoPrompt: boolean;
+}
+
+/** Parameters for sending mana. */
+export interface SendManaParams {
+    /** Amount of mana to send, e.g. 1000000. */
+    mana: u64 | NumericString;
+    /** Recipient address, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3. */
+    address: Bech32Address;
+    /** Whether to gift the storage deposit or not. */
+    return_strategy?: ReturnStrategy;
 }

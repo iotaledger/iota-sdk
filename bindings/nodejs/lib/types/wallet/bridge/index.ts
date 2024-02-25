@@ -39,6 +39,7 @@ import type {
     __PrepareSendNativeTokensMethod__,
     __PrepareSendNftMethod__,
     __SendOutputsMethod__,
+    __SendManaMethod__,
     __SetAliasMethod__,
     __SetDefaultSyncOptionsMethod__,
     __SignTransactionMethod__,
@@ -120,6 +121,7 @@ export type __WalletMethod__ =
     | __PrepareSendNativeTokensMethod__
     | __PrepareSendNftMethod__
     | __SendOutputsMethod__
+    | __SendManaMethod__
     | __SetAliasMethod__
     | __SetDefaultSyncOptionsMethod__
     | __SignTransactionMethod__

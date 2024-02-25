@@ -11,6 +11,7 @@ import type {
     SendParams,
     SendNativeTokenParams,
     SendNftParams,
+    SendManaParams,
 } from '../address';
 import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
@@ -418,6 +419,14 @@ export type __SendOutputsMethod__ = {
     name: 'sendOutputs';
     data: {
         outputs: Output[];
+        options?: TransactionOptions;
+    };
+};
+
+export type __SendManaMethod__ = {
+    name: 'sendMana';
+    data: {
+        params: SendManaParams;
         options?: TransactionOptions;
     };
 };
