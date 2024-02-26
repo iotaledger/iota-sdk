@@ -19,10 +19,12 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
             UnlockConditions,
         },
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        ChainId, DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
+        StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
+    slot::SlotIndex,
     unlock::Unlock,
     Error,
 };
@@ -103,6 +105,11 @@ impl AnchorOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), anchor_id)
     }
 
+    /// Creates an [`AnchorOutputBuilder`] with a provided amount, unless it is below the minimum.
+    pub fn new_with_amount_or_minimum(amount: u64, anchor_id: AnchorId, params: StorageScoreParameters) -> Self {
+        Self::new(OutputBuilderAmount::AmountOrMinimum(amount, params), anchor_id)
+    }
+
     /// Creates an [`AnchorOutputBuilder`] with provided storage score parameters.
     /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
@@ -126,6 +133,13 @@ impl AnchorOutputBuilder {
     #[inline(always)]
     pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
+        self
+    }
+
+    /// Sets the amount to the provided value, unless it is below the minimum.
+    #[inline(always)]
+    pub fn with_amount_or_minimum(mut self, amount: u64, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::AmountOrMinimum(amount, params);
         self
     }
 
@@ -275,6 +289,7 @@ impl AnchorOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::AmountOrMinimum(amount, params) => output.minimum_amount(params).max(amount),
             OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
@@ -449,6 +464,40 @@ impl AnchorOutput {
         };
 
         Ok(())
+    }
+
+    /// Returns all the mana held by the output, which is potential + stored, all decayed.
+    pub fn available_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<u64, Error> {
+        let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
+
+        decayed_mana
+            .stored
+            .checked_add(decayed_mana.potential)
+            .ok_or(Error::ConsumedManaOverflow)
+    }
+
+    /// Returns the decayed stored and potential mana of the output.
+    pub fn decayed_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<DecayedMana, Error> {
+        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
+        let generation_amount = self.amount().saturating_sub(min_deposit);
+        let stored_mana = protocol_parameters.mana_with_decay(self.mana(), creation_index, target_index)?;
+        let potential_mana =
+            protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
+
+        Ok(DecayedMana {
+            stored: stored_mana,
+            potential: potential_mana,
+        })
     }
 
     // Transition, just without full ValidationContext

@@ -42,7 +42,7 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
+    output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ProofError, ValueHash},
     storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
@@ -74,6 +74,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
+    AmountOrMinimum(u64, StorageScoreParameters),
     MinimumAmount(StorageScoreParameters),
 }
 
@@ -254,25 +255,14 @@ impl Output {
         creation_index: SlotIndex,
         target_index: SlotIndex,
     ) -> Result<DecayedMana, Error> {
-        let (amount, mana) = match self {
-            Self::Basic(output) => (output.amount(), output.mana()),
-            Self::Account(output) => (output.amount(), output.mana()),
-            Self::Anchor(output) => (output.amount(), output.mana()),
-            Self::Foundry(output) => (output.amount(), 0),
-            Self::Nft(output) => (output.amount(), output.mana()),
-            Self::Delegation(output) => (output.amount(), 0),
-        };
-
-        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
-        let generation_amount = amount.saturating_sub(min_deposit);
-        let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
-        let potential_mana =
-            protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
-
-        Ok(DecayedMana {
-            stored: stored_mana,
-            potential: potential_mana,
-        })
+        match self {
+            Self::Basic(output) => output.decayed_mana(protocol_parameters, creation_index, target_index),
+            Self::Account(output) => output.decayed_mana(protocol_parameters, creation_index, target_index),
+            Self::Anchor(output) => output.decayed_mana(protocol_parameters, creation_index, target_index),
+            Self::Foundry(output) => output.decayed_mana(protocol_parameters, creation_index, target_index),
+            Self::Nft(output) => output.decayed_mana(protocol_parameters, creation_index, target_index),
+            Self::Delegation(output) => output.decayed_mana(protocol_parameters, creation_index, target_index),
+        }
     }
 
     /// Returns the unlock conditions of an [`Output`], if any.

@@ -357,11 +357,17 @@ pub enum WalletMethod {
     PrepareExtendStaking {
         account_id: AccountId,
         additional_epochs: u32,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
     },
     /// Prepare to end staking.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareEndStaking { account_id: AccountId },
+    PrepareEndStaking {
+        account_id: AccountId,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
     /// Announce candidacy for an account.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
     #[serde(rename_all = "camelCase")]

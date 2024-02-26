@@ -340,12 +340,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::PrepareExtendStaking {
             account_id,
             additional_epochs,
+            options,
         } => {
-            let data = wallet.prepare_extend_staking(account_id, additional_epochs).await?;
+            let data = wallet
+                .prepare_extend_staking(account_id, additional_epochs, options)
+                .await?;
             Response::PreparedTransaction(data)
         }
-        WalletMethod::PrepareEndStaking { account_id } => {
-            let data = wallet.prepare_end_staking(account_id).await?;
+        WalletMethod::PrepareEndStaking { account_id, options } => {
+            let data = wallet.prepare_end_staking(account_id, options).await?;
             Response::PreparedTransaction(data)
         }
         WalletMethod::AnnounceCandidacy { account_id } => {
