@@ -55,6 +55,7 @@ impl InputSelection {
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let mut builder = AccountOutputBuilder::from(input)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
@@ -67,9 +68,7 @@ impl InputSelection {
             )?)
         }
 
-        let output = builder
-            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
-            .finish_output()?;
+        let output = builder.finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
@@ -104,9 +103,9 @@ impl InputSelection {
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let output = NftOutputBuilder::from(input)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
             .with_nft_id(nft_id)
             .with_features(features)
-            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
             .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{nft_id:?}");
