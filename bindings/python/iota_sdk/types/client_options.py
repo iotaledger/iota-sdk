@@ -21,6 +21,7 @@ class Duration:
 @dataclass
 class MqttBrokerOptions:
     """Options for the MQTT broker.
+
         Attributes:
         automatic_disconnect (bool):
             Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not.
