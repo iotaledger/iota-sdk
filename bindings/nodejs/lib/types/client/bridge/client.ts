@@ -49,14 +49,14 @@ export interface __GetHealthMethod__ {
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
-}
-
-export interface __GetNodeInfoMethod__ {
-    name: 'getNodeInfo';
     data: {
         url: string;
         auth?: Auth;
     };
+}
+
+export interface __GetNodeInfoMethod__ {
+    name: 'getNodeInfo';
 }
 
 export interface __GetRoutesMethod__ {

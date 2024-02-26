@@ -125,9 +125,9 @@ export class Client {
     /**
      * Get the node information together with the url of the used node.
      */
-    async getInfo(): Promise<InfoResponse> {
+    async getNodeInfo(): Promise<NodeInfoResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'getInfo',
+            name: 'getNodeInfo',
         });
 
         return JSON.parse(response).payload;
@@ -139,9 +139,9 @@ export class Client {
      * @param url The URL of the node.
      * @param auth An authentication object (e.g. JWT).
      */
-    async getNodeInfo(url: string, auth?: Auth): Promise<NodeInfoResponse> {
+    async getInfo(url: string, auth?: Auth): Promise<InfoResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'getNodeInfo',
+            name: 'getInfo',
             data: {
                 url,
                 auth,
