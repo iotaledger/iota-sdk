@@ -9,11 +9,10 @@ pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
-use alloc::collections::BTreeMap;
-use core::ops::Deref;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use packable::PackableExt;
+use primitive_types::U256;
 
 use self::requirement::account::is_account_with_id;
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
@@ -29,7 +28,7 @@ use crate::{
         mana::ManaAllotment,
         output::{
             AccountId, AccountOutput, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, FoundryOutput,
-            NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
+            NftOutput, NftOutputBuilder, Output, OutputId, TokenId, OUTPUT_COUNT_RANGE,
         },
         payload::{
             signed_transaction::{Transaction, TransactionCapabilities},
@@ -647,8 +646,8 @@ impl InputSelection {
     }
 
     fn validate_transitions(inputs: &[InputSigningData], outputs: &[Output]) -> Result<(), Error> {
-        let mut input_native_tokens_builder = NativeTokensBuilder::new();
-        let mut output_native_tokens_builder = NativeTokensBuilder::new();
+        let mut input_native_tokens_builder = BTreeMap::<TokenId, U256>::new();
+        let mut output_native_tokens_builder = BTreeMap::<TokenId, U256>::new();
         let mut input_accounts = Vec::new();
         let mut input_chains_foundries = hashbrown::HashMap::new();
         let mut input_foundries = Vec::new();
@@ -656,7 +655,7 @@ impl InputSelection {
 
         for input in inputs {
             if let Some(native_token) = input.output.native_token() {
-                input_native_tokens_builder.add_native_token(*native_token)?;
+                (*input_native_tokens_builder.entry(*native_token.token_id()).or_default()) += native_token.amount();
             }
             match &input.output {
                 Output::Basic(basic) => {
@@ -680,7 +679,9 @@ impl InputSelection {
 
         for output in outputs {
             if let Some(native_token) = output.native_token() {
-                output_native_tokens_builder.add_native_token(*native_token)?;
+                (*output_native_tokens_builder
+                    .entry(*native_token.token_id())
+                    .or_default()) += native_token.amount();
             }
         }
 
@@ -733,8 +734,8 @@ impl InputSelection {
                         if let Err(err) = FoundryOutput::transition_inner(
                             foundry_input.output.as_foundry(),
                             foundry_output,
-                            input_native_tokens_builder.deref(),
-                            output_native_tokens_builder.deref(),
+                            &input_native_tokens_builder,
+                            &output_native_tokens_builder,
                             // We use `all` capabilities here because this transition may be burning
                             // native tokens, and validation will fail without the capability.
                             &TransactionCapabilities::all(),
