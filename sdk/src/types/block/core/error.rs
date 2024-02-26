@@ -44,6 +44,12 @@ pub enum BlockError {
     },
     #[display(fmt = "unsupported address kind: {_0}")]
     UnsupportedAddressKind(u8),
+    #[display(fmt = "the block slot is before its contained transaction creation slot")]
+    BlockSlotBeforeTransactionCreationSlot,
+    #[display(fmt = "the transaction commitment slot is not in the allowed block slot interval")]
+    TransactionCommitmentSlotNotInBlockSlotInterval,
+    #[display(fmt = "the transaction commitment slot is after the block commitment slot")]
+    TransactionCommitmentSlotAfterBlockCommitmentSlot,
     #[from]
     Payload(PayloadError),
     #[from]

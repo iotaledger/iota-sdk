@@ -118,10 +118,8 @@ impl InputSelection {
         let additional_inputs = self.get_inputs_for_mana_balance()?;
         // If we needed more inputs to cover the additional allotment mana
         // then update remainders and re-run this requirement
-        if additional_inputs {
-            if !self.requirements.contains(&Requirement::Mana) {
-                self.requirements.push(Requirement::Mana);
-            }
+        if additional_inputs && !self.requirements.contains(&Requirement::Mana) {
+            self.requirements.push(Requirement::Mana);
         }
 
         Ok(Vec::new())

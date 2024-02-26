@@ -17,7 +17,7 @@ use crate::{
         context_input::{ContextInput, ContextInputs},
         input::{Input, InputError, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{Output, OutputError, OUTPUT_COUNT_RANGE},
+        output::{Output, OutputCommitmentProof, OutputError, OutputIdProof, ProofError, OUTPUT_COUNT_RANGE},
         payload::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
             OptionalPayload, Payload, PayloadError,
@@ -332,6 +332,18 @@ impl Transaction {
     fn output_commitment(&self) -> [u8; 32] {
         let outputs_serialized = self.outputs.iter().map(|o| o.pack_to_vec()).collect::<Vec<_>>();
         merkle_hasher::MerkleHasher::digest::<Blake2b256>(&outputs_serialized).into()
+    }
+
+    /// Returns a proof for the output in the transaction at the given index,
+    /// if the transaction has an output at that index.
+    pub fn output_id_proof(&self, index: u16) -> Result<OutputIdProof, ProofError> {
+        let output_commitment_proof = OutputCommitmentProof::new(&self.outputs, index)?;
+        Ok(OutputIdProof {
+            slot: self.creation_slot(),
+            output_index: index,
+            transaction_commitment: self.transaction_commitment(),
+            output_commitment_proof,
+        })
     }
 
     /// Computes the identifier of a [`Transaction`].
