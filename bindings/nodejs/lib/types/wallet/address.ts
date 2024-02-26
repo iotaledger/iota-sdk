@@ -60,11 +60,3 @@ export interface SendNftParams {
     /** The ID of the NFT to send. */
     nftId: NftId;
 }
-
-/** Options for address generation, useful with a Ledger Nano SecretManager */
-export interface GenerateAddressOptions {
-    /** Whether to generate a public or an internal (change) address. */
-    internal: boolean;
-    /** Whether to display the generated address on Ledger Nano devices. */
-    ledgerNanoPrompt: boolean;
-}
