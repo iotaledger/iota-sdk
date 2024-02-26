@@ -5,18 +5,16 @@ use alloc::collections::BTreeMap;
 use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
+use primitive_types::U256;
 
 use super::{Error, InputSelection};
 use crate::{
-    client::api::{
-        input_selection::requirement::native_tokens::{get_native_tokens, get_native_tokens_diff},
-        RemainderData,
-    },
+    client::api::{input_selection::requirement::native_tokens::get_native_tokens_diff, RemainderData},
     types::block::{
         address::{Address, Ed25519Address},
         output::{
             unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
-            NftOutput, Output, StorageScoreParameters,
+            NativeToken, NftOutput, Output, StorageScoreParameters, TokenId,
         },
         Error as BlockError,
     },
@@ -71,16 +69,7 @@ impl InputSelection {
     }
 
     pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), Error> {
-        let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
-        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
-
-        input_native_tokens.merge(minted_native_tokens)?;
-        output_native_tokens.merge(melted_native_tokens)?;
-
-        if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
-        }
+        let (input_native_tokens, output_native_tokens) = self.input_output_native_tokens()?;
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
@@ -110,17 +99,7 @@ impl InputSelection {
             }
         }
 
-        let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
-        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
-
-        input_native_tokens.merge(minted_native_tokens)?;
-        output_native_tokens.merge(melted_native_tokens)?;
-
-        if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
-        }
-
+        let (input_native_tokens, output_native_tokens) = self.input_output_native_tokens()?;
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
         let (input_mana, output_mana) = self.mana_sums(false)?;
@@ -210,7 +189,7 @@ impl InputSelection {
     /// tokens are remaining) and returns if there are native tokens as remainder.
     pub(crate) fn required_remainder_amount(
         &self,
-        remainder_native_tokens: Option<NativeTokens>,
+        remainder_native_tokens: Option<BTreeMap<TokenId, U256>>,
     ) -> Result<(u64, bool, bool), Error> {
         let native_tokens_remainder = remainder_native_tokens.is_some();
 
@@ -221,8 +200,9 @@ impl InputSelection {
                 ))));
 
         let remainder_amount = if let Some(native_tokens) = remainder_native_tokens {
+            let entry = native_tokens.first_key_value().unwrap();
             let nt_remainder_amount = remainder_builder
-                .with_native_token(*native_tokens.first().unwrap())
+                .with_native_token(NativeToken::new(*entry.0, entry.1)?)
                 .finish_output()?
                 .amount();
             // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
@@ -249,7 +229,7 @@ impl InputSelection {
 fn create_remainder_outputs(
     amount_diff: u64,
     mana_diff: u64,
-    native_tokens_diff: Option<NativeTokens>,
+    mut native_tokens_diff: Option<BTreeMap<TokenId, U256>>,
     remainder_address: Address,
     remainder_address_chain: Option<Bip44>,
     storage_score_parameters: StorageScoreParameters,
@@ -259,15 +239,15 @@ fn create_remainder_outputs(
     let mut catchall_native_token = None;
 
     // Start with the native tokens
-    if let Some(native_tokens) = native_tokens_diff {
-        if let Some((last, nts)) = native_tokens.split_last() {
+    if let Some(mut native_tokens) = native_tokens_diff {
+        if let Some(last) = native_tokens.pop_last() {
             // Save this one for the catchall
-            catchall_native_token.replace(*last);
+            catchall_native_token.replace(last);
             // Create remainder outputs with min amount
-            for native_token in nts {
+            for native_token in native_tokens {
                 let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
                     .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                    .with_native_token(*native_token)
+                    .with_native_token(NativeToken::new(native_token.0, native_token.1)?)
                     .finish_output()?;
                 log::debug!(
                     "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
@@ -283,7 +263,7 @@ fn create_remainder_outputs(
         .with_mana(mana_diff)
         .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
     if let Some(native_token) = catchall_native_token {
-        catchall = catchall.with_native_token(native_token);
+        catchall = catchall.with_native_token(NativeToken::new(native_token.0, native_token.1)?);
     }
     let catchall = catchall.finish_output()?;
     catchall.verify_storage_deposit(storage_score_parameters)?;

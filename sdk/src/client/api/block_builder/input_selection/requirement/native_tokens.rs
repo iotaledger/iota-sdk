@@ -56,7 +56,9 @@ pub(crate) fn get_native_tokens_diff(
 }
 
 impl InputSelection {
-    pub(crate) fn fulfill_native_tokens_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn input_output_native_tokens(
+        &self,
+    ) -> Result<(BTreeMap<TokenId, U256>, BTreeMap<TokenId, U256>), Error> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
@@ -74,6 +76,12 @@ impl InputSelection {
                 (*output_native_tokens.entry(burnt_native_token_id).or_default()) += burnt_native_token_amount;
             }
         }
+
+        Ok((input_native_tokens, output_native_tokens))
+    }
+
+    pub(crate) fn fulfill_native_tokens_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+        let (input_native_tokens, output_native_tokens) = self.input_output_native_tokens()?;
 
         // TODO weird that it happens in this direction?
         if let Some(diffs) = get_native_tokens_diff(&output_native_tokens, &input_native_tokens)? {
