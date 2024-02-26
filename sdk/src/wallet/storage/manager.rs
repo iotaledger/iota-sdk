@@ -142,10 +142,12 @@ mod tests {
     #[tokio::test]
     async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
-            .await
-            .unwrap()
-            .is_none());
+        assert!(
+            WalletBuilder::<SecretManager>::load(&storage_manager)
+                .await
+                .unwrap()
+                .is_none()
+        );
 
         let wallet_address = Bech32Address::new("rms".parse().unwrap(), Ed25519Address::null());
         let wallet_bip_path = Bip44::new(SHIMMER_COIN_TYPE);
