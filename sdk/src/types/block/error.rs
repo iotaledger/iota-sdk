@@ -22,7 +22,7 @@ use crate::types::block::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
         AccountId, AnchorId, ChainId, MetadataFeatureEntryCount, MetadataFeatureKeyLength, MetadataFeatureValueLength,
-        NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
+        NftId, OutputIndex, TagFeatureLength,
     },
     payload::{
         tagged_data::{TagLength, TaggedDataLength},
@@ -112,7 +112,6 @@ pub enum Error {
     InvalidMetadataFeatureEntryCount(<MetadataFeatureEntryCount as TryFrom<usize>>::Error),
     InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
-    InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
     InvalidManaDecayFactors,
     InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
@@ -326,7 +325,6 @@ impl fmt::Display for Error {
             Self::InvalidMetadataFeatureValueLength(length) => {
                 write!(f, "invalid metadata feature value length: {length}")
             }
-            Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),
             Self::InvalidManaDecayFactors => write!(f, "invalid mana decay factors"),
             Self::InvalidNftIndex(index) => write!(f, "invalid nft index: {index}"),

@@ -8,7 +8,7 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
+    types::block::output::{NativeToken, Output, TokenScheme},
 };
 
 pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -> Result<NativeTokensBuilder, Error> {

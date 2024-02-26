@@ -39,7 +39,7 @@ pub use self::{
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
     metadata::{OutputConsumptionMetadata, OutputInclusionMetadata, OutputMetadata},
-    native_token::{NativeToken, NativeTokensBuilder, TokenId},
+    native_token::{NativeToken, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ProofError, ValueHash},
@@ -49,7 +49,6 @@ pub use self::{
 };
 pub(crate) use self::{
     feature::{MetadataFeatureEntryCount, MetadataFeatureKeyLength, MetadataFeatureValueLength, TagFeatureLength},
-    native_token::NativeTokenCount,
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };

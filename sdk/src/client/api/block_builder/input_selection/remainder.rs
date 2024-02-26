@@ -16,7 +16,7 @@ use crate::{
         address::{Address, Ed25519Address},
         output::{
             unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
-            NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
+            NftOutput, Output, StorageScoreParameters,
         },
         Error as BlockError,
     },

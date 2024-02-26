@@ -5,9 +5,7 @@ use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{
-        unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
-    },
+    types::block::output::{unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, Output},
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
