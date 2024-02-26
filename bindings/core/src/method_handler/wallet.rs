@@ -20,8 +20,8 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
     let response = match method {
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
-        WalletMethod::Backup { destination, password } => {
-            wallet.backup(destination, password).await?;
+        WalletMethod::BackupToStrongholdSnapshot { destination, password } => {
+            wallet.backup_to_stronghold_snapshot(destination, password).await?;
             Response::Ok
         }
         #[cfg(feature = "stronghold")]
@@ -45,14 +45,14 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::Bool(is_available)
         }
         #[cfg(feature = "stronghold")]
-        WalletMethod::RestoreBackup {
+        WalletMethod::RestoreFromStrongholdSnapshot {
             source,
             password,
             ignore_if_coin_type_mismatch,
             ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_backup(
+                .restore_from_stronghold_snapshot(
                     source,
                     password,
                     ignore_if_coin_type_mismatch,
