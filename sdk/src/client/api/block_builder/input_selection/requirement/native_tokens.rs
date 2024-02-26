@@ -1,22 +1,27 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{cmp::Ordering, collections::HashSet};
+use std::{
+    cmp::Ordering,
+    collections::{BTreeMap, HashSet},
+};
 
 use primitive_types::U256;
 
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{NativeToken, Output, TokenScheme},
+    types::block::output::{NativeToken, Output, TokenId, TokenScheme},
 };
 
-pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -> Result<NativeTokensBuilder, Error> {
-    let mut required_native_tokens = NativeTokensBuilder::new();
+pub(crate) fn get_native_tokens<'a>(
+    outputs: impl Iterator<Item = &'a Output>,
+) -> Result<BTreeMap<TokenId, U256>, Error> {
+    let mut required_native_tokens = BTreeMap::<TokenId, U256>::new();
 
     for output in outputs {
         if let Some(native_token) = output.native_token() {
-            required_native_tokens.add_native_token(*native_token)?;
+            (*required_native_tokens.entry(*native_token.token_id()).or_default()) += native_token.amount();
         }
     }
 
@@ -25,10 +30,10 @@ pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -
 
 // TODO only handles one side
 pub(crate) fn get_native_tokens_diff(
-    inputs: &NativeTokensBuilder,
-    outputs: &NativeTokensBuilder,
-) -> Result<Option<NativeTokens>, Error> {
-    let mut native_tokens_diff = NativeTokensBuilder::new();
+    inputs: &BTreeMap<TokenId, U256>,
+    outputs: &BTreeMap<TokenId, U256>,
+) -> Result<Option<BTreeMap<TokenId, U256>>, Error> {
+    let mut native_tokens_diff = BTreeMap::<TokenId, U256>::new();
 
     for (token_id, input_amount) in inputs.iter() {
         match outputs.get(token_id) {
@@ -72,14 +77,14 @@ impl InputSelection {
             let mut newly_selected_inputs = Vec::new();
             let mut newly_selected_ids = HashSet::new();
 
-            for diff in diffs.iter() {
+            for (token_id, diff) in diffs {
                 let mut amount = U256::zero();
                 // TODO sort ?
                 let inputs = self.available_inputs.iter().filter(|input| {
                     input
                         .output
                         .native_token()
-                        .is_some_and(|native_token| native_token.token_id() == diff.token_id())
+                        .is_some_and(|native_token| native_token.token_id() == &token_id)
                 });
 
                 for input in inputs {
@@ -94,16 +99,16 @@ impl InputSelection {
                         newly_selected_inputs.push(input.clone());
                     }
 
-                    if amount >= diff.amount() {
+                    if amount >= diff {
                         break;
                     }
                 }
 
-                if amount < diff.amount() {
+                if amount < diff {
                     return Err(Error::InsufficientNativeTokenAmount {
-                        token_id: *diff.token_id(),
+                        token_id,
                         found: amount,
-                        required: diff.amount(),
+                        required: diff,
                     });
                 }
             }
@@ -123,9 +128,9 @@ impl InputSelection {
 
     pub(crate) fn get_minted_and_melted_native_tokens(
         &self,
-    ) -> Result<(NativeTokensBuilder, NativeTokensBuilder), Error> {
-        let mut minted_native_tokens = NativeTokensBuilder::new();
-        let mut melted_native_tokens = NativeTokensBuilder::new();
+    ) -> Result<(BTreeMap<TokenId, U256>, BTreeMap<TokenId, U256>), Error> {
+        let mut minted_native_tokens = BTreeMap::<TokenId, U256>::new();
+        let mut melted_native_tokens = BTreeMap::<TokenId, U256>::new();
 
         for output in self.non_remainder_outputs() {
             if let Output::Foundry(output_foundry) = output {
@@ -170,8 +175,7 @@ impl InputSelection {
                     let circulating_supply = output_foundry_simple_ts.circulating_supply();
 
                     if !circulating_supply.is_zero() {
-                        minted_native_tokens
-                            .add_native_token(NativeToken::new(output_foundry.token_id(), circulating_supply)?)?;
+                        (*minted_native_tokens.entry(output_foundry.token_id()).or_default()) += circulating_supply;
                     }
                 }
             }
