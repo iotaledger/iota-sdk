@@ -164,7 +164,7 @@ impl InputSelection {
     /// Gets requirements from burn.
     pub(crate) fn burn_requirements(&mut self) -> Result<(), Error> {
         if let Some(burn) = self.burn.as_ref() {
-            if burn.mana() {
+            if burn.mana() && self.initial_mana_excess()? > 0 {
                 self.transaction_capabilities
                     .add_capability(TransactionCapabilityFlag::BurnMana);
             }
