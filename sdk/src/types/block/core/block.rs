@@ -173,19 +173,6 @@ impl Block {
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
 
-    // /// Creates a new [`Block`].
-    // #[inline(always)]
-    // pub fn new(
-    //     header: BlockHeader,
-    //     body: BlockBody,
-    //     signature: impl Into<Signature>,
-    //     params: &ProtocolParameters,
-    // ) -> Result<Self, Error> {
-
-    // }
-
-    // TODO add new_unverified
-
     /// Creates a new [`UnsignedBlock`].
     #[inline(always)]
     pub fn build(header: BlockHeader, body: BlockBody) -> UnsignedBlock {
