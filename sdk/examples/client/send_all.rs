@@ -19,7 +19,7 @@ use iota_sdk::{
         Client,
     },
     types::block::{
-        output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, NativeTokensBuilder},
+        output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder},
         payload::{Payload, SignedTransactionPayload},
     },
 };
@@ -45,30 +45,41 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager_2 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC_2").unwrap())?;
     let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
-    let address = secret_manager_1
+    let from_address = secret_manager_1
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0]
         .clone();
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
-        .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(address))
+        .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+            from_address.clone(),
+        ))
         .await?;
 
     // Get the outputs by their id
     let outputs_responses = client.get_outputs_with_metadata(&output_ids_response.items).await?;
 
-    // Calculate the total amount and native tokens
+    let protocol_parameters = client.get_protocol_parameters().await?;
+
+    // Calculate the total amount
     let mut total_amount = 0;
-    let mut total_native_tokens = NativeTokensBuilder::new();
 
     let mut inputs = Vec::new();
+    let mut outputs = Vec::new();
 
     for res in outputs_responses {
-        if let Some(native_token) = res.output.native_token() {
-            total_native_tokens.add_native_token(native_token.clone())?;
-        }
         total_amount += res.output.amount();
+        if let Some(native_token) = res.output.native_token() {
+            // We don't want to send the native tokens, so return them and subtract out the storage amount.
+            let native_token_return =
+                BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+                    .add_unlock_condition(AddressUnlockCondition::new(from_address.clone()))
+                    .with_native_token(native_token.clone())
+                    .finish_output()?;
+            total_amount -= native_token_return.amount();
+            outputs.push(native_token_return);
+        }
         inputs.push(InputSigningData {
             output: res.output,
             output_metadata: res.metadata,
@@ -76,29 +87,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         });
     }
 
-    let total_native_tokens = total_native_tokens.finish()?;
-
     println!("Total amount: {total_amount}");
 
-    let address = secret_manager_2
+    let to_address = secret_manager_2
         .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0]
         .clone();
 
-    let mut basic_output_builder =
-        BasicOutputBuilder::new_with_amount(total_amount).add_unlock_condition(AddressUnlockCondition::new(address));
-
-    for native_token in total_native_tokens {
-        basic_output_builder = basic_output_builder.with_native_token(native_token);
-    }
-    let new_output = basic_output_builder.finish_output()?;
-
-    let protocol_parameters = client.get_protocol_parameters().await?;
+    // Add the output with the total amount we're sending
+    outputs.push(
+        BasicOutputBuilder::new_with_amount(total_amount)
+            .add_unlock_condition(AddressUnlockCondition::new(to_address.clone()))
+            .finish_output()?,
+    );
 
     let prepared_transaction = InputSelection::new(
         inputs,
-        [new_output],
-        None,
+        outputs,
+        [from_address.into_inner()],
         client.get_slot_index().await?,
         client.get_issuance().await?.latest_commitment.id(),
         protocol_parameters.clone(),
