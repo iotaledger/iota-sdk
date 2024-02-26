@@ -7,7 +7,7 @@ use derivative::Derivative;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::{Address, Bech32Address, Hrp},
         output::{AccountId, AnchorId, NftId, Output, OutputId, StorageScoreParameters},
         payload::signed_transaction::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
@@ -39,6 +39,12 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     HexToBech32 {
         hex: String,
+        bech32_hrp: Hrp,
+    },
+    /// Converts an address to its bech32 representation
+    #[serde(rename_all = "camelCase")]
+    AddressToBech32 {
+        address: Address,
         bech32_hrp: Hrp,
     },
     /// Transforms an account id to a bech32 encoded address

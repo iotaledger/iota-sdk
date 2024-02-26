@@ -14,7 +14,7 @@ use iota_sdk::{
         node_manager::node::NodeAuth,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::{Address, Bech32Address, Hrp},
         output::{
             feature::Feature, unlock_condition::UnlockCondition, AccountId, AnchorId, DelegationId, FoundryId, NftId,
             Output, OutputId, TokenScheme,
@@ -417,6 +417,9 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
+    /// Converts an address to its bech32 representation
+    #[serde(rename_all = "camelCase")]
+    AddressToBech32 { address: Address, bech32_hrp: Option<Hrp> },
     /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 {
