@@ -17,6 +17,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlockBody, ValidationBlockBody},
     output::AccountId,
+    payload::Payload,
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
@@ -56,8 +57,26 @@ impl UnsignedBlock {
         [self.header.hash(), self.body.hash()].concat()
     }
 
+    /// Finishes an [`UnsignedBlock`] into a [`Block`].
+    pub fn finish_with_params<'a>(
+        self,
+        signature: impl Into<Signature>,
+        params: impl Into<Option<&'a ProtocolParameters>>,
+    ) -> Result<Block, Error> {
+        if let Some(params) = params.into() {
+            verify_block_slot(&self.header, &self.body, params)?;
+        }
+
+        Ok(Block {
+            header: self.header,
+            body: self.body,
+            signature: signature.into(),
+        })
+    }
+
+    /// Finishes an [`UnsignedBlock`] into a [`Block`] without protocol validation.
     pub fn finish(self, signature: impl Into<Signature>) -> Result<Block, Error> {
-        Ok(Block::new(self.header, self.body, signature))
+        self.finish_with_params(signature, None)
     }
 }
 
@@ -153,18 +172,6 @@ impl Block {
     pub const LENGTH_MIN: usize = 46;
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
-
-    /// Creates a new [`Block`].
-    #[inline(always)]
-    pub fn new(header: BlockHeader, body: BlockBody, signature: impl Into<Signature>) -> Self {
-        let signature = signature.into();
-
-        Self {
-            header,
-            body,
-            signature,
-        }
-    }
 
     /// Creates a new [`UnsignedBlock`].
     #[inline(always)]
@@ -288,7 +295,9 @@ impl Packable for Block {
             signature,
         };
 
-        if protocol_params.is_some() {
+        if let Some(protocol_params) = protocol_params {
+            verify_block_slot(&block.header, &block.body, &protocol_params).map_err(UnpackError::Packable)?;
+
             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
             } else {
@@ -302,6 +311,35 @@ impl Packable for Block {
 
         Ok(block)
     }
+}
+
+fn verify_block_slot(header: &BlockHeader, body: &BlockBody, params: &ProtocolParameters) -> Result<(), Error> {
+    if let BlockBody::Basic(basic) = body {
+        if let Some(Payload::SignedTransaction(signed_transaction)) = basic.payload() {
+            let transaction = signed_transaction.transaction();
+            let block_slot = params.slot_index(header.issuing_time / 1_000_000_000);
+
+            if block_slot < transaction.creation_slot() {
+                return Err(Error::BlockSlotBeforeTransactionCreationSlot);
+            }
+
+            if let Some(commitment) = signed_transaction.transaction().context_inputs().commitment() {
+                let commitment_slot = commitment.slot_index();
+
+                if !(block_slot - params.max_committable_age()..=block_slot - params.min_committable_age())
+                    .contains(&commitment_slot)
+                {
+                    return Err(Error::TransactionCommitmentSlotNotInBlockSlotInterval);
+                }
+
+                if commitment_slot > header.slot_commitment_id.slot_index() {
+                    return Err(Error::TransactionCommitmentSlotAfterBlockCommitmentSlot);
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(feature = "serde")]
@@ -366,11 +404,11 @@ pub(crate) mod dto {
                 }
             }
 
-            Ok(Self::new(
+            UnsignedBlock::new(
                 BlockHeader::try_from_dto_with_params_inner(dto.inner.header, params)?,
                 BlockBody::try_from_dto_with_params_inner(dto.inner.body, params)?,
-                dto.signature,
-            ))
+            )
+            .finish_with_params(dto.signature, params)
         }
     }
 

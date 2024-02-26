@@ -41,13 +41,20 @@ impl DelegationId {
     }
 }
 
+// TODO maybe can be removed as part of https://github.com/iotaledger/iota-sdk/issues/1938
+#[derive(Copy, Clone)]
+pub enum DelegatedAmount {
+    Amount(u64),
+    MinimumAmount(StorageScoreParameters),
+}
+
 /// Builder for a [`DelegationOutput`].
 #[derive(Clone)]
 #[must_use]
 pub struct DelegationOutputBuilder {
     // TODO https://github.com/iotaledger/iota-sdk/issues/1938
     amount: Option<OutputBuilderAmount>,
-    delegated_amount: OutputBuilderAmount,
+    delegated_amount: DelegatedAmount,
     delegation_id: DelegationId,
     validator_address: AccountAddress,
     start_epoch: EpochIndex,
@@ -59,7 +66,19 @@ impl DelegationOutputBuilder {
     /// Creates a [`DelegationOutputBuilder`] with a provided amount.
     /// Will set the delegated amount field to match.
     pub fn new_with_amount(amount: u64, delegation_id: DelegationId, validator_address: AccountAddress) -> Self {
-        Self::new(OutputBuilderAmount::Amount(amount), delegation_id, validator_address)
+        Self::new(DelegatedAmount::Amount(amount), delegation_id, validator_address)
+    }
+
+    /// Creates a [`DelegationOutputBuilder`] with a provided amount, unless it is below the minimum.
+    /// Will set the delegated amount field to match.
+    pub fn new_with_amount_or_minimum(
+        amount: u64,
+        delegation_id: DelegationId,
+        validator_address: AccountAddress,
+        params: StorageScoreParameters,
+    ) -> Self {
+        Self::new(DelegatedAmount::Amount(amount), delegation_id, validator_address)
+            .with_amount_or_minimum(amount, params)
     }
 
     /// Creates a [`DelegationOutputBuilder`] with provided storage score parameters.
@@ -69,18 +88,10 @@ impl DelegationOutputBuilder {
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
-        Self::new(
-            OutputBuilderAmount::MinimumAmount(params),
-            delegation_id,
-            validator_address,
-        )
+        Self::new(DelegatedAmount::MinimumAmount(params), delegation_id, validator_address)
     }
 
-    fn new(
-        delegated_amount: OutputBuilderAmount,
-        delegation_id: DelegationId,
-        validator_address: AccountAddress,
-    ) -> Self {
+    fn new(delegated_amount: DelegatedAmount, delegation_id: DelegationId, validator_address: AccountAddress) -> Self {
         Self {
             amount: None,
             delegated_amount,
@@ -98,9 +109,16 @@ impl DelegationOutputBuilder {
         self
     }
 
+    /// Sets the amount to the provided value, unless it is below the minimum.
+    #[inline(always)]
+    pub fn with_amount_or_minimum(mut self, amount: u64, params: StorageScoreParameters) -> Self {
+        self.amount = Some(OutputBuilderAmount::AmountOrMinimum(amount, params));
+        self
+    }
+
     /// Sets the amount to the minimum required amount.
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
-        if matches!(self.delegated_amount, OutputBuilderAmount::MinimumAmount(_)) {
+        if matches!(self.delegated_amount, DelegatedAmount::MinimumAmount(_)) {
             self.amount = None;
         } else {
             self.amount = Some(OutputBuilderAmount::MinimumAmount(params));
@@ -181,21 +199,22 @@ impl DelegationOutputBuilder {
         };
 
         match self.delegated_amount {
-            OutputBuilderAmount::Amount(amount) => {
+            DelegatedAmount::Amount(amount) => {
                 output.delegated_amount = amount;
                 output.amount = self.amount.map_or(amount, |builder_amount| match builder_amount {
                     OutputBuilderAmount::Amount(amount) => amount,
+                    OutputBuilderAmount::AmountOrMinimum(amount, params) => output.minimum_amount(params).max(amount),
                     OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
                 });
             }
-            OutputBuilderAmount::MinimumAmount(params) => {
+            DelegatedAmount::MinimumAmount(params) => {
                 let min = output.minimum_amount(params);
                 output.delegated_amount = min;
-                output.amount = if let Some(OutputBuilderAmount::Amount(amount)) = self.amount {
-                    amount
-                } else {
-                    min
-                };
+                output.amount = self.amount.map_or(min, |builder_amount| match builder_amount {
+                    OutputBuilderAmount::Amount(amount) => amount,
+                    OutputBuilderAmount::AmountOrMinimum(amount, params) => output.minimum_amount(params).max(amount),
+                    OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
+                });
             }
         }
 
@@ -212,7 +231,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
     fn from(output: &DelegationOutput) -> Self {
         Self {
             amount: Some(OutputBuilderAmount::Amount(output.amount)),
-            delegated_amount: OutputBuilderAmount::Amount(output.delegated_amount),
+            delegated_amount: DelegatedAmount::Amount(output.delegated_amount),
             delegation_id: output.delegation_id,
             validator_address: *output.validator_address.as_account(),
             start_epoch: output.start_epoch,

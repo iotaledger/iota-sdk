@@ -12,6 +12,7 @@ import type {
     __TransactionIdMethod__,
     __Bech32ToHexMethod__,
     __HexToBech32Method__,
+    __AddressToBech32Method__,
     __AccountIdToBech32Method__,
     __AnchorIdToBech32Method__,
     __NftIdToBech32Method__,
@@ -50,6 +51,7 @@ export type __UtilsMethods__ =
     | __TransactionIdMethod__
     | __Bech32ToHexMethod__
     | __HexToBech32Method__
+    | __AddressToBech32Method__
     | __AccountIdToBech32Method__
     | __AnchorIdToBech32Method__
     | __NftIdToBech32Method__
