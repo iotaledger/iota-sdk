@@ -28,7 +28,8 @@ class OutputId(str):
         return instance
 
     @classmethod
-    def from_transaction_id_and_output_index(cls, transaction_id: TransactionId, output_index: int):
+    def from_transaction_id_and_output_index(
+            cls, transaction_id: TransactionId, output_index: int):
         """Creates an `OutputId` instance from its transaction id and output index.
 
         Args:
