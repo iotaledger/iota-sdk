@@ -3,7 +3,8 @@
 
 from __future__ import annotations  # Allow reference to Burn in Burn class
 from typing import List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.common import HexStr, json
 
@@ -14,16 +15,24 @@ class Burn:
     """A DTO for `Burn`.
 
     Attributes:
+        mana: Whether excess mana should be burned.
         accounts: The accounts to burn.
         nfts: The NFTs to burn.
         foundries: The foundries to burn.
         native_tokens: The native tokens to burn.
     """
 
+    mana: bool
     accounts: Optional[List[HexStr]] = None
     nfts: Optional[List[HexStr]] = None
     foundries: Optional[List[HexStr]] = None
     native_tokens: Optional[List[NativeToken]] = None
+
+    def set_mana(self, mana: bool) -> Burn:
+        """Burn excess mana.
+        """
+        self.mana = mana
+        return self
 
     def add_account(self, account: HexStr) -> Burn:
         """Add an account to the burn.

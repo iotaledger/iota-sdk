@@ -36,8 +36,6 @@ export interface TransactionOptions {
      * If this flag is disabled, additional inputs will be selected to cover the amount.
      */
     allowAllottingFromAccountMana?: boolean;
-    /** Transaction capabilities. */
-    capabilities?: HexEncodedString;
     /** Mana allotments for the transaction. */
     manaAllotments?: { [account_id: AccountId]: u64 };
     /** Optional block issuer to which the transaction will have required mana allotted. */

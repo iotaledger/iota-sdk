@@ -6,6 +6,8 @@ import { AccountId, FoundryId, NftId, TokenId } from '../block/id';
 
 /** A DTO for [`Burn`] */
 export interface Burn {
+    /** Mana to burn */
+    mana?: boolean;
     /** Accounts to burn */
     accounts?: AccountId[];
     /** NFTs to burn */

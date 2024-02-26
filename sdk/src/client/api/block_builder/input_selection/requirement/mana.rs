@@ -262,6 +262,21 @@ impl InputSelection {
         Ok(added_inputs)
     }
 
+    pub(crate) fn initial_mana_excess(&self) -> Result<u64, Error> {
+        let output_mana = self.provided_outputs.iter().map(|o| o.mana()).sum::<u64>();
+        let mut input_mana = 0;
+
+        for input in self
+            .selected_inputs
+            .iter()
+            .filter(|i| self.required_inputs.contains(i.output_id()))
+        {
+            input_mana += self.total_mana(input)?;
+        }
+
+        Ok(input_mana.saturating_sub(output_mana))
+    }
+
     pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {
         let mut required_mana =
             self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();

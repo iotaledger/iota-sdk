@@ -14,6 +14,9 @@ use crate::types::block::output::{AccountId, DelegationId, FoundryId, NativeToke
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Burn {
+    // Whether excess mana should be burned.
+    #[serde(default)]
+    pub(crate) mana: bool,
     /// Accounts to burn.
     #[serde(default, skip_serializing_if = "HashSet::is_empty")]
     pub(crate) accounts: HashSet<AccountId>,
@@ -35,6 +38,17 @@ impl Burn {
     /// Creates a new [`Burn`].
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Sets the flag to [`Burn`] excess mana.
+    pub fn set_mana(mut self, burn_mana: bool) -> Self {
+        self.mana = burn_mana;
+        self
+    }
+
+    /// Returns whether to [`Burn`] mana.
+    pub fn mana(&self) -> bool {
+        self.mana
     }
 
     /// Adds an account to [`Burn`].

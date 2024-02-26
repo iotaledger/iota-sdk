@@ -161,10 +161,7 @@ impl InputSelection {
         self.available_inputs
             .retain(|input| !self.forbidden_inputs.contains(input.output_id()));
 
-        // This is to avoid a borrow of self since there is a mutable borrow in the loop already.
-        let required_inputs = std::mem::take(&mut self.required_inputs);
-
-        for required_input in required_inputs {
+        for required_input in self.required_inputs.clone() {
             // Checks that required input is not forbidden.
             if self.forbidden_inputs.contains(&required_input) {
                 return Err(Error::RequiredInputIsForbidden(required_input));
@@ -436,15 +433,6 @@ impl InputSelection {
     /// Disables selecting additional inputs.
     pub fn disable_additional_input_selection(mut self) -> Self {
         self.allow_additional_input_selection = false;
-        self
-    }
-
-    /// Sets the transaction capabilities.
-    pub fn with_transaction_capabilities(
-        mut self,
-        transaction_capabilities: impl Into<TransactionCapabilities>,
-    ) -> Self {
-        self.transaction_capabilities = transaction_capabilities.into();
         self
     }
 
