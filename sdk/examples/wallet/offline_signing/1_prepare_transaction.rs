@@ -11,7 +11,8 @@
 use iota_sdk::{
     client::{api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager},
     crypto::keys::bip44::Bip44,
-    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
+    types::block::address::Bech32Address,
+    wallet::{ClientOptions, Result, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -35,7 +36,7 @@ async fn main() -> Result<()> {
     let params = [SendParams::new(SEND_AMOUNT, RECV_ADDRESS)?];
 
     // Recovers addresses from example `0_address_generation`.
-    let address = read_address_from_file().await?.into_bech32();
+    let address = read_address_from_file().await?;
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
@@ -71,7 +72,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_address_from_file() -> Result<Bip44Address> {
+async fn read_address_from_file() -> Result<Bech32Address> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESS_FILE_PATH).await?);
