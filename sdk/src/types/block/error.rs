@@ -209,6 +209,9 @@ pub enum Error {
     },
     TrailingCapabilityBytes,
     RestrictedAddressCapability(AddressCapabilityFlag),
+    BlockSlotBeforeTransactionCreationSlot,
+    TransactionCommitmentSlotNotInBlockSlotInterval,
+    TransactionCommitmentSlotAfterBlockCommitmentSlot,
 }
 
 #[cfg(feature = "std")]
@@ -450,6 +453,16 @@ impl fmt::Display for Error {
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
             Self::RestrictedAddressCapability(cap) => write!(f, "restricted address capability: {cap:?}"),
+            Self::BlockSlotBeforeTransactionCreationSlot => {
+                write!(f, "the block slot is before its contained transaction creation slot")
+            }
+            Self::TransactionCommitmentSlotNotInBlockSlotInterval => write!(
+                f,
+                "the transaction commitment slot is not in the allowed block slot interval"
+            ),
+            Self::TransactionCommitmentSlotAfterBlockCommitmentSlot => {
+                write!(f, "the transaction commitment slot is after the block commitment slot")
+            }
         }
     }
 }
