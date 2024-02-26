@@ -22,11 +22,11 @@ export interface GenerateAddressesOptions {
  */
 export interface GenerateAddressOptions {
     /**
-     * Internal addresses
+     * Whether to generate an internal address.
      */
-    internal?: boolean;
+    internal: boolean;
     /**
      * Display the address on ledger devices.
      */
-    ledgerNanoPrompt?: boolean;
+    ledgerNanoPrompt: boolean;
 }
