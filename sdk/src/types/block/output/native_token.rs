@@ -1,13 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{
-    collections::{BTreeMap, BTreeSet},
-    vec::Vec,
-};
-
-use derive_more::{Deref, DerefMut, From};
-use packable::{bounded::BoundedU8, Packable};
+use packable::Packable;
 use primitive_types::U256;
 
 use crate::types::block::{
@@ -93,53 +87,3 @@ fn verify_amount(amount: &U256) -> Result<(), Error> {
         Ok(())
     }
 }
-
-/// A builder for [`NativeTokens`].
-#[derive(Clone, Default, Debug, Deref, DerefMut, From)]
-#[must_use]
-pub struct NativeTokensBuilder(BTreeMap<TokenId, U256>);
-
-impl NativeTokensBuilder {
-    /// Creates a new [`NativeTokensBuilder`].
-    #[inline(always)]
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Adds the given [`NativeToken`].
-    pub fn add_native_token(&mut self, native_token: NativeToken) -> Result<(), Error> {
-        let entry = self.0.entry(*native_token.token_id()).or_default();
-        *entry = entry
-            .checked_add(native_token.amount())
-            .ok_or(Error::NativeTokensOverflow)?;
-
-        Ok(())
-    }
-
-    /// Merges another [`NativeTokensBuilder`] into this one.
-    pub fn merge(&mut self, other: Self) -> Result<(), Error> {
-        for (token_id, amount) in other.0.into_iter() {
-            self.add_native_token(NativeToken::new(token_id, amount)?)?;
-        }
-
-        Ok(())
-    }
-
-    /// Finishes the [`NativeTokensBuilder`] into a [`Vec<NativeToken>`].
-    pub fn finish_vec(self) -> Result<Vec<NativeToken>, Error> {
-        self.0
-            .into_iter()
-            .map(|(token_id, amount)| NativeToken::new(token_id, amount))
-            .collect::<Result<_, _>>()
-    }
-
-    /// Finishes the [`NativeTokensBuilder`] into a [`BTreeSet<NativeToken>`].
-    pub fn finish_set(self) -> Result<BTreeSet<NativeToken>, Error> {
-        self.0
-            .into_iter()
-            .map(|(token_id, amount)| NativeToken::new(token_id, amount))
-            .collect::<Result<_, _>>()
-    }
-}
-
-pub(crate) type NativeTokenCount = BoundedU8<0, 255>;
