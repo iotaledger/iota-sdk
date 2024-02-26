@@ -50,6 +50,15 @@ class Utils:
         })
 
     @staticmethod
+    def address_to_bech32(address: Address, bech32_hrp: str) -> str:
+        """Convert an address to its bech32 representation.
+        """
+        return _call_method('addressToBech32', {
+            'address': address,
+            'bech32Hrp': bech32_hrp
+        })
+
+    @staticmethod
     def account_id_to_bech32(account_id: HexStr, bech32_hrp: str) -> str:
         """Convert an account id to a Bech32 encoded address.
         """
@@ -307,13 +316,15 @@ class Utils:
     def iota_mainnet_protocol_parameters() -> ProtocolParameters:
         """Returns sample protocol parameters for IOTA mainnet.
         """
-        return ProtocolParameters.from_dict(_call_method('iotaMainnetProtocolParameters'))
+        return ProtocolParameters.from_dict(
+            _call_method('iotaMainnetProtocolParameters'))
 
     @staticmethod
     def shimmer_mainnet_protocol_parameters() -> ProtocolParameters:
         """Returns sample protocol parameters for Shimmer mainnet.
         """
-        return ProtocolParameters.from_dict(_call_method('shimmerMainnetProtocolParameters'))
+        return ProtocolParameters.from_dict(
+            _call_method('shimmerMainnetProtocolParameters'))
 
 
 class UtilsError(Exception):

@@ -295,6 +295,23 @@ export class Utils {
     }
 
     /**
+     * Converts an address to its bech32 representation.
+     *
+     * @param address An address.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
+     */
+    static addressToBech32(address: Address, bech32Hrp: string): Bech32Address {
+        return callUtilsMethod({
+            name: 'addressToBech32',
+            data: {
+                address,
+                bech32Hrp,
+            },
+        });
+    }
+
+    /**
      * Transforms an account id to a bech32 encoded address.
      *
      * @param accountId An account ID.
