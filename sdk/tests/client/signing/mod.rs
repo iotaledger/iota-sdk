@@ -406,7 +406,6 @@ async fn all_combined() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 13);
-    println!("{unlocks:#?}");
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Reference(a) => {
