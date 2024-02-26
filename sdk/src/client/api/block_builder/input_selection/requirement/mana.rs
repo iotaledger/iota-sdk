@@ -301,8 +301,8 @@ impl InputSelection {
             AccountOutput::KIND,
             NftOutput::KIND,
             FoundryOutput::KIND,
-            AnchorOutput::KIND,
             DelegationOutput::KIND,
+            AnchorOutput::KIND,
         ]
         .into_iter()
         .zip(0..)
