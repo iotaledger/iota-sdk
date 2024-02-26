@@ -11,8 +11,8 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, Output,
-            SimpleTokenScheme, TokenId,
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder,
+            Output, SimpleTokenScheme, TokenId,
         },
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
@@ -1225,4 +1225,158 @@ fn melt_and_burn_native_tokens() {
             // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 421);
         }
     });
+}
+
+#[test]
+fn auto_transition_foundry_less_than_min() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
+    let token_id = TokenId::from(foundry_id);
+
+    let small_amount_foundry = 5;
+    let small_amount_account = 10;
+
+    let mut inputs = build_inputs(
+        [(
+            Foundry {
+                amount: small_amount_foundry,
+                account_id,
+                serial_number: 1,
+                token_scheme: SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+                native_token: Some((&token_id.to_string(), 1000)),
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
+    let account_output = AccountOutputBuilder::new_with_amount(small_amount_account, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap_err();
+
+    let min_amount = FoundryOutputBuilder::from(inputs[0].output.as_foundry())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount()
+        + AccountOutputBuilder::from(inputs[1].output.as_account())
+            .with_minimum_amount(protocol_parameters.storage_score_parameters())
+            .finish_output()
+            .unwrap()
+            .amount();
+
+    assert_eq!(
+        selected,
+        Error::InsufficientAmount {
+            found: small_amount_foundry + small_amount_account,
+            required: min_amount
+        },
+    );
+}
+
+#[test]
+fn auto_transition_foundry_less_than_min_additional() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
+    let token_id = TokenId::from(foundry_id);
+
+    let small_amount = 5;
+
+    let mut inputs = build_inputs(
+        [
+            (
+                Foundry {
+                    amount: small_amount,
+                    account_id,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+                    native_token: Some((&token_id.to_string(), 1000)),
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    native_token: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
+    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    let min_amount_foundry = FoundryOutputBuilder::from(inputs[0].output.as_foundry())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let foundry_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_foundry_opt)
+        .find(|o| o.id() == foundry_id)
+        .unwrap();
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id)
+        .unwrap();
+    assert_eq!(foundry_output.amount(), min_amount_foundry);
+    assert_eq!(account_output.amount(), 1_000_000);
 }

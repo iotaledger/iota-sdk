@@ -2142,3 +2142,115 @@ fn implicit_account_transition() {
     // One remainder Mana
     assert_eq!(selected.transaction.outputs()[0].mana(), 1);
 }
+
+#[test]
+fn auto_transition_account_less_than_min() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let small_amount = 5;
+
+    let inputs = build_inputs(
+        [(
+            Account {
+                amount: small_amount,
+                account_id: account_id_1,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                sender: None,
+                issuer: None,
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap_err();
+
+    let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+
+    assert_eq!(
+        selected,
+        Error::InsufficientAmount {
+            found: small_amount,
+            required: min_amount
+        },
+    );
+}
+
+#[test]
+fn auto_transition_account_less_than_min_additional() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let small_amount = 5;
+
+    let inputs = build_inputs(
+        [
+            (
+                Account {
+                    amount: small_amount,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    native_token: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id_1)
+        .unwrap();
+    assert_eq!(account_output.amount(), min_amount);
+}
