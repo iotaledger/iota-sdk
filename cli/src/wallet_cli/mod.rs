@@ -3,7 +3,7 @@
 
 mod completer;
 
-use std::str::FromStr;
+use std::{collections::BTreeMap, str::FromStr};
 
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
@@ -15,8 +15,7 @@ use iota_sdk::{
         output::{
             feature::{BlockIssuerKeySource, MetadataFeature},
             unlock_condition::AddressUnlockCondition,
-            AccountId, BasicOutputBuilder, DelegationId, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output,
-            OutputId, TokenId,
+            AccountId, BasicOutputBuilder, DelegationId, FoundryId, NativeToken, NftId, Output, OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
@@ -1314,7 +1313,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
 
     let mut output_ids = Vec::new();
     let mut amount = 0;
-    let mut native_tokens = NativeTokensBuilder::new();
+    let mut native_tokens = BTreeMap::<TokenId, U256>::new();
     let mut accounts = Vec::new();
     let mut foundries = Vec::new();
     let mut nfts = Vec::new();
@@ -1335,7 +1334,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
             .is_some_and(|required_address| required_address == address.inner())
         {
             if let Some(nt) = output_data.output.native_token() {
-                native_tokens.add_native_token(*nt)?;
+                (*native_tokens.entry(*nt.token_id()).or_default()) += nt.amount();
             }
             match &output_data.output {
                 Output::Basic(_) => {}
@@ -1365,7 +1364,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:?}\nAccounts: {:?}\nFoundries: {:?}\nNFTs: {:?}\nDelegations: {:?}\nAnchors: {:?}\n",
         output_ids,
         amount,
-        native_tokens.finish_vec()?,
+        native_tokens,
         accounts,
         foundries,
         nfts,
