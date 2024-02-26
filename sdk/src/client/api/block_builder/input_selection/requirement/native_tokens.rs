@@ -11,7 +11,7 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{NativeToken, Output, TokenId, TokenScheme},
+    types::block::output::{Output, TokenId, TokenScheme},
 };
 
 pub(crate) fn get_native_tokens<'a>(
@@ -51,7 +51,7 @@ pub(crate) fn get_native_tokens_diff(
     if native_tokens_diff.is_empty() {
         Ok(None)
     } else {
-        Ok(Some(native_tokens_diff.finish()?))
+        Ok(Some(native_tokens_diff))
     }
 }
 
@@ -61,11 +61,18 @@ impl InputSelection {
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
 
-        input_native_tokens.merge(minted_native_tokens)?;
-        output_native_tokens.merge(melted_native_tokens)?;
+        for (minted_native_token_id, minted_native_token_amount) in minted_native_tokens {
+            (*input_native_tokens.entry(minted_native_token_id).or_default()) += minted_native_token_amount;
+        }
+
+        for (melted_native_token_id, melted_native_token_amount) in melted_native_tokens {
+            (*output_native_tokens.entry(melted_native_token_id).or_default()) += melted_native_token_amount;
+        }
 
         if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
+            for (burnt_native_token_id, burnt_native_token_amount) in burn.native_tokens {
+                (*output_native_tokens.entry(burnt_native_token_id).or_default()) += burnt_native_token_amount;
+            }
         }
 
         // TODO weird that it happens in this direction?
@@ -153,15 +160,13 @@ impl InputSelection {
                                     let minted_native_token_amount = output_foundry_simple_ts.circulating_supply()
                                         - input_foundry_simple_ts.circulating_supply();
 
-                                    minted_native_tokens
-                                        .add_native_token(NativeToken::new(token_id, minted_native_token_amount)?)?;
+                                    (*minted_native_tokens.entry(token_id).or_default()) += minted_native_token_amount;
                                 }
                                 Ordering::Less => {
                                     let melted_native_token_amount = input_foundry_simple_ts.circulating_supply()
                                         - output_foundry_simple_ts.circulating_supply();
 
-                                    melted_native_tokens
-                                        .add_native_token(NativeToken::new(token_id, melted_native_token_amount)?)?;
+                                    (*melted_native_tokens.entry(token_id).or_default()) += melted_native_token_amount;
                                 }
                                 Ordering::Equal => {}
                             }
