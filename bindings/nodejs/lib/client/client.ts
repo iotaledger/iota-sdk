@@ -47,6 +47,7 @@ import {
     SlotIndex,
     SlotCommitmentId,
     SlotCommitment,
+    Address,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
@@ -683,6 +684,28 @@ export class Client {
             name: 'hexToBech32',
             data: {
                 hex,
+                bech32Hrp,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Converts an address to its bech32 representation
+     *
+     * @param address An address.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
+     * @returns The corresponding Bech32 address.
+     */
+    async addressToBech32(
+        address: Address,
+        bech32Hrp?: string,
+    ): Promise<Bech32Address> {
+        const response = await this.methodHandler.callMethod({
+            name: 'addressToBech32',
+            data: {
+                address,
                 bech32Hrp,
             },
         });
