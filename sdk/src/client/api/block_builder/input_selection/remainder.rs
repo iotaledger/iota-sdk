@@ -229,7 +229,7 @@ impl InputSelection {
 fn create_remainder_outputs(
     amount_diff: u64,
     mana_diff: u64,
-    mut native_tokens_diff: Option<BTreeMap<TokenId, U256>>,
+    native_tokens_diff: Option<BTreeMap<TokenId, U256>>,
     remainder_address: Address,
     remainder_address_chain: Option<Bip44>,
     storage_score_parameters: StorageScoreParameters,

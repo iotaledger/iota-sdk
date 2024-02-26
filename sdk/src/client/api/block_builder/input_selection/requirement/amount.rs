@@ -31,7 +31,11 @@ pub(crate) fn sdruc_not_expired(
             .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired { Some(sdr) } else { None }
+        if !expired {
+            Some(sdr)
+        } else {
+            None
+        }
     })
 }
 
@@ -187,8 +191,7 @@ impl AmountSelection {
     }
 
     pub(crate) fn remainder_amount(&self, input_selection: &InputSelection) -> Result<(u64, bool, bool), Error> {
-        let input_native_tokens =
-            get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish()?;
+        let input_native_tokens = get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?;
 
         input_selection.required_remainder_amount(Some(input_native_tokens))
     }

@@ -71,9 +71,9 @@ impl InputSelection {
             (*output_native_tokens.entry(melted_native_token_id).or_default()) += melted_native_token_amount;
         }
 
-        if let Some(burn) = self.burn.as_ref() {
-            for (burnt_native_token_id, burnt_native_token_amount) in burn.native_tokens {
-                (*output_native_tokens.entry(burnt_native_token_id).or_default()) += burnt_native_token_amount;
+        if let Some(burn) = &self.burn {
+            for (burnt_native_token_id, burnt_native_token_amount) in &burn.native_tokens {
+                (*output_native_tokens.entry(*burnt_native_token_id).or_default()) += *burnt_native_token_amount;
             }
         }
 
