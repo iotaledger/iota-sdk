@@ -9,13 +9,16 @@
 //! cargo run --release --example 02_address_balance
 //! ```
 
+use std::collections::BTreeMap;
+
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters,
         secret::SecretManager, Client, Result,
     },
-    types::block::output::NativeTokensBuilder,
+    types::block::output::TokenId,
 };
+use primitive_types::U256;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -57,19 +60,17 @@ async fn main() -> Result<()> {
 
     // Calculate the total amount and native tokens
     let mut total_amount = 0;
-    let mut total_native_tokens = NativeTokensBuilder::new();
+    let mut total_native_tokens = BTreeMap::<TokenId, U256>::new();
     for output in outputs {
         if let Some(native_token) = output.output.native_token() {
-            total_native_tokens.add_native_token(*native_token)?;
+            (*total_native_tokens.entry(*native_token.token_id()).or_default()) += native_token.amount();
         }
         total_amount += output.output.amount();
     }
 
     println!(
         "Outputs controlled by {} have: {:?}i and native tokens:\n{:#?}",
-        first_address,
-        total_amount,
-        total_native_tokens.finish_vec()?
+        first_address, total_amount, total_native_tokens
     );
     Ok(())
 }

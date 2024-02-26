@@ -1362,14 +1362,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
 
     log = format!(
         "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:?}\nAccounts: {:?}\nFoundries: {:?}\nNFTs: {:?}\nDelegations: {:?}\nAnchors: {:?}\n",
-        output_ids,
-        amount,
-        native_tokens,
-        accounts,
-        foundries,
-        nfts,
-        delegations,
-        anchors
+        output_ids, amount, native_tokens, accounts, foundries, nfts, delegations, anchors
     );
 
     println_log_info!("{log}");

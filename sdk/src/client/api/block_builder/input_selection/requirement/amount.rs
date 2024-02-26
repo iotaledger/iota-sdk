@@ -31,11 +31,7 @@ pub(crate) fn sdruc_not_expired(
             .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired {
-            Some(sdr)
-        } else {
-            None
-        }
+        if !expired { Some(sdr) } else { None }
     })
 }
 
