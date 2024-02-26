@@ -16,7 +16,7 @@ export enum Network {
 /**
  * Basic Auth or JWT.
  */
-export interface IAuth {
+export interface Auth {
     /** JWT authentication parameters. */
     jwt?: string;
     /** Basic authentication parameters. */
@@ -26,7 +26,7 @@ export interface IAuth {
 /**
  * Options for the MQTT broker.
  */
-export interface IMqttBrokerOptions {
+export interface MqttBrokerOptions {
     /** Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not. */
     automaticDisconnect?: boolean;
     /** Sets the timeout in seconds used for the MQTT operations. */
@@ -42,11 +42,11 @@ export interface IMqttBrokerOptions {
 /**
  * A node object for the client.
  */
-export interface INode {
+export interface Node {
     /** The URL of the node. */
     url: string;
     /** The authentication parameters. */
-    auth?: IAuth;
+    auth?: Auth;
     /** Whether the node is disabled or not. */
     disabled?: boolean;
     /** Whether the node is a permanode or not. */
@@ -56,7 +56,7 @@ export interface INode {
 /**
  * Struct containing network related information
  */
-export interface INetworkInfo {
+export interface NetworkInfo {
     /** Protocol parameters */
     protocolParameters: ProtocolParameters;
 }

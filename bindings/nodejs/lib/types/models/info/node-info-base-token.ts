@@ -4,7 +4,7 @@
 /**
  * The base token info of the node.
  */
-export interface INodeInfoBaseToken {
+export interface NodeInfoBaseToken {
     /**
      * The base token name.
      */

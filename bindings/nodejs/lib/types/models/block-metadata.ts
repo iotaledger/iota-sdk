@@ -9,7 +9,7 @@ import { TransactionFailureReason } from './transaction-failure-reason';
 /**
  * Response from the metadata endpoint.
  */
-export interface IBlockMetadata {
+export interface BlockMetadata {
     /**
      * The block id.
      */
@@ -31,7 +31,7 @@ export interface IBlockMetadata {
 /**
  * Response from the full endpoint.
  */
-export interface IBlockWithMetadata {
+export interface BlockWithMetadata {
     /**
      * The block.
      */
@@ -39,7 +39,7 @@ export interface IBlockWithMetadata {
     /**
      * The block metadata.
      */
-    metadata: IBlockMetadata;
+    metadata: BlockMetadata;
 }
 
 /**

@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { INodeInfoBaseToken } from './node-info-base-token';
-import type { INodeInfoMetrics } from './node-info-metrics';
+import type { NodeInfoBaseToken } from './node-info-base-token';
+import type { NodeInfoMetrics } from './node-info-metrics';
 import type { ProtocolInfo } from './node-info-protocol';
-import type { INodeInfoStatus } from './node-info-status';
+import type { NodeInfoStatus } from './node-info-status';
 /**
  * Response from the /info endpoint.
  */
-export interface IInfoResponse {
+export interface InfoResponse {
     /**
      * The name of the node.
      */
@@ -20,11 +20,11 @@ export interface IInfoResponse {
     /**
      * The status of the node.
      */
-    status: INodeInfoStatus;
+    status: NodeInfoStatus;
     /**
      * The metrics for the node.
      */
-    metrics: INodeInfoMetrics;
+    metrics: NodeInfoMetrics;
     /**
      * The protocol parameters.
      */
@@ -32,5 +32,5 @@ export interface IInfoResponse {
     /**
      * The base token info of the node.
      */
-    baseToken: INodeInfoBaseToken;
+    baseToken: NodeInfoBaseToken;
 }

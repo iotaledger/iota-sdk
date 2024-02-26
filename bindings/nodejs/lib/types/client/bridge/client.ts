@@ -30,7 +30,7 @@ import type {
     NftOutputQueryParameters,
     OutputQueryParameters,
 } from '../query-parameters';
-import type { IAuth } from '../network';
+import type { Auth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
 import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
@@ -55,7 +55,7 @@ export interface __GetNodeInfoMethod__ {
     name: 'getNodeInfo';
     data: {
         url: string;
-        auth?: IAuth;
+        auth?: Auth;
     };
 }
 

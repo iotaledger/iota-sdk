@@ -7,7 +7,7 @@ import { BlockId, SlotCommitment, SlotIndex } from '../../block';
  * Information that is used to attach a block in the network.
  * Response of GET /api/core/v3/blocks/issuance
  */
-export interface IIssuanceBlockHeaderResponse {
+export interface IssuanceBlockHeaderResponse {
     /**
      * Blocks that are strongly directly approved.
      */

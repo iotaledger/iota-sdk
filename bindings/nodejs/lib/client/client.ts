@@ -3,11 +3,10 @@
 
 import { ClientMethodHandler } from './client-method-handler';
 import {
-    IClientOptions,
-    PreparedTransactionData,
-    INetworkInfo,
-    INode,
-    IAuth,
+    ClientOptions,
+    NetworkInfo,
+    Node,
+    Auth,
     AccountOutputBuilderParams,
     BasicOutputBuilderParams,
     FoundryOutputBuilderParams,
@@ -20,11 +19,7 @@ import {
     NftOutputQueryParameters,
     OutputQueryParameters,
 } from '../types/client';
-import type { INodeInfoResponse } from '../types/client/nodeInfo';
-import {
-    Bip44,
-    SecretManagerType,
-} from '../types/secret_manager/secret-manager';
+import type { NodeInfoResponse } from '../types/client/nodeInfo';
 import {
     AccountOutput,
     BasicOutput,
@@ -32,9 +27,7 @@ import {
     NftOutput,
     Output,
     BlockId,
-    UnlockCondition,
     Payload,
-    SignedTransactionPayload,
     parseBlock,
     Block,
     AccountId,
@@ -51,8 +44,8 @@ import {
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
-    IBlockMetadata,
-    IInfoResponse,
+    BlockMetadata,
+    InfoResponse,
     UTXOInput,
     Response,
     OutputId,
@@ -60,19 +53,19 @@ import {
     u64,
     TransactionId,
     Bech32Address,
-    IBlockWithMetadata,
+    BlockWithMetadata,
     TransactionMetadata,
 } from '../types';
 import {
     OutputResponse,
-    IOutputsResponse,
+    OutputsResponse,
     CongestionResponse,
     UtxoChangesResponse,
     UtxoChangesFullResponse,
-    ICommitteeResponse,
-    IIssuanceBlockHeaderResponse,
+    CommitteeResponse,
+    IssuanceBlockHeaderResponse,
 } from '../types/models/api';
-import { IRoutesResponse } from '../types/models/info/routes-response';
+import { RoutesResponse } from '../types/models/info/routes-response';
 
 import { plainToInstance } from 'class-transformer';
 import { ManaRewardsResponse } from '../types/models/api/mana-rewards-response';
@@ -95,7 +88,7 @@ export class Client {
     /**
      * @param options The client options.
      */
-    static async create(options: IClientOptions): Promise<Client> {
+    static async create(options: ClientOptions): Promise<Client> {
         return new Client(await ClientMethodHandler.create(options));
     }
     async destroy(): Promise<void> {
@@ -121,7 +114,7 @@ export class Client {
     /**
      * Returns the available API route groups of the node.
      */
-    async getRoutes(): Promise<IRoutesResponse> {
+    async getRoutes(): Promise<RoutesResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getRoutes',
         });
@@ -132,7 +125,7 @@ export class Client {
     /**
      * Get the node information together with the url of the used node.
      */
-    async getInfo(): Promise<IInfoResponse> {
+    async getInfo(): Promise<InfoResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getInfo',
         });
@@ -146,7 +139,7 @@ export class Client {
      * @param url The URL of the node.
      * @param auth An authentication object (e.g. JWT).
      */
-    async getNodeInfo(url: string, auth?: IAuth): Promise<INodeInfoResponse> {
+    async getNodeInfo(url: string, auth?: Auth): Promise<NodeInfoResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getNodeInfo',
             data: {
@@ -240,7 +233,7 @@ export class Client {
      * Returns the information of committee members at the given epoch index. If epoch index is not provided, the
      * current committee members are returned.
      */
-    async getCommittee(epochIndex: EpochIndex): Promise<ICommitteeResponse> {
+    async getCommittee(epochIndex: EpochIndex): Promise<CommitteeResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getCommittee',
             data: {
@@ -253,7 +246,7 @@ export class Client {
 
     // Blocks routes.
 
-    async getIssuance(): Promise<IIssuanceBlockHeaderResponse> {
+    async getIssuance(): Promise<IssuanceBlockHeaderResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getIssuance',
         });
@@ -336,7 +329,7 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block metadata.
      * @returns The requested block metadata.
      */
-    async getBlockMetadata(blockId: BlockId): Promise<IBlockMetadata> {
+    async getBlockMetadata(blockId: BlockId): Promise<BlockMetadata> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlockMetadata',
             data: {
@@ -353,7 +346,7 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block.
      * @returns The requested block with its metadata.
      */
-    async getBlockWithMetadata(blockId: BlockId): Promise<IBlockWithMetadata> {
+    async getBlockWithMetadata(blockId: BlockId): Promise<BlockWithMetadata> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlockWithMetadata',
             data: {
@@ -441,7 +434,7 @@ export class Client {
      */
     async getIncludedBlockMetadata(
         transactionId: TransactionId,
-    ): Promise<IBlockMetadata> {
+    ): Promise<BlockMetadata> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
@@ -580,7 +573,7 @@ export class Client {
     /**
      * Get the network related information such as network_id.
      */
-    async getNetworkInfo(): Promise<INetworkInfo> {
+    async getNetworkInfo(): Promise<NetworkInfo> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkInfo',
         });
@@ -633,7 +626,7 @@ export class Client {
     /**
      * Get a node candidate from the healthy node pool.
      */
-    async getNode(): Promise<INode> {
+    async getNode(): Promise<Node> {
         const response = await this.methodHandler.callMethod({
             name: 'getNode',
         });
@@ -811,7 +804,7 @@ export class Client {
     /**
      * Return the unhealthy nodes.
      */
-    async unhealthyNodes(): Promise<Set<INode>> {
+    async unhealthyNodes(): Promise<Set<Node>> {
         const response = await this.methodHandler.callMethod({
             name: 'unhealthyNodes',
         });
@@ -998,7 +991,7 @@ export class Client {
      */
     async outputIds(
         queryParameters: OutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'outputIds',
             data: {
@@ -1014,7 +1007,7 @@ export class Client {
      */
     async basicOutputIds(
         queryParameters: BasicOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'basicOutputIds',
             data: {
@@ -1033,7 +1026,7 @@ export class Client {
      */
     async accountOutputIds(
         queryParameters: AccountOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'accountOutputIds',
             data: {
@@ -1069,7 +1062,7 @@ export class Client {
      */
     async anchorOutputIds(
         queryParameters: AnchorOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'anchorOutputIds',
             data: {
@@ -1105,7 +1098,7 @@ export class Client {
      */
     async delegationOutputIds(
         queryParameters: DelegationOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'delegationOutputIds',
             data: {
@@ -1141,7 +1134,7 @@ export class Client {
      */
     async foundryOutputIds(
         queryParameters: FoundryOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'foundryOutputIds',
             data: {
@@ -1177,7 +1170,7 @@ export class Client {
      */
     async nftOutputIds(
         queryParameters: NftOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'nftOutputIds',
             data: {

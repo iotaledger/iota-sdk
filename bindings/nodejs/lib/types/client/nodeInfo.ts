@@ -1,12 +1,12 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { IInfoResponse } from '../models/info';
+import { InfoResponse } from '../models/info';
 
 /** NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used) */
-export interface INodeInfoResponse {
+export interface NodeInfoResponse {
     /** The node info */
-    nodeInfo: IInfoResponse;
+    nodeInfo: InfoResponse;
     /** The url of the node */
     url: string;
 }

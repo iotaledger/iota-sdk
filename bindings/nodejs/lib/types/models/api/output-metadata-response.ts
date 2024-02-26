@@ -9,7 +9,7 @@ import { SlotCommitmentId, SlotIndex } from '../../block/slot';
 /**
  * Metadata of an output.
  */
-export interface IOutputMetadataResponse {
+export interface OutputMetadataResponse {
     /**
      * The ID of the output.
      */
@@ -21,11 +21,11 @@ export interface IOutputMetadataResponse {
     /**
      * Metadata of the output if it is included in the ledger.
      */
-    included: IOutputInclusionMetadata;
+    included: OutputInclusionMetadata;
     /**
      * Metadata of the output if it is marked as spent in the ledger.
      */
-    spent?: IOutputConsumptionMetadata;
+    spent?: OutputConsumptionMetadata;
     /**
      * Latest commitment ID of the node.
      */
@@ -35,7 +35,7 @@ export interface IOutputMetadataResponse {
 /**
  * Metadata of the output if it is included in the ledger.
  */
-export interface IOutputInclusionMetadata {
+export interface OutputInclusionMetadata {
     /**
      * Slot in which the output was included.
      */
@@ -53,7 +53,7 @@ export interface IOutputInclusionMetadata {
 /**
  * Metadata of the output if it is marked as spent in the ledger.
  */
-export interface IOutputConsumptionMetadata {
+export interface OutputConsumptionMetadata {
     /**
      * Slot in which the output was spent.
      */
