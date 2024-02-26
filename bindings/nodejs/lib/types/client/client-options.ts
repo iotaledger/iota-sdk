@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ProtocolParameters } from '../models/info/node-info-protocol';
-import type { INode } from './network';
+import type { IMqttBrokerOptions, INode } from './network';
 
 /** Options for the client builder */
 export interface IClientOptions {
@@ -24,16 +24,8 @@ export interface IClientOptions {
     quorumThreshold?: number;
     /** The User-Agent header for requests */
     userAgent?: string;
-    /** Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not. */
-    automaticDisconnect?: boolean;
-    /** Sets the timeout in seconds used for the MQTT operations. */
-    timeout?: number;
-    /** Sets whether websockets should be used instead of regular TCP for the MQTT operations. */
-    useWs?: boolean;
-    /** Sets the port used for the MQTT operations. */
-    port?: number;
-    /** Sets the maximum number of reconnection attempts. 0 is unlimited. */
-    maxReconnectionAttempts?: number;
+    /** Options for the MQTT broker */
+    brokerOptions?: IMqttBrokerOptions;
     /** Protocol parameters */
     protocolParameters?: ProtocolParameters;
     /** Timeout for API requests */
