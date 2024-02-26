@@ -41,6 +41,7 @@ impl DelegationId {
     }
 }
 
+// TODO maybe can be removed as part of https://github.com/iotaledger/iota-sdk/issues/1938
 #[derive(Copy, Clone)]
 pub enum DelegatedAmount {
     Amount(u64),
