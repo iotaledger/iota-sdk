@@ -20,7 +20,6 @@ use crate::{
     types::block::address::{Bech32Address, Ed25519Address},
     wallet::{
         core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletInner, WalletLedger},
-        operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
 };
@@ -261,12 +260,17 @@ where
             unlock_unused_inputs(wallet_ledger)?;
         }
 
+        #[cfg(feature = "storage")]
+        let default_sync_options = storage_manager.get_default_sync_options().await?.unwrap_or_default();
+        #[cfg(not(feature = "storage"))]
+        let default_sync_options = crate::wallet::SyncOptions::default();
+
         let background_syncing_status = tokio::sync::watch::channel(BackgroundSyncStatus::Stopped);
         let background_syncing_status = (Arc::new(background_syncing_status.0), background_syncing_status.1);
 
         // Build the wallet.
         let wallet_inner = WalletInner {
-            default_sync_options: Mutex::new(SyncOptions::default()),
+            default_sync_options: Mutex::new(default_sync_options),
             last_synced: Mutex::new(0),
             background_syncing_status,
             client,
