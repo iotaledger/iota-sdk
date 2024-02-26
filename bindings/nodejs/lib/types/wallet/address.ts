@@ -5,16 +5,6 @@ import { SlotIndex } from '../block/slot';
 import { Bech32Address, NftId, TokenId } from '../block';
 import { NumericString, u256, u64 } from '../utils';
 
-/** A Bip44 address */
-export interface Bip44Address {
-    /** The Bech32 address. */
-    address: Bech32Address;
-    /** The address key index. */
-    keyIndex: number;
-    /** Whether the address is a public or an internal (change) address. */
-    internal: boolean;
-}
-
 /** Address with a base token amount */
 export interface SendParams {
     /** The Bech32 address to send the amount to. */
