@@ -458,7 +458,7 @@ impl fmt::Display for Error {
             }
             Self::TransactionCommitmentSlotNotInBlockSlotInterval => write!(
                 f,
-                "the transaction commitment slot int not in the allowed block slot interval"
+                "the transaction commitment slot is not in the allowed block slot interval"
             ),
             Self::TransactionCommitmentSlotAfterBlockCommitmentSlot => {
                 write!(f, "the transaction commitment slot is after the block commitment slot")
