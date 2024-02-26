@@ -74,6 +74,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
+    AmountOrMinimum(u64, StorageScoreParameters),
     MinimumAmount(StorageScoreParameters),
 }
 
