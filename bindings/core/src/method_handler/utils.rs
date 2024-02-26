@@ -25,6 +25,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
     let response = match method {
         UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(bech32)?),
         UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, bech32_hrp)?),
+        UtilsMethod::AddressToBech32 { address, bech32_hrp } => Response::Bech32Address(address.to_bech32(bech32_hrp)),
         UtilsMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
             Response::Bech32Address(account_id.to_bech32(bech32_hrp))
         }
