@@ -1,11 +1,15 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::BTreeMap;
+
 use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, Output},
+    types::block::output::{
+        unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, Output, TokenId,
+    },
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
@@ -32,7 +36,7 @@ where
 
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
-        let mut total_native_tokens = NativeTokensBuilder::default();
+        let mut total_native_tokens = BTreeMap::<TokenId, U256>::new();
 
         #[cfg(feature = "participation")]
         let voting_output = wallet_ledger.get_voting_output()?;
@@ -98,7 +102,7 @@ where
 
                     // Add native token
                     if let Some(native_token) = output.native_token() {
-                        total_native_tokens.add_native_token(*native_token)?;
+                        (*total_native_tokens.entry(*native_token.token_id()).or_default()) += native_token.amount();
                     }
 
                     balance.foundries.insert(foundry.id());
@@ -161,7 +165,8 @@ where
 
                         // Add native token
                         if let Some(native_token) = output.native_token() {
-                            total_native_tokens.add_native_token(*native_token)?;
+                            (*total_native_tokens.entry(*native_token.token_id()).or_default()) +=
+                                native_token.amount();
                         }
                     } else {
                         // if we have multiple unlock conditions for basic or nft outputs, then we can't
@@ -240,7 +245,8 @@ where
 
                                 // Add native token
                                 if let Some(native_token) = output.native_token() {
-                                    total_native_tokens.add_native_token(*native_token)?;
+                                    (*total_native_tokens.entry(*native_token.token_id()).or_default()) +=
+                                        native_token.amount();
                                 }
                             } else {
                                 // only add outputs that can't be locked now and at any point in the future
@@ -271,7 +277,7 @@ where
 
         let mut locked_amount = 0;
         let mut locked_mana = DecayedMana::default();
-        let mut locked_native_tokens = NativeTokensBuilder::default();
+        let mut locked_native_tokens = BTreeMap::<TokenId, U256>::new();
 
         for locked_output in &wallet_ledger.locked_outputs {
             // Skip potentially_locked_outputs, as their amounts aren't added to the balance
@@ -289,7 +295,7 @@ where
                     )?;
 
                     if let Some(native_token) = output_data.output.native_token() {
-                        locked_native_tokens.add_native_token(*native_token)?;
+                        (*locked_native_tokens.entry(*native_token.token_id()).or_default()) += native_token.amount();
                     }
                 }
             }
@@ -307,27 +313,23 @@ where
 
         locked_amount += total_storage_cost;
 
-        for native_token in total_native_tokens.finish_set()? {
+        for (token_id, token_amount) in total_native_tokens {
             // Check if some amount is currently locked
-            let locked_native_token_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
-                if id == native_token.token_id() {
-                    Some(amount)
-                } else {
-                    None
-                }
-            });
+            let locked_native_token_amount = locked_native_tokens
+                .iter()
+                .find_map(|(id, amount)| if id == &token_id { Some(amount) } else { None });
 
             let metadata = wallet_ledger
                 .native_token_foundries
-                .get(&FoundryId::from(*native_token.token_id()))
+                .get(&FoundryId::from(token_id))
                 .and_then(|foundry| foundry.immutable_features().metadata())
                 .cloned();
 
             balance.native_tokens.insert(
-                *native_token.token_id(),
+                token_id,
                 NativeTokensBalance {
-                    total: native_token.amount(),
-                    available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+                    total: token_amount,
+                    available: token_amount - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
                     metadata,
                 },
             );
