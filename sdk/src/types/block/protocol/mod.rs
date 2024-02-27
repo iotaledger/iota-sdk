@@ -30,6 +30,11 @@ pub enum ProtocolParametersError {
     InvalidNetworkName(FromUtf8Error),
     InvalidManaDecayFactors,
     InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid protocol parameters hash: expected {expected} but got {actual}")]
+    InvalidProtocolParametersHash {
+        expected: ProtocolParametersHash,
+        actual: ProtocolParametersHash,
+    },
     #[from]
     ManaParameters(ManaError),
     #[from]

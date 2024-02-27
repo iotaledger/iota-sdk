@@ -11,8 +11,7 @@ use crate::types::block::{
         feature::FeatureError, unlock_condition::UnlockConditionError, NativeTokenError, OutputError, TokenSchemeError,
     },
     payload::PayloadError,
-    protocol::ProtocolParametersHash,
-    semantic::SemanticError,
+    protocol::ProtocolParametersError,
     signature::SignatureError,
     unlock::UnlockError,
     IdentifierError,
@@ -37,11 +36,6 @@ pub enum BlockError {
     NetworkIdMismatch { expected: u64, actual: u64 },
     #[display(fmt = "protocol version mismatch: expected {expected} but got {actual}")]
     ProtocolVersionMismatch { expected: u8, actual: u8 },
-    #[display(fmt = "invalid protocol parameters hash: expected {expected} but got {actual}")]
-    InvalidProtocolParametersHash {
-        expected: ProtocolParametersHash,
-        actual: ProtocolParametersHash,
-    },
     #[display(fmt = "unsupported address kind: {_0}")]
     UnsupportedAddressKind(u8),
     #[display(fmt = "the block slot is before its contained transaction creation slot")]
@@ -57,7 +51,7 @@ pub enum BlockError {
     #[from]
     Identifier(IdentifierError),
     #[from]
-    Semantic(SemanticError),
+    ProtocolParameters(ProtocolParametersError),
 }
 
 #[cfg(feature = "std")]

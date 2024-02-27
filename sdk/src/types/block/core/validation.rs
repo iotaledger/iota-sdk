@@ -5,7 +5,7 @@ use packable::Packable;
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, BlockBody, BlockError, Parents},
-    protocol::{ProtocolParameters, ProtocolParametersHash},
+    protocol::{ProtocolParameters, ProtocolParametersError, ProtocolParametersHash},
 };
 
 pub type StrongParents = Parents<1, 50>;
@@ -162,11 +162,11 @@ impl ValidationBlockBody {
 fn verify_protocol_parameters_hash(
     hash: &ProtocolParametersHash,
     params: &ProtocolParameters,
-) -> Result<(), BlockError> {
+) -> Result<(), ProtocolParametersError> {
     let params_hash = params.hash();
 
     if hash != &params_hash {
-        return Err(BlockError::InvalidProtocolParametersHash {
+        return Err(ProtocolParametersError::InvalidProtocolParametersHash {
             expected: params_hash,
             actual: *hash,
         });

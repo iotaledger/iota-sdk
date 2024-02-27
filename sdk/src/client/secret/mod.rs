@@ -682,7 +682,7 @@ where
         .inspect_err(|e| {
             log::debug!("[sign_transaction] conflict: {e:?} for {tx_payload:#?}");
         })
-        .map_err(BlockError::from)?;
+        .map_err(Error::TransactionSemantic)?;
 
     Ok(tx_payload)
 }

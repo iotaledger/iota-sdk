@@ -10,14 +10,11 @@ use alloc::collections::BTreeMap;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
-pub use self::{
-    error::{SemanticError, TransactionFailureReason},
-    state_transition::StateTransitionVerifier,
-};
+pub use self::{error::TransactionFailureReason, state_transition::StateTransitionVerifier};
 use crate::types::block::{
     address::Address,
     context_input::RewardContextInput,
-    output::{feature::Features, AccountId, AnchorOutput, ChainId, FoundryId, Output, OutputError, OutputId, TokenId},
+    output::{feature::Features, AccountId, ChainId, FoundryId, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     protocol::ProtocolParameters,
     slot::SlotCommitmentId,
@@ -109,7 +106,7 @@ impl<'a> SemanticValidationContext<'a> {
     }
 
     ///
-    pub fn validate(mut self) -> Result<(), SemanticError> {
+    pub fn validate(mut self) -> Result<(), TransactionFailureReason> {
         self.commitment_context_input = self
             .transaction
             .context_inputs()
@@ -127,7 +124,7 @@ impl<'a> SemanticValidationContext<'a> {
             if let Some(output_id) = self.inputs.get(reward_context_input.index() as usize).map(|v| v.0) {
                 self.reward_context_inputs.insert(*output_id, *reward_context_input);
             } else {
-                return Err(TransactionFailureReason::RewardInputReferenceInvalid.into());
+                return Err(TransactionFailureReason::RewardInputReferenceInvalid);
             }
         }
 
@@ -137,7 +134,7 @@ impl<'a> SemanticValidationContext<'a> {
 
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             if output_id.transaction_id().slot_index() > self.transaction.creation_slot() {
-                return Err(TransactionFailureReason::InputCreationAfterTxCreation.into());
+                return Err(TransactionFailureReason::InputCreationAfterTxCreation);
             }
 
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
@@ -147,28 +144,33 @@ impl<'a> SemanticValidationContext<'a> {
                         let account_id = output.account_id_non_null(output_id);
 
                         if self.commitment_context_input.is_none() {
-                            return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing.into());
+                            return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing);
                         }
                         if !bic_context_inputs.contains(&account_id) {
-                            return Err(TransactionFailureReason::BlockIssuanceCreditInputMissing.into());
+                            return Err(TransactionFailureReason::BlockIssuanceCreditInputMissing);
                         }
                         let entry = self.block_issuer_mana.entry(account_id).or_default();
                         entry.0 = entry
                             .0
-                            .checked_add(consumed_output.available_mana(
-                                &self.protocol_parameters,
-                                output_id.transaction_id().slot_index(),
-                                self.transaction.creation_slot(),
-                            )?)
-                            .ok_or(SemanticError::ConsumedManaOverflow)?;
+                            .checked_add(
+                                consumed_output
+                                    .available_mana(
+                                        &self.protocol_parameters,
+                                        output_id.transaction_id().slot_index(),
+                                        self.transaction.creation_slot(),
+                                    )
+                                    // Unwrap is fine as we already checked both slot indices against each others.
+                                    .unwrap(),
+                            )
+                            .ok_or(TransactionFailureReason::ManaOverflow)?;
                     }
                     if output.features().staking().is_some() && self.commitment_context_input.is_none() {
-                        return Err(TransactionFailureReason::StakingCommitmentInputMissing.into());
+                        return Err(TransactionFailureReason::StakingCommitmentInputMissing);
                     }
 
                     (output.amount(), None, output.unlock_conditions())
                 }
-                Output::Anchor(_) => return Err(OutputError::InvalidOutputKind(AnchorOutput::KIND).into()),
+                Output::Anchor(_) => return Err(TransactionFailureReason::SemanticValidationFailed),
                 Output::Foundry(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
                 Output::Nft(output) => (output.amount(), None, output.unlock_conditions()),
                 Output::Delegation(output) => (output.amount(), None, output.unlock_conditions()),
@@ -176,7 +178,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if unlock_conditions.addresses().any(Address::is_implicit_account_creation) {
                 if has_implicit_account_creation_address {
-                    return Err(TransactionFailureReason::MultipleImplicitAccountCreationAddresses.into());
+                    return Err(TransactionFailureReason::MultipleImplicitAccountCreationAddresses);
                 } else {
                     has_implicit_account_creation_address = true;
                 }
@@ -187,10 +189,10 @@ impl<'a> SemanticValidationContext<'a> {
             if let Some(timelock) = unlock_conditions.timelock() {
                 if let Some(commitment_slot_index) = commitment_slot_index {
                     if timelock.is_timelocked(commitment_slot_index, self.protocol_parameters.min_committable_age()) {
-                        return Err(TransactionFailureReason::TimelockNotExpired.into());
+                        return Err(TransactionFailureReason::TimelockNotExpired);
                     }
                 } else {
-                    return Err(TransactionFailureReason::TimelockCommitmentInputMissing.into());
+                    return Err(TransactionFailureReason::TimelockCommitmentInputMissing);
                 }
             }
 
@@ -207,35 +209,40 @@ impl<'a> SemanticValidationContext<'a> {
 
                                 *amount = amount
                                     .checked_add(storage_deposit_return.amount())
-                                    .ok_or(SemanticError::StorageDepositReturnOverflow)?;
+                                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
                             }
                         }
-                        None => return Err(TransactionFailureReason::ExpirationNotUnlockable.into()),
+                        None => return Err(TransactionFailureReason::ExpirationNotUnlockable),
                         _ => {}
                     }
                 } else {
-                    return Err(TransactionFailureReason::ExpirationCommitmentInputMissing.into());
+                    return Err(TransactionFailureReason::ExpirationCommitmentInputMissing);
                 }
             }
 
             self.input_amount = self
                 .input_amount
                 .checked_add(amount)
-                .ok_or(SemanticError::ConsumedAmountOverflow)?;
+                .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
 
             self.input_mana = self
                 .input_mana
-                .checked_add(consumed_output.available_mana(
-                    &self.protocol_parameters,
-                    output_id.transaction_id().slot_index(),
-                    self.transaction.creation_slot(),
-                )?)
-                .ok_or(SemanticError::ConsumedManaOverflow)?;
+                .checked_add(
+                    consumed_output
+                        .available_mana(
+                            &self.protocol_parameters,
+                            output_id.transaction_id().slot_index(),
+                            self.transaction.creation_slot(),
+                        )
+                        // Unwrap is fine as we already checked both slot indices against each others.
+                        .unwrap(),
+                )
+                .ok_or(TransactionFailureReason::ManaOverflow)?;
 
             if let Some(mana_rewards) = self.mana_rewards.get(*output_id) {
                 self.input_mana
                     .checked_add(*mana_rewards)
-                    .ok_or(SemanticError::ConsumedManaOverflow)?;
+                    .ok_or(TransactionFailureReason::ManaOverflow)?;
             }
 
             if let Some(consumed_native_token) = consumed_native_token {
@@ -246,15 +253,17 @@ impl<'a> SemanticValidationContext<'a> {
 
                 *native_token_amount = native_token_amount
                     .checked_add(consumed_native_token.amount())
-                    .ok_or(SemanticError::ConsumedNativeTokensAmountOverflow)?;
+                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
             }
 
             if let Some(unlocks) = self.unlocks {
                 if unlocks.len() != self.inputs.len() {
-                    return Err(TransactionFailureReason::SemanticValidationFailed.into());
+                    return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
 
-                self.output_unlock(consumed_output, output_id, &unlocks[index])?;
+                if let Err(conflict) = self.output_unlock(consumed_output, output_id, &unlocks[index]) {
+                    return Err(conflict);
+                }
             }
         }
 
@@ -263,7 +272,7 @@ impl<'a> SemanticValidationContext<'a> {
             self.output_mana = self
                 .output_mana
                 .checked_add(mana_allotment.mana())
-                .ok_or(SemanticError::CreatedManaOverflow)?;
+                .ok_or(TransactionFailureReason::ManaOverflow)?;
         }
 
         // Validation of outputs.
@@ -275,7 +284,7 @@ impl<'a> SemanticValidationContext<'a> {
 
                         *amount = amount
                             .checked_add(output.amount())
-                            .ok_or(SemanticError::CreatedAmountOverflow)?;
+                            .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
                     }
 
                     (
@@ -290,37 +299,37 @@ impl<'a> SemanticValidationContext<'a> {
                         let account_id = output.account_id_non_null(&OutputId::new(self.transaction_id, index as u16));
 
                         if self.commitment_context_input.is_none() {
-                            return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing.into());
+                            return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing);
                         }
                         if !bic_context_inputs.contains(&account_id) {
-                            return Err(TransactionFailureReason::BlockIssuanceCreditInputMissing.into());
+                            return Err(TransactionFailureReason::BlockIssuanceCreditInputMissing);
                         }
                         let entry = self.block_issuer_mana.entry(account_id).or_default();
 
                         entry.1 = entry
                             .1
                             .checked_add(output.mana())
-                            .ok_or(SemanticError::CreatedManaOverflow)?;
+                            .ok_or(TransactionFailureReason::ManaOverflow)?;
 
                         if let Some(allotment) = self.transaction.allotments().get(&account_id) {
                             entry.1 = entry
                                 .1
                                 .checked_add(allotment.mana())
-                                .ok_or(SemanticError::CreatedManaOverflow)?;
+                                .ok_or(TransactionFailureReason::ManaOverflow)?;
                         }
                     }
                     if output.features().staking().is_some() {
                         if self.commitment_context_input.is_none() {
-                            return Err(TransactionFailureReason::StakingCommitmentInputMissing.into());
+                            return Err(TransactionFailureReason::StakingCommitmentInputMissing);
                         }
                         if output.features().block_issuer().is_none() {
-                            return Err(TransactionFailureReason::StakingBlockIssuerFeatureMissing.into());
+                            return Err(TransactionFailureReason::StakingBlockIssuerFeatureMissing);
                         }
                     }
 
                     (output.amount(), output.mana(), None, Some(output.features()))
                 }
-                Output::Anchor(_) => return Err(OutputError::InvalidOutputKind(AnchorOutput::KIND).into()),
+                Output::Anchor(_) => return Err(TransactionFailureReason::SemanticValidationFailed),
                 Output::Foundry(output) => (output.amount(), 0, output.native_token(), Some(output.features())),
                 Output::Nft(output) => (output.amount(), output.mana(), None, Some(output.features())),
                 Output::Delegation(output) => (output.amount(), 0, None, None),
@@ -328,7 +337,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(sender) = features.and_then(Features::sender) {
                 if !self.unlocked_addresses.contains(sender.address()) {
-                    return Err(TransactionFailureReason::SenderFeatureNotUnlocked.into());
+                    return Err(TransactionFailureReason::SenderFeatureNotUnlocked);
                 }
             }
 
@@ -346,10 +355,10 @@ impl<'a> SemanticValidationContext<'a> {
                                     entry.1 = entry
                                         .1
                                         .checked_add(created_output.mana())
-                                        .ok_or(SemanticError::CreatedAmountOverflow)?;
+                                        .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
                                 }
                             } else {
-                                return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing.into());
+                                return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing);
                             }
                         }
                     }
@@ -359,13 +368,13 @@ impl<'a> SemanticValidationContext<'a> {
             self.output_amount = self
                 .output_amount
                 .checked_add(amount)
-                .ok_or(SemanticError::CreatedAmountOverflow)?;
+                .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
 
             // Add stored mana
             self.output_mana = self
                 .output_mana
                 .checked_add(mana)
-                .ok_or(SemanticError::CreatedManaOverflow)?;
+                .ok_or(TransactionFailureReason::ManaOverflow)?;
 
             if let Some(created_native_token) = created_native_token {
                 let native_token_amount = self
@@ -375,8 +384,7 @@ impl<'a> SemanticValidationContext<'a> {
 
                 *native_token_amount = native_token_amount
                     .checked_add(created_native_token.amount())
-                    // TODO should be a tx failure reason ?
-                    .ok_or(SemanticError::CreatedNativeTokensAmountOverflow)?;
+                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
             }
         }
 
@@ -384,31 +392,31 @@ impl<'a> SemanticValidationContext<'a> {
         for (return_address, return_amount) in self.storage_deposit_returns.iter() {
             if let Some(deposit_amount) = self.simple_deposits.get(return_address) {
                 if deposit_amount < return_amount {
-                    return Err(TransactionFailureReason::ReturnAmountNotFulFilled.into());
+                    return Err(TransactionFailureReason::ReturnAmountNotFulFilled);
                 }
             } else {
-                return Err(TransactionFailureReason::ReturnAmountNotFulFilled.into());
+                return Err(TransactionFailureReason::ReturnAmountNotFulFilled);
             }
         }
 
         // Validation of amounts.
         if self.input_amount != self.output_amount {
-            return Err(TransactionFailureReason::InputOutputBaseTokenMismatch.into());
+            return Err(TransactionFailureReason::InputOutputBaseTokenMismatch);
         }
 
         if self.input_mana != self.output_mana {
             if self.input_mana > self.output_mana {
                 if !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
-                    return Err(TransactionFailureReason::CapabilitiesManaBurningNotAllowed.into());
+                    return Err(TransactionFailureReason::CapabilitiesManaBurningNotAllowed);
                 }
             } else {
-                return Err(TransactionFailureReason::InputOutputManaMismatch.into());
+                return Err(TransactionFailureReason::InputOutputManaMismatch);
             }
         }
 
         for (account_input_mana, account_output_mana) in self.block_issuer_mana.values() {
             if self.input_mana - account_input_mana < self.output_mana - account_output_mana {
-                return Err(TransactionFailureReason::ManaMovedOffBlockIssuerAccount.into());
+                return Err(TransactionFailureReason::ManaMovedOffBlockIssuerAccount);
             }
         }
 
@@ -421,7 +429,7 @@ impl<'a> SemanticValidationContext<'a> {
                     .output_chains
                     .contains_key(&ChainId::from(FoundryId::from(*token_id)))
             {
-                return Err(TransactionFailureReason::NativeTokenSumUnbalanced.into());
+                return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
             }
         }
 

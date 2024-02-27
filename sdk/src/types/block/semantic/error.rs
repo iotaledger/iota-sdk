@@ -3,51 +3,18 @@
 
 use core::convert::Infallible;
 
-use crate::types::block::output::OutputError;
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
+#[display(fmt = "invalid transaction failure reason: {_0}")]
+pub struct InvalidTransactionFailureReasonError(u8);
 
-#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
-#[allow(missing_docs)]
-pub enum SemanticError {
-    #[display(fmt = "consumed amount overflow")]
-    ConsumedAmountOverflow,
-    #[display(fmt = "created amount overflow")]
-    CreatedAmountOverflow,
-    #[display(fmt = "consumed mana overflow")]
-    ConsumedManaOverflow,
-    #[display(fmt = "consumed mana overflow")]
-    CreatedManaOverflow,
-    #[display(fmt = "storage deposit return overflow")]
-    StorageDepositReturnOverflow,
-    #[display(fmt = "consumed native tokens amount overflow")]
-    ConsumedNativeTokensAmountOverflow,
-    #[display(fmt = "created native tokens amount overflow")]
-    CreatedNativeTokensAmountOverflow,
-    #[display(fmt = "invalid transaction failure reason: {_0}")]
-    InvalidTransactionFailureReason(u8),
-    #[from]
-    Output(OutputError),
-    #[from]
-    Reason(TransactionFailureReason),
-}
-
-impl SemanticError {
-    pub fn transaction_failure_reason(&self) -> TransactionFailureReason {
-        if let Self::Reason(reason) = self {
-            *reason
-        } else {
-            TransactionFailureReason::SemanticValidationFailed
-        }
+impl From<Infallible> for InvalidTransactionFailureReasonError {
+    fn from(value: Infallible) -> Self {
+        match value {}
     }
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for SemanticError {}
-
-impl From<Infallible> for SemanticError {
-    fn from(error: Infallible) -> Self {
-        match error {}
-    }
-}
+impl std::error::Error for TransactionFailureReason {}
 
 /// Describes the reason of a transaction failure.
 #[repr(u8)]
@@ -65,8 +32,8 @@ impl From<Infallible> for SemanticError {
 )]
 #[cfg_attr(feature = "serde", derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr))]
 #[strum(serialize_all = "camelCase")]
-#[packable(unpack_error = SemanticError)]
-#[packable(tag_type = u8, with_error = SemanticError::InvalidTransactionFailureReason)]
+#[packable(unpack_error = InvalidTransactionFailureReasonError)]
+#[packable(tag_type = u8, with_error = InvalidTransactionFailureReasonError)]
 #[non_exhaustive]
 pub enum TransactionFailureReason {
     #[display(fmt = "none")]
@@ -220,9 +187,9 @@ pub enum TransactionFailureReason {
 }
 
 impl TryFrom<u8> for TransactionFailureReason {
-    type Error = SemanticError;
+    type Error = InvalidTransactionFailureReasonError;
 
     fn try_from(c: u8) -> Result<Self, Self::Error> {
-        Self::from_repr(c).ok_or(Self::Error::InvalidTransactionFailureReason(c))
+        Self::from_repr(c).ok_or(InvalidTransactionFailureReasonError(c))
     }
 }

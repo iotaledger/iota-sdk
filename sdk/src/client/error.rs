@@ -10,7 +10,7 @@ use serde::{ser::Serializer, Serialize};
 
 use crate::{
     client::api::input_selection::Error as InputSelectionError,
-    types::block::{address::AddressError, BlockError},
+    types::block::{address::AddressError, semantic::TransactionFailureReason, BlockError},
     utils::ConversionError,
 };
 
@@ -133,6 +133,9 @@ pub enum Error {
         /// The tangle time.
         tangle_time: u64,
     },
+    /// The semantic validation of a transaction failed.
+    #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
+    TransactionSemantic(#[from] TransactionFailureReason),
     /// Unpack error
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<BlockError, UnexpectedEOF>),

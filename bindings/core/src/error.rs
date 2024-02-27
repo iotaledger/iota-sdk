@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    mana::ManaError, output::OutputError, payload::PayloadError, semantic::SemanticError, signature::SignatureError,
-    BlockError,
+    mana::ManaError, output::OutputError, payload::PayloadError, semantic::TransactionFailureReason,
+    signature::SignatureError, BlockError,
 };
 use packable::error::UnexpectedEOF;
 use serde::{Serialize, Serializer};
@@ -33,7 +33,7 @@ pub enum Error {
     Mana(#[from] ManaError),
     /// Semantic errors.
     #[error("{0}")]
-    Semantic(#[from] SemanticError),
+    TransactionFailure(#[from] TransactionFailureReason),
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),

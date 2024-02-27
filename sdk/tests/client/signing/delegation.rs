@@ -199,12 +199,11 @@ async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::E
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
+    );
 
     assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationCommitmentInputMissing
+        conflict,
+        Err(TransactionFailureReason::DelegationCommitmentInputMissing)
     );
 
     Ok(())
@@ -289,13 +288,9 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::NewChainOutputHasNonZeroedId
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::NewChainOutputHasNonZeroedId));
 
     Ok(())
 }
@@ -379,13 +374,9 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationAmountMismatch
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationAmountMismatch));
 
     Ok(())
 }
@@ -469,13 +460,9 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationEndEpochNotZero
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationEndEpochNotZero));
 
     Ok(())
 }
@@ -560,13 +547,9 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationStartEpochInvalid
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationStartEpochInvalid));
 
     Ok(())
 }
@@ -662,12 +645,11 @@ async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
+    );
 
     assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationOutputTransitionedTwice
+        conflict,
+        Err(TransactionFailureReason::DelegationOutputTransitionedTwice)
     );
 
     Ok(())
@@ -764,13 +746,9 @@ async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationModified
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
@@ -866,13 +844,9 @@ async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationModified
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
@@ -968,13 +942,9 @@ async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> 
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationModified
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
@@ -1070,13 +1040,9 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::erro
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationEndEpochInvalid
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationEndEpochInvalid));
 
     Ok(())
 }
@@ -1264,13 +1230,9 @@ async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )
-    .unwrap_err();
-
-    assert_eq!(
-        conflict.transaction_failure_reason(),
-        TransactionFailureReason::DelegationRewardInputMissing
     );
+
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationRewardInputMissing));
 
     Ok(())
 }

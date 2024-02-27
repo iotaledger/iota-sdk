@@ -129,7 +129,7 @@ where
             );
             // unlock outputs so they are available for a new transaction
             self.unlock_inputs(&signed_transaction_data.inputs_data).await?;
-            return Err(BlockError::from(conflict).into());
+            return Err(crate::client::Error::TransactionSemantic(conflict).into());
         }
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]

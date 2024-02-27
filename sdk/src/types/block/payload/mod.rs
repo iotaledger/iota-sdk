@@ -34,6 +34,7 @@ use crate::types::block::{
     },
     payload::tagged_data::{TagLength, TaggedDataLength},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    semantic::TransactionFailureReason,
     unlock::UnlockError,
 };
 
@@ -68,6 +69,8 @@ pub enum PayloadError {
     MissingCreationSlot,
     #[display(fmt = "input count and unlock count mismatch: {input_count} != {unlock_count}")]
     InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
+    #[from]
+    TransactionSemantic(TransactionFailureReason),
     #[from]
     Input(InputError),
     #[from]
