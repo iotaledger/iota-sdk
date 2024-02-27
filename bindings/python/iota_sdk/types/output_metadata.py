@@ -35,7 +35,7 @@ class OutputMetadata:
 
 @json
 @dataclass
-class OutputAndMetadata:
+class OutputWithMetadata:
     """An output and its metadata.
 
     Attributes:
@@ -48,22 +48,22 @@ class OutputAndMetadata:
     metadata: OutputMetadata
 
     @classmethod
-    def from_dict(cls, data_dict: Dict) -> OutputAndMetadata:
+    def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
         """Creates an output with metadata instance from the dict object.
         """
         obj = cls.__new__(cls)
-        super(OutputAndMetadata, obj).__init__()
+        super(OutputWithMetadata, obj).__init__()
         for k, v in data_dict.items():
             setattr(obj, k, v)
         return obj
 
     def as_dict(self):
-        """Returns a dictionary representation of OutputAndMetadata, with the fields metadata and output.
+        """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
         """
         d = {}
 
-        d['metadata'] = self.metadata.to_dict()
         d['output'] = self.output.as_dict()
+        d['metadata'] = self.metadata.to_dict()
 
         return d
 
