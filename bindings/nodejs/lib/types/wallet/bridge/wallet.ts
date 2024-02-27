@@ -431,6 +431,14 @@ export type __SendManaMethod__ = {
     };
 };
 
+export type __PrepareSendManaMethod__ = {
+    name: 'prepareSendMana';
+    data: {
+        params: SendManaParams;
+        options?: TransactionOptions;
+    };
+};
+
 export type __SetAliasMethod__ = {
     name: 'setAlias';
     data: {

@@ -1732,6 +1732,34 @@ export class Wallet {
     }
 
     /**
+     * Prepare to send mana.
+     *
+     * @param params Amount, Address, and Return Strategy.
+     * @param transactionOptions Additional transaction options.
+     * @returns The sent transaction.
+     */
+    async prepareSendMana(
+        params: SendManaParams,
+        transactionOptions?: TransactionOptions,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareSendMana',
+            data: {
+                params,
+                options: transactionOptions,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
      * Set the alias for the account
      *
      * @param alias The account alias to set.
