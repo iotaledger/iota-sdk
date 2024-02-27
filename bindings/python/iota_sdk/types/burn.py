@@ -21,7 +21,7 @@ class Burn:
         native_tokens: The native tokens to burn.
     """
 
-    mana: bool
+    mana: Optional[bool] = False
     accounts: Optional[List[HexStr]] = None
     nfts: Optional[List[HexStr]] = None
     foundries: Optional[List[HexStr]] = None
