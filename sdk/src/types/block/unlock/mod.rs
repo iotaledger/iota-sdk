@@ -41,18 +41,31 @@ pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNL
 #[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
 #[allow(missing_docs)]
 pub enum UnlockError {
-    InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid unlock kind: {_0}")]
     InvalidUnlockKind(u8),
+    #[display(fmt = "invalid unlock count: {_0}")]
+    InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid unlock reference: {_0}")]
     InvalidUnlockReference(u16),
+    #[display(fmt = "invalid unlock account: {_0}")]
     InvalidUnlockAccount(u16),
+    #[display(fmt = "invalid unlock nft: {_0}")]
     InvalidUnlockNft(u16),
+    #[display(fmt = "invalid unlock anchor: {_0}")]
     InvalidUnlockAnchor(u16),
+    #[display(fmt = "duplicate signature unlock at index: {_0}")]
     DuplicateSignatureUnlock(u16),
+    #[display(fmt = "multi unlock recursion")]
     MultiUnlockRecursion,
+    #[display(fmt = "invalid account index: {_0}")]
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid anchor index: {_0}")]
     InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid nft index: {_0}")]
     InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid reference index: {_0}")]
     InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid multi unlock count: {_0}")]
     InvalidMultiUnlockCount(<UnlocksCount as TryFrom<usize>>::Error),
     #[from]
     Signature(SignatureError),

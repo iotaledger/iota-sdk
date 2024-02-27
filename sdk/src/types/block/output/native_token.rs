@@ -38,10 +38,15 @@ impl From<FoundryId> for TokenId {
 pub enum NativeTokenError {
     #[display(fmt = "invalid native token count: {_0}")]
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
+    #[display(fmt = "native tokens are not unique and/or sorted")]
     NativeTokensNotUniqueSorted,
+    #[display(fmt = "native tokens null amount")]
     NativeTokensNullAmount,
+    #[display(fmt = "native tokens overflow")]
     NativeTokensOverflow,
+    #[display(fmt = "consumed native tokens amount overflow")]
     ConsumedNativeTokensAmountOverflow,
+    #[display(fmt = "created native tokens amount overflow")]
     CreatedNativeTokensAmountOverflow,
 }
 
