@@ -14,7 +14,7 @@ use crate::types::block::output::{AccountId, DelegationId, FoundryId, NativeToke
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Burn {
-    // Whether excess mana should be burned.
+    // Whether initial excess mana should be burned (only from inputs/outputs that have been specified manually).
     #[serde(default)]
     pub(crate) mana: bool,
     // Whether generated mana should be burned.
@@ -43,7 +43,7 @@ impl Burn {
         Self::default()
     }
 
-    /// Sets the flag to [`Burn`] excess mana.
+    /// Sets the flag to [`Burn`] initial excess mana.
     pub fn set_mana(mut self, burn_mana: bool) -> Self {
         self.mana = burn_mana;
         self

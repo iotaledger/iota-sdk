@@ -6,7 +6,7 @@ import { AccountId, FoundryId, NftId, TokenId } from '../block/id';
 
 /** A DTO for [`Burn`] */
 export interface Burn {
-    /** Burn initial excess mana */
+    /** Burn initial excess mana (only from inputs/outputs that have been specified manually) */
     mana?: boolean;
     /** Burn generated mana */
     generatedMana?: boolean;

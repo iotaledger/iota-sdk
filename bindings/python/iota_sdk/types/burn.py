@@ -14,7 +14,7 @@ class Burn:
     """A DTO for `Burn`.
 
     Attributes:
-        mana: Whether initial excess mana should be burned.
+        mana: Whether initial excess mana should be burned (only from inputs/outputs that have been specified manually).
         generated_mana: Whether generated mana should be burned.
         accounts: The accounts to burn.
         nfts: The NFTs to burn.
@@ -22,14 +22,15 @@ class Burn:
         native_tokens: The native tokens to burn.
     """
 
-    mana: Optional[bool] = False
+    mana: Optional[bool] = None
+    generated_mana: Optional[bool] = None
     accounts: Optional[List[HexStr]] = None
     nfts: Optional[List[HexStr]] = None
     foundries: Optional[List[HexStr]] = None
     native_tokens: Optional[List[NativeToken]] = None
 
     def set_mana(self, burn_mana: bool) -> Burn:
-        """Burn excess initial mana.
+        """Burn excess initial mana (only from inputs/outputs that have been specified manually).
         """
         self.mana = burn_mana
         return self
