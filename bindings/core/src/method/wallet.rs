@@ -315,6 +315,13 @@ pub enum WalletMethod {
         #[serde(default)]
         options: Option<TransactionOptions>,
     },
+    /// Prepare to send mana.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    PrepareSendMana {
+        params: SendManaParams,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
     /// Prepare to send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNativeTokens {
@@ -441,7 +448,7 @@ pub enum WalletMethod {
     /// Send mana.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendMana {
-        params: Box<SendManaParams>,
+        params: SendManaParams,
         #[serde(default)]
         options: Option<TransactionOptions>,
     },
