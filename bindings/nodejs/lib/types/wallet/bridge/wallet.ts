@@ -52,7 +52,7 @@ export type __AnnounceCandidacyMethod__ = {
 };
 
 export type __BackupToStrongholdSnapshotMethod__ = {
-    name: 'backup';
+    name: 'backupToStrongholdSnapshot';
     data: {
         destination: string;
         password: string;
@@ -94,7 +94,7 @@ export type __IsStrongholdPasswordAvailableMethod__ = {
 };
 
 export type __RestoreFromStrongholdSnapshotMethod__ = {
-    name: 'restoreBackup';
+    name: 'restoreFromStrongholdSnapshot';
     data: {
         source: string;
         password: string;

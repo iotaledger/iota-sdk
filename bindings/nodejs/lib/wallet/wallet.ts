@@ -84,7 +84,10 @@ export class Wallet {
     /**
      * Backup the data to a Stronghold snapshot.
      */
-    async backupToStrongholdSnapshot(destination: string, password: string): Promise<void> {
+    async backupToStrongholdSnapshot(
+        destination: string,
+        password: string,
+    ): Promise<void> {
         await this.methodHandler.callMethod({
             name: 'backupToStrongholdSnapshot',
             data: {
