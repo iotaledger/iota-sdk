@@ -17,18 +17,16 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-                IssuanceBlockHeaderResponse, ManaRewardsResponse, NodeInfoResponse, OutputResponse, RoutesResponse,
-                TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-                ValidatorsResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, NodeInfoResponse, OutputMetadataResponse,
+                OutputResponse, OutputWithMetadataResponse, RoutesResponse, TransactionMetadataResponse,
+                UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{
-                AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId,
-            },
+            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             semantic::TransactionFailureReason,
@@ -170,10 +168,10 @@ pub enum Response {
     OutputResponse(OutputResponse),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
-    OutputMetadata(OutputMetadata),
+    OutputMetadata(OutputMetadataResponse),
     /// Response for:
     /// - [`GetOutputWithMetadata`](crate::method::ClientMethod::GetOutputWithMetadata)
-    OutputWithMetadata(OutputWithMetadata),
+    OutputWithMetadata(OutputWithMetadataResponse),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)

@@ -10,11 +10,17 @@ use alloc::{
 
 use serde::{Deserialize, Serialize};
 
+// Re-export types that are also used as responses.
+pub use crate::types::block::{
+    output::{OutputMetadata as OutputMetadataResponse, OutputWithMetadata as OutputWithMetadataResponse},
+    slot::SlotCommitment as Commitment,
+    Block as BlockResponse,
+};
 use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputIdProof, OutputWithMetadata},
+        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -30,16 +36,6 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct RoutesResponse {
     pub routes: Vec<String>,
-}
-
-/// Contains the info and the url from the node (useful when multiple nodes are used)
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NodeInfoResponse {
-    /// The returned info
-    pub info: InfoResponse,
-    /// The url from the node which returned the info
-    pub url: String,
 }
 
 /// Response of GET /api/core/v3/info.
@@ -73,6 +69,16 @@ impl core::fmt::Display for InfoResponse {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", serde_json::to_string_pretty(self).unwrap())
     }
+}
+
+/// Contains the info and the url from the node (useful when multiple nodes are used)
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NodeInfoResponse {
+    /// The returned info
+    pub info: InfoResponse,
+    /// The url from the node which returned the info
+    pub url: String,
 }
 
 /// Response of GET /api/core/v3/info.
@@ -511,8 +517,8 @@ pub struct OutputResponse {
     pub output_id_proof: OutputIdProof,
 }
 
-impl From<&OutputWithMetadata> for OutputResponse {
-    fn from(value: &OutputWithMetadata) -> Self {
+impl From<&OutputWithMetadataResponse> for OutputResponse {
+    fn from(value: &OutputWithMetadataResponse) -> Self {
         Self {
             output: value.output().clone(),
             output_id_proof: value.output_id_proof().clone(),
@@ -520,8 +526,8 @@ impl From<&OutputWithMetadata> for OutputResponse {
     }
 }
 
-impl From<OutputWithMetadata> for OutputResponse {
-    fn from(value: OutputWithMetadata) -> Self {
+impl From<OutputWithMetadataResponse> for OutputResponse {
+    fn from(value: OutputWithMetadataResponse) -> Self {
         Self {
             output: value.output,
             output_id_proof: value.output_id_proof,
