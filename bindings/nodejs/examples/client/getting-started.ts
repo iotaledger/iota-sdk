@@ -14,7 +14,7 @@ async function run() {
     });
 
     try {
-        const info = await client.getInfo();
+        const info = (await client.getNodeInfo()).info;
         console.log(info);
     } catch (error) {
         if (
