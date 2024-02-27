@@ -357,7 +357,5 @@ where
 
             Ok(balance)
         }).await?
-
-        
     }
 }
