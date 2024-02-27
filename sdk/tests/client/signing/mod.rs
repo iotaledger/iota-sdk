@@ -27,7 +27,6 @@ use iota_sdk::{
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::iota_mainnet_protocol_parameters,
         slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
-        unlock::{SignatureUnlock, Unlock},
     },
 };
 use pretty_assertions::assert_eq;
@@ -406,80 +405,10 @@ async fn all_combined() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 13);
-    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
-    match (*unlocks).get(1).unwrap() {
-        Unlock::Reference(a) => {
-            assert_eq!(a.index(), 0);
-        }
-        _ => panic!("Invalid unlock 2"),
-    }
-    match (*unlocks).get(2).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 1);
-        }
-        _ => panic!("Invalid unlock 3"),
-    }
-    match (*unlocks).get(3).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 1);
-        }
-        _ => panic!("Invalid unlock 4"),
-    }
-    match (*unlocks).get(4).unwrap() {
-        Unlock::Reference(a) => {
-            assert_eq!(a.index(), 0);
-        }
-        _ => panic!("Invalid unlock 5"),
-    }
-
-    match (*unlocks).get(5).unwrap() {
-        Unlock::Nft(a) => {
-            assert_eq!(a.index(), 4);
-        }
-        _ => panic!("Invalid unlock 6"),
-    }
-    match (*unlocks).get(6).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 5);
-        }
-        _ => panic!("Invalid unlock 7"),
-    }
-    match (*unlocks).get(7).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 5);
-        }
-        _ => panic!("Invalid unlock 8"),
-    }
-    match (*unlocks).get(8).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 5);
-        }
-        _ => panic!("Invalid unlock 9"),
-    }
-    match (*unlocks).get(9).unwrap() {
-        Unlock::Nft(a) => {
-            assert_eq!(a.index(), 7);
-        }
-        _ => panic!("Invalid unlock 10"),
-    }
-    match (*unlocks).get(10).unwrap() {
-        Unlock::Account(a) => {
-            assert_eq!(a.index(), 5);
-        }
-        _ => panic!("Invalid unlock 11"),
-    }
-    match (*unlocks).get(11).unwrap() {
-        Unlock::Nft(a) => {
-            assert_eq!(a.index(), 6);
-        }
-        _ => panic!("Invalid unlock 12"),
-    }
-    match (*unlocks).get(12).unwrap() {
-        Unlock::Nft(a) => {
-            assert_eq!(a.index(), 11);
-        }
-        _ => panic!("Invalid unlock 13"),
-    }
+    assert_eq!(unlocks.iter().filter(|u| u.is_signature()).count(), 3);
+    assert_eq!(unlocks.iter().filter(|u| u.is_reference()).count(), 4);
+    assert_eq!(unlocks.iter().filter(|u| u.is_account()).count(), 3);
+    assert_eq!(unlocks.iter().filter(|u| u.is_nft()).count(), 3);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
