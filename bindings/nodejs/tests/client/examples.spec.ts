@@ -46,7 +46,7 @@ const chain = {
 describe.skip('Main examples', () => {
     it('gets info about the node', async () => {
         const client = await makeClient();
-        const info = await client.getInfo();
+        const info = (await client.getNodeInfo()).info;
 
         expect(
             info.protocolParameters[0].parameters.bech32Hrp,
@@ -228,7 +228,7 @@ describe.skip('Main examples', () => {
         await client.destroy();
 
         try {
-            const _info = await client.getInfo();
+            const _info = (await client.getNodeInfo()).info;
             throw 'Should return an error because the client was destroyed';
         } catch (err: any) {
             expect(err.message).toEqual('Client was destroyed');
