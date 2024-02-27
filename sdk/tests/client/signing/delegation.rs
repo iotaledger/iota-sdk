@@ -110,16 +110,12 @@ async fn valid_creation() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
-
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
 
     Ok(())
 }
@@ -203,11 +199,11 @@ async fn creation_missing_commitment_input() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
     assert_eq!(
         conflict,
-        Some(TransactionFailureReason::DelegationCommitmentInputMissing)
+        Err(TransactionFailureReason::DelegationCommitmentInputMissing)
     );
 
     Ok(())
@@ -292,9 +288,9 @@ async fn non_null_id_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::NewChainOutputHasNonZeroedId));
+    assert_eq!(conflict, Err(TransactionFailureReason::NewChainOutputHasNonZeroedId));
 
     Ok(())
 }
@@ -378,9 +374,9 @@ async fn mismatch_amount_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationAmountMismatch));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationAmountMismatch));
 
     Ok(())
 }
@@ -464,9 +460,9 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationEndEpochNotZero));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationEndEpochNotZero));
 
     Ok(())
 }
@@ -551,9 +547,9 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationStartEpochInvalid));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationStartEpochInvalid));
 
     Ok(())
 }
@@ -649,11 +645,11 @@ async fn delay_not_null_id() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
     assert_eq!(
         conflict,
-        Some(TransactionFailureReason::DelegationOutputTransitionedTwice)
+        Err(TransactionFailureReason::DelegationOutputTransitionedTwice)
     );
 
     Ok(())
@@ -750,9 +746,9 @@ async fn delay_modified_amount() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
@@ -848,9 +844,9 @@ async fn delay_modified_validator() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
@@ -946,9 +942,9 @@ async fn delay_modified_start_epoch() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
@@ -1044,9 +1040,9 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationEndEpochInvalid));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationEndEpochInvalid));
 
     Ok(())
 }
@@ -1138,16 +1134,12 @@ async fn destroy_null_id() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
-
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
 
     Ok(())
 }
@@ -1238,9 +1230,9 @@ async fn destroy_reward_missing() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationRewardInputMissing));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationRewardInputMissing));
 
     Ok(())
 }

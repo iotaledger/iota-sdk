@@ -13,6 +13,7 @@ from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.client.common import _call_client_method_routine
 from iota_sdk.types.block.block import UnsignedBlock
+from iota_sdk.types.client_options import MqttBrokerOptions
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.network_info import NetworkInfo
@@ -45,6 +46,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         min_quorum_size: Optional[int] = None,
         quorum_threshold: Optional[int] = None,
         user_agent: Optional[str] = None,
+        broker_options: Optional[MqttBrokerOptions] = None,
         max_parallel_api_requests: Optional[int] = None,
         client_handle=None
     ):
@@ -69,6 +71,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             % of nodes that have to return the same response so it gets accepted.
         user_agent :
             The User-Agent header for requests.
+        broker_options (MqttBrokerOptions):
+            Options for the MQTT broker.
         max_parallel_api_requests :
             Set maximum parallel API requests.
         client_handle :
@@ -83,6 +87,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         client_config['primary_nodes'] = convert_nodes(primary_nodes)
         client_config['nodes'] = convert_nodes(nodes)
+        if broker_options is not None:
+            client_config['broker_options'] = broker_options.to_dict()
         if protocol_parameters is not None:
             client_config['protocol_parameters'] = protocol_parameters.to_dict()
 
