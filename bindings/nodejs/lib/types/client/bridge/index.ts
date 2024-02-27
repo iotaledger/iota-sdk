@@ -20,7 +20,6 @@ import type {
     __GetBlockMetadataMethod__,
     __GetBlockWithMetadataMethod__,
     __FindInputsMethod__,
-    __SignTransactionMethod__,
     __BuildBasicBlockMethod__,
     __GetNodeMethod__,
     __GetNetworkIdMethod__,
@@ -63,7 +62,6 @@ import type {
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
     __ClearListenersMethod__,
-    __SignatureUnlockMethod__,
     __ComputeMinimumOutputAmountMethod__,
     __RequestFundsFromFaucetMethod__,
     __CallPluginRouteMethod__,
@@ -89,8 +87,6 @@ export type __ClientMethods__ =
     | __GetBlockMetadataMethod__
     | __GetBlockWithMetadataMethod__
     | __FindInputsMethod__
-    | __SignTransactionMethod__
-    | __SignatureUnlockMethod__
     | __BuildBasicBlockMethod__
     | __GetNodeMethod__
     | __GetNetworkIdMethod__

@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type {
-    Bip44,
-    SecretManagerType,
-} from '../../secret_manager/secret-manager';
-import type {
     AccountId,
     Block,
     BlockId,
@@ -21,7 +17,6 @@ import type {
     EpochIndex,
     Address,
 } from '../../block';
-import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AccountOutputQueryParameters,
     AnchorOutputQueryParameters,

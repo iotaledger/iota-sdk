@@ -166,7 +166,7 @@ describe.skip('Main examples', () => {
 
     it('gets block data', async () => {
         const client = await makeClient();
-        const tips = (await client.getIssuance()).strongParents[0];
+        const tips = (await client.getIssuance()).strongParents;
         const params = await client.getProtocolParameters();
 
         const blockData = await client.getBlock(tips[0]);
