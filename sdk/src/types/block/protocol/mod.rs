@@ -28,6 +28,7 @@ use crate::types::block::{
 pub enum ProtocolParametersError {
     #[display(fmt = "invalid network name: {_0}")]
     InvalidNetworkName(FromUtf8Error),
+    #[display(fmt = "invalid mana decay factors")]
     InvalidManaDecayFactors,
     InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
     #[display(fmt = "invalid protocol parameters hash: expected {expected} but got {actual}")]
