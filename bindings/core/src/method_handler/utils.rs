@@ -130,11 +130,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 protocol_parameters,
             );
 
-            if let Err(e) = context.validate() {
-                Response::TransactionFailureReason(Some(e))
-            } else {
-                Response::TransactionFailureReason(None)
-            }
+            context.validate().map_err(Error::from)?;
+
+            Response::Ok
         }
         UtilsMethod::ManaWithDecay {
             mana,
