@@ -807,7 +807,7 @@ class Wallet:
 
     def send_mana(
             self, params: SendManaParams, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
-        """Send mana to a single address.
+        """Send mana.
         """
         return TransactionWithMetadata.from_dict(self._call_method(
             'sendMana', {
@@ -815,6 +815,18 @@ class Wallet:
                 'options': options
             }
         ))
+
+    def prepare_send_mana(self, params: SendManaParams,
+                          options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Prepare to send mana.
+        """
+        prepared = PreparedTransactionData.from_dict(self._call_method(
+            'prepareSendMana', {
+                'params': params,
+                'options': options
+            }
+        ))
+        return PreparedTransaction(self, prepared)
 
     def set_alias(self, alias: str):
         """Set alias.
