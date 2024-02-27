@@ -115,7 +115,7 @@ fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum CliCommand {
-    /// Create a backup file. Currently only Stronghold backup supported.
+    /// Create a backup file. Currently only Stronghold backup is supported.
     Backup {
         /// Path of the created stronghold backup file.
         backup_path: String,
