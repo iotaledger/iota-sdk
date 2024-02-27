@@ -72,6 +72,11 @@ impl NftOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), nft_id)
     }
 
+    /// Creates an [`NftOutputBuilder`] with a provided amount, unless it is below the minimum.
+    pub fn new_with_amount_or_minimum(amount: u64, nft_id: NftId, params: StorageScoreParameters) -> Self {
+        Self::new(OutputBuilderAmount::AmountOrMinimum(amount, params), nft_id)
+    }
+
     /// Creates an [`NftOutputBuilder`] with provided storage score parameters.
     /// The amount will be set to the minimum required amount of the resulting output.
     pub fn new_with_minimum_amount(params: StorageScoreParameters, nft_id: NftId) -> Self {
@@ -93,6 +98,13 @@ impl NftOutputBuilder {
     #[inline(always)]
     pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
+        self
+    }
+
+    /// Sets the amount to the provided value, unless it is below the minimum.
+    #[inline(always)]
+    pub fn with_amount_or_minimum(mut self, amount: u64, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::AmountOrMinimum(amount, params);
         self
     }
 
@@ -245,6 +257,7 @@ impl NftOutputBuilder {
                     self
                 }
             }
+            OutputBuilderAmount::AmountOrMinimum(_, _) => self,
             OutputBuilderAmount::MinimumAmount(_) => self,
         })
     }
@@ -275,6 +288,7 @@ impl NftOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::AmountOrMinimum(amount, params) => output.minimum_amount(params).max(amount),
             OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 

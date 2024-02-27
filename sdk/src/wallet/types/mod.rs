@@ -12,10 +12,7 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
-pub use self::{
-    address::{AddressWithUnspentOutputs, Bip44Address},
-    balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
-};
+pub use self::balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit};
 use crate::{
     client::secret::types::InputSigningData,
     types::{
