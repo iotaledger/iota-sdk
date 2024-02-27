@@ -29,6 +29,7 @@ use crate::types::block::{
         InputCount, OutputCount,
     },
     protocol::ProtocolParametersHash,
+    semantic::TransactionFailureReason,
     unlock::{UnlockCount, UnlockIndex, UnlocksCount},
 };
 
@@ -212,6 +213,7 @@ pub enum Error {
     BlockSlotBeforeTransactionCreationSlot,
     TransactionCommitmentSlotNotInBlockSlotInterval,
     TransactionCommitmentSlotAfterBlockCommitmentSlot,
+    TransactionFailureReason(TransactionFailureReason),
 }
 
 #[cfg(feature = "std")]
@@ -463,6 +465,9 @@ impl fmt::Display for Error {
             Self::TransactionCommitmentSlotAfterBlockCommitmentSlot => {
                 write!(f, "the transaction commitment slot is after the block commitment slot")
             }
+            Self::TransactionFailureReason(r) => {
+                write!(f, "transaction failure reason: {r}")
+            }
         }
     }
 }
@@ -476,6 +481,12 @@ impl From<Bech32HrpError> for Error {
 impl From<CryptoError> for Error {
     fn from(error: CryptoError) -> Self {
         Self::Crypto(error)
+    }
+}
+
+impl From<TransactionFailureReason> for Error {
+    fn from(error: TransactionFailureReason) -> Self {
+        Self::TransactionFailureReason(error)
     }
 }
 

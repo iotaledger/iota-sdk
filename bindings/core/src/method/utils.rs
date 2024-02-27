@@ -173,7 +173,7 @@ pub enum UtilsMethod {
         output: Output,
     },
     /// Verifies the semantic of a transaction.
-    /// Expected response: [`TransactionFailureReason`](crate::Response::TransactionFailureReason)
+    /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]
     VerifyTransactionSemantic {
         transaction: TransactionDto,

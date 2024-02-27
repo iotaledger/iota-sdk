@@ -257,6 +257,9 @@ impl fmt::Display for TransactionFailureReason {
     }
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for TransactionFailureReason {}
+
 impl TryFrom<u8> for TransactionFailureReason {
     type Error = Error;
 

@@ -121,9 +121,9 @@ where
             &signed_transaction_data.payload,
             signed_transaction_data.mana_rewards,
             self.client().get_protocol_parameters().await?,
-        )?;
+        );
 
-        if let Some(conflict) = conflict {
+        if let Err(conflict) = conflict {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload
