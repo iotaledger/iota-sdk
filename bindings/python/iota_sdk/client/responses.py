@@ -381,8 +381,8 @@ class OutputResponse:
     Response of GET /api/core/v3/outputs/{outputId}.
 
     Attributes:
-        output: One of the possible outputs.
-        output_id_proof: The associated Output ID proof.
+        output: One of the possible output types.
+        output_id_proof: The proof of the output identifier.
     """
     output: Output = field(metadata=config(
         decoder=deserialize_output
@@ -397,9 +397,9 @@ class OutputWithMetadataResponse:
     Response of GET /api/core/v3/outputs/{outputId}/full.
 
     Attributes:
-        output: One of the possible outputs.
+        output: One of the possible output types.
         output_id_proof: The associated Output ID proof.
-        metadata: The metadata of an output.
+        metadata: The metadata of the output.
     """
     output: Output = field(metadata=config(
         decoder=deserialize_output

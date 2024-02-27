@@ -83,7 +83,7 @@ class OutputIdProof:
         slot: The slot index of the output.
         output_index: The index of the output within the corresponding transaction.
         transaction_commitment: The commitment of the transaction that created the output. Hex-encoded with 0x prefix.
-        output_commitment_proof: The proof of the output commitment. Hex-encoded with 0x prefix.
+        output_commitment_proof: The proof of the output commitment.
     """
     slot: SlotIndex
     output_index: int
