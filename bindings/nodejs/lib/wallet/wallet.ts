@@ -1736,7 +1736,7 @@ export class Wallet {
      *
      * @param params Amount, Address, and Return Strategy.
      * @param transactionOptions Additional transaction options.
-     * @returns The sent transaction.
+     * @returns The prepared transaction.
      */
     async prepareSendMana(
         params: SendManaParams,
