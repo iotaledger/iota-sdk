@@ -8,8 +8,8 @@ pub mod routes;
 use crate::{
     client::{node_api::error::Error as NodeApiError, Client, Error, Result},
     types::{
-        api::core::OutputResponse,
-        block::output::{OutputId, OutputMetadata, OutputWithMetadataResponse},
+        api::core::{OutputResponse, OutputWithMetadataResponse},
+        block::output::{OutputId, OutputMetadata},
     },
 };
 

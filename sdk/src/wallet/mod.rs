@@ -74,9 +74,12 @@ pub use self::{
     types::OutputData,
 };
 use crate::{
-    types::block::{
-        output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata, OutputWithMetadataResponse},
-        payload::signed_transaction::{SignedTransactionPayload, TransactionId},
+    types::{
+        api::core::OutputWithMetadataResponse,
+        block::{
+            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata},
+            payload::signed_transaction::{SignedTransactionPayload, TransactionId},
+        },
     },
     wallet::types::InclusionState,
 };

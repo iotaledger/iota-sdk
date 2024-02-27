@@ -13,14 +13,16 @@ use crate::{
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
         unix_timestamp_now, Client,
     },
-    types::block::{
-        address::Bech32Address,
-        core::{BasicBlockBody, Block, BlockBody},
-        input::{Input, UtxoInput, INPUT_COUNT_MAX},
-        output::OutputWithMetadataResponse,
-        payload::{signed_transaction::TransactionId, Payload},
-        slot::SlotIndex,
-        BlockId,
+    types::{
+        api::core::OutputWithMetadataResponse,
+        block::{
+            address::Bech32Address,
+            core::{BasicBlockBody, Block, BlockBody},
+            input::{Input, UtxoInput, INPUT_COUNT_MAX},
+            payload::{signed_transaction::TransactionId, Payload},
+            slot::SlotIndex,
+            BlockId,
+        },
     },
 };
 
