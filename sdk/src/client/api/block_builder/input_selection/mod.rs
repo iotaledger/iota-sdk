@@ -32,7 +32,7 @@ use crate::{
             NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
-            signed_transaction::{Transaction, TransactionCapabilities},
+            signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
             TaggedDataPayload,
         },
         protocol::{CommittableAgeRange, ProtocolParameters},
@@ -265,6 +265,19 @@ impl InputSelection {
                     Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
                     _ => unreachable!(),
                 };
+            }
+        }
+
+        // If we're burning generated mana, set the capability flag.
+        if self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
+            // Get the mana sums with generated mana to see whether there's a difference.
+            if !self
+                .transaction_capabilities
+                .has_capability(TransactionCapabilityFlag::BurnMana)
+                && input_mana < self.total_selected_mana(true)?
+            {
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::BurnMana);
             }
         }
 

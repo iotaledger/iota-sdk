@@ -248,7 +248,7 @@ impl InputSelection {
             }
             // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
-                selected_mana += self.total_mana(&input)?;
+                selected_mana += self.total_mana(&input, None)?;
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();
                 }
@@ -271,7 +271,7 @@ impl InputSelection {
             .iter()
             .filter(|i| self.required_inputs.contains(i.output_id()))
         {
-            input_mana += self.total_mana(input)?;
+            input_mana += self.total_mana(input, None)?;
         }
 
         Ok(input_mana.saturating_sub(output_mana))
@@ -286,20 +286,32 @@ impl InputSelection {
             required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana;
         }
 
+        Ok((self.total_selected_mana(None)?, required_mana))
+    }
+
+    pub(crate) fn total_selected_mana(&self, include_generated: impl Into<Option<bool>> + Copy) -> Result<u64, Error> {
         let mut selected_mana = 0;
 
         for input in &self.selected_inputs {
-            selected_mana += self.total_mana(input)?;
+            selected_mana += self.total_mana(input, include_generated)?;
         }
-        Ok((selected_mana, required_mana))
+
+        Ok(selected_mana)
     }
 
-    fn total_mana(&self, input: &InputSigningData) -> Result<u64, Error> {
+    fn total_mana(&self, input: &InputSigningData, include_generated: impl Into<Option<bool>>) -> Result<u64, Error> {
+        let include_generated = include_generated
+            .into()
+            .unwrap_or(self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
-            + input.output.available_mana(
-                &self.protocol_parameters,
-                input.output_id().transaction_id().slot_index(),
-                self.creation_slot,
-            )?)
+            + if include_generated {
+                input.output.available_mana(
+                    &self.protocol_parameters,
+                    input.output_id().transaction_id().slot_index(),
+                    self.creation_slot,
+                )?
+            } else {
+                input.output.mana()
+            })
     }
 }
