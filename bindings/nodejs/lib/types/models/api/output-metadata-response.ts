@@ -86,3 +86,17 @@ export class OutputWithMetadataResponse {
      */
     metadata!: OutputMetadataResponse;
 }
+
+/**
+ * An output and its metadata.
+ */
+export class OutputWithMetadata {
+    /**
+     * One of the possible output types.
+     */
+    output!: Output;
+    /**
+     * The metadata of the output.
+     */
+    metadata!: OutputMetadataResponse;
+}

@@ -21,5 +21,5 @@ export class OutputResponse {
     /**
      * The proof of the output identifier.
      */
-    output_id_proof!: OutputIdProof;
+    outputIdProof!: OutputIdProof;
 }

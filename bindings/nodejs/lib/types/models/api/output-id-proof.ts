@@ -86,7 +86,7 @@ export class ValueHash extends TreeNode {
      * @param hash The hash of the value.
      */
     constructor(hash: HexEncodedString) {
-        super(TreeNodeType.LeafHash);
+        super(TreeNodeType.ValueHash);
         this.hash = hash;
     }
 }

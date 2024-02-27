@@ -15,15 +15,15 @@ export interface CommitteeMember {
     /**
      * The total stake of the pool, including delegators.
      */
-    pool_stake: u64;
+    poolStake: u64;
     /**
      * The stake of a validator.
      */
-    validator_stake: u64;
+    validatorStake: u64;
     /**
      * The fixed cost of the validator, which it receives as part of its Mana rewards.
      */
-    fixed_cost: u64;
+    fixedCost: u64;
 }
 
 /**
