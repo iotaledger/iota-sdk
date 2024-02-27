@@ -1,19 +1,18 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::OnceLock};
 
 use super::{Error, InputSelection, Requirement};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{api::input_selection::requirement::PriorityMap, secret::types::InputSigningData},
     types::block::{
         address::Address,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutput, AccountOutputBuilder, AnchorOutput,
-            BasicOutput, DelegationOutput, FoundryOutput, FoundryOutputBuilder, MinimumOutputAmount, NftOutput,
-            NftOutputBuilder, Output,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutput, AccountOutputBuilder, BasicOutput,
+            FoundryOutput, FoundryOutputBuilder, MinimumOutputAmount, NftOutput, NftOutputBuilder, Output,
         },
-        slot::SlotIndex,
+        slot::{SlotCommitmentId, SlotIndex},
     },
 };
 
@@ -31,7 +30,7 @@ pub(crate) fn sdruc_not_expired(
             .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired { Some(sdr) } else { None }
+        (!expired).then_some(sdr)
     })
 }
 
@@ -57,9 +56,10 @@ impl InputSelection {
                 });
             }
         } else {
+            let mut priority_map = PriorityMap::<AmountPriority>::generate(&mut self.available_inputs);
             loop {
-                self.sort_available_inputs_for_amount(output_amount - input_amount);
-                let Some(input) = self.available_inputs.pop_front() else {
+                let Some(input) = priority_map.next(output_amount - input_amount, self.latest_slot_commitment_id)
+                else {
                     break;
                 };
                 log::debug!("selecting input with amount {}", input.output.amount());
@@ -69,6 +69,10 @@ impl InputSelection {
                 if self.reduce_funds_of_chains(input_amount, &mut output_amount)? {
                     break;
                 }
+            }
+            // Return unselected inputs to the available list
+            for input in priority_map.into_inputs() {
+                self.available_inputs.push(input);
             }
             if output_amount > input_amount {
                 return Err(Error::InsufficientAmount {
@@ -177,23 +181,57 @@ impl InputSelection {
 
         Ok(input_amount >= *output_amount)
     }
+}
 
-    fn sort_available_inputs_for_amount(&mut self, missing_amount: u64) {
-        // Establish the order in which we want to pick an input
-        let sort_order_type = [
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+struct AmountPriority {
+    kind_priority: usize,
+    has_native_token: bool,
+}
+
+impl PartialOrd for AmountPriority {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl Ord for AmountPriority {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        (self.kind_priority, self.has_native_token).cmp(&(other.kind_priority, other.has_native_token))
+    }
+}
+
+impl From<&InputSigningData> for Option<AmountPriority> {
+    fn from(value: &InputSigningData) -> Self {
+        sort_order_type()
+            .get(&value.output.kind())
+            .map(|&kind_priority| AmountPriority {
+                kind_priority,
+                has_native_token: value.output.native_token().is_some(),
+            })
+    }
+}
+
+/// Establish the order in which we want to pick an input
+pub fn sort_order_type() -> &'static HashMap<u8, usize> {
+    static MAP: OnceLock<HashMap<u8, usize>> = OnceLock::new();
+    MAP.get_or_init(|| {
+        [
             BasicOutput::KIND,
             AccountOutput::KIND,
             NftOutput::KIND,
             FoundryOutput::KIND,
-            DelegationOutput::KIND,
-            AnchorOutput::KIND,
         ]
         .into_iter()
-        .zip(0..)
-        .collect::<HashMap<_, _>>();
+        .zip(0_usize..)
+        .collect::<HashMap<_, _>>()
+    })
+}
+
+impl PriorityMap<AmountPriority> {
+    fn next(&mut self, missing_amount: u64, slot_committment_id: SlotCommitmentId) -> Option<InputSigningData> {
         let amount_sort = |output: &Output| {
             let mut amount = output.amount();
-            if let Some(sdruc) = sdruc_not_expired(output, self.latest_slot_commitment_id.slot_index()) {
+            if let Some(sdruc) = sdruc_not_expired(output, slot_committment_id.slot_index()) {
                 amount -= sdruc.amount();
             }
             // If the amount is greater than the missing amount, we want the smallest ones first
@@ -204,23 +242,15 @@ impl InputSelection {
                 (true, u64::MAX - amount)
             }
         };
-        // The sort order is by native tokens, type, then amount
-        let sort_order = |output: &Output| {
-            (
-                output.native_token().is_some(),
-                sort_order_type[&output.kind()],
-                amount_sort(output),
-            )
-        };
-        self.available_inputs
-            .make_contiguous()
-            .sort_unstable_by(|v1, v2| sort_order(&v1.output).cmp(&sort_order(&v2.output)));
-        log::debug!(
-            "sorted inputs: {:?}",
-            self.available_inputs
-                .iter()
-                .map(|i| i.output.amount())
-                .collect::<Vec<_>>()
-        );
+        if let Some((priority, mut inputs)) = self.0.pop_first() {
+            // Sort in reverse so we can pop from the back
+            inputs.sort_unstable_by(|i1, i2| amount_sort(&i2.output).cmp(&amount_sort(&i1.output)));
+            let input = inputs.pop();
+            if !inputs.is_empty() {
+                self.0.insert(priority, inputs);
+            }
+            return input;
+        }
+        None
     }
 }

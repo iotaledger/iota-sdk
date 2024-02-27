@@ -49,7 +49,7 @@ impl InputSelection {
             .position(|input| is_nft_with_id(&input.output, &nft_id, input.output_id()))
             .ok_or(Error::UnfulfillableRequirement(Requirement::Nft(nft_id)))?;
         // Remove the input from the available inputs.
-        let input = self.available_inputs.remove(index).unwrap();
+        let input = self.available_inputs.swap_remove(index);
 
         log::debug!("{nft_id:?} requirement fulfilled by {:?}", input.output_id());
 

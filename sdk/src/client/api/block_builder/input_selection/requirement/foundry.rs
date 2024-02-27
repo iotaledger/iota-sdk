@@ -42,7 +42,7 @@ impl InputSelection {
             .position(|input| is_foundry_with_id(&input.output, &foundry_id))
             .ok_or(Error::UnfulfillableRequirement(Requirement::Foundry(foundry_id)))?;
         // Remove the input from the available inputs.
-        let input = self.available_inputs.remove(index).unwrap();
+        let input = self.available_inputs.swap_remove(index);
 
         log::debug!("{foundry_id:?} requirement fulfilled by {:?}", input.output_id());
 
