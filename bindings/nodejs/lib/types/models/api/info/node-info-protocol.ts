@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { StorageScoreParameters } from '../storage-score';
-import { EpochIndex } from '../../block/slot';
-import { u64 } from '../../utils/type-aliases';
+import type { StorageScoreParameters } from '../../storage-score';
+import { EpochIndex } from '../../../block/slot';
+import { u64 } from '../../../utils/type-aliases';
 
 /**
  * The Protocol Info.

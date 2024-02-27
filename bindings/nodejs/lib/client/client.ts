@@ -44,7 +44,7 @@ import {
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
-    BlockMetadata,
+    BlockMetadataResponse,
     InfoResponse,
     UTXOInput,
     Response,
@@ -53,8 +53,8 @@ import {
     u64,
     TransactionId,
     Bech32Address,
-    BlockWithMetadata,
-    TransactionMetadata,
+    BlockFullResponse,
+    TransactionMetadataResponse,
 } from '../types';
 import {
     OutputResponse,
@@ -65,7 +65,7 @@ import {
     CommitteeResponse,
     IssuanceBlockHeaderResponse,
 } from '../types/models/api';
-import { RoutesResponse } from '../types/models/info/routes-response';
+import { RoutesResponse } from '../types/models/api/routes-response';
 
 import { plainToInstance } from 'class-transformer';
 import { ManaRewardsResponse } from '../types/models/api/mana-rewards-response';
@@ -329,7 +329,7 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block metadata.
      * @returns The requested block metadata.
      */
-    async getBlockMetadata(blockId: BlockId): Promise<BlockMetadata> {
+    async getBlockMetadata(blockId: BlockId): Promise<BlockMetadataResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlockMetadata',
             data: {
@@ -346,7 +346,7 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block.
      * @returns The requested block with its metadata.
      */
-    async getBlockWithMetadata(blockId: BlockId): Promise<BlockWithMetadata> {
+    async getBlockWithMetadata(blockId: BlockId): Promise<BlockFullResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlockWithMetadata',
             data: {
@@ -434,7 +434,7 @@ export class Client {
      */
     async getIncludedBlockMetadata(
         transactionId: TransactionId,
-    ): Promise<BlockMetadata> {
+    ): Promise<BlockMetadataResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
@@ -452,7 +452,7 @@ export class Client {
      */
     async getTransactionMetadata(
         transactionId: TransactionId,
-    ): Promise<TransactionMetadata> {
+    ): Promise<TransactionMetadataResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getTransactionMetadata',
             data: {
