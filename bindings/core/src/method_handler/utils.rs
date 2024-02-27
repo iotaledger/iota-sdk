@@ -130,7 +130,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 protocol_parameters,
             );
 
-            Response::TransactionFailureReason(context.validate()?)
+            context.validate().map_err(Error::from)?;
+
+            Response::Ok
         }
         UtilsMethod::ManaWithDecay {
             mana,
