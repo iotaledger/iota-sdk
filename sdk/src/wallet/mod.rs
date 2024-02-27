@@ -75,7 +75,7 @@ pub use self::{
 };
 use crate::{
     types::block::{
-        output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputAndMetadata, OutputWithMetadata},
+        output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata, OutputWithMetadataResponse},
         payload::signed_transaction::{SignedTransactionPayload, TransactionId},
     },
     wallet::types::InclusionState,
@@ -109,7 +109,7 @@ pub struct FilterOptions {
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
     tx_payload: SignedTransactionPayload,
-    inputs: Vec<OutputWithMetadata>,
+    inputs: Vec<OutputWithMetadataResponse>,
 ) -> crate::wallet::Result<TransactionWithMetadata> {
     Ok(TransactionWithMetadata {
         payload: tx_payload.clone(),
@@ -127,7 +127,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         note: None,
         inputs: inputs
             .into_iter()
-            .map(|input| OutputAndMetadata {
+            .map(|input| OutputWithMetadata {
                 output: input.output,
                 metadata: input.metadata,
             })

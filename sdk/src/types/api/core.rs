@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 
 // Re-export types that are also used as responses.
 pub use crate::types::block::{
-    output::{OutputMetadata as OutputMetadataResponse, OutputWithMetadata as OutputWithMetadataResponse},
+    output::{OutputMetadata as OutputMetadataResponse, OutputWithMetadataResponse},
     slot::SlotCommitment as Commitment,
     Block as BlockResponse,
 };

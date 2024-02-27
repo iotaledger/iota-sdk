@@ -20,7 +20,7 @@ use crate::{
         Error,
     },
     types::block::{
-        output::{Output, OutputAndMetadata},
+        output::{Output, OutputWithMetadata},
         payload::signed_transaction::SignedTransactionPayload,
     },
     wallet::{
@@ -156,7 +156,7 @@ where
         let inputs = signed_transaction_data
             .inputs_data
             .into_iter()
-            .map(|input| OutputAndMetadata {
+            .map(|input| OutputWithMetadata {
                 metadata: input.output_metadata,
                 output: input.output,
             })

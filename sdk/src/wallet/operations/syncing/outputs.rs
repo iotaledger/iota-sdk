@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         core::{BasicBlockBody, BlockBody},
         input::Input,
-        output::{OutputId, OutputWithMetadata},
+        output::{OutputId, OutputWithMetadataResponse},
         payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
     },
     wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet},
@@ -22,7 +22,7 @@ where
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
         &self,
-        outputs_with_meta: Vec<OutputWithMetadata>,
+        outputs_with_meta: Vec<OutputWithMetadataResponse>,
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
@@ -56,7 +56,7 @@ where
     pub(crate) async fn get_outputs(
         &self,
         output_ids: Vec<OutputId>,
-    ) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
+    ) -> crate::wallet::Result<Vec<OutputWithMetadataResponse>> {
         log::debug!("[SYNC] start get_outputs");
         let get_outputs_start_time = Instant::now();
         let mut outputs = Vec::new();
@@ -73,7 +73,7 @@ where
                         output_data.metadata.spent = None;
                     }
                     unspent_outputs.push((output_id, output_data.clone()));
-                    outputs.push(OutputWithMetadata::new(
+                    outputs.push(OutputWithMetadataResponse::new(
                         output_data.output.clone(),
                         output_data.output_id_proof.clone(),
                         output_data.metadata,
@@ -138,8 +138,10 @@ where
                                             let inputs_with_meta =
                                                 get_inputs_for_transaction_payload(&client, transaction_payload)
                                                     .await?;
-                                            let inputs_response: Vec<OutputWithMetadata> =
-                                                inputs_with_meta.into_iter().map(OutputWithMetadata::from).collect();
+                                            let inputs_response: Vec<OutputWithMetadataResponse> = inputs_with_meta
+                                                .into_iter()
+                                                .map(OutputWithMetadataResponse::from)
+                                                .collect();
 
                                             let transaction = build_transaction_from_payload_and_inputs(
                                                 transaction_id,
@@ -193,7 +195,7 @@ where
 pub(crate) async fn get_inputs_for_transaction_payload(
     client: &Client,
     transaction_payload: &SignedTransactionPayload,
-) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
+) -> crate::wallet::Result<Vec<OutputWithMetadataResponse>> {
     let output_ids = transaction_payload
         .transaction()
         .inputs()

@@ -17,7 +17,7 @@ use crate::{
         address::Bech32Address,
         core::{BasicBlockBody, Block, BlockBody},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
-        output::OutputWithMetadata,
+        output::OutputWithMetadataResponse,
         payload::{signed_transaction::TransactionId, Payload},
         slot::SlotIndex,
         BlockId,
@@ -26,7 +26,10 @@ use crate::{
 
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
-    pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
+    pub async fn inputs_from_transaction_id(
+        &self,
+        transaction_id: &TransactionId,
+    ) -> Result<Vec<OutputWithMetadataResponse>> {
         let block = self.get_included_block(transaction_id).await?;
 
         if let BlockBody::Basic(basic_block_body) = block.body() {

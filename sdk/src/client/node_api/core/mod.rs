@@ -9,7 +9,7 @@ use crate::{
     client::{node_api::error::Error as NodeApiError, Client, Error, Result},
     types::{
         api::core::OutputResponse,
-        block::output::{OutputId, OutputMetadata, OutputWithMetadata},
+        block::output::{OutputId, OutputMetadata, OutputWithMetadataResponse},
     },
 };
 
@@ -44,7 +44,7 @@ impl Client {
     }
 
     /// Requests outputs and their metadata by their output ID in parallel.
-    pub async fn get_outputs_with_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadata>> {
+    pub async fn get_outputs_with_metadata(&self, output_ids: &[OutputId]) -> Result<Vec<OutputWithMetadataResponse>> {
         futures::future::try_join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id))).await
     }
 
@@ -53,7 +53,7 @@ impl Client {
     pub async fn get_outputs_with_metadata_ignore_not_found(
         &self,
         output_ids: &[OutputId],
-    ) -> Result<Vec<OutputWithMetadata>> {
+    ) -> Result<Vec<OutputWithMetadataResponse>> {
         futures::future::join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id)))
             .await
             .into_iter()
