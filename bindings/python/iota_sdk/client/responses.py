@@ -9,7 +9,7 @@ from dataclasses_json import config
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
-from iota_sdk.types.node_info import NodeInfoBaseToken, NodeInfoMetrics, NodeInfoStatus, ProtocolParameters
+from iota_sdk.types.node_info import BaseTokenResponse, MetricsResponse, StatusResponse, ProtocolParameters
 from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId, OutputWithId
 from iota_sdk.types.output_id_proof import OutputIdProof
@@ -39,11 +39,11 @@ class ProtocolParametersResponse:
     """Protocol Parameters with start epoch.
 
     Attributes:
-        start_epoch: The start epoch of the set of protocol parameters.
         parameters: The protocol parameters.
+        start_epoch: The start epoch of the set of protocol parameters.
     """
-    start_epoch: EpochIndex
     parameters: ProtocolParameters
+    start_epoch: EpochIndex
 
 
 @json
@@ -62,10 +62,10 @@ class InfoResponse:
     """
     name: str
     version: str
-    status: NodeInfoStatus
-    metrics: NodeInfoMetrics
+    status: StatusResponse
+    metrics: MetricsResponse
     protocol_parameters: List[ProtocolParametersResponse]
-    base_token: NodeInfoBaseToken
+    base_token: BaseTokenResponse
 
 
 @json
