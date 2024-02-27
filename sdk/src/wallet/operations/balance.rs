@@ -28,7 +28,7 @@ where
         let slot_index = self.client().get_slot_index().await?;
 
         let wallet_address = self.address().await;
-        let wallet_ledger = self.ledger().await;
+        let wallet_ledger = self.ledger().await.clone();
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
 
@@ -72,11 +72,7 @@ where
                         slot_index,
                     )?;
                     // Add mana rewards
-                    // NOTE: Block here because we really don't want to yield to the executor while we are holding the
-                    // ledger lock
-                    if let Ok(response) = tokio::runtime::Handle::current()
-                        .block_on(self.client().get_output_mana_rewards(output_id, slot_index))
-                    {
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
                         balance.mana.rewards += response.rewards;
                     }
 
@@ -109,11 +105,7 @@ where
                     // Add amount
                     balance.base_coin.total += delegation.amount();
                     // Add mana rewards
-                    // NOTE: Block here because we really don't want to yield to the executor while we are holding the
-                    // ledger lock
-                    if let Ok(response) = tokio::runtime::Handle::current()
-                        .block_on(self.client().get_output_mana_rewards(output_id, slot_index))
-                    {
+                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
                         balance.mana.rewards += response.rewards;
                     }
                     // Add storage deposit

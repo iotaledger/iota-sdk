@@ -33,7 +33,7 @@ pub struct ClientBuilder {
     /// Options for the MQTT broker
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
-    #[serde(flatten)]
+    #[serde(default)]
     pub broker_options: BrokerOptions,
     /// Protocol parameters
     #[serde(default, skip_serializing_if = "Option::is_none")]
