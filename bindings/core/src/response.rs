@@ -31,7 +31,6 @@ use iota_sdk::{
             },
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
-            semantic::TransactionFailureReason,
             signature::Ed25519Signature,
             slot::{SlotCommitment, SlotCommitmentId},
             unlock::Unlock,
@@ -233,8 +232,6 @@ pub enum Response {
     CustomJson(serde_json::Value),
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
     SlotCommitmentId(SlotCommitmentId),
-    /// Response for [`VerifyTransactionSemantic`](crate::method::UtilsMethod::VerifyTransactionSemantic).
-    TransactionFailureReason(Option<TransactionFailureReason>),
 
     // Responses in client and wallet
     /// Response for:
