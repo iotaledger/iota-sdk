@@ -140,7 +140,7 @@ pub enum CliCommand {
     },
     /// Get information about currently set node.
     NodeInfo,
-    /// Restore a backup file. Currently only Stronghold backup supported.
+    /// Restore a backup file. Currently only Stronghold backup is supported.
     Restore {
         /// Path of the to be restored stronghold backup file.
         backup_path: String,
