@@ -33,7 +33,7 @@ pub enum Error {
     Mana(#[from] ManaError),
     /// Semantic errors.
     #[error("{0}")]
-    TransactionFailure(#[from] TransactionFailureReason),
+    TransactionSemantic(#[from] TransactionFailureReason),
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
