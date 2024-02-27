@@ -274,23 +274,6 @@ export interface __FindInputsMethod__ {
     };
 }
 
-export interface __SignTransactionMethod__ {
-    name: 'signTransaction';
-    data: {
-        secretManager: SecretManagerType;
-        preparedTransactionData: PreparedTransactionData;
-    };
-}
-
-export interface __SignatureUnlockMethod__ {
-    name: 'signatureUnlock';
-    data: {
-        secretManager: SecretManagerType;
-        transactionSigningHash: HexEncodedString;
-        chain: Bip44;
-    };
-}
-
 export interface __BuildBasicBlockMethod__ {
     name: 'buildBasicBlock';
     data: {
