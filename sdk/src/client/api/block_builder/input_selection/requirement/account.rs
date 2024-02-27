@@ -51,7 +51,7 @@ impl InputSelection {
             .iter()
             .position(|input| is_account_with_id(&input.output, &account_id, input.output_id()))
             .ok_or(Error::UnfulfillableRequirement(Requirement::Account(account_id)))?;
-        // Remove the input from the available inputs.
+        // Remove the input from the available inputs, swap to make it O(1).
         let input = self.available_inputs.swap_remove(index);
 
         log::debug!("{account_id:?} requirement fulfilled by {:?}", input.output_id());
