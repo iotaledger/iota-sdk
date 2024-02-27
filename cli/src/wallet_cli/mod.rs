@@ -1301,7 +1301,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let address = wallet.address().await;
 
     let mut log = format!(
-        "Address:\n{:<9}{}\n{:<9}{:?}",
+        "Address:\n{:<9}{}\n{:<9}{:?}\n",
         "Bech32:",
         address,
         "Hex:",
@@ -1358,12 +1358,16 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     }
 
     let bip_path = wallet.bip_path().await;
-    log = format!("{log}\nBIP path: {bip_path:?}");
 
-    log = format!(
-        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:?}\nAccounts: {:?}\nFoundries: {:?}\nNFTs: {:?}\nDelegations: {:?}\nAnchors: {:?}\n",
-        output_ids, amount, native_tokens, accounts, foundries, nfts, delegations, anchors
-    );
+    log = format!("{log}BIP path: {bip_path:?}\n");
+    log = format!("{log}Outputs: {output_ids:#?}\n");
+    log = format!("{log}Base coin amount: {amount:#?}\n");
+    log = format!("{log}Native Tokens: {native_tokens:#?}\n");
+    log = format!("{log}Accounts: {accounts:#?}\n");
+    log = format!("{log}Foundries: {foundries:#?}\n");
+    log = format!("{log}NFTs: {nfts:#?}\n");
+    log = format!("{log}Delegations: {delegations:#?}\n");
+    log = format!("{log}Anchors: {anchors:#?}\n");
 
     println_log_info!("{log}");
 
