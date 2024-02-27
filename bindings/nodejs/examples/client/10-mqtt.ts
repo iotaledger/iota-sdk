@@ -24,7 +24,7 @@ async function run() {
     });
 
     // Array of topics to subscribe to
-    // Topics can be found here https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/iotaledger/tips/main/tips/TIP-0028/event-api.yml
+    // Topics can be found here https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/iotaledger/tips/tip48/tips/TIP-0048/asyncapi3.yaml
     const topics = ['blocks'];
 
     const callback = function (error: Error, data: string) {
