@@ -6,17 +6,17 @@ import { EpochIndex } from '../../../block/slot';
 import { NumericString } from '../../../utils';
 
 /**
- * The Protocol Info.
+ * The Protocol Parameters response.
  */
-interface ProtocolInfo {
-    /**
-     * The start epoch of the set of protocol parameters.
-     */
-    startEpoch: EpochIndex;
+interface ProtocolParametersResponse {
     /**
      * The protocol parameters.
      */
     parameters: ProtocolParameters;
+    /**
+     * The start epoch of the set of protocol parameters.
+     */
+    startEpoch: EpochIndex;
 }
 
 /**
@@ -302,7 +302,7 @@ interface VersionSignalingParameters {
 }
 
 export {
-    ProtocolInfo,
+    ProtocolParametersResponse,
     ProtocolParameters,
     RewardsParameters,
     WorkScoreParameters,

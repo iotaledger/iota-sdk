@@ -6,7 +6,7 @@ import { SlotIndex, EpochIndex } from '../../../block/slot';
 /**
  * Response from the /info endpoint.
  */
-export interface NodeInfoStatus {
+export interface StatusResponse {
     /**
      * Tells whether the node is healthy or not.
      */

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BlockId, SlotCommitment, SlotIndex } from '../../block';
+import { NumericString } from '../../utils';
 
 /**
  * Information that is used to attach a block in the network.
@@ -15,7 +16,7 @@ export interface IssuanceBlockHeaderResponse {
     /**
      * Latest issuing time of the returned parents.
      */
-    latestParentBlockIssuingTime: number;
+    latestParentBlockIssuingTime: NumericString;
     /**
      * The slot index of the latest finalized slot.
      */
