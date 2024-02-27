@@ -559,7 +559,7 @@ export class Utils {
      * @param unlocks The unlocks.
      * @param manaRewards The total mana rewards claimed in the transaction.
      *
-     * @returns The conflict reason.
+     * @returns void.
      */
     static verifyTransactionSemantic(
         transaction: SignedTransactionPayload,
@@ -567,8 +567,8 @@ export class Utils {
         protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
         manaRewards?: { [outputId: HexEncodedString]: NumericString },
-    ): string {
-        const conflictReason = callUtilsMethod({
+    ): void {
+        return callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
                 transaction,
@@ -578,7 +578,6 @@ export class Utils {
                 manaRewards,
             },
         });
-        return conflictReason;
     }
 
     /**
