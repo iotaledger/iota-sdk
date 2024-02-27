@@ -242,7 +242,7 @@ impl ProtocolParameters {
         self.rewards_parameters.final_target_rewards_rate = (self.token_supply()
             * self.rewards_parameters().reward_to_generation_ratio() as u64
             * self.mana_parameters().generation_rate() as u64)
-            >> self.mana_parameters().generation_rate_exponent() - self.slots_per_epoch_exponent();
+            >> (self.mana_parameters().generation_rate_exponent() - self.slots_per_epoch_exponent());
         let bootstrapping_duration_years =
             self.rewards_parameters().bootstrapping_duration() as f64 * self.epochs_per_year().exp();
         self.rewards_parameters.initial_target_rewards_rate = (self.rewards_parameters.final_target_rewards_rate as f64

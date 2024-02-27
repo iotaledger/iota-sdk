@@ -1,6 +1,7 @@
-// Copyright 2021-2023 IOTA Stiftung
+// Copyright 2021-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { ProtocolParameters } from '../models';
+
+import { ProtocolParameters } from '../models/api/info/node-info-protocol';
 import type { MqttBrokerOptions, Node } from './network';
 
 /** Options for the client builder */
@@ -21,10 +22,12 @@ export interface ClientOptions {
     minQuorumSize?: number;
     /** % of nodes that have to return the same response so it gets accepted */
     quorumThreshold?: number;
-    /** Data related to the used network */
-    protocolParameters?: ProtocolParameters;
+    /** The User-Agent header for requests */
+    userAgent?: string;
     /** Options for the MQTT broker */
     brokerOptions?: MqttBrokerOptions;
+    /** Protocol parameters */
+    protocolParameters?: ProtocolParameters;
     /** Timeout for API requests */
     apiTimeout?: Duration;
     /** The maximum parallel API requests. */

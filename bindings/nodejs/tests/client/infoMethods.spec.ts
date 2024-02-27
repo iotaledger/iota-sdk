@@ -7,6 +7,7 @@ import 'dotenv/config';
 
 import { Client } from '../../lib/client';
 import '../customMatchers';
+import protocolParametersFixture from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
 
 async function makeClient(): Promise<Client> {
     return await Client.create({
@@ -80,3 +81,16 @@ describe.skip('Client info methods', () => {
         expect(bech32Hrp).toBeDefined();
     });
 });
+
+// TODO: enable after ProtocolParameters fixture is updated https://github.com/iotaledger/iota-sdk/issues/2040
+// describe('Offline client info methods', () => {
+    // it('provided protocol parameters', async () => {
+    //     const protocolParameters = protocolParametersFixture.params;
+    //     const client = await Client.create({
+    //         protocolParameters
+    //     });
+    //     const networkInfo = await client.getNetworkInfo();
+
+    //     expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
+    // });
+// })

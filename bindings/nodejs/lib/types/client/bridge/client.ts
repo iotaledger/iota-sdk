@@ -19,6 +19,7 @@ import type {
     SlotIndex,
     SlotCommitmentId,
     EpochIndex,
+    Address,
 } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
@@ -318,6 +319,14 @@ export interface __HexToBech32Method__ {
     name: 'hexToBech32';
     data: {
         hex: HexEncodedString;
+        bech32Hrp?: string;
+    };
+}
+
+export interface __AddressToBech32Method__ {
+    name: 'addressToBech32';
+    data: {
+        address: Address;
         bech32Hrp?: string;
     };
 }

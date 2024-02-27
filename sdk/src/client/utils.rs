@@ -117,6 +117,18 @@ impl Client {
         }
     }
 
+    /// Converts an address to its bech32 representation
+    pub async fn address_to_bech32(
+        &self,
+        address: Address,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
+    ) -> crate::client::Result<Bech32Address> {
+        match bech32_hrp {
+            Some(hrp) => Ok(address.to_bech32(hrp.convert()?)),
+            None => Ok(address.to_bech32(self.get_bech32_hrp().await?)),
+        }
+    }
+
     /// Transforms an account id to a bech32 encoded address
     pub async fn account_id_to_bech32(
         &self,

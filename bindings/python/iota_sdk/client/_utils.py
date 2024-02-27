@@ -3,6 +3,7 @@
 
 from typing import Optional
 from abc import ABCMeta, abstractmethod
+from iota_sdk.types.address import Address
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr
@@ -35,7 +36,8 @@ class ClientUtils(metaclass=ABCMeta):
         """
 
     # pylint: disable=redefined-builtin
-    def hex_to_bech32(self, hex_str: HexStr, bech32_hrp: Optional[str] = None) -> str:
+    def hex_to_bech32(self, hex_str: HexStr,
+                      bech32_hrp: Optional[str] = None) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return self._call_method('hexToBech32', {
@@ -43,7 +45,17 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
-    def account_id_to_bech32(self, account_id: HexStr, bech32_hrp: Optional[str] = None) -> str:
+    def address_to_bech32(self, address: Address,
+                          bech32_hrp: Optional[str] = None) -> str:
+        """Converts an address to its bech32 representation.
+        """
+        return self._call_method('addressToBech32', {
+            'address': address,
+            'bech32Hrp': bech32_hrp
+        })
+
+    def account_id_to_bech32(self, account_id: HexStr,
+                             bech32_hrp: Optional[str] = None) -> str:
         """Transforms an account id to a bech32 encoded address.
         """
         return self._call_method('accountIdToBech32', {
@@ -51,7 +63,8 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
-    def anchor_id_to_bech32(self, anchor_id: HexStr, bech32_hrp: Optional[str] = None) -> str:
+    def anchor_id_to_bech32(self, anchor_id: HexStr,
+                            bech32_hrp: Optional[str] = None) -> str:
         """Transforms an anchor id to a bech32 encoded address.
         """
         return self._call_method('anchorIdToBech32', {
@@ -59,7 +72,8 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
-    def nft_id_to_bech32(self, nft_id: HexStr, bech32_hrp: Optional[str] = None) -> str:
+    def nft_id_to_bech32(self, nft_id: HexStr,
+                         bech32_hrp: Optional[str] = None) -> str:
         """Transforms an nft id to a bech32 encoded address.
         """
         return self._call_method('nftIdToBech32', {
