@@ -239,7 +239,7 @@ impl<'a> SemanticValidationContext<'a> {
                 )
                 .ok_or(TransactionFailureReason::ManaOverflow)?;
 
-            if let Some(mana_rewards) = self.mana_rewards.and_then(|r| r.get(*output_id)) {
+            if let Some(mana_rewards) = self.mana_rewards.as_ref().and_then(|r| r.get(*output_id)) {
                 self.input_mana
                     .checked_add(*mana_rewards)
                     .ok_or(TransactionFailureReason::ManaOverflow)?;
