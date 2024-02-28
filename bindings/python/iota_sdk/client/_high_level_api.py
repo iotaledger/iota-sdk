@@ -96,7 +96,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         })
         return [OutputResponse.from_dict(o) for o in outputs]
 
-    def get_outputs_ignore_errors(
+    def get_outputs_ignore_not_found(
             self, output_ids: List[OutputId]) -> List[OutputResponse]:
         """Try to get OutputResponse from provided OutputIds.
         Requests are sent in parallel and errors are ignored, can be useful for spent outputs.
@@ -107,7 +107,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         Returns:
             A list of corresponding `OutputResponse` objects.
         """
-        outputs = self._call_method('getOutputsIgnoreErrors', {
+        outputs = self._call_method('getOutputsIgnoreNotFound', {
             'outputIds': list(map(lambda o: o.output_id, output_ids))
         })
         return [OutputResponse.from_dict(o) for o in outputs]
