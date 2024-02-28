@@ -413,7 +413,7 @@ pub enum ClientMethod {
     /// Try to get outputs with associated output ID proofs from provided OutputIds (requests are sent in parallel and
     /// errors are ignored, can be useful for spent outputs)
     #[serde(rename_all = "camelCase")]
-    GetOutputsIgnoreErrors {
+    GetOutputsIgnoreNotFound {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },

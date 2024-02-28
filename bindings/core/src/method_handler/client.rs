@@ -228,7 +228,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputWithMetadata(client.get_output_with_metadata(&output_id).await?)
         }
         ClientMethod::GetOutputs { output_ids } => Response::Outputs(client.get_outputs(&output_ids).await?),
-        ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
+        ClientMethod::GetOutputsIgnoreNotFound { output_ids } => {
             Response::Outputs(client.get_outputs_ignore_not_found(&output_ids).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {

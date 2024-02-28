@@ -173,7 +173,7 @@ pub enum Response {
     OutputWithMetadata(OutputWithMetadataResponse),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
-    /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
+    /// - [`GetOutputsIgnoreNotFound`](crate::method::ClientMethod::GetOutputsIgnoreNotFound)
     Outputs(Vec<OutputResponse>),
     /// Response for:
     /// - [`AccountOutputId`](crate::method::ClientMethod::AccountOutputId)
