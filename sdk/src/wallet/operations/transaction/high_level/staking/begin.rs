@@ -9,6 +9,7 @@ use crate::{
         output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
         slot::EpochIndex,
     },
+    utils::serde::string,
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -19,8 +20,10 @@ pub struct BeginStakingParams {
     /// The account id which will begin staking.
     pub account_id: AccountId,
     /// The amount of tokens to stake.
+    #[serde(with = "string")]
     pub staked_amount: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    #[serde(with = "string")]
     pub fixed_cost: u64,
     /// The staking period (in epochs). Will default to the staking unbonding period.
     pub staking_period: Option<u32>,

@@ -9,6 +9,7 @@ use crate::{
         address::{AccountAddress, Bech32Address},
         output::{unlock_condition::AddressUnlockCondition, DelegationId, DelegationOutputBuilder},
     },
+    utils::serde::string,
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
 
@@ -21,6 +22,7 @@ pub struct CreateDelegationParams {
     // TODO: https://github.com/iotaledger/iota-sdk/issues/1888
     pub address: Option<Bech32Address>,
     /// The amount to delegate.
+    #[serde(with = "string")]
     pub delegated_amount: u64,
     /// The Account Address of the validator to which this output will delegate.
     pub validator_address: AccountAddress,
