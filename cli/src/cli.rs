@@ -115,7 +115,7 @@ fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum CliCommand {
-    /// Create a stronghold backup file.
+    /// Create a backup file. Currently only Stronghold backup is supported.
     Backup {
         /// Path of the created stronghold backup file.
         backup_path: String,
@@ -140,7 +140,7 @@ pub enum CliCommand {
     },
     /// Get information about currently set node.
     NodeInfo,
-    /// Restore a stronghold backup file.
+    /// Restore a backup file. Currently only Stronghold backup is supported.
     Restore {
         /// Path of the to be restored stronghold backup file.
         backup_path: String,
@@ -202,7 +202,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                             snapshot_exists: true, ..
                         } => {
                             let password = get_password("Stronghold password", false)?;
-                            backup_command_stronghold(&wallet, &password, Path::new(&backup_path)).await?;
+                            backup_to_stronghold_snapshot_command(&wallet, &password, Path::new(&backup_path)).await?;
                             return Ok(None);
                         }
                         LinkedSecretManager::Stronghold { snapshot_path, .. } => {
@@ -294,7 +294,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                             // we need to explicitly drop the current wallet here to prevent:
                             // "error accessing storage: IO error: lock hold by current process"
                             drop(wallet);
-                            let wallet = restore_command_stronghold(
+                            let wallet = restore_from_stronghold_snapshot_command(
                                 storage_path,
                                 snapshot_path.as_path(),
                                 Path::new(&backup_path),
@@ -312,7 +312,8 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                     let init_params = InitParameters::default();
                     let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
                     let wallet =
-                        restore_command_stronghold(storage_path, snapshot_path, Path::new(&backup_path)).await?;
+                        restore_from_stronghold_snapshot_command(storage_path, snapshot_path, Path::new(&backup_path))
+                            .await?;
                     Some(wallet)
                 }
             }
@@ -382,8 +383,14 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
     })
 }
 
-pub async fn backup_command_stronghold(wallet: &Wallet, password: &Password, backup_path: &Path) -> Result<(), Error> {
-    wallet.backup(backup_path.into(), password.clone()).await?;
+pub async fn backup_to_stronghold_snapshot_command(
+    wallet: &Wallet,
+    password: &Password,
+    backup_path: &Path,
+) -> Result<(), Error> {
+    wallet
+        .backup_to_stronghold_snapshot(backup_path.into(), password.clone())
+        .await?;
 
     println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 
@@ -453,7 +460,7 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn restore_command_stronghold(
+pub async fn restore_from_stronghold_snapshot_command(
     storage_path: &Path,
     snapshot_path: &Path,
     backup_path: &Path,
@@ -495,7 +502,10 @@ pub async fn restore_command_stronghold(
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    if let Err(e) = wallet.restore_backup(backup_path.into(), password, None, None).await {
+    if let Err(e) = wallet
+        .restore_from_stronghold_snapshot(backup_path.into(), password, None, None)
+        .await
+    {
         // Clean up the file system after a failed restore (typically produces a wallet without a secret manager).
         // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
         // the restore will be successful. https://github.com/iotaledger/iota-sdk/issues/2018
