@@ -31,11 +31,6 @@ export interface TransactionOptions {
     allowMicroAmount?: boolean;
     /** Whether to allow the selection of additional inputs for this transaction. */
     allowAdditionalInputSelection?: boolean;
-    /**
-     * Whether to allow allotting automatically calculated mana from the issuer account.
-     * If this flag is disabled, additional inputs will be selected to cover the amount.
-     */
-    allowAllottingFromAccountMana?: boolean;
     /** Mana allotments for the transaction. */
     manaAllotments?: { [account_id: AccountId]: u64 };
     /** Optional block issuer to which the transaction will have required mana allotted. */
