@@ -445,13 +445,6 @@ pub enum WalletMethod {
         #[serde(default)]
         options: Option<TransactionOptions>,
     },
-    /// Send mana.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendMana {
-        params: SendManaParams,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
     /// Set the alias of the wallet.
     /// Expected response: [`Ok`](crate::Response::Ok)
     SetAlias { alias: String },

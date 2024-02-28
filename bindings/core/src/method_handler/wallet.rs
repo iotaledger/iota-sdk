@@ -403,10 +403,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let transaction = wallet.send_outputs(outputs, options).await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
-        WalletMethod::SendMana { params, options } => {
-            let transaction = wallet.send_mana(params, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
-        }
         WalletMethod::SetAlias { alias } => {
             wallet.set_alias(&alias).await?;
             Response::Ok

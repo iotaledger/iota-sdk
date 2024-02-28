@@ -1717,18 +1717,7 @@ export class Wallet {
         params: SendManaParams,
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        const response = await this.methodHandler.callMethod({
-            name: 'sendMana',
-            data: {
-                params,
-                options: transactionOptions,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        return (await this.prepareSendMana(params, transactionOptions)).send();
     }
 
     /**

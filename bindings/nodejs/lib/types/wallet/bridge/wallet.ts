@@ -156,13 +156,6 @@ export type __PrepareClaimOutputsMethod__ = {
     };
 };
 
-export type __ClaimOutputsMethod__ = {
-    name: 'claimOutputs';
-    data: {
-        outputIdsToClaim: OutputId[];
-    };
-};
-
 export type __PrepareConsolidateOutputsMethod__ = {
     name: 'prepareConsolidateOutputs';
     data: {
@@ -419,14 +412,6 @@ export type __SendOutputsMethod__ = {
     name: 'sendOutputs';
     data: {
         outputs: Output[];
-        options?: TransactionOptions;
-    };
-};
-
-export type __SendManaMethod__ = {
-    name: 'sendMana';
-    data: {
-        params: SendManaParams;
         options?: TransactionOptions;
     };
 };

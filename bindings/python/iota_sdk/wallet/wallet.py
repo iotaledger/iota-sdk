@@ -809,12 +809,7 @@ class Wallet:
             self, params: SendManaParams, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send mana.
         """
-        return TransactionWithMetadata.from_dict(self._call_method(
-            'sendMana', {
-                'params': params.to_dict(),
-                'options': options
-            }
-        ))
+        return self.prepare_send_mana(params, options).send()
 
     def prepare_send_mana(self, params: SendManaParams,
                           options: Optional[TransactionOptions] = None) -> PreparedTransaction:
