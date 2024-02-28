@@ -296,7 +296,7 @@ impl Packable for Block {
         };
 
         if let Some(protocol_params) = protocol_params {
-            verify_block_slot(&block.header, &block.body, &protocol_params).map_err(UnpackError::Packable)?;
+            verify_block_slot(&block.header, &block.body, protocol_params).map_err(UnpackError::Packable)?;
 
             let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start

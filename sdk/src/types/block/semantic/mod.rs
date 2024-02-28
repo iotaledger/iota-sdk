@@ -261,9 +261,7 @@ impl<'a> SemanticValidationContext<'a> {
                     return Err(TransactionFailureReason::SemanticValidationFailed);
                 }
 
-                if let Err(conflict) = self.output_unlock(consumed_output, output_id, &unlocks[index]) {
-                    return Err(conflict);
-                }
+                self.output_unlock(consumed_output, output_id, &unlocks[index])?
             }
         }
 

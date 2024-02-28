@@ -36,9 +36,6 @@ pub struct TransactionOptions {
     pub allow_micro_amount: bool,
     /// Whether to allow the selection of additional inputs for this transaction.
     pub allow_additional_input_selection: bool,
-    /// Whether to allow allotting automatically calculated mana from the issuer account.
-    /// If this flag is disabled, additional inputs will be selected to cover the amount.
-    pub allow_allotting_from_account_mana: bool,
     /// Transaction capabilities.
     pub capabilities: Option<TransactionCapabilities>,
     /// Mana allotments for the transaction.
@@ -58,7 +55,6 @@ impl Default for TransactionOptions {
             note: Default::default(),
             allow_micro_amount: false,
             allow_additional_input_selection: true,
-            allow_allotting_from_account_mana: false,
             capabilities: Default::default(),
             mana_allotments: Default::default(),
             issuer_id: Default::default(),
