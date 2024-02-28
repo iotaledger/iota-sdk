@@ -47,7 +47,7 @@ pub fn verify_semantic(
         protocol_parameters,
     );
 
-    Ok(context.validate()?)
+    context.validate()
 }
 
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
