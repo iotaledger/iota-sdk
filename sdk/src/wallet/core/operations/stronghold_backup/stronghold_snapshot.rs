@@ -26,7 +26,10 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub(crate) async fn backup_with_stronghold(&self, stronghold: &StrongholdAdapter) -> crate::wallet::Result<()> {
+    pub(crate) async fn write_fields_to_stronghold_snapshot(
+        &self,
+        stronghold: &StrongholdAdapter,
+    ) -> crate::wallet::Result<()> {
         // Set migration version
         stronghold
             .set(MIGRATION_VERSION_KEY, &latest_backup_migration_version())
@@ -59,7 +62,7 @@ where
     }
 }
 
-pub(crate) async fn restore_with_stronghold<S: 'static + SecretManagerConfig>(
+pub(crate) async fn read_fields_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Bech32Address,
