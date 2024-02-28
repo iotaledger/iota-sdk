@@ -291,7 +291,7 @@ pub mod option_mana_rewards {
         s: S,
     ) -> Result<S::Ok, S::Error> {
         match mana_rewards {
-            Some(bytes) => super::mana_rewards::serialize(bytes, s),
+            Some(map) => super::mana_rewards::serialize(map, s),
             None => s.serialize_none(),
         }
     }
