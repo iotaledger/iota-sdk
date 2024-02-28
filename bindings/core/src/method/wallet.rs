@@ -52,7 +52,7 @@ pub enum WalletMethod {
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    Backup {
+    BackupToStrongholdSnapshot {
         /// The backup destination.
         destination: PathBuf,
         /// Stronghold file password.
@@ -71,7 +71,7 @@ pub enum WalletMethod {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[serde(rename_all = "camelCase")]
-    RestoreBackup {
+    RestoreFromStrongholdSnapshot {
         /// The path to the backed up Stronghold.
         source: PathBuf,
         /// Stronghold file password.

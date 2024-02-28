@@ -26,7 +26,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub(crate) async fn backup_to_stronghold_snapshot(
+    pub(crate) async fn write_fields_to_stronghold_snapshot(
         &self,
         stronghold: &StrongholdAdapter,
     ) -> crate::wallet::Result<()> {
@@ -62,7 +62,7 @@ where
     }
 }
 
-pub(crate) async fn restore_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
+pub(crate) async fn read_fields_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
 ) -> crate::wallet::Result<(
     Bech32Address,

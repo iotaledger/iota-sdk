@@ -431,7 +431,7 @@ fn consolidate_with_min_allotment() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 10, true)
+    .with_min_mana_allotment(account_id_1, 10)
     .with_required_inputs(inputs.iter().map(|i| *i.output_id()))
     .select()
     .unwrap();
