@@ -2,7 +2,6 @@ import type {
     __AnnounceCandidacyMethod__,
     __PrepareBurnMethod__,
     __PrepareClaimOutputsMethod__,
-    __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAccountOutputMethod__,
     __DeregisterParticipationEventMethod__,
@@ -26,6 +25,7 @@ import type {
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
     __PrepareSendMethod__,
+    __PrepareSendManaMethod__,
     __PrepareCreateDelegationMethod__,
     __PrepareDelayDelegationClaimingMethod__,
     __PrepareBeginStakingMethod__,
@@ -77,7 +77,6 @@ import type {
 export type __WalletMethod__ =
     | __AnnounceCandidacyMethod__
     | __PrepareBurnMethod__
-    | __ClaimOutputsMethod__
     | __PrepareClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAccountOutputMethod__
@@ -107,6 +106,7 @@ export type __WalletMethod__ =
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
     | __PrepareSendMethod__
+    | __PrepareSendManaMethod__
     | __PrepareCreateDelegationMethod__
     | __PrepareDelayDelegationClaimingMethod__
     | __PrepareBeginStakingMethod__
