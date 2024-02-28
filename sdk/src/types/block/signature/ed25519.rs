@@ -103,8 +103,11 @@ impl Ed25519Signature {
             });
         }
 
-        if !self.try_verify(message)? {
-            return Err(SignatureError::InvalidSignature);
+        if !self
+            .try_verify(message)
+            .map_err(SignatureError::InvalidSignatureBytes)?
+        {
+            return Err(SignatureError::SignatureMismatch(prefix_hex::encode(message)));
         }
 
         Ok(())
@@ -196,8 +199,8 @@ pub(crate) mod dto {
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
             Ok(Self::from_bytes(
-                prefix_hex::decode(&value.public_key).map_err(|_| SignatureError::InvalidPublicKey)?,
-                prefix_hex::decode(&value.signature).map_err(|_| SignatureError::InvalidSignature)?,
+                prefix_hex::decode(&value.public_key).map_err(SignatureError::InvalidPublicKeyHex)?,
+                prefix_hex::decode(&value.signature).map_err(SignatureError::InvalidSignatureHex)?,
             ))
         }
     }
