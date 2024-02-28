@@ -23,7 +23,7 @@ from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_ou
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.transaction_id import TransactionId
-from iota_sdk.types.send_params import BeginStakingParams, CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
+from iota_sdk.types.send_params import BeginStakingParams, CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendManaParams, SendNativeTokenParams, SendNftParams, SendParams
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.transaction_with_metadata import CreateDelegationTransaction, CreateNativeTokenTransaction, TransactionWithMetadata
 from iota_sdk.types.transaction_options import TransactionOptions
@@ -804,6 +804,24 @@ class Wallet:
                 'options': options,
             }
         ))
+
+    def send_mana(
+            self, params: SendManaParams, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send mana.
+        """
+        return self.prepare_send_mana(params, options).send()
+
+    def prepare_send_mana(self, params: SendManaParams,
+                          options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Prepare to send mana.
+        """
+        prepared = PreparedTransactionData.from_dict(self._call_method(
+            'prepareSendMana', {
+                'params': params,
+                'options': options
+            }
+        ))
+        return PreparedTransaction(self, prepared)
 
     def set_alias(self, alias: str):
         """Set alias.
