@@ -84,9 +84,12 @@ export class Wallet {
     /**
      * Backup the data to a Stronghold snapshot.
      */
-    async backup(destination: string, password: string): Promise<void> {
+    async backupToStrongholdSnapshot(
+        destination: string,
+        password: string,
+    ): Promise<void> {
         await this.methodHandler.callMethod({
-            name: 'backup',
+            name: 'backupToStrongholdSnapshot',
             data: {
                 destination,
                 password,
@@ -200,14 +203,14 @@ export class Wallet {
      * if ignore_if_coin_type_mismatch == true, client options coin type and accounts will not be restored if the cointype doesn't match
      * If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address, the wallet will not be restored.
      */
-    async restoreBackup(
+    async restoreFromStrongholdSnapshot(
         source: string,
         password: string,
         ignoreIfCoinTypeMismatch?: boolean,
         ignoreIfBech32Mismatch?: string,
     ): Promise<void> {
         await this.methodHandler.callMethod({
-            name: 'restoreBackup',
+            name: 'restoreFromStrongholdSnapshot',
             data: {
                 source,
                 password,
