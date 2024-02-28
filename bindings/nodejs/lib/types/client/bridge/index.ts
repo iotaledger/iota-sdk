@@ -54,7 +54,7 @@ import type {
     __FoundryOutputIdMethod__,
     __NftOutputIdsMethod__,
     __NftOutputIdMethod__,
-    __GetOutputsIgnoreErrorsMethod__,
+    __GetOutputsIgnoreNotFoundMethod__,
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
     __BuildBasicOutputMethod__,
@@ -121,7 +121,7 @@ export type __ClientMethods__ =
     | __FoundryOutputIdMethod__
     | __NftOutputIdsMethod__
     | __NftOutputIdMethod__
-    | __GetOutputsIgnoreErrorsMethod__
+    | __GetOutputsIgnoreNotFoundMethod__
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__
     | __BuildBasicOutputMethod__

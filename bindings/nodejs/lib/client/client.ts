@@ -397,11 +397,11 @@ export class Client {
      * @param outputIds An array of output IDs.
      * @returns An array of corresponding output responses.
      */
-    async getOutputsIgnoreErrors(
+    async getOutputsIgnoreNotFound(
         outputIds: OutputId[],
     ): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
-            name: 'getOutputsIgnoreErrors',
+            name: 'getOutputsIgnoreNotFound',
             data: {
                 outputIds,
             },

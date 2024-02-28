@@ -183,8 +183,8 @@ export interface __GetOutputsMethod__ {
     };
 }
 
-export interface __GetOutputsIgnoreErrorsMethod__ {
-    name: 'getOutputsIgnoreErrors';
+export interface __GetOutputsIgnoreNotFoundMethod__ {
+    name: 'getOutputsIgnoreNotFound';
     data: {
         outputIds: OutputId[];
     };
