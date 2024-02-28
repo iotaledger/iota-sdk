@@ -43,7 +43,7 @@ where
             let voting_output = wallet_ledger.get_voting_output()?;
 
             let claimable_outputs =
-                wallet_ledger.claimable_outputs(&wallet_address, OutputsToClaim::All, slot_index, &protocol_parameters)?;
+                wallet_ledger.claimable_outputs(wallet_address.inner().clone(), OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
             #[cfg(feature = "participation")]
             {
@@ -53,6 +53,9 @@ where
                     }
                 }
             }
+
+let controlled_addresses = wallet_ledger.controlled_addresses(wallet_address.inner().clone());
+
 
             for (output_id, output_data) in &wallet_ledger.unspent_outputs {
                 // Check if output is from the network we're currently connected to
@@ -182,10 +185,7 @@ where
                                 // check if output can be unlocked always from now on, in that case it should be
                                 // added to the total amount
                                 let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
-                                    // We use the addresses with unspent outputs, because other addresses of
-                                    // the account without unspent
-                                    // outputs can't be related to this output
-                                    wallet_address.inner(),
+                                    &controlled_addresses,
                                     output,
                                     slot_index,
                                     protocol_parameters.committable_age_range(),
