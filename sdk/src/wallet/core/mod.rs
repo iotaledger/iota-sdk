@@ -411,7 +411,7 @@ where
     }
 
     /// Get the wallet's ledger RwLock.
-    pub fn ledger_rw(&self) -> &Arc<tokio::sync::RwLock<WalletLedger>> {
+    pub(crate) fn ledger_rw(&self) -> &Arc<tokio::sync::RwLock<WalletLedger>> {
         &self.ledger
     }
 
