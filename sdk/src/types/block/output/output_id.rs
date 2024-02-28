@@ -15,7 +15,6 @@ pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUT
 
 /// The identifier of an [`Output`](crate::types::block::output::Output).
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
-#[packable(unpack_error = IdentifierError)]
 pub struct OutputId {
     transaction_id: TransactionId,
     index: u16,
