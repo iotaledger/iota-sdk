@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Bech32Address, EpochIndex } from '../../block';
-import { u64 } from '../../utils';
+import { NumericString } from '../../utils';
 
 /**
  * Returns information of a validator (committee member).
@@ -15,15 +15,15 @@ export interface CommitteeMember {
     /**
      * The total stake of the pool, including delegators.
      */
-    poolStake: u64;
+    poolStake: NumericString;
     /**
      * The stake of a validator.
      */
-    validatorStake: u64;
+    validatorStake: NumericString;
     /**
      * The fixed cost of the validator, which it receives as part of its Mana rewards.
      */
-    fixedCost: u64;
+    fixedCost: NumericString;
 }
 
 /**
@@ -37,11 +37,11 @@ export interface CommitteeResponse {
     /**
      * The total amount of delegated and staked IOTA tokens in the selected committee.
      */
-    totalStake: u64;
+    totalStake: NumericString;
     /**
      * The total amount of staked IOTA tokens in the selected committee.
      */
-    totalValidatorStake: u64;
+    totalValidatorStake: NumericString;
     /**
      * The validators of the committee.
      */
