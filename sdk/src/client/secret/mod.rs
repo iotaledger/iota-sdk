@@ -671,11 +671,16 @@ where
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone())
-        .inspect_err(|e| {
-            log::debug!("[sign_transaction] conflict: {e:?} for {tx_payload:#?}");
-        })
-        .map_err(Error::TransactionSemantic)?;
+    verify_semantic(
+        &inputs_data,
+        &tx_payload,
+        Some(mana_rewards),
+        protocol_parameters.clone(),
+    )
+    .inspect_err(|e| {
+        log::debug!("[sign_transaction] conflict: {e:?} for {tx_payload:#?}");
+    })
+    .map_err(Error::TransactionSemantic)?;
 
     Ok(tx_payload)
 }
