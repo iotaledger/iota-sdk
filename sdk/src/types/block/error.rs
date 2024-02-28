@@ -236,10 +236,7 @@ impl fmt::Display for Error {
             }
             Self::DuplicateUtxo(utxo) => write!(f, "duplicate UTXO {utxo:?} in inputs"),
             Self::ExpirationUnlockConditionZero => {
-                write!(
-                    f,
-                    "expiration unlock condition with milestone index and timestamp set to 0",
-                )
+                write!(f, "expiration unlock condition with slot index set to 0",)
             }
             Self::FeaturesNotUniqueSorted => write!(f, "features are not unique and/or sorted"),
             Self::InputUnlockCountMismatch {
@@ -433,10 +430,7 @@ impl fmt::Display for Error {
                 write!(f, "storage deposit return overflow",)
             }
             Self::TimelockUnlockConditionZero => {
-                write!(
-                    f,
-                    "timelock unlock condition with milestone index and timestamp set to 0",
-                )
+                write!(f, "timelock unlock condition with slot index set to 0",)
             }
             Self::UnallowedFeature { index, kind } => {
                 write!(f, "unallowed feature at index {index} with kind {kind}")
