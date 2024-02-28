@@ -8,6 +8,7 @@ from dataclasses_json import config
 from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.output_params import ReturnStrategy
 
 
 @json
@@ -152,3 +153,20 @@ class CreateAccountOutputParams:
     address: str
     immutable_metadata: Optional[str] = None
     metadata: Optional[str] = None
+
+
+@json
+@dataclass
+class SendManaParams:
+    """Parameters for sending mana.
+
+    Attributes:
+        mana: Amount of mana to send, e.g. 1000000.
+        address: Recipient address, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        return_strategy: Whether to gift the storage deposit or not.
+    """
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
+    address: str
+    return_strategy: Optional[ReturnStrategy] = None
