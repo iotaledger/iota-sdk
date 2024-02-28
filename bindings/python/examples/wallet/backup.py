@@ -35,5 +35,5 @@ wallet = Wallet(wallet_options)
 # done once.
 wallet.store_mnemonic(os.environ['MNEMONIC'])
 
-wallet.backup("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
+wallet.backup_to_stronghold_snapshot("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
 print('Created backup')

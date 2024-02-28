@@ -73,7 +73,7 @@ class Wallet:
             message['data'] = data
         return message
 
-    def backup(self, destination: str, password: str):
+    def backup_to_stronghold_snapshot(self, destination: str, password: str):
         """Backup storage.
         """
         return self._call_method(
@@ -150,7 +150,7 @@ class Wallet:
             }
         )
 
-    def restore_backup(self, source: str, password: str):
+    def restore_from_stronghold_snapshot(self, source: str, password: str):
         """Restore a backup from a Stronghold file.
         Replaces `client_options`, `coin_type`, `secret_manager` and wallet.
         Returns an error if the wallet was already created. If Stronghold is used
