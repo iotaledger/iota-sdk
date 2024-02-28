@@ -131,7 +131,6 @@ macro_rules! impl_id {
 
             $(#[$id_meta])*
             #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
-            #[packable(unpack_error = $crate::types::block::IdentifierError)]
             #[repr(C)]
             $id_vis struct $id_name {
                 pub(crate) hash: $hash_name,
@@ -395,4 +394,17 @@ macro_rules! impl_deserialize_untagged {
             }
         }
     }
+}
+
+#[macro_export]
+macro_rules! impl_from_error_via {
+    ($self:ident via $via:ident: $($err:ident),+$(,)?) => {
+        $(
+        impl From<$err> for $self {
+            fn from(error: $err) -> Self {
+                Self::from($via::from(error))
+            }
+        }
+        )+
+    };
 }

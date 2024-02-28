@@ -5,11 +5,8 @@ use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::{
-        output::{
-            unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
-        },
-        BlockError,
+    types::block::output::{
+        unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
@@ -69,13 +66,11 @@ where
                 Output::Account(account) => {
                     // Add amount
                     balance.base_coin.total += account.amount();
-                    balance.mana.total += output
-                        .decayed_mana(
-                            &protocol_parameters,
-                            output_id.transaction_id().slot_index(),
-                            slot_index,
-                        )
-                        .map_err(BlockError::from)?;
+                    balance.mana.total += output.decayed_mana(
+                        &protocol_parameters,
+                        output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
                     // Add mana rewards
                     if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
                         balance.mana.rewards += response.rewards;
@@ -101,9 +96,7 @@ where
 
                     // Add native token
                     if let Some(native_token) = output.native_token() {
-                        total_native_tokens
-                            .add_native_token(*native_token)
-                            .map_err(BlockError::from)?;
+                        total_native_tokens.add_native_token(*native_token)?;
                     }
 
                     balance.foundries.insert(foundry.id());
@@ -141,13 +134,11 @@ where
                         // Add amount
                         balance.base_coin.total += output.amount();
                         // Add decayed mana
-                        balance.mana.total += output
-                            .decayed_mana(
-                                &protocol_parameters,
-                                output_id.transaction_id().slot_index(),
-                                slot_index,
-                            )
-                            .map_err(BlockError::from)?;
+                        balance.mana.total += output.decayed_mana(
+                            &protocol_parameters,
+                            output_id.transaction_id().slot_index(),
+                            slot_index,
+                        )?;
 
                         // Add storage deposit
                         if output.is_basic() {
@@ -164,9 +155,7 @@ where
 
                         // Add native token
                         if let Some(native_token) = output.native_token() {
-                            total_native_tokens
-                                .add_native_token(*native_token)
-                                .map_err(BlockError::from)?;
+                            total_native_tokens.add_native_token(*native_token)?;
                         }
                     } else {
                         // if we have multiple unlock conditions for basic or nft outputs, then we can't
@@ -220,13 +209,11 @@ where
                                 // Add amount
                                 balance.base_coin.total += amount;
                                 // Add decayed mana
-                                balance.mana.total += output
-                                    .decayed_mana(
-                                        &protocol_parameters,
-                                        output_id.transaction_id().slot_index(),
-                                        slot_index,
-                                    )
-                                    .map_err(BlockError::from)?;
+                                balance.mana.total += output.decayed_mana(
+                                    &protocol_parameters,
+                                    output_id.transaction_id().slot_index(),
+                                    slot_index,
+                                )?;
 
                                 // Add storage deposit
                                 if output.is_basic() {
@@ -247,9 +234,7 @@ where
 
                                 // Add native token
                                 if let Some(native_token) = output.native_token() {
-                                    total_native_tokens
-                                        .add_native_token(*native_token)
-                                        .map_err(BlockError::from)?;
+                                    total_native_tokens.add_native_token(*native_token)?;
                                 }
                             } else {
                                 // only add outputs that can't be locked now and at any point in the future
@@ -291,19 +276,14 @@ where
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
-                    locked_mana += output_data
-                        .output
-                        .decayed_mana(
-                            &protocol_parameters,
-                            output_data.output_id.transaction_id().slot_index(),
-                            slot_index,
-                        )
-                        .map_err(BlockError::from)?;
+                    locked_mana += output_data.output.decayed_mana(
+                        &protocol_parameters,
+                        output_data.output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
 
                     if let Some(native_token) = output_data.output.native_token() {
-                        locked_native_tokens
-                            .add_native_token(*native_token)
-                            .map_err(BlockError::from)?;
+                        locked_native_tokens.add_native_token(*native_token)?;
                     }
                 }
             }
@@ -321,7 +301,7 @@ where
 
         locked_amount += total_storage_cost;
 
-        for native_token in total_native_tokens.finish_set().map_err(BlockError::from)? {
+        for native_token in total_native_tokens.finish_set()? {
             // Check if some amount is currently locked
             let locked_native_token_amount = locked_native_tokens.iter().find_map(|(id, amount)| {
                 if id == native_token.token_id() {

@@ -13,7 +13,6 @@ use crate::{
             BasicOutputBuilder, MinimumOutputAmount,
         },
         slot::SlotIndex,
-        BlockError,
     },
     utils::{serde::string, ConvertTo},
     wallet::{
@@ -177,8 +176,7 @@ where
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish()
-                .map_err(BlockError::from)?;
+                .finish()?;
 
             if amount >= output.minimum_amount(storage_score_params) {
                 outputs.push(output.into())
@@ -190,14 +188,12 @@ where
 
                 // Since it does need a storage deposit, calculate how much that should be
                 let output = BasicOutputBuilder::from(&output)
-                    .add_unlock_condition(
-                        ExpirationUnlockCondition::new(return_address.clone(), expiration_slot_index)
-                            .map_err(BlockError::from)?,
-                    )
-                    .with_sufficient_storage_deposit(return_address, storage_score_params)
-                    .map_err(BlockError::from)?
-                    .finish_output()
-                    .map_err(BlockError::from)?;
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
+                        return_address.clone(),
+                        expiration_slot_index,
+                    )?)
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
+                    .finish_output()?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
                     return Err(Error::InsufficientFunds {

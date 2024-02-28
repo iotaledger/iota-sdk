@@ -14,7 +14,6 @@ use crate::{
         },
         protocol::ProtocolParameters,
         slot::SlotIndex,
-        BlockError,
     },
     wallet::{
         core::WalletLedger,
@@ -272,15 +271,13 @@ where
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
-                        .finish_output()
-                        .map_err(BlockError::from)?
+                        .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
-                        .finish_output()
-                        .map_err(BlockError::from)?
+                        .finish_output()?
                 };
 
                 nft_outputs_to_send.push(nft_output);

@@ -14,7 +14,6 @@ use crate::{
             BasicOutputBuilder, NativeToken, TokenId,
         },
         slot::SlotIndex,
-        BlockError,
     },
     utils::ConvertTo,
     wallet::{
@@ -162,7 +161,7 @@ where
                 .transpose()?
                 .unwrap_or_else(|| default_return_address.clone());
 
-            let native_token = NativeToken::new(native_token.0, native_token.1).map_err(BlockError::from)?;
+            let native_token = NativeToken::new(native_token.0, native_token.1)?;
 
             let expiration_slot_index = expiration
                 .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
@@ -173,14 +172,12 @@ where
                 BasicOutputBuilder::new_with_amount(0)
                     .with_native_token(native_token)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(
-                        ExpirationUnlockCondition::new(return_address.clone(), expiration_slot_index)
-                            .map_err(BlockError::from)?,
-                    )
-                    .with_sufficient_storage_deposit(return_address, storage_score_params)
-                    .map_err(BlockError::from)?
-                    .finish_output()
-                    .map_err(BlockError::from)?,
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
+                        return_address.clone(),
+                        expiration_slot_index,
+                    )?)
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
+                    .finish_output()?,
             )
         }
 

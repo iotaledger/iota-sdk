@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
-        BlockError,
-    },
+    types::block::output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
 
@@ -86,7 +83,7 @@ where
             ));
         }
 
-        let output = output_builder.finish_output().map_err(BlockError::from)?;
+        let output = output_builder.finish_output()?;
 
         let transaction = self.prepare_transaction([output], options).await?;
 

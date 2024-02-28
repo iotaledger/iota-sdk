@@ -26,7 +26,7 @@ use crate::{
             },
             protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
-            BlockError, BlockId,
+            BlockId,
         },
         TryFromDto,
     },
@@ -63,8 +63,7 @@ impl OutputData {
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output
-            .required_address(commitment_slot_index.into(), committable_age_range)
-            .map_err(BlockError::from)?
+            .required_address(commitment_slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {

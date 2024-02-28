@@ -8,7 +8,6 @@ use crate::{
     types::block::{
         output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
         slot::EpochIndex,
-        BlockError,
     },
     wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
 };
@@ -94,8 +93,7 @@ where
                     .map(|period| start_epoch + period)
                     .unwrap_or(EpochIndex(u32::MAX)),
             ))
-            .finish_output()
-            .map_err(BlockError::from)?;
+            .finish_output()?;
 
         let transaction = self.prepare_transaction([output], options).await?;
 

@@ -20,7 +20,7 @@ use crate::{
     },
     types::{
         api::core::OutputWithMetadataResponse,
-        block::{output::Output, payload::signed_transaction::SignedTransactionPayload, BlockError},
+        block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
     },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
@@ -72,9 +72,7 @@ where
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output
-                .verify_storage_deposit(protocol_parameters.storage_score_parameters())
-                .map_err(BlockError::from)?;
+            output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;

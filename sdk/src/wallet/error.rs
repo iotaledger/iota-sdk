@@ -7,7 +7,18 @@ use crypto::keys::bip44::Bip44;
 use serde::{ser::Serializer, Serialize};
 
 use crate::types::block::{
-    address::Bech32Address, output::DelegationId, payload::signed_transaction::TransactionId, BlockError,
+    address::Bech32Address,
+    context_input::ContextInputError,
+    input::InputError,
+    mana::ManaError,
+    output::{
+        feature::FeatureError, unlock_condition::UnlockConditionError, DelegationId, NativeTokenError, OutputError,
+        TokenSchemeError,
+    },
+    payload::{signed_transaction::TransactionId, PayloadError},
+    signature::SignatureError,
+    unlock::UnlockError,
+    BlockError,
 };
 
 /// The wallet error type.
@@ -180,6 +191,20 @@ impl From<crate::client::api::input_selection::Error> for Error {
         }
     }
 }
+
+crate::impl_from_error_via!(Error via BlockError:
+    PayloadError,
+    OutputError,
+    InputError,
+    NativeTokenError,
+    ManaError,
+    UnlockConditionError,
+    FeatureError,
+    TokenSchemeError,
+    ContextInputError,
+    UnlockError,
+    SignatureError,
+);
 
 #[cfg(feature = "stronghold")]
 impl From<crate::client::stronghold::Error> for Error {

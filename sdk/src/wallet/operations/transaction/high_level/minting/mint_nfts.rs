@@ -13,7 +13,6 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        BlockError,
     },
     utils::ConvertTo,
     wallet::{
@@ -209,7 +208,7 @@ where
             }
 
             if let Some(tag) = tag {
-                nft_builder = nft_builder.add_feature(TagFeature::new(tag).map_err(BlockError::from)?);
+                nft_builder = nft_builder.add_feature(TagFeature::new(tag)?);
             }
 
             if let Some(issuer) = issuer {
@@ -220,7 +219,7 @@ where
                 nft_builder = nft_builder.add_immutable_feature(immutable_metadata);
             }
 
-            outputs.push(nft_builder.finish_output().map_err(BlockError::from)?);
+            outputs.push(nft_builder.finish_output()?);
         }
 
         self.prepare_transaction(outputs, options).await

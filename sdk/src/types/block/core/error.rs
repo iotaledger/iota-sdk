@@ -57,18 +57,7 @@ pub enum BlockError {
 #[cfg(feature = "std")]
 impl std::error::Error for BlockError {}
 
-macro_rules! impl_from_error_via {
-    ($via:ident: $($err:ident),+$(,)?) => {
-        $(
-        impl From<$err> for BlockError {
-            fn from(error: $err) -> Self {
-                Self::from($via::from(error))
-            }
-        }
-        )+
-    };
-}
-impl_from_error_via!(PayloadError:
+crate::impl_from_error_via!(BlockError via PayloadError:
     UnlockError,
     ContextInputError,
     NativeTokenError,

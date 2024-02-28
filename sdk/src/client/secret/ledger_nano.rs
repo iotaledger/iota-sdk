@@ -34,11 +34,11 @@ use crate::{
     },
     types::block::{
         address::{AccountAddress, Address, NftAddress},
-        output::Output,
+        output::{Output, OutputError},
         payload::signed_transaction::SignedTransactionPayload,
         protocol::ProtocolParameters,
-        signature::{Ed25519Signature, Signature},
-        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        signature::{Ed25519Signature, Signature, SignatureError},
+        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, UnlockError, Unlocks},
         BlockError,
     },
 };
@@ -87,6 +87,8 @@ pub enum Error {
     #[error("output not unlockable due to deadzone in expiration unlock condition")]
     ExpirationDeadzone,
 }
+
+crate::impl_from_error_via!(Error via BlockError: OutputError, UnlockError, SignatureError);
 
 // map most errors to a single error but there are some errors that
 // need special care.
@@ -406,7 +408,7 @@ impl SecretManage for LedgerSecretManager {
             unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), protocol_parameters)?;
         }
 
-        Ok(Unlocks::new(unlocks).map_err(BlockError::from)?)
+        Ok(Unlocks::new(unlocks)?)
     }
 
     async fn sign_transaction(
@@ -534,8 +536,7 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())
-            .map_err(BlockError::from)?
+            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())?
             // Time in which no address can unlock the output because of an expiration unlock condition
             .ok_or(Error::ExpirationDeadzone)?;
 
@@ -551,16 +552,10 @@ fn merge_unlocks(
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
-                    merged_unlocks.push(Unlock::Reference(
-                        ReferenceUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                    ));
+                    merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
-                Address::Account(_) => merged_unlocks.push(Unlock::Account(
-                    AccountUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                )),
-                Address::Nft(_) => merged_unlocks.push(Unlock::Nft(
-                    NftUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                )),
+                Address::Account(_) => merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
+                Address::Nft(_) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
                 _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
             },
             None => {
@@ -580,9 +575,7 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature
-                        .validate(transaction_signing_hash.as_ref(), &ed25519_address)
-                        .map_err(BlockError::from)?;
+                    ed25519_signature.validate(transaction_signing_hash.as_ref(), &ed25519_address)?;
                 }
 
                 merged_unlocks.push(unlock);

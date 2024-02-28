@@ -10,7 +10,21 @@ use serde::{ser::Serializer, Serialize};
 
 use crate::{
     client::api::input_selection::Error as InputSelectionError,
-    types::block::{address::AddressError, semantic::TransactionFailureReason, BlockError},
+    types::block::{
+        address::AddressError,
+        context_input::ContextInputError,
+        input::InputError,
+        mana::ManaError,
+        output::{
+            feature::FeatureError, unlock_condition::UnlockConditionError, NativeTokenError, OutputError,
+            TokenSchemeError,
+        },
+        payload::PayloadError,
+        semantic::TransactionFailureReason,
+        signature::SignatureError,
+        unlock::UnlockError,
+        BlockError,
+    },
     utils::ConversionError,
 };
 
@@ -211,3 +225,17 @@ impl Serialize for Error {
         .serialize(serializer)
     }
 }
+
+crate::impl_from_error_via!(Error via BlockError:
+    PayloadError,
+    OutputError,
+    InputError,
+    NativeTokenError,
+    ManaError,
+    UnlockConditionError,
+    FeatureError,
+    TokenSchemeError,
+    ContextInputError,
+    UnlockError,
+    SignatureError,
+);

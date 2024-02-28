@@ -19,7 +19,6 @@ use crate::{
         },
         secret::SecretManage,
     },
-    types::block::BlockError,
     wallet::{operations::transaction::SignedTransactionPayload, Wallet},
 };
 
@@ -90,8 +89,7 @@ where
                 return Err(err.into());
             }
         };
-        let payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)
-            .map_err(BlockError::from)?;
+        let payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", payload);
 

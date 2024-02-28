@@ -5,9 +5,8 @@ use primitive_types::U256;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        output::{AccountId, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
-        BlockError,
+    types::block::output::{
+        AccountId, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
         operations::transaction::TransactionOptions,
@@ -72,16 +71,12 @@ where
 
         let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
         let outputs = [FoundryOutputBuilder::from(&existing_foundry_output)
-            .with_token_scheme(TokenScheme::Simple(
-                SimpleTokenScheme::new(
-                    token_scheme.minted_tokens(),
-                    token_scheme.melted_tokens() + melt_amount,
-                    token_scheme.maximum_supply(),
-                )
-                .map_err(BlockError::from)?,
-            ))
-            .finish_output()
-            .map_err(BlockError::from)?];
+            .with_token_scheme(TokenScheme::Simple(SimpleTokenScheme::new(
+                token_scheme.minted_tokens(),
+                token_scheme.melted_tokens() + melt_amount,
+                token_scheme.maximum_supply(),
+            )?))
+            .finish_output()?];
         // Input selection will detect that we're melting native tokens and add the required inputs if available
         self.prepare_transaction(outputs, options).await
     }

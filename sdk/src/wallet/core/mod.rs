@@ -37,7 +37,6 @@ use crate::{
             output::{AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::signed_transaction::TransactionId,
             protocol::ProtocolParameters,
-            BlockError,
         },
         TryFromDto,
     },
@@ -524,23 +523,13 @@ impl TryFromDto<WalletLedgerDto> for WalletLedger {
             transactions: dto
                 .transactions
                 .into_iter()
-                .map(|(id, o)| {
-                    Ok((
-                        id,
-                        TransactionWithMetadata::try_from_dto_with_params_inner(o, params).map_err(BlockError::from)?,
-                    ))
-                })
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
-                .map(|(id, o)| {
-                    Ok((
-                        id,
-                        TransactionWithMetadata::try_from_dto_with_params_inner(o, params).map_err(BlockError::from)?,
-                    ))
-                })
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto.native_token_foundries,

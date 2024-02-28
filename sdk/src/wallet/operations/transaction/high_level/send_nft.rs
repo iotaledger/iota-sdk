@@ -9,7 +9,6 @@ use crate::{
     types::block::{
         address::{AddressError, Bech32Address},
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
-        BlockError,
     },
     utils::ConvertTo,
     wallet::{
@@ -106,7 +105,7 @@ where
                     let nft_builder = NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_id)
                         .with_unlock_conditions([AddressUnlockCondition::new(address)]);
-                    outputs.push(nft_builder.finish_output().map_err(BlockError::from)?);
+                    outputs.push(nft_builder.finish_output()?);
                 }
             } else {
                 return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);

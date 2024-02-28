@@ -585,8 +585,7 @@ where
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())
-            .map_err(BlockError::from)?
+            .required_address(commitment_slot_index, protocol_parameters.committable_age_range())?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
@@ -601,16 +600,10 @@ where
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
-                    blocks.push(Unlock::Reference(
-                        ReferenceUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                    ));
+                    blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
-                Address::Account(_) => blocks.push(Unlock::Account(
-                    AccountUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                )),
-                Address::Nft(_) => blocks.push(Unlock::Nft(
-                    NftUnlock::new(*block_index as u16).map_err(BlockError::from)?,
-                )),
+                Address::Account(_) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
+                Address::Nft(_) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
                 _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
             },
             None => {
@@ -651,7 +644,7 @@ where
         };
     }
 
-    Ok(Unlocks::new(blocks).map_err(BlockError::from)?)
+    Ok(Unlocks::new(blocks)?)
 }
 
 pub(crate) async fn default_sign_transaction<M: SecretManage>(
@@ -674,7 +667,7 @@ where
         mana_rewards,
         ..
     } = prepared_transaction_data;
-    let tx_payload = SignedTransactionPayload::new(transaction, unlocks).map_err(BlockError::from)?;
+    let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 

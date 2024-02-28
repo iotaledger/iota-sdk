@@ -15,11 +15,11 @@ use packable::{
 #[allow(missing_docs)]
 pub enum CapabilityError {
     #[display(fmt = "invalid capabilities count: {_0}")]
-    InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
+    InvalidCount(<u8 as TryFrom<usize>>::Error),
     #[display(fmt = "invalid capability byte at index {index}: {byte:x}")]
-    InvalidCapabilityByte { index: usize, byte: u8 },
+    InvalidByte { index: usize, byte: u8 },
     #[display(fmt = "capability bytes have trailing zeroes")]
-    TrailingCapabilityBytes,
+    TrailingBytes,
 }
 
 #[cfg(feature = "std")]
@@ -61,19 +61,14 @@ impl<Flag> Capabilities<Flag> {
 impl<Flag: CapabilityFlag> Capabilities<Flag> {
     /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
     pub fn from_bytes(bytes: impl Into<Box<[u8]>>) -> Result<Self, CapabilityError> {
-        Self::from_prefix_box_slice(
-            bytes
-                .into()
-                .try_into()
-                .map_err(CapabilityError::InvalidCapabilitiesCount)?,
-        )
+        Self::from_prefix_box_slice(bytes.into().try_into().map_err(CapabilityError::InvalidCount)?)
     }
 
     /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
     pub(crate) fn from_prefix_box_slice(bytes: BoxedSlicePrefix<u8, u8>) -> Result<Self, CapabilityError> {
         // Check if there is a trailing zero.
         if bytes.last().map(|b| *b == 0).unwrap_or_default() {
-            return Err(CapabilityError::TrailingCapabilityBytes);
+            return Err(CapabilityError::TrailingBytes);
         }
         // Check if the bytes are valid instances of the flag type.
         for (index, &byte) in bytes.iter().enumerate() {
@@ -84,7 +79,7 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
             }
             // Check whether the byte contains erroneous bits by using the max value as a mask
             if b | byte != b {
-                return Err(CapabilityError::InvalidCapabilityByte { index, byte });
+                return Err(CapabilityError::InvalidByte { index, byte });
             }
         }
         Ok(Self {
@@ -377,7 +372,7 @@ mod test {
         let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_4, TestFlag::VAL_9, TestFlag::VAL_3];
         assert_eq!(
             Capabilities::<TestFlag>::from_bytes(capability_bytes),
-            Err(CapabilityError::InvalidCapabilityByte {
+            Err(CapabilityError::InvalidByte {
                 index: 2,
                 byte: TestFlag::VAL_3
             })
@@ -389,13 +384,13 @@ mod test {
         let capability_bytes = [0, 0];
         assert_eq!(
             Capabilities::<TestFlag>::from_bytes(capability_bytes),
-            Err(CapabilityError::TrailingCapabilityBytes)
+            Err(CapabilityError::TrailingBytes)
         );
 
         let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_4, 0];
         assert_eq!(
             Capabilities::<TestFlag>::from_bytes(capability_bytes),
-            Err(CapabilityError::TrailingCapabilityBytes)
+            Err(CapabilityError::TrailingBytes)
         );
     }
 
@@ -404,7 +399,7 @@ mod test {
         let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_3, TestFlag::VAL_9 | TestFlag::VAL_2];
         assert_eq!(
             Capabilities::<TestFlag>::from_bytes(capability_bytes),
-            Err(CapabilityError::InvalidCapabilityByte {
+            Err(CapabilityError::InvalidByte {
                 index: 1,
                 byte: TestFlag::VAL_9 | TestFlag::VAL_2
             })

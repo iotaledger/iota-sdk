@@ -13,7 +13,6 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutput, OutputId,
         },
-        BlockError,
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -92,11 +91,9 @@ where
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(ed25519_address))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![block_issuer_key]).map_err(BlockError::from)?,
-            )
-            .map_err(BlockError::from)?])
-            .finish_output()
-            .map_err(BlockError::from)?;
+                BlockIssuerKeys::from_vec(vec![block_issuer_key])?,
+            )?])
+            .finish_output()?;
 
         drop(wallet_ledger);
 

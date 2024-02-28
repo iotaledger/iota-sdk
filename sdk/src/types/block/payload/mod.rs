@@ -86,18 +86,13 @@ pub enum PayloadError {
 #[cfg(feature = "std")]
 impl std::error::Error for PayloadError {}
 
-macro_rules! impl_from_error_via {
-    ($via:ident: $($err:ident),+$(,)?) => {
-        $(
-        impl From<$err> for PayloadError {
-            fn from(error: $err) -> Self {
-                Self::from($via::from(error))
-            }
-        }
-        )+
-    };
-}
-impl_from_error_via!(OutputError: NativeTokenError, ManaError, UnlockConditionError, FeatureError, TokenSchemeError);
+crate::impl_from_error_via!(PayloadError via OutputError:
+    NativeTokenError,
+    ManaError,
+    UnlockConditionError,
+    FeatureError,
+    TokenSchemeError,
+);
 
 impl From<Infallible> for PayloadError {
     fn from(value: Infallible) -> Self {

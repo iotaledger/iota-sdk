@@ -10,7 +10,6 @@ use crate::{
         output::{
             feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output,
         },
-        BlockError,
     },
     wallet::{
         operations::transaction::TransactionOptions,
@@ -99,7 +98,7 @@ where
             }
         }
 
-        let outputs = [account_output_builder.finish_output().map_err(BlockError::from)?];
+        let outputs = [account_output_builder.finish_output()?];
 
         self.prepare_transaction(outputs, options).await
     }

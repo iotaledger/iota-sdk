@@ -8,7 +8,6 @@ use crate::{
     types::block::{
         address::{AccountAddress, Bech32Address},
         output::{unlock_condition::AddressUnlockCondition, DelegationId, DelegationOutputBuilder},
-        BlockError,
     },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
@@ -101,8 +100,7 @@ where
             params.validator_address,
         )
         .add_unlock_condition(AddressUnlockCondition::new(address))
-        .finish_output()
-        .map_err(BlockError::from)?;
+        .finish_output()?;
 
         let transaction = self.prepare_transaction([output], options).await?;
 

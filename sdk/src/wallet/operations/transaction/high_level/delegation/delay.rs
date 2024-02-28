@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        output::{AddressUnlockCondition, DelegationId, DelegationOutputBuilder, MinimumOutputAmount},
-        BlockError,
-    },
+    types::block::output::{AddressUnlockCondition, DelegationId, DelegationOutputBuilder, MinimumOutputAmount},
     wallet::{types::TransactionWithMetadata, Wallet},
 };
 
@@ -60,8 +57,7 @@ where
             outputs.push(
                 builder
                     .with_minimum_amount(protocol_parameters.storage_score_parameters())
-                    .finish_output()
-                    .map_err(BlockError::from)?,
+                    .finish_output()?,
             );
         } else {
             let min_delegation_amount =
@@ -72,8 +68,7 @@ where
                 outputs.push(
                     builder
                         .with_minimum_amount(protocol_parameters.storage_score_parameters())
-                        .finish_output()
-                        .map_err(BlockError::from)?,
+                        .finish_output()?,
                 );
 
                 outputs.push(
@@ -85,11 +80,10 @@ where
                     .add_unlock_condition(AddressUnlockCondition::new(
                         delegation_output.as_delegation().address().clone(),
                     ))
-                    .finish_output()
-                    .map_err(BlockError::from)?,
+                    .finish_output()?,
                 );
             } else {
-                outputs.push(builder.finish_output().map_err(BlockError::from)?);
+                outputs.push(builder.finish_output()?);
             }
         };
 
