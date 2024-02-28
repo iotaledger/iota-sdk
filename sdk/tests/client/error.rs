@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{api::input_selection::Error as IsaError, Error};
+use iota_sdk::{
+    client::{api::input_selection::Error as IsaError, Error},
+    types::block::BlockError,
+};
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -34,5 +37,11 @@ fn stringified_error() {
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
         "{\"type\":\"inputSelection\",\"error\":\"insufficient amount: found 0, required 100\"}"
+    );
+
+    let error = Error::InputSelection(IsaError::Block(BlockError::UnsupportedAddressKind(6)));
+    assert_eq!(
+        &serde_json::to_string(&error).unwrap(),
+        "{\"type\":\"inputSelection\",\"error\":\"unsupported address kind 6\"}"
     );
 }

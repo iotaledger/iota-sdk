@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::{AddressError, Bech32Address},
+        address::Bech32Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
@@ -54,12 +54,7 @@ impl MintNftParams {
 
     /// Set the address and try convert to [`Bech32Address`]
     pub fn try_with_address(mut self, address: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
-        self.address = Some(
-            address
-                .convert()
-                .map_err(AddressError::from)
-                .map_err(crate::client::Error::from)?,
-        );
+        self.address = Some(address.convert().map_err(crate::client::Error::from)?);
         Ok(self)
     }
 
@@ -71,12 +66,7 @@ impl MintNftParams {
 
     /// Set the sender address and try convert to [`Bech32Address`]
     pub fn try_with_sender(mut self, sender: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
-        self.sender = Some(
-            sender
-                .convert()
-                .map_err(AddressError::from)
-                .map_err(crate::client::Error::from)?,
-        );
+        self.sender = Some(sender.convert().map_err(crate::client::Error::from)?);
         Ok(self)
     }
 
@@ -100,12 +90,7 @@ impl MintNftParams {
 
     /// Set the issuer address and try convert to [`Bech32Address`]
     pub fn try_with_issuer(mut self, issuer: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
-        self.issuer = Some(
-            issuer
-                .convert()
-                .map_err(AddressError::from)
-                .map_err(crate::client::Error::from)?,
-        );
+        self.issuer = Some(issuer.convert().map_err(crate::client::Error::from)?);
         Ok(self)
     }
 
