@@ -1468,28 +1468,24 @@ fn two_accounts_required() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 3);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(
-        selected
-            .transaction
-            .outputs()
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .transaction
-            .outputs()
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .transaction
+        .outputs()
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .transaction
+        .outputs()
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1723,7 +1719,7 @@ fn min_allot_account_mana() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .select()
     .unwrap();
 
@@ -1793,7 +1789,7 @@ fn min_allot_account_mana_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
@@ -1859,7 +1855,7 @@ fn min_allot_account_mana_cannot_select_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_2, provided_allotment)))
     .with_required_inputs([*inputs[0].output_id()])
     .disable_additional_input_selection()
@@ -1912,7 +1908,7 @@ fn min_allot_account_mana_requirement_twice() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
@@ -1993,7 +1989,7 @@ fn min_allot_account_mana_requirement_covered() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
@@ -2068,7 +2064,7 @@ fn min_allot_account_mana_requirement_covered_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
@@ -2109,14 +2105,12 @@ fn implicit_account_transition() {
 
     let input_output_id = *inputs[0].output_id();
     let account_id = AccountId::from(&input_output_id);
-    let outputs = vec![
-        AccountOutputBuilder::new_with_amount(1_000_000, account_id)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .finish_output()
-            .unwrap(),
-    ];
+    let outputs = vec![AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .finish_output()
+        .unwrap()];
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -2127,7 +2121,7 @@ fn implicit_account_transition() {
         protocol_parameters,
     )
     .with_required_inputs(vec![input_output_id])
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .select()
     .unwrap();
 
