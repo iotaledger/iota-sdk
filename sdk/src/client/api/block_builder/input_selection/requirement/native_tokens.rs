@@ -62,11 +62,9 @@ impl InputSelection {
         input_native_tokens.merge(minted_native_tokens)?;
         output_native_tokens.merge(melted_native_tokens)?;
 
-        if let Some(burn) = self.burn.as_ref() {
-            if !burn.native_tokens.is_empty() {
-                self.transaction_capabilities
-                    .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
-            }
+        if let Some(burn) = self.burn.as_ref().filter(|burn| !burn.native_tokens.is_empty()) {
+            self.transaction_capabilities
+                .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
             output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
         }
 
