@@ -69,7 +69,6 @@ pub struct InputSelection {
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
-    allow_allotting_from_account_mana: bool,
     reference_mana_cost: u64,
     allotment_debt: u64,
 }
@@ -418,15 +417,9 @@ impl InputSelection {
     }
 
     /// Specifies an account to which the minimum required mana allotment will be added.
-    pub fn with_min_mana_allotment(
-        mut self,
-        account_id: AccountId,
-        reference_mana_cost: u64,
-        allow_allotting_from_account_mana: bool,
-    ) -> Self {
+    pub fn with_min_mana_allotment(mut self, account_id: AccountId, reference_mana_cost: u64) -> Self {
         self.min_mana_allotment.replace(MinManaAllotment {
             issuer_id: account_id,
-            allow_allotting_from_account_mana,
             reference_mana_cost,
             allotment_debt: 0,
         });
