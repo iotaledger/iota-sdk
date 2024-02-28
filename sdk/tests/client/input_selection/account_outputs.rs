@@ -1348,6 +1348,10 @@ fn account_burn_should_validate_account_address() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
     assert_eq!(selected.transaction.outputs().len(), 2);
@@ -1477,28 +1481,24 @@ fn two_accounts_required() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 3);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(
-        selected
-            .transaction
-            .outputs()
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .transaction
-            .outputs()
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .transaction
+        .outputs()
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .transaction
+        .outputs()
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -2118,14 +2118,12 @@ fn implicit_account_transition() {
 
     let input_output_id = *inputs[0].output_id();
     let account_id = AccountId::from(&input_output_id);
-    let outputs = vec![
-        AccountOutputBuilder::new_with_amount(1_000_000, account_id)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .finish_output()
-            .unwrap(),
-    ];
+    let outputs = vec![AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .finish_output()
+        .unwrap()];
 
     let selected = InputSelection::new(
         inputs.clone(),
