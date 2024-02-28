@@ -79,9 +79,6 @@ pub enum WalletCommand {
         fixed_cost: u64,
         /// The staking period (in epochs). Will default to the staking unbonding period.
         staking_period: Option<u32>,
-        /// Whether to allot mana from the account output.
-        #[arg(long, default_value_t = true)]
-        allot_from_account: bool,
     },
     /// Burn an amount of native token.
     BurnNativeToken {
@@ -167,9 +164,6 @@ pub enum WalletCommand {
     EndStaking {
         /// The Account ID of the staking account.
         account_id: AccountId,
-        /// Whether to allot mana from the account output.
-        #[arg(long, default_value_t = true)]
-        allot_from_account: bool,
     },
     /// Exit the CLI wallet.
     Exit,
@@ -179,9 +173,6 @@ pub enum WalletCommand {
         account_id: AccountId,
         /// The number of additional epochs to add to the staking period.
         additional_epochs: u32,
-        /// Whether to allot mana from the account output.
-        #[arg(long, default_value_t = true)]
-        allot_from_account: bool,
     },
     /// Request funds from the faucet.
     Faucet {
@@ -491,7 +482,6 @@ pub async fn begin_staking_command(
     staked_amount: u64,
     fixed_cost: u64,
     staking_period: Option<u32>,
-    allot_from_account: bool,
 ) -> Result<(), Error> {
     println_log_info!("Begin staking for {account_id}.");
 
@@ -503,10 +493,7 @@ pub async fn begin_staking_command(
                 fixed_cost,
                 staking_period,
             },
-            TransactionOptions {
-                allow_allotting_from_account_mana: allot_from_account,
-                ..Default::default()
-            },
+            None,
         )
         .await?;
 
@@ -816,22 +803,10 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 }
 
 // `end-staking` command
-pub async fn end_staking_command(
-    wallet: &Wallet,
-    account_id: AccountId,
-    allot_from_account: bool,
-) -> Result<(), Error> {
+pub async fn end_staking_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
     println_log_info!("Ending staking for {account_id}.");
 
-    let transaction = wallet
-        .end_staking(
-            account_id,
-            TransactionOptions {
-                allow_allotting_from_account_mana: allot_from_account,
-                ..Default::default()
-            },
-        )
-        .await?;
+    let transaction = wallet.end_staking(account_id, None).await?;
 
     println_log_info!(
         "End staking transaction sent:\n{:?}\n{:?}",
@@ -847,20 +822,10 @@ pub async fn extend_staking_command(
     wallet: &Wallet,
     account_id: AccountId,
     additional_epochs: u32,
-    allot_from_account: bool,
 ) -> Result<(), Error> {
     println_log_info!("Extending staking for {account_id} by {additional_epochs} epochs.");
 
-    let transaction = wallet
-        .extend_staking(
-            account_id,
-            additional_epochs,
-            TransactionOptions {
-                allow_allotting_from_account_mana: allot_from_account,
-                ..Default::default()
-            },
-        )
-        .await?;
+    let transaction = wallet.extend_staking(account_id, additional_epochs, None).await?;
 
     println_log_info!(
         "Extend staking transaction sent:\n{:?}\n{:?}",
@@ -1472,18 +1437,9 @@ pub async fn prompt_internal(
                             staked_amount,
                             fixed_cost,
                             staking_period,
-                            allot_from_account,
                         } => {
                             ensure_password(wallet).await?;
-                            begin_staking_command(
-                                wallet,
-                                account_id,
-                                staked_amount,
-                                fixed_cost,
-                                staking_period,
-                                allot_from_account,
-                            )
-                            .await
+                            begin_staking_command(wallet, account_id, staked_amount, fixed_cost, staking_period).await
                         }
                         WalletCommand::BurnNativeToken { token_id, amount } => {
                             ensure_password(wallet).await?;
@@ -1555,12 +1511,9 @@ pub async fn prompt_internal(
                             ensure_password(wallet).await?;
                             destroy_foundry_command(wallet, foundry_id).await
                         }
-                        WalletCommand::EndStaking {
-                            account_id,
-                            allot_from_account,
-                        } => {
+                        WalletCommand::EndStaking { account_id } => {
                             ensure_password(wallet).await?;
-                            end_staking_command(wallet, account_id, allot_from_account).await
+                            end_staking_command(wallet, account_id).await
                         }
                         WalletCommand::Exit => {
                             return Ok(PromptResponse::Done);
@@ -1568,10 +1521,9 @@ pub async fn prompt_internal(
                         WalletCommand::ExtendStaking {
                             account_id,
                             additional_epochs,
-                            allot_from_account,
                         } => {
                             ensure_password(wallet).await?;
-                            extend_staking_command(wallet, account_id, additional_epochs, allot_from_account).await
+                            extend_staking_command(wallet, account_id, additional_epochs).await
                         }
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
