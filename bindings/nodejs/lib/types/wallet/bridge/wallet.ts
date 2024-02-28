@@ -11,6 +11,7 @@ import type {
     SendParams,
     SendNativeTokenParams,
     SendNftParams,
+    SendManaParams,
 } from '../address';
 import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
@@ -150,13 +151,6 @@ export type __PrepareBurnMethod__ = {
 
 export type __PrepareClaimOutputsMethod__ = {
     name: 'prepareClaimOutputs';
-    data: {
-        outputIdsToClaim: OutputId[];
-    };
-};
-
-export type __ClaimOutputsMethod__ = {
-    name: 'claimOutputs';
     data: {
         outputIdsToClaim: OutputId[];
     };
@@ -418,6 +412,14 @@ export type __SendOutputsMethod__ = {
     name: 'sendOutputs';
     data: {
         outputs: Output[];
+        options?: TransactionOptions;
+    };
+};
+
+export type __PrepareSendManaMethod__ = {
+    name: 'prepareSendMana';
+    data: {
+        params: SendManaParams;
         options?: TransactionOptions;
     };
 };
