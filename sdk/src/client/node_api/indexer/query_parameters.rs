@@ -16,17 +16,23 @@ pub trait QueryParameter: Serialize + Send + Sync {
 
         for (field, v) in value.as_object().unwrap().iter() {
             if !v.is_null() {
+                if let Some(v_bool) = v.as_bool() {
+                    if !query_string.is_empty() {
+                        query_string.push('&');
+                    }
+                    query_string.push_str(&format!("{field}={v_bool}"));
+                }
                 if let Some(v_str) = v.as_str() {
                     if !query_string.is_empty() {
                         query_string.push('&');
                     }
-                    query_string.push_str(&format!("{}={}", field, v_str));
+                    query_string.push_str(&format!("{field}={v_str}"));
                 }
                 if let Some(v_u64) = v.as_u64() {
                     if !query_string.is_empty() {
                         query_string.push('&');
                     }
-                    query_string.push_str(&format!("{}={}", field, v_u64));
+                    query_string.push_str(&format!("{field}={v_u64}"));
                 }
             }
         }
