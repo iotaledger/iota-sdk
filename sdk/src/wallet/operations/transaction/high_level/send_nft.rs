@@ -109,6 +109,6 @@ where
             };
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_transaction(outputs, None, options).await
     }
 }

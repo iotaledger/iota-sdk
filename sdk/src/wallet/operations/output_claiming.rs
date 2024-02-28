@@ -302,6 +302,7 @@ where
         self.prepare_transaction(
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
+            None,
             TransactionOptions {
                 required_inputs: outputs_to_claim
                     .iter()

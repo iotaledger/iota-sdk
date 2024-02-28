@@ -31,7 +31,11 @@ pub(crate) fn sdruc_not_expired(
             .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired { Some(sdr) } else { None }
+        if !expired {
+            Some(sdr)
+        } else {
+            None
+        }
     })
 }
 
@@ -252,7 +256,7 @@ impl InputSelection {
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
         // Only consider automatically transitioned outputs.
-        for output in self.added_outputs.iter_mut() {
+        for output in self.mutable_outputs.iter_mut() {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
             let minimum_amount = output.minimum_amount(self.protocol_parameters.storage_score_parameters());

@@ -370,12 +370,12 @@ async fn all_combined() -> Result<()> {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],
         slot_index,
         slot_commitment_id,
         protocol_parameters.clone(),
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 

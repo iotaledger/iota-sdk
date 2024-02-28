@@ -40,12 +40,12 @@ fn no_inputs() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -74,12 +74,12 @@ fn no_outputs() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(selected, Err(Error::InvalidOutputCount(0))));
@@ -108,12 +108,12 @@ fn no_outputs_but_required_input() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_required_inputs(HashSet::from([*inputs[0].output_id()]))
     .select()
     .unwrap();
@@ -151,12 +151,12 @@ fn no_outputs_but_burn() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_account(account_id_2))
     .select()
     .unwrap();
@@ -200,15 +200,9 @@ fn no_address_provided() {
         expiration: None,
     }]);
 
-    let selected = InputSelection::new(
-        inputs,
-        outputs,
-        None,
-        SLOT_INDEX,
-        SLOT_COMMITMENT_ID,
-        protocol_parameters,
-    )
-    .select();
+    let selected = InputSelection::new(inputs, None, SLOT_INDEX, SLOT_COMMITMENT_ID, protocol_parameters)
+        .with_immutable_outputs(outputs)
+        .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
 }
@@ -244,12 +238,12 @@ fn no_matching_address_provided() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -300,12 +294,12 @@ fn two_addresses_one_missing() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(
@@ -362,7 +356,6 @@ fn two_addresses() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -371,6 +364,7 @@ fn two_addresses() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -425,7 +419,6 @@ fn consolidate_with_min_allotment() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,

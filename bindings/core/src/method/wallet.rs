@@ -381,7 +381,10 @@ pub enum WalletMethod {
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
-        outputs: Vec<Output>,
+        #[serde(default)]
+        immutable_outputs: Vec<Output>,
+        #[serde(default)]
+        mutable_outputs: Vec<Output>,
         #[serde(default)]
         options: Option<TransactionOptions>,
     },

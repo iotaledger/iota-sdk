@@ -18,17 +18,19 @@ where
     /// Get inputs and build the transaction
     pub async fn prepare_transaction(
         &self,
-        outputs: impl Into<Vec<Output>> + Send,
+        mutable_outputs: impl IntoIterator<Item = Output> + Send,
+        immutable_outputs: impl IntoIterator<Item = Output> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into().unwrap_or_default();
-        let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
+        let mutable_outputs = mutable_outputs.into_iter().collect::<Vec<_>>();
+        let immutable_outputs = immutable_outputs.into_iter().collect::<Vec<_>>();
         // Check if the outputs have enough amount to cover the storage deposit
-        for output in &outputs {
+        for output in immutable_outputs.iter().chain(&mutable_outputs) {
             output.verify_storage_deposit(storage_score_params)?;
         }
 
@@ -38,7 +40,7 @@ where
             ))?;
         }
 
-        let prepared_transaction_data = self.select_inputs(outputs, options).await?;
+        let prepared_transaction_data = self.select_inputs(mutable_outputs, immutable_outputs, options).await?;
 
         log::debug!(
             "[TRANSACTION] finished prepare_transaction in {:.2?}",

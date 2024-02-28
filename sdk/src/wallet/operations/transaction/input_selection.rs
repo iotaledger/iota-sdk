@@ -33,7 +33,8 @@ where
     /// Selects inputs for a transaction and locks them in the wallet, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
-        outputs: Vec<Output>,
+        mutable_outputs: Vec<Output>,
+        immutable_outputs: Vec<Output>,
         mut options: TransactionOptions,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] select_inputs");
@@ -115,13 +116,16 @@ where
                 )));
             }
             if let Some(input) = wallet_ledger.outputs.get(output_id) {
-                if input.output.can_claim_rewards(outputs.iter().find(|o| {
-                    input
-                        .output
-                        .chain_id()
-                        .map(|chain_id| chain_id.or_from_output_id(output_id))
-                        == o.chain_id()
-                })) {
+                if input
+                    .output
+                    .can_claim_rewards(immutable_outputs.iter().chain(&mutable_outputs).find(|o| {
+                        input
+                            .output
+                            .chain_id()
+                            .map(|chain_id| chain_id.or_from_output_id(output_id))
+                            == o.chain_id()
+                    }))
+                {
                     mana_rewards.insert(
                         *output_id,
                         self.client()
@@ -135,12 +139,13 @@ where
 
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
-            outputs,
             Some(self.address().await.into_inner()),
             creation_slot,
             slot_commitment_id,
             protocol_parameters.clone(),
         )
+        .with_immutable_outputs(immutable_outputs)
+        .with_mutable_outputs(mutable_outputs)
         .with_required_inputs(options.required_inputs)
         .with_forbidden_inputs(forbidden_inputs)
         .with_context_inputs(options.context_inputs)

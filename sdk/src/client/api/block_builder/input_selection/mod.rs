@@ -48,8 +48,8 @@ pub struct InputSelection {
     forbidden_inputs: HashSet<OutputId>,
     selected_inputs: Vec<InputSigningData>,
     context_inputs: HashSet<ContextInput>,
-    provided_outputs: Vec<Output>,
-    added_outputs: Vec<Output>,
+    immutable_outputs: Vec<Output>,
+    mutable_outputs: Vec<Output>,
     addresses: HashSet<Address>,
     burn: Option<Burn>,
     remainders: Remainders,
@@ -85,7 +85,6 @@ impl InputSelection {
     /// Creates a new [`InputSelection`].
     pub fn new(
         available_inputs: impl IntoIterator<Item = InputSigningData>,
-        outputs: impl IntoIterator<Item = Output>,
         addresses: impl IntoIterator<Item = Address>,
         creation_slot_index: impl Into<SlotIndex>,
         latest_slot_commitment_id: SlotCommitmentId,
@@ -119,8 +118,8 @@ impl InputSelection {
             forbidden_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
             context_inputs: HashSet::new(),
-            provided_outputs: outputs.into_iter().collect(),
-            added_outputs: Vec::new(),
+            immutable_outputs: Vec::new(),
+            mutable_outputs: Vec::new(),
             addresses,
             burn: None,
             remainders: Default::default(),
@@ -199,13 +198,14 @@ impl InputSelection {
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<PreparedTransactionData, Error> {
-        if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
+        let num_provided_outputs = self.immutable_outputs.len() + self.mutable_outputs.len();
+        if !OUTPUT_COUNT_RANGE.contains(&(num_provided_outputs as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
-            if !self.provided_outputs.is_empty()
+            if num_provided_outputs > 0
                 || (self.burn.is_none() && self.mana_allotments.is_empty() && self.required_inputs.is_empty())
             {
-                return Err(Error::InvalidOutputCount(self.provided_outputs.len()));
+                return Err(Error::InvalidOutputCount(num_provided_outputs));
             }
         }
 
@@ -271,9 +271,9 @@ impl InputSelection {
         }
 
         let outputs = self
-            .provided_outputs
+            .immutable_outputs
             .into_iter()
-            .chain(self.added_outputs)
+            .chain(self.mutable_outputs)
             .chain(self.remainders.storage_deposit_returns)
             .chain(self.remainders.data.iter().map(|r| r.output.clone()))
             .collect::<Vec<_>>();
@@ -343,8 +343,8 @@ impl InputSelection {
             // - the issuer feature doesn't need to be verified as the chain is not new
             // - input doesn't need to be checked for as we just transitioned it
             // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
-            self.added_outputs.push(output);
-            added_output = self.added_outputs.last();
+            self.mutable_outputs.push(output);
+            added_output = self.mutable_outputs.last();
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
@@ -360,6 +360,18 @@ impl InputSelection {
         }
 
         Ok(added_output)
+    }
+
+    /// Sets outputs that can be mutated by [`InputSelection`].
+    pub fn with_mutable_outputs(mut self, outputs: impl IntoIterator<Item = Output>) -> Self {
+        self.mutable_outputs = outputs.into_iter().collect();
+        self
+    }
+
+    /// Sets outputs that cannot be mutated by [`InputSelection`].
+    pub fn with_immutable_outputs(mut self, outputs: impl IntoIterator<Item = Output>) -> Self {
+        self.immutable_outputs = outputs.into_iter().collect();
+        self
     }
 
     /// Sets the required inputs of an [`InputSelection`].
@@ -446,7 +458,7 @@ impl InputSelection {
     }
 
     pub(crate) fn non_remainder_outputs(&self) -> impl Iterator<Item = &Output> {
-        self.provided_outputs.iter().chain(&self.added_outputs)
+        self.immutable_outputs.iter().chain(&self.mutable_outputs)
     }
 
     pub(crate) fn remainder_outputs(&self) -> impl Iterator<Item = &Output> {

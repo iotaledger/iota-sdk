@@ -166,7 +166,7 @@ impl InputSelection {
 
     fn output_for_added_mana_exists(&self, remainder_address: &Address) -> bool {
         // Find the first value that matches the remainder address
-        self.non_remainder_outputs().any(|o| {
+        self.mutable_outputs.iter().any(|o| {
             (o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
                 && o.unlock_conditions()
                     .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
@@ -187,9 +187,8 @@ impl InputSelection {
         ]);
         // Remove those that do not have an ordering and sort
         let ordered_outputs = self
-            .provided_outputs
+            .mutable_outputs
             .iter_mut()
-            .chain(&mut self.added_outputs)
             .filter(|o| {
                 o.unlock_conditions()
                     .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())

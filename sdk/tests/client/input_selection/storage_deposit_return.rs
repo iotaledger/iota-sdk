@@ -47,12 +47,12 @@ fn sdruc_output_not_provided_no_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -113,12 +113,12 @@ fn sdruc_output_provided_no_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -157,12 +157,12 @@ fn sdruc_output_provided_remainder() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -226,12 +226,12 @@ fn two_sdrucs_to_the_same_address_both_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -295,12 +295,12 @@ fn two_sdrucs_to_the_same_address_one_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -365,12 +365,12 @@ fn two_sdrucs_to_different_addresses_both_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -446,12 +446,12 @@ fn two_sdrucs_to_different_addresses_one_needed() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -502,12 +502,12 @@ fn insufficient_amount_because_of_sdruc() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(
@@ -564,7 +564,6 @@ fn useless_sdruc_required_for_sender_feature() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -573,6 +572,7 @@ fn useless_sdruc_required_for_sender_feature() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -635,12 +635,12 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -715,12 +715,12 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 

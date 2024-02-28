@@ -46,12 +46,12 @@ fn one_output_timelock_not_expired() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -88,12 +88,12 @@ fn timelock_equal_timestamp() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         200,
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -146,12 +146,12 @@ fn two_outputs_one_timelock_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -205,12 +205,12 @@ fn two_outputs_one_timelocked_one_missing() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -250,12 +250,12 @@ fn one_output_timelock_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 

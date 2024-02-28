@@ -69,12 +69,12 @@ fn burn_account_present() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_account(account_id_1))
     .select()
     .unwrap();
@@ -128,12 +128,12 @@ fn burn_account_present_and_required() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_account(account_id_1))
     .with_required_inputs([*inputs[0].output_id()])
     .select()
@@ -191,12 +191,12 @@ fn burn_account_id_zero() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_nft(nft_id))
     .select()
     .unwrap();
@@ -238,12 +238,12 @@ fn burn_account_absent() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
@@ -308,12 +308,12 @@ fn burn_accounts_present() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().set_accounts(HashSet::from([account_id_1, account_id_2])))
     .select()
     .unwrap();
@@ -375,12 +375,12 @@ fn burn_account_in_outputs() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_account(account_id_1))
     .select();
 
@@ -436,12 +436,12 @@ fn burn_nft_present() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_nft(nft_id_1))
     .select()
     .unwrap();
@@ -497,12 +497,12 @@ fn burn_nft_present_and_required() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_nft(nft_id_1))
     .with_required_inputs([*inputs[0].output_id()])
     .select()
@@ -558,12 +558,12 @@ fn burn_nft_id_zero() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_account(account_id))
     .select()
     .unwrap();
@@ -605,12 +605,12 @@ fn burn_nft_absent() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_nft(nft_id_1))
     .select();
 
@@ -679,12 +679,12 @@ fn burn_nfts_present() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().set_nfts(HashSet::from([nft_id_1, nft_id_2])))
     .select()
     .unwrap();
@@ -750,12 +750,12 @@ fn burn_nft_in_outputs() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_nft(nft_id_1))
     .select();
 
@@ -819,12 +819,12 @@ fn burn_foundry_present() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().add_foundry(inputs[0].output.as_foundry().id()))
     .select()
     .unwrap();
@@ -920,12 +920,12 @@ fn burn_foundry_absent() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_foundry(foundry_id_1))
     .select();
 
@@ -987,12 +987,12 @@ fn burn_foundries_present() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(Burn::new().set_foundries(HashSet::from([
         inputs[0].output.as_foundry().id(),
         inputs[1].output.as_foundry().id(),
@@ -1073,12 +1073,12 @@ fn burn_foundry_in_outputs() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .with_burn(Burn::new().add_foundry(foundry_id_1))
     .select();
 
@@ -1126,7 +1126,6 @@ fn burn_native_tokens() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
@@ -1210,12 +1209,12 @@ fn burn_foundry_and_its_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_burn(
         Burn::new()
             .add_foundry(inputs[0].output.as_foundry().id())

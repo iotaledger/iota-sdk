@@ -52,12 +52,12 @@ fn one_output_expiration_not_expired() {
 
     let selected = InputSelection::new(
         inputs,
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -94,12 +94,12 @@ fn expiration_equal_timestamp() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         200,
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -138,12 +138,12 @@ fn one_output_expiration_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -196,12 +196,12 @@ fn two_outputs_one_expiration_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -255,12 +255,12 @@ fn two_outputs_one_unexpired_one_missing() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -326,12 +326,12 @@ fn two_outputs_two_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap()],
         200,
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -385,7 +385,6 @@ fn two_outputs_two_expired_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
@@ -394,6 +393,7 @@ fn two_outputs_two_expired_2() {
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -432,12 +432,12 @@ fn expiration_expired_with_sdr() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -476,12 +476,12 @@ fn expiration_expired_with_sdr_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -520,12 +520,12 @@ fn expiration_expired_with_sdr_and_timelock() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -564,12 +564,12 @@ fn expiration_expired_with_sdr_and_timelock_2() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -658,7 +658,6 @@ fn sender_in_expiration() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -667,6 +666,7 @@ fn sender_in_expiration() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -706,7 +706,6 @@ fn sender_in_expiration_already_selected() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -715,6 +714,7 @@ fn sender_in_expiration_already_selected() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
@@ -754,7 +754,6 @@ fn remainder_in_expiration() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -763,6 +762,7 @@ fn remainder_in_expiration() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -812,12 +812,12 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -870,12 +870,12 @@ fn expiration_expired_only_account_addresses() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -915,12 +915,12 @@ fn one_nft_output_expiration_unexpired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 
@@ -960,12 +960,12 @@ fn one_nft_output_expiration_expired() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         100,
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
+    .with_immutable_outputs(outputs.clone())
     .select()
     .unwrap();
 

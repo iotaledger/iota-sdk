@@ -53,12 +53,12 @@ impl InputSelection {
                 needs_commitment_context = true;
             }
         }
-        for output in self
-            .provided_outputs
-            .iter_mut()
-            .chain(&mut self.added_outputs)
-            .filter(|o| o.is_delegation())
-        {
+        if self.non_remainder_outputs().any(|o| o.is_delegation()) {
+            log::debug!("Adding commitment context input for delegation output");
+            needs_commitment_context = true;
+        }
+        // TODO: move this to the delegation functions
+        for output in self.mutable_outputs.iter_mut().filter(|o| o.is_delegation()) {
             // Created delegations have their start epoch set, and delayed delegations have their end set
             if output.as_delegation().delegation_id().is_null() {
                 let start_epoch = self
@@ -77,8 +77,6 @@ impl InputSelection {
                     .with_end_epoch(end_epoch)
                     .finish_output()?;
             }
-            log::debug!("Adding commitment context input for delegation output");
-            needs_commitment_context = true;
         }
         // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
         if self

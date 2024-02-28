@@ -76,7 +76,7 @@ where
             output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
-        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
+        let prepared_transaction_data = self.prepare_transaction(None, outputs, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction_data, options)
             .await

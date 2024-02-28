@@ -132,9 +132,8 @@ impl InputSelection {
             .as_mut()
             .ok_or(Error::UnfulfillableRequirement(Requirement::Mana))?;
         if let Some(output) = self
-            .provided_outputs
+            .mutable_outputs
             .iter_mut()
-            .chain(&mut self.added_outputs)
             .filter(|o| o.is_account() && o.mana() != 0)
             .find(|o| o.as_account().account_id() == issuer_id)
         {
