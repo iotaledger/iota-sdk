@@ -326,16 +326,21 @@ mod tests {
                 Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
                     .unwrap(),
             )
+            .created_after(5.into())
+            .has_timelock(true)
             .cursor("".into());
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),
-            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=".into())
+            Some(
+                "address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&createdAfter=5&cursor=&hasTimelock=true"
+                    .into()
+            )
         );
 
         basic_outputs_query_parameters.replace_cursor("newCursor".into());
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),
-            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=newCursor".into())
+            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&createdAfter=5&cursor=newCursor&hasTimelock=true".into())
         );
     }
 }
