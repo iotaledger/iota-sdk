@@ -69,16 +69,6 @@ impl core::fmt::Display for InfoResponse {
     }
 }
 
-/// Contains the info and the url from the node (useful when multiple nodes are used)
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NodeInfoResponse {
-    /// The returned info
-    pub info: InfoResponse,
-    /// The url from the node which returned the info
-    pub url: String,
-}
-
 /// Response of GET /api/core/v3/info.
 /// General information about the node.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

@@ -10,6 +10,7 @@ use iota_sdk::client::secret::LedgerNanoStatus;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, SignedTransactionDataDto},
+        node_api::core::routes::NodeInfoResponse,
         node_manager::node::Node,
         NetworkInfo,
     },
@@ -17,9 +18,9 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-                IssuanceBlockHeaderResponse, ManaRewardsResponse, NodeInfoResponse, OutputMetadataResponse,
-                OutputResponse, OutputWithMetadataResponse, RoutesResponse, TransactionMetadataResponse,
-                UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputMetadataResponse, OutputResponse,
+                OutputWithMetadataResponse, RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse,
+                UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },

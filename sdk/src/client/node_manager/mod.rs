@@ -26,9 +26,10 @@ use crate::client::request_pool::RateLimitExt;
 use crate::{
     client::{
         error::{Error, Result},
+        node_api::core::routes::NodeInfoResponse,
         node_manager::builder::NodeManagerBuilder,
     },
-    types::api::core::{InfoResponse, NodeInfoResponse},
+    types::api::core::InfoResponse,
 };
 
 // The node manager takes care of selecting node(s) for requests until a result is returned or if quorum is enabled it

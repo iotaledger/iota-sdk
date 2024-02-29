@@ -4,6 +4,7 @@
 //! Node core API routes.
 
 use packable::PackableExt;
+use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{
@@ -16,10 +17,10 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockResponse, BlockWithMetadataResponse, Commitment, CommitteeResponse,
-            CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse, NodeInfoResponse,
-            OutputMetadataResponse, OutputResponse, OutputWithMetadataResponse, PermanodeInfoResponse, RoutesResponse,
-            SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-            ValidatorResponse, ValidatorsResponse,
+            CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputMetadataResponse,
+            OutputResponse, OutputWithMetadataResponse, PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse,
+            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+            ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -34,6 +35,16 @@ use crate::{
 
 /// Info path is the exact path extension for node APIs to request their info.
 pub(crate) static INFO_PATH: &str = "api/core/v3/info";
+
+/// Contains the info and the url from the node (useful when multiple nodes are used)
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NodeInfoResponse {
+    /// The returned info
+    pub info: InfoResponse,
+    /// The url from the node which returned the info
+    pub url: String,
+}
 
 impl ClientInner {
     // Node routes.

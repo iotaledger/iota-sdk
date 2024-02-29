@@ -4,9 +4,13 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters, Client},
+    client::{
+        api::GetAddressesOptions,
+        node_api::{core::routes::NodeInfoResponse, indexer::query_parameters::BasicOutputQueryParameters},
+        Client,
+    },
     types::{
-        api::core::{NodeInfoResponse, TransactionState},
+        api::core::TransactionState,
         block::{
             output::{Output, OutputId},
             Block,
