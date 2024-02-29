@@ -48,7 +48,7 @@ impl SendParams {
     pub fn new(amount: u64, address: impl ConvertTo<Bech32Address>) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
             amount,
-            address: address.convert().map_err(crate::client::Error::from)?,
+            address: address.convert()?,
             return_address: None,
             expiration: None,
         })
@@ -58,7 +58,7 @@ impl SendParams {
         mut self,
         address: impl ConvertTo<Bech32Address>,
     ) -> Result<Self, crate::wallet::Error> {
-        self.return_address = Some(address.convert().map_err(crate::client::Error::from)?);
+        self.return_address = Some(address.convert()?);
         Ok(self)
     }
 

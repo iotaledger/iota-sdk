@@ -6,19 +6,22 @@ use std::fmt::Debug;
 use crypto::keys::bip44::Bip44;
 use serde::{ser::Serializer, Serialize};
 
-use crate::types::block::{
-    address::Bech32Address,
-    context_input::ContextInputError,
-    input::InputError,
-    mana::ManaError,
-    output::{
-        feature::FeatureError, unlock_condition::UnlockConditionError, DelegationId, NativeTokenError, OutputError,
-        TokenSchemeError,
+use crate::{
+    types::block::{
+        address::Bech32Address,
+        context_input::ContextInputError,
+        input::InputError,
+        mana::ManaError,
+        output::{
+            feature::FeatureError, unlock_condition::UnlockConditionError, DelegationId, NativeTokenError, OutputError,
+            TokenSchemeError,
+        },
+        payload::{signed_transaction::TransactionId, PayloadError},
+        signature::SignatureError,
+        unlock::UnlockError,
+        BlockError,
     },
-    payload::{signed_transaction::TransactionId, PayloadError},
-    signature::SignatureError,
-    unlock::UnlockError,
-    BlockError,
+    utils::ConversionError,
 };
 
 /// The wallet error type.
@@ -148,6 +151,8 @@ pub enum Error {
     AccountNotFound,
     #[error("staking failed: {0}")]
     StakingFailed(String),
+    #[error("{0}")]
+    Convert(#[from] ConversionError),
 }
 
 impl Error {

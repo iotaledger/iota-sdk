@@ -47,7 +47,7 @@ impl SendNativeTokenParams {
     /// Creates a new instance of [`SendNativeTokenParams`]
     pub fn new(address: impl ConvertTo<Bech32Address>, native_token: (TokenId, U256)) -> Result<Self> {
         Ok(Self {
-            address: address.convert().map_err(crate::client::Error::from)?,
+            address: address.convert()?,
             native_token,
             return_address: None,
             expiration: None,
@@ -56,7 +56,7 @@ impl SendNativeTokenParams {
 
     /// Set the return address and try convert to [`Bech32Address`]
     pub fn try_with_return_address(mut self, return_address: impl ConvertTo<Bech32Address>) -> Result<Self> {
-        self.return_address = Some(return_address.convert().map_err(crate::client::Error::from)?);
+        self.return_address = Some(return_address.convert()?);
         Ok(self)
     }
 

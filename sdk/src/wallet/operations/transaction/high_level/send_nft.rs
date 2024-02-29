@@ -36,8 +36,8 @@ impl SendNftParams {
         nft_id: impl ConvertTo<NftId>,
     ) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
-            address: address.convert().map_err(crate::client::Error::from)?,
-            nft_id: nft_id.convert().map_err(crate::client::Error::from)?,
+            address: address.convert()?,
+            nft_id: nft_id.convert()?,
         })
     }
 }
