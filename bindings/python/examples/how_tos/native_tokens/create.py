@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import CreateNativeTokenParams, Wallet, WalletOptions, Irc30Metadata
 
 load_dotenv()

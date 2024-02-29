@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './api';
-export * from './info';
-
-export * from './transaction-failure-reason';
-export * from './block-metadata';
 export * from './native-token';
 export * from './storage-score';
 export * from './state';

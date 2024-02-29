@@ -6,4 +6,3 @@ export * from './node-info-base-token';
 export * from './node-info-metrics';
 export * from './node-info-protocol';
 export * from './node-info-status';
-export * from './routes-response';

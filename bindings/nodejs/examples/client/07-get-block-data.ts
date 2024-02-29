@@ -23,7 +23,7 @@ async function run() {
 
     try {
         // Fetch a block ID from the node.
-        const blockIds = await client.getTips();
+        const blockIds = (await client.getIssuance()).strongParents;
         console.log('Block IDs:', blockIds, '\n');
 
         // Get the metadata for the block.
