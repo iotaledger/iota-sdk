@@ -4,5 +4,5 @@ from iota_sdk import Client
 client = Client(nodes=['https://api.testnet.shimmer.network'])
 
 # Get the node info
-node_info = client.get_info()
+node_info = client.get_node_info()
 print(f'{node_info}')

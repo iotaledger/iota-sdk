@@ -26,6 +26,7 @@ use crate::client::request_pool::RateLimitExt;
 use crate::{
     client::{
         error::{Error, Result},
+        node_api::core::routes::NodeInfoResponse,
         node_manager::builder::NodeManagerBuilder,
     },
     types::api::core::InfoResponse,
@@ -229,12 +230,12 @@ impl NodeManager {
                     Ok(res) => {
                         // Handle node_info extra because we also want to return the url
                         if path == crate::client::node_api::core::routes::INFO_PATH {
-                            let node_info: InfoResponse = res.into_json().await?;
-                            let wrapper = crate::client::node_api::core::routes::NodeInfoWrapper {
-                                node_info,
+                            let info: InfoResponse = res.into_json().await?;
+                            let node_info = NodeInfoResponse {
+                                info,
                                 url: format!("{}://{}", node.url.scheme(), node.url.host_str().unwrap_or("")),
                             };
-                            let serde_res = serde_json::to_string(&wrapper)?;
+                            let serde_res = serde_json::to_string(&node_info)?;
                             return Ok(serde_json::from_str(&serde_res)?);
                         }
 

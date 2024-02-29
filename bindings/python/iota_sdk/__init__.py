@@ -20,7 +20,6 @@ from .types.block.block import *
 from .types.block.body.basic import *
 from .types.block.body.type import *
 from .types.block.body.validation import *
-from .types.block.metadata import *
 from .types.block.id import *
 from .types.block_builder_options import *
 from .types.block_issuer_key import *

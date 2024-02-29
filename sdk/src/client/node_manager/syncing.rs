@@ -101,7 +101,7 @@ impl Client {
                     }
                 }
             } else {
-                match Self::get_node_info(node.url.as_ref(), node.auth.clone()).await {
+                match Self::get_info(node.url.as_ref(), node.auth.clone()).await {
                     Ok(info) => {
                         if info.status.is_healthy || ignore_node_health {
                             // Unwrap: We should always have parameters for this version. If we don't we can't recover.

@@ -2,7 +2,6 @@ import json
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import OutputParams, Unlocks, Wallet, WalletOptions
 
 load_dotenv()

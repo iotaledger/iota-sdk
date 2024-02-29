@@ -4,15 +4,11 @@
 use iota_sdk::types::{
     api::core::{
         BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
-        TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-        ValidatorsResponse,
+        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse, RoutesResponse,
+        SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
+        ValidatorResponse, ValidatorsResponse,
     },
-    block::{
-        output::{OutputMetadata, OutputWithMetadata},
-        slot::SlotCommitment,
-        BlockDto,
-    },
+    block::{output::OutputMetadata, slot::SlotCommitment, BlockDto},
 };
 use packable::{
     error::{UnexpectedEOF, UnpackError},
@@ -91,7 +87,7 @@ fn responses() {
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/full
-    json_response::<OutputWithMetadata>("get-full-output-metadata-example.json").unwrap();
+    json_response::<OutputWithMetadataResponse>("get-full-output-metadata-example.json").unwrap();
     // GET /api/core/v3/transactions/{transactionId}/metadata
     json_response::<TransactionMetadataResponse>("get-transaction-metadata-by-id-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
