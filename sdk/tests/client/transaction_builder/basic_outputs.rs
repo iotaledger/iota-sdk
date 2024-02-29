@@ -747,10 +747,12 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs_data.len(), 2);
-    assert!(selected
-        .inputs_data
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs_data
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.transaction.outputs().len(), 2);
 }
@@ -891,10 +893,12 @@ fn account_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs_data.len(), 2);
-    assert!(selected
-        .inputs_data
-        .iter()
-        .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1));
+    assert!(
+        selected
+            .inputs_data
+            .iter()
+            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
+    );
     // Provided output + account
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
@@ -956,11 +960,13 @@ fn account_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
-    assert!(selected
-        .transaction
-        .outputs()
-        .iter()
-        .any(|output| output.is_account() && *output.as_account().account_id() == account_id));
+    assert!(
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
+    );
 }
 
 #[test]
@@ -1101,10 +1107,12 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs_data.len(), 2);
-    assert!(selected
-        .inputs_data
-        .iter()
-        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
+    assert!(
+        selected
+            .inputs_data
+            .iter()
+            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
+    );
     // Provided output + nft
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&inputs[2].output));
@@ -1169,11 +1177,13 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
-    assert!(selected
-        .transaction
-        .outputs()
-        .iter()
-        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
+    assert!(
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
+    );
 }
 
 #[test]
@@ -2252,10 +2262,12 @@ fn restricted_ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs_data.len(), 2);
-    assert!(selected
-        .inputs_data
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs_data
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.transaction.outputs().len(), 2);
 }
@@ -2447,13 +2459,15 @@ fn automatic_allotment_provided_in_and_output() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .with_mana(1)
-        .finish_output()
-        .unwrap()];
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_mana(1)
+            .finish_output()
+            .unwrap(),
+    ];
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
