@@ -61,15 +61,13 @@ fn remainder_needed_for_mana() {
     let delegation_output_id = *inputs[0].output_id();
     let delegation_id = DelegationId::from(&delegation_output_id);
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_mana(200)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .finish_output()
-            .unwrap(),
-    ];
+    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)
+        .with_mana(200)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .finish_output()
+        .unwrap()];
 
     let mana_rewards = 100;
 
@@ -84,6 +82,33 @@ fn remainder_needed_for_mana() {
     .with_burn(Burn::from(delegation_id))
     .add_mana_rewards(delegation_output_id, mana_rewards)
     .select()
+    .unwrap();
+
+    let inputs = inputs
+        .iter()
+        .map(|input| (input.output_id(), &input.output))
+        .collect::<Vec<_>>();
+
+    // validating without rewards
+    iota_sdk::types::block::semantic::SemanticValidationContext::new(
+        &selected.transaction,
+        &inputs,
+        None,
+        None,
+        protocol_parameters.clone(),
+    )
+    .validate()
+    .unwrap();
+
+    // validating with rewards
+    iota_sdk::types::block::semantic::SemanticValidationContext::new(
+        &selected.transaction,
+        &inputs,
+        None,
+        Some(std::collections::BTreeMap::from([(delegation_output_id, mana_rewards)])),
+        protocol_parameters.clone(),
+    )
+    .validate()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);
