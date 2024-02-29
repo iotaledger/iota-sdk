@@ -4,7 +4,7 @@
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
 import { Output, OutputDiscriminator, OutputId } from '../block/output';
-import { IOutputMetadataResponse } from '../models/api';
+import { OutputMetadataResponse } from '../models/api';
 
 /** Output to claim */
 export enum OutputsToClaim {
@@ -20,7 +20,7 @@ export class OutputData {
     /** The identifier of an Output */
     outputId!: OutputId;
     /** The metadata of the output */
-    metadata!: IOutputMetadataResponse;
+    metadata!: OutputMetadataResponse;
     /** The actual Output */
     @Type(() => Output, {
         discriminator: OutputDiscriminator,

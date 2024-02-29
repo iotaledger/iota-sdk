@@ -63,7 +63,6 @@ pub use self::{
     builder::{ClientBuilder, NetworkInfo},
     core::*,
     error::*,
-    node_api::core::routes::NodeInfoWrapper,
     utils::*,
 };
 
