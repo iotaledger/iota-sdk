@@ -82,15 +82,14 @@ describe.skip('Client info methods', () => {
     });
 });
 
-// TODO: enable after ProtocolParameters fixture is updated https://github.com/iotaledger/iota-sdk/issues/2040
-// describe('Offline client info methods', () => {
-// it('provided protocol parameters', async () => {
-//     const protocolParameters = protocolParametersFixture.params;
-//     const client = await Client.create({
-//         protocolParameters
-//     });
-//     const networkInfo = await client.getNetworkInfo();
+describe('Offline client info methods', () => {
+    it('provided protocol parameters', async () => {
+        const protocolParameters = protocolParametersFixture.params;
+        const client = await Client.create({
+            protocolParameters
+        });
+        const networkInfo = await client.getNetworkInfo();
 
-//     expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
-// });
-// })
+        expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
+    });
+})
