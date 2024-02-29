@@ -1,7 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! This example returns the health of the node by querying its `/health` endpoint.
+//! This example returns the validators of the node by querying its `/validators` endpoint.
+//! The result is paginated with a page size of 1. You can provide a LIST_INDEX to request
+//! a particular validator.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
