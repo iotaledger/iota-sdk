@@ -243,9 +243,10 @@ impl InputSelection {
             if !self.allow_additional_input_selection {
                 return Err(Error::AdditionalInputsRequired(Requirement::Mana));
             }
+            let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
             // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
-                selected_mana += self.total_mana(&input, None)?;
+                selected_mana += self.total_mana(&input, include_generated)?;
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();
                 }
@@ -262,13 +263,14 @@ impl InputSelection {
     pub(crate) fn initial_mana_excess(&self) -> Result<u64, Error> {
         let output_mana = self.provided_outputs.iter().map(|o| o.mana()).sum::<u64>();
         let mut input_mana = 0;
+        let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
 
         for input in self
             .selected_inputs
             .iter()
             .filter(|i| self.required_inputs.contains(i.output_id()))
         {
-            input_mana += self.total_mana(input, None)?;
+            input_mana += self.total_mana(input, include_generated)?;
         }
 
         Ok(input_mana.saturating_sub(output_mana))
@@ -288,6 +290,9 @@ impl InputSelection {
 
     pub(crate) fn total_selected_mana(&self, include_generated: impl Into<Option<bool>> + Copy) -> Result<u64, Error> {
         let mut selected_mana = 0;
+        let include_generated = include_generated
+            .into()
+            .unwrap_or(self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
 
         for input in &self.selected_inputs {
             selected_mana += self.total_mana(input, include_generated)?;
@@ -296,10 +301,7 @@ impl InputSelection {
         Ok(selected_mana)
     }
 
-    fn total_mana(&self, input: &InputSigningData, include_generated: impl Into<Option<bool>>) -> Result<u64, Error> {
-        let include_generated = include_generated
-            .into()
-            .unwrap_or(self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
+    fn total_mana(&self, input: &InputSigningData, include_generated: bool) -> Result<u64, Error> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
             + if include_generated {
                 input.output.available_mana(
