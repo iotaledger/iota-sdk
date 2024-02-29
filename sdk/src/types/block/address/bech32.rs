@@ -7,7 +7,6 @@ use alloc::{
 };
 use core::str::FromStr;
 
-use bech32::primitives::hrp::Error;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::{AsRef, Deref, Display};
 use packable::{
@@ -44,7 +43,7 @@ impl Hrp {
 }
 
 impl FromStr for Hrp {
-    type Err = Error;
+    type Err = AddressError;
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
         Ok(Self(bech32::Hrp::parse(hrp)?))
