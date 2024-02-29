@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     types::block::output::feature::MetadataFeature,
-    wallet::{CreateNativeTokenParams, Result, SyncOptions},
+    wallet::{CreateNativeTokenParams, SyncOptions},
     U256,
 };
 use pretty_assertions::assert_eq;
@@ -12,7 +12,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
-async fn create_and_mint_native_token() -> Result<()> {
+async fn create_and_mint_native_token() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/create_and_mint_native_token";
     setup(storage_path)?;
 
@@ -63,7 +63,7 @@ async fn create_and_mint_native_token() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn native_token_foundry_metadata() -> Result<()> {
+async fn native_token_foundry_metadata() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/native_token_foundry_metadata";
     setup(storage_path)?;
 

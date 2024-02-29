@@ -14,11 +14,11 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn sync_print_balance(wallet: &Wallet) -> Result<()> {
+async fn sync_print_balance(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
     println!("Wallet synced in: {:.2?}", now.elapsed());

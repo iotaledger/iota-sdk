@@ -5,8 +5,8 @@ use packable::bounded::BoundedU16;
 
 use super::CONTEXT_INPUT_COUNT_RANGE;
 use crate::types::block::{
+    context_input::ContextInputError,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
 };
 
 pub(crate) type RewardContextInputIndex =
@@ -14,16 +14,21 @@ pub(crate) type RewardContextInputIndex =
 
 /// A Reward Context Input indicates which transaction Input is claiming Mana rewards.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
-#[packable(unpack_error = Error)]
-pub struct RewardContextInput(#[packable(unpack_error_with = Error::InvalidRewardInputIndex)] RewardContextInputIndex);
+#[packable(unpack_error = ContextInputError)]
+pub struct RewardContextInput(
+    #[packable(unpack_error_with = ContextInputError::InvalidRewardInputIndex)] RewardContextInputIndex,
+);
 
 impl RewardContextInput {
     /// The context input kind of a [`RewardContextInput`].
     pub const KIND: u8 = 2;
 
     /// Creates a new [`RewardContextInput`].
-    pub fn new(index: u16) -> Result<Self, Error> {
-        index.try_into().map(Self).map_err(Error::InvalidRewardInputIndex)
+    pub fn new(index: u16) -> Result<Self, ContextInputError> {
+        index
+            .try_into()
+            .map(Self)
+            .map_err(ContextInputError::InvalidRewardInputIndex)
     }
 
     /// Returns the index of a [`RewardContextInput`].
@@ -68,7 +73,7 @@ mod dto {
     }
 
     impl TryFrom<RewardContextInputDto> for RewardContextInput {
-        type Error = Error;
+        type Error = ContextInputError;
 
         fn try_from(value: RewardContextInputDto) -> Result<Self, Self::Error> {
             Self::new(value.index)

@@ -12,14 +12,13 @@ use iota_sdk::client::{
     constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
     secret::{stronghold::StrongholdSecretManager, SecretManager},
     stronghold::StrongholdAdapter,
-    Result,
 };
 
 const V2_PATH: &str = "./tests/wallet/fixtures/v2.stronghold";
 const V3_PATH: &str = "./v3.stronghold";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This should fail with error, migration required.
     let error = if let Err(e) = StrongholdSecretManager::builder()
         .password("current_password".to_owned())

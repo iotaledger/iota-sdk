@@ -1,11 +1,14 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
+use crate::types::block::{
+    protocol::WorkScore,
+    unlock::{UnlockError, UnlockIndex},
+};
 
 /// Points to the unlock of a consumed account output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = Error, with = Error::InvalidAccountIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::InvalidAccountIndex)]
 pub struct AccountUnlock(
     /// Index of input and unlock corresponding to an [`AccountOutput`](crate::types::block::output::AccountOutput).
     UnlockIndex,
@@ -17,8 +20,8 @@ impl AccountUnlock {
 
     /// Creates a new [`AccountUnlock`].
     #[inline(always)]
-    pub fn new(index: u16) -> Result<Self, Error> {
-        index.try_into().map(Self).map_err(Error::InvalidAccountIndex)
+    pub fn new(index: u16) -> Result<Self, UnlockError> {
+        index.try_into().map(Self).map_err(UnlockError::InvalidAccountIndex)
     }
 
     /// Return the index of an [`AccountUnlock`].
@@ -31,7 +34,7 @@ impl AccountUnlock {
 impl WorkScore for AccountUnlock {}
 
 impl TryFrom<u16> for AccountUnlock {
-    type Error = Error;
+    type Error = UnlockError;
 
     fn try_from(index: u16) -> Result<Self, Self::Error> {
         Self::new(index)
@@ -62,7 +65,7 @@ mod dto {
     }
 
     impl TryFrom<AccountUnlockDto> for AccountUnlock {
-        type Error = Error;
+        type Error = UnlockError;
 
         fn try_from(value: AccountUnlockDto) -> Result<Self, Self::Error> {
             Self::new(value.index)

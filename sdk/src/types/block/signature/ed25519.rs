@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::{fmt, ops::Deref};
+use core::{convert::Infallible, fmt, ops::Deref};
 
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
@@ -17,7 +17,7 @@ use packable::{
 use crate::types::block::{
     address::Ed25519Address,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
+    signature::SignatureError,
 };
 
 /// An Ed25519 signature.
@@ -53,7 +53,7 @@ impl Ed25519Signature {
     pub fn try_from_bytes(
         public_key: [u8; Self::PUBLIC_KEY_LENGTH],
         signature: [u8; Self::SIGNATURE_LENGTH],
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, SignatureError> {
         Ok(Self::from_bytes(public_key, signature))
     }
 
@@ -93,18 +93,21 @@ impl Ed25519Signature {
     }
 
     /// Validates the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
-    pub fn validate(&self, message: &[u8], address: &Ed25519Address) -> Result<(), Error> {
+    pub fn validate(&self, message: &[u8], address: &Ed25519Address) -> Result<(), SignatureError> {
         let signature_address: [u8; Self::PUBLIC_KEY_LENGTH] = Blake2b256::digest(self.public_key).into();
 
         if address.deref() != &signature_address {
-            return Err(Error::SignaturePublicKeyMismatch {
+            return Err(SignatureError::SignaturePublicKeyMismatch {
                 expected: prefix_hex::encode(address.as_ref()),
                 actual: prefix_hex::encode(signature_address),
             });
         }
 
-        if !self.try_verify(message)? {
-            return Err(Error::InvalidSignature);
+        if !self
+            .try_verify(message)
+            .map_err(SignatureError::InvalidSignatureBytes)?
+        {
+            return Err(SignatureError::SignatureMismatch(prefix_hex::encode(message)));
         }
 
         Ok(())
@@ -142,7 +145,7 @@ impl WorkScore for Ed25519Signature {
 }
 
 impl Packable for Ed25519Signature {
-    type UnpackError = Error;
+    type UnpackError = Infallible;
     type UnpackVisitor = ();
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -170,7 +173,6 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Defines an Ed25519 signature.
     #[derive(Serialize, Deserialize)]
@@ -193,12 +195,12 @@ pub(crate) mod dto {
     }
 
     impl TryFrom<Ed25519SignatureDto> for Ed25519Signature {
-        type Error = Error;
+        type Error = SignatureError;
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
             Ok(Self::from_bytes(
-                prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
-                prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
+                prefix_hex::decode(&value.public_key).map_err(SignatureError::InvalidPublicKeyHex)?,
+                prefix_hex::decode(&value.signature).map_err(SignatureError::InvalidSignatureHex)?,
             ))
         }
     }
