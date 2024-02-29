@@ -16,8 +16,8 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{
-            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionError,
-            UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
+            UnlockConditions,
         },
         ChainId, DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
         StorageScoreParameters,
@@ -43,7 +43,11 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -238,8 +242,7 @@ impl AccountOutputBuilder {
             AccountOutput::KIND,
             features.native_token(),
             self.mana,
-        )
-        .map_err(UnlockConditionError::from)?;
+        )?;
         verify_allowed_features(&features, AccountOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -564,7 +567,6 @@ impl Packable for AccountOutput {
 
         if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
-                .map_err(UnlockConditionError::from)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES)

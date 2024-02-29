@@ -11,8 +11,7 @@ use crate::types::block::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
-            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionError, UnlockConditionFlags,
-            UnlockConditions,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
         DecayedMana, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputError, StorageScore,
         StorageScoreParameters,
@@ -212,8 +211,7 @@ impl BasicOutputBuilder {
             BasicOutput::KIND,
             features.native_token(),
             self.mana,
-        )
-        .map_err(UnlockConditionError::from)?;
+        )?;
         verify_features(&features)?;
 
         let mut output = BasicOutput {
@@ -451,8 +449,7 @@ fn verify_basic_output(output: &BasicOutput, _: &ProtocolParameters) -> Result<(
         BasicOutput::KIND,
         output.features.native_token(),
         output.mana,
-    )
-    .map_err(UnlockConditionError::from)?)
+    )?)
 }
 
 #[cfg(feature = "serde")]

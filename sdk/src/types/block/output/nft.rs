@@ -16,8 +16,7 @@ use crate::types::block::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
-            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionError, UnlockConditionFlags,
-            UnlockConditions,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
         BasicOutputBuilder, ChainId, DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError,
         OutputId, StorageScore, StorageScoreParameters,
@@ -44,7 +43,11 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -270,8 +273,7 @@ impl NftOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
-        verify_restricted_addresses(&unlock_conditions, NftOutput::KIND, features.native_token(), self.mana)
-            .map_err(UnlockConditionError::from)?;
+        verify_restricted_addresses(&unlock_conditions, NftOutput::KIND, features.native_token(), self.mana)?;
         verify_allowed_features(&features, NftOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -522,7 +524,6 @@ impl Packable for NftOutput {
 
         if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
-                .map_err(UnlockConditionError::from)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES)

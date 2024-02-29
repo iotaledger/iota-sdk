@@ -409,35 +409,29 @@ pub(crate) fn verify_restricted_addresses(
     output_kind: u8,
     native_token: Option<&NativeTokenFeature>,
     mana: u64,
-) -> Result<(), AddressError> {
+) -> Result<(), UnlockConditionError> {
     let addresses = unlock_conditions.restricted_addresses();
 
     for address in addresses {
         if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
-            return Err(AddressError::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithNativeTokens,
-            ));
+            return Err(
+                AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithNativeTokens).into(),
+            );
         }
 
         if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
-            return Err(AddressError::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithMana,
-            ));
+            return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithMana).into());
         }
 
         if unlock_conditions.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
         {
-            return Err(AddressError::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithTimelock,
-            ));
+            return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithTimelock).into());
         }
 
         if unlock_conditions.expiration().is_some()
             && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
         {
-            return Err(AddressError::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithExpiration,
-            ));
+            return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithExpiration).into());
         }
 
         if unlock_conditions.storage_deposit_return().is_some()
@@ -445,29 +439,22 @@ pub(crate) fn verify_restricted_addresses(
         {
             return Err(AddressError::RestrictedAddressCapability(
                 AddressCapabilityFlag::OutputsWithStorageDepositReturn,
-            ));
+            )
+            .into());
         }
 
         match output_kind {
             AccountOutput::KIND if !address.has_capability(AddressCapabilityFlag::AccountOutputs) => {
-                return Err(AddressError::RestrictedAddressCapability(
-                    AddressCapabilityFlag::AccountOutputs,
-                ));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::AccountOutputs).into());
             }
             AnchorOutput::KIND if !address.has_capability(AddressCapabilityFlag::AnchorOutputs) => {
-                return Err(AddressError::RestrictedAddressCapability(
-                    AddressCapabilityFlag::AnchorOutputs,
-                ));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::AnchorOutputs).into());
             }
             NftOutput::KIND if !address.has_capability(AddressCapabilityFlag::NftOutputs) => {
-                return Err(AddressError::RestrictedAddressCapability(
-                    AddressCapabilityFlag::NftOutputs,
-                ));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::NftOutputs).into());
             }
             DelegationOutput::KIND if !address.has_capability(AddressCapabilityFlag::DelegationOutputs) => {
-                return Err(AddressError::RestrictedAddressCapability(
-                    AddressCapabilityFlag::DelegationOutputs,
-                ));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::DelegationOutputs).into());
             }
             _ => {}
         }

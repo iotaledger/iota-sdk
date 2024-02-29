@@ -10,8 +10,8 @@ use crate::types::block::{
     output::{
         chain_id::ChainId,
         unlock_condition::{
-            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionError,
-            UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
+            UnlockConditions,
         },
         DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
         StorageScoreParameters,
@@ -37,7 +37,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -186,8 +190,7 @@ impl DelegationOutputBuilder {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions)?;
-        verify_restricted_addresses(&unlock_conditions, DelegationOutput::KIND, None, 0)
-            .map_err(UnlockConditionError::from)?;
+        verify_restricted_addresses(&unlock_conditions, DelegationOutput::KIND, None, 0)?;
 
         let mut output = DelegationOutput {
             amount: 0,
@@ -457,10 +460,12 @@ fn verify_unlock_conditions_packable(
 }
 
 fn verify_delegation_output(output: &DelegationOutput, _: &ProtocolParameters) -> Result<(), OutputError> {
-    Ok(
-        verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
-            .map_err(UnlockConditionError::from)?,
-    )
+    Ok(verify_restricted_addresses(
+        output.unlock_conditions(),
+        DelegationOutput::KIND,
+        None,
+        0,
+    )?)
 }
 
 #[cfg(feature = "serde")]
