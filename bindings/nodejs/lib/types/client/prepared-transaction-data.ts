@@ -5,7 +5,7 @@ import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
 import { Output, OutputDiscriminator } from '../block/output/output';
 import { Transaction } from '../block/payload/signed_transaction';
-import { IOutputMetadataResponse } from '../models/api';
+import { OutputMetadataResponse } from '../models/api';
 import { Bip44 } from '../secret_manager';
 import { HexEncodedString, NumericString } from '../utils';
 
@@ -45,7 +45,7 @@ export class InputSigningData {
     /**
      * The output metadata
      */
-    outputMetadata!: IOutputMetadataResponse;
+    outputMetadata!: OutputMetadataResponse;
     /**
      * The chain derived from seed, only for ed25519 addresses
      */

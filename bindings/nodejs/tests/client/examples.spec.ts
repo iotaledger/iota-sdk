@@ -46,10 +46,10 @@ const chain = {
 describe.skip('Main examples', () => {
     it('gets info about the node', async () => {
         const client = await makeClient();
-        const info = await client.getInfo();
+        const info = (await client.getNodeInfo()).info;
 
         expect(
-            info.nodeInfo.protocolParameters[0].parameters.bech32Hrp,
+            info.protocolParameters[0].parameters.bech32Hrp,
         ).toBe('rms');
     });
 
@@ -93,10 +93,6 @@ describe.skip('Main examples', () => {
         const addressOutputs = await client.getOutputs(outputIdsResponse.items);
 
         expect(addressOutputs).toBeDefined();
-
-        addressOutputs.forEach((output) => {
-            expect(output.metadata.blockId).toBeValidBlockId();
-        });
     });
 
     it('gets the output of a known output ID', async () => {
@@ -105,7 +101,7 @@ describe.skip('Main examples', () => {
             '0xc1d95ac9c8c0237c6929faf427556c3562055a7155c6d336ee7891691d5525c90100',
         );
 
-        expect(output.metadata.blockId).toBeValidBlockId();
+        expect(output).toBeDefined();
     });
 
     it('gets the balance of an address', async () => {
@@ -170,7 +166,7 @@ describe.skip('Main examples', () => {
 
     it('gets block data', async () => {
         const client = await makeClient();
-        const tips = await client.getTips();
+        const tips = (await client.getIssuance()).strongParents;
         const params = await client.getProtocolParameters();
 
         const blockData = await client.getBlock(tips[0]);
@@ -228,7 +224,7 @@ describe.skip('Main examples', () => {
         await client.destroy();
 
         try {
-            const _info = await client.getInfo();
+            const _info = (await client.getNodeInfo()).info;
             throw 'Should return an error because the client was destroyed';
         } catch (err: any) {
             expect(err.message).toEqual('Client was destroyed');

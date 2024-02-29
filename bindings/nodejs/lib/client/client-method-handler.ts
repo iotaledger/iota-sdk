@@ -8,7 +8,7 @@ import {
     listenMqtt,
     destroyClient,
 } from '../bindings';
-import type { IClientOptions, __ClientMethods__ } from '../types/client';
+import type { ClientOptions, __ClientMethods__ } from '../types/client';
 
 /**
  * The MethodHandler which sends the commands to the Rust side.
@@ -26,7 +26,7 @@ export class ClientMethodHandler {
     /**
      * @param options The client options.
      */
-    static async create(options: IClientOptions): Promise<ClientMethodHandler> {
+    static async create(options: ClientOptions): Promise<ClientMethodHandler> {
         try {
             const methodHandler = await createClient(JSON.stringify(options));
             return new ClientMethodHandler(methodHandler);

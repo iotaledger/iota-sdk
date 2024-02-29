@@ -2,7 +2,6 @@ import json
 from dataclasses import asdict
 
 from dotenv import load_dotenv
-
 from iota_sdk import (
     AddressUnlockCondition,
     Client,

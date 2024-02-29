@@ -20,7 +20,7 @@ describe('Address tests', () => {
             const secretManager = SecretManager.create({
                 mnemonic: test['mnemonic']
             });
-        
+
             const generatedAddress = await secretManager.generateEd25519Addresses({
                 coinType: test['coin_type'],
                 accountIndex: test['account_index'],
@@ -31,13 +31,14 @@ describe('Address tests', () => {
                 bech32Hrp: test['bech32_hrp'],
                 options: {
                     internal: test['internal'],
+                    ledgerNanoPrompt: false,
                 }
             });
-        
+
             if (test['bech32_address'] !== generatedAddress[0]) {
-              throw new Error('Test failed: Bech32 address does not match generated address.');
+                throw new Error('Test failed: Bech32 address does not match generated address.');
             }
-          }
+        }
     });
 
     it('generates addresses', async () => {
