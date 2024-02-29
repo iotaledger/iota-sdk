@@ -13,7 +13,9 @@ use instant::Instant;
 
 use crate::{
     client::{
-        node_api::indexer::query_parameters::{FoundryOutputQueryParameters, OutputQueryParameters},
+        node_api::indexer::query_parameters::{
+            DelegationOutputQueryParameters, FoundryOutputQueryParameters, OutputQueryParameters,
+        },
         secret::SecretManage,
     },
     types::block::{address::Bech32Address, output::OutputId},
@@ -93,34 +95,6 @@ where
             }
         }
 
-        if (address.is_ed25519() && sync_options.wallet.nft_outputs)
-            || (address.is_nft() && sync_options.nft.nft_outputs)
-            || (address.is_account() && sync_options.account.nft_outputs)
-        {
-            // nfts
-            #[cfg(target_family = "wasm")]
-            {
-                results.push(self.get_nft_output_ids_with_any_unlock_condition(address.clone()).await)
-            }
-
-            #[cfg(not(target_family = "wasm"))]
-            {
-                tasks.push(
-                    async {
-                        let bech32_address = address.clone();
-                        let wallet = self.clone();
-                        tokio::spawn(async move {
-                            wallet
-                                .get_nft_output_ids_with_any_unlock_condition(bech32_address)
-                                .await
-                        })
-                        .await
-                    }
-                    .boxed(),
-                );
-            }
-        }
-
         if (address.is_ed25519() && sync_options.wallet.account_outputs)
             || (address.is_nft() && sync_options.nft.account_outputs)
             || (address.is_account() && sync_options.account.account_outputs)
@@ -171,6 +145,67 @@ where
                         tokio::spawn(async move {
                             Ok(client
                                 .foundry_output_ids(FoundryOutputQueryParameters::new().account(bech32_address))
+                                .await?
+                                .items)
+                        })
+                        .await
+                    }
+                    .boxed(),
+                );
+            }
+        }
+
+        if (address.is_ed25519() && sync_options.wallet.nft_outputs)
+            || (address.is_nft() && sync_options.nft.nft_outputs)
+            || (address.is_account() && sync_options.account.nft_outputs)
+        {
+            // nfts
+            #[cfg(target_family = "wasm")]
+            {
+                results.push(self.get_nft_output_ids_with_any_unlock_condition(address.clone()).await)
+            }
+
+            #[cfg(not(target_family = "wasm"))]
+            {
+                tasks.push(
+                    async {
+                        let bech32_address = address.clone();
+                        let wallet = self.clone();
+                        tokio::spawn(async move {
+                            wallet
+                                .get_nft_output_ids_with_any_unlock_condition(bech32_address)
+                                .await
+                        })
+                        .await
+                    }
+                    .boxed(),
+                );
+            }
+        }
+
+        if (address.is_ed25519() && sync_options.wallet.delegation_outputs)
+            || (address.is_nft() && sync_options.nft.delegation_outputs)
+            || (address.is_account() && sync_options.account.delegation_outputs)
+        {
+            // delegations
+            #[cfg(target_family = "wasm")]
+            {
+                results.push(Ok(self
+                    .client()
+                    .foundry_output_ids(DelegationOutputQueryParameters::new().address(address.clone()))
+                    .await?
+                    .items))
+            }
+
+            #[cfg(not(target_family = "wasm"))]
+            {
+                tasks.push(
+                    async {
+                        let bech32_address = address.clone();
+                        let client = self.client().clone();
+                        tokio::spawn(async move {
+                            Ok(client
+                                .delegation_output_ids(DelegationOutputQueryParameters::new().address(bech32_address))
                                 .await?
                                 .items)
                         })
