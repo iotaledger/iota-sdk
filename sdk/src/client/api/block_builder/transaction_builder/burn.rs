@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::block::output::{AccountId, DelegationId, FoundryId, NativeToken, NftId, TokenId};
 
-/// A type to specify what needs to be burned during iransaction builder.
+/// A type to specify what needs to be burned in a transaction.
 /// Nothing will be burned that has not been explicitly set with this struct.
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

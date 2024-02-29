@@ -67,7 +67,7 @@ where
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
-            TransactionProgressEvent::SelectingInputs,
+            TransactionProgressEvent::BuildingTransaction,
         ))
         .await;
 
@@ -181,7 +181,7 @@ where
 }
 
 /// Filter available outputs to only include outputs that can be unlocked forever from this moment.
-/// Note: this is only for the default iransaction builder, it's still possible to send these outputs by using
+/// Note: this is only for the default transaction builder, it's still possible to send these outputs by using
 /// `claim_outputs` or providing their OutputId's in the custom_inputs
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs<'a>(

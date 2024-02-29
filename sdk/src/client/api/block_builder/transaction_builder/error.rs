@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Error handling for iransaction builder.
+//! Error handling for transaction builder.
 
 use std::fmt::Debug;
 
@@ -10,11 +10,11 @@ use primitive_types::U256;
 use super::Requirement;
 use crate::types::block::output::{ChainId, OutputId, TokenId};
 
-/// Errors related to iransaction builder.
+/// Errors related to transaction builder.
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
-    #[error("additional inputs required for {0:?}, but additional iransaction builder is disabled")]
+    #[error("additional inputs required for {0:?}, but additional input selection is disabled")]
     AdditionalInputsRequired(Requirement),
     /// Block error.
     #[error("{0}")]
@@ -59,7 +59,7 @@ pub enum Error {
     /// No input with matching ed25519 address provided.
     #[error("no input with matching ed25519 address provided")]
     MissingInputWithEd25519Address,
-    /// No available inputs were provided to iransaction builder.
+    /// No available inputs were provided to transaction builder.
     #[error("no available inputs provided")]
     NoAvailableInputsProvided,
     /// Required input is forbidden.

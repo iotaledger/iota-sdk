@@ -168,7 +168,7 @@ impl Client {
     }
 }
 
-/// Working state for the iransaction builder algorithm.
+/// Working state for the transaction builder algorithm.
 #[derive(Debug)]
 pub struct TransactionBuilder {
     available_inputs: Vec<InputSigningData>,

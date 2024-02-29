@@ -28,7 +28,7 @@ pub struct TransactionOptions {
     pub context_inputs: Vec<ContextInput>,
     /// Inputs that must be used for the transaction.
     pub required_inputs: BTreeSet<OutputId>,
-    /// Specifies what needs to be burned during iransaction builder.
+    /// Specifies what needs to be burned in the transaction.
     pub burn: Option<Burn>,
     /// A string attached to the transaction.
     pub note: Option<String>,
