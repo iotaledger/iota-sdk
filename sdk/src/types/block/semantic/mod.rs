@@ -404,12 +404,10 @@ impl<'a> SemanticValidationContext<'a> {
 
         if self.input_mana != self.output_mana {
             if self.input_mana > self.output_mana {
-                if (self.mana_rewards.is_some() || self.reward_context_inputs.is_empty())
-                    && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana)
-                {
+                if !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
                     return Err(TransactionFailureReason::CapabilitiesManaBurningNotAllowed);
                 }
-            } else {
+            } else if self.mana_rewards.is_some() || self.reward_context_inputs.is_empty() {
                 return Err(TransactionFailureReason::InputOutputManaMismatch);
             }
         }
