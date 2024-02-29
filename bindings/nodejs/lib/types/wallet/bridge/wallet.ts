@@ -354,7 +354,8 @@ export type __PrepareSendMethod__ = {
 export type __PrepareTransactionMethod__ = {
     name: 'prepareTransaction';
     data: {
-        outputs: Output[];
+        immutableOutputs: Output[];
+        mutableOutputs: Output[];
         options?: TransactionOptions;
     };
 };

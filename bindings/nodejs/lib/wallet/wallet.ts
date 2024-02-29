@@ -1465,32 +1465,43 @@ export class Wallet {
     /**
      * Send a transaction.
      *
-     * @param outputs Outputs to use in the transaction.
+     * @param immutableOutputs Outputs to use in the transaction that cannot be changed in any way.
+     * @param mutableOutputs Outputs to use in the transaction that may have amount/mana changes made to fulfill requirements.
      * @param options Additional transaction options.
      * @returns The transaction data.
      */
     async sendTransaction(
-        outputs: Output[],
+        immutableOutputs: Output[],
+        mutableOutputs: Output[],
         options?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        return (await this.prepareTransaction(outputs, options)).send();
+        return (
+            await this.prepareTransaction(
+                immutableOutputs,
+                mutableOutputs,
+                options,
+            )
+        ).send();
     }
 
     /**
      * Prepare a transaction, useful for offline signing.
      *
-     * @param outputs Outputs to use in the transaction.
+     * @param immutableOutputs Outputs to use in the transaction that cannot be changed in any way.
+     * @param mutableOutputs Outputs to use in the transaction that may have amount/mana changes made to fulfill requirements.
      * @param options Additional transaction options.
      * @returns The prepared transaction data.
      */
     async prepareTransaction(
-        outputs: Output[],
+        immutableOutputs: Output[],
+        mutableOutputs: Output[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
             name: 'prepareTransaction',
             data: {
-                outputs,
+                immutableOutputs,
+                mutableOutputs,
                 options,
             },
         });

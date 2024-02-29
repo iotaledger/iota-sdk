@@ -702,18 +702,21 @@ class Wallet:
         ))
 
     def send_transaction(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+            self, immutable_outputs: List[Output], mutable_outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send a transaction.
         """
-        return self.prepare_transaction(outputs, options).send()
+        return self.prepare_transaction(immutable_outputs, mutable_outputs, options).send()
 
     def prepare_transaction(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+            self, immutable_outputs: List[Output], mutable_outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Prepare transaction.
+            Immutable outputs are not allowed to be changed in any way.
+            Mutable outputs may have amount/mana changes made to fulfill requirements.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
             'prepareTransaction', {
-                'outputs': outputs,
+                'immutableOutputs': immutable_outputs,
+                'mutableOutputs': mutable_outputs,
                 'options': options
             }
         ))
