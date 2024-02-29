@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import Wallet, WalletOptions
 
 # In this example, we create an implicit account creation address.

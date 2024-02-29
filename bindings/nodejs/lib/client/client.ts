@@ -3,11 +3,10 @@
 
 import { ClientMethodHandler } from './client-method-handler';
 import {
-    IClientOptions,
-    PreparedTransactionData,
-    INetworkInfo,
-    INode,
-    IAuth,
+    ClientOptions,
+    NetworkInfo,
+    Node,
+    Auth,
     AccountOutputBuilderParams,
     BasicOutputBuilderParams,
     FoundryOutputBuilderParams,
@@ -20,11 +19,7 @@ import {
     NftOutputQueryParameters,
     OutputQueryParameters,
 } from '../types/client';
-import type { INodeInfoWrapper } from '../types/client/nodeInfo';
-import {
-    Bip44,
-    SecretManagerType,
-} from '../types/secret_manager/secret-manager';
+import type { NodeInfoResponse } from '../types/client/nodeInfo';
 import {
     AccountOutput,
     BasicOutput,
@@ -32,9 +27,7 @@ import {
     NftOutput,
     Output,
     BlockId,
-    UnlockCondition,
     Payload,
-    SignedTransactionPayload,
     parseBlock,
     Block,
     AccountId,
@@ -47,12 +40,13 @@ import {
     SlotIndex,
     SlotCommitmentId,
     SlotCommitment,
+    EpochIndex,
     Address,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
-    IBlockMetadata,
-    INodeInfo,
+    BlockMetadataResponse,
+    InfoResponse,
     UTXOInput,
     Response,
     OutputId,
@@ -60,16 +54,19 @@ import {
     u64,
     TransactionId,
     Bech32Address,
-    IBlockWithMetadata,
-    TransactionMetadata,
+    BlockWithMetadataResponse,
+    TransactionMetadataResponse,
 } from '../types';
 import {
     OutputResponse,
-    IOutputsResponse,
+    OutputsResponse,
     CongestionResponse,
     UtxoChangesResponse,
     UtxoChangesFullResponse,
+    CommitteeResponse,
+    IssuanceBlockHeaderResponse,
 } from '../types/models/api';
+import { RoutesResponse } from '../types/models/api/routes-response';
 
 import { plainToInstance } from 'class-transformer';
 import { ManaRewardsResponse } from '../types/models/api/mana-rewards-response';
@@ -92,34 +89,70 @@ export class Client {
     /**
      * @param options The client options.
      */
-    static async create(options: IClientOptions): Promise<Client> {
+    static async create(options: ClientOptions): Promise<Client> {
         return new Client(await ClientMethodHandler.create(options));
     }
     async destroy(): Promise<void> {
         return this.methodHandler.destroy();
     }
 
+    // Node routes.
+
+    /**
+     * Get the health of a node.
+     */
+    async getHealth(url: string): Promise<boolean> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getHealth',
+            data: {
+                url,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Returns the available API route groups of the node.
+     */
+    async getRoutes(): Promise<RoutesResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getRoutes',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
     /**
      * Get the node information together with the url of the used node.
      */
-    async getInfo(): Promise<INodeInfoWrapper> {
+    async getNodeInfo(): Promise<NodeInfoResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'getInfo',
+            name: 'getNodeInfo',
         });
 
         return JSON.parse(response).payload;
     }
 
     /**
-     * Get the network related information such as network_id.
+     * Get the info about the node.
+     *
+     * @param url The URL of the node.
+     * @param auth An authentication object (e.g. JWT).
      */
-    async getNetworkInfo(): Promise<INetworkInfo> {
+    async getInfo(url: string, auth?: Auth): Promise<InfoResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'getNetworkInfo',
+            name: 'getInfo',
+            data: {
+                url,
+                auth,
+            },
         });
 
         return JSON.parse(response).payload;
     }
+
+    // Accounts routes.
 
     /**
      * Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
@@ -140,6 +173,8 @@ export class Client {
         return JSON.parse(response).payload;
     }
 
+    // Rewards routes.
+
     /**
      * Returns the totally available Mana rewards of an account or delegation output decayed up to endEpoch index
      * provided in the response.
@@ -158,6 +193,8 @@ export class Client {
 
         return JSON.parse(response).payload;
     }
+
+    // Validators routes.
 
     /**
      * Returns information of all registered validators and if they are active, ordered by their holding stake.
@@ -191,6 +228,140 @@ export class Client {
         return JSON.parse(response).payload;
     }
 
+    // Committee routes.
+
+    /**
+     * Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+     * current committee members are returned.
+     */
+    async getCommittee(epochIndex: EpochIndex): Promise<CommitteeResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getCommittee',
+            data: {
+                epochIndex,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    // Blocks routes.
+
+    async getIssuance(): Promise<IssuanceBlockHeaderResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getIssuance',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get a block in JSON format.
+     *
+     * @param blockId The corresponding block ID of the requested block.
+     * @returns The requested block.
+     */
+    async getBlock(blockId: BlockId): Promise<Block> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBlock',
+            data: {
+                blockId,
+            },
+        });
+
+        const parsed = JSON.parse(response) as Response<Block>;
+        return parseBlock(parsed.payload);
+    }
+
+    /**
+     * Get block as raw bytes.
+     *
+     * @param blockId The block ID of the requested block.
+     * @returns The raw bytes of the requested block.
+     */
+    async getBlockRaw(blockId: BlockId): Promise<Uint8Array> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBlockRaw',
+            data: {
+                blockId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Post a block in JSON format.
+     *
+     * @param block The block to post.
+     * @returns The block ID once the block has been posted.
+     */
+    async postBlock(block: Block): Promise<BlockId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'postBlock',
+            data: {
+                block,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Post block as raw bytes, returns the block ID.
+     *
+     * @param block The block.
+     * @returns The ID of the posted block.
+     */
+    async postBlockRaw(block: Block): Promise<BlockId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'postBlockRaw',
+            data: {
+                block,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the metadata of a block.
+     *
+     * @param blockId The corresponding block ID of the requested block metadata.
+     * @returns The requested block metadata.
+     */
+    async getBlockMetadata(blockId: BlockId): Promise<BlockMetadataResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBlockMetadata',
+            data: {
+                blockId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get a block with its metadata.
+     *
+     * @param blockId The corresponding block ID of the requested block.
+     * @returns The requested block with its metadata.
+     */
+    async getBlockWithMetadata(
+        blockId: BlockId,
+    ): Promise<BlockWithMetadataResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBlockWithMetadata',
+            data: {
+                blockId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    // UTXO routes.
+
     /**
      * Get output from a given output ID.
      */
@@ -222,294 +393,23 @@ export class Client {
     }
 
     /**
-     * Request tips from the node.
-     * The tips can be considered as non-lazy and are therefore ideal for attaching a block to the Tangle.
-     * @returns An array of tips represented by their block IDs.
-     */
-    async getTips(): Promise<BlockId[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getTips',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Post a block in JSON format.
+     * Get outputs from provided output IDs (requests are sent
+     * in parallel and errors are ignored, can be useful for spent outputs)
      *
-     * @param block The block to post.
-     * @returns The block ID once the block has been posted.
+     * @param outputIds An array of output IDs.
+     * @returns An array of corresponding output responses.
      */
-    async postBlock(block: Block): Promise<BlockId> {
+    async getOutputsIgnoreNotFound(
+        outputIds: OutputId[],
+    ): Promise<OutputResponse[]> {
         const response = await this.methodHandler.callMethod({
-            name: 'postBlock',
+            name: 'getOutputsIgnoreNotFound',
             data: {
-                block,
+                outputIds,
             },
         });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get a block in JSON format.
-     *
-     * @param blockId The corresponding block ID of the requested block.
-     * @returns The requested block.
-     */
-    async getBlock(blockId: BlockId): Promise<Block> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getBlock',
-            data: {
-                blockId,
-            },
-        });
-
-        const parsed = JSON.parse(response) as Response<Block>;
-        return parseBlock(parsed.payload);
-    }
-
-    /**
-     * Get the metadata of a block.
-     *
-     * @param blockId The corresponding block ID of the requested block metadata.
-     * @returns The requested block metadata.
-     */
-    async getBlockMetadata(blockId: BlockId): Promise<IBlockMetadata> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getBlockMetadata',
-            data: {
-                blockId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get a block with its metadata.
-     *
-     * @param blockId The corresponding block ID of the requested block.
-     * @returns The requested block with its metadata.
-     */
-    async getBlockWithMetadata(blockId: BlockId): Promise<IBlockWithMetadata> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getBlockWithMetadata',
-            data: {
-                blockId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Find inputs from addresses for a given amount (useful for offline signing).
-     *
-     * @param addresses A list of included addresses.
-     * @param amount The amount to find inputs for.
-     * @returns An array of UTXO inputs.
-     */
-    async findInputs(addresses: string[], amount: u64): Promise<UTXOInput[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'findInputs',
-            data: {
-                addresses,
-                amount: Number(amount),
-            },
-        });
-
-        const parsed = JSON.parse(response) as Response<UTXOInput[]>;
-        return plainToInstance(UTXOInput, parsed.payload);
-    }
-
-    /**
-     * Sign a transaction.
-     *
-     * @param secretManager One of the supported secret managers.
-     * @param preparedTransactionData An instance of `PreparedTransactionData`.
-     * @returns The corresponding signed transaction payload.
-     */
-    async signTransaction(
-        secretManager: SecretManagerType,
-        preparedTransactionData: PreparedTransactionData,
-    ): Promise<SignedTransactionPayload> {
-        const response = await this.methodHandler.callMethod({
-            name: 'signTransaction',
-            data: {
-                secretManager,
-                preparedTransactionData,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<SignedTransactionPayload>;
-        return plainToInstance(SignedTransactionPayload, parsed.payload);
-    }
-
-    /**
-     * Create a signature unlock using the given secret manager.
-     *
-     * @param secretManager One of the supported secret managers.
-     * @param transactionSigningHash The signing hash of the transaction.
-     * @param chain A BIP44 chain
-     * @returns The corresponding unlock condition.
-     */
-    async signatureUnlock(
-        secretManager: SecretManagerType,
-        transactionSigningHash: HexEncodedString,
-        chain: Bip44,
-    ): Promise<UnlockCondition> {
-        const response = await this.methodHandler.callMethod({
-            name: 'signatureUnlock',
-            data: {
-                secretManager,
-                transactionSigningHash,
-                chain,
-            },
-        });
-
-        return UnlockCondition.parse(JSON.parse(response).payload);
-    }
-
-    /**
-     * Build an unsigned block.
-     *
-     * @param issuerId The identifier of the block issuer account.
-     * @param payload The payload to post.
-     * @returns The block ID followed by the block containing the payload.
-     */
-    async buildBasicBlock(
-        issuerId: AccountId,
-        payload?: Payload,
-    ): Promise<UnsignedBlock> {
-        const response = await this.methodHandler.callMethod({
-            name: 'buildBasicBlock',
-            data: {
-                issuerId,
-                payload,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<UnsignedBlock>;
-        return parseUnsignedBlock(parsed.payload);
-    }
-
-    /**
-     * Get a node candidate from the healthy node pool.
-     */
-    async getNode(): Promise<INode> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getNode',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the ID of the network the node is connected to.
-     */
-    async getNetworkId(): Promise<string> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getNetworkId',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the Bech32 HRP (human readable part) of the network the node is connected to.
-     */
-    async getBech32Hrp(): Promise<string> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getBech32Hrp',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the token supply.
-     */
-    async getTokenSupply(): Promise<u64> {
-        return BigInt((await this.getProtocolParameters()).tokenSupply);
-    }
-
-    /**
-     * Get the protocol parameters.
-     */
-    async getProtocolParameters(): Promise<ProtocolParameters> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getProtocolParameters',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the health of a node.
-     */
-    async getHealth(url: string): Promise<boolean> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getHealth',
-            data: {
-                url,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the info about the node.
-     *
-     * @param url The URL of the node.
-     * @param auth An authentication object (e.g. JWT).
-     */
-    async getNodeInfo(url: string, auth?: IAuth): Promise<INodeInfo> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getNodeInfo',
-            data: {
-                url,
-                auth,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Post block as raw bytes, returns the block ID.
-     *
-     * @param block The block.
-     * @returns The ID of the posted block.
-     */
-    async postBlockRaw(block: Block): Promise<BlockId> {
-        const response = await this.methodHandler.callMethod({
-            name: 'postBlockRaw',
-            data: {
-                block,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get block as raw bytes.
-     *
-     * @param blockId The block ID of the requested block.
-     * @returns The raw bytes of the requested block.
-     */
-    async getBlockRaw(blockId: BlockId): Promise<Uint8Array> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getBlockRaw',
-            data: {
-                blockId,
-            },
-        });
-
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
+        return plainToInstance(OutputResponse, parsed.payload);
     }
 
     /**
@@ -537,7 +437,7 @@ export class Client {
      */
     async getIncludedBlockMetadata(
         transactionId: TransactionId,
-    ): Promise<IBlockMetadata> {
+    ): Promise<BlockMetadataResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
@@ -555,7 +455,7 @@ export class Client {
      */
     async getTransactionMetadata(
         transactionId: TransactionId,
-    ): Promise<TransactionMetadata> {
+    ): Promise<TransactionMetadataResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getTransactionMetadata',
             data: {
@@ -564,6 +464,8 @@ export class Client {
         });
         return JSON.parse(response).payload;
     }
+
+    // Commitments routes.
 
     /**
      * Look up a commitment by a given commitment ID.
@@ -625,9 +527,9 @@ export class Client {
      * @param slot Index of the commitment to look up.
      * @returns The commitment.
      */
-    async getCommitmentByIndex(slot: SlotIndex): Promise<SlotCommitment> {
+    async getCommitmentBySlot(slot: SlotIndex): Promise<SlotCommitment> {
         const response = await this.methodHandler.callMethod({
-            name: 'getCommitmentByIndex',
+            name: 'getCommitmentBySlot',
             data: {
                 slot,
             },
@@ -641,9 +543,9 @@ export class Client {
      * @param slot Index of the commitment to look up.
      * @returns The UTXO changes.
      */
-    async getUtxoChangesByIndex(slot: SlotIndex): Promise<UtxoChangesResponse> {
+    async getUtxoChangesBySlot(slot: SlotIndex): Promise<UtxoChangesResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'getUtxoChangesByIndex',
+            name: 'getUtxoChangesBySlot',
             data: {
                 slot,
             },
@@ -657,15 +559,121 @@ export class Client {
      * @param slot Index of the commitment to look up.
      * @returns The UTXO changes.
      */
-    async getUtxoChangesFullByIndex(
+    async getUtxoChangesFullBySlot(
         slot: SlotIndex,
     ): Promise<UtxoChangesFullResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'getUtxoChangesFullByIndex',
+            name: 'getUtxoChangesFullBySlot',
             data: {
                 slot,
             },
         });
+        return JSON.parse(response).payload;
+    }
+
+    // Other routes.
+
+    /**
+     * Get the network related information such as network_id.
+     */
+    async getNetworkInfo(): Promise<NetworkInfo> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getNetworkInfo',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Find inputs from addresses for a given amount (useful for offline signing).
+     *
+     * @param addresses A list of included addresses.
+     * @param amount The amount to find inputs for.
+     * @returns An array of UTXO inputs.
+     */
+    async findInputs(addresses: string[], amount: u64): Promise<UTXOInput[]> {
+        const response = await this.methodHandler.callMethod({
+            name: 'findInputs',
+            data: {
+                addresses,
+                amount: Number(amount),
+            },
+        });
+
+        const parsed = JSON.parse(response) as Response<UTXOInput[]>;
+        return plainToInstance(UTXOInput, parsed.payload);
+    }
+
+    /**
+     * Build an unsigned block.
+     *
+     * @param issuerId The identifier of the block issuer account.
+     * @param payload The payload to post.
+     * @returns The block ID followed by the block containing the payload.
+     */
+    async buildBasicBlock(
+        issuerId: AccountId,
+        payload?: Payload,
+    ): Promise<UnsignedBlock> {
+        const response = await this.methodHandler.callMethod({
+            name: 'buildBasicBlock',
+            data: {
+                issuerId,
+                payload,
+            },
+        });
+        const parsed = JSON.parse(response) as Response<UnsignedBlock>;
+        return parseUnsignedBlock(parsed.payload);
+    }
+
+    /**
+     * Get a node candidate from the healthy node pool.
+     */
+    async getNode(): Promise<Node> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getNode',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the ID of the network the node is connected to.
+     */
+    async getNetworkId(): Promise<string> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getNetworkId',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the Bech32 HRP (human readable part) of the network the node is connected to.
+     */
+    async getBech32Hrp(): Promise<string> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBech32Hrp',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the token supply.
+     */
+    async getTokenSupply(): Promise<u64> {
+        return BigInt((await this.getProtocolParameters()).tokenSupply);
+    }
+
+    /**
+     * Get the protocol parameters.
+     */
+    async getProtocolParameters(): Promise<ProtocolParameters> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getProtocolParameters',
+        });
+
         return JSON.parse(response).payload;
     }
 
@@ -802,26 +810,6 @@ export class Client {
     }
 
     /**
-     * Get outputs from provided output IDs (requests are sent
-     * in parallel and errors are ignored, can be useful for spent outputs)
-     *
-     * @param outputIds An array of output IDs.
-     * @returns An array of corresponding output responses.
-     */
-    async getOutputsIgnoreErrors(
-        outputIds: OutputId[],
-    ): Promise<OutputResponse[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getOutputsIgnoreErrors',
-            data: {
-                outputIds,
-            },
-        });
-        const parsed = JSON.parse(response) as Response<OutputResponse[]>;
-        return plainToInstance(OutputResponse, parsed.payload);
-    }
-
-    /**
      * Find blocks by their IDs.
      *
      * @param blockIds An array of `BlockId`s.
@@ -841,7 +829,7 @@ export class Client {
     /**
      * Return the unhealthy nodes.
      */
-    async unhealthyNodes(): Promise<Set<INode>> {
+    async unhealthyNodes(): Promise<Set<Node>> {
         const response = await this.methodHandler.callMethod({
             name: 'unhealthyNodes',
         });
@@ -1028,7 +1016,7 @@ export class Client {
      */
     async outputIds(
         queryParameters: OutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'outputIds',
             data: {
@@ -1044,7 +1032,7 @@ export class Client {
      */
     async basicOutputIds(
         queryParameters: BasicOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'basicOutputIds',
             data: {
@@ -1063,7 +1051,7 @@ export class Client {
      */
     async accountOutputIds(
         queryParameters: AccountOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'accountOutputIds',
             data: {
@@ -1099,7 +1087,7 @@ export class Client {
      */
     async anchorOutputIds(
         queryParameters: AnchorOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'anchorOutputIds',
             data: {
@@ -1135,7 +1123,7 @@ export class Client {
      */
     async delegationOutputIds(
         queryParameters: DelegationOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'delegationOutputIds',
             data: {
@@ -1171,7 +1159,7 @@ export class Client {
      */
     async foundryOutputIds(
         queryParameters: FoundryOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'foundryOutputIds',
             data: {
@@ -1207,7 +1195,7 @@ export class Client {
      */
     async nftOutputIds(
         queryParameters: NftOutputQueryParameters,
-    ): Promise<IOutputsResponse> {
+    ): Promise<OutputsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'nftOutputIds',
             data: {

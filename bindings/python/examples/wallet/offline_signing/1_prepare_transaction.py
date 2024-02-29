@@ -8,7 +8,6 @@ import os
 
 from dacite import from_dict
 from dotenv import load_dotenv
-
 from iota_sdk import (AccountAddress, ClientOptions, CoinType, SendParams,
                       Wallet, WalletOptions, Bip44)
 

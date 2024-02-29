@@ -10,25 +10,24 @@ use iota_sdk::client::secret::LedgerNanoStatus;
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, SignedTransactionDataDto},
+        node_api::core::routes::NodeInfoResponse,
         node_manager::node::Node,
-        NetworkInfo, NodeInfoWrapper,
+        NetworkInfo,
     },
     types::{
         api::{
             core::{
-                BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
-                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse,
-                TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-                ValidatorsResponse,
+                BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
+                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
+                ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{
-                AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId,
-            },
+            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
@@ -101,11 +100,14 @@ pub enum Response {
     #[cfg(not(target_family = "wasm"))]
     UnhealthyNodes(HashSet<Node>),
     /// Response for:
-    /// - [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
-    NodeInfo(NodeInfo),
-    /// Response for:
     /// - [`GetInfo`](crate::method::ClientMethod::GetInfo)
-    Info(NodeInfoWrapper),
+    Info(InfoResponse),
+    /// Response for:
+    /// - [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
+    NodeInfo(NodeInfoResponse),
+    /// Response for:
+    /// - [`GetRoutes`](crate::method::ClientMethod::GetRoutes)
+    Routes(RoutesResponse),
     /// Response for:
     /// - [`GetAccountCongestion`](crate::method::ClientMethod::GetAccountCongestion)
     Congestion(CongestionResponse),
@@ -155,21 +157,25 @@ pub enum Response {
     BlockWithMetadata(BlockWithMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
+    /// - [`GetOutputRaw`](crate::method::ClientMethod::GetOutputRaw)
+    /// - [`GetIncludedBlockRaw`](crate::method::ClientMethod::GetIncludedBlockRaw)
+    /// - [`GetCommitmentRaw`](crate::method::ClientMethod::GetCommitmentRaw)
+    /// - [`GetCommitmentBySlotRaw`](crate::method::ClientMethod::GetCommitmentBySlotRaw)
     /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
-    OutputWithMetadataResponse(OutputWithMetadataResponse),
+    OutputResponse(OutputResponse),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
     OutputMetadata(OutputMetadata),
     /// Response for:
     /// - [`GetOutputWithMetadata`](crate::method::ClientMethod::GetOutputWithMetadata)
-    OutputWithMetadata(OutputWithMetadata),
+    OutputWithMetadata(OutputWithMetadataResponse),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
-    /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)
-    Outputs(Vec<OutputWithMetadataResponse>),
+    /// - [`GetOutputsIgnoreNotFound`](crate::method::ClientMethod::GetOutputsIgnoreNotFound)
+    Outputs(Vec<OutputResponse>),
     /// Response for:
     /// - [`AccountOutputId`](crate::method::ClientMethod::AccountOutputId)
     /// - [`AnchorOutputId`](crate::method::ClientMethod::AnchorOutputId)
@@ -222,8 +228,6 @@ pub enum Response {
     /// Response for:
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
     Hash(String),
-    /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
-    NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
     /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)

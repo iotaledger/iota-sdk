@@ -4,7 +4,6 @@
 from dataclasses import dataclass
 from typing import Optional
 from abc import ABCMeta, abstractmethod
-
 from iota_sdk.client.responses import OutputIdsResponse
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.output_id import OutputId
