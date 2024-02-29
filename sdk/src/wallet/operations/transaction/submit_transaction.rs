@@ -22,11 +22,14 @@ where
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] submit_signed_transaction");
 
+        let block_id = self
+            .submit_basic_block(Some(Payload::from(payload)), issuer_id, true)
+            .await?;
+
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
             .await;
 
-        self.submit_basic_block(Some(Payload::from(payload)), issuer_id, true)
-            .await
+        Ok(block_id)
     }
 }

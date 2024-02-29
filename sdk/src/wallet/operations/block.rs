@@ -4,7 +4,10 @@
 use crate::{
     client::secret::{SecretManage, SignBlock},
     types::block::{output::AccountId, payload::Payload, BlockId},
-    wallet::{Error, Result, Wallet},
+    wallet::{
+        events::{types::TransactionProgressEvent, WalletEvent},
+        Error, Result, Wallet,
+    },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -38,6 +41,12 @@ where
                 });
             }
         }
+
+        #[cfg(feature = "events")]
+        self.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::PreparedBlockSigningHash(unsigned_block.signing_hash().to_string()),
+        ))
+        .await;
 
         let block = unsigned_block
             .sign_ed25519(

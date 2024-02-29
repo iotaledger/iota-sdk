@@ -17,7 +17,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlockBody, ValidationBlockBody},
     output::AccountId,
-    payload::Payload,
+    payload::{signed_transaction::TransactionSigningHash, Payload},
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
@@ -25,7 +25,7 @@ use crate::types::block::{
 };
 
 /// Block without a signature. Can be finished into a [`Block`].
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Packable)]
 pub struct UnsignedBlock {
     /// The block header.
     pub(crate) header: BlockHeader,
@@ -55,6 +55,11 @@ impl UnsignedBlock {
     /// Get the signing input that can be used to generate a [`Signature`] for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
         [self.header.hash(), self.body.hash()].concat()
+    }
+
+    /// Return the Blake2b hash of the block.
+    pub fn signing_hash(&self) -> TransactionSigningHash {
+        TransactionSigningHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
 
     /// Finishes an [`UnsignedBlock`] into a [`Block`].

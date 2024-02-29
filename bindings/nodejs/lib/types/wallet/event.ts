@@ -121,12 +121,14 @@ enum TransactionProgressType {
     GeneratingRemainderDepositAddress = 1,
     /** Prepared transaction. */
     PreparedTransaction = 2,
-    /** Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano. */
-    PreparedTransactionSigningHash = 3,
     /** Signing the transaction. */
-    SigningTransaction = 4,
+    SigningTransaction = 3,
+    /** Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano. */
+    PreparedTransactionSigningHash = 4,
+    /** Prepared block signing hash hex encoded, required for blindsigning with a Ledger Nano. */
+    PrepareBlockSigningHash = 5,
     /** Broadcasting. */
-    Broadcasting = 5,
+    Broadcasting = 6,
 }
 
 /**
@@ -208,6 +210,15 @@ class PreparedTransactionProgress extends TransactionProgress {
 }
 
 /**
+ * A 'signing transaction' progress.
+ */
+class SigningTransactionProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.SigningTransaction);
+    }
+}
+
+/**
  * A 'prepared transaction hash' progress.
  */
 class PreparedTransactionSigningHashProgress extends TransactionProgress {
@@ -223,11 +234,17 @@ class PreparedTransactionSigningHashProgress extends TransactionProgress {
 }
 
 /**
- * A 'signing transaction' progress.
+ * A 'prepared block hash' progress.
  */
-class SigningTransactionProgress extends TransactionProgress {
-    constructor() {
-        super(TransactionProgressType.SigningTransaction);
+class PreparedBlockSigningHashProgress extends TransactionProgress {
+    blockSigningHash: HexEncodedString;
+
+    /**
+     * @param signingHash The signing hash of the block.
+     */
+    constructor(signingHash: HexEncodedString) {
+        super(TransactionProgressType.PrepareBlockSigningHash);
+        this.blockSigningHash = signingHash;
     }
 }
 
@@ -252,8 +269,9 @@ export {
     SelectingInputsProgress,
     GeneratingRemainderDepositAddressProgress,
     PreparedTransactionProgress,
-    PreparedTransactionSigningHashProgress,
     SigningTransactionProgress,
+    PreparedTransactionSigningHashProgress,
+    PreparedBlockSigningHashProgress,
     BroadcastingProgress,
     TransactionProgressType,
 };
