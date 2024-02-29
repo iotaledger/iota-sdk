@@ -18,16 +18,16 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-                IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputMetadataResponse, OutputResponse,
-                OutputWithMetadataResponse, RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse,
-                UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
+                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
+                ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, TokenId},
+            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
@@ -168,7 +168,7 @@ pub enum Response {
     OutputResponse(OutputResponse),
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
-    OutputMetadata(OutputMetadataResponse),
+    OutputMetadata(OutputMetadata),
     /// Response for:
     /// - [`GetOutputWithMetadata`](crate::method::ClientMethod::GetOutputWithMetadata)
     OutputWithMetadata(OutputWithMetadataResponse),

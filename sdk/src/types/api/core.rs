@@ -10,8 +10,6 @@ use alloc::{
 
 use serde::{Deserialize, Serialize};
 
-// Re-export types that are also used as responses.
-pub use crate::types::block::{slot::SlotCommitment as Commitment, Block as BlockResponse};
 use crate::{
     types::block::{
         address::Bech32Address,
@@ -25,8 +23,6 @@ use crate::{
     },
     utils::serde::{option_string, string},
 };
-
-pub type OutputMetadataResponse = OutputMetadata;
 
 /// Response of GET /api/routes.
 /// The available API route groups of the node.

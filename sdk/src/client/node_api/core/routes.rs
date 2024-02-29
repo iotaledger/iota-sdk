@@ -16,17 +16,16 @@ use crate::{
     },
     types::{
         api::core::{
-            BlockMetadataResponse, BlockResponse, BlockWithMetadataResponse, Commitment, CommitteeResponse,
-            CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputMetadataResponse,
-            OutputResponse, OutputWithMetadataResponse, PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse,
-            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-            ValidatorsResponse,
+            BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
+            PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse, TransactionMetadataResponse,
+            UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
-            output::{AccountId, OutputId},
+            output::{AccountId, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
-            slot::{EpochIndex, SlotCommitmentId, SlotIndex},
+            slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
         },
         TryFromDto,
@@ -202,7 +201,7 @@ impl Client {
 
     /// Finds a block by its ID and returns it as object.
     /// GET /api/core/v3/blocks/{blockId}
-    pub async fn get_block(&self, block_id: &BlockId) -> Result<BlockResponse> {
+    pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
         let dto = self.get_request::<BlockDto>(path, None, false).await?;
@@ -257,7 +256,7 @@ impl Client {
 
     /// Finds output metadata by output ID.
     /// GET /api/core/v3/outputs/{outputId}/metadata
-    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadataResponse> {
+    pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v3/outputs/{output_id}/metadata");
 
         self.get_request(path, None, false).await
@@ -273,7 +272,7 @@ impl Client {
 
     /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
-    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<BlockResponse> {
+    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
         let dto = self.get_request::<BlockDto>(path, None, true).await?;
@@ -315,7 +314,7 @@ impl Client {
 
     /// Finds a slot commitment by its ID and returns it as object.
     /// GET /api/core/v3/commitments/{commitmentId}
-    pub async fn get_commitment(&self, commitment_id: &SlotCommitmentId) -> Result<Commitment> {
+    pub async fn get_commitment(&self, commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/{commitment_id}");
 
         self.get_request(path, None, false).await
@@ -347,7 +346,7 @@ impl Client {
 
     /// Finds a slot commitment by slot index and returns it as object.
     /// GET /api/core/v3/commitments/by-slot/{slot}
-    pub async fn get_commitment_by_slot(&self, slot: SlotIndex) -> Result<Commitment> {
+    pub async fn get_commitment_by_slot(&self, slot: SlotIndex) -> Result<SlotCommitment> {
         let path = &format!("api/core/v3/commitments/by-slot/{slot}");
 
         self.get_request(path, None, false).await

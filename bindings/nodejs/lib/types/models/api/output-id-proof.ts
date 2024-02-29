@@ -77,7 +77,7 @@ export class LeafHash extends OutputCommitmentProof {
 }
 
 /**
- * Contains the hash of the value for which the proof is being computed.
+ * Contains the hash of the value for which the OutputCommitmentProof is being computed.
  */
 export class ValueHash extends OutputCommitmentProof {
     readonly hash: HexEncodedString;

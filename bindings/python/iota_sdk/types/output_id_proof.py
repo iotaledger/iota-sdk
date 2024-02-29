@@ -67,7 +67,7 @@ class LeafHash:
 @json
 @dataclass
 class ValueHash:
-    """Contains the hash of the value for which the proof is being computed.
+    """Contains the hash of the value for which the OutputCommitmentProof is being computed.
     """
     type: int = field(default_factory=lambda: int(
         OutputCommitmentProofNodeType.ValueHash), init=False)

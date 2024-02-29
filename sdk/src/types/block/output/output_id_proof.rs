@@ -194,7 +194,7 @@ impl Packable for LeafHash {
     }
 }
 
-/// Contains the hash of the value for which the proof is being computed.
+/// Contains the hash of the value for which the OutputCommitmentProof is being computed.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct ValueHash(pub [u8; 32]);
 

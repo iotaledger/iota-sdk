@@ -3,12 +3,12 @@
 
 use iota_sdk::types::{
     api::core::{
-        BlockMetadataResponse, BlockWithMetadataResponse, Commitment, CommitteeResponse, CongestionResponse,
-        InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputMetadataResponse, OutputResponse,
-        OutputWithMetadataResponse, RoutesResponse, SubmitBlockResponse, TransactionMetadataResponse,
-        UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+        BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse, RoutesResponse,
+        SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
+        ValidatorResponse, ValidatorsResponse,
     },
-    block::BlockDto,
+    block::{output::OutputMetadata, slot::SlotCommitment, BlockDto},
 };
 use packable::{
     error::{UnexpectedEOF, UnpackError},
@@ -84,15 +84,15 @@ fn responses() {
     // GET /api/core/v3/outputs/{outputId}
     json_response::<OutputResponse>("get-outputs-by-id-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/metadata
-    json_response::<OutputMetadataResponse>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
-    json_response::<OutputMetadataResponse>("get-output-metadata-by-id-response-spent-example.json").unwrap();
+    json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
+    json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/full
     json_response::<OutputWithMetadataResponse>("get-full-output-metadata-example.json").unwrap();
     // GET /api/core/v3/transactions/{transactionId}/metadata
     json_response::<TransactionMetadataResponse>("get-transaction-metadata-by-id-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
-    json_response::<Commitment>("get-commitment-response-example.json").unwrap();
-    binary_response::<Commitment>("get-commitment-response-binary-example", &()).unwrap();
+    json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
+    binary_response::<SlotCommitment>("get-commitment-response-binary-example", &()).unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes
     json_response::<UtxoChangesResponse>("get-utxo-changes-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
