@@ -9,8 +9,8 @@ from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json, SlotIndex
 
 
-class OutputCommitmentProofNodeType(IntEnum):
-    """OutputCommitmentProof node types.
+class OutputCommitmentProofType(IntEnum):
+    """OutputCommitmentProof types.
 
     Attributes:
         HashableNode (0): Denotes a HashableNode.
@@ -29,14 +29,14 @@ def deserialize_proof(d: Dict[str, Any]) -> OutputCommitmentProof:
     Arguments:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    node_type = d['type']
-    if node_type == OutputCommitmentProofNodeType.HashableNode:
+    proof_type = d['type']
+    if proof_type == OutputCommitmentProofType.HashableNode:
         return HashableNode.from_dict(d)
-    if node_type == OutputCommitmentProofNodeType.LeafHash:
+    if proof_type == OutputCommitmentProofType.LeafHash:
         return LeafHash.from_dict(d)
-    if node_type == OutputCommitmentProofNodeType.ValueHash:
+    if proof_type == OutputCommitmentProofType.ValueHash:
         return ValueHash.from_dict(d)
-    raise Exception(f'invalid node type: {node_type}')
+    raise Exception(f'invalid proof type: {proof_type}')
 
 
 @json
@@ -45,7 +45,7 @@ class HashableNode:
     """Contains the hashes of the left and right children of a node in the OutputCommitmentProof tree.
     """
     type: int = field(default_factory=lambda: int(
-        OutputCommitmentProofNodeType.HashableNode), init=False)
+        OutputCommitmentProofType.HashableNode), init=False)
     l: OutputCommitmentProof = field(metadata=config(
         decoder=deserialize_proof
     ))
@@ -60,7 +60,7 @@ class LeafHash:
     """Contains the hash of a leaf in the OutputCommitmentProof tree.
     """
     type: int = field(default_factory=lambda: int(
-        OutputCommitmentProofNodeType.LeafHash), init=False)
+        OutputCommitmentProofType.LeafHash), init=False)
     hash: HexStr
 
 
@@ -70,7 +70,7 @@ class ValueHash:
     """Contains the hash of the value for which the OutputCommitmentProof is being computed.
     """
     type: int = field(default_factory=lambda: int(
-        OutputCommitmentProofNodeType.ValueHash), init=False)
+        OutputCommitmentProofType.ValueHash), init=False)
     hash: HexStr
 
 
