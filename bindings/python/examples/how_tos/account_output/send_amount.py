@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import Wallet, WalletOptions, Utils, NodeIndexerAPI, SyncOptions, WalletSyncOptions, SendParams
 
 # In this example we send funds from an account output.

@@ -4,7 +4,7 @@
 /**
  * Base response data.
  */
-export interface IResponse {
+export interface Response {
     /**
      * Optional error in the response.
      */

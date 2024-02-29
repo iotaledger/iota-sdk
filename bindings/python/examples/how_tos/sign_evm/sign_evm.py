@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import (Bip44, CoinType, SecretManager, StrongholdSecretManager,
                       utf8_to_hex)
 

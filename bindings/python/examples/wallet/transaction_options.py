@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import (RemainderValueStrategy, TaggedDataPayload, SendParams,
                       TransactionOptions, Wallet, WalletOptions, utf8_to_hex)
 
