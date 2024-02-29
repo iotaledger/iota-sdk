@@ -42,6 +42,6 @@ fn stringified_error() {
     let error = Error::InputSelection(IsaError::Block(BlockError::UnsupportedAddressKind(6)));
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"inputSelection\",\"error\":\"unsupported address kind 6\"}"
+        "{\"type\":\"inputSelection\",\"error\":\"unsupported address kind: 6\"}"
     );
 }
