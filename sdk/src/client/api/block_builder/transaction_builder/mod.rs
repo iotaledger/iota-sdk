@@ -53,7 +53,7 @@ impl Client {
         addresses: impl IntoIterator<Item = Address>,
         outputs: impl IntoIterator<Item = Output>,
         options: TransactionOptions,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::client::Result<PreparedTransactionData> {
         let outputs = outputs.into_iter().collect::<Vec<_>>();
         let addresses = addresses.into_iter().collect::<Vec<_>>();
         // Voting output needs to be requested before to prevent a deadlock
