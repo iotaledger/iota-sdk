@@ -192,7 +192,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(DelegationOutputQueryParameters::new().address(address.clone()))
+                    .delegation_output_ids(DelegationOutputQueryParameters::new().address(address.clone()))
                     .await?
                     .items))
             }
