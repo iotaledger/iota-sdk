@@ -3,8 +3,7 @@
 
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
-
-from iota_sdk.client.responses import NodeInfoWrapper, InfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
@@ -52,17 +51,22 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'url': url
         })
 
-    # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_info(self) -> NodeInfoWrapper:
-        """Returns general information about the node together with its URL.
-        GET /api/core/v3/info
+    def get_routes(self) -> RoutesResponse:
+        """Returns the available API route groups of the node.
+        GET /api/routes
         """
-        return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
+        return RoutesResponse.from_dict(self._call_method('getRoutes'))
 
-    # TODO: this is not strictly following the 2.0 Core API Spec (or maybe the TIP isn't updated yet)
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_node_info(self, url: str, auth=None) -> InfoResponse:
+    def get_node_info(self) -> NodeInfoResponse:
+        """Returns general information about a node together with its URL.
+        GET /api/core/v3/info
+
+        Returns:
+            The node info with its URL.
+        """
+        return NodeInfoResponse.from_dict(self._call_method('getNodeInfo'))
+
+    def get_info(self, url: str, auth=None) -> InfoResponse:
         """Returns general information about the node.
         GET /api/core/v3/info
 
@@ -73,38 +77,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The node info.
         """
-        return InfoResponse.from_dict(self._call_method('getNodeInfo', {
+        return InfoResponse.from_dict(self._call_method('getInfo', {
             'url': url,
             'auth': auth
         }))
-
-    # TODO: this should made be available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_routes(self) -> RoutesResponse:
-        """Returns the available API route groups of the node.
-        GET /api/routes
-        """
-
-    def call_plugin_route(self, base_plugin_path: str, method: str,
-                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
-        """Extension method which provides request methods for plugins.
-
-        Args:
-            base_plugin_path: The base path of the routes provided by the plugin.
-            method: The HTTP method.
-            endpoint: The endpoint to query provided by the plugin.
-            query_params: The parameters of the query.
-            request: The request object sent to the endpoint of the plugin.
-        """
-        if query_params is None:
-            query_params = []
-        return self._call_method('callPluginRoute', {
-            'basePluginPath': base_plugin_path,
-            'method': method,
-            'endpoint': endpoint,
-            'queryParams': query_params,
-            'request': request,
-        })
 
     # Accounts routes.
 
@@ -244,10 +220,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # UTXO routes.
 
-    # TODO: this should return `OutputResponse`, not OutputWithMetadataResponse
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadataResponse:
+            self, output_id: Union[OutputId, HexStr]) -> OutputResponse:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -256,12 +230,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputWithMetadataResponse.from_dict(self._call_method('getOutput', {
+        return OutputResponse.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
-    # TODO: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_output_raw(
             self, output_id: Union[OutputId, HexStr]) -> List[int]:
         """Finds an output by its ID and returns it as raw bytes.
@@ -315,10 +287,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
-    # TODO: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_included_block_raw(
-            self, transaction_id: TransactionId) -> List[int]:
+    def get_included_block_raw(self, transaction_id: TransactionId) -> List[int]:
         """Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
         GET /api/core/v3/transactions/{transactionId}/included-block
 
@@ -367,8 +336,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'commitmentId': commitment_id
         }))
 
-    # TODO: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_commitment_raw(
             self, commitment_id: SlotCommitmentId) -> List[int]:
         """Finds a slot commitment by its ID and returns it as raw bytes.
@@ -405,9 +372,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'commitmentId': commitment_id
         }))
 
-    # TODO: call method name needs to be changed to `getCommitmentBySlot`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_slot_commitment_by_slot(
+    def get_commitment_by_slot(
             self, slot: SlotIndex) -> SlotCommitment:
         """Finds a slot commitment by slot index and returns it as object.
         GET /api/core/v3/commitments/by-slot/{slot}
@@ -415,13 +380,11 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The corresponding slot commitment.
         """
-        return SlotCommitment.from_dict(self._call_method('getCommitmentByIndex', {
+        return SlotCommitment.from_dict(self._call_method('getCommitmentBySlot', {
             'slot': slot
         }))
 
-    # TODO: this should be made available
-    # https://github.com/iotaledger/iota-sdk/issues/1921
-    def get_slot_commitment_by_slot_raw(
+    def get_commitment_by_slot_raw(
             self, slot: SlotIndex) -> List[int]:
         """Finds a slot commitment by slot index and returns it as raw bytes.
         GET /api/core/v3/commitments/by-slot/{slot}
@@ -433,8 +396,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slot': slot
         })
 
-    # TODO: call method name needs to be changed to `getUxoChangesBySlot`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_utxo_changes_by_slot(self, slot: SlotIndex) -> UtxoChangesResponse:
         """Get all UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
@@ -442,12 +403,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The corresponding UTXO changes.
         """
-        return UtxoChangesResponse.from_dict(self._call_method('getUtxoChangesByIndex', {
+        return UtxoChangesResponse.from_dict(self._call_method('getUtxoChangesBySlot', {
             'slot': slot
         }))
 
-    # TODO: call method name needs to be changed to `getUxoChangesFullBySlot`
-    # https://github.com/iotaledger/iota-sdk/issues/1921
     def get_utxo_changes_full_by_slot(
             self, slot: SlotIndex) -> UtxoChangesFullResponse:
         """Get all full UTXO changes of a given slot by its index.
@@ -456,6 +415,29 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The full UTXO changes.
         """
-        return UtxoChangesFullResponse.from_dict(self._call_method('getUtxoChangesFullByIndex', {
+        return UtxoChangesFullResponse.from_dict(self._call_method('getUtxoChangesFullBySlot', {
             'slot': slot
         }))
+
+    # Plugin routes.
+
+    def call_plugin_route(self, base_plugin_path: str, method: str,
+                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
+        """Extension method which provides request methods for plugins.
+
+        Args:
+            base_plugin_path: The base path of the routes provided by the plugin.
+            method: The HTTP method.
+            endpoint: The endpoint to query provided by the plugin.
+            query_params: The parameters of the query.
+            request: The request object sent to the endpoint of the plugin.
+        """
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'endpoint': endpoint,
+            'queryParams': query_params,
+            'request': request,
+        })

@@ -2,7 +2,6 @@ import os
 import time
 
 from dotenv import load_dotenv
-
 from iota_sdk import Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOptions
 
 # In this example we request funds to the wallet's first account output

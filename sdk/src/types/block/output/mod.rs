@@ -78,8 +78,8 @@ pub enum OutputBuilderAmount {
     MinimumAmount(StorageScoreParameters),
 }
 
-/// Contains the generic [`Output`] with associated [`OutputIdProof`] and [`OutputMetadata`].
-#[derive(Clone, Debug)]
+/// Contains the generic [`Output`] and the associated [`OutputMetadata`].
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -87,49 +87,7 @@ pub enum OutputBuilderAmount {
 )]
 pub struct OutputWithMetadata {
     pub output: Output,
-    pub output_id_proof: OutputIdProof,
     pub metadata: OutputMetadata,
-}
-
-impl OutputWithMetadata {
-    /// Creates a new [`OutputWithMetadata`].
-    pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
-        Self {
-            output,
-            output_id_proof,
-            metadata,
-        }
-    }
-
-    /// Returns the [`Output`].
-    pub fn output(&self) -> &Output {
-        &self.output
-    }
-
-    /// Consumes self and returns the [`Output`].
-    pub fn into_output(self) -> Output {
-        self.output
-    }
-
-    /// Returns the [`OutputIdProof`].
-    pub fn output_id_proof(&self) -> &OutputIdProof {
-        &self.output_id_proof
-    }
-
-    /// Consumes self and returns the [`OutputIdProof`].
-    pub fn into_output_id_proof(self) -> OutputIdProof {
-        self.output_id_proof
-    }
-
-    /// Returns the [`OutputMetadata`].
-    pub fn metadata(&self) -> &OutputMetadata {
-        &self.metadata
-    }
-
-    /// Consumes self and returns the [`OutputMetadata`].
-    pub fn into_metadata(self) -> OutputMetadata {
-        self.metadata
-    }
 }
 
 /// A generic output that can represent different types defining the deposit of funds.

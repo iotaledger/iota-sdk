@@ -2,10 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
-
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.transaction_with_metadata import CreateDelegationTransaction, CreateNativeTokenTransaction, TransactionWithMetadata
 from iota_sdk.types.transaction_data import PreparedTransactionData
