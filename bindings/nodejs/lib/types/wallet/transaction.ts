@@ -4,7 +4,7 @@
 import { Type } from 'class-transformer';
 import { BlockId, TransactionId } from '../block';
 import { SignedTransactionPayload } from '../block/payload/signed_transaction';
-import { OutputResponse } from '../models/api';
+import { OutputWithMetadata } from '../models';
 
 /** Possible InclusionStates of transactions sent with the wallet */
 export enum InclusionState {
@@ -45,6 +45,6 @@ export class TransactionWithMetadata {
      * Outputs that are used as input in the transaction.
      * May not be all, because some may have already been deleted from the node.
      */
-    @Type(() => OutputResponse)
-    inputs!: OutputResponse[];
+    @Type(() => OutputWithMetadata)
+    inputs!: OutputWithMetadata[];
 }

@@ -16,10 +16,9 @@ pub use self::balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredS
 use crate::{
     client::secret::types::InputSigningData,
     types::{
-        api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
-            output::{Output, OutputId, OutputIdProof, OutputMetadata},
+            output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
@@ -105,7 +104,7 @@ pub struct TransactionWithMetadata {
     /// Outputs that are used as input in the transaction. May not be all, because some may have already been deleted
     /// from the node.
     // serde(default) is needed so it doesn't break with old dbs
-    pub inputs: Vec<OutputWithMetadataResponse>,
+    pub inputs: Vec<OutputWithMetadata>,
 }
 
 /// Dto for a transaction with metadata
@@ -128,7 +127,7 @@ pub struct TransactionWithMetadataDto {
     pub incoming: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
-    pub inputs: Vec<OutputWithMetadataResponse>,
+    pub inputs: Vec<OutputWithMetadata>,
 }
 
 impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {

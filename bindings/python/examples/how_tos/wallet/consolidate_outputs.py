@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import ConsolidationParams, Utils, Wallet, WalletOptions, FeatureType
 
 # In this example we will consolidate basic outputs from a wallet with only an AddressUnlockCondition by sending

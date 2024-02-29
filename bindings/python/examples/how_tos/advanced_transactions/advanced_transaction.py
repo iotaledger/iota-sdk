@@ -3,7 +3,6 @@ import os
 import time
 
 from dotenv import load_dotenv
-
 from iota_sdk import (
     AddressUnlockCondition,
     Client,

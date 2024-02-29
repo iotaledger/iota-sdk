@@ -2,7 +2,6 @@ import os
 import sys
 
 from dotenv import load_dotenv
-
 from iota_sdk import MintNftParams, Utils, Wallet, WalletOptions, Irc27Metadata
 
 load_dotenv()

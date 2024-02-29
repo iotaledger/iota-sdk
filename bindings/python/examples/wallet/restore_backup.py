@@ -2,7 +2,6 @@ import json
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import ClientOptions, CoinType, Wallet, WalletOptions, Bip44
 
 load_dotenv()

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { UnsignedBlock } from '../../block';
-import type { IGenerateAddressesOptions } from '../../client/generate-addresses-options';
+import type { GenerateAddressesOptions } from '../../client/generate-addresses-options';
 import type { PreparedTransactionData } from '../../client/prepared-transaction-data';
 import { HexEncodedString } from '../../utils';
 import { Bip44 } from '../secret-manager';
@@ -10,14 +10,14 @@ import { Bip44 } from '../secret-manager';
 export interface __GenerateEd25519AddressesMethod__ {
     name: 'generateEd25519Addresses';
     data: {
-        options: IGenerateAddressesOptions;
+        options: GenerateAddressesOptions;
     };
 }
 
 export interface __GenerateEvmAddressesMethod__ {
     name: 'generateEvmAddresses';
     data: {
-        options: IGenerateAddressesOptions;
+        options: GenerateAddressesOptions;
     };
 }
 
