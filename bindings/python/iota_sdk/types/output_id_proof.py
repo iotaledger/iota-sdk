@@ -9,8 +9,8 @@ from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json, SlotIndex
 
 
-class TreeNodeType(IntEnum):
-    """Tree node types.
+class OutputCommitmentProofNodeType(IntEnum):
+    """OutputCommitmentProof node types.
 
     Attributes:
         HashableNode (0): Denotes a HashableNode.
@@ -30,11 +30,11 @@ def deserialize_proof(d: Dict[str, Any]) -> OutputCommitmentProof:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
     node_type = d['type']
-    if node_type == TreeNodeType.HashableNode:
+    if node_type == OutputCommitmentProofNodeType.HashableNode:
         return HashableNode.from_dict(d)
-    if node_type == TreeNodeType.LeafHash:
+    if node_type == OutputCommitmentProofNodeType.LeafHash:
         return LeafHash.from_dict(d)
-    if node_type == TreeNodeType.ValueHash:
+    if node_type == OutputCommitmentProofNodeType.ValueHash:
         return ValueHash.from_dict(d)
     raise Exception(f'invalid node type: {node_type}')
 
@@ -45,7 +45,7 @@ class HashableNode:
     """Node contains the hashes of the left and right children of a node in the tree.
     """
     type: int = field(default_factory=lambda: int(
-        TreeNodeType.HashableNode), init=False)
+        OutputCommitmentProofNodeType.HashableNode), init=False)
     l: OutputCommitmentProof = field(metadata=config(
         decoder=deserialize_proof
     ))
@@ -60,7 +60,7 @@ class LeafHash:
     """Leaf Hash contains the hash of a leaf in the tree.
     """
     type: int = field(default_factory=lambda: int(
-        TreeNodeType.LeafHash), init=False)
+        OutputCommitmentProofNodeType.LeafHash), init=False)
     hash: HexStr
 
 
@@ -70,7 +70,7 @@ class ValueHash:
     """Value Hash contains the hash of the value for which the proof is being computed.
     """
     type: int = field(default_factory=lambda: int(
-        TreeNodeType.ValueHash), init=False)
+        OutputCommitmentProofNodeType.ValueHash), init=False)
     hash: HexStr
 
 

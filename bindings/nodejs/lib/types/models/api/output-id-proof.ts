@@ -9,7 +9,7 @@ import { HexEncodedString } from '../../utils';
 /**
  * Node types.
  */
-export enum OutputCommitmentProofType {
+export enum OutputCommitmentProofNodeType {
     /** Denotes a HashableNode */
     HashableNode = 0,
     /** Denotes a LeafHash */
@@ -19,12 +19,12 @@ export enum OutputCommitmentProofType {
 }
 
 export abstract class OutputCommitmentProof {
-    readonly type: OutputCommitmentProofType;
+    readonly type: OutputCommitmentProofNodeType;
 
     /**
      * @param type The type of tree node.
      */
-    constructor(type: OutputCommitmentProofType) {
+    constructor(type: OutputCommitmentProofNodeType) {
         this.type = type;
     }
 
@@ -32,11 +32,11 @@ export abstract class OutputCommitmentProof {
      * Parse a tree node from a plain JS JSON object.
      */
     public static parse(data: any): OutputCommitmentProof {
-        if (data.type == OutputCommitmentProofType.HashableNode) {
+        if (data.type == OutputCommitmentProofNodeType.HashableNode) {
             return plainToInstance(HashableNode, data) as any as HashableNode;
-        } else if (data.type == OutputCommitmentProofType.LeafHash) {
+        } else if (data.type == OutputCommitmentProofNodeType.LeafHash) {
             return plainToInstance(LeafHash, data) as any as LeafHash;
-        } else if (data.type == OutputCommitmentProofType.ValueHash) {
+        } else if (data.type == OutputCommitmentProofNodeType.ValueHash) {
             return plainToInstance(ValueHash, data) as any as ValueHash;
         }
         throw new Error('Invalid JSON');
@@ -55,7 +55,7 @@ export class HashableNode extends OutputCommitmentProof {
      * @param r Output commitment proof of the right sub-tree.
      */
     constructor(l: OutputCommitmentProof, r: OutputCommitmentProof) {
-        super(OutputCommitmentProofType.HashableNode);
+        super(OutputCommitmentProofNodeType.HashableNode);
         this.l = l;
         this.r = r;
     }
@@ -71,7 +71,7 @@ export class LeafHash extends OutputCommitmentProof {
      * @param hash The hash of the leaf.
      */
     constructor(hash: HexEncodedString) {
-        super(OutputCommitmentProofType.LeafHash);
+        super(OutputCommitmentProofNodeType.LeafHash);
         this.hash = hash;
     }
 }
@@ -86,7 +86,7 @@ export class ValueHash extends OutputCommitmentProof {
      * @param hash The hash of the value.
      */
     constructor(hash: HexEncodedString) {
-        super(OutputCommitmentProofType.ValueHash);
+        super(OutputCommitmentProofNodeType.ValueHash);
         this.hash = hash;
     }
 }
