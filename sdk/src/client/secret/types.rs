@@ -39,6 +39,7 @@ impl core::fmt::Debug for StrongholdDto {
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GenerateAddressOptions {
+    /// Whether to generate an internal address.
     pub internal: bool,
     /// Display the address on ledger devices.
     pub ledger_nano_prompt: bool,

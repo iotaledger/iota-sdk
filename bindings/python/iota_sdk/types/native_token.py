@@ -3,7 +3,6 @@
 
 from dataclasses import dataclass, field
 from dataclasses_json import config
-
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
 
 

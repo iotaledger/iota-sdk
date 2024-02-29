@@ -266,7 +266,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
             }
             CliCommand::NodeInfo => {
                 if let Some((wallet, _)) = wallet_and_secret_manager {
-                    node_info_command(&wallet).await?;
+                    crate::wallet_cli::node_info_command(&wallet).await?;
                     return Ok(None);
                 } else {
                     bail!("wallet db does not exist at '{}'", storage_path.display());
@@ -428,14 +428,6 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
 
 pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: Option<bool>) -> Result<(), Error> {
     generate_mnemonic(output_file_name, output_stdout).await?;
-    Ok(())
-}
-
-pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
-    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
-
-    println_log_info!("Current node info: {node_info}");
-
     Ok(())
 }
 

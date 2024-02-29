@@ -1,19 +1,19 @@
 // Copyright 2021-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProtocolParameters } from '../models/info/node-info-protocol';
-import type { IMqttBrokerOptions, INode } from './network';
+import { ProtocolParameters } from '../models/api/info/node-info-protocol';
+import type { MqttBrokerOptions, Node } from './network';
 
 /** Options for the client builder */
-export interface IClientOptions {
+export interface ClientOptions {
     /** Nodes which will be tried first for all requests */
-    primaryNodes?: Array<string | INode>;
+    primaryNodes?: Array<string | Node>;
     /** A list of nodes. */
-    nodes?: Array<string | INode>;
+    nodes?: Array<string | Node>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;
     /** Interval in which nodes will be checked for their sync status and the NetworkInfo gets updated */
-    nodeSyncInterval?: IDuration;
+    nodeSyncInterval?: Duration;
     /** If node quorum is enabled. Will compare the responses from multiple nodes and only returns the
      * response if quorum_threshold of the nodes return the same one
      */
@@ -25,17 +25,17 @@ export interface IClientOptions {
     /** The User-Agent header for requests */
     userAgent?: string;
     /** Options for the MQTT broker */
-    brokerOptions?: IMqttBrokerOptions;
+    brokerOptions?: MqttBrokerOptions;
     /** Protocol parameters */
     protocolParameters?: ProtocolParameters;
     /** Timeout for API requests */
-    apiTimeout?: IDuration;
+    apiTimeout?: Duration;
     /** The maximum parallel API requests. */
     maxParallelApiRequests?: number;
 }
 
 /** Time duration */
-export interface IDuration {
+export interface Duration {
     /** Seconds. */
     secs: number;
     /** Nanoseconds. */

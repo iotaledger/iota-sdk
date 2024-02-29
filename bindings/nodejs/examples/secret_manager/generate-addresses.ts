@@ -49,7 +49,7 @@ async function run() {
                 start: 0,
                 end: 4,
             },
-            options: { internal: true },
+            options: { internal: true, ledgerNanoPrompt: false },
         });
         console.log(
             'List of generated internal addresses:',

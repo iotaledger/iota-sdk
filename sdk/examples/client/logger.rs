@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Get node info.
-    let _ = client.get_info().await?;
+    let _ = client.get_node_info().await?;
 
     println!("Example completed successfully. `client.log` file has been updated.");
 

@@ -976,7 +976,7 @@ pub async fn mint_nft_command(
 
 // `node-info` command
 pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
-    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
+    let node_info = serde_json::to_string_pretty(&wallet.client().get_node_info().await?)?;
 
     println_log_info!("Current node info: {node_info}");
 

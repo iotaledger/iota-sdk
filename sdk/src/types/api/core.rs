@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
+        output::{Output, OutputId, OutputIdProof, OutputMetadata},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -23,6 +23,14 @@ use crate::{
     },
     utils::serde::{option_string, string},
 };
+
+/// Response of GET /api/routes.
+/// The available API route groups of the node.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RoutesResponse {
+    pub routes: Vec<String>,
+}
 
 /// Response of GET /api/core/v3/info.
 /// General information about the node.
@@ -480,38 +488,85 @@ pub struct BlockWithMetadataResponse {
     pub metadata: BlockMetadataResponse,
 }
 
-// TODO: needs to be aligned with TIP-48.
-// https://github.com/iotaledger/iota-sdk/issues/1921
 /// Response of GET /api/core/v3/outputs/{output_id}.
-/// An output and its metadata.
+/// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputWithMetadataResponse {
+pub struct OutputResponse {
     pub output: Output,
-    pub metadata: OutputMetadata,
+    pub output_id_proof: OutputIdProof,
 }
 
-impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
-    fn from(value: &OutputWithMetadata) -> Self {
+impl From<&OutputWithMetadataResponse> for OutputResponse {
+    fn from(value: &OutputWithMetadataResponse) -> Self {
         Self {
             output: value.output().clone(),
-            metadata: value.metadata,
+            output_id_proof: value.output_id_proof().clone(),
         }
     }
 }
 
-impl From<OutputWithMetadata> for OutputWithMetadataResponse {
-    fn from(value: OutputWithMetadata) -> Self {
-        Self::from(&value)
+impl From<OutputWithMetadataResponse> for OutputResponse {
+    fn from(value: OutputWithMetadataResponse) -> Self {
+        Self {
+            output: value.output,
+            output_id_proof: value.output_id_proof,
+        }
     }
 }
 
-/// Response of GET /api/routes.
-/// The available API route groups of the node.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RoutesResponse {
-    pub routes: Vec<String>,
+/// Contains the generic [`Output`] with associated [`OutputIdProof`] and [`OutputMetadata`].
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct OutputWithMetadataResponse {
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
+    pub metadata: OutputMetadata,
+}
+
+impl OutputWithMetadataResponse {
+    /// Creates a new [`OutputWithMetadataResponse`].
+    pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
+        Self {
+            output,
+            output_id_proof,
+            metadata,
+        }
+    }
+
+    /// Returns the [`Output`].
+    pub fn output(&self) -> &Output {
+        &self.output
+    }
+
+    /// Consumes self and returns the [`Output`].
+    pub fn into_output(self) -> Output {
+        self.output
+    }
+
+    /// Returns the [`OutputIdProof`].
+    pub fn output_id_proof(&self) -> &OutputIdProof {
+        &self.output_id_proof
+    }
+
+    /// Consumes self and returns the [`OutputIdProof`].
+    pub fn into_output_id_proof(self) -> OutputIdProof {
+        self.output_id_proof
+    }
+
+    /// Returns the [`OutputMetadata`].
+    pub fn metadata(&self) -> &OutputMetadata {
+        &self.metadata
+    }
+
+    /// Consumes self and returns the [`OutputMetadata`].
+    pub fn into_metadata(self) -> OutputMetadata {
+        self.metadata
+    }
 }
 
 /// Response of
@@ -544,12 +599,4 @@ pub struct UtxoChangesFullResponse {
 pub struct OutputWithId {
     pub output: Output,
     pub output_id: OutputId,
-}
-
-/// Contains the generic [`Output`] with associated [`OutputIdProof`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputResponse {
-    pub output: Output,
-    pub output_id_proof: OutputIdProof,
 }

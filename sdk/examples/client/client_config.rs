@@ -37,8 +37,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .finish()
         .await?;
 
-    let info = client.get_info().await?;
-    println!("{info:#?}");
+    let node_info = client.get_node_info().await?;
+    println!("{node_info:#?}");
 
     Ok(())
 }
