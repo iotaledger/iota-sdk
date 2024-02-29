@@ -178,7 +178,7 @@ impl Client {
 
 impl ClientInner {
     pub(crate) async fn fetch_network_info(&self) -> Result<NetworkInfo> {
-        let info = self.get_info().await?.node_info;
+        let info = self.get_node_info().await?.info;
         let protocol_parameters = info
             .protocol_parameters_by_version(crate::types::block::PROTOCOL_VERSION)
             .expect("missing v3 protocol parameters")

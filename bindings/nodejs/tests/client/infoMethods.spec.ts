@@ -32,9 +32,9 @@ describe.skip('Client info methods', () => {
         const client = await makeClient();
         const nodeInfo = await client.getNode();
 
-        const nodeInfoByUrl = await client.getNodeInfo(nodeInfo.url);
+        const infoByUrl = await client.getInfo(nodeInfo.url);
 
-        expect(nodeInfoByUrl).toBeDefined();
+        expect(infoByUrl).toBeDefined();
     });
 
     it('gets health of node with input url', async () => {
@@ -55,7 +55,7 @@ describe.skip('Client info methods', () => {
 
     it('gets tips', async () => {
         const client = await makeClient();
-        const tips = await client.getTips();
+        const tips = (await client.getIssuance()).strongParents;
 
         expect(tips.length).toBeGreaterThan(0);
     });
@@ -82,15 +82,14 @@ describe.skip('Client info methods', () => {
     });
 });
 
-// TODO: enable after ProtocolParameters fixture is updated https://github.com/iotaledger/iota-sdk/issues/2040
-// describe('Offline client info methods', () => {
-    // it('provided protocol parameters', async () => {
-    //     const protocolParameters = protocolParametersFixture.params;
-    //     const client = await Client.create({
-    //         protocolParameters
-    //     });
-    //     const networkInfo = await client.getNetworkInfo();
+describe('Offline client info methods', () => {
+    it('provided protocol parameters', async () => {
+        const protocolParameters = protocolParametersFixture.params;
+        const client = await Client.create({
+            protocolParameters
+        });
+        const networkInfo = await client.getNetworkInfo();
 
-    //     expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
-    // });
-// })
+        expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
+    });
+})

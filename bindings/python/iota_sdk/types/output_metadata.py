@@ -17,7 +17,7 @@ from iota_sdk.types.transaction_id import TransactionId
 @dataclass
 class OutputMetadata:
     """Metadata about an output.
-    Response of GET /api/core/v3/outputs/{output_id}/metadata.
+    Response of GET /api/core/v3/outputs/{outputId}/metadata.
 
     Attributes:
         output_id: The ID of the output.
@@ -36,11 +36,11 @@ class OutputMetadata:
 @json
 @dataclass
 class OutputWithMetadata:
-    """An output with its metadata.
+    """An output and its metadata.
 
     Attributes:
-        metadata: The `OutputMetadata` object that belongs to `output`.
         output: An `Output` object.
+        metadata: The `OutputMetadata` object that belongs to `output`.
     """
     output: Output = field(metadata=config(
         decoder=deserialize_output
@@ -62,8 +62,8 @@ class OutputWithMetadata:
         """
         d = {}
 
-        d['metadata'] = self.metadata.to_dict()
         d['output'] = self.output.as_dict()
+        d['metadata'] = self.metadata.to_dict()
 
         return d
 

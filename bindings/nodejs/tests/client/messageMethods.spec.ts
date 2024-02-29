@@ -56,7 +56,7 @@ describe.skip('Block methods', () => {
 
     it('finds blocks by block IDs', async () => {
         const client = await makeClient();
-        const blockIds = await client.getTips();
+        const blockIds = (await client.getIssuance()).strongParents;
         const blocks = await client.findBlocks(blockIds);
 
         expect(blocks.length).toBe(blockIds.length);
@@ -64,7 +64,7 @@ describe.skip('Block methods', () => {
 
     it('gets block as raw bytes', async () => {
         const client = await makeClient();
-        const tips = await client.getTips();
+        const tips = (await client.getIssuance()).strongParents;
 
         const blockRaw = await client.getBlockRaw(tips[0]);
 

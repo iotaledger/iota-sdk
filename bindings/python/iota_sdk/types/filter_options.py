@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 from typing import List, Optional
-
 from dataclasses import dataclass
-
 from iota_sdk.types.common import json
 
 

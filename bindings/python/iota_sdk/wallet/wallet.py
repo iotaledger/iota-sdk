@@ -4,7 +4,6 @@
 from json import dumps
 from typing import List, Optional, Union
 from dataclasses import dataclass
-
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 from iota_sdk.wallet.common import _call_wallet_method_routine

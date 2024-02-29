@@ -1,23 +1,25 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { Output, OutputDiscriminator } from '../../block/output';
-import type { IOutputMetadataResponse } from './output-metadata-response';
+import { OutputIdProof } from './output-id-proof';
 
 import { Type } from 'class-transformer';
 
 /**
- * Details of an output.
+ * An output with its output id proof.
+ * Response of GET /api/core/v3/outputs/{outputId}.
  */
 export class OutputResponse {
     /**
-     * The metadata about the output.
-     */
-    metadata!: IOutputMetadataResponse;
-    /**
-     * The output.
+     * One of the possible output types.
      */
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
     output!: Output;
+    /**
+     * The proof of the output identifier.
+     */
+    outputIdProof!: OutputIdProof;
 }

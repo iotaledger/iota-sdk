@@ -4,7 +4,7 @@
 /**
  * Response from the /info endpoint.
  */
-export interface INodeInfoMetrics {
+export interface MetricsResponse {
     /**
      * The current rate of new blocks per second.
      */
