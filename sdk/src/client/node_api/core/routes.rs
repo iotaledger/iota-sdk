@@ -147,8 +147,8 @@ impl Client {
     ) -> Result<ValidatorsResponse> {
         const PATH: &str = "api/core/v3/validators";
         let query = query_tuples_to_query_string([
-            page_size.into().map(|i| ("pageSize", i.to_string())),
-            cursor.into().map(|i| ("cursor", i)),
+            page_size.into().map(|page_size| ("pageSize", page_size.to_string())),
+            cursor.into().map(|cursor| ("cursor", cursor)),
         ]);
 
         self.get_request(PATH, query.as_deref(), false).await
