@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{
+        api::{options::TransactionOptions, PreparedTransactionData},
+        secret::SecretManage,
+    },
     types::block::output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
-    wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
+    wallet::{types::TransactionWithMetadata, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>

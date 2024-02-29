@@ -12,8 +12,8 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
-            input_selection::InputSelection, transaction::validate_signed_transaction_payload_length, verify_semantic,
-            GetAddressesOptions, PreparedTransactionData,
+            transaction::validate_signed_transaction_payload_length, transaction_builder::TransactionBuilder,
+            verify_semantic, GetAddressesOptions, PreparedTransactionData,
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
@@ -368,7 +368,7 @@ async fn all_combined() -> Result<()> {
         },
     ]);
 
-    let selected = InputSelection::new(
+    let selected = TransactionBuilder::new(
         inputs.clone(),
         outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],

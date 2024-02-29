@@ -176,17 +176,17 @@ impl From<crate::client::Error> for Error {
     }
 }
 
-impl From<crate::client::api::input_selection::Error> for Error {
-    fn from(error: crate::client::api::input_selection::Error) -> Self {
+impl From<crate::client::api::transaction_builder::Error> for Error {
+    fn from(error: crate::client::api::transaction_builder::Error) -> Self {
         // Map "same" error so it's easier to handle
         match error {
-            crate::client::api::input_selection::Error::InsufficientAmount { found, required } => {
+            crate::client::api::transaction_builder::Error::InsufficientAmount { found, required } => {
                 Self::InsufficientFunds {
                     available: found,
                     required,
                 }
             }
-            _ => Self::Client(Box::new(crate::client::Error::InputSelection(error))),
+            _ => Self::Client(Box::new(crate::client::Error::TransactionBuilder(error))),
         }
     }
 }

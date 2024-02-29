@@ -1,8 +1,9 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-pub mod input_selection;
+pub mod options;
 pub mod transaction;
+pub mod transaction_builder;
 
 pub use self::transaction::verify_semantic;
 use crate::{

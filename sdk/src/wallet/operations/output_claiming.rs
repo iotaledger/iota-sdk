@@ -6,7 +6,10 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{
+        api::{options::TransactionOptions, PreparedTransactionData},
+        secret::SecretManage,
+    },
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         output::{
@@ -17,7 +20,7 @@ use crate::{
     },
     wallet::{
         core::WalletLedger,
-        operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
+        operations::helpers::time::can_output_be_unlocked_now,
         types::{OutputData, TransactionWithMetadata},
         Wallet,
     },
@@ -309,7 +312,7 @@ where
                     // add additional inputs
                     .chain(possible_additional_inputs.iter().map(|o| o.output_id))
                     .collect(),
-                allow_additional_input_selection: false,
+                allow_additional_transaction_builder: false,
                 ..Default::default()
             },
         )

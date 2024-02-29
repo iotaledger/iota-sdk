@@ -8,7 +8,13 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "ledger_nano")]
 use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{
+        api::{
+            options::{RemainderValueStrategy, TransactionOptions},
+            PreparedTransactionData,
+        },
+        secret::SecretManage,
+    },
     types::block::{
         address::{Address, Bech32Address},
         input::INPUT_COUNT_MAX,
@@ -17,9 +23,9 @@ use crate::{
     },
     wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
-        operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
+        operations::helpers::time::can_output_be_unlocked_now,
         types::{OutputData, TransactionWithMetadata},
-        RemainderValueStrategy, Result, Wallet,
+        Result, Wallet,
     },
 };
 
@@ -103,7 +109,7 @@ where
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
-            allow_additional_input_selection: false,
+            allow_additional_transaction_builder: false,
             ..Default::default()
         });
 

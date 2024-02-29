@@ -8,7 +8,7 @@ use std::str::FromStr;
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager},
+    client::{api::options::TransactionOptions, request_funds_from_faucet, secret::SecretManager},
     types::block::{
         address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
@@ -25,7 +25,7 @@ use iota_sdk::{
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
         Error as WalletError, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
-        SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        SendNftParams, SendParams, SyncOptions, Wallet,
     },
     U256,
 };

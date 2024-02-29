@@ -7,7 +7,7 @@ use futures::{StreamExt, TryStreamExt};
 
 use crate::{
     client::{
-        api::input_selection::Error as InputSelectionError,
+        api::transaction_builder::Error as TransactionBuilderError,
         constants::FIVE_MINUTES_IN_NANOSECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
@@ -105,7 +105,7 @@ impl Client {
         }
 
         if total_already_spent < amount {
-            return Err(InputSelectionError::InsufficientAmount {
+            return Err(TransactionBuilderError::InsufficientAmount {
                 found: total_already_spent,
                 required: amount,
             })?;

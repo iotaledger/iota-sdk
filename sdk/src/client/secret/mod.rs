@@ -49,8 +49,8 @@ use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
         api::{
-            input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
-            verify_semantic, PreparedTransactionData,
+            transaction::validate_signed_transaction_payload_length,
+            transaction_builder::Error as TransactionBuilderError, verify_semantic, PreparedTransactionData,
         },
         Error,
     },
@@ -612,7 +612,7 @@ where
                 // than the current block index
                 match &required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                    _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
+                    _ => Err(TransactionBuilderError::MissingInputWithEd25519Address)?,
                 }
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;

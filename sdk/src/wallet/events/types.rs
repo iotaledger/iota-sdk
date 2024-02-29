@@ -192,7 +192,7 @@ pub struct TransactionInclusionEvent {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum TransactionProgressEvent {
-    /// Performing input selection.
+    /// Performing iransaction builder.
     SelectingInputs,
     /// Generating remainder value deposit address.
     GeneratingRemainderDepositAddress(AddressData),

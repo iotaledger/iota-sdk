@@ -2,20 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
+mod build_transaction;
 pub(crate) mod high_level;
-mod input_selection;
-mod options;
 pub(crate) mod prepare_output;
 mod prepare_transaction;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
-pub use self::options::{RemainderValueStrategy, TransactionOptions};
 #[cfg(feature = "storage")]
 use crate::wallet::core::WalletLedgerDto;
 use crate::{
     client::{
-        api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
+        api::{options::TransactionOptions, verify_semantic, PreparedTransactionData, SignedTransactionData},
         secret::{types::InputSigningData, SecretManage},
         Error,
     },

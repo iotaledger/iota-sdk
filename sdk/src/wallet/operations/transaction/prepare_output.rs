@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::secret::SecretManage,
+    client::{api::options::RemainderValueStrategy, secret::SecretManage},
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         output::{
@@ -20,11 +20,7 @@ use crate::{
         Error,
     },
     utils::serde::string,
-    wallet::{
-        operations::transaction::{RemainderValueStrategy, TransactionOptions},
-        types::OutputData,
-        Wallet,
-    },
+    wallet::{operations::transaction::TransactionOptions, types::OutputData, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>

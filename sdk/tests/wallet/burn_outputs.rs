@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::api::input_selection::Burn,
+    client::api::transaction_builder::Burn,
     types::block::output::{
         feature::MetadataFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
