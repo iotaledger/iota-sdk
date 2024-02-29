@@ -54,7 +54,7 @@ import {
     u64,
     TransactionId,
     Bech32Address,
-    BlockFullResponse,
+    BlockWithMetadataResponse,
     TransactionMetadataResponse,
 } from '../types';
 import {
@@ -347,7 +347,9 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block.
      * @returns The requested block with its metadata.
      */
-    async getBlockWithMetadata(blockId: BlockId): Promise<BlockFullResponse> {
+    async getBlockWithMetadata(
+        blockId: BlockId,
+    ): Promise<BlockWithMetadataResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlockWithMetadata',
             data: {

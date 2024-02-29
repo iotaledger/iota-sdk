@@ -31,7 +31,7 @@ export interface BlockMetadataResponse {
 /**
  * Response from the full endpoint.
  */
-export interface BlockFullResponse {
+export interface BlockWithMetadataResponse {
     /**
      * The block.
      */
