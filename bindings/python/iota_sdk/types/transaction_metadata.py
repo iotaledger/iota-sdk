@@ -4,7 +4,7 @@
 from enum import Enum
 
 
-class TransactionState(Enum):
+class TransactionState(str, Enum):
     """Describes the state of a transaction.
 
     Attributes:
@@ -14,11 +14,11 @@ class TransactionState(Enum):
         Finalized: Included, its included block is finalized and cannot be reverted anymore.
         Failed: Not successfully issued due to failure reason.
     """
-    Pending = 0
-    Accepted = 1
-    Confirmed = 2
-    Finalized = 3
-    Failed = 4
+    Pending = 'pending'
+    Accepted = 'accepted'
+    Confirmed = 'confirmed'
+    Finalized = 'finalized'
+    Failed = 'failed'
 
 
 class TransactionFailureReason(Enum):

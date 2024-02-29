@@ -6,8 +6,7 @@ use primitive_types::U256;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::output::{
-        AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
-        TokenScheme,
+        AccountId, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
         operations::transaction::TransactionOptions,
@@ -59,29 +58,27 @@ where
                 Output::Foundry(foundry_output) => (account_data, foundry_output),
                 _ => unreachable!("We already checked it's a foundry output"),
             })?;
-
-        if let Output::Account(account_output) = &existing_account_output_data.output {
-            // Create the new account output with updated amount.
-            let account_output = AccountOutputBuilder::from(account_output)
-                .with_account_id(account_id)
-                .finish_output()?;
-
-            let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
-            let outputs = [
-                account_output,
-                FoundryOutputBuilder::from(&existing_foundry_output)
-                    .with_token_scheme(TokenScheme::Simple(SimpleTokenScheme::new(
-                        token_scheme.minted_tokens(),
-                        token_scheme.melted_tokens() + melt_amount,
-                        token_scheme.maximum_supply(),
-                    )?))
-                    .finish_output()?,
-            ];
-            // Input selection will detect that we're melting native tokens and add the required inputs if available
-            self.prepare_transaction(outputs, options).await
+        let account_output_id = existing_account_output_data.output_id;
+        let mut options = options.into();
+        if let Some(options) = options.as_mut() {
+            options.required_inputs.insert(account_output_id);
         } else {
-            unreachable!("We checked if it's an account output before")
+            options.replace(TransactionOptions {
+                required_inputs: [account_output_id].into(),
+                ..Default::default()
+            });
         }
+
+        let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
+        let outputs = [FoundryOutputBuilder::from(&existing_foundry_output)
+            .with_token_scheme(TokenScheme::Simple(SimpleTokenScheme::new(
+                token_scheme.minted_tokens(),
+                token_scheme.melted_tokens() + melt_amount,
+                token_scheme.maximum_supply(),
+            )?))
+            .finish_output()?];
+        // Input selection will detect that we're melting native tokens and add the required inputs if available
+        self.prepare_transaction(outputs, options).await
     }
 
     /// Find and return unspent `OutputData` for given `account_id` and `foundry_id`

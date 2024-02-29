@@ -33,7 +33,7 @@ pub struct ClientBuilder {
     /// Options for the MQTT broker
     #[cfg(feature = "mqtt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "mqtt")))]
-    #[serde(flatten)]
+    #[serde(default)]
     pub broker_options: BrokerOptions,
     /// Protocol parameters
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -195,7 +195,7 @@ impl ClientBuilder {
 
         let node_sync_interval = self.node_manager_builder.node_sync_interval;
         let ignore_node_health = self.node_manager_builder.ignore_node_health;
-        let nodes = self
+        let nodes: HashSet<Node> = self
             .node_manager_builder
             .primary_nodes
             .iter()
@@ -207,7 +207,9 @@ impl ClientBuilder {
         let (mqtt_event_tx, mqtt_event_rx) = tokio::sync::watch::channel(MqttEvent::Connected);
 
         let client_inner = Arc::new(ClientInner {
-            node_manager: RwLock::new(self.node_manager_builder.build(HashSet::new())),
+            // Initially assume all nodes are healthy, so `fetch_network_info()` works. `sync_nodes()` will afterwards
+            // update the healthy nodes.
+            node_manager: RwLock::new(self.node_manager_builder.build(nodes.clone())),
             api_timeout: RwLock::new(self.api_timeout),
             #[cfg(feature = "mqtt")]
             mqtt: super::MqttInner {

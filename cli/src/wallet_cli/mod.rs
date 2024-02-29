@@ -806,7 +806,7 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 pub async fn end_staking_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
     println_log_info!("Ending staking for {account_id}.");
 
-    let transaction = wallet.end_staking(account_id).await?;
+    let transaction = wallet.end_staking(account_id, None).await?;
 
     println_log_info!(
         "End staking transaction sent:\n{:?}\n{:?}",
@@ -825,7 +825,7 @@ pub async fn extend_staking_command(
 ) -> Result<(), Error> {
     println_log_info!("Extending staking for {account_id} by {additional_epochs} epochs.");
 
-    let transaction = wallet.extend_staking(account_id, additional_epochs).await?;
+    let transaction = wallet.extend_staking(account_id, additional_epochs, None).await?;
 
     println_log_info!(
         "Extend staking transaction sent:\n{:?}\n{:?}",

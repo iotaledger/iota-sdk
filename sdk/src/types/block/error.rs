@@ -29,6 +29,7 @@ use crate::types::block::{
         InputCount, OutputCount,
     },
     protocol::ProtocolParametersHash,
+    semantic::TransactionFailureReason,
     unlock::{UnlockCount, UnlockIndex, UnlocksCount},
 };
 
@@ -209,6 +210,10 @@ pub enum Error {
     },
     TrailingCapabilityBytes,
     RestrictedAddressCapability(AddressCapabilityFlag),
+    BlockSlotBeforeTransactionCreationSlot,
+    TransactionCommitmentSlotNotInBlockSlotInterval,
+    TransactionCommitmentSlotAfterBlockCommitmentSlot,
+    TransactionFailureReason(TransactionFailureReason),
 }
 
 #[cfg(feature = "std")]
@@ -450,6 +455,19 @@ impl fmt::Display for Error {
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
             Self::RestrictedAddressCapability(cap) => write!(f, "restricted address capability: {cap:?}"),
+            Self::BlockSlotBeforeTransactionCreationSlot => {
+                write!(f, "the block slot is before its contained transaction creation slot")
+            }
+            Self::TransactionCommitmentSlotNotInBlockSlotInterval => write!(
+                f,
+                "the transaction commitment slot is not in the allowed block slot interval"
+            ),
+            Self::TransactionCommitmentSlotAfterBlockCommitmentSlot => {
+                write!(f, "the transaction commitment slot is after the block commitment slot")
+            }
+            Self::TransactionFailureReason(r) => {
+                write!(f, "transaction failure reason: {r}")
+            }
         }
     }
 }
@@ -463,6 +481,12 @@ impl From<Bech32HrpError> for Error {
 impl From<CryptoError> for Error {
     fn from(error: CryptoError) -> Self {
         Self::Crypto(error)
+    }
+}
+
+impl From<TransactionFailureReason> for Error {
+    fn from(error: TransactionFailureReason) -> Self {
+        Self::TransactionFailureReason(error)
     }
 }
 

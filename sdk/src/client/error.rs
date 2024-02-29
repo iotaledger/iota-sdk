@@ -130,7 +130,7 @@ pub enum Error {
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
-    TransactionSemantic(TransactionFailureReason),
+    TransactionSemantic(#[from] TransactionFailureReason),
     /// Unpack error
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),

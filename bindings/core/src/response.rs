@@ -31,7 +31,6 @@ use iota_sdk::{
             },
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
-            semantic::TransactionFailureReason,
             signature::Ed25519Signature,
             slot::{SlotCommitment, SlotCommitmentId},
             unlock::Unlock,
@@ -233,8 +232,6 @@ pub enum Response {
     CustomJson(serde_json::Value),
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
     SlotCommitmentId(SlotCommitmentId),
-    /// Response for [`VerifyTransactionSemantic`](crate::method::UtilsMethod::VerifyTransactionSemantic).
-    TransactionFailureReason(Option<TransactionFailureReason>),
 
     // Responses in client and wallet
     /// Response for:
@@ -246,6 +243,8 @@ pub enum Response {
     /// - [`PrepareOutput`](crate::method::WalletMethod::PrepareOutput)
     Output(Output),
     /// Response for:
+    /// - [`AddressToBech32`](crate::method::ClientMethod::AddressToBech32)
+    /// - [`AddressToBech32`](crate::method::UtilsMethod::AddressToBech32)
     /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
     /// - [`AccountIdToBech32`](crate::method::UtilsMethod::AccountIdToBech32)
     /// - [`AnchorIdToBech32`](crate::method::ClientMethod::AnchorIdToBech32)
@@ -334,6 +333,7 @@ pub enum Response {
     /// - [`PrepareMintNativeToken`](crate::method::WalletMethod::PrepareMintNativeToken),
     /// - [`PrepareMintNfts`](crate::method::WalletMethod::PrepareMintNfts),
     /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
+    /// - [`PrepareSendMana`](crate::method::WalletMethod::PrepareSendMana),
     /// - [`PrepareSendNativeTokens`](crate::method::WalletMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::WalletMethod::PrepareSendNft),
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)

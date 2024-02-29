@@ -18,7 +18,7 @@ use crate::{
     },
     wallet::{
         constants::MIN_SYNC_INTERVAL,
-        types::{AddressWithUnspentOutputs, Balance, OutputData},
+        types::{address::AddressWithUnspentOutputs, Balance, OutputData},
         Wallet,
     },
 };
@@ -97,8 +97,6 @@ where
         let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
             address: self.address().await,
             output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
-            internal: false,
-            key_index: 0,
         };
 
         let address_to_sync = vec![
@@ -106,8 +104,6 @@ where
             AddressWithUnspentOutputs {
                 address: self.implicit_account_creation_address().await?,
                 output_ids: vec![],
-                internal: false,
-                key_index: 0,
             },
         ];
 
