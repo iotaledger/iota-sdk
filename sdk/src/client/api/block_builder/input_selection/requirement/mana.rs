@@ -81,7 +81,6 @@ impl InputSelection {
             let MinManaAllotment {
                 issuer_id,
                 allotment_debt,
-                allow_allotting_from_account_mana,
                 ..
             } = self
                 .min_mana_allotment
@@ -102,9 +101,7 @@ impl InputSelection {
                 *allotment_debt = self.mana_allotments[issuer_id];
             }
 
-            if *allow_allotting_from_account_mana {
-                self.reduce_account_output()?;
-            }
+            self.reduce_account_output()?;
         } else if !self.requirements.contains(&Requirement::Mana) {
             self.requirements.push(Requirement::Mana);
         }
@@ -118,10 +115,8 @@ impl InputSelection {
         let additional_inputs = self.get_inputs_for_mana_balance()?;
         // If we needed more inputs to cover the additional allotment mana
         // then update remainders and re-run this requirement
-        if additional_inputs {
-            if !self.requirements.contains(&Requirement::Mana) {
-                self.requirements.push(Requirement::Mana);
-            }
+        if additional_inputs && !self.requirements.contains(&Requirement::Mana) {
+            self.requirements.push(Requirement::Mana);
         }
 
         Ok(Vec::new())

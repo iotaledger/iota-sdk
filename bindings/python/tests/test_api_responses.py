@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, OutputMetadata, OutputResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockMetadataResponse, BlockWithMetadataResponse, OutputMetadata, OutputResponse, TransactionMetadataResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -51,20 +51,19 @@ def test_api_responses():
     test_api_response(
         Block, "get-block-by-id-validation-response-example.json")
     # GET /api/core/v3/blocks/{blockId}/metadata
-    # TODO enable when Block and Tx State enums are fixed https://github.com/iotaledger/iota-sdk/issues/2019
-    # test_api_response(BlockMetadataResponse,
-    #                   "get-block-by-id-response-example-new-transaction.json")
-    # test_api_response(BlockMetadataResponse,
-    #                   "get-block-by-id-response-example-new.json")
-    # test_api_response(BlockMetadataResponse,
-    #                   "get-block-by-id-response-example-confirmed-transaction.json")
-    # test_api_response(BlockMetadataResponse,
-    #                   "get-block-by-id-response-example-confirmed.json")
-    # test_api_response(BlockMetadataResponse,
-    #                   "get-block-by-id-response-example-conflicting-transaction.json")
-    # # GET /api/core/v3/blocks/{blockId}/full
-    # test_api_response(BlockWithMetadataResponse,
-    #                   "get-full-block-by-id-tagged-data-response-example.json")
+    test_api_response(BlockMetadataResponse,
+                      "get-block-by-id-response-example-new-transaction.json")
+    test_api_response(BlockMetadataResponse,
+                      "get-block-by-id-response-example-new.json")
+    test_api_response(BlockMetadataResponse,
+                      "get-block-by-id-response-example-confirmed-transaction.json")
+    test_api_response(BlockMetadataResponse,
+                      "get-block-by-id-response-example-confirmed.json")
+    test_api_response(BlockMetadataResponse,
+                      "get-block-by-id-response-example-conflicting-transaction.json")
+    # GET /api/core/v3/blocks/{blockId}/full
+    test_api_response(BlockWithMetadataResponse,
+                      "get-full-block-by-id-tagged-data-response-example.json")
     # GET /api/core/v3/outputs/{outputId}
     test_api_response(
         OutputResponse, "get-outputs-by-id-response-example.json")
@@ -78,9 +77,8 @@ def test_api_responses():
     # test_api_response(OutputWithMetadata,
     #                   "get-full-output-metadata-example.json")
     # GET /api/core/v3/transactions/{transactionId}/metadata
-    # TODO enable when Tx State enum is fixed https://github.com/iotaledger/iota-sdk/issues/2019
-    # test_api_response(TransactionMetadataResponse,
-    #                   "get-transaction-metadata-by-id-response-example.json")
+    test_api_response(TransactionMetadataResponse,
+                      "get-transaction-metadata-by-id-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}
     test_api_response(SlotCommitment, "get-commitment-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes
