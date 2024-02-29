@@ -240,7 +240,7 @@ impl TransactionBuilder {
         if selected_mana >= required_mana {
             log::debug!("Mana requirement already fulfilled");
         } else {
-            if !self.allow_additional_transaction_builder {
+            if !self.allow_additional_input_selection {
                 return Err(Error::AdditionalInputsRequired(Requirement::Mana));
             }
             // TODO we should do as for the amount and have preferences on which inputs to pick.

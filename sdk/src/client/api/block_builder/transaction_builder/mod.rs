@@ -152,7 +152,7 @@ impl Client {
             transaction_builder = transaction_builder.with_min_mana_allotment(account_id, reference_mana_cost);
         }
 
-        if !options.allow_additional_transaction_builder {
+        if !options.allow_additional_input_selection {
             transaction_builder = transaction_builder.disable_additional_transaction_builder();
         }
 
@@ -187,7 +187,7 @@ pub struct TransactionBuilder {
     mana_allotments: BTreeMap<AccountId, u64>,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
-    allow_additional_transaction_builder: bool,
+    allow_additional_input_selection: bool,
     transaction_capabilities: TransactionCapabilities,
     protocol_parameters: ProtocolParameters,
 }
@@ -256,7 +256,7 @@ impl TransactionBuilder {
             min_mana_allotment: None,
             mana_allotments: Default::default(),
             mana_rewards: Default::default(),
-            allow_additional_transaction_builder: true,
+            allow_additional_input_selection: true,
             transaction_capabilities: Default::default(),
             payload: None,
             protocol_parameters,
@@ -340,7 +340,7 @@ impl TransactionBuilder {
             // Fulfill the requirement.
             let inputs = self.fulfill_requirement(&requirement)?;
 
-            if !self.allow_additional_transaction_builder && !inputs.is_empty() {
+            if !self.allow_additional_input_selection && !inputs.is_empty() {
                 return Err(Error::AdditionalInputsRequired(requirement));
             }
 
@@ -539,7 +539,7 @@ impl TransactionBuilder {
 
     /// Disables selecting additional inputs.
     pub fn disable_additional_transaction_builder(mut self) -> Self {
-        self.allow_additional_transaction_builder = false;
+        self.allow_additional_input_selection = false;
         self
     }
 

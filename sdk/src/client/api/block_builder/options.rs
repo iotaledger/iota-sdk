@@ -35,7 +35,7 @@ pub struct TransactionOptions {
     /// Whether to allow sending a micro amount.
     pub allow_micro_amount: bool,
     /// Whether to allow the selection of additional inputs for this transaction.
-    pub allow_additional_transaction_builder: bool,
+    pub allow_additional_input_selection: bool,
     /// Transaction capabilities.
     pub capabilities: Option<TransactionCapabilities>,
     /// Mana allotments for the transaction.
@@ -54,7 +54,7 @@ impl Default for TransactionOptions {
             burn: Default::default(),
             note: Default::default(),
             allow_micro_amount: false,
-            allow_additional_transaction_builder: true,
+            allow_additional_input_selection: true,
             capabilities: Default::default(),
             mana_allotments: Default::default(),
             issuer_id: Default::default(),

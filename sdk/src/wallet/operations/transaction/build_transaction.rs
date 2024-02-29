@@ -158,7 +158,7 @@ where
             transaction_builder = transaction_builder.with_min_mana_allotment(account_id, reference_mana_cost);
         }
 
-        if !options.allow_additional_transaction_builder {
+        if !options.allow_additional_input_selection {
             transaction_builder = transaction_builder.disable_additional_transaction_builder();
         }
 
