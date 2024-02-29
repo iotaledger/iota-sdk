@@ -7,14 +7,14 @@ import { SlotIndex } from '../../block';
 import { HexEncodedString } from '../../utils';
 
 /**
- * Node types.
+ * OutputCommitmentProof node types.
  */
 export enum OutputCommitmentProofNodeType {
-    /** Denotes a HashableNode */
+    /** Denotes a HashableNode. */
     HashableNode = 0,
-    /** Denotes a LeafHash */
+    /** Denotes a LeafHash. */
     LeafHash = 1,
-    /** Denotes a ValueHash */
+    /** Denotes a ValueHash. */
     ValueHash = 2,
 }
 
@@ -22,14 +22,14 @@ export abstract class OutputCommitmentProof {
     readonly type: OutputCommitmentProofNodeType;
 
     /**
-     * @param type The type of tree node.
+     * @param type The type of OutputCommitmentProof node.
      */
     constructor(type: OutputCommitmentProofNodeType) {
         this.type = type;
     }
 
     /**
-     * Parse a tree node from a plain JS JSON object.
+     * Parse an OutputCommitmentProof from a plain JSON object.
      */
     public static parse(data: any): OutputCommitmentProof {
         if (data.type == OutputCommitmentProofNodeType.HashableNode) {
@@ -44,15 +44,15 @@ export abstract class OutputCommitmentProof {
 }
 
 /**
- * Contains the hashes of the left and right children of a node in the tree.
+ * Contains the hashes of the left and right children of a node in the OutputCommitmentProof tree.
  */
 export class HashableNode extends OutputCommitmentProof {
     readonly l: OutputCommitmentProof;
     readonly r: OutputCommitmentProof;
 
     /**
-     * @param l Output commitment proof of the left sub-tree.
-     * @param r Output commitment proof of the right sub-tree.
+     * @param l Output commitment proof of the left subtree.
+     * @param r Output commitment proof of the right subtree.
      */
     constructor(l: OutputCommitmentProof, r: OutputCommitmentProof) {
         super(OutputCommitmentProofNodeType.HashableNode);
@@ -62,7 +62,7 @@ export class HashableNode extends OutputCommitmentProof {
 }
 
 /**
- * Contains the hash of a leaf in the tree.
+ * Contains the hash of a leaf in the OutputCommitmentProof tree.
  */
 export class LeafHash extends OutputCommitmentProof {
     readonly hash: HexEncodedString;
@@ -91,6 +91,9 @@ export class ValueHash extends OutputCommitmentProof {
     }
 }
 
+/**
+ * The proof of the output identifier.
+ */
 export class OutputIdProof {
     readonly slot: SlotIndex;
     readonly outputIndex: number;

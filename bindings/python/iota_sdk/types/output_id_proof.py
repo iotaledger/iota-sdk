@@ -42,7 +42,7 @@ def deserialize_proof(d: Dict[str, Any]) -> OutputCommitmentProof:
 @json
 @dataclass
 class HashableNode:
-    """Node contains the hashes of the left and right children of a node in the tree.
+    """Contains the hashes of the left and right children of a node in the OutputCommitmentProof tree.
     """
     type: int = field(default_factory=lambda: int(
         OutputCommitmentProofNodeType.HashableNode), init=False)
@@ -57,7 +57,7 @@ class HashableNode:
 @json
 @dataclass
 class LeafHash:
-    """Leaf Hash contains the hash of a leaf in the tree.
+    """Contains the hash of a leaf in the OutputCommitmentProof tree.
     """
     type: int = field(default_factory=lambda: int(
         OutputCommitmentProofNodeType.LeafHash), init=False)
@@ -67,7 +67,7 @@ class LeafHash:
 @json
 @dataclass
 class ValueHash:
-    """Value Hash contains the hash of the value for which the proof is being computed.
+    """Contains the hash of the value for which the proof is being computed.
     """
     type: int = field(default_factory=lambda: int(
         OutputCommitmentProofNodeType.ValueHash), init=False)
