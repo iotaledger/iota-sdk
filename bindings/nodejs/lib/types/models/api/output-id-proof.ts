@@ -9,7 +9,7 @@ import { HexEncodedString } from '../../utils';
 /**
  * Node types.
  */
-export enum TreeNodeType {
+export enum OutputCommitmentProofType {
     /** Denotes a HashableNode */
     HashableNode = 0,
     /** Denotes a LeafHash */
@@ -18,25 +18,25 @@ export enum TreeNodeType {
     ValueHash = 2,
 }
 
-export abstract class TreeNode {
-    readonly type: TreeNodeType;
+export abstract class OutputCommitmentProof {
+    readonly type: OutputCommitmentProofType;
 
     /**
      * @param type The type of tree node.
      */
-    constructor(type: TreeNodeType) {
+    constructor(type: OutputCommitmentProofType) {
         this.type = type;
     }
 
     /**
      * Parse a tree node from a plain JS JSON object.
      */
-    public static parse(data: any): TreeNode {
-        if (data.type == TreeNodeType.HashableNode) {
+    public static parse(data: any): OutputCommitmentProof {
+        if (data.type == OutputCommitmentProofType.HashableNode) {
             return plainToInstance(HashableNode, data) as any as HashableNode;
-        } else if (data.type == TreeNodeType.LeafHash) {
+        } else if (data.type == OutputCommitmentProofType.LeafHash) {
             return plainToInstance(LeafHash, data) as any as LeafHash;
-        } else if (data.type == TreeNodeType.ValueHash) {
+        } else if (data.type == OutputCommitmentProofType.ValueHash) {
             return plainToInstance(ValueHash, data) as any as ValueHash;
         }
         throw new Error('Invalid JSON');
@@ -46,16 +46,16 @@ export abstract class TreeNode {
 /**
  * Contains the hashes of the left and right children of a node in the tree.
  */
-export class HashableNode extends TreeNode {
-    readonly l: TreeNode;
-    readonly r: TreeNode;
+export class HashableNode extends OutputCommitmentProof {
+    readonly l: OutputCommitmentProof;
+    readonly r: OutputCommitmentProof;
 
     /**
      * @param l Output commitment proof of the left sub-tree.
      * @param r Output commitment proof of the right sub-tree.
      */
-    constructor(l: TreeNode, r: TreeNode) {
-        super(TreeNodeType.HashableNode);
+    constructor(l: OutputCommitmentProof, r: OutputCommitmentProof) {
+        super(OutputCommitmentProofType.HashableNode);
         this.l = l;
         this.r = r;
     }
@@ -64,14 +64,14 @@ export class HashableNode extends TreeNode {
 /**
  * Contains the hash of a leaf in the tree.
  */
-export class LeafHash extends TreeNode {
+export class LeafHash extends OutputCommitmentProof {
     readonly hash: HexEncodedString;
 
     /**
      * @param hash The hash of the leaf.
      */
     constructor(hash: HexEncodedString) {
-        super(TreeNodeType.LeafHash);
+        super(OutputCommitmentProofType.LeafHash);
         this.hash = hash;
     }
 }
@@ -79,14 +79,14 @@ export class LeafHash extends TreeNode {
 /**
  * Contains the hash of the value for which the proof is being computed.
  */
-export class ValueHash extends TreeNode {
+export class ValueHash extends OutputCommitmentProof {
     readonly hash: HexEncodedString;
 
     /**
      * @param hash The hash of the value.
      */
     constructor(hash: HexEncodedString) {
-        super(TreeNodeType.ValueHash);
+        super(OutputCommitmentProofType.ValueHash);
         this.hash = hash;
     }
 }
@@ -95,7 +95,7 @@ export class OutputIdProof {
     readonly slot: SlotIndex;
     readonly outputIndex: number;
     readonly transactionCommitment: HexEncodedString;
-    readonly outputCommitmentProof: TreeNode;
+    readonly outputCommitmentProof: OutputCommitmentProof;
 
     /**
      * @param slot The slot index of the output.
@@ -107,7 +107,7 @@ export class OutputIdProof {
         slot: SlotIndex,
         outputIndex: number,
         transactionCommitment: HexEncodedString,
-        outputCommitmentProof: TreeNode,
+        outputCommitmentProof: OutputCommitmentProof,
     ) {
         this.slot = slot;
         this.outputIndex = outputIndex;
