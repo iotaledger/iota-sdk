@@ -21,14 +21,12 @@ pub trait QueryParameter: Serialize + Send + Sync {
                         query_string.push('&');
                     }
                     query_string.push_str(&format!("{field}={v_bool}"));
-                }
-                if let Some(v_str) = v.as_str() {
+                } else if let Some(v_str) = v.as_str() {
                     if !query_string.is_empty() {
                         query_string.push('&');
                     }
                     query_string.push_str(&format!("{field}={v_str}"));
-                }
-                if let Some(v_u64) = v.as_u64() {
+                } else if let Some(v_u64) = v.as_u64() {
                     if !query_string.is_empty() {
                         query_string.push('&');
                     }
