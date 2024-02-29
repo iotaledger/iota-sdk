@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Bbuilder for transactions
+//! Builder for transactions
 
 pub(crate) mod burn;
 pub(crate) mod error;
