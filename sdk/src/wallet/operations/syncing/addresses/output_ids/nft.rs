@@ -3,10 +3,7 @@
 
 use crate::{
     client::{node_api::indexer::query_parameters::NftOutputQueryParameters, secret::SecretManage},
-    types::block::{
-        address::{AddressError, Bech32Address},
-        output::OutputId,
-    },
+    types::block::{address::Bech32Address, output::OutputId},
     utils::ConvertTo,
     wallet::Wallet,
 };
@@ -21,10 +18,7 @@ where
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        let bech32_address = bech32_address
-            .convert()
-            .map_err(AddressError::from)
-            .map_err(crate::client::Error::from)?;
+        let bech32_address = bech32_address.convert().map_err(crate::client::Error::from)?;
 
         Ok(self
             .client()

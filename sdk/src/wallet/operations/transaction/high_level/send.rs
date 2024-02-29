@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::{AddressError, Bech32Address, ToBech32Ext},
+        address::{Bech32Address, ToBech32Ext},
         output::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
             BasicOutputBuilder, MinimumOutputAmount,
@@ -48,10 +48,7 @@ impl SendParams {
     pub fn new(amount: u64, address: impl ConvertTo<Bech32Address>) -> Result<Self, crate::wallet::Error> {
         Ok(Self {
             amount,
-            address: address
-                .convert()
-                .map_err(AddressError::from)
-                .map_err(crate::client::Error::from)?,
+            address: address.convert().map_err(crate::client::Error::from)?,
             return_address: None,
             expiration: None,
         })
@@ -61,12 +58,7 @@ impl SendParams {
         mut self,
         address: impl ConvertTo<Bech32Address>,
     ) -> Result<Self, crate::wallet::Error> {
-        self.return_address = Some(
-            address
-                .convert()
-                .map_err(AddressError::from)
-                .map_err(crate::client::Error::from)?,
-        );
+        self.return_address = Some(address.convert().map_err(crate::client::Error::from)?);
         Ok(self)
     }
 
