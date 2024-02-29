@@ -135,7 +135,7 @@ pub enum OutputCommitmentProof {
     Value(ValueHash),
 }
 
-/// Node contains the hashes of the left and right children of a node in the tree.
+/// Contains the hashes of the left and right children of a node in the OutputCommitmentProof tree.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_visitor = ())]
 pub struct HashableNode {
@@ -154,7 +154,7 @@ impl HashableNode {
     }
 }
 
-/// Leaf Hash contains the hash of a leaf in the tree.
+/// Contains the hash of a leaf in the OutputCommitmentProof tree.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct LeafHash(pub [u8; 32]);
 
@@ -194,7 +194,7 @@ impl Packable for LeafHash {
     }
 }
 
-/// Value Hash contains the hash of the value for which the proof is being computed.
+/// Contains the hash of the value for which the proof is being computed.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct ValueHash(pub [u8; 32]);
 
