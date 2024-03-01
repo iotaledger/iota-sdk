@@ -17,6 +17,7 @@ use iota_sdk::{
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
+        semantic::TransactionFailureReason,
     },
 };
 use pretty_assertions::assert_eq;
@@ -826,7 +827,7 @@ fn mint_and_burn_at_the_same_time() {
 
     assert_eq!(
         selected,
-        TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(foundry_id))
+        TransactionBuilderError::Semantic(TransactionFailureReason::NativeTokenSumUnbalanced)
     );
 }
 
