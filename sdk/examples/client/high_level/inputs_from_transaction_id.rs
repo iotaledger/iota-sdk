@@ -10,13 +10,10 @@
 //! cargo run --release --example inputs_from_transaction_id <TRANSACTION_ID>
 //! ```
 
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::payload::transaction::TransactionId,
-};
+use iota_sdk::{client::Client, types::block::payload::signed_transaction::TransactionId};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

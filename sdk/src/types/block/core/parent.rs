@@ -10,7 +10,7 @@ use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{BlockId, Error};
+use crate::types::block::{core::BlockError, BlockId};
 
 /// A [`Block`](crate::types::block::Block)'s [`Parents`] are the [`BlockId`]s of the blocks it directly approves.
 ///
@@ -21,7 +21,7 @@ use crate::types::block::{BlockId, Error};
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[deref(forward)]
-#[packable(unpack_error = Error, with = |_| Error::InvalidParentCount)]
+#[packable(unpack_error = BlockError, with = |_| BlockError::InvalidParentCount)]
 pub struct Parents<const MIN: u8, const MAX: u8>(
     #[packable(verify_with = verify_parents)] BoxedSlicePrefix<BlockId, BoundedU8<MIN, MAX>>,
 );
@@ -31,7 +31,7 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     pub const COUNT_RANGE: RangeInclusive<u8> = MIN..=MAX;
 
     /// Creates new [`Parents`] from a vec.
-    pub fn from_vec(mut inner: Vec<BlockId>) -> Result<Self, Error> {
+    pub fn from_vec(mut inner: Vec<BlockId>) -> Result<Self, BlockError> {
         inner.sort_unstable();
         inner.dedup();
 
@@ -39,18 +39,18 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
             inner
                 .into_boxed_slice()
                 .try_into()
-                .map_err(|_| Error::InvalidParentCount)?,
+                .map_err(|_| BlockError::InvalidParentCount)?,
         ))
     }
 
     /// Creates new [`Parents`] from an ordered set.
-    pub fn from_set(inner: BTreeSet<BlockId>) -> Result<Self, Error> {
+    pub fn from_set(inner: BTreeSet<BlockId>) -> Result<Self, BlockError> {
         Ok(Self(
             inner
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(|_| Error::InvalidParentCount)?,
+                .map_err(|_| BlockError::InvalidParentCount)?,
         ))
     }
 
@@ -75,9 +75,9 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     }
 }
 
-fn verify_parents<const VERIFY: bool>(parents: &[BlockId]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(parents.iter().map(AsRef::as_ref)) {
-        Err(Error::ParentsNotUniqueSorted)
+fn verify_parents(parents: &[BlockId]) -> Result<(), BlockError> {
+    if !is_unique_sorted(parents.iter().map(AsRef::as_ref)) {
+        Err(BlockError::ParentsNotUniqueSorted)
     } else {
         Ok(())
     }
@@ -93,13 +93,13 @@ pub(crate) fn verify_parents_sets(
     strong_parents: &[BlockId],
     weak_parents: &[BlockId],
     shallow_like_parents: &[BlockId],
-) -> Result<(), Error> {
+) -> Result<(), BlockError> {
     let strong_parents: BTreeSet<_> = strong_parents.iter().copied().collect();
     let weak_parents: BTreeSet<_> = weak_parents.iter().copied().collect();
     let shallow_like_parents: BTreeSet<_> = shallow_like_parents.iter().copied().collect();
 
     if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
-        return Err(Error::NonDisjointParents);
+        return Err(BlockError::NonDisjointParents);
     }
 
     Ok(())

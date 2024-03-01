@@ -9,7 +9,23 @@ use packable::error::UnexpectedEOF;
 use serde::{ser::Serializer, Serialize};
 
 use crate::{
-    client::api::input_selection::Error as InputSelectionError, types::block::semantic::TransactionFailureReason,
+    client::api::input_selection::Error as InputSelectionError,
+    types::block::{
+        address::AddressError,
+        context_input::ContextInputError,
+        input::InputError,
+        mana::ManaError,
+        output::{
+            feature::FeatureError, unlock_condition::UnlockConditionError, NativeTokenError, OutputError,
+            TokenSchemeError,
+        },
+        payload::PayloadError,
+        semantic::TransactionFailureReason,
+        signature::SignatureError,
+        unlock::UnlockError,
+        BlockError,
+    },
+    utils::ConversionError,
 };
 
 /// Type alias of `Result` in iota-client
@@ -33,7 +49,10 @@ pub enum Error {
     Blake2b256(&'static str),
     /// Block types error
     #[error("{0}")]
-    Block(#[from] crate::types::block::Error),
+    Block(#[from] BlockError),
+    /// Address types error
+    #[error("{0}")]
+    Address(#[from] AddressError),
     /// Crypto.rs error
     #[error("{0}")]
     Crypto(#[from] crypto::Error),
@@ -130,10 +149,10 @@ pub enum Error {
     },
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
-    TransactionSemantic(TransactionFailureReason),
+    TransactionSemantic(#[from] TransactionFailureReason),
     /// Unpack error
     #[error("{0}")]
-    Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),
+    Unpack(#[from] packable::error::UnpackError<BlockError, UnexpectedEOF>),
     /// URL auth error
     #[error("can't set {0} to URL")]
     UrlAuth(&'static str),
@@ -182,6 +201,8 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[error("{0}")]
     Stronghold(#[from] crate::client::stronghold::Error),
+    #[error("{0}")]
+    Convert(#[from] ConversionError),
 }
 
 // Serialize type with Display error
@@ -204,3 +225,17 @@ impl Serialize for Error {
         .serialize(serializer)
     }
 }
+
+crate::impl_from_error_via!(Error via BlockError:
+    PayloadError,
+    OutputError,
+    InputError,
+    NativeTokenError,
+    ManaError,
+    UnlockConditionError,
+    FeatureError,
+    TokenSchemeError,
+    ContextInputError,
+    UnlockError,
+    SignatureError,
+);

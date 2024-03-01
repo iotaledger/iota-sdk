@@ -12,17 +12,16 @@ use iota_sdk::{
         address::{Address, ImplicitAccountCreationAddress},
         mana::ManaAllotment,
         output::{
-            feature::SenderFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder,
-            BasicOutputBuilder, Output,
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
         },
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0,
     BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, SLOT_COMMITMENT_ID, SLOT_INDEX,
@@ -30,7 +29,7 @@ use crate::client::{
 
 #[test]
 fn input_account_eq_output_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -71,7 +70,7 @@ fn input_account_eq_output_account() {
 
 #[test]
 fn transition_account_id_zero() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -113,7 +112,7 @@ fn transition_account_id_zero() {
 
 // #[test]
 // fn input_amount_lt_output_amount() {
-//     let protocol_parameters = protocol_parameters();
+//     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 //     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
 //     let inputs = build_inputs([Account(
@@ -158,7 +157,7 @@ fn transition_account_id_zero() {
 
 // #[test]
 // fn input_amount_lt_output_amount_2() {
-//     let protocol_parameters = protocol_parameters();
+//     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 //     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
 //     let inputs = build_inputs([
@@ -206,7 +205,7 @@ fn transition_account_id_zero() {
 
 // #[test]
 // fn basic_output_with_account_input() {
-//     let protocol_parameters = protocol_parameters();
+//     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 //     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
 //     let inputs = build_inputs([Account(
@@ -247,7 +246,7 @@ fn transition_account_id_zero() {
 
 #[test]
 fn create_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -299,7 +298,7 @@ fn create_account() {
 
 #[test]
 fn burn_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -343,7 +342,7 @@ fn burn_account() {
 
 // #[test]
 // fn not_enough_storage_deposit_for_remainder() {
-//     let protocol_parameters = protocol_parameters();
+//     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 //     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
 //     let inputs = build_inputs([Account(
@@ -388,7 +387,7 @@ fn burn_account() {
 
 #[test]
 fn missing_input_for_account_output() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -432,7 +431,7 @@ fn missing_input_for_account_output() {
 
 #[test]
 fn missing_input_for_account_output_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -489,7 +488,7 @@ fn missing_input_for_account_output_2() {
 
 #[test]
 fn missing_input_for_account_output_but_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -530,7 +529,7 @@ fn missing_input_for_account_output_but_created() {
 
 #[test]
 fn account_in_output_and_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -591,7 +590,7 @@ fn account_in_output_and_sender() {
 
 #[test]
 fn missing_ed25519_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -633,7 +632,7 @@ fn missing_ed25519_sender() {
 
 #[test]
 fn missing_ed25519_issuer_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -677,7 +676,7 @@ fn missing_ed25519_issuer_created() {
 
 #[test]
 fn missing_ed25519_issuer_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -716,7 +715,7 @@ fn missing_ed25519_issuer_transition() {
 
 #[test]
 fn missing_account_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -758,7 +757,7 @@ fn missing_account_sender() {
 
 #[test]
 fn missing_account_issuer_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -802,7 +801,7 @@ fn missing_account_issuer_created() {
 
 #[test]
 fn missing_account_issuer_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -841,7 +840,7 @@ fn missing_account_issuer_transition() {
 
 #[test]
 fn missing_nft_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -883,7 +882,7 @@ fn missing_nft_sender() {
 
 #[test]
 fn missing_nft_issuer_created() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -927,7 +926,7 @@ fn missing_nft_issuer_created() {
 
 #[test]
 fn missing_nft_issuer_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -966,7 +965,7 @@ fn missing_nft_issuer_transition() {
 
 #[test]
 fn increase_account_amount() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1021,7 +1020,7 @@ fn increase_account_amount() {
 
 #[test]
 fn decrease_account_amount() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1076,19 +1075,19 @@ fn decrease_account_amount() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None
-            ));
+                None,
+            );
         }
     });
 }
 
 #[test]
 fn prefer_basic_to_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1146,7 +1145,7 @@ fn prefer_basic_to_account() {
 
 #[test]
 fn take_amount_from_account_to_fund_basic() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1218,7 +1217,7 @@ fn take_amount_from_account_to_fund_basic() {
 
 #[test]
 fn account_burn_should_validate_account_sender() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1276,19 +1275,19 @@ fn account_burn_should_validate_account_sender() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            )
         }
     });
 }
 
 #[test]
 fn account_burn_should_validate_account_address() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1346,19 +1345,19 @@ fn account_burn_should_validate_account_address() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            )
         }
     });
 }
 
 #[test]
 fn transitioned_zero_account_id_no_longer_is_zero() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -1416,7 +1415,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
 
 #[test]
 fn two_accounts_required() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -1495,7 +1494,7 @@ fn two_accounts_required() {
 
 #[test]
 fn state_controller_sender_required() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1539,7 +1538,7 @@ fn state_controller_sender_required() {
 
 #[test]
 fn state_controller_sender_required_already_selected() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1592,7 +1591,7 @@ fn state_controller_sender_required_already_selected() {
 
 #[test]
 fn state_transition_and_required() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1634,7 +1633,7 @@ fn state_transition_and_required() {
 
 #[test]
 fn remainder_address_in_state_controller() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1674,23 +1673,24 @@ fn remainder_address_in_state_controller() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None
-            ));
+                None,
+            )
         }
     });
 }
 
 #[test]
 fn min_allot_account_mana() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = Vec::new();
     let mana_input_amount = 1_000_000;
+    let required_allotment = 7864;
 
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -1723,7 +1723,7 @@ fn min_allot_account_mana() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 500)
+    .with_min_mana_allotment(account_id_1, 2)
     .select()
     .unwrap();
 
@@ -1731,26 +1731,25 @@ fn min_allot_account_mana() {
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     assert_eq!(selected.transaction.allotments().len(), 1);
-    let mana_cost = 230_000;
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+        ManaAllotment::new(account_id_1, required_allotment).unwrap()
     );
     assert_eq!(
         selected.transaction.outputs()[1].as_account().mana(),
-        mana_input_amount - mana_cost
+        mana_input_amount - required_allotment
     );
 }
 
 #[test]
 fn min_allot_account_mana_additional() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let additional_allotment = 1000;
-    let txn_required_mana_allotment = 240_000;
+    let provided_allotment = 1000;
+    let required_allotment = 7900;
     // The account does not have enough to cover the requirement
-    let account_mana = txn_required_mana_allotment - 100;
+    let account_mana = required_allotment - 100;
     // But there is additional available mana elsewhere
     let additional_available_mana = 111;
 
@@ -1783,9 +1782,6 @@ fn min_allot_account_mana_additional() {
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
-        .add_feature(SenderFeature::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
         .finish_output()
         .unwrap()];
 
@@ -1797,8 +1793,8 @@ fn min_allot_account_mana_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 500)
-    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .with_min_mana_allotment(account_id_1, 2)
+    .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
 
@@ -1809,26 +1805,26 @@ fn min_allot_account_mana_additional() {
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, txn_required_mana_allotment).unwrap()
+        ManaAllotment::new(account_id_1, required_allotment).unwrap()
     );
     assert_eq!(
         selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
-        account_mana + additional_available_mana - txn_required_mana_allotment
+        account_mana + additional_available_mana - required_allotment
     );
 }
 
 #[test]
 fn min_allot_account_mana_cannot_select_additional() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
-    let additional_allotment = 1000;
-    let txn_required_mana_allotment = 271_000;
+    let provided_allotment = 1000;
+    let required_allotment = 7900;
     // The account does not have enough to cover the requirement
-    let account_mana = txn_required_mana_allotment - 100;
+    let account_mana = required_allotment - 100;
     // But there is additional available mana elsewhere
-    let additional_available_mana = additional_allotment + 111;
+    let additional_available_mana = 111;
 
     let inputs = [
         AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
@@ -1839,10 +1835,10 @@ fn min_allot_account_mana_cannot_select_additional() {
             .finish_output()
             .unwrap(),
         BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .with_mana(additional_available_mana)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
+            .with_mana(additional_available_mana)
             .finish_output()
             .unwrap(),
     ];
@@ -1863,8 +1859,8 @@ fn min_allot_account_mana_cannot_select_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 500)
-    .with_mana_allotments(Some((account_id_2, additional_allotment)))
+    .with_min_mana_allotment(account_id_1, 2)
+    .with_mana_allotments(Some((account_id_2, provided_allotment)))
     .with_required_inputs([*inputs[0].output_id()])
     .disable_additional_input_selection()
     .select()
@@ -1878,15 +1874,17 @@ fn min_allot_account_mana_cannot_select_additional() {
 
 #[test]
 fn min_allot_account_mana_requirement_twice() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let required_allotment = 7900;
 
     let inputs = [
         AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
-            .with_mana(1000)
+            .with_mana(required_allotment)
             .finish_output()
             .unwrap(),
         BasicOutputBuilder::new_with_amount(1_000_000)
@@ -1906,55 +1904,59 @@ fn min_allot_account_mana_requirement_twice() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = build_outputs([Basic {
-        amount: 1_000_000,
-        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        native_token: None,
-        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
-        sdruc: None,
-        timelock: None,
-        expiration: None,
-    }]);
-
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs.clone(),
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
     .with_min_mana_allotment(account_id_1, 2)
+    .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
-    assert!(selected.transaction.outputs().contains(&outputs[0]));
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id_1)
+        .unwrap();
     assert_eq!(selected.transaction.allotments().len(), 1);
-    let mana_cost = 960;
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, mana_cost).unwrap()
+        ManaAllotment::new(account_id_1, required_allotment).unwrap()
     );
-    assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 140);
+    assert_eq!(account_output.mana(), 100);
 }
 
 #[test]
 fn min_allot_account_mana_requirement_covered() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let additional_allotment = 1100;
+    let provided_allotment = 7900;
+
+    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(provided_allotment - 100)
+        .finish_output()
+        .unwrap();
+
+    // Must manually add account output with mana reduced for the manual allotment
+    let account_output = AccountOutputBuilder::from(account_input.as_account())
+        .with_mana(0)
+        .finish_output()
+        .unwrap();
 
     let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(1000)
-            .finish_output()
-            .unwrap(),
+        account_input,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1972,15 +1974,16 @@ fn min_allot_account_mana_requirement_covered() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = build_outputs([Basic {
+    let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
-        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sender: None,
         sdruc: None,
         timelock: None,
         expiration: None,
     }]);
+    outputs.push(account_output);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -1991,7 +1994,7 @@ fn min_allot_account_mana_requirement_covered() {
         protocol_parameters,
     )
     .with_min_mana_allotment(account_id_1, 2)
-    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
 
@@ -2001,31 +2004,39 @@ fn min_allot_account_mana_requirement_covered() {
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, additional_allotment).unwrap()
+        ManaAllotment::new(account_id_1, provided_allotment).unwrap()
     );
     assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 0);
 }
 
 #[test]
 fn min_allot_account_mana_requirement_covered_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let additional_allotment = 1100;
+    let provided_allotment = 7900;
+
+    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(100)
+        .finish_output()
+        .unwrap();
+
+    // Must manually add account output with mana reduced for the manual allotment
+    let account_output = AccountOutputBuilder::from(account_input.as_account())
+        .with_mana(0)
+        .finish_output()
+        .unwrap();
 
     let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(100)
-            .finish_output()
-            .unwrap(),
+        account_input,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
-            .with_mana(1000)
+            .with_mana(provided_allotment - 100)
             .finish_output()
             .unwrap(),
     ];
@@ -2038,15 +2049,16 @@ fn min_allot_account_mana_requirement_covered_2() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = build_outputs([Basic {
+    let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
-        sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
+        sender: None,
         sdruc: None,
         timelock: None,
         expiration: None,
     }]);
+    outputs.push(account_output);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -2057,7 +2069,7 @@ fn min_allot_account_mana_requirement_covered_2() {
         protocol_parameters,
     )
     .with_min_mana_allotment(account_id_1, 2)
-    .with_mana_allotments(Some((account_id_1, additional_allotment)))
+    .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
 
@@ -2067,14 +2079,14 @@ fn min_allot_account_mana_requirement_covered_2() {
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, additional_allotment).unwrap()
+        ManaAllotment::new(account_id_1, provided_allotment).unwrap()
     );
     assert_eq!(selected.transaction.outputs()[1].as_account().mana(), 0);
 }
 
 #[test]
 fn implicit_account_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
@@ -2083,7 +2095,7 @@ fn implicit_account_transition() {
                 **Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().as_ed25519(),
             ),
         )))
-        .with_mana(961)
+        .with_mana(7871)
         .finish_output()
         .unwrap()];
     let inputs = inputs
@@ -2125,8 +2137,120 @@ fn implicit_account_transition() {
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, 960).unwrap()
+        ManaAllotment::new(account_id_1, 7870).unwrap()
     );
     // One remainder Mana
     assert_eq!(selected.transaction.outputs()[0].mana(), 1);
+}
+
+#[test]
+fn auto_transition_account_less_than_min() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let small_amount = 5;
+
+    let inputs = build_inputs(
+        [(
+            Account {
+                amount: small_amount,
+                account_id: account_id_1,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                sender: None,
+                issuer: None,
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap_err();
+
+    let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+
+    assert_eq!(
+        selected,
+        Error::InsufficientAmount {
+            found: small_amount,
+            required: min_amount
+        },
+    );
+}
+
+#[test]
+fn auto_transition_account_less_than_min_additional() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let small_amount = 5;
+
+    let inputs = build_inputs(
+        [
+            (
+                Account {
+                    amount: small_amount,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    native_token: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id_1)
+        .unwrap();
+    assert_eq!(account_output.amount(), min_amount);
 }

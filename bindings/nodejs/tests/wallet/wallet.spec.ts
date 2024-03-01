@@ -4,7 +4,13 @@
 import 'reflect-metadata';
 
 import { describe, it, expect } from '@jest/globals';
-import { Wallet, CoinType, WalletOptions, SecretManager } from '../../lib/';
+import {
+    Wallet,
+    CoinType,
+    WalletOptions,
+    SecretManager,
+    Utils,
+} from '../../lib/';
 
 describe('Wallet', () => {
     it('create wallet', async () => {
@@ -20,7 +26,9 @@ describe('Wallet', () => {
 
         const secretManager = SecretManager.create(strongholdSecretManager);
 
-        await secretManager.storeMnemonic('vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',);
+        await secretManager.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const wallet_address = await secretManager.generateEd25519Addresses({
             coinType: CoinType.IOTA,
@@ -37,6 +45,7 @@ describe('Wallet', () => {
             storagePath: './test-create-wallet',
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             bipPath: {
                 coinType: CoinType.IOTA,
@@ -44,13 +53,11 @@ describe('Wallet', () => {
             secretManager: strongholdSecretManager,
         };
 
-
         const wallet = await Wallet.create(walletOptions);
 
         await wallet.destroy();
         removeDir(storagePath);
     }, 20000);
-
 
     it('recreate wallet', async () => {
         let storagePath = 'test-recreate-wallet';
@@ -65,7 +72,9 @@ describe('Wallet', () => {
 
         const secretManager = SecretManager.create(strongholdSecretManager);
 
-        await secretManager.storeMnemonic('vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',);
+        await secretManager.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const wallet_address = await secretManager.generateEd25519Addresses({
             coinType: CoinType.IOTA,
@@ -82,6 +91,7 @@ describe('Wallet', () => {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             bipPath: {
                 coinType: CoinType.IOTA,
@@ -89,12 +99,11 @@ describe('Wallet', () => {
             secretManager: strongholdSecretManager,
         };
 
-
         const wallet = await Wallet.create(walletOptions);
 
         const client = await wallet.getClient();
         const hrp = await client.getBech32Hrp();
-        expect(hrp).toEqual("smr");
+        expect(hrp).toEqual('smr');
 
         await wallet.destroy();
 
@@ -104,7 +113,7 @@ describe('Wallet', () => {
         // expect(accounts.length).toStrictEqual(0);
 
         await recreatedWallet.destroy();
-        removeDir(storagePath)
+        removeDir(storagePath);
     }, 20000);
 
     it('error after destroy', async () => {
@@ -116,8 +125,10 @@ describe('Wallet', () => {
                 snapshotPath: `./${storagePath}/wallet.stronghold`,
                 password: `A12345678*`,
             },
-        }
-        const secretManager = await SecretManager.create(strongholdSecretManager);
+        };
+        const secretManager = await SecretManager.create(
+            strongholdSecretManager,
+        );
         await secretManager.storeMnemonic(
             'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
         );
@@ -137,6 +148,7 @@ describe('Wallet', () => {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
+                protocolParameters: Utils.iotaMainnetProtocolParameters(),
             },
             bipPath: {
                 coinType: CoinType.IOTA,
@@ -163,7 +175,7 @@ describe('Wallet', () => {
         }
         removeDir(storagePath);
     }, 35000);
-})
+});
 
 function removeDir(storagePath: string) {
     const fs = require('fs');

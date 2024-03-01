@@ -3,11 +3,14 @@
 
 use derive_more::From;
 
-use crate::types::block::{output::StorageScore, slot::SlotIndex, Error};
+use crate::types::block::{
+    output::{unlock_condition::UnlockConditionError, StorageScore},
+    slot::SlotIndex,
+};
 
 /// Defines a slot index until which the output can not be unlocked.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = UnlockConditionError)]
 pub struct TimelockUnlockCondition(#[packable(verify_with = verify_slot_index)] SlotIndex);
 
 impl TimelockUnlockCondition {
@@ -16,10 +19,10 @@ impl TimelockUnlockCondition {
 
     /// Creates a new [`TimelockUnlockCondition`].
     #[inline(always)]
-    pub fn new(slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
+    pub fn new(slot_index: impl Into<SlotIndex>) -> Result<Self, UnlockConditionError> {
         let slot_index = slot_index.into();
 
-        verify_slot_index::<true>(&slot_index)?;
+        verify_slot_index(&slot_index)?;
 
         Ok(Self(slot_index))
     }
@@ -39,9 +42,9 @@ impl TimelockUnlockCondition {
 impl StorageScore for TimelockUnlockCondition {}
 
 #[inline]
-fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex) -> Result<(), Error> {
-    if VERIFY && *slot_index == 0 {
-        Err(Error::TimelockUnlockConditionZero)
+fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), UnlockConditionError> {
+    if *slot_index == 0 {
+        Err(UnlockConditionError::TimelockUnlockConditionZero)
     } else {
         Ok(())
     }
@@ -52,7 +55,6 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -72,10 +74,10 @@ pub(crate) mod dto {
     }
 
     impl TryFrom<TimelockUnlockConditionDto> for TimelockUnlockCondition {
-        type Error = Error;
+        type Error = UnlockConditionError;
 
-        fn try_from(value: TimelockUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.slot).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
+        fn try_from(value: TimelockUnlockConditionDto) -> Result<Self, UnlockConditionError> {
+            Self::new(value.slot)
         }
     }
 

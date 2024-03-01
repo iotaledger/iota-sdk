@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, List, Optional
 from iota_sdk.common import custom_encoder
-
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
@@ -50,11 +49,29 @@ class Utils:
         })
 
     @staticmethod
+    def address_to_bech32(address: Address, bech32_hrp: str) -> str:
+        """Convert an address to its bech32 representation.
+        """
+        return _call_method('addressToBech32', {
+            'address': address,
+            'bech32Hrp': bech32_hrp
+        })
+
+    @staticmethod
     def account_id_to_bech32(account_id: HexStr, bech32_hrp: str) -> str:
         """Convert an account id to a Bech32 encoded address.
         """
         return _call_method('accountIdToBech32', {
             'accountId': account_id,
+            'bech32Hrp': bech32_hrp
+        })
+
+    @staticmethod
+    def anchor_id_to_bech32(anchor_id: HexStr, bech32_hrp: str) -> str:
+        """Convert an anchor id to a Bech32 encoded address.
+        """
+        return _call_method('anchorIdToBech32', {
+            'anchorId': anchor_id,
             'bech32Hrp': bech32_hrp
         })
 
@@ -151,7 +168,7 @@ class Utils:
                           index: int) -> OutputId:
         """Compute the output id from transaction id and output index.
         """
-        return OutputId.from_string(_call_method('computeOutputId', {
+        return OutputId(_call_method('computeOutputId', {
             'id': transaction_id,
             'index': index,
         }))
@@ -223,10 +240,10 @@ class Utils:
 
     @staticmethod
     def verify_transaction_semantic(
-            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None, mana_rewards: Optional[dict[OutputId, int]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None, mana_rewards: Optional[dict[OutputId, int]] = None):
         """Verifies the semantic of a transaction.
         """
-        return _call_method('verifyTransactionSemantic', {
+        _call_method('verifyTransactionSemantic', {
             'transaction': transaction,
             'inputs': inputs,
             'unlocks': unlocks,
@@ -293,6 +310,20 @@ class Utils:
         return bytes(_call_method('blockBytes', {
             'block': block.as_dict(),
         }))
+
+    @staticmethod
+    def iota_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for IOTA mainnet.
+        """
+        return ProtocolParameters.from_dict(
+            _call_method('iotaMainnetProtocolParameters'))
+
+    @staticmethod
+    def shimmer_mainnet_protocol_parameters() -> ProtocolParameters:
+        """Returns sample protocol parameters for Shimmer mainnet.
+        """
+        return ProtocolParameters.from_dict(
+            _call_method('shimmerMainnetProtocolParameters'))
 
 
 class UtilsError(Exception):

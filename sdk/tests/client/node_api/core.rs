@@ -5,8 +5,9 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters, Client,
-        NodeInfoWrapper,
+        api::GetAddressesOptions,
+        node_api::{core::routes::NodeInfoResponse, indexer::query_parameters::BasicOutputQueryParameters},
+        Client,
     },
     types::{
         api::core::TransactionState,
@@ -36,7 +37,7 @@ async fn test_get_health() {
 #[ignore]
 #[tokio::test]
 async fn test_get_info() {
-    let r = Client::get_node_info(NODE_LOCAL, None).await.unwrap();
+    let r = Client::get_info(NODE_LOCAL, None).await.unwrap();
     println!("{r:#?}");
 }
 
@@ -157,7 +158,7 @@ async fn test_get_output_raw() {
     let output_id = OutputId::new(transaction_id, 0);
 
     let output = client.get_output(&output_id).await.unwrap();
-    let output_raw = Output::unpack_verified(
+    let output_raw = Output::unpack_bytes_verified(
         client.get_output_raw(&output_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
@@ -184,7 +185,7 @@ async fn test_get_included_block_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
-    let block_raw = Block::unpack_verified(
+    let block_raw = Block::unpack_bytes_verified(
         client.get_included_block_raw(&transaction_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
@@ -199,15 +200,15 @@ async fn test_call_plugin_route() {
     let c = setup_client_with_node_health_ignored().await;
 
     // we call the "custom" plugin "node info"
-    let plugin_res: NodeInfoWrapper = c
+    let plugin_res: NodeInfoResponse = c
         .call_plugin_route("api/core/v2/", "GET", "info", vec![], None)
         .await
         .unwrap();
 
-    let info = c.get_info().await.unwrap();
+    let node_info = c.get_node_info().await.unwrap();
 
     // Just check name as info can change between 2 calls
-    assert_eq!(plugin_res.node_info.name, info.node_info.name);
+    assert_eq!(plugin_res.info.name, node_info.info.name);
 }
 
 #[ignore]

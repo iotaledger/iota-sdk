@@ -5,19 +5,23 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
-    types::block::{address::Address, output::TokenId, protocol::protocol_parameters},
+    types::block::{
+        address::Address,
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
+        protocol::{iota_mainnet_protocol_parameters, ProtocolParameters},
+    },
 };
 use pretty_assertions::assert_eq;
 use primitive_types::U256;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0,
     SLOT_COMMITMENT_ID, SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
 };
 
 #[test]
 fn two_native_tokens_one_needed() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -76,7 +80,7 @@ fn two_native_tokens_one_needed() {
 
 #[test]
 fn two_native_tokens_both_needed_plus_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -144,19 +148,19 @@ fn two_native_tokens_both_needed_plus_remainder() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 2_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                Some((TOKEN_ID_2, 50))
-            ));
+                Some((TOKEN_ID_2, 50)),
+            );
         }
     });
 }
 
 #[test]
 fn three_inputs_two_needed_plus_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -225,19 +229,19 @@ fn three_inputs_two_needed_plus_remainder() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                Some((TOKEN_ID_1, 80))
-            ));
+                Some((TOKEN_ID_1, 80)),
+            );
         }
     });
 }
 
 #[test]
 fn three_inputs_two_needed_no_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -307,7 +311,7 @@ fn three_inputs_two_needed_no_remainder() {
 
 #[test]
 fn insufficient_native_tokens_one_input() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -355,7 +359,7 @@ fn insufficient_native_tokens_one_input() {
 
 #[test]
 fn insufficient_native_tokens_three_inputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -429,7 +433,7 @@ fn insufficient_native_tokens_three_inputs() {
 
 #[test]
 fn burn_and_send_at_the_same_time() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -491,19 +495,19 @@ fn burn_and_send_at_the_same_time() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                Some((TOKEN_ID_1, 40))
-            ));
+                Some((TOKEN_ID_1, 40)),
+            );
         }
     });
 }
 
 #[test]
 fn burn_one_input_no_output() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -535,17 +539,17 @@ fn burn_one_input_no_output() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 1);
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[0],
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        Some((TOKEN_ID_1, 50))
-    ));
+        Some((TOKEN_ID_1, 50)),
+    );
 }
 
 #[test]
 fn multiple_native_tokens() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -604,7 +608,7 @@ fn multiple_native_tokens() {
 
 #[test]
 fn insufficient_native_tokens() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -652,7 +656,7 @@ fn insufficient_native_tokens() {
 
 #[test]
 fn insufficient_native_tokens_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -700,7 +704,7 @@ fn insufficient_native_tokens_2() {
 
 #[test]
 fn insufficient_amount_for_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -727,6 +731,8 @@ fn insufficient_amount_for_remainder() {
         expiration: None,
     }]);
 
+    let nt_remainder_min_storage_deposit = nt_remainder_min_storage_deposit(&protocol_parameters);
+
     let selected = InputSelection::new(
         inputs,
         outputs,
@@ -737,18 +743,18 @@ fn insufficient_amount_for_remainder() {
     )
     .select();
 
-    assert!(matches!(
-        selected,
-        Err(Error::InsufficientAmount {
+    assert_eq!(
+        selected.unwrap_err(),
+        Error::InsufficientAmount {
             found: 1_000_000,
-            required: 1_106_000,
-        })
-    ));
+            required: 1_000_000 + nt_remainder_min_storage_deposit,
+        }
+    );
 }
 
 #[test]
 fn single_output_native_token_no_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -792,7 +798,7 @@ fn single_output_native_token_no_remainder() {
 
 #[test]
 fn single_output_native_token_remainder_1() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -833,17 +839,17 @@ fn single_output_native_token_remainder_1() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[0],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        Some((TOKEN_ID_1, 50))
-    ));
+        Some((TOKEN_ID_1, 50)),
+    );
 }
 
 #[test]
 fn single_output_native_token_remainder_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [(
@@ -884,17 +890,17 @@ fn single_output_native_token_remainder_2() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None
-    ));
+        None,
+    );
 }
 
 #[test]
 fn two_basic_outputs_1() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -950,17 +956,17 @@ fn two_basic_outputs_1() {
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 100)),
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_2() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1016,17 +1022,17 @@ fn two_basic_outputs_2() {
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 50)),
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_3() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1082,17 +1088,17 @@ fn two_basic_outputs_3() {
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 25)),
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_4() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1148,17 +1154,17 @@ fn two_basic_outputs_4() {
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_5() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1214,17 +1220,17 @@ fn two_basic_outputs_5() {
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_6() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1279,17 +1285,17 @@ fn two_basic_outputs_6() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         1_500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some((TOKEN_ID_1, 50)),
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_7() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1344,17 +1350,17 @@ fn two_basic_outputs_7() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         1_500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-    ));
+    );
 }
 
 #[test]
 fn two_basic_outputs_8() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1416,7 +1422,7 @@ fn two_basic_outputs_8() {
 
 #[test]
 fn two_basic_outputs_native_tokens_not_needed() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1472,17 +1478,17 @@ fn two_basic_outputs_native_tokens_not_needed() {
     assert!(selected.inputs_data.contains(&inputs[1]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(is_remainder_or_return(
+    assert_remainder_or_return(
         &selected.transaction.outputs()[1],
         500_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-    ));
+    );
 }
 
 #[test]
 fn multiple_remainders() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1547,6 +1553,8 @@ fn multiple_remainders() {
         expiration: None,
     }]);
 
+    let nt_remainder_min_storage_deposit = nt_remainder_min_storage_deposit(&protocol_parameters);
+
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
@@ -1561,24 +1569,37 @@ fn multiple_remainders() {
     assert_eq!(selected.inputs_data.len(), 4);
     assert_eq!(selected.transaction.outputs().len(), 3);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    let nt_remainder_min_storage_deposit = 106000;
+
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(
-                is_remainder_or_return(
+            if output.native_token().unwrap().token_id().to_string() == TOKEN_ID_1 {
+                assert_remainder_or_return(
                     output,
                     nt_remainder_min_storage_deposit,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                    Some((TOKEN_ID_1, 300))
-                ) || is_remainder_or_return(
+                    Some((TOKEN_ID_1, 300)),
+                );
+            } else {
+                assert_remainder_or_return(
                     output,
                     5_000_000 - nt_remainder_min_storage_deposit,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                    Some((TOKEN_ID_2, 100))
-                )
-            );
+                    Some((TOKEN_ID_2, 100)),
+                );
+            }
         }
     });
+}
+
+pub fn nt_remainder_min_storage_deposit(protocol_parameters: &ProtocolParameters) -> u64 {
+    BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .add_unlock_condition(AddressUnlockCondition::from(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_native_token(NativeToken::new(TokenId::from_str(TOKEN_ID_1).unwrap(), 1).unwrap())
+        .finish_output()
+        .unwrap()
+        .amount()
 }
 
 // #[test]

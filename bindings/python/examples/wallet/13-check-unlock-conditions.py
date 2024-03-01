@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import OutputParams, Utils, Wallet, WalletOptions
 
 load_dotenv()

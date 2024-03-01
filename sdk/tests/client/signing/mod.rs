@@ -17,7 +17,6 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Result,
     },
     types::block::{
         address::{AccountAddress, Address, NftAddress},
@@ -25,7 +24,7 @@ use iota_sdk::{
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         slot::{SlotCommitmentHash, SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
@@ -39,13 +38,13 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn all_combined() -> Result<()> {
+async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(
         // mnemonic needs to be hardcoded to make the ordering deterministic
         "mirror add nothing long orphan hat this rough scare gallery fork twelve old shrug voyage job table obscure mimic holiday possible proud giraffe fan".to_owned(),
     )?;
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let ed25519_bech32_addresses = secret_manager
         .generate_ed25519_addresses(
@@ -487,16 +486,12 @@ async fn all_combined() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
-
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
 
     Ok(())
 }

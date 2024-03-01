@@ -12,14 +12,17 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         context_input::{CommitmentContextInput, RewardContextInput},
         input::{Input, UtxoInput},
         output::DelegationId,
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
-        protocol::protocol_parameters,
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilityFlag},
+            SignedTransactionPayload,
+        },
+        protocol::iota_mainnet_protocol_parameters,
         rand::{address::rand_account_address, output::rand_delegation_id, slot::rand_slot_commitment_id},
         semantic::TransactionFailureReason,
         unlock::SignatureUnlock,
@@ -33,7 +36,7 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn valid_creation() -> Result<()> {
+async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -46,7 +49,7 @@ async fn valid_creation() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id = rand_slot_commitment_id();
     let slot_index = slot_commitment_id.slot_index();
 
@@ -86,6 +89,7 @@ async fn valid_creation() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_context_inputs([CommitmentContextInput::new(slot_commitment_id).into()])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -106,22 +110,18 @@ async fn valid_creation() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
-
     Ok(())
 }
 
 #[tokio::test]
-async fn creation_missing_commitment_input() -> Result<()> {
+async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -134,7 +134,7 @@ async fn creation_missing_commitment_input() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id = rand_slot_commitment_id();
     let slot_index = slot_commitment_id.slot_index();
 
@@ -173,6 +173,7 @@ async fn creation_missing_commitment_input() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -198,18 +199,18 @@ async fn creation_missing_commitment_input() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
     assert_eq!(
         conflict,
-        Some(TransactionFailureReason::DelegationCommitmentInputMissing)
+        Err(TransactionFailureReason::DelegationCommitmentInputMissing)
     );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn non_null_id_creation() -> Result<()> {
+async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -222,7 +223,7 @@ async fn non_null_id_creation() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id = rand_slot_commitment_id();
     let slot_index = slot_commitment_id.slot_index();
 
@@ -261,6 +262,7 @@ async fn non_null_id_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -286,15 +288,15 @@ async fn non_null_id_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::NewChainOutputHasNonZeroedId));
+    assert_eq!(conflict, Err(TransactionFailureReason::NewChainOutputHasNonZeroedId));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn mismatch_amount_creation() -> Result<()> {
+async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -307,7 +309,7 @@ async fn mismatch_amount_creation() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id = rand_slot_commitment_id();
     let slot_index = slot_commitment_id.slot_index();
 
@@ -346,6 +348,7 @@ async fn mismatch_amount_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -371,15 +374,15 @@ async fn mismatch_amount_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationAmountMismatch));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationAmountMismatch));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn non_zero_end_epoch_creation() -> Result<()> {
+async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -392,7 +395,7 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id = rand_slot_commitment_id();
     let slot_index = slot_commitment_id.slot_index();
 
@@ -431,6 +434,7 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -456,15 +460,15 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationEndEpochNotZero));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationEndEpochNotZero));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn invalid_start_epoch_creation() -> Result<()> {
+async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -477,7 +481,7 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id = rand_slot_commitment_id();
     let slot_index = slot_commitment_id.slot_index();
 
@@ -516,6 +520,7 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .with_context_inputs([CommitmentContextInput::new(slot_commitment_id).into()])
         .finish_with_params(&protocol_parameters)?;
 
@@ -542,15 +547,15 @@ async fn invalid_start_epoch_creation() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationStartEpochInvalid));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationStartEpochInvalid));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_not_null_id() -> Result<()> {
+async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -563,7 +568,7 @@ async fn delay_not_null_id() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -614,6 +619,7 @@ async fn delay_not_null_id() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -639,18 +645,18 @@ async fn delay_not_null_id() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
     assert_eq!(
         conflict,
-        Some(TransactionFailureReason::DelegationOutputTransitionedTwice)
+        Err(TransactionFailureReason::DelegationOutputTransitionedTwice)
     );
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_modified_amount() -> Result<()> {
+async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -663,7 +669,7 @@ async fn delay_modified_amount() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -714,6 +720,7 @@ async fn delay_modified_amount() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -739,15 +746,15 @@ async fn delay_modified_amount() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_modified_validator() -> Result<()> {
+async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -760,7 +767,7 @@ async fn delay_modified_validator() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -811,6 +818,7 @@ async fn delay_modified_validator() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -836,15 +844,15 @@ async fn delay_modified_validator() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_modified_start_epoch() -> Result<()> {
+async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -857,7 +865,7 @@ async fn delay_modified_start_epoch() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -908,6 +916,7 @@ async fn delay_modified_start_epoch() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -933,15 +942,15 @@ async fn delay_modified_start_epoch() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationModified));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationModified));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
+async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -954,7 +963,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -1005,6 +1014,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -1030,15 +1040,15 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationEndEpochInvalid));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationEndEpochInvalid));
 
     Ok(())
 }
 
 #[tokio::test]
-async fn destroy_null_id() -> Result<()> {
+async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1051,7 +1061,7 @@ async fn destroy_null_id() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -1100,6 +1110,7 @@ async fn destroy_null_id() -> Result<()> {
             CommitmentContextInput::new(slot_commitment_id_2).into(),
             RewardContextInput::new(0)?.into(),
         ])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let mut mana_rewards = BTreeMap::default();
@@ -1123,22 +1134,18 @@ async fn destroy_null_id() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
-
     Ok(())
 }
 
 #[tokio::test]
-async fn destroy_reward_missing() -> Result<()> {
+async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1151,7 +1158,7 @@ async fn destroy_reward_missing() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_commitment_id_1 = rand_slot_commitment_id();
     let slot_index_1 = slot_commitment_id_1.slot_index();
     let slot_commitment_id_2 = rand_slot_commitment_id()
@@ -1197,6 +1204,7 @@ async fn destroy_reward_missing() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index_2 + 1)
         .with_context_inputs([CommitmentContextInput::new(slot_commitment_id_2).into()])
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -1222,9 +1230,9 @@ async fn destroy_reward_missing() -> Result<()> {
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
-    )?;
+    );
 
-    assert_eq!(conflict, Some(TransactionFailureReason::DelegationRewardInputMissing));
+    assert_eq!(conflict, Err(TransactionFailureReason::DelegationRewardInputMissing));
 
     Ok(())
 }

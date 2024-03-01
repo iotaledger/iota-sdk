@@ -11,7 +11,8 @@
 use iota_sdk::{
     client::{api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager},
     crypto::keys::bip44::Bip44,
-    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
+    types::block::address::Bech32Address,
+    wallet::{ClientOptions, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -24,7 +25,7 @@ const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpu
 const SEND_AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -35,7 +36,7 @@ async fn main() -> Result<()> {
     let params = [SendParams::new(SEND_AMOUNT, RECV_ADDRESS)?];
 
     // Recovers addresses from example `0_address_generation`.
-    let address = read_address_from_file().await?.into_bech32();
+    let address = read_address_from_file().await?;
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
@@ -44,8 +45,8 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_address(address)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
@@ -71,7 +72,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_address_from_file() -> Result<Bip44Address> {
+async fn read_address_from_file() -> Result<Bech32Address, Box<dyn std::error::Error>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESS_FILE_PATH).await?);
@@ -81,7 +82,7 @@ async fn read_address_from_file() -> Result<Bip44Address> {
     Ok(serde_json::from_str(&json)?)
 }
 
-async fn write_data_to_file(data: impl serde::Serialize, path: &str) -> Result<()> {
+async fn write_data_to_file(data: impl serde::Serialize, path: &str) -> Result<(), Box<dyn std::error::Error>> {
     use tokio::io::AsyncWriteExt;
 
     let json = serde_json::to_string_pretty(&data)?;

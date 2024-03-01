@@ -9,7 +9,7 @@ import {
     TokenId,
 } from '../block/id';
 import { DecayedMana, HexEncodedString, u256, u64 } from '../utils';
-import { IClientOptions } from '../client';
+import { ClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
 import { Bech32Address } from '../block';
 
@@ -22,7 +22,7 @@ export interface WalletOptions {
     /** The the BIP44 path of the wallet. */
     bipPath?: Bip44;
     /** The node client options. */
-    clientOptions?: IClientOptions;
+    clientOptions?: ClientOptions;
     /** The secret manager to use. */
     secretManager?: SecretManagerType;
     /** The path to the wallet database. */
@@ -131,6 +131,8 @@ export interface WalletSyncOptions {
     accountOutputs?: boolean;
     /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
+    /** Whether to sync delegation outputs. */
+    delegationOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an account output. */
@@ -139,10 +141,12 @@ export interface AccountSyncOptions {
     basicOutputs?: boolean;
     /** Whether to sync Account outputs. */
     accountOutputs?: boolean;
-    /** Whether to sync NFT outputs. */
-    nftOutputs?: boolean;
     /** Whether to sync foundry outputs. */
     foundryOutputs?: boolean;
+    /** Whether to sync NFT outputs. */
+    nftOutputs?: boolean;
+    /** Whether to sync delegation outputs. */
+    delegationOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an nft output. */
@@ -153,6 +157,8 @@ export interface NftSyncOptions {
     accountOutputs?: boolean;
     /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
+    /** Whether to sync delegation outputs. */
+    delegationOutputs?: boolean;
 }
 
 /** Options to filter outputs */

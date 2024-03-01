@@ -53,7 +53,7 @@ fn pack_unpack_valid() {
     assert_eq!(packed_block_id.len(), block_id.packed_len());
     assert_eq!(
         block_id,
-        PackableExt::unpack_verified(packed_block_id.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_block_id.as_slice(), &()).unwrap()
     );
 }
 
@@ -77,53 +77,53 @@ fn protocol_parameters() -> ProtocolParameters {
     serde_json::from_value::<ProtocolParameters>(params_json.clone()).unwrap()
 }
 
-// #[test]
-// fn basic_block_tagged_data_payload_id() {
-//     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
-//     let protocol_parameters = protocol_parameters();
-//     let file = std::fs::read_to_string("./tests/types/fixtures/basic_block_tagged_data_payload.json").unwrap();
-//     let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
-//     let block_json = &json["block"];
-//     let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
-//     let block = Block::try_from_dto(block_dto).unwrap();
-//     let block_bytes = block.pack_to_vec();
-//     let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
+#[test]
+fn basic_block_tagged_data_payload_id() {
+    // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
+    let protocol_parameters = protocol_parameters();
+    let file = std::fs::read_to_string("./tests/types/fixtures/basic_block_tagged_data_payload.json").unwrap();
+    let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
+    let block_json = &json["block"];
+    let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
+    let block = Block::try_from_dto(block_dto).unwrap();
+    let block_bytes = block.pack_to_vec();
+    let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
 
-//     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
-//     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-//     assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
-//     assert_eq!(block_work_score, json["workScore"]);
-// }
+    assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
+    assert_eq!(block, Block::unpack_bytes_unverified(block_bytes).unwrap());
+    assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
+    assert_eq!(block_work_score, json["workScore"]);
+}
 
-// #[test]
-// fn basic_block_transaction_payload_id() {
-//     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
-//     let protocol_parameters = protocol_parameters();
-//     let file = std::fs::read_to_string("./tests/types/fixtures/basic_block_transaction_payload.json").unwrap();
-//     let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
-//     let block_json = &json["block"];
-//     let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
-//     let block = Block::try_from_dto(block_dto).unwrap();
-//     let block_bytes = block.pack_to_vec();
-//     let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
+#[test]
+fn basic_block_transaction_payload_id() {
+    // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
+    let protocol_parameters = protocol_parameters();
+    let file = std::fs::read_to_string("./tests/types/fixtures/basic_block_transaction_payload.json").unwrap();
+    let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
+    let block_json = &json["block"];
+    let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
+    let block = Block::try_from_dto(block_dto).unwrap();
+    let block_bytes = block.pack_to_vec();
+    let block_work_score = block.as_basic().work_score(protocol_parameters.work_score_parameters());
 
-//     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
-//     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-//     assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
-//     assert_eq!(block_work_score, json["workScore"]);
-// }
+    assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
+    assert_eq!(block, Block::unpack_bytes_unverified(block_bytes).unwrap());
+    assert_eq!(block.id(&protocol_parameters).to_string(), json["id"]);
+    assert_eq!(block_work_score, json["workScore"]);
+}
 
-// #[test]
-// fn validation_block_id() {
-//     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#validation-block-id
-//     let file = std::fs::read_to_string("./tests/types/fixtures/validation_block.json").unwrap();
-//     let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
-//     let block_json = &json["block"];
-//     let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
-//     let block = Block::try_from_dto(block_dto).unwrap();
-//     let block_bytes = block.pack_to_vec();
+#[test]
+fn validation_block_id() {
+    // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#validation-block-id
+    let file = std::fs::read_to_string("./tests/types/fixtures/validation_block.json").unwrap();
+    let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
+    let block_json = &json["block"];
+    let block_dto = serde_json::from_value::<BlockDto>(block_json.clone()).unwrap();
+    let block = Block::try_from_dto(block_dto).unwrap();
+    let block_bytes = block.pack_to_vec();
 
-//     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
-//     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-//     assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
-// }
+    assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
+    assert_eq!(block, Block::unpack_bytes_unverified(block_bytes).unwrap());
+    assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
+}

@@ -19,12 +19,13 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
             UnlockConditions,
         },
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        ChainId, DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
+        StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
+    slot::SlotIndex,
     unlock::Unlock,
-    Error,
 };
 
 crate::impl_id!(
@@ -103,6 +104,11 @@ impl AnchorOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), anchor_id)
     }
 
+    /// Creates an [`AnchorOutputBuilder`] with a provided amount, unless it is below the minimum.
+    pub fn new_with_amount_or_minimum(amount: u64, anchor_id: AnchorId, params: StorageScoreParameters) -> Self {
+        Self::new(OutputBuilderAmount::AmountOrMinimum(amount, params), anchor_id)
+    }
+
     /// Creates an [`AnchorOutputBuilder`] with provided storage score parameters.
     /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
@@ -126,6 +132,13 @@ impl AnchorOutputBuilder {
     #[inline(always)]
     pub fn with_amount(mut self, amount: u64) -> Self {
         self.amount = OutputBuilderAmount::Amount(amount);
+        self
+    }
+
+    /// Sets the amount to the provided value, unless it is below the minimum.
+    #[inline(always)]
+    pub fn with_amount_or_minimum(mut self, amount: u64, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::AmountOrMinimum(amount, params);
         self
     }
 
@@ -242,7 +255,7 @@ impl AnchorOutputBuilder {
     }
 
     ///
-    pub fn finish(self) -> Result<AnchorOutput, Error> {
+    pub fn finish(self) -> Result<AnchorOutput, OutputError> {
         verify_index_counter(&self.anchor_id, self.state_index)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -275,6 +288,7 @@ impl AnchorOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::AmountOrMinimum(amount, params) => output.minimum_amount(params).max(amount),
             OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
@@ -282,7 +296,7 @@ impl AnchorOutputBuilder {
     }
 
     /// Finishes the [`AnchorOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, OutputError> {
         Ok(Output::Anchor(self.finish()?))
     }
 }
@@ -451,6 +465,40 @@ impl AnchorOutput {
         Ok(())
     }
 
+    /// Returns all the mana held by the output, which is potential + stored, all decayed.
+    pub fn available_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<u64, OutputError> {
+        let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
+
+        decayed_mana
+            .stored
+            .checked_add(decayed_mana.potential)
+            .ok_or(OutputError::ConsumedManaOverflow)
+    }
+
+    /// Returns the decayed stored and potential mana of the output.
+    pub fn decayed_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<DecayedMana, OutputError> {
+        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
+        let generation_amount = self.amount().saturating_sub(min_deposit);
+        let stored_mana = protocol_parameters.mana_with_decay(self.mana(), creation_index, target_index)?;
+        let potential_mana =
+            protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
+
+        Ok(DecayedMana {
+            stored: stored_mana,
+            potential: potential_mana,
+        })
+    }
+
     // Transition, just without full ValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
@@ -508,7 +556,7 @@ impl WorkScore for AnchorOutput {
 impl MinimumOutputAmount for AnchorOutput {}
 
 impl Packable for AnchorOutput {
-    type UnpackError = Error;
+    type UnpackError = OutputError;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -523,40 +571,44 @@ impl Packable for AnchorOutput {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let mana = u64::unpack_inner(unpacker, visitor).coerce()?;
 
-        let anchor_id = AnchorId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let anchor_id = AnchorId::unpack_inner(unpacker, visitor).coerce()?;
+        let state_index = u32::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_index_counter(&anchor_id, state_index).map_err(UnpackError::Packable)?;
         }
 
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions, &anchor_id).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
-                .map_err(UnpackError::Packable)?;
-            verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
+                .map_err(UnpackError::Packable)
+                .coerce()?;
+            verify_allowed_features(&features, Self::ALLOWED_FEATURES)
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
-        let immutable_features = Features::unpack::<_, VERIFY>(unpacker, &())?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
-        if VERIFY {
+        if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
-                .map_err(UnpackError::Packable)?;
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
         Ok(Self {
@@ -572,36 +624,39 @@ impl Packable for AnchorOutput {
 }
 
 #[inline]
-fn verify_index_counter(anchor_id: &AnchorId, state_index: u32) -> Result<(), Error> {
+fn verify_index_counter(anchor_id: &AnchorId, state_index: u32) -> Result<(), OutputError> {
     if anchor_id.is_null() && state_index != 0 {
-        Err(Error::NonZeroStateIndexOrFoundryCounter)
+        Err(OutputError::NonZeroStateIndexOrFoundryCounter)
     } else {
         Ok(())
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &AnchorId) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &AnchorId) -> Result<(), OutputError> {
     if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
         if let Address::Anchor(anchor_address) = unlock_condition.address() {
             if anchor_address.anchor_id() == anchor_id {
-                return Err(Error::SelfControlledAnchorOutput(*anchor_id));
+                return Err(OutputError::SelfControlledAnchorOutput(*anchor_id));
             }
         }
     } else {
-        return Err(Error::MissingStateControllerUnlockCondition);
+        return Err(OutputError::MissingStateControllerUnlockCondition);
     }
 
     if let Some(unlock_condition) = unlock_conditions.governor_address() {
         if let Address::Anchor(anchor_address) = unlock_condition.address() {
             if anchor_address.anchor_id() == anchor_id {
-                return Err(Error::SelfControlledAnchorOutput(*anchor_id));
+                return Err(OutputError::SelfControlledAnchorOutput(*anchor_id));
             }
         }
     } else {
-        return Err(Error::MissingGovernorUnlockCondition);
+        return Err(OutputError::MissingGovernorUnlockCondition);
     }
 
-    verify_allowed_unlock_conditions(unlock_conditions, AnchorOutput::ALLOWED_UNLOCK_CONDITIONS)
+    Ok(verify_allowed_unlock_conditions(
+        unlock_conditions,
+        AnchorOutput::ALLOWED_UNLOCK_CONDITIONS,
+    )?)
 }
 
 #[cfg(feature = "serde")]
@@ -611,10 +666,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{output::unlock_condition::UnlockCondition, Error},
-        utils::serde::string,
-    };
+    use crate::{types::block::output::unlock_condition::UnlockCondition, utils::serde::string};
 
     /// Describes an anchor in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -651,7 +703,7 @@ mod dto {
     }
 
     impl TryFrom<AnchorOutputDto> for AnchorOutput {
-        type Error = Error;
+        type Error = OutputError;
 
         fn try_from(dto: AnchorOutputDto) -> Result<Self, Self::Error> {
             let mut builder = AnchorOutputBuilder::new_with_amount(dto.amount, dto.anchor_id)
@@ -671,16 +723,17 @@ mod dto {
     crate::impl_serde_typed_dto!(AnchorOutput, AnchorOutputDto, "anchor output");
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod tests {
     use super::*;
     use crate::types::block::{
-        output::anchor::dto::AnchorOutputDto, protocol::protocol_parameters, rand::output::rand_anchor_output,
+        output::anchor::dto::AnchorOutputDto, protocol::iota_mainnet_protocol_parameters,
+        rand::output::rand_anchor_output,
     };
 
     #[test]
     fn to_from_dto() {
-        let protocol_parameters = protocol_parameters();
+        let protocol_parameters = iota_mainnet_protocol_parameters();
         let anchor_output = rand_anchor_output(protocol_parameters.token_supply());
         let dto = AnchorOutputDto::from(&anchor_output);
         let output = Output::Anchor(AnchorOutput::try_from(dto).unwrap());

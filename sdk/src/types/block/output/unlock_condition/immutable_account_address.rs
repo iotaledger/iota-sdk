@@ -4,13 +4,13 @@
 use derive_more::From;
 
 use crate::types::block::{
-    address::{AccountAddress, Address},
-    error::Error,
-    output::{StorageScore, StorageScoreParameters},
+    address::{AccountAddress, Address, AddressError},
+    output::{unlock_condition::UnlockConditionError, StorageScore, StorageScoreParameters},
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[packable(unpack_error = UnlockConditionError)]
 pub struct ImmutableAccountAddressUnlockCondition(#[packable(verify_with = verify_address)] Address);
 
 impl ImmutableAccountAddressUnlockCondition {
@@ -37,9 +37,9 @@ impl StorageScore for ImmutableAccountAddressUnlockCondition {
 }
 
 #[inline]
-fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
-    if VERIFY && !address.is_account() {
-        Err(Error::InvalidAddressKind(address.kind()))
+fn verify_address(address: &Address) -> Result<(), UnlockConditionError> {
+    if !address.is_account() {
+        Err(AddressError::InvalidAddressKind(address.kind()).into())
     } else {
         Ok(())
     }

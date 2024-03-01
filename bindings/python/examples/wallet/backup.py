@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet, WalletOptions, Bip44
 
 load_dotenv()
@@ -35,5 +34,7 @@ wallet = Wallet(wallet_options)
 # done once.
 wallet.store_mnemonic(os.environ['MNEMONIC'])
 
-wallet.backup("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
+wallet.backup_to_stronghold_snapshot(
+    "backup.stronghold",
+    os.environ['STRONGHOLD_PASSWORD'])
 print('Created backup')

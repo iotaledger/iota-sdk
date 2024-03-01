@@ -21,16 +21,15 @@ use packable::{
 };
 
 use crate::types::block::{
-    output::{StorageScore, StorageScoreParameters},
+    output::{feature::FeatureError, StorageScore, StorageScoreParameters},
     protocol::{WorkScore, WorkScoreParameters},
     slot::SlotIndex,
-    Error,
 };
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
-#[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidBlockIssuerKeyKind)]
+#[packable(unpack_error = FeatureError)]
+#[packable(tag_type = u8, with_error = FeatureError::InvalidBlockIssuerKeyKind)]
 pub enum BlockIssuerKey {
     /// An Ed25519 public key hash block issuer key.
     #[packable(tag = Ed25519PublicKeyHashBlockIssuerKey::KIND)]
@@ -99,7 +98,7 @@ impl core::fmt::Debug for Ed25519PublicKeyHashBlockIssuerKey {
 }
 
 impl Packable for Ed25519PublicKeyHashBlockIssuerKey {
-    type UnpackError = Error;
+    type UnpackError = FeatureError;
     type UnpackVisitor = ();
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -107,13 +106,11 @@ impl Packable for Ed25519PublicKeyHashBlockIssuerKey {
         Ok(())
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(Self(
-            <[u8; Self::LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?,
-        ))
+        Ok(Self(<[u8; Self::LENGTH]>::unpack(unpacker, visitor).coerce()?))
     }
 }
 
@@ -122,21 +119,21 @@ pub(crate) type BlockIssuerKeyCount =
 
 /// Lexicographically ordered list of unique [`BlockIssuerKey`]
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable, Hash)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidBlockIssuerKeyCount(p.into())))]
+#[packable(unpack_error = FeatureError, with = |e| e.unwrap_item_err_or_else(|p| FeatureError::InvalidBlockIssuerKeyCount(p.into())))]
 pub struct BlockIssuerKeys(
     #[packable(verify_with = verify_block_issuer_keys)] BoxedSlicePrefix<BlockIssuerKey, BlockIssuerKeyCount>,
 );
 
-fn verify_block_issuer_keys<const VERIFY: bool>(block_issuer_keys: &[BlockIssuerKey]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(block_issuer_keys.iter()) {
-        return Err(Error::BlockIssuerKeysNotUniqueSorted);
+fn verify_block_issuer_keys(block_issuer_keys: &[BlockIssuerKey]) -> Result<(), FeatureError> {
+    if !is_unique_sorted(block_issuer_keys.iter()) {
+        return Err(FeatureError::BlockIssuerKeysNotUniqueSorted);
     }
 
     Ok(())
 }
 
 impl TryFrom<Vec<BlockIssuerKey>> for BlockIssuerKeys {
-    type Error = Error;
+    type Error = FeatureError;
 
     #[inline(always)]
     fn try_from(block_issuer_keys: Vec<BlockIssuerKey>) -> Result<Self, Self::Error> {
@@ -145,7 +142,7 @@ impl TryFrom<Vec<BlockIssuerKey>> for BlockIssuerKeys {
 }
 
 impl TryFrom<BTreeSet<BlockIssuerKey>> for BlockIssuerKeys {
-    type Error = Error;
+    type Error = FeatureError;
 
     #[inline(always)]
     fn try_from(block_issuer_keys: BTreeSet<BlockIssuerKey>) -> Result<Self, Self::Error> {
@@ -171,25 +168,25 @@ impl BlockIssuerKeys {
     pub const COUNT_RANGE: RangeInclusive<u8> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
 
     /// Creates a new [`BlockIssuerKeys`] from a vec.
-    pub fn from_vec(block_issuer_keys: Vec<BlockIssuerKey>) -> Result<Self, Error> {
+    pub fn from_vec(block_issuer_keys: Vec<BlockIssuerKey>) -> Result<Self, FeatureError> {
         let mut block_issuer_keys =
             BoxedSlicePrefix::<BlockIssuerKey, BlockIssuerKeyCount>::try_from(block_issuer_keys.into_boxed_slice())
-                .map_err(Error::InvalidBlockIssuerKeyCount)?;
+                .map_err(FeatureError::InvalidBlockIssuerKeyCount)?;
 
         block_issuer_keys.sort();
 
         // Still need to verify the duplicate block issuer keys.
-        verify_block_issuer_keys::<true>(&block_issuer_keys)?;
+        verify_block_issuer_keys(&block_issuer_keys)?;
 
         Ok(Self(block_issuer_keys))
     }
 
     /// Creates a new [`BlockIssuerKeys`] from an ordered set.
-    pub fn from_set(block_issuer_keys: BTreeSet<BlockIssuerKey>) -> Result<Self, Error> {
+    pub fn from_set(block_issuer_keys: BTreeSet<BlockIssuerKey>) -> Result<Self, FeatureError> {
         let block_issuer_keys = BoxedSlicePrefix::<BlockIssuerKey, BlockIssuerKeyCount>::try_from(
             block_issuer_keys.into_iter().collect::<Box<[_]>>(),
         )
-        .map_err(Error::InvalidBlockIssuerKeyCount)?;
+        .map_err(FeatureError::InvalidBlockIssuerKeyCount)?;
 
         // We don't need to verify the block issuer keys here, because they are already verified by the BTreeSet.
         Ok(Self(block_issuer_keys))
@@ -205,7 +202,7 @@ impl StorageScore for BlockIssuerKeys {
 /// This feature defines the block issuer keys with which a signature from the containing
 /// account's Block Issuance Credit can be verified in order to burn Mana.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = FeatureError)]
 pub struct BlockIssuerFeature {
     /// The slot index at which the feature expires and can be removed.
     expiry_slot: SlotIndex,
@@ -222,7 +219,7 @@ impl BlockIssuerFeature {
     pub fn new(
         expiry_slot: impl Into<SlotIndex>,
         block_issuer_keys: impl IntoIterator<Item = BlockIssuerKey>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, FeatureError> {
         let block_issuer_keys =
             BlockIssuerKeys::from_vec(block_issuer_keys.into_iter().collect::<Vec<BlockIssuerKey>>())?;
 
@@ -269,10 +266,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{slot::SlotIndex, Error},
-        utils::serde::prefix_hex_bytes,
-    };
+    use crate::{types::block::slot::SlotIndex, utils::serde::prefix_hex_bytes};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -324,7 +318,7 @@ mod dto {
     }
 
     impl TryFrom<BlockIssuerFeatureDto> for BlockIssuerFeature {
-        type Error = Error;
+        type Error = FeatureError;
 
         fn try_from(value: BlockIssuerFeatureDto) -> Result<Self, Self::Error> {
             Self::new(value.expiry_slot, BlockIssuerKeys::from_vec(value.block_issuer_keys)?)

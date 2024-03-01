@@ -11,7 +11,7 @@ tv = {}
 with open('../../sdk/tests/client/fixtures/test_vectors.json', "r", encoding="utf-8") as json_file:
     tv = json.load(json_file)
 
-client = Client()
+client = Client(protocol_parameters=Utils.iota_mainnet_protocol_parameters())
 
 
 def test_mnemonic_address_generation():
@@ -60,35 +60,43 @@ class TestTypes(unittest.TestCase):
         transaction_id = TransactionId(
             '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000')
         output_index = 42
-        output_id = OutputId(transaction_id, output_index)
-        assert repr(
-            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
+        output_id = OutputId.from_transaction_id_and_output_index(
+            transaction_id, output_index)
+        assert str(output_id
+                   ) == "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00"
 
-        new_output_id = OutputId.from_string(
+        new_output_id = OutputId(
             '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00')
-        assert repr(
-            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
-        assert new_output_id.transaction_id == transaction_id
-        assert new_output_id.output_index == output_index
+        assert str(new_output_id
+                   ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
+        assert new_output_id.transaction_id() == transaction_id
+        assert new_output_id.output_index() == output_index
+
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00'
+        with self.assertRaises(ValueError):
+            OutputId(output_id_invalid_hex_char)
 
         transaction_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
-            OutputId(transaction_id_missing_0x_prefix, output_index)
+            OutputId.from_transaction_id_and_output_index(
+                transaction_id_missing_0x_prefix, output_index)
         transaction_id__invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
-            OutputId(transaction_id__invalid_hex_prefix, output_index)
+            OutputId.from_transaction_id_and_output_index(
+                transaction_id__invalid_hex_prefix, output_index)
         transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000'
         with self.assertRaises(ValueError):
-            OutputId(transaction_id_invalid_hex_char, output_index)
+            OutputId.from_transaction_id_and_output_index(
+                transaction_id_invalid_hex_char, output_index)
         output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000000000'
         with self.assertRaises(ValueError):
-            OutputId.from_string(output_id_missing_0x_prefix)
+            OutputId(output_id_missing_0x_prefix)
         output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000000000'
         with self.assertRaises(ValueError):
-            OutputId.from_string(output_id_invalid_hex_char)
+            OutputId(output_id_invalid_hex_char)
         output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000000000'
         with self.assertRaises(ValueError):
-            OutputId.from_string(output_id_invalid_hex_prefix)
+            OutputId(output_id_invalid_hex_prefix)
 
 
 def test_hex_utf8():

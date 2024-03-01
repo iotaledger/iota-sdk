@@ -8,10 +8,10 @@
 //! cargo run --release --all-features --example get_health [NODE_URL]
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::Client;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 

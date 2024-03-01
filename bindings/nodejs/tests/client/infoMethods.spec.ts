@@ -7,6 +7,7 @@ import 'dotenv/config';
 
 import { Client } from '../../lib/client';
 import '../customMatchers';
+import protocolParametersFixture from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
 
 async function makeClient(): Promise<Client> {
     return await Client.create({
@@ -31,9 +32,9 @@ describe.skip('Client info methods', () => {
         const client = await makeClient();
         const nodeInfo = await client.getNode();
 
-        const nodeInfoByUrl = await client.getNodeInfo(nodeInfo.url);
+        const infoByUrl = await client.getInfo(nodeInfo.url);
 
-        expect(nodeInfoByUrl).toBeDefined();
+        expect(infoByUrl).toBeDefined();
     });
 
     it('gets health of node with input url', async () => {
@@ -54,7 +55,7 @@ describe.skip('Client info methods', () => {
 
     it('gets tips', async () => {
         const client = await makeClient();
-        const tips = await client.getTips();
+        const tips = (await client.getIssuance()).strongParents;
 
         expect(tips.length).toBeGreaterThan(0);
     });
@@ -80,3 +81,15 @@ describe.skip('Client info methods', () => {
         expect(bech32Hrp).toBeDefined();
     });
 });
+
+describe('Offline client info methods', () => {
+    it('provided protocol parameters', async () => {
+        const protocolParameters = protocolParametersFixture.params;
+        const client = await Client.create({
+            protocolParameters
+        });
+        const networkInfo = await client.getNetworkInfo();
+
+        expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
+    });
+})

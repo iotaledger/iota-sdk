@@ -17,7 +17,7 @@ use crate::{
             StorageScoreParameters, UnlockCondition,
         },
         slot::SlotIndex,
-        Error,
+        BlockError,
     },
     utils::serde::string,
     wallet::{
@@ -59,7 +59,7 @@ where
         if let Some(features) = params.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(tag).map_err(|_| Error::InvalidField("tag"))?,
+                    prefix_hex::decode::<Vec<u8>>(tag).map_err(crate::client::Error::PrefixHex)?,
                 )?);
             }
 
@@ -113,7 +113,7 @@ where
         let min_amount_basic_output =
             BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
-        let min_required_storage_deposit = first_output.minimum_amount(storage_score_params);
+        let min_required_storage_deposit = first_output.amount();
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -421,10 +421,10 @@ impl OutputBuilder {
 
         self
     }
-    fn finish_output(self) -> Result<Output, crate::types::block::Error> {
-        match self {
-            Self::Basic(b) => b.finish_output(),
-            Self::Nft(b) => b.finish_output(),
-        }
+    fn finish_output(self) -> Result<Output, BlockError> {
+        Ok(match self {
+            Self::Basic(b) => b.finish_output()?,
+            Self::Nft(b) => b.finish_output()?,
+        })
     }
 }

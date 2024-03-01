@@ -11,7 +11,8 @@ use iota_sdk::{
             output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
             semantic::SemanticValidationContext,
-            Block, Error,
+            signature::SignatureError,
+            Block,
         },
         TryFromDto,
     },
@@ -25,8 +26,12 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
     let response = match method {
         UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(bech32)?),
         UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, bech32_hrp)?),
+        UtilsMethod::AddressToBech32 { address, bech32_hrp } => Response::Bech32Address(address.to_bech32(bech32_hrp)),
         UtilsMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
             Response::Bech32Address(account_id.to_bech32(bech32_hrp))
+        }
+        UtilsMethod::AnchorIdToBech32 { anchor_id, bech32_hrp } => {
+            Response::Bech32Address(anchor_id.to_bech32(bech32_hrp))
         }
         UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Response::Bech32Address(nft_id.to_bech32(bech32_hrp)),
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
@@ -87,7 +92,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.try_verify(&message).map_err(Error::from)?)
+            Response::Bool(signature.try_verify(&message).map_err(iota_sdk::client::Error::from)?)
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,
@@ -96,9 +101,11 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         } => {
             use crypto::signatures::secp256k1_ecdsa;
             let public_key = prefix_hex::decode(public_key)?;
-            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
+            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)
+                .map_err(SignatureError::InvalidPublicKeyBytes)?;
             let signature = prefix_hex::decode(signature)?;
-            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
+            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)
+                .map_err(SignatureError::InvalidSignatureBytes)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
@@ -125,8 +132,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 mana_rewards,
                 protocol_parameters,
             );
+            context.validate()?;
 
-            Response::TransactionFailureReason(context.validate()?)
+            Response::Ok
         }
         UtilsMethod::ManaWithDecay {
             mana,
@@ -161,6 +169,12 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let block = Block::try_from_dto(block)?;
             Response::Raw(block.pack_to_vec())
         }
+        UtilsMethod::IotaMainnetProtocolParameters => {
+            Response::ProtocolParameters(iota_sdk::types::block::protocol::iota_mainnet_protocol_parameters().clone())
+        }
+        UtilsMethod::ShimmerMainnetProtocolParameters => Response::ProtocolParameters(
+            iota_sdk::types::block::protocol::shimmer_mainnet_protocol_parameters().clone(),
+        ),
     };
 
     Ok(response)

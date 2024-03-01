@@ -8,10 +8,10 @@
 //! cargo run --release --example client_logger
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::Client;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get node info.
-    let _ = client.get_info().await?;
+    let _ = client.get_node_info().await?;
 
     println!("Example completed successfully. `client.log` file has been updated.");
 

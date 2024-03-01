@@ -7,12 +7,13 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, UnlockCondition,
     },
-    wallet::{types::Balance, Result},
+    wallet::types::Balance,
 };
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
+#[cfg(all(feature = "rand", feature = "protocol_parameters_samples"))]
 #[test]
 fn rand_balance_add_assign() {
     use iota_sdk::U256;
@@ -126,7 +127,7 @@ fn rand_balance_add_assign() {
 
 #[ignore]
 #[tokio::test]
-async fn balance_expiration() -> Result<()> {
+async fn balance_expiration() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/balance_expiration_0";
     let storage_path_1 = "test-storage/balance_expiration_1";
     let storage_path_2 = "test-storage/balance_expiration_2";
@@ -210,7 +211,7 @@ async fn balance_expiration() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn balance_transfer() -> Result<()> {
+async fn balance_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/addresses_balance_0";
     let storage_path_1 = "test-storage/addresses_balance_1";
     setup(storage_path_0)?;

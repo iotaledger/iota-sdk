@@ -5,15 +5,16 @@ use alloc::string::ToString;
 use core::str::FromStr;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
-use packable::{bounded::BoundedU16, PackableExt};
+use packable::bounded::BoundedU16;
 
-use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId, Error};
+use crate::types::block::{
+    error::IdentifierError, output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId,
+};
 
 pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUTPUT_INDEX_RANGE.end() }>;
 
 /// The identifier of an [`Output`](crate::types::block::output::Output).
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
-#[packable(unpack_error = Error)]
 pub struct OutputId {
     transaction_id: TransactionId,
     index: u16,
@@ -49,38 +50,49 @@ impl OutputId {
     /// Hash the [`OutputId`] with BLAKE2b-256.
     #[inline(always)]
     pub fn hash(&self) -> [u8; 32] {
-        Blake2b256::digest(self.pack_to_vec()).into()
+        Blake2b256::digest(self.to_bytes()).into()
+    }
+
+    pub fn to_bytes(&self) -> [u8; Self::LENGTH] {
+        let mut buffer = [0u8; Self::LENGTH];
+        let (transaction_id, index) = buffer.split_at_mut(TransactionId::LENGTH);
+        transaction_id.copy_from_slice(self.transaction_id.as_ref());
+        index.copy_from_slice(&self.index().to_le_bytes());
+        buffer
     }
 }
 
 #[cfg(feature = "serde")]
 crate::string_serde_impl!(OutputId);
 
-#[allow(clippy::fallible_impl_from)]
 impl From<[u8; Self::LENGTH]> for OutputId {
     fn from(bytes: [u8; Self::LENGTH]) -> Self {
-        // Unwrap is fine because size is already known and valid.
-        Self::unpack_unverified(bytes).unwrap()
+        #[repr(C)]
+        #[allow(dead_code)]
+        struct Layout {
+            transaction_id: TransactionId,
+            index: [u8; 2],
+        }
+        unsafe {
+            let Layout { transaction_id, index } = core::mem::transmute(bytes);
+            Self::new(transaction_id, u16::from_le_bytes(index))
+        }
     }
 }
 
 impl FromStr for OutputId {
-    type Err = Error;
+    type Err = IdentifierError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(
-            prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(Error::Hex)?,
+            prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(IdentifierError)?,
         ))
     }
 }
 
 impl core::fmt::Display for OutputId {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut buffer = [0u8; Self::LENGTH];
-        let (transaction_id, index) = buffer.split_at_mut(TransactionId::LENGTH);
-        transaction_id.copy_from_slice(self.transaction_id.as_ref());
-        index.copy_from_slice(&self.index().to_le_bytes());
-        write!(f, "{}", prefix_hex::encode(buffer))
+        write!(f, "{}", prefix_hex::encode(self.to_bytes()))
     }
 }
 

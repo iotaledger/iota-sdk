@@ -62,7 +62,7 @@ use crate::{
         protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Block, Error as BlockError,
+        Block, BlockError,
     },
 };
 
@@ -671,12 +671,9 @@ where
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone())?;
-
-    if let Some(conflict) = conflict {
-        log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
-        return Err(Error::TransactionSemantic(conflict));
-    }
+    verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone()).inspect_err(|e| {
+        log::debug!("[sign_transaction] conflict: {e:?} for {tx_payload:#?}");
+    })?;
 
     Ok(tx_payload)
 }

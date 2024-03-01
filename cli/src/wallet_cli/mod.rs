@@ -7,6 +7,7 @@ use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
+use eyre::Error;
 use iota_sdk::{
     client::{request_funds_from_faucet, secret::SecretManager},
     types::block::{
@@ -20,12 +21,13 @@ use iota_sdk::{
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
+        IdentifierError,
     },
     utils::ConvertTo,
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        Error as WalletError, MintNftParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams,
-        SyncOptions, TransactionOptions, Wallet,
+        Error as WalletError, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
+        SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -33,7 +35,6 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    error::Error,
     helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
@@ -53,7 +54,7 @@ impl WalletCli {
 }
 
 /// Commands
-#[derive(Debug, Subcommand, strum::EnumVariantNames)]
+#[derive(Debug, Subcommand, strum::VariantNames)]
 #[strum(serialize_all = "kebab-case")]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
@@ -272,6 +273,16 @@ pub enum WalletCommand {
         #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
+    /// Send mana.
+    SendMana {
+        /// Recipient address, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
+        address: Bech32Address,
+        /// Amount of mana to send, e.g. 1000000.
+        mana: u64,
+        /// Whether to gift the storage deposit or not.
+        #[arg(short, long, default_value_t = false)]
+        gift: bool,
+    },
     /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
@@ -348,7 +359,7 @@ pub enum WalletCommand {
 }
 
 fn parse_u256(s: &str) -> Result<U256, Error> {
-    U256::from_dec_str(s).map_err(|e| Error::Miscellaneous(e.to_string()))
+    Ok(U256::from_dec_str(s)?)
 }
 
 /// Select by transaction ID or list index
@@ -359,7 +370,7 @@ pub enum TransactionSelector {
 }
 
 impl FromStr for TransactionSelector {
-    type Err = Error;
+    type Err = IdentifierError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(if let Ok(index) = s.parse() {
@@ -378,7 +389,7 @@ pub enum OutputSelector {
 }
 
 impl FromStr for OutputSelector {
-    type Err = Error;
+    type Err = IdentifierError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(if let Ok(index) = s.parse() {
@@ -796,7 +807,7 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: FoundryId) -> 
 pub async fn end_staking_command(wallet: &Wallet, account_id: AccountId) -> Result<(), Error> {
     println_log_info!("Ending staking for {account_id}.");
 
-    let transaction = wallet.end_staking(account_id).await?;
+    let transaction = wallet.end_staking(account_id, None).await?;
 
     println_log_info!(
         "End staking transaction sent:\n{:?}\n{:?}",
@@ -815,7 +826,7 @@ pub async fn extend_staking_command(
 ) -> Result<(), Error> {
     println_log_info!("Extending staking for {account_id} by {additional_epochs} epochs.");
 
-    let transaction = wallet.extend_staking(account_id, additional_epochs).await?;
+    let transaction = wallet.extend_staking(account_id, additional_epochs, None).await?;
 
     println_log_info!(
         "Extend staking transaction sent:\n{:?}\n{:?}",
@@ -934,7 +945,7 @@ pub async fn mint_nft_command(
     issuer: Option<Bech32Address>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
-        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex)?)
     } else {
         None
     };
@@ -965,7 +976,7 @@ pub async fn mint_nft_command(
 
 // `node-info` command
 pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
-    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
+    let node_info = serde_json::to_string_pretty(&wallet.client().get_node_info().await?)?;
 
     println_log_info!("Current node info: {node_info}");
 
@@ -1023,6 +1034,29 @@ pub async fn send_command(
             },
         )
         .await?;
+
+    println_log_info!(
+        "Transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `send-mana` command
+pub async fn send_mana_command(
+    wallet: &Wallet,
+    address: impl ConvertTo<Bech32Address>,
+    mana: u64,
+    gift: bool,
+) -> Result<(), Error> {
+    let params = SendManaParams::new(mana, address.convert()?).with_return_strategy(if gift {
+        ReturnStrategy::Gift
+    } else {
+        ReturnStrategy::Return
+    });
+    let transaction = wallet.send_mana(params, None).await?;
 
     println_log_info!(
         "Transaction sent:\n{:?}\n{:?}",
@@ -1556,6 +1590,10 @@ pub async fn prompt_internal(
                                 allow_micro_amount
                             };
                             send_command(wallet, address, amount, return_address, expiration, allow_micro_amount).await
+                        }
+                        WalletCommand::SendMana { address, mana, gift } => {
+                            ensure_password(wallet).await?;
+                            send_mana_command(wallet, address, mana, gift).await
                         }
                         WalletCommand::SendNativeToken {
                             address,

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    payload::tagged_data::TaggedDataPayload,
+    payload::{tagged_data::TaggedDataPayload, PayloadError},
     rand::bytes::{rand_bytes, rand_bytes_array},
-    Block, Error,
+    Block,
 };
 use packable::{
     bounded::{TryIntoBoundedU32Error, TryIntoBoundedU8Error},
@@ -59,7 +59,7 @@ fn new_valid_tag_length_min() {
 fn new_invalid_tag_length_more_than_max() {
     assert!(matches!(
         TaggedDataPayload::new(rand_bytes(65), [0x42, 0xff, 0x84, 0xa2, 0x42, 0xff, 0x84, 0xa2]),
-        Err(Error::InvalidTagLength(TryIntoBoundedU8Error::Invalid(65)))
+        Err(PayloadError::InvalidTagLength(TryIntoBoundedU8Error::Invalid(65)))
     ));
 }
 
@@ -68,7 +68,7 @@ fn new_invalid_data_length_more_than_max() {
     assert!(matches!(
         // TODO https://github.com/iotaledger/iota-sdk/issues/1226
         TaggedDataPayload::new(rand_bytes(32), [0u8; Block::LENGTH_MAX + 42]),
-        Err(Error::InvalidTaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == Block::LENGTH_MAX as u32 + 42
+        Err(PayloadError::InvalidTaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == Block::LENGTH_MAX as u32 + 42
     ));
 }
 
@@ -84,7 +84,7 @@ fn packed_len() {
 fn pack_unpack_valid() {
     let tagged_data_1 =
         TaggedDataPayload::new(rand_bytes(32), [0x42, 0xff, 0x84, 0xa2, 0x42, 0xff, 0x84, 0xa2]).unwrap();
-    let tagged_data_2 = TaggedDataPayload::unpack_verified(tagged_data_1.pack_to_vec().as_slice(), &()).unwrap();
+    let tagged_data_2 = TaggedDataPayload::unpack_bytes_verified(tagged_data_1.pack_to_vec().as_slice(), &()).unwrap();
 
     assert_eq!(tagged_data_1.tag(), tagged_data_2.tag());
     assert_eq!(tagged_data_1.data(), tagged_data_2.data());
@@ -92,7 +92,8 @@ fn pack_unpack_valid() {
 
 #[test]
 fn unpack_valid_tag_length_min() {
-    let payload = TaggedDataPayload::unpack_verified([0x00, 0x00, 0x00, 0x00, 0x00, 0x00].as_slice(), &()).unwrap();
+    let payload =
+        TaggedDataPayload::unpack_bytes_verified([0x00, 0x00, 0x00, 0x00, 0x00, 0x00].as_slice(), &()).unwrap();
 
     assert!(payload.tag().is_empty());
 }
@@ -100,7 +101,7 @@ fn unpack_valid_tag_length_min() {
 #[test]
 fn unpack_invalid_tag_length_more_than_max() {
     assert!(matches!(
-        TaggedDataPayload::unpack_verified(
+        TaggedDataPayload::unpack_bytes_verified(
             [
                 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -110,7 +111,7 @@ fn unpack_invalid_tag_length_more_than_max() {
             ],
             &()
         ),
-        Err(UnpackError::Packable(Error::InvalidTagLength(
+        Err(UnpackError::Packable(PayloadError::InvalidTagLength(
             TryIntoBoundedU8Error::Invalid(65)
         )))
     ));
@@ -119,8 +120,8 @@ fn unpack_invalid_tag_length_more_than_max() {
 #[test]
 fn unpack_invalid_data_length_more_than_max() {
     assert!(matches!(
-        TaggedDataPayload::unpack_verified([0x02, 0x00, 0x00, 0x35, 0x82, 0x00, 0x00], &()),
-        Err(UnpackError::Packable(Error::InvalidTaggedDataLength(
+        TaggedDataPayload::unpack_bytes_verified([0x02, 0x00, 0x00, 0x35, 0x82, 0x00, 0x00], &()),
+        Err(UnpackError::Packable(PayloadError::InvalidTaggedDataLength(
             TryIntoBoundedU32Error::Invalid(33333)
         )))
     ));

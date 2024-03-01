@@ -10,12 +10,15 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         input::{Input, UtxoInput},
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
-        protocol::protocol_parameters,
+        payload::{
+            signed_transaction::{Transaction, TransactionCapabilityFlag},
+            SignedTransactionPayload,
+        },
+        protocol::iota_mainnet_protocol_parameters,
         slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
@@ -25,7 +28,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{build_inputs, build_outputs, Build::Basic};
 
 #[tokio::test]
-async fn single_ed25519_unlock() -> Result<()> {
+async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
@@ -38,7 +41,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -76,6 +79,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -96,22 +100,18 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
-
     Ok(())
 }
 
 #[tokio::test]
-async fn ed25519_reference_unlocks() -> Result<()> {
+async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
@@ -124,7 +124,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -188,6 +188,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -220,22 +221,18 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
 
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
-
     Ok(())
 }
 
 #[tokio::test]
-async fn two_signature_unlocks() -> Result<()> {
+async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
@@ -257,7 +254,7 @@ async fn two_signature_unlocks() -> Result<()> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -309,6 +306,7 @@ async fn two_signature_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
+        .with_capabilities([TransactionCapabilityFlag::BurnMana])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -330,16 +328,12 @@ async fn two_signature_unlocks() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(
+    verify_semantic(
         &prepared_transaction_data.inputs_data,
         &tx_payload,
         prepared_transaction_data.mana_rewards,
         protocol_parameters,
     )?;
-
-    if let Some(conflict) = conflict {
-        panic!("{conflict:?}, with {tx_payload:#?}");
-    }
 
     Ok(())
 }

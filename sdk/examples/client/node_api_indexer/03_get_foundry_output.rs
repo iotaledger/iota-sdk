@@ -11,13 +11,10 @@
 //! cargo run --release --example node_api_indexer_get_foundry_output <FOUNDRY ID> [NODE URL]
 //! ```
 
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::output::FoundryId,
-};
+use iota_sdk::{client::Client, types::block::output::FoundryId};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

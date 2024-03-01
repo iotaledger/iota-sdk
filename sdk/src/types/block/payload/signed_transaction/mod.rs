@@ -14,14 +14,14 @@ pub use self::{
     transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
 use crate::types::block::{
+    payload::PayloadError,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     unlock::Unlocks,
-    Error,
 };
 
 /// A signed transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = PayloadError)]
 #[packable(verify_with = verify_signed_transaction_payload)]
 pub struct SignedTransactionPayload {
     transaction: Transaction,
@@ -33,10 +33,10 @@ impl SignedTransactionPayload {
     pub const KIND: u8 = 1;
 
     /// Creates a new [`SignedTransactionPayload`].
-    pub fn new(transaction: Transaction, unlocks: Unlocks) -> Result<Self, Error> {
+    pub fn new(transaction: Transaction, unlocks: Unlocks) -> Result<Self, PayloadError> {
         let payload = Self { transaction, unlocks };
 
-        verify_signed_transaction_payload::<true>(&payload)?;
+        verify_signed_transaction_payload(&payload)?;
 
         Ok(payload)
     }
@@ -61,9 +61,9 @@ impl WorkScore for SignedTransactionPayload {
     }
 }
 
-fn verify_signed_transaction_payload<const VERIFY: bool>(payload: &SignedTransactionPayload) -> Result<(), Error> {
+fn verify_signed_transaction_payload(payload: &SignedTransactionPayload) -> Result<(), PayloadError> {
     if payload.transaction.inputs().len() != payload.unlocks.len() {
-        return Err(Error::InputUnlockCountMismatch {
+        return Err(PayloadError::InputUnlockCountMismatch {
             input_count: payload.transaction.inputs().len(),
             unlock_count: payload.unlocks.len(),
         });
@@ -80,10 +80,7 @@ pub mod dto {
 
     pub use super::transaction::dto::TransactionDto;
     use super::*;
-    use crate::types::{
-        block::{unlock::Unlock, Error},
-        TryFromDto,
-    };
+    use crate::types::{block::unlock::Unlock, TryFromDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct SignedTransactionPayloadDto {
@@ -104,7 +101,7 @@ pub mod dto {
     }
 
     impl TryFromDto<SignedTransactionPayloadDto> for SignedTransactionPayload {
-        type Error = Error;
+        type Error = PayloadError;
 
         fn try_from_dto_with_params_inner(
             dto: SignedTransactionPayloadDto,

@@ -3,10 +3,7 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{
-    address::{Address, Bech32Address, Ed25519Address, Hrp},
-    Error,
-};
+use iota_sdk::types::block::address::{Address, AddressError, Bech32Address, Ed25519Address, Hrp};
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
@@ -40,7 +37,7 @@ fn ctors() {
 fn hrp_from_str() {
     Hrp::from_str("rms").unwrap();
 
-    assert!(matches!(Hrp::from_str("中國"), Err(Error::InvalidBech32Hrp(_))));
+    assert!(matches!(Hrp::from_str("中國"), Err(AddressError::InvalidBech32Hrp(_))));
 }
 
 #[test]
@@ -56,14 +53,14 @@ fn hrp_pack_unpack() {
     let hrp = Hrp::from_str("rms").unwrap();
     let packed_hrp = hrp.pack_to_vec();
 
-    assert_eq!(hrp, Hrp::unpack_verified(packed_hrp.as_slice(), &()).unwrap());
+    assert_eq!(hrp, Hrp::unpack_bytes_verified(packed_hrp.as_slice(), &()).unwrap());
 }
 
 #[test]
 fn invalid_hrp_unpack() {
     let packed_hrp = vec![32, 32, 32]; // invalid HRP: "   "
 
-    assert!(Hrp::unpack_verified(packed_hrp.as_slice(), &()).is_err());
+    assert!(Hrp::unpack_bytes_verified(packed_hrp.as_slice(), &()).is_err());
 }
 
 #[test]

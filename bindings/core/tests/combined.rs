@@ -41,7 +41,12 @@ async fn create_wallet() -> Result<()> {
 
     let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
-        .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
+        .with_client_options(
+            ClientBuilder::new()
+                .from_json(client_options)
+                .unwrap()
+                .with_protocol_parameters(iota_sdk::types::block::protocol::iota_mainnet_protocol_parameters().clone()),
+        )
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
         .build()
@@ -79,7 +84,12 @@ async fn client_from_wallet() -> Result<()> {
 
     let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
-        .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
+        .with_client_options(
+            ClientBuilder::new()
+                .from_json(client_options)
+                .unwrap()
+                .with_protocol_parameters(iota_sdk::types::block::protocol::iota_mainnet_protocol_parameters().clone()),
+        )
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
         .build()

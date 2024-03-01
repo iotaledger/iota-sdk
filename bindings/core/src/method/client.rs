@@ -14,7 +14,7 @@ use iota_sdk::{
         node_manager::node::NodeAuth,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::{Address, Bech32Address, Hrp},
         output::{
             feature::Feature, unlock_condition::UnlockCondition, AccountId, AnchorId, DelegationId, FoundryId, NftId,
             Output, OutputId, TokenScheme,
@@ -135,20 +135,22 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Node core API
     //////////////////////////////////////////////////////////////////////
-    /// Get health
+    /// Returns the health of the node.
     GetHealth {
         /// Url
         url: String,
     },
-    /// Get node info
-    GetNodeInfo {
+    /// Returns the available API route groups of the node.
+    GetRoutes,
+    /// Returns general information about a node given its URL and - if required - the authentication data.
+    GetInfo {
         /// Url
         url: String,
         /// Node authentication
         auth: Option<NodeAuth>,
     },
-    /// Returns the node information together with the url of the used node
-    GetInfo,
+    /// Returns general information about the node together with its URL.
+    GetNodeInfo,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
     #[serde(rename_all = "camelCase")]
@@ -224,25 +226,31 @@ pub enum ClientMethod {
         /// Block ID
         block_id: BlockId,
     },
-    /// Get block raw
+    /// Get block as raw bytes.
     #[serde(rename_all = "camelCase")]
     GetBlockRaw {
         /// Block ID
         block_id: BlockId,
     },
-    /// Get output
+    /// Get output with its output ID proof.
     #[serde(rename_all = "camelCase")]
     GetOutput {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output metadata
+    /// Get output as raw bytes.
+    #[serde(rename_all = "camelCase")]
+    GetOutputRaw {
+        /// Output ID
+        output_id: OutputId,
+    },
+    /// Get output metadata.
     #[serde(rename_all = "camelCase")]
     GetOutputMetadata {
         /// Output ID
         output_id: OutputId,
     },
-    /// Get output with its metadata
+    /// Get output with its metadata including the output ID proof.
     #[serde(rename_all = "camelCase")]
     GetOutputWithMetadata {
         /// Output ID
@@ -251,6 +259,12 @@ pub enum ClientMethod {
     /// Returns the included block of the transaction.
     #[serde(rename_all = "camelCase")]
     GetIncludedBlock {
+        /// Transaction ID
+        transaction_id: TransactionId,
+    },
+    /// Returns the raw bytes of the included block of a transaction.
+    #[serde(rename_all = "camelCase")]
+    GetIncludedBlockRaw {
         /// Transaction ID
         transaction_id: TransactionId,
     },
@@ -272,6 +286,12 @@ pub enum ClientMethod {
         /// Commitment ID of the commitment to look up.
         commitment_id: SlotCommitmentId,
     },
+    /// Look up a commitment by a given commitment ID and return its raw bytes.
+    #[serde(rename_all = "camelCase")]
+    GetCommitmentRaw {
+        /// Commitment ID of the commitment to look up.
+        commitment_id: SlotCommitmentId,
+    },
     /// Get all UTXO changes of a given slot by Commitment ID.
     #[serde(rename_all = "camelCase")]
     GetUtxoChanges {
@@ -285,17 +305,22 @@ pub enum ClientMethod {
         commitment_id: SlotCommitmentId,
     },
     /// Look up a commitment by a given commitment index.
-    GetCommitmentByIndex {
+    GetCommitmentBySlot {
+        /// Index of the commitment to look up.
+        slot: SlotIndex,
+    },
+    /// Look up a commitment by a given commitment index and return its raw bytes.
+    GetCommitmentBySlotRaw {
         /// Index of the commitment to look up.
         slot: SlotIndex,
     },
     /// Get all UTXO changes of a given slot by commitment index.
-    GetUtxoChangesByIndex {
+    GetUtxoChangesBySlot {
         /// Index of the commitment to look up.
         slot: SlotIndex,
     },
     /// Get all full UTXO changes of a given slot by commitment index.
-    GetUtxoChangesFullByIndex {
+    GetUtxoChangesFullBySlot {
         /// Index of the commitment to look up.
         slot: SlotIndex,
     },
@@ -379,16 +404,16 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // High level API
     //////////////////////////////////////////////////////////////////////
-    /// Fetch OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel)
+    /// Fetch outputs with associated output ID proofs from provided OutputIds (requests are sent in parallel)
     #[serde(rename_all = "camelCase")]
     GetOutputs {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },
-    /// Try to get OutputWithMetadataResponse from provided OutputIds (requests are sent in parallel and errors are
-    /// ignored, can be useful for spent outputs)
+    /// Try to get outputs with associated output ID proofs from provided OutputIds (requests are sent in parallel and
+    /// errors are ignored, can be useful for spent outputs)
     #[serde(rename_all = "camelCase")]
-    GetOutputsIgnoreErrors {
+    GetOutputsIgnoreNotFound {
         /// Output IDs
         output_ids: Vec<OutputId>,
     },
@@ -417,11 +442,22 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
+    /// Converts an address to its bech32 representation
+    #[serde(rename_all = "camelCase")]
+    AddressToBech32 { address: Address, bech32_hrp: Option<Hrp> },
     /// Transforms an account id to a bech32 encoded address
     #[serde(rename_all = "camelCase")]
     AccountIdToBech32 {
         /// Account ID
         account_id: AccountId,
+        /// Human readable part
+        bech32_hrp: Option<Hrp>,
+    },
+    /// Transforms an anchor id to a bech32 encoded address
+    #[serde(rename_all = "camelCase")]
+    AnchorIdToBech32 {
+        /// Anchor ID
+        anchor_id: AnchorId,
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },

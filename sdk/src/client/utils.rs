@@ -14,12 +14,12 @@ use crypto::{
 use serde::{Deserialize, Serialize};
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-use super::{Client, ClientInner};
+use super::Client;
 use crate::{
     client::{Error, Result},
     types::block::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-        output::{AccountId, NftId},
+        output::{AccountId, AnchorId, NftId},
         payload::TaggedDataPayload,
         Block, BlockId,
     },
@@ -104,7 +104,7 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address
     Ok(faucet_response)
 }
 
-impl ClientInner {
+impl Client {
     /// Transforms a hex encoded address to a bech32 encoded address
     pub async fn hex_to_bech32(
         &self,
@@ -117,6 +117,18 @@ impl ClientInner {
         }
     }
 
+    /// Converts an address to its bech32 representation
+    pub async fn address_to_bech32(
+        &self,
+        address: Address,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
+    ) -> crate::client::Result<Bech32Address> {
+        match bech32_hrp {
+            Some(hrp) => Ok(address.to_bech32(hrp.convert()?)),
+            None => Ok(address.to_bech32(self.get_bech32_hrp().await?)),
+        }
+    }
+
     /// Transforms an account id to a bech32 encoded address
     pub async fn account_id_to_bech32(
         &self,
@@ -126,6 +138,18 @@ impl ClientInner {
         match bech32_hrp {
             Some(hrp) => Ok(account_id.to_bech32(hrp.convert()?)),
             None => Ok(account_id.to_bech32(self.get_bech32_hrp().await?)),
+        }
+    }
+
+    /// Transforms an anchor id to a bech32 encoded address
+    pub async fn anchor_id_to_bech32(
+        &self,
+        anchor_id: AnchorId,
+        bech32_hrp: Option<impl ConvertTo<Hrp>>,
+    ) -> crate::client::Result<Bech32Address> {
+        match bech32_hrp {
+            Some(hrp) => Ok(anchor_id.to_bech32(hrp.convert()?)),
+            None => Ok(anchor_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 
@@ -152,9 +176,7 @@ impl ClientInner {
             None => Ok(hex_public_key_to_bech32_address(hex, self.get_bech32_hrp().await?)?),
         }
     }
-}
 
-impl Client {
     /// Transforms bech32 to hex
     pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> crate::client::Result<String> {
         bech32_to_hex(bech32)

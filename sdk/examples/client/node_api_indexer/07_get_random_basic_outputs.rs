@@ -11,10 +11,10 @@
 //! cargo run --release --example node_api_indexer_get_random_basic_outputs [NODE_URL]
 //! ```
 
-use iota_sdk::client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, Client, Result};
+use iota_sdk::client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, Client};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

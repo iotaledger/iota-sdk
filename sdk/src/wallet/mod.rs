@@ -62,6 +62,7 @@ pub use self::{
                     mint_nfts::MintNftParams,
                 },
                 send::SendParams,
+                send_mana::SendManaParams,
                 send_native_tokens::SendNativeTokenParams,
                 send_nft::SendNftParams,
                 staking::begin::BeginStakingParams,
@@ -76,7 +77,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId},
+            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata},
             payload::signed_transaction::{SignedTransactionPayload, TransactionId},
         },
     },
@@ -127,6 +128,12 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         network_id: tx_payload.transaction().network_id(),
         incoming: true,
         note: None,
-        inputs,
+        inputs: inputs
+            .into_iter()
+            .map(|input| OutputWithMetadata {
+                output: input.output,
+                metadata: input.metadata,
+            })
+            .collect(),
     })
 }

@@ -8,7 +8,7 @@ use alloc::collections::BTreeMap;
 use packable::PackableExt;
 
 use crate::{
-    client::{secret::types::InputSigningData, Error, Result},
+    client::{secret::types::InputSigningData, Error},
     types::block::{
         output::{Output, OutputId},
         payload::signed_transaction::{SignedTransactionPayload, Transaction},
@@ -31,9 +31,9 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction_payload: &SignedTransactionPayload,
-    mana_rewards: BTreeMap<OutputId, u64>,
+    mana_rewards: impl Into<Option<BTreeMap<OutputId, u64>>>,
     protocol_parameters: ProtocolParameters,
-) -> crate::client::Result<Option<TransactionFailureReason>> {
+) -> Result<(), TransactionFailureReason> {
     let inputs = input_signing_data
         .iter()
         .map(|input| (input.output_id(), &input.output))
@@ -43,15 +43,17 @@ pub fn verify_semantic(
         transaction_payload.transaction(),
         &inputs,
         Some(transaction_payload.unlocks()),
-        mana_rewards,
+        mana_rewards.into(),
         protocol_parameters,
     );
 
-    Ok(context.validate()?)
+    context.validate()
 }
 
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
-pub fn validate_signed_transaction_payload_length(signed_transaction_payload: &SignedTransactionPayload) -> Result<()> {
+pub fn validate_signed_transaction_payload_length(
+    signed_transaction_payload: &SignedTransactionPayload,
+) -> crate::client::error::Result<()> {
     let signed_transaction_payload_bytes = signed_transaction_payload.pack_to_vec();
     if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
         return Err(Error::InvalidSignedTransactionPayloadLength {
@@ -65,7 +67,7 @@ pub fn validate_signed_transaction_payload_length(signed_transaction_payload: &S
 /// Verifies that the transaction doesn't exceed the block size limit with 8 parents.
 /// Assuming one signature unlock and otherwise reference/account/nft unlocks. `validate_transaction_payload_length()`
 /// should later be used to check the length again with the correct unlocks.
-pub fn validate_transaction_length(transaction: &Transaction) -> Result<()> {
+pub fn validate_transaction_length(transaction: &Transaction) -> crate::client::error::Result<()> {
     let transaction_bytes = transaction.pack_to_vec();
 
     // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks

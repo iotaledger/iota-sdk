@@ -20,8 +20,8 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
     let response = match method {
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
-        WalletMethod::Backup { destination, password } => {
-            wallet.backup(destination, password).await?;
+        WalletMethod::BackupToStrongholdSnapshot { destination, password } => {
+            wallet.backup_to_stronghold_snapshot(destination, password).await?;
             Response::Ok
         }
         #[cfg(feature = "stronghold")]
@@ -45,14 +45,14 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::Bool(is_available)
         }
         #[cfg(feature = "stronghold")]
-        WalletMethod::RestoreBackup {
+        WalletMethod::RestoreFromStrongholdSnapshot {
             source,
             password,
             ignore_if_coin_type_mismatch,
             ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_backup(
+                .restore_from_stronghold_snapshot(
                     source,
                     password,
                     ignore_if_coin_type_mismatch,
@@ -312,6 +312,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let data = wallet.prepare_send(params, options).await?;
             Response::PreparedTransaction(data)
         }
+        WalletMethod::PrepareSendMana { params, options } => {
+            let data = wallet.prepare_send_mana(params, options).await?;
+            Response::PreparedTransaction(data)
+        }
         WalletMethod::PrepareSendNativeTokens { params, options } => {
             let data = wallet.prepare_send_native_tokens(params.clone(), options).await?;
             Response::PreparedTransaction(data)
@@ -340,12 +344,15 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::PrepareExtendStaking {
             account_id,
             additional_epochs,
+            options,
         } => {
-            let data = wallet.prepare_extend_staking(account_id, additional_epochs).await?;
+            let data = wallet
+                .prepare_extend_staking(account_id, additional_epochs, options)
+                .await?;
             Response::PreparedTransaction(data)
         }
-        WalletMethod::PrepareEndStaking { account_id } => {
-            let data = wallet.prepare_end_staking(account_id).await?;
+        WalletMethod::PrepareEndStaking { account_id, options } => {
+            let data = wallet.prepare_end_staking(account_id, options).await?;
             Response::PreparedTransaction(data)
         }
         WalletMethod::AnnounceCandidacy { account_id } => {

@@ -11,16 +11,13 @@
 //! cargo run --release --all-features --example send_nft
 //! ```
 
-use iota_sdk::{
-    wallet::{Result, SendNftParams},
-    Wallet,
-};
+use iota_sdk::{wallet::SendNftParams, Wallet};
 
 // The address to send the tokens to
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

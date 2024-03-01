@@ -24,6 +24,7 @@ import {
 } from '../types';
 import {
     AccountId,
+    AnchorId,
     BlockId,
     FoundryId,
     NftId,
@@ -294,6 +295,23 @@ export class Utils {
     }
 
     /**
+     * Converts an address to its bech32 representation.
+     *
+     * @param address An address.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
+     */
+    static addressToBech32(address: Address, bech32Hrp: string): Bech32Address {
+        return callUtilsMethod({
+            name: 'addressToBech32',
+            data: {
+                address,
+                bech32Hrp,
+            },
+        });
+    }
+
+    /**
      * Transforms an account id to a bech32 encoded address.
      *
      * @param accountId An account ID.
@@ -308,6 +326,26 @@ export class Utils {
             name: 'accountIdToBech32',
             data: {
                 accountId,
+                bech32Hrp,
+            },
+        });
+    }
+
+    /**
+     * Transforms an anchor id to a bech32 encoded address.
+     *
+     * @param anchorId An anchor ID.
+     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
+     * @returns The Bech32-encoded address string.
+     */
+    static anchorIdToBech32(
+        anchorId: AnchorId,
+        bech32Hrp: string,
+    ): Bech32Address {
+        return callUtilsMethod({
+            name: 'anchorIdToBech32',
+            data: {
+                anchorId,
                 bech32Hrp,
             },
         });
@@ -521,7 +559,7 @@ export class Utils {
      * @param unlocks The unlocks.
      * @param manaRewards The total mana rewards claimed in the transaction.
      *
-     * @returns The conflict reason.
+     * @returns void.
      */
     static verifyTransactionSemantic(
         transaction: SignedTransactionPayload,
@@ -529,8 +567,8 @@ export class Utils {
         protocolParameters: ProtocolParameters,
         unlocks?: Unlock[],
         manaRewards?: { [outputId: HexEncodedString]: NumericString },
-    ): string {
-        const conflictReason = callUtilsMethod({
+    ): void {
+        return callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
                 transaction,
@@ -540,7 +578,6 @@ export class Utils {
                 manaRewards,
             },
         });
-        return conflictReason;
     }
 
     /**
@@ -665,5 +702,19 @@ export class Utils {
             },
         });
         return new Uint8Array(blockBytes);
+    }
+
+    static iotaMainnetProtocolParameters(): ProtocolParameters {
+        const params = callUtilsMethod({
+            name: 'iotaMainnetProtocolParameters',
+        });
+        return params;
+    }
+
+    static shimmerMainnetProtocolParameters(): ProtocolParameters {
+        const params = callUtilsMethod({
+            name: 'shimmerMainnetProtocolParameters',
+        });
+        return params;
     }
 }

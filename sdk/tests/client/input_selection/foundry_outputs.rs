@@ -11,24 +11,24 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, Output,
-            SimpleTokenScheme, TokenId,
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder,
+            Output, SimpleTokenScheme, TokenId,
         },
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs, unsorted_eq,
     Build::{Account, Basic, Foundry},
     ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_COMMITMENT_ID, SLOT_INDEX,
 };
 
 #[test]
 fn missing_input_account_for_foundry() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -110,7 +110,7 @@ fn missing_input_account_for_foundry() {
 
 #[test]
 fn minted_native_tokens_in_new_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -173,7 +173,7 @@ fn minted_native_tokens_in_new_remainder() {
 
 #[test]
 fn minted_native_tokens_in_provided_output() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_2), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -244,7 +244,7 @@ fn minted_native_tokens_in_provided_output() {
 
 #[test]
 fn melt_native_tokens() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs(
@@ -322,7 +322,7 @@ fn melt_native_tokens() {
 
 #[test]
 fn destroy_foundry_with_account_state_transition() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -376,7 +376,7 @@ fn destroy_foundry_with_account_state_transition() {
 
 #[test]
 fn destroy_foundry_with_account_burn() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
@@ -435,19 +435,19 @@ fn destroy_foundry_with_account_burn() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            );
         }
     });
 }
 
 #[test]
 fn prefer_basic_to_foundry() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -515,7 +515,7 @@ fn prefer_basic_to_foundry() {
 
 #[test]
 fn simple_foundry_transition_basic_not_needed() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs(
@@ -600,7 +600,7 @@ fn simple_foundry_transition_basic_not_needed() {
 
 #[test]
 fn simple_foundry_transition_basic_not_needed_with_remainder() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs(
@@ -679,12 +679,12 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else if output.is_basic() {
-                assert!(is_remainder_or_return(
+                assert_remainder_or_return(
                     output,
                     1_000_000,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     None,
-                ));
+                );
             } else {
                 panic!("unexpected output type")
             }
@@ -761,7 +761,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 
 #[test]
 fn mint_and_burn_at_the_same_time() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -819,7 +819,7 @@ fn mint_and_burn_at_the_same_time() {
 
 #[test]
 fn take_amount_from_account_and_foundry_to_fund_basic() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -902,7 +902,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 
 #[test]
 fn create_native_token_but_burn_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -958,19 +958,19 @@ fn create_native_token_but_burn_account() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 2_000_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            );
         }
     });
 }
 
 #[test]
 fn melted_tokens_not_provided() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
@@ -1029,7 +1029,7 @@ fn melted_tokens_not_provided() {
 
 #[test]
 fn burned_tokens_not_provided() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);
     let token_id_1 = TokenId::from(foundry_id);
@@ -1089,7 +1089,7 @@ fn burned_tokens_not_provided() {
 
 #[test]
 fn foundry_in_outputs_and_required() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let mut inputs = build_inputs(
@@ -1149,7 +1149,7 @@ fn foundry_in_outputs_and_required() {
 
 #[test]
 fn melt_and_burn_native_tokens() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
@@ -1225,4 +1225,158 @@ fn melt_and_burn_native_tokens() {
             // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 421);
         }
     });
+}
+
+#[test]
+fn auto_transition_foundry_less_than_min() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
+    let token_id = TokenId::from(foundry_id);
+
+    let small_amount_foundry = 5;
+    let small_amount_account = 10;
+
+    let mut inputs = build_inputs(
+        [(
+            Foundry {
+                amount: small_amount_foundry,
+                account_id,
+                serial_number: 1,
+                token_scheme: SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+                native_token: Some((&token_id.to_string(), 1000)),
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
+    let account_output = AccountOutputBuilder::new_with_amount(small_amount_account, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap_err();
+
+    let min_amount = FoundryOutputBuilder::from(inputs[0].output.as_foundry())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount()
+        + AccountOutputBuilder::from(inputs[1].output.as_account())
+            .with_minimum_amount(protocol_parameters.storage_score_parameters())
+            .finish_output()
+            .unwrap()
+            .amount();
+
+    assert_eq!(
+        selected,
+        Error::InsufficientAmount {
+            found: small_amount_foundry + small_amount_account,
+            required: min_amount
+        },
+    );
+}
+
+#[test]
+fn auto_transition_foundry_less_than_min_additional() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
+    let token_id = TokenId::from(foundry_id);
+
+    let small_amount = 5;
+
+    let mut inputs = build_inputs(
+        [
+            (
+                Foundry {
+                    amount: small_amount,
+                    account_id,
+                    serial_number: 1,
+                    token_scheme: SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+                    native_token: Some((&token_id.to_string(), 1000)),
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    native_token: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
+    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output()
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 3);
+    let min_amount_foundry = FoundryOutputBuilder::from(inputs[0].output.as_foundry())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
+        .finish_output()
+        .unwrap()
+        .amount();
+    let foundry_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_foundry_opt)
+        .find(|o| o.id() == foundry_id)
+        .unwrap();
+    let account_output = selected
+        .transaction
+        .outputs()
+        .iter()
+        .filter_map(Output::as_account_opt)
+        .find(|o| o.account_id() == &account_id)
+        .unwrap();
+    assert_eq!(foundry_output.amount(), min_amount_foundry);
+    assert_eq!(account_output.amount(), 1_000_000);
 }

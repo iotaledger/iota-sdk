@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type {
-    Bip44,
-    SecretManagerType,
-} from '../../secret_manager/secret-manager';
-import type {
     AccountId,
     Block,
     BlockId,
@@ -18,8 +14,9 @@ import type {
     Payload,
     SlotIndex,
     SlotCommitmentId,
+    EpochIndex,
+    Address,
 } from '../../block';
-import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AccountOutputQueryParameters,
     AnchorOutputQueryParameters,
@@ -29,7 +26,7 @@ import type {
     NftOutputQueryParameters,
     OutputQueryParameters,
 } from '../query-parameters';
-import type { IAuth } from '../network';
+import type { Auth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
 import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
@@ -37,38 +34,32 @@ import type { NftOutputBuilderParams } from '../output_builder_params/nft-output
 import { HexEncodedString } from '../../utils';
 import { TransactionId } from '../..';
 
+// Node routes.
+
+export interface __GetHealthMethod__ {
+    name: 'getHealth';
+    data: {
+        url: string;
+    };
+}
+
 export interface __GetInfoMethod__ {
     name: 'getInfo';
-}
-
-export interface __GetOutputMethod__ {
-    name: 'getOutput';
     data: {
-        outputId: OutputId;
+        url: string;
+        auth?: Auth;
     };
 }
 
-export interface __GetOutputsMethod__ {
-    name: 'getOutputs';
-    data: {
-        outputIds: OutputId[];
-    };
+export interface __GetNodeInfoMethod__ {
+    name: 'getNodeInfo';
 }
 
-export interface __PostBlockMethod__ {
-    name: 'postBlock';
-    data: {
-        block: Block;
-    };
+export interface __GetRoutesMethod__ {
+    name: 'getRoutes';
 }
 
-export interface __GetTipsMethod__ {
-    name: 'getTips';
-}
-
-export interface __GetNetworkInfoMethod__ {
-    name: 'getNetworkInfo';
-}
+// Accounts routes.
 
 export interface __GetAccountCongestionMethod__ {
     name: 'getAccountCongestion';
@@ -78,6 +69,8 @@ export interface __GetAccountCongestionMethod__ {
     };
 }
 
+// Rewards routes.
+
 export interface __GetRewardsMethod__ {
     name: 'getRewards';
     data: {
@@ -85,6 +78,8 @@ export interface __GetRewardsMethod__ {
         slotIndex?: SlotIndex;
     };
 }
+
+// Validators routes.
 
 export interface __GetValidatorsMethod__ {
     name: 'getValidators';
@@ -101,10 +96,46 @@ export interface __GetValidatorMethod__ {
     };
 }
 
+// Committee routes.
+
+export interface __GetCommitteeMethod__ {
+    name: 'getCommittee';
+    data: {
+        epochIndex?: EpochIndex;
+    };
+}
+
+// Blocks routes.
+
+export interface __GetIssuanceMethod__ {
+    name: 'getIssuance';
+}
+
 export interface __GetBlockMethod__ {
     name: 'getBlock';
     data: {
         blockId: BlockId;
+    };
+}
+
+export interface __GetBlockRawMethod__ {
+    name: 'getBlockRaw';
+    data: {
+        blockId: BlockId;
+    };
+}
+
+export interface __PostBlockMethod__ {
+    name: 'postBlock';
+    data: {
+        block: Block;
+    };
+}
+
+export interface __PostBlockRawMethod__ {
+    name: 'postBlockRaw';
+    data: {
+        block: Block;
     };
 }
 
@@ -122,28 +153,119 @@ export interface __GetBlockWithMetadataMethod__ {
     };
 }
 
+// UTXO routes.
+
+export interface __GetOutputMethod__ {
+    name: 'getOutput';
+    data: {
+        outputId: OutputId;
+    };
+}
+
+export interface __GetOutputMetadataMethod__ {
+    name: 'getOutputMetadata';
+    data: {
+        outputId: OutputId;
+    };
+}
+
+export interface __GetOutputWithMetadataMethod__ {
+    name: 'getOutputWithMetadata';
+    data: {
+        outputId: OutputId;
+    };
+}
+
+export interface __GetOutputsMethod__ {
+    name: 'getOutputs';
+    data: {
+        outputIds: OutputId[];
+    };
+}
+
+export interface __GetOutputsIgnoreNotFoundMethod__ {
+    name: 'getOutputsIgnoreNotFound';
+    data: {
+        outputIds: OutputId[];
+    };
+}
+
+export interface __GetIncludedBlockMethod__ {
+    name: 'getIncludedBlock';
+    data: {
+        transactionId: TransactionId;
+    };
+}
+
+export interface __GetIncludedBlockMetadataMethod__ {
+    name: 'getIncludedBlockMetadata';
+    data: {
+        transactionId: TransactionId;
+    };
+}
+
+export interface __GetTransactionMetadataMethod__ {
+    name: 'getTransactionMetadata';
+    data: {
+        transactionId: TransactionId;
+    };
+}
+
+// Commitments routes.
+
+export interface __GetCommitmentMethod__ {
+    name: 'getCommitment';
+    data: {
+        commitmentId: SlotCommitmentId;
+    };
+}
+
+export interface __GetUtxoChangesMethod__ {
+    name: 'getUtxoChanges';
+    data: {
+        commitmentId: SlotCommitmentId;
+    };
+}
+
+export interface __GetUtxoChangesFullMethod__ {
+    name: 'getUtxoChangesFull';
+    data: {
+        commitmentId: SlotCommitmentId;
+    };
+}
+
+export interface __GetCommitmentBySlotMethod__ {
+    name: 'getCommitmentBySlot';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
+export interface __GetUtxoChangesBySlotMethod__ {
+    name: 'getUtxoChangesBySlot';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
+export interface __GetUtxoChangesFullBySlotMethod__ {
+    name: 'getUtxoChangesFullBySlot';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
+// Other routes.
+
+export interface __GetNetworkInfoMethod__ {
+    name: 'getNetworkInfo';
+}
+
 export interface __FindInputsMethod__ {
     name: 'findInputs';
     data: {
         addresses: string[];
         amount: number;
-    };
-}
-
-export interface __SignTransactionMethod__ {
-    name: 'signTransaction';
-    data: {
-        secretManager: SecretManagerType;
-        preparedTransactionData: PreparedTransactionData;
-    };
-}
-
-export interface __SignatureUnlockMethod__ {
-    name: 'signatureUnlock';
-    data: {
-        secretManager: SecretManagerType;
-        transactionSigningHash: HexEncodedString;
-        chain: Bip44;
     };
 }
 
@@ -171,98 +293,6 @@ export interface __GetProtocolParametersMethod__ {
     name: 'getProtocolParameters';
 }
 
-export interface __GetHealthMethod__ {
-    name: 'getHealth';
-    data: {
-        url: string;
-    };
-}
-
-export interface __GetNodeInfoMethod__ {
-    name: 'getNodeInfo';
-    data: {
-        url: string;
-        auth?: IAuth;
-    };
-}
-
-export interface __PostBlockRawMethod__ {
-    name: 'postBlockRaw';
-    data: {
-        block: Block;
-    };
-}
-
-export interface __GetBlockRawMethod__ {
-    name: 'getBlockRaw';
-    data: {
-        blockId: BlockId;
-    };
-}
-
-export interface __GetIncludedBlockMethod__ {
-    name: 'getIncludedBlock';
-    data: {
-        transactionId: TransactionId;
-    };
-}
-
-export interface __GetIncludedBlockMetadataMethod__ {
-    name: 'getIncludedBlockMetadata';
-    data: {
-        transactionId: TransactionId;
-    };
-}
-
-export interface __GetTransactionMetadataMethod__ {
-    name: 'getTransactionMetadata';
-    data: {
-        transactionId: TransactionId;
-    };
-}
-
-export interface __GetCommitmentMethod__ {
-    name: 'getCommitment';
-    data: {
-        commitmentId: SlotCommitmentId;
-    };
-}
-
-export interface __GetUtxoChangesMethod__ {
-    name: 'getUtxoChanges';
-    data: {
-        commitmentId: SlotCommitmentId;
-    };
-}
-
-export interface __GetUtxoChangesFullMethod__ {
-    name: 'getUtxoChangesFull';
-    data: {
-        commitmentId: SlotCommitmentId;
-    };
-}
-
-export interface __GetCommitmentByIndexMethod__ {
-    name: 'getCommitmentByIndex';
-    data: {
-        slot: SlotIndex;
-    };
-}
-
-export interface __GetUtxoChangesByIndexMethod__ {
-    name: 'getUtxoChangesByIndex';
-    data: {
-        slot: SlotIndex;
-    };
-}
-
-export interface __GetUtxoChangesFullByIndexMethod__ {
-    name: 'getUtxoChangesFullByIndex';
-    data: {
-        slot: SlotIndex;
-    };
-}
-
 export interface __HexToBech32Method__ {
     name: 'hexToBech32';
     data: {
@@ -271,10 +301,26 @@ export interface __HexToBech32Method__ {
     };
 }
 
+export interface __AddressToBech32Method__ {
+    name: 'addressToBech32';
+    data: {
+        address: Address;
+        bech32Hrp?: string;
+    };
+}
+
 export interface __AccountIdToBech32Method__ {
     name: 'accountIdToBech32';
     data: {
         accountId: AccountId;
+        bech32Hrp?: string;
+    };
+}
+
+export interface __AnchorIdToBech32Method__ {
+    name: 'anchorIdToBech32';
+    data: {
+        anchorId: AnchorId;
         bech32Hrp?: string;
     };
 }
@@ -292,13 +338,6 @@ export interface __HexPublicKeyToBech32AddressMethod__ {
     data: {
         hex: HexEncodedString;
         bech32Hrp?: string;
-    };
-}
-
-export interface __GetOutputsIgnoreErrorsMethod__ {
-    name: 'getOutputsIgnoreErrors';
-    data: {
-        outputIds: OutputId[];
     };
 }
 

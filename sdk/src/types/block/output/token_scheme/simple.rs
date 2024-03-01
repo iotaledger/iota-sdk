@@ -5,13 +5,13 @@ use packable::Packable;
 use primitive_types::U256;
 
 use crate::types::block::{
+    output::token_scheme::TokenSchemeError,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
 };
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = TokenSchemeError)]
 #[packable(verify_with = verify_simple_token_scheme)]
 pub struct SimpleTokenScheme {
     // Amount of tokens minted by a foundry.
@@ -32,7 +32,7 @@ impl SimpleTokenScheme {
         minted_tokens: impl Into<U256>,
         melted_tokens: impl Into<U256>,
         maximum_supply: impl Into<U256>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, TokenSchemeError> {
         let minted_tokens = minted_tokens.into();
         let melted_tokens = melted_tokens.into();
         let maximum_supply = maximum_supply.into();
@@ -43,7 +43,7 @@ impl SimpleTokenScheme {
             maximum_supply,
         };
 
-        verify_simple_token_scheme::<true>(&token_scheme)?;
+        verify_simple_token_scheme(&token_scheme)?;
 
         Ok(token_scheme)
     }
@@ -80,13 +80,12 @@ impl WorkScore for SimpleTokenScheme {
 }
 
 #[inline]
-fn verify_simple_token_scheme<const VERIFY: bool>(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {
-    if VERIFY
-        && (token_scheme.maximum_supply.is_zero()
-            || token_scheme.melted_tokens > token_scheme.minted_tokens
-            || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply)
+fn verify_simple_token_scheme(token_scheme: &SimpleTokenScheme) -> Result<(), TokenSchemeError> {
+    if token_scheme.maximum_supply.is_zero()
+        || token_scheme.melted_tokens > token_scheme.minted_tokens
+        || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply
     {
-        return Err(Error::InvalidFoundryOutputSupply {
+        return Err(TokenSchemeError::InvalidFoundryOutputSupply {
             minted: token_scheme.minted_tokens,
             melted: token_scheme.melted_tokens,
             max: token_scheme.maximum_supply,
@@ -101,7 +100,6 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Describes a foundry output that is controlled by an account.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -129,7 +127,7 @@ pub(crate) mod dto {
     }
 
     impl TryFrom<SimpleTokenSchemeDto> for SimpleTokenScheme {
-        type Error = Error;
+        type Error = TokenSchemeError;
 
         fn try_from(value: SimpleTokenSchemeDto) -> Result<Self, Self::Error> {
             Self::new(value.minted_tokens, value.melted_tokens, value.maximum_supply)

@@ -12,7 +12,9 @@ import type {
     __TransactionIdMethod__,
     __Bech32ToHexMethod__,
     __HexToBech32Method__,
+    __AddressToBech32Method__,
     __AccountIdToBech32Method__,
+    __AnchorIdToBech32Method__,
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
     __IsAddressValidMethod__,
@@ -31,6 +33,8 @@ import type {
     __OutputManaWithDecay__,
     __VerifyTransactionSyntax__,
     __BlockBytes__,
+    __IotaMainnetProtocolParameters__,
+    __ShimmerMainnetProtocolParameters__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -47,7 +51,9 @@ export type __UtilsMethods__ =
     | __TransactionIdMethod__
     | __Bech32ToHexMethod__
     | __HexToBech32Method__
+    | __AddressToBech32Method__
     | __AccountIdToBech32Method__
+    | __AnchorIdToBech32Method__
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__
@@ -65,4 +71,6 @@ export type __UtilsMethods__ =
     | __GenerateManaWithDecay__
     | __OutputManaWithDecay__
     | __VerifyTransactionSyntax__
-    | __BlockBytes__;
+    | __BlockBytes__
+    | __IotaMainnetProtocolParameters__
+    | __ShimmerMainnetProtocolParameters__;

@@ -5,9 +5,9 @@ use getset::CopyGetters;
 use packable::{prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{
-    protocol::ProtocolParameters,
+    mana::ManaError,
+    protocol::{ProtocolParameters, ProtocolParametersError},
     slot::{EpochIndex, SlotIndex},
-    Error,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
@@ -16,7 +16,7 @@ use crate::types::block::{
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[getset(get_copy = "pub")]
 pub struct ManaParameters {
     /// The number of bits used to represent Mana.
@@ -28,7 +28,7 @@ pub struct ManaParameters {
     pub(crate) generation_rate_exponent: u8,
     /// A lookup table of epoch index diff to mana decay factor.
     /// The actual decay factor is given by decay_factors\[epoch_diff\] * 2^(-decay_factors_exponent).
-    #[packable(unpack_error_with = |_| Error::InvalidManaDecayFactors)]
+    #[packable(unpack_error_with = |_| ProtocolParametersError::InvalidManaDecayFactors)]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::boxed_slice_prefix"))]
     #[getset(skip)]
     pub(crate) decay_factors: BoxedSlicePrefix<u32, u16>,
@@ -98,22 +98,6 @@ impl ManaParameters {
     }
 }
 
-impl Default for ManaParameters {
-    fn default() -> Self {
-        // TODO: use actual values
-        Self {
-            bits_count: 63,
-            generation_rate: Default::default(),
-            generation_rate_exponent: Default::default(),
-            decay_factors: Default::default(),
-            decay_factors_exponent: Default::default(),
-            decay_factor_epochs_sum: Default::default(),
-            decay_factor_epochs_sum_exponent: Default::default(),
-            annual_decay_factor_percentage: Default::default(),
-        }
-    }
-}
-
 impl ProtocolParameters {
     /// Applies mana decay to the given mana.
     pub fn mana_with_decay(
@@ -121,14 +105,14 @@ impl ProtocolParameters {
         mana: u64,
         slot_index_created: impl Into<SlotIndex>,
         slot_index_target: impl Into<SlotIndex>,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, ManaError> {
         let (epoch_index_created, epoch_index_target) = (
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
 
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDiff {
+            return Err(ManaError::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -145,11 +129,11 @@ impl ProtocolParameters {
         reward: u64,
         reward_epoch: impl Into<EpochIndex>,
         claimed_epoch: impl Into<EpochIndex>,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, ManaError> {
         let (reward_epoch, claimed_epoch) = (reward_epoch.into(), claimed_epoch.into());
 
         if reward_epoch > claimed_epoch {
-            return Err(Error::InvalidEpochDiff {
+            return Err(ManaError::InvalidEpochDiff {
                 created: reward_epoch,
                 target: claimed_epoch,
             });
@@ -165,7 +149,7 @@ impl ProtocolParameters {
         amount: u64,
         slot_index_created: impl Into<SlotIndex>,
         slot_index_target: impl Into<SlotIndex>,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, ManaError> {
         let (slot_index_created, slot_index_target) = (slot_index_created.into(), slot_index_target.into());
         let (epoch_index_created, epoch_index_target) = (
             self.epoch_index_of(slot_index_created),
@@ -173,7 +157,7 @@ impl ProtocolParameters {
         );
 
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDiff {
+            return Err(ManaError::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -219,65 +203,23 @@ const fn fixed_point_multiply(value: u64, mult_factor: u32, shift_factor: u8) ->
     ((value as u128 * mult_factor as u128) >> shift_factor) as u64
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 
     use super::*;
+    use crate::types::block::protocol::iota_mainnet_protocol_parameters;
 
     // Tests from https://github.com/iotaledger/iota.go/blob/develop/mana_decay_provider_test.go
 
     fn params() -> &'static ProtocolParameters {
-        use once_cell::sync::Lazy;
-        static PARAMS: Lazy<ProtocolParameters> = Lazy::new(|| {
-            let mut params = ProtocolParameters {
-                genesis_slot: 0,
-                genesis_unix_timestamp: time::OffsetDateTime::now_utc().unix_timestamp() as _,
-                slots_per_epoch_exponent: 13,
-                slot_duration_in_seconds: 10,
-                token_supply: 1813620509061365,
-                mana_parameters: ManaParameters {
-                    bits_count: 63,
-                    generation_rate: 1,
-                    generation_rate_exponent: 17,
-                    decay_factors_exponent: 32,
-                    decay_factor_epochs_sum_exponent: 21,
-                    annual_decay_factor_percentage: 70,
-                    ..Default::default()
-                },
-                ..Default::default()
-            };
-            params.mana_parameters.decay_factors = {
-                let epochs_in_table = (u16::MAX as usize).min(params.epochs_per_year().floor() as usize);
-                let decay_per_epoch = params.decay_per_epoch();
-                (1..=epochs_in_table)
-                    .map(|epoch| {
-                        (decay_per_epoch.powi(epoch as _)
-                            * 2f64.powi(params.mana_parameters().decay_factors_exponent() as _))
-                        .floor() as u32
-                    })
-                    .collect::<Box<[_]>>()
-            }
-            .try_into()
-            .unwrap();
-            params.mana_parameters.decay_factor_epochs_sum = {
-                let delta = params.epochs_per_year().recip();
-                let annual_decay_factor = params.mana_parameters().annual_decay_factor();
-                (annual_decay_factor.powf(delta) / (1.0 - annual_decay_factor.powf(delta))
-                    * (2f64.powi(params.mana_parameters().decay_factor_epochs_sum_exponent() as _)))
-                .floor() as _
-            };
-            params
-        });
-        &PARAMS
+        iota_mainnet_protocol_parameters()
     }
 
     #[test]
     fn mana_decay_no_factors() {
-        let mana_parameters = ManaParameters {
-            decay_factors: Box::<[_]>::default().try_into().unwrap(),
-            ..Default::default()
-        };
+        let mut mana_parameters = params().mana_parameters().clone();
+        mana_parameters.decay_factors = Box::<[_]>::default().try_into().unwrap();
         assert_eq!(mana_parameters.decay(100, 100), 100);
     }
 
@@ -286,7 +228,7 @@ mod test {
         stored_mana: u64,
         created_slot: SlotIndex,
         target_slot: SlotIndex,
-        err: Option<Error>,
+        err: Option<ManaError>,
     }
 
     #[test]
@@ -311,7 +253,7 @@ mod test {
                 stored_mana: 0,
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
-                err: Some(Error::InvalidEpochDiff {
+                err: Some(ManaError::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
                 }),
@@ -373,7 +315,7 @@ mod test {
         created_slot: SlotIndex,
         target_slot: SlotIndex,
         potential_mana: Option<u64>,
-        err: Option<Error>,
+        err: Option<ManaError>,
     }
 
     #[test]
@@ -401,7 +343,7 @@ mod test {
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
                 potential_mana: None,
-                err: Some(Error::InvalidEpochDiff {
+                err: Some(ManaError::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
                 }),

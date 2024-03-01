@@ -17,11 +17,8 @@ use packable::{
 };
 
 use crate::{
-    types::block::{
-        address::{Address, MultiAddress},
-        Error,
-    },
-    utils::ConvertTo,
+    types::block::address::{Address, AddressError, MultiAddress},
+    utils::{ConversionError, ConvertTo},
 };
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Display)]
@@ -46,7 +43,7 @@ impl Hrp {
 }
 
 impl FromStr for Hrp {
-    type Err = Error;
+    type Err = AddressError;
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
         Ok(Self(bech32::Hrp::parse(hrp)?))
@@ -54,32 +51,30 @@ impl FromStr for Hrp {
 }
 
 impl Packable for Hrp {
-    type UnpackError = Error;
+    type UnpackError = AddressError;
     type UnpackVisitor = ();
 
     #[inline]
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         (self.0.len() as u8).pack(packer)?;
-        // TODO revisit when/if bech32 adds a way to get the bytes without iteration to avoid collecting
-        packer.pack_bytes(&self.0.byte_iter().collect::<Vec<_>>())?;
+        packer.pack_bytes(self.0.as_bytes())?;
 
         Ok(())
     }
 
     #[inline]
-    fn unpack<U: Unpacker, const VERIFY: bool>(
+    fn unpack<U: Unpacker>(
         unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
+        visitor: Option<&Self::UnpackVisitor>,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let len = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()? as usize;
+        let len = u8::unpack(unpacker, visitor).coerce()? as usize;
 
         let mut bytes = alloc::vec![0u8; len];
         unpacker.unpack_bytes(&mut bytes)?;
 
-        Ok(Self(
-            bech32::Hrp::parse(&String::from_utf8_lossy(&bytes))
-                .map_err(|e| UnpackError::Packable(Error::InvalidBech32Hrp(e)))?,
-        ))
+        Ok(Self(bech32::Hrp::parse(&String::from_utf8_lossy(&bytes)).map_err(
+            |e| UnpackError::Packable(AddressError::InvalidBech32Hrp(e)),
+        )?))
     }
 }
 
@@ -105,8 +100,8 @@ impl PartialEq<str> for Hrp {
 crate::string_serde_impl!(Hrp);
 
 impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
-    fn convert(self) -> Result<Hrp, Error> {
-        Hrp::from_str(self.as_ref())
+    fn convert(self) -> Result<Hrp, ConversionError> {
+        Hrp::from_str(self.as_ref()).map_err(ConversionError::new)
     }
 
     fn convert_unchecked(self) -> Hrp {
@@ -124,17 +119,17 @@ pub struct Bech32Address {
 }
 
 impl FromStr for Bech32Address {
-    type Err = Error;
+    type Err = AddressError;
 
     fn from_str(address: &str) -> Result<Self, Self::Err> {
         match bech32::decode(address) {
-            Ok((hrp, bytes)) => Address::unpack_verified(bytes.as_slice(), &())
-                .map_err(|_| Error::InvalidAddress)
+            Ok((hrp, bytes)) => Address::unpack_bytes_verified(bytes.as_slice(), &())
+                .map_err(|_| AddressError::InvalidAddress)
                 .map(|address| Self {
                     hrp: Hrp(hrp),
                     inner: address,
                 }),
-            Err(_) => Err(Error::InvalidAddress),
+            Err(_) => Err(AddressError::InvalidAddress),
         }
     }
 }
@@ -149,7 +144,7 @@ impl Bech32Address {
     }
 
     /// Creates a new address wrapper by parsing a string HRP.
-    pub fn try_new(hrp: impl ConvertTo<Hrp>, inner: impl Into<Address>) -> Result<Self, Error> {
+    pub fn try_new(hrp: impl ConvertTo<Hrp>, inner: impl Into<Address>) -> Result<Self, AddressError> {
         Ok(Self {
             hrp: hrp.convert()?,
             inner: inner.into(),
@@ -172,7 +167,7 @@ impl Bech32Address {
     }
 
     /// Parses a bech32 address string.
-    pub fn try_from_str(address: impl AsRef<str>) -> Result<Self, Error> {
+    pub fn try_from_str(address: impl AsRef<str>) -> Result<Self, AddressError> {
         Self::from_str(address.as_ref())
     }
 }
@@ -226,7 +221,7 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
 crate::string_serde_impl!(Bech32Address);
 
 impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
-    fn convert(self) -> Result<Bech32Address, Error> {
-        Bech32Address::try_from_str(self)
+    fn convert(self) -> Result<Bech32Address, ConversionError> {
+        Bech32Address::try_from_str(self).map_err(ConversionError::new)
     }
 }

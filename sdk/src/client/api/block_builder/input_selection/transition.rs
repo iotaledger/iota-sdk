@@ -55,12 +55,13 @@ impl InputSelection {
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let mut builder = AccountOutputBuilder::from(input)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
         if input.is_block_issuer() {
-            builder = builder.with_mana(Output::from(input.clone()).available_mana(
+            builder = builder.with_mana(input.available_mana(
                 &self.protocol_parameters,
                 output_id.transaction_id().slot_index(),
                 self.creation_slot,
@@ -102,6 +103,7 @@ impl InputSelection {
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let output = NftOutputBuilder::from(input)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
             .with_nft_id(nft_id)
             .with_features(features)
             .finish_output()?;
@@ -139,7 +141,9 @@ impl InputSelection {
             return Ok(None);
         }
 
-        let output = FoundryOutputBuilder::from(input).finish_output()?;
+        let output = FoundryOutputBuilder::from(input)
+            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
+            .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
 

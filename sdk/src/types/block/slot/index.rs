@@ -124,15 +124,15 @@ impl From<SlotIndex> for u32 {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "protocol_parameters_samples"))]
 mod test {
     use pretty_assertions::assert_eq;
 
-    use crate::types::block::protocol::ProtocolParameters;
+    use crate::types::block::protocol::iota_mainnet_protocol_parameters;
 
     #[test]
     fn to_from_timestamp() {
-        let protocol_params = ProtocolParameters::default();
+        let protocol_params = iota_mainnet_protocol_parameters();
 
         // Timestamp before the genesis
         let timestamp = protocol_params.genesis_unix_timestamp() - 100;

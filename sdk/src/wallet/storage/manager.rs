@@ -49,6 +49,11 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
+    pub(crate) async fn save_wallet_ledger(&self, wallet_ledger: &WalletLedgerDto) -> crate::wallet::Result<()> {
+        self.set(WALLET_LEDGER_KEY, wallet_ledger).await?;
+        Ok(())
+    }
+
     pub(crate) async fn load_wallet_ledger(&self) -> crate::wallet::Result<Option<WalletLedger>> {
         if let Some(dto) = self.get::<WalletLedgerDto>(WALLET_LEDGER_KEY).await? {
             Ok(Some(WalletLedger::try_from_dto(dto)?))
@@ -57,18 +62,11 @@ impl StorageManager {
         }
     }
 
-    pub(crate) async fn save_wallet_ledger(&self, wallet_ledger: &WalletLedgerDto) -> crate::wallet::Result<()> {
-        self.set(WALLET_LEDGER_KEY, wallet_ledger).await?;
-        Ok(())
-    }
-
     pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
         let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
     }
 
-    // TODO: call this method in wallet builder: https://github.com/iotaledger/iota-sdk/issues/2022
-    #[allow(dead_code)]
     pub(crate) async fn get_default_sync_options(&self) -> crate::wallet::Result<Option<SyncOptions>> {
         let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.get(&key).await

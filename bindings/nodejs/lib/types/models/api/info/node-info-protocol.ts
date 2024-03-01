@@ -1,22 +1,22 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { StorageScoreParameters } from '../storage-score';
-import { EpochIndex } from '../../block/slot';
-import { u64 } from '../../utils/type-aliases';
+import type { StorageScoreParameters } from '../../storage-score';
+import { EpochIndex } from '../../../block/slot';
+import { NumericString } from '../../../utils';
 
 /**
- * The Protocol Info.
+ * The Protocol Parameters response.
  */
-interface ProtocolInfo {
-    /**
-     * The start epoch of the set of protocol parameters.
-     */
-    startEpoch: EpochIndex;
+interface ProtocolParametersResponse {
     /**
      * The protocol parameters.
      */
     parameters: ProtocolParameters;
+    /**
+     * The start epoch of the set of protocol parameters.
+     */
+    startEpoch: EpochIndex;
 }
 
 /**
@@ -54,7 +54,7 @@ interface ProtocolParameters {
     /**
      * Current supply of base token.
      */
-    tokenSupply: u64;
+    tokenSupply: NumericString;
     /**
      * Genesis Slot defines the slot of the genesis.
      */
@@ -62,7 +62,7 @@ interface ProtocolParameters {
     /**
      * The genesis timestamp at which the slots start to count.
      */
-    genesisUnixTimestamp: u64;
+    genesisUnixTimestamp: NumericString;
     /**
      * The duration of a slot, in seconds.
      */
@@ -145,11 +145,11 @@ interface RewardsParameters {
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
-    initialTargetRewardsRate: u64;
+    initialTargetRewardsRate: NumericString;
     /**
      * The rate of Mana rewards after the bootstrapping phase.
      */
-    finalTargetRewardsRate: u64;
+    finalTargetRewardsRate: NumericString;
     /**
      * Pool Coefficient Exponent is the exponent used for shifting operation
      * in the pool rewards calculations.
@@ -239,6 +239,10 @@ interface ManaParameters {
      * The scaling of ManaDecayFactorEpochsSum expressed as an exponent of 2.
      */
     decayFactorEpochsSumExponent: number;
+    /**
+     * Decay factor for 1 year.
+     */
+    annualDecayFactorPercentage: number;
 }
 
 /**
@@ -248,15 +252,15 @@ interface CongestionControlParameters {
     /**
      * The minimum value of the reference Mana cost.
      */
-    minReferenceManaCost: u64;
+    minReferenceManaCost: NumericString;
     /**
      * The increase step size of the reference Mana cost.
      */
-    increase: u64;
+    increase: NumericString;
     /**
      * The decrease step size of the reference Mana cost.
      */
-    decrease: u64;
+    decrease: NumericString;
     /**
      * The threshold for increasing the reference Mana cost.
      */
@@ -298,7 +302,7 @@ interface VersionSignalingParameters {
 }
 
 export {
-    ProtocolInfo,
+    ProtocolParametersResponse,
     ProtocolParameters,
     RewardsParameters,
     WorkScoreParameters,

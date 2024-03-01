@@ -1,16 +1,17 @@
 import type { SyncOptions, FilterOptions } from '../wallet';
 import type { WalletEventType, WalletEvent } from '../event';
 import type {
-    IAuth,
-    IClientOptions,
+    Auth,
+    ClientOptions,
     Burn,
-    INode,
+    Node,
     PreparedTransactionData,
 } from '../../client';
 import type {
     SendParams,
     SendNativeTokenParams,
     SendNftParams,
+    SendManaParams,
 } from '../address';
 import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
@@ -51,8 +52,8 @@ export type __AnnounceCandidacyMethod__ = {
     };
 };
 
-export type __BackupMethod__ = {
-    name: 'backup';
+export type __BackupToStrongholdSnapshotMethod__ = {
+    name: 'backupToStrongholdSnapshot';
     data: {
         destination: string;
         password: string;
@@ -93,8 +94,8 @@ export type __IsStrongholdPasswordAvailableMethod__ = {
     name: 'isStrongholdPasswordAvailable';
 };
 
-export type __RestoreBackupMethod__ = {
-    name: 'restoreBackup';
+export type __RestoreFromStrongholdSnapshotMethod__ = {
+    name: 'restoreFromStrongholdSnapshot';
     data: {
         source: string;
         password: string;
@@ -105,7 +106,7 @@ export type __RestoreBackupMethod__ = {
 
 export type __SetClientOptionsMethod__ = {
     name: 'setClientOptions';
-    data: { clientOptions: IClientOptions };
+    data: { clientOptions: ClientOptions };
 };
 
 export type __SetStrongholdPasswordMethod__ = {
@@ -137,7 +138,7 @@ export type __StoreMnemonicMethod__ = {
 
 export type __UpdateNodeAuthMethod__ = {
     name: 'updateNodeAuth';
-    data: { url: string; auth?: IAuth };
+    data: { url: string; auth?: Auth };
 };
 
 export type __PrepareBurnMethod__ = {
@@ -150,13 +151,6 @@ export type __PrepareBurnMethod__ = {
 
 export type __PrepareClaimOutputsMethod__ = {
     name: 'prepareClaimOutputs';
-    data: {
-        outputIdsToClaim: OutputId[];
-    };
-};
-
-export type __ClaimOutputsMethod__ = {
-    name: 'claimOutputs';
     data: {
         outputIdsToClaim: OutputId[];
     };
@@ -422,6 +416,14 @@ export type __SendOutputsMethod__ = {
     };
 };
 
+export type __PrepareSendManaMethod__ = {
+    name: 'prepareSendMana';
+    data: {
+        params: SendManaParams;
+        options?: TransactionOptions;
+    };
+};
+
 export type __SetAliasMethod__ = {
     name: 'setAlias';
     data: {
@@ -503,7 +505,7 @@ export type __GetParticipationEventMethod__ = {
 export type __GetParticipationEventIdsMethod__ = {
     name: 'getParticipationEventIds';
     data: {
-        node: INode;
+        node: Node;
         eventType?: ParticipationEventType;
     };
 };

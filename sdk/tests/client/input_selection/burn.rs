@@ -11,13 +11,15 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{AccountId, ChainId, NftId, SimpleTokenScheme, TokenId},
-        protocol::protocol_parameters,
+        protocol::iota_mainnet_protocol_parameters,
     },
 };
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    assert_remainder_or_return, build_inputs, build_outputs,
+    input_selection::native_tokens::nt_remainder_min_storage_deposit,
+    unsorted_eq,
     Build::{Account, Basic, Foundry, Nft},
     ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, NFT_ID_0, NFT_ID_1, NFT_ID_2,
     SLOT_COMMITMENT_ID, SLOT_INDEX, TOKEN_ID_1, TOKEN_ID_2,
@@ -25,7 +27,7 @@ use crate::client::{
 
 #[test]
 fn burn_account_present() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -84,7 +86,7 @@ fn burn_account_present() {
 
 #[test]
 fn burn_account_present_and_required() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -144,7 +146,7 @@ fn burn_account_present_and_required() {
 
 #[test]
 fn burn_account_id_zero() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -206,7 +208,7 @@ fn burn_account_id_zero() {
 
 #[test]
 fn burn_account_absent() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -253,7 +255,7 @@ fn burn_account_absent() {
 
 #[test]
 fn burn_accounts_present() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
@@ -322,7 +324,7 @@ fn burn_accounts_present() {
 
 #[test]
 fn burn_account_in_outputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -390,7 +392,7 @@ fn burn_account_in_outputs() {
 
 #[test]
 fn burn_nft_present() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -451,7 +453,7 @@ fn burn_nft_present() {
 
 #[test]
 fn burn_nft_present_and_required() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -513,7 +515,7 @@ fn burn_nft_present_and_required() {
 
 #[test]
 fn burn_nft_id_zero() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs(
@@ -573,7 +575,7 @@ fn burn_nft_id_zero() {
 
 #[test]
 fn burn_nft_absent() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -620,7 +622,7 @@ fn burn_nft_absent() {
 
 #[test]
 fn burn_nfts_present() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
     let nft_id_2 = NftId::from_str(NFT_ID_2).unwrap();
 
@@ -693,7 +695,7 @@ fn burn_nfts_present() {
 
 #[test]
 fn burn_nft_in_outputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -765,7 +767,7 @@ fn burn_nft_in_outputs() {
 
 #[test]
 fn burn_foundry_present() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -835,12 +837,12 @@ fn burn_foundry_present() {
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             if output.is_basic() {
-                assert!(is_remainder_or_return(
+                assert_remainder_or_return(
                     output,
                     1_500_000,
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     None,
-                ));
+                );
             } else if output.is_account() {
                 assert_eq!(output.amount(), 1_000_000);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
@@ -860,7 +862,7 @@ fn burn_foundry_present() {
 
 #[test]
 fn burn_foundry_absent() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let foundry_id_1 = build_inputs(
         [(
@@ -935,7 +937,7 @@ fn burn_foundry_absent() {
 
 #[test]
 fn burn_foundries_present() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1019,7 +1021,7 @@ fn burn_foundries_present() {
 
 #[test]
 fn burn_foundry_in_outputs() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1088,7 +1090,7 @@ fn burn_foundry_in_outputs() {
 
 #[test]
 fn burn_native_tokens() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = build_inputs(
         [
@@ -1120,6 +1122,8 @@ fn burn_native_tokens() {
         Some(SLOT_INDEX),
     );
 
+    let nt_remainder_output_amount = nt_remainder_min_storage_deposit(&protocol_parameters);
+
     let selected = InputSelection::new(
         inputs.clone(),
         None,
@@ -1137,25 +1141,24 @@ fn burn_native_tokens() {
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
-    let nt_remainder_output_amount = 106000;
-    assert!(
-        is_remainder_or_return(
-            &selected.transaction.outputs()[0],
-            nt_remainder_output_amount,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((TOKEN_ID_1, 80))
-        ) && is_remainder_or_return(
-            &selected.transaction.outputs()[1],
-            2_000_000 - nt_remainder_output_amount,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            Some((TOKEN_ID_2, 70))
-        )
+
+    assert_remainder_or_return(
+        &selected.transaction.outputs()[0],
+        nt_remainder_output_amount,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        Some((TOKEN_ID_1, 80)),
+    );
+    assert_remainder_or_return(
+        &selected.transaction.outputs()[1],
+        2_000_000 - nt_remainder_output_amount,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        Some((TOKEN_ID_2, 70)),
     );
 }
 
 #[test]
 fn burn_foundry_and_its_account() {
-    let protocol_parameters = protocol_parameters();
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs(
@@ -1229,12 +1232,12 @@ fn burn_foundry_and_its_account() {
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(
+            assert_remainder_or_return(
                 output,
                 1_500_000,
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
-            ));
+            );
         }
     });
 }

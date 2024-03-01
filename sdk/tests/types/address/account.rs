@@ -141,10 +141,12 @@ fn serde_invalid_account_id() {
         "accountId": ACCOUNT_ID_INVALID,
     });
 
-    assert!(matches!(
-        serde_json::from_value::<AccountAddress>(account_address_ser),
-        Err(e) if e.to_string() == "hex error: Invalid hex string length for slice: expected 64 got 61"
-    ));
+    assert_eq!(
+        serde_json::from_value::<AccountAddress>(account_address_ser)
+            .unwrap_err()
+            .to_string(),
+        "Invalid hex string length for slice: expected 64 got 61"
+    );
 }
 
 #[test]
@@ -167,7 +169,7 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_address.as_slice(), &()).unwrap()
     );
 
     let address = Address::from(AccountAddress::from_str(ACCOUNT_ID).unwrap());
@@ -175,6 +177,6 @@ fn pack_unpack() {
 
     assert_eq!(
         address,
-        PackableExt::unpack_verified(packed_address.as_slice(), &()).unwrap()
+        PackableExt::unpack_bytes_verified(packed_address.as_slice(), &()).unwrap()
     );
 }

@@ -14,10 +14,11 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    types::block::address::Bech32Address,
-    wallet::{ClientOptions, Result, Wallet},
+    types::block::{address::Bech32Address, protocol::iota_mainnet_protocol_parameters},
+    wallet::{ClientOptions, Wallet},
 };
 use pretty_assertions::assert_eq;
+#[cfg(feature = "storage")]
 use url::Url;
 
 #[cfg(feature = "storage")]
@@ -26,11 +27,12 @@ use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NOD
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn update_client_options() -> Result<()> {
+async fn update_client_options() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
+    let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
+    let wallet = make_wallet(storage_path, mnemonic.clone(), Some(NODE_OTHER)).await?;
 
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
@@ -49,7 +51,7 @@ async fn update_client_options() -> Result<()> {
 
     // The client options are also updated in the database and available the next time
     drop(wallet);
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet = make_wallet(storage_path, mnemonic, None).await?;
     let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
@@ -59,7 +61,7 @@ async fn update_client_options() -> Result<()> {
 
 // #[cfg(feature = "storage")]
 // #[tokio::test]
-// async fn different_seed() -> Result<()> {
+// async fn different_seed() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path = "test-storage/different_seed";
 //     setup(storage_path)?;
 
@@ -76,15 +78,14 @@ async fn update_client_options() -> Result<()> {
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn changed_bip_path() -> Result<()> {
+async fn changed_bip_path() -> Result<(), Box<dyn std::error::Error>> {
     use iota_sdk::crypto::keys::bip44::Bip44;
 
     let storage_path = "test-storage/changed_coin_type";
     setup(storage_path)?;
 
     let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
-
-    let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None).await?;
+    let wallet = make_wallet(storage_path, mnemonic.clone(), None).await?;
 
     drop(wallet);
 
@@ -97,14 +98,12 @@ async fn changed_bip_path() -> Result<()> {
         .finish()
         .await;
 
-    let _mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
-        new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
-        old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    });
-
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    assert!(matches!(result, _mismatch_err));
+    assert!(matches!(result, Err(Error::BipPathMismatch {
+        new_bip_path: Some(new_bip_path),
+        old_bip_path: Some(old_bip_path),
+    }) if new_bip_path == Bip44::new(IOTA_COIN_TYPE) && old_bip_path == Bip44::new(SHIMMER_COIN_TYPE)));
 
     // Building the wallet with the same coin type still works
     assert!(
@@ -122,7 +121,7 @@ async fn changed_bip_path() -> Result<()> {
 }
 
 #[tokio::test]
-async fn shimmer_coin_type() -> Result<()> {
+async fn shimmer_coin_type() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
@@ -139,11 +138,13 @@ async fn shimmer_coin_type() -> Result<()> {
 }
 
 #[tokio::test]
-async fn iota_coin_type() -> Result<()> {
+async fn iota_coin_type() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/iota_coin_type";
     setup(storage_path)?;
 
-    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+    let client_options = ClientOptions::new()
+        .with_node(NODE_LOCAL)?
+        .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
@@ -170,7 +171,7 @@ async fn iota_coin_type() -> Result<()> {
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn update_node_auth() -> Result<()> {
+async fn update_node_auth() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/update_node_auth";
     setup(storage_path)?;
 
