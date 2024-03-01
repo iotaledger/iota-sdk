@@ -9,7 +9,10 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{Output, TokenId, TokenScheme},
+    types::block::{
+        output::{Output, TokenId, TokenScheme},
+        payload::signed_transaction::TransactionCapabilityFlag,
+    },
 };
 
 impl InputSelection {
@@ -20,6 +23,11 @@ impl InputSelection {
             log::debug!("Native tokens requirement already fulfilled");
 
             return Ok(Vec::new());
+        }
+
+        if self.burn.as_ref().map_or(false, |burn| !burn.native_tokens.is_empty()) {
+            self.transaction_capabilities
+                .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
         }
 
         log::debug!("Fulfilling native tokens requirement");
