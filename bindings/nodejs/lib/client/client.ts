@@ -65,6 +65,8 @@ import {
     UtxoChangesFullResponse,
     CommitteeResponse,
     IssuanceBlockHeaderResponse,
+    OutputMetadataResponse,
+    OutputWithMetadataResponse,
 } from '../types/models/api';
 import { RoutesResponse } from '../types/models/api/routes-response';
 
@@ -363,7 +365,8 @@ export class Client {
     // UTXO routes.
 
     /**
-     * Get output from a given output ID.
+     * Finds an output by its ID and returns it as object.
+     * GET /api/core/v3/outputs/{outputId}
      */
     async getOutput(outputId: OutputId): Promise<OutputResponse> {
         const response = await this.methodHandler.callMethod({
@@ -375,6 +378,58 @@ export class Client {
 
         const parsed = JSON.parse(response) as Response<OutputResponse>;
         return plainToInstance(OutputResponse, parsed.payload);
+    }
+
+    /**
+     * Finds an output by its ID and returns it as raw bytes.
+     * GET /api/core/v3/outputs/{outputId}
+     */
+    async getOutputRaw(outputId: OutputId): Promise<Uint8Array> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getOutputRaw',
+            data: {
+                outputId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Finds output metadata by output ID.
+     * GET /api/core/v3/outputs/{outputId}/metadata
+     */
+    async getOutputMetadata(
+        outputId: OutputId,
+    ): Promise<OutputMetadataResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getOutputMetadata',
+            data: {
+                outputId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Finds an output with its metadata by output ID.
+     * GET /api/core/v3/outputs/{outputId}/full
+     */
+    async getOutputWithMetadata(
+        outputId: OutputId,
+    ): Promise<OutputWithMetadataResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getOutputWithMetadata',
+            data: {
+                outputId,
+            },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<OutputWithMetadataResponse>;
+        return plainToInstance(OutputWithMetadataResponse, parsed.payload);
     }
 
     /**

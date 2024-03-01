@@ -162,6 +162,13 @@ export interface __GetOutputMethod__ {
     };
 }
 
+export interface __GetOutputRawMethod__ {
+    name: 'getOutputRaw';
+    data: {
+        outputId: OutputId;
+    };
+}
+
 export interface __GetOutputMetadataMethod__ {
     name: 'getOutputMetadata';
     data: {

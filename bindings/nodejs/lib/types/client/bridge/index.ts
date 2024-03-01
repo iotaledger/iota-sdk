@@ -7,7 +7,11 @@ import type {
     __GetOutputIdsMethod__,
     __GetBasicOutputIdsMethod__,
     __GetOutputMethod__,
+    __GetOutputRawMethod__,
     __GetOutputsMethod__,
+    __GetOutputsIgnoreNotFoundMethod__,
+    __GetOutputMetadataMethod__,
+    __GetOutputWithMetadataMethod__,
     __PostBlockMethod__,
     __GetNetworkInfoMethod__,
     __GetAccountCongestionMethod__,
@@ -54,7 +58,6 @@ import type {
     __FoundryOutputIdMethod__,
     __NftOutputIdsMethod__,
     __NftOutputIdMethod__,
-    __GetOutputsIgnoreNotFoundMethod__,
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
     __BuildBasicOutputMethod__,
@@ -71,10 +74,14 @@ import type {
 export type __ClientMethods__ =
     | __GetInfoMethod__
     | __GetRoutesMethod__
-    | __GetOutputMethod__
     | __GetOutputIdsMethod__
     | __GetBasicOutputIdsMethod__
+    | __GetOutputMethod__
+    | __GetOutputRawMethod__
     | __GetOutputsMethod__
+    | __GetOutputsIgnoreNotFoundMethod__
+    | __GetOutputMetadataMethod__
+    | __GetOutputWithMetadataMethod__
     | __PostBlockMethod__
     | __GetNetworkInfoMethod__
     | __GetAccountCongestionMethod__
@@ -121,7 +128,6 @@ export type __ClientMethods__ =
     | __FoundryOutputIdMethod__
     | __NftOutputIdsMethod__
     | __NftOutputIdMethod__
-    | __GetOutputsIgnoreNotFoundMethod__
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__
     | __BuildBasicOutputMethod__
