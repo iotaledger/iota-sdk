@@ -25,7 +25,7 @@ use crate::types::block::{
 };
 
 crate::impl_id!(
-    /// The signing hash of a [`Block`].
+    /// The signing hash of a [`Block`]'s signing input.
     pub BlockSigningHash {
         pub const LENGTH: usize = 32;
     }
