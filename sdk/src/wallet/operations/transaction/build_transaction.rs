@@ -84,8 +84,8 @@ where
             RemainderValueStrategy::ReuseAddress => None,
             RemainderValueStrategy::CustomAddress(address) => Some(address),
         };
-        // lock so the same inputs can't be selected in multiple transactions
-        let mut wallet_ledger = self.ledger_mut().await;
+
+        let wallet_ledger = self.ledger().await;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -192,12 +192,6 @@ where
         let prepared_transaction_data = transaction_builder.finish()?;
 
         prepared_transaction_data.transaction.validate_length()?;
-
-        // lock outputs so they don't get used by another transaction
-        for output in &prepared_transaction_data.inputs_data {
-            log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            wallet_ledger.locked_outputs.insert(*output.output_id());
-        }
 
         Ok(prepared_transaction_data)
     }

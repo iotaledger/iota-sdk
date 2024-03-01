@@ -73,20 +73,12 @@ where
         }
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let unlocks = match self
+        let unlocks = self
             .secret_manager
             .read()
             .await
             .transaction_unlocks(prepared_transaction_data, &protocol_parameters)
-            .await
-        {
-            Ok(res) => res,
-            Err(err) => {
-                // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(&prepared_transaction_data.inputs_data).await?;
-                return Err(err.into());
-            }
-        };
+            .await?;
         let payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", payload);

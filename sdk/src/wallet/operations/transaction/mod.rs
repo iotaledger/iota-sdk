@@ -14,7 +14,8 @@ use crate::wallet::core::WalletLedgerDto;
 use crate::{
     client::{
         api::{options::TransactionOptions, PreparedTransactionData, SignedTransactionData},
-        secret::{types::InputSigningData, SecretManage},
+        secret::SecretManage,
+        Error,
     },
     types::block::{
         output::{Output, OutputWithMetadata},
@@ -87,14 +88,19 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
-        let signed_transaction_data = match self.sign_transaction(&prepared_transaction_data).await {
-            Ok(res) => res,
-            Err(err) => {
-                // unlock outputs so they are available for a new transaction
-                self.unlock_inputs(&prepared_transaction_data.inputs_data).await?;
-                return Err(err);
-            }
-        };
+        let wallet_ledger = self.ledger().await;
+        // check if inputs got already used by another transaction
+        for output in &prepared_transaction_data.inputs_data {
+            if wallet_ledger.locked_outputs.contains(output.output_id()) {
+                return Err(crate::wallet::Error::CustomInput(format!(
+                    "provided input {} is already used in another transaction",
+                    output.output_id()
+                )));
+            };
+        }
+        drop(wallet_ledger);
+
+        let signed_transaction_data = self.sign_transaction(&prepared_transaction_data).await?;
 
         self.submit_and_store_transaction(signed_transaction_data, options)
             .await
@@ -119,10 +125,16 @@ where
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload
             );
-            // unlock outputs so they are available for a new transaction
-            self.unlock_inputs(&signed_transaction_data.inputs_data).await?;
-            return Err(crate::client::Error::TransactionSemantic(conflict).into());
+            return Err(Error::TransactionSemantic(conflict).into());
         }
+
+        let mut wallet_ledger = self.ledger_mut().await;
+        // lock outputs so they don't get used by another transaction
+        for output in &signed_transaction_data.inputs_data {
+            log::debug!("[TRANSACTION] locking: {}", output.output_id());
+            wallet_ledger.locked_outputs.insert(*output.output_id());
+        }
+        drop(wallet_ledger);
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
@@ -180,19 +192,5 @@ where
         }
 
         Ok(transaction)
-    }
-
-    // unlock outputs
-    async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
-        let mut wallet_ledger = self.ledger_mut().await;
-        for input_signing_data in inputs {
-            let output_id = input_signing_data.output_id();
-            wallet_ledger.locked_outputs.remove(output_id);
-            log::debug!(
-                "[TRANSACTION] Unlocked output {} because of transaction error",
-                output_id
-            );
-        }
-        Ok(())
     }
 }
