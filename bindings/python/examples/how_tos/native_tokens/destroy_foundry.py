@@ -25,9 +25,10 @@ transaction = wallet.prepare_destroy_foundry(foundry_id).send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get accepted
-block_id = wallet.wait_for_transaction_acceptance(
+wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
-print(f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+print(
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
 
 balance = wallet.sync()
 print(f'Foundries after destroying: {len(balance.foundries)}')

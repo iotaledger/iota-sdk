@@ -720,17 +720,17 @@ class Wallet:
         return PreparedTransaction(self, prepared)
 
     def wait_for_transaction_acceptance(
-            self, transaction_id: TransactionId, interval=None, max_attempts=None) -> BlockId:
+            self, transaction_id: TransactionId, interval=None, max_attempts=None):
         """Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds. Returns the block id that
         contains this transaction.
         """
-        return BlockId(self._call_method(
+        return self._call_method(
             'waitForTransactionAcceptance', {
                 'transactionId': transaction_id,
                 'interval': interval,
                 'maxAttempts': max_attempts
             }
-        ))
+        )
 
     def send(self, amount: int, address: str,
              options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
