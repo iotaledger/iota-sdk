@@ -90,6 +90,18 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
+        let wallet_ledger = self.ledger().await;
+        // check if inputs got already used by another transaction
+        for output in &prepared_transaction_data.inputs_data {
+            if wallet_ledger.locked_outputs.contains(output.output_id()) {
+                return Err(crate::wallet::Error::CustomInput(format!(
+                    "provided input {} is already used in another transaction",
+                    output.output_id()
+                )));
+            };
+        }
+        drop(wallet_ledger);
+
         let signed_transaction_data = self.sign_transaction(&prepared_transaction_data).await?;
 
         self.submit_and_store_transaction(signed_transaction_data, options)
