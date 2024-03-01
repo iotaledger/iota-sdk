@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let recv_address = wallet.address().await;
-    println!("receive address: {recv_address}");
+    println!("recipient address: {recv_address}");
     println!("{:?}", wallet.get_ledger_nano_status().await?);
 
     let now = tokio::time::Instant::now();
