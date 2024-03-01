@@ -3,6 +3,7 @@
 
 pub mod basic;
 mod block;
+mod error;
 mod parent;
 pub mod validation;
 
@@ -15,19 +16,19 @@ use packable::{Packable, PackableExt};
 pub use self::{
     basic::{BasicBlockBody, BasicBlockBodyBuilder},
     block::{Block, BlockHeader, UnsignedBlock},
+    error::BlockError,
     parent::Parents,
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
 use crate::types::block::{
     core::basic::MaxBurnedManaAmount,
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    Error,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = BlockError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = Error::InvalidBlockBodyKind)]
+#[packable(tag_type = u8, with_error = BlockError::InvalidBlockBodyKind)]
 pub enum BlockBody {
     #[packable(tag = BasicBlockBody::KIND)]
     Basic(Box<BasicBlockBody>),
@@ -48,25 +49,25 @@ impl From<ValidationBlockBody> for BlockBody {
 }
 
 impl TryFrom<BlockBody> for BasicBlockBodyBuilder {
-    type Error = Error;
+    type Error = BlockError;
 
     fn try_from(value: BlockBody) -> Result<Self, Self::Error> {
         if let BlockBody::Basic(block) = value {
             Ok((*block).into())
         } else {
-            Err(Error::InvalidBlockBodyKind(value.kind()))
+            Err(BlockError::InvalidBlockBodyKind(value.kind()))
         }
     }
 }
 
 impl TryFrom<BlockBody> for ValidationBlockBodyBuilder {
-    type Error = Error;
+    type Error = BlockError;
 
     fn try_from(value: BlockBody) -> Result<Self, Self::Error> {
         if let BlockBody::Validation(block) = value {
             Ok((*block).into())
         } else {
-            Err(Error::InvalidBlockBodyKind(value.kind()))
+            Err(BlockError::InvalidBlockBodyKind(value.kind()))
         }
     }
 }
@@ -203,7 +204,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<BlockBodyDto> for BlockBody {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: BlockBodyDto,

@@ -60,12 +60,12 @@ where
         }
 
         if change_in_node_manager {
-            if let Ok(info) = self.client.get_info().await {
-                let params = &info.node_info.latest_protocol_parameters().parameters;
+            if let Ok(node_info) = self.client.get_node_info().await {
+                let params = &node_info.info.latest_protocol_parameters().parameters;
 
                 *self.client.network_info.write().await = NetworkInfo {
                     protocol_parameters: params.clone(),
-                    tangle_time: info.node_info.status.relative_accepted_tangle_time,
+                    tangle_time: node_info.info.status.relative_accepted_tangle_time,
                 };
             } else if let Some(protocol_parameters) = protocol_parameters {
                 *self.client.network_info.write().await = NetworkInfo {

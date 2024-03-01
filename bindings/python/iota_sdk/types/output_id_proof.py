@@ -9,13 +9,13 @@ from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json, SlotIndex
 
 
-class TreeNodeType(IntEnum):
-    """Tree node types.
+class OutputCommitmentProofType(IntEnum):
+    """OutputCommitmentProof types.
 
     Attributes:
         HashableNode (0): Denotes a HashableNode.
         LeafHash (1): Denotes a LeafHash.
-        Valuehash (2): Denotes a Valuehash.
+        ValueHash (2): Denotes a ValueHash.
     """
     HashableNode = 0
     LeafHash = 1
@@ -29,23 +29,23 @@ def deserialize_proof(d: Dict[str, Any]) -> OutputCommitmentProof:
     Arguments:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    node_type = d['type']
-    if node_type == TreeNodeType.HashableNode:
+    proof_type = d['type']
+    if proof_type == OutputCommitmentProofType.HashableNode:
         return HashableNode.from_dict(d)
-    if node_type == TreeNodeType.LeafHash:
+    if proof_type == OutputCommitmentProofType.LeafHash:
         return LeafHash.from_dict(d)
-    if node_type == TreeNodeType.ValueHash:
+    if proof_type == OutputCommitmentProofType.ValueHash:
         return ValueHash.from_dict(d)
-    raise Exception(f'invalid node type: {node_type}')
+    raise Exception(f'invalid proof type: {proof_type}')
 
 
 @json
 @dataclass
 class HashableNode:
-    """Node contains the hashes of the left and right children of a node in the tree.
+    """Contains the hashes of the left and right children of a node in the OutputCommitmentProof tree.
     """
     type: int = field(default_factory=lambda: int(
-        TreeNodeType.HashableNode), init=False)
+        OutputCommitmentProofType.HashableNode), init=False)
     l: OutputCommitmentProof = field(metadata=config(
         decoder=deserialize_proof
     ))
@@ -57,20 +57,20 @@ class HashableNode:
 @json
 @dataclass
 class LeafHash:
-    """Leaf Hash contains the hash of a leaf in the tree.
+    """Contains the hash of a leaf in the OutputCommitmentProof tree.
     """
     type: int = field(default_factory=lambda: int(
-        TreeNodeType.LeafHash), init=False)
+        OutputCommitmentProofType.LeafHash), init=False)
     hash: HexStr
 
 
 @json
 @dataclass
 class ValueHash:
-    """Value Hash contains the hash of the value for which the proof is being computed.
+    """Contains the hash of the value for which the OutputCommitmentProof is being computed.
     """
     type: int = field(default_factory=lambda: int(
-        TreeNodeType.ValueHash), init=False)
+        OutputCommitmentProofType.ValueHash), init=False)
     hash: HexStr
 
 
@@ -83,12 +83,14 @@ class OutputIdProof:
         slot: The slot index of the output.
         output_index: The index of the output within the corresponding transaction.
         transaction_commitment: The commitment of the transaction that created the output. Hex-encoded with 0x prefix.
-        output_commitment_proof: The proof of the output commitment. Hex-encoded with 0x prefix.
+        output_commitment_proof: The proof of the output commitment.
     """
     slot: SlotIndex
     output_index: int
     transaction_commitment: HexStr
-    output_commitment_proof: OutputCommitmentProof
+    output_commitment_proof: OutputCommitmentProof = field(metadata=config(
+        decoder=deserialize_proof
+    ))
 
 
 OutputCommitmentProof: TypeAlias = Union[HashableNode, LeafHash, ValueHash]

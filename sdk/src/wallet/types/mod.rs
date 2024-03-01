@@ -16,14 +16,16 @@ pub use self::balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredS
 use crate::{
     client::secret::types::InputSigningData,
     types::{
-        api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
-            output::{Output, OutputId, OutputIdProof, OutputMetadata},
-            payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
+            output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
+            payload::{
+                signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
+                PayloadError,
+            },
             protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
-            BlockId, Error as BlockError,
+            BlockId,
         },
         TryFromDto,
     },
@@ -105,7 +107,7 @@ pub struct TransactionWithMetadata {
     /// Outputs that are used as input in the transaction. May not be all, because some may have already been deleted
     /// from the node.
     // serde(default) is needed so it doesn't break with old dbs
-    pub inputs: Vec<OutputWithMetadataResponse>,
+    pub inputs: Vec<OutputWithMetadata>,
 }
 
 /// Dto for a transaction with metadata
@@ -128,7 +130,7 @@ pub struct TransactionWithMetadataDto {
     pub incoming: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
-    pub inputs: Vec<OutputWithMetadataResponse>,
+    pub inputs: Vec<OutputWithMetadata>,
 }
 
 impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
@@ -148,7 +150,7 @@ impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
 }
 
 impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
-    type Error = BlockError;
+    type Error = PayloadError;
 
     fn try_from_dto_with_params_inner(
         dto: TransactionWithMetadataDto,
@@ -160,13 +162,13 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
             inclusion_state: dto.inclusion_state,
             timestamp: dto
                 .timestamp
-                .parse()
-                .map_err(|_| BlockError::InvalidField("timestamp"))?,
+                .parse::<u128>()
+                .map_err(|e| PayloadError::InvalidTimestamp(e.to_string()))?,
             transaction_id: dto.transaction_id,
             network_id: dto
                 .network_id
-                .parse()
-                .map_err(|_| BlockError::InvalidField("network id"))?,
+                .parse::<u64>()
+                .map_err(|e| PayloadError::InvalidNetworkId(e.to_string()))?,
             incoming: dto.incoming,
             note: dto.note,
             inputs: dto.inputs,

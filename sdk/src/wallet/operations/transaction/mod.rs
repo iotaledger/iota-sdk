@@ -17,11 +17,10 @@ use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
         secret::{types::InputSigningData, SecretManage},
-        Error,
     },
-    types::{
-        api::core::OutputWithMetadataResponse,
-        block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
+    types::block::{
+        output::{Output, OutputWithMetadata},
+        payload::signed_transaction::SignedTransactionPayload,
     },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
@@ -116,21 +115,19 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let conflict = verify_semantic(
+        if let Err(conflict) = verify_semantic(
             &signed_transaction_data.inputs_data,
             &signed_transaction_data.payload,
             signed_transaction_data.mana_rewards,
             self.client().get_protocol_parameters().await?,
-        );
-
-        if let Err(conflict) = conflict {
+        ) {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload
             );
             // unlock outputs so they are available for a new transaction
             self.unlock_inputs(&signed_transaction_data.inputs_data).await?;
-            return Err(Error::TransactionSemantic(conflict).into());
+            return Err(crate::client::Error::TransactionSemantic(conflict).into());
         }
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
@@ -156,7 +153,7 @@ where
         let inputs = signed_transaction_data
             .inputs_data
             .into_iter()
-            .map(|input| OutputWithMetadataResponse {
+            .map(|input| OutputWithMetadata {
                 metadata: input.output_metadata,
                 output: input.output,
             })

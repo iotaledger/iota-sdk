@@ -2,7 +2,6 @@ import type {
     __AnnounceCandidacyMethod__,
     __PrepareBurnMethod__,
     __PrepareClaimOutputsMethod__,
-    __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAccountOutputMethod__,
     __DeregisterParticipationEventMethod__,
@@ -26,6 +25,7 @@ import type {
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
     __PrepareSendMethod__,
+    __PrepareSendManaMethod__,
     __PrepareCreateDelegationMethod__,
     __PrepareDelayDelegationClaimingMethod__,
     __PrepareBeginStakingMethod__,
@@ -55,7 +55,7 @@ import type {
     __PrepareIncreaseVotingPowerMethod__,
     __PrepareDecreaseVotingPowerMethod__,
     __PrepareStopParticipatingMethod__,
-    __BackupMethod__,
+    __BackupToStrongholdSnapshotMethod__,
     __ChangeStrongholdPasswordMethod__,
     __ClearStrongholdPasswordMethod__,
     __ClearListenersMethod__,
@@ -63,7 +63,7 @@ import type {
     __GenerateMnemonicMethod__,
     __GetLedgerNanoStatusMethod__,
     __IsStrongholdPasswordAvailableMethod__,
-    __RestoreBackupMethod__,
+    __RestoreFromStrongholdSnapshotMethod__,
     __SetClientOptionsMethod__,
     __SetStrongholdPasswordClearIntervalMethod__,
     __SetStrongholdPasswordMethod__,
@@ -77,7 +77,6 @@ import type {
 export type __WalletMethod__ =
     | __AnnounceCandidacyMethod__
     | __PrepareBurnMethod__
-    | __ClaimOutputsMethod__
     | __PrepareClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAccountOutputMethod__
@@ -107,6 +106,7 @@ export type __WalletMethod__ =
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
     | __PrepareSendMethod__
+    | __PrepareSendManaMethod__
     | __PrepareCreateDelegationMethod__
     | __PrepareDelayDelegationClaimingMethod__
     | __PrepareBeginStakingMethod__
@@ -131,7 +131,7 @@ export type __WalletMethod__ =
     | __GetParticipationOverviewMethod__
     | __PrepareIncreaseVotingPowerMethod__
     | __PrepareDecreaseVotingPowerMethod__
-    | __BackupMethod__
+    | __BackupToStrongholdSnapshotMethod__
     | __ChangeStrongholdPasswordMethod__
     | __ClearListenersMethod__
     | __ClearStrongholdPasswordMethod__
@@ -139,7 +139,7 @@ export type __WalletMethod__ =
     | __GenerateMnemonicMethod__
     | __GetLedgerNanoStatusMethod__
     | __IsStrongholdPasswordAvailableMethod__
-    | __RestoreBackupMethod__
+    | __RestoreFromStrongholdSnapshotMethod__
     | __SetClientOptionsMethod__
     | __SetStrongholdPasswordClearIntervalMethod__
     | __SetStrongholdPasswordMethod__

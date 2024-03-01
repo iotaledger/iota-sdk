@@ -7,7 +7,7 @@ import { NumericString } from '../../../../utils';
 /**
  * Details of an outputs response from the indexer plugin.
  */
-export interface IOutputsResponse {
+export interface OutputsResponse {
     /**
      * The committed slot at which these outputs were available at.
      */

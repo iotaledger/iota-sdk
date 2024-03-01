@@ -38,7 +38,7 @@ const INCREASE_VOTING_POWER_AMOUNT: u64 = 1000001;
 const DECREASE_VOTING_POWER_AMOUNT: u64 = 1;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

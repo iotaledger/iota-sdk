@@ -4,6 +4,7 @@
 use std::{path::Path, str::FromStr};
 
 use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
+use eyre::{bail, Error};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
@@ -18,7 +19,6 @@ use iota_sdk::{
 use log::LevelFilter;
 
 use crate::{
-    error::Error,
     helper::{
         check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_alias, get_decision, get_password,
         import_mnemonic, select_secret_manager, SecretManagerChoice,
@@ -115,7 +115,7 @@ fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum CliCommand {
-    /// Create a stronghold backup file.
+    /// Create a backup file. Currently only Stronghold backup is supported.
     Backup {
         /// Path of the created stronghold backup file.
         backup_path: String,
@@ -140,7 +140,7 @@ pub enum CliCommand {
     },
     /// Get information about currently set node.
     NodeInfo,
-    /// Restore a stronghold backup file.
+    /// Restore a backup file. Currently only Stronghold backup is supported.
     Restore {
         /// Path of the to be restored stronghold backup file.
         backup_path: String,
@@ -202,14 +202,11 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                             snapshot_exists: true, ..
                         } => {
                             let password = get_password("Stronghold password", false)?;
-                            backup_command_stronghold(&wallet, &password, Path::new(&backup_path)).await?;
+                            backup_to_stronghold_snapshot_command(&wallet, &password, Path::new(&backup_path)).await?;
                             return Ok(None);
                         }
                         LinkedSecretManager::Stronghold { snapshot_path, .. } => {
-                            return Err(Error::Miscellaneous(format!(
-                                "Stronghold snapshot does not exist at '{}'",
-                                snapshot_path.display()
-                            )));
+                            bail!("Stronghold snapshot does not exist at '{}'", snapshot_path.display());
                         }
                         _ => {
                             println_log_info!("only Stronghold backup supported");
@@ -217,10 +214,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                         }
                     }
                 } else {
-                    return Err(Error::Miscellaneous(format!(
-                        "wallet db does not exist at '{}'",
-                        storage_path.display()
-                    )));
+                    bail!("wallet db does not exist at '{}'", storage_path.display());
                 }
             }
             CliCommand::ChangePassword => {
@@ -234,10 +228,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                             Some(wallet)
                         }
                         LinkedSecretManager::Stronghold { snapshot_path, .. } => {
-                            return Err(Error::Miscellaneous(format!(
-                                "Stronghold snapshot does not exist at '{}'",
-                                snapshot_path.display()
-                            )));
+                            bail!("Stronghold snapshot does not exist at '{}'", snapshot_path.display());
                         }
                         _ => {
                             println_log_info!("only Stronghold password change supported");
@@ -245,18 +236,15 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                         }
                     }
                 } else {
-                    return Err(Error::Miscellaneous(format!(
-                        "wallet db does not exist at '{}'",
-                        storage_path.display()
-                    )));
+                    bail!("wallet db does not exist at '{}'", storage_path.display());
                 }
             }
             CliCommand::Init(init_parameters) => {
                 if wallet_and_secret_manager.is_some() {
-                    return Err(Error::Miscellaneous(format!(
+                    bail!(
                         "cannot initialize: wallet db at '{}' already exists",
                         storage_path.display()
-                    )));
+                    );
                 }
                 let secret_manager = create_secret_manager(&init_parameters).await?;
                 let secret_manager_variant = secret_manager.to_string();
@@ -278,13 +266,10 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
             }
             CliCommand::NodeInfo => {
                 if let Some((wallet, _)) = wallet_and_secret_manager {
-                    node_info_command(&wallet).await?;
+                    crate::wallet_cli::node_info_command(&wallet).await?;
                     return Ok(None);
                 } else {
-                    return Err(Error::Miscellaneous(format!(
-                        "wallet db does not exist at '{}'",
-                        storage_path.display()
-                    )));
+                    bail!("wallet db does not exist at '{}'", storage_path.display());
                 }
             }
             CliCommand::Restore { backup_path } => {
@@ -294,7 +279,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                             // we need to explicitly drop the current wallet here to prevent:
                             // "error accessing storage: IO error: lock hold by current process"
                             drop(wallet);
-                            let wallet = restore_command_stronghold(
+                            let wallet = restore_from_stronghold_snapshot_command(
                                 storage_path,
                                 snapshot_path.as_path(),
                                 Path::new(&backup_path),
@@ -312,7 +297,8 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                     let init_params = InitParameters::default();
                     let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
                     let wallet =
-                        restore_command_stronghold(storage_path, snapshot_path, Path::new(&backup_path)).await?;
+                        restore_from_stronghold_snapshot_command(storage_path, snapshot_path, Path::new(&backup_path))
+                            .await?;
                     Some(wallet)
                 }
             }
@@ -321,10 +307,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                     set_node_url_command(&wallet, url).await?;
                     Some(wallet)
                 } else {
-                    return Err(Error::Miscellaneous(format!(
-                        "wallet db does not exist at '{}'",
-                        storage_path.display()
-                    )));
+                    bail!("wallet db does not exist at '{}'", storage_path.display());
                 }
             }
             CliCommand::Sync => {
@@ -332,10 +315,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                     sync_command(&wallet).await?;
                     Some(wallet)
                 } else {
-                    return Err(Error::Miscellaneous(format!(
-                        "wallet db does not exist at '{}'",
-                        storage_path.display()
-                    )));
+                    bail!("wallet db does not exist at '{}'", storage_path.display());
                 }
             }
         }
@@ -382,8 +362,14 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
     })
 }
 
-pub async fn backup_command_stronghold(wallet: &Wallet, password: &Password, backup_path: &Path) -> Result<(), Error> {
-    wallet.backup(backup_path.into(), password.clone()).await?;
+pub async fn backup_to_stronghold_snapshot_command(
+    wallet: &Wallet,
+    password: &Password,
+    backup_path: &Path,
+) -> Result<(), Error> {
+    wallet
+        .backup_to_stronghold_snapshot(backup_path.into(), password.clone())
+        .await?;
 
     println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 
@@ -445,15 +431,7 @@ pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: O
     Ok(())
 }
 
-pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
-    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
-
-    println_log_info!("Current node info: {node_info}");
-
-    Ok(())
-}
-
-pub async fn restore_command_stronghold(
+pub async fn restore_from_stronghold_snapshot_command(
     storage_path: &Path,
     snapshot_path: &Path,
     backup_path: &Path,
@@ -495,7 +473,10 @@ pub async fn restore_command_stronghold(
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    if let Err(e) = wallet.restore_backup(backup_path.into(), password, None, None).await {
+    if let Err(e) = wallet
+        .restore_from_stronghold_snapshot(backup_path.into(), password, None, None)
+        .await
+    {
         // Clean up the file system after a failed restore (typically produces a wallet without a secret manager).
         // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
         // the restore will be successful. https://github.com/iotaledger/iota-sdk/issues/2018
@@ -538,10 +519,7 @@ async fn create_secret_manager(init_params: &InitParameters) -> Result<SecretMan
             let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
 
             if snapshot_path.exists() {
-                return Err(Error::Miscellaneous(format!(
-                    "cannot initialize: {} already exists",
-                    snapshot_path.display()
-                )));
+                bail!("cannot initialize: {} already exists", snapshot_path.display());
             }
 
             let password = get_password("Stronghold password", true)?;

@@ -11,7 +11,7 @@ from iota_sdk.types.slot import SlotCommitmentId
 
 @json
 @dataclass
-class NodeInfoStatus:
+class StatusResponse:
     """Node status.
 
     Attributes:
@@ -48,7 +48,7 @@ class NodeInfoStatus:
 
 @json
 @dataclass
-class NodeInfoMetrics:
+class MetricsResponse:
     """Node metrics.
 
     Attributes:
@@ -306,7 +306,7 @@ class ProtocolParameters:
 
 @json
 @dataclass
-class NodeInfoBaseToken:
+class BaseTokenResponse:
     """The base coin info.
 
     Attributes:

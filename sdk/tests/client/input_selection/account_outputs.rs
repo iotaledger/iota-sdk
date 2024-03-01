@@ -1723,7 +1723,7 @@ fn min_allot_account_mana() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .select()
     .unwrap();
 
@@ -1793,7 +1793,7 @@ fn min_allot_account_mana_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
@@ -1859,7 +1859,7 @@ fn min_allot_account_mana_cannot_select_additional() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_2, provided_allotment)))
     .with_required_inputs([*inputs[0].output_id()])
     .disable_additional_input_selection()
@@ -1912,7 +1912,7 @@ fn min_allot_account_mana_requirement_twice() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_required_inputs([*inputs[1].output_id()])
     .select()
     .unwrap();
@@ -1993,7 +1993,7 @@ fn min_allot_account_mana_requirement_covered() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
@@ -2068,7 +2068,7 @@ fn min_allot_account_mana_requirement_covered_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
     .select()
     .unwrap();
@@ -2127,7 +2127,7 @@ fn implicit_account_transition() {
         protocol_parameters,
     )
     .with_required_inputs(vec![input_output_id])
-    .with_min_mana_allotment(account_id_1, 2, true)
+    .with_min_mana_allotment(account_id_1, 2)
     .select()
     .unwrap();
 

@@ -31,7 +31,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction_payload: &SignedTransactionPayload,
-    mana_rewards: BTreeMap<OutputId, u64>,
+    mana_rewards: impl Into<Option<BTreeMap<OutputId, u64>>>,
     protocol_parameters: ProtocolParameters,
 ) -> Result<(), TransactionFailureReason> {
     let inputs = input_signing_data
@@ -43,11 +43,11 @@ pub fn verify_semantic(
         transaction_payload.transaction(),
         &inputs,
         Some(transaction_payload.unlocks()),
-        mana_rewards,
+        mana_rewards.into(),
         protocol_parameters,
     );
 
-    Ok(context.validate()?)
+    context.validate()
 }
 
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.

@@ -4,7 +4,7 @@
 /**
  * Response from the /routes endpoint.
  */
-export interface IRoutesResponse {
+export interface RoutesResponse {
     /**
      * The routes the node exposes.
      */
