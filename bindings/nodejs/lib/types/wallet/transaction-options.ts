@@ -19,8 +19,6 @@ export interface TransactionOptions {
     remainderValueStrategy?: RemainderValueStrategy;
     /** An optional tagged data payload. */
     taggedDataPayload?: TaggedDataPayload;
-    /** Transaction context inputs to include. */
-    contextInputs?: ContextInput[];
     /** Inputs that must be used for the transaction. */
     requiredInputs?: OutputId[];
     /** Specifies what needs to be burned during input selection. */

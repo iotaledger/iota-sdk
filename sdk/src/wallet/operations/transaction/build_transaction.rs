@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
 
@@ -19,7 +19,6 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        context_input::ContextInput,
         output::{Output, OutputId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
@@ -45,28 +44,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let creation_slot = self.client().get_slot_index().await?;
 
-        let (bic_context_inputs, commitment_context_input) = options.context_inputs.into_iter().fold(
-            (HashSet::new(), None),
-            |(mut bic_context_inputs, mut commitment_context_input), i| {
-                match i {
-                    ContextInput::BlockIssuanceCredit(i) => {
-                        bic_context_inputs.insert(i);
-                    }
-                    ContextInput::Commitment(i) => {
-                        commitment_context_input.replace(i);
-                    }
-                    // TODO: It's not really possible to accurately provide a reward context input,
-                    // so should we forbid it in transaction options?
-                    ContextInput::Reward(_) => (),
-                }
-                (bic_context_inputs, commitment_context_input)
-            },
-        );
-
-        let slot_commitment_id = match commitment_context_input {
-            Some(c) => c.slot_commitment_id(),
-            None => self.client().get_issuance().await?.latest_commitment.id(),
-        };
+        let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         if options.issuer_id.is_none() {
             options.issuer_id = self.ledger().await.first_account_id();
         }
@@ -169,8 +147,6 @@ where
             protocol_parameters.clone(),
         )
         .with_required_inputs(options.required_inputs)
-        .with_block_issuance_credit_context_inputs(bic_context_inputs)
-        .with_commitment_context_input(commitment_context_input)
         .with_mana_rewards(mana_rewards)
         .with_payload(options.tagged_data_payload)
         .with_mana_allotments(options.mana_allotments)

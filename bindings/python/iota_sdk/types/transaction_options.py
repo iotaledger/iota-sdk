@@ -49,7 +49,6 @@ class TransactionOptions:
     Attributes:
         remainder_value_strategy: The strategy applied for base coin remainders.
         tagged_data_payload: An optional tagged data payload.
-        context_inputs: Transaction context inputs to include.
         required_inputs: Inputs that must be used for the transaction.
         burn: Specifies what needs to be burned during input selection.
         note: A string attached to the transaction.
@@ -62,7 +61,6 @@ class TransactionOptions:
     remainder_value_strategy: Optional[Union[RemainderValueStrategy,
                                              RemainderValueStrategyCustomAddress]] = None
     tagged_data_payload: Optional[TaggedDataPayload] = None
-    context_inputs: Optional[List[ContextInput]] = None
     required_inputs: Optional[List[OutputId]] = None
     burn: Optional[Burn] = None
     note: Optional[str] = None

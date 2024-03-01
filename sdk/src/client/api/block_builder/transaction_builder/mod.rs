@@ -57,28 +57,7 @@ impl Client {
         let protocol_parameters = self.get_protocol_parameters().await?;
         let creation_slot = self.get_slot_index().await?;
 
-        let (bic_context_inputs, commitment_context_input) = options.context_inputs.into_iter().fold(
-            (HashSet::new(), None),
-            |(mut bic_context_inputs, mut commitment_context_input), i| {
-                match i {
-                    ContextInput::BlockIssuanceCredit(i) => {
-                        bic_context_inputs.insert(i);
-                    }
-                    ContextInput::Commitment(i) => {
-                        commitment_context_input.replace(i);
-                    }
-                    // TODO: It's not really possible to accurately provide a reward context input,
-                    // so should we forbid it in transaction options?
-                    ContextInput::Reward(_) => (),
-                }
-                (bic_context_inputs, commitment_context_input)
-            },
-        );
-
-        let slot_commitment_id = match commitment_context_input {
-            Some(c) => c.slot_commitment_id(),
-            None => self.get_issuance().await?.latest_commitment.id(),
-        };
+        let slot_commitment_id = self.get_issuance().await?.latest_commitment.id();
         let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
             Some(self.get_account_congestion(&issuer_id, None).await?.reference_mana_cost)
         } else {
@@ -160,8 +139,6 @@ impl Client {
             protocol_parameters.clone(),
         )
         .with_required_inputs(options.required_inputs)
-        .with_block_issuance_credit_context_inputs(bic_context_inputs)
-        .with_commitment_context_input(commitment_context_input)
         .with_mana_rewards(mana_rewards)
         .with_payload(options.tagged_data_payload)
         .with_mana_allotments(options.mana_allotments)
@@ -517,24 +494,6 @@ impl TransactionBuilder {
     /// Sets the required inputs of an [`TransactionBuilder`].
     pub fn with_required_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
         self.required_inputs = inputs.into_iter().collect();
-        self
-    }
-
-    /// Sets the block issance credit context inputs of an [`TransactionBuilder`].
-    pub fn with_block_issuance_credit_context_inputs(
-        mut self,
-        bic_context_inputs: impl IntoIterator<Item = BlockIssuanceCreditContextInput>,
-    ) -> Self {
-        self.bic_context_inputs = bic_context_inputs.into_iter().collect();
-        self
-    }
-
-    /// Sets the commitment context input of an [`TransactionBuilder`].
-    pub fn with_commitment_context_input(
-        mut self,
-        commitment_context_input: impl Into<Option<CommitmentContextInput>>,
-    ) -> Self {
-        self.commitment_context_input = commitment_context_input.into();
         self
     }
 

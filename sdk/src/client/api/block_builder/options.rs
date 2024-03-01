@@ -9,7 +9,6 @@ use crate::{
     client::api::transaction_builder::Burn,
     types::block::{
         address::Address,
-        context_input::ContextInput,
         output::{AccountId, OutputId},
         payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
     },
@@ -24,8 +23,6 @@ pub struct TransactionOptions {
     pub remainder_value_strategy: RemainderValueStrategy,
     /// An optional tagged data payload.
     pub tagged_data_payload: Option<TaggedDataPayload>,
-    /// Transaction context inputs to include.
-    pub context_inputs: Vec<ContextInput>,
     /// Inputs that must be used for the transaction.
     pub required_inputs: BTreeSet<OutputId>,
     /// Specifies what needs to be burned in the transaction.
@@ -49,7 +46,6 @@ impl Default for TransactionOptions {
         Self {
             remainder_value_strategy: Default::default(),
             tagged_data_payload: Default::default(),
-            context_inputs: Default::default(),
             required_inputs: Default::default(),
             burn: Default::default(),
             note: Default::default(),
