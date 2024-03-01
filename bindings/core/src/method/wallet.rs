@@ -387,6 +387,7 @@ pub enum WalletMethod {
     // PrepareStopParticipating { event_id: ParticipationEventId },
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
     PrepareTransaction {
         #[serde(default)]
         immutable_outputs: Vec<Output>,
