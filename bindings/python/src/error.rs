@@ -37,14 +37,6 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<iota_sdk_bindings_core::iota_sdk::types::block::Error> for Error {
-    fn from(err: iota_sdk_bindings_core::iota_sdk::types::block::Error) -> Self {
-        Self {
-            error: PyErr::new::<exceptions::PyValueError, _>(err.to_string()),
-        }
-    }
-}
-
 impl From<iota_sdk_bindings_core::Error> for Error {
     fn from(err: iota_sdk_bindings_core::Error) -> Self {
         Self {

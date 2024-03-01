@@ -6,7 +6,7 @@ use packable::bounded::TryIntoBoundedU16Error;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{input::INPUT_COUNT_MAX, output::Output},
+    types::block::{input::INPUT_COUNT_MAX, output::Output, payload::PayloadError},
     wallet::{operations::transaction::TransactionOptions, Wallet},
 };
 
@@ -35,9 +35,9 @@ where
         }
 
         if options.required_inputs.len() as u16 > INPUT_COUNT_MAX {
-            return Err(crate::types::block::Error::InvalidInputCount(
-                TryIntoBoundedU16Error::Truncated(options.required_inputs.len()),
-            ))?;
+            return Err(PayloadError::InvalidInputCount(TryIntoBoundedU16Error::Truncated(
+                options.required_inputs.len(),
+            )))?;
         }
 
         let prepared_transaction_data = self.select_inputs(mutable_outputs, immutable_outputs, options).await?;

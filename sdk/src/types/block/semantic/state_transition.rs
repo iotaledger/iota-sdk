@@ -247,7 +247,10 @@ impl StateTransitionVerifier for AccountOutput {
 
                 if staking_input.end_epoch() >= future_bounded_epoch {
                     return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
-                } else if !context.mana_rewards.contains_key(current_output_id)
+                } else if context
+                    .mana_rewards
+                    .as_ref()
+                    .is_some_and(|r| !r.contains_key(current_output_id))
                     || !context.reward_context_inputs.contains_key(current_output_id)
                 {
                     return Err(TransactionFailureReason::StakingRewardClaimingInvalid);
@@ -280,7 +283,10 @@ impl StateTransitionVerifier for AccountOutput {
                     && (staking_input.start_epoch() != past_bounded_epoch
                         || staking_input.end_epoch()
                             < past_bounded_epoch + context.protocol_parameters.staking_unbonding_period
-                        || !context.mana_rewards.contains_key(current_output_id)
+                        || context
+                            .mana_rewards
+                            .as_ref()
+                            .is_some_and(|r| !r.contains_key(current_output_id))
                         || !context.reward_context_inputs.contains_key(current_output_id))
                 {
                     return Err(TransactionFailureReason::StakingRewardClaimingInvalid);
@@ -321,7 +327,10 @@ impl StateTransitionVerifier for AccountOutput {
 
             if staking.end_epoch() >= future_bounded_epoch {
                 return Err(TransactionFailureReason::StakingFeatureRemovedBeforeUnbonding);
-            } else if !context.mana_rewards.contains_key(output_id)
+            } else if context
+                .mana_rewards
+                .as_ref()
+                .is_some_and(|r| !r.contains_key(output_id))
                 || !context.reward_context_inputs.contains_key(output_id)
             {
                 return Err(TransactionFailureReason::StakingRewardClaimingInvalid);
@@ -571,7 +580,12 @@ impl StateTransitionVerifier for DelegationOutput {
         _current_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        if !context.mana_rewards.contains_key(output_id) || !context.reward_context_inputs.contains_key(output_id) {
+        if context
+            .mana_rewards
+            .as_ref()
+            .is_some_and(|r| !r.contains_key(output_id))
+            || !context.reward_context_inputs.contains_key(output_id)
+        {
             return Err(TransactionFailureReason::DelegationRewardInputMissing);
         }
 

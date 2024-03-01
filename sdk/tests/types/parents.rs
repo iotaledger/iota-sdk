@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 use iota_sdk::types::block::{
     core::basic,
     rand::block::{rand_block_id, rand_block_ids},
-    BlockId, Error,
+    BlockError, BlockId,
 };
 use packable::{error::UnpackError, prefix::VecPrefix, PackableExt};
 use pretty_assertions::assert_eq;
@@ -62,7 +62,7 @@ fn new_invalid_more_than_max() {
     // ));
     assert!(matches!(
         basic::StrongParents::from_vec(inner),
-        Err(Error::InvalidParentCount)
+        Err(BlockError::InvalidParentCount)
     ));
 }
 
@@ -121,7 +121,7 @@ fn pack_unpack_invalid_less_than_min() {
     // ));
     assert!(matches!(
         basic::StrongParents::unpack_bytes_verified(bytes.as_slice(), &()),
-        Err(UnpackError::Packable(Error::InvalidParentCount))
+        Err(UnpackError::Packable(BlockError::InvalidParentCount))
     ));
 }
 
@@ -142,7 +142,7 @@ fn pack_unpack_invalid_more_than_max() {
     // ));
     assert!(matches!(
         basic::StrongParents::unpack_bytes_verified(bytes.as_slice(), &()),
-        Err(UnpackError::Packable(Error::InvalidParentCount))
+        Err(UnpackError::Packable(BlockError::InvalidParentCount))
     ));
 }
 
@@ -157,7 +157,7 @@ fn unpack_invalid_not_sorted() {
 
     assert!(matches!(
         parents,
-        Err(UnpackError::Packable(Error::ParentsNotUniqueSorted))
+        Err(UnpackError::Packable(BlockError::ParentsNotUniqueSorted))
     ),);
 }
 
@@ -172,6 +172,6 @@ fn unpack_invalid_not_unique() {
 
     assert!(matches!(
         parents,
-        Err(UnpackError::Packable(Error::ParentsNotUniqueSorted))
+        Err(UnpackError::Packable(BlockError::ParentsNotUniqueSorted))
     ),);
 }

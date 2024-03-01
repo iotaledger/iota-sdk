@@ -13,13 +13,12 @@ use iota_sdk::{
         api::GetAddressesOptions,
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{stronghold::StrongholdSecretManager, SecretManager},
-        Result,
     },
     crypto::keys::bip39::Mnemonic,
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

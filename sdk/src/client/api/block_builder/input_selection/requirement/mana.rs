@@ -19,7 +19,7 @@ use crate::{
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError,
+        BlockError,
     },
 };
 

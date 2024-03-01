@@ -40,7 +40,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{output::TokenId, Error};
+    use crate::types::block::output::{feature::FeatureError, TokenId};
 
     #[derive(Serialize, Deserialize)]
     struct NativeTokenFeatureDto {
@@ -62,9 +62,9 @@ mod dto {
     }
 
     impl TryFrom<NativeTokenFeatureDto> for NativeTokenFeature {
-        type Error = Error;
+        type Error = FeatureError;
 
-        fn try_from(value: NativeTokenFeatureDto) -> Result<Self, Error> {
+        fn try_from(value: NativeTokenFeatureDto) -> Result<Self, Self::Error> {
             Ok(Self::new(NativeToken::new(value.token_id, value.amount)?))
         }
     }

@@ -16,13 +16,13 @@
 //! cargo run --release --all-features --example mint_native_token [TOKEN_ID]
 //! ```
 
-use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
+use iota_sdk::{types::block::output::TokenId, Wallet};
 
 // The amount of native tokens to mint
 const MINT_AMOUNT: u64 = 10;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

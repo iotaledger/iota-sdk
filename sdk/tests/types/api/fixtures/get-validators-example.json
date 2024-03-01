@@ -1,5 +1,5 @@
 {
-  "stakers": [
+  "validators": [
     {
       "address": "rms1pp4wuuz0y42caz48vv876qfpmffswsvg40zz8v79sy8cp0jfxm4kunflcgt",
       "stakingEndEpoch": 100,

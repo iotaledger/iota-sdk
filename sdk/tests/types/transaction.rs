@@ -15,13 +15,12 @@ use iota_sdk::types::block::{
         signed_transaction::{
             SignedTransactionPayload, Transaction, TransactionCapabilities, TransactionCapabilityFlag, TransactionId,
         },
-        Payload,
+        Payload, PayloadError,
     },
     protocol::iota_mainnet_protocol_parameters,
     rand::{mana::rand_mana_allotment, payload::rand_tagged_data_payload},
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-    Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
 use pretty_assertions::assert_eq;
@@ -144,7 +143,7 @@ fn build_invalid_payload_kind() {
         .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters);
 
-    assert!(matches!(transaction, Err(Error::InvalidPayloadKind(1))));
+    assert!(matches!(transaction, Err(PayloadError::InvalidPayloadKind(1))));
 }
 
 #[test]
@@ -166,7 +165,7 @@ fn build_invalid_input_count_low() {
 
     assert!(matches!(
         transaction,
-        Err(Error::InvalidInputCount(TryIntoBoundedU16Error::Invalid(0)))
+        Err(PayloadError::InvalidInputCount(TryIntoBoundedU16Error::Invalid(0)))
     ));
 }
 
@@ -192,7 +191,7 @@ fn build_invalid_input_count_high() {
 
     assert!(matches!(
         transaction,
-        Err(Error::InvalidInputCount(TryIntoBoundedU16Error::Invalid(129)))
+        Err(PayloadError::InvalidInputCount(TryIntoBoundedU16Error::Invalid(129)))
     ));
 }
 
@@ -209,7 +208,7 @@ fn build_invalid_output_count_low() {
 
     assert!(matches!(
         transaction,
-        Err(Error::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(0)))
+        Err(PayloadError::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(0)))
     ));
 }
 
@@ -235,7 +234,7 @@ fn build_invalid_output_count_high() {
 
     assert!(matches!(
         transaction,
-        Err(Error::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(129)))
+        Err(PayloadError::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(129)))
     ));
 }
 
@@ -259,7 +258,7 @@ fn build_invalid_duplicate_utxo() {
         .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters);
 
-    assert!(matches!(transaction, Err(Error::DuplicateUtxo(_))));
+    assert!(matches!(transaction, Err(PayloadError::DuplicateUtxo(_))));
 }
 
 #[test]
@@ -294,7 +293,7 @@ fn build_invalid_accumulated_output() {
         .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters);
 
-    assert!(matches!(transaction, Err(Error::InvalidTransactionAmountSum(_))));
+    assert!(matches!(transaction, Err(PayloadError::InvalidTransactionAmountSum(_))));
 }
 
 #[test]
@@ -351,7 +350,7 @@ fn duplicate_output_nft() {
 
     assert!(matches!(
         transaction,
-        Err(Error::DuplicateOutputChain(ChainId::Nft(nft_id_0))) if nft_id_0 == nft_id
+        Err(PayloadError::DuplicateOutputChain(ChainId::Nft(nft_id_0))) if nft_id_0 == nft_id
     ));
 }
 
@@ -408,7 +407,7 @@ fn duplicate_output_account() {
 
     assert!(matches!(
         transaction,
-        Err(Error::DuplicateOutputChain(ChainId::Account(account_id_0))) if account_id_0 == account_id
+        Err(PayloadError::DuplicateOutputChain(ChainId::Account(account_id_0))) if account_id_0 == account_id
     ));
 }
 
@@ -444,7 +443,7 @@ fn duplicate_output_foundry() {
 
     assert!(matches!(
         transaction,
-        Err(Error::DuplicateOutputChain(ChainId::Foundry(foundry_id_0))) if foundry_id_0 == foundry_id
+        Err(PayloadError::DuplicateOutputChain(ChainId::Foundry(foundry_id_0))) if foundry_id_0 == foundry_id
     ));
 }
 

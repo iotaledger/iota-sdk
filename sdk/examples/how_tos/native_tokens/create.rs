@@ -11,11 +11,7 @@
 //! cargo run --release --all-features --example create_native_token
 //! ```
 
-use iota_sdk::{
-    types::block::output::feature::Irc30Metadata,
-    wallet::{CreateNativeTokenParams, Result},
-    Wallet, U256,
-};
+use iota_sdk::{types::block::output::feature::Irc30Metadata, wallet::CreateNativeTokenParams, Wallet, U256};
 
 // The circulating supply of the native token
 const CIRCULATING_SUPPLY: u64 = 100;
@@ -23,7 +19,7 @@ const CIRCULATING_SUPPLY: u64 = 100;
 const MAXIMUM_SUPPLY: u64 = 100;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

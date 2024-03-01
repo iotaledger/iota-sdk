@@ -11,7 +11,8 @@ use iota_sdk::{
             output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
             semantic::SemanticValidationContext,
-            Block, Error,
+            signature::SignatureError,
+            Block,
         },
         TryFromDto,
     },
@@ -91,7 +92,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.try_verify(&message).map_err(Error::from)?)
+            Response::Bool(signature.try_verify(&message).map_err(iota_sdk::client::Error::from)?)
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,
@@ -100,9 +101,11 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         } => {
             use crypto::signatures::secp256k1_ecdsa;
             let public_key = prefix_hex::decode(public_key)?;
-            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
+            let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key)
+                .map_err(SignatureError::InvalidPublicKeyBytes)?;
             let signature = prefix_hex::decode(signature)?;
-            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature).map_err(Error::from)?;
+            let signature = secp256k1_ecdsa::Signature::try_from_bytes(&signature)
+                .map_err(SignatureError::InvalidSignatureBytes)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
             Response::Bool(public_key.verify_keccak256(&signature, &message))
         }
@@ -129,8 +132,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 mana_rewards,
                 protocol_parameters,
             );
-
-            context.validate().map_err(Error::from)?;
+            context.validate()?;
 
             Response::Ok
         }

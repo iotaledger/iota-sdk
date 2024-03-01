@@ -92,23 +92,25 @@ impl Default for SyncOptions {
 #[serde(default, rename_all = "camelCase")]
 pub struct WalletSyncOptions {
     pub basic_outputs: bool,
-    pub nft_outputs: bool,
     pub account_outputs: bool,
+    pub nft_outputs: bool,
+    pub delegation_outputs: bool,
 }
 
 impl Default for WalletSyncOptions {
     fn default() -> Self {
         Self {
             basic_outputs: true,
-            nft_outputs: true,
             account_outputs: true,
+            nft_outputs: true,
+            delegation_outputs: true,
         }
     }
 }
 
 impl WalletSyncOptions {
     pub(crate) fn all_outputs(&self) -> bool {
-        self.basic_outputs && self.nft_outputs && self.account_outputs
+        self.basic_outputs && self.account_outputs && self.nft_outputs && self.delegation_outputs
     }
 }
 
@@ -117,9 +119,10 @@ impl WalletSyncOptions {
 #[serde(default, rename_all = "camelCase")]
 pub struct AccountSyncOptions {
     pub basic_outputs: bool,
-    pub nft_outputs: bool,
     pub account_outputs: bool,
     pub foundry_outputs: bool,
+    pub nft_outputs: bool,
+    pub delegation_outputs: bool,
 }
 
 impl Default for AccountSyncOptions {
@@ -127,16 +130,21 @@ impl Default for AccountSyncOptions {
     fn default() -> Self {
         Self {
             basic_outputs: false,
-            nft_outputs: false,
             account_outputs: false,
             foundry_outputs: true,
+            nft_outputs: false,
+            delegation_outputs: false,
         }
     }
 }
 
 impl AccountSyncOptions {
     pub(crate) fn all_outputs(&self) -> bool {
-        self.basic_outputs && self.nft_outputs && self.account_outputs && self.foundry_outputs
+        self.basic_outputs
+            && self.account_outputs
+            && self.foundry_outputs
+            && self.nft_outputs
+            && self.delegation_outputs
     }
 }
 
@@ -145,12 +153,13 @@ impl AccountSyncOptions {
 #[serde(default, rename_all = "camelCase")]
 pub struct NftSyncOptions {
     pub basic_outputs: bool,
-    pub nft_outputs: bool,
     pub account_outputs: bool,
+    pub nft_outputs: bool,
+    pub delegation_outputs: bool,
 }
 
 impl NftSyncOptions {
     pub(crate) fn all_outputs(&self) -> bool {
-        self.basic_outputs && self.nft_outputs && self.account_outputs
+        self.basic_outputs && self.account_outputs && self.nft_outputs && self.delegation_outputs
     }
 }

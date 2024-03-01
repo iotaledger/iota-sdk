@@ -52,14 +52,13 @@ fn responses() {
     // GET /api/routes
     json_response::<RoutesResponse>("get-routes-response-example.json").unwrap();
     // GET /api/core/v3/info
-    // json_response::<InfoResponse>("get-info-response-example.json").unwrap();
+    json_response::<InfoResponse>("get-info-response-example.json").unwrap();
     // GET /api/core/v3/accounts/{bech32Address}/congestion
     json_response::<CongestionResponse>("get-congestion-estimate-response-example.json").unwrap();
     // GET /api/core/v3/rewards/{outputId}
     json_response::<ManaRewardsResponse>("get-mana-rewards-example.json").unwrap();
     // GET /api/core/v3/validators
-    // TODO reenable when TIP is updated
-    // json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
+    json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
     // GET /api/core/v3/validators/{bech32Address}
     json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
     // GET /api/core/v3/committee
