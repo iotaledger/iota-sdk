@@ -3,7 +3,7 @@
 
 import { SecretManagerMethodHandler } from './secret-manager-method-handler';
 import type {
-    IGenerateAddressesOptions,
+    GenerateAddressesOptions,
     PreparedTransactionData,
     LedgerNanoStatus,
 } from '../types/client';
@@ -50,7 +50,7 @@ export class SecretManager {
      * @returns An array of generated addresses.
      */
     async generateEd25519Addresses(
-        generateAddressesOptions: IGenerateAddressesOptions,
+        generateAddressesOptions: GenerateAddressesOptions,
     ): Promise<string[]> {
         const response = await this.methodHandler.callMethod({
             name: 'generateEd25519Addresses',
@@ -69,7 +69,7 @@ export class SecretManager {
      * @returns An array of generated addresses.
      */
     async generateEvmAddresses(
-        generateAddressesOptions: IGenerateAddressesOptions,
+        generateAddressesOptions: GenerateAddressesOptions,
     ): Promise<HexEncodedString[]> {
         const response = await this.methodHandler.callMethod({
             name: 'generateEvmAddresses',

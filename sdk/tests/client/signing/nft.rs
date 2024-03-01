@@ -12,7 +12,7 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         address::{Address, NftAddress},
@@ -36,7 +36,7 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn nft_reference_unlocks() -> Result<()> {
+async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager

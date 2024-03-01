@@ -11,8 +11,6 @@ from iota_sdk.types.mana import ManaAllotment
 from iota_sdk.types.input import UtxoInput, deserialize_inputs
 from iota_sdk.types.context_input import ContextInput, deserialize_context_inputs
 from iota_sdk.types.output import Output, deserialize_outputs
-
-
 from iota_sdk.types.unlock import Unlock, deserialize_unlocks
 
 

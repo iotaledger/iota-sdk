@@ -3,7 +3,6 @@
 
 from typing import Optional
 from dataclasses import dataclass
-
 from iota_sdk.types.common import json
 
 

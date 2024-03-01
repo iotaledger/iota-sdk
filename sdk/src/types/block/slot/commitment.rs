@@ -4,15 +4,11 @@
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{Packable, PackableExt};
 
-use crate::types::block::{
-    slot::{commitment_id::SlotCommitmentHash, RootsId, SlotCommitmentId, SlotIndex},
-    Error,
-};
+use crate::types::block::slot::{commitment_id::SlotCommitmentHash, RootsId, SlotCommitmentId, SlotIndex};
 
 /// Contains a summary of a slot.
 /// It is linked to the commitment of the previous slot, which forms a commitment chain.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, derive_more::From, Packable)]
-#[packable(unpack_error = Error)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),

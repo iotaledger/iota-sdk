@@ -3,14 +3,15 @@
 
 mod utxo;
 
-use core::ops::RangeInclusive;
+use core::{convert::Infallible, ops::RangeInclusive};
 
 use derive_more::From;
 
 pub use self::utxo::UtxoInput;
 use crate::types::block::{
+    payload::InputCount,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
+    IdentifierError,
 };
 
 /// The maximum number of inputs of a transaction.
@@ -22,10 +23,30 @@ pub const INPUT_INDEX_MAX: u16 = INPUT_COUNT_MAX - 1; // 127
 /// The range of valid indices of inputs of a transaction.
 pub const INPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=INPUT_INDEX_MAX; // [0..127]
 
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum InputError {
+    #[display(fmt = "invalid input kind: {_0}")]
+    InvalidInputKind(u8),
+    #[display(fmt = "invalid input count: {_0}")]
+    InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
+    #[from]
+    Identifier(IdentifierError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for InputError {}
+
+impl From<Infallible> for InputError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
+
 /// A generic input supporting different input kinds.
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
-#[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidInputKind)]
+#[packable(unpack_error = InputError)]
+#[packable(tag_type = u8, with_error = InputError::InvalidInputKind)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Input {
     /// A UTXO input.

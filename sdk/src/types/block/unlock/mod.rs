@@ -10,7 +10,7 @@ mod reference;
 mod signature;
 
 use alloc::boxed::Box;
-use core::ops::RangeInclusive;
+use core::{convert::Infallible, ops::RangeInclusive};
 
 use derive_more::{Deref, From};
 use hashbrown::HashSet;
@@ -24,7 +24,7 @@ pub use self::{
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
+    signature::SignatureError,
 };
 
 /// The maximum number of unlocks of a transaction.
@@ -38,10 +38,52 @@ pub const UNLOCK_INDEX_RANGE: RangeInclusive<u16> = 0..=UNLOCK_INDEX_MAX; // [0.
 
 pub(crate) type UnlockIndex = BoundedU16<{ *UNLOCK_INDEX_RANGE.start() }, { *UNLOCK_INDEX_RANGE.end() }>;
 
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum UnlockError {
+    #[display(fmt = "invalid unlock kind: {_0}")]
+    InvalidUnlockKind(u8),
+    #[display(fmt = "invalid unlock count: {_0}")]
+    InvalidUnlockCount(<UnlockCount as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid unlock reference: {_0}")]
+    InvalidUnlockReference(u16),
+    #[display(fmt = "invalid unlock account: {_0}")]
+    InvalidUnlockAccount(u16),
+    #[display(fmt = "invalid unlock nft: {_0}")]
+    InvalidUnlockNft(u16),
+    #[display(fmt = "invalid unlock anchor: {_0}")]
+    InvalidUnlockAnchor(u16),
+    #[display(fmt = "duplicate signature unlock at index: {_0}")]
+    DuplicateSignatureUnlock(u16),
+    #[display(fmt = "multi unlock recursion")]
+    MultiUnlockRecursion,
+    #[display(fmt = "invalid account index: {_0}")]
+    InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid anchor index: {_0}")]
+    InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid nft index: {_0}")]
+    InvalidNftIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid reference index: {_0}")]
+    InvalidReferenceIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    #[display(fmt = "invalid multi unlock count: {_0}")]
+    InvalidMultiUnlockCount(<UnlocksCount as TryFrom<usize>>::Error),
+    #[from]
+    Signature(SignatureError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for UnlockError {}
+
+impl From<Infallible> for UnlockError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
+
 /// Defines the mechanism by which a transaction input is authorized to be consumed.
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
-#[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidUnlockKind)]
+#[packable(unpack_error = UnlockError)]
+#[packable(tag_type = u8, with_error = UnlockError::InvalidUnlockKind)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Unlock {
     /// A signature unlock.
@@ -123,14 +165,14 @@ pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNL
 
 /// A collection of unlocks.
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockCount(p.into())))]
+#[packable(unpack_error = UnlockError, with = |e| e.unwrap_item_err_or_else(|p| UnlockError::InvalidUnlockCount(p.into())))]
 pub struct Unlocks(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlockCount>);
 
 impl Unlocks {
     /// Creates a new [`Unlocks`].
-    pub fn new(unlocks: impl Into<Box<[Unlock]>>) -> Result<Self, Error> {
+    pub fn new(unlocks: impl Into<Box<[Unlock]>>) -> Result<Self, UnlockError> {
         let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> =
-            unlocks.into().try_into().map_err(Error::InvalidUnlockCount)?;
+            unlocks.into().try_into().map_err(UnlockError::InvalidUnlockCount)?;
 
         verify_unlocks(&unlocks)?;
 
@@ -155,11 +197,11 @@ fn verify_non_multi_unlock<'a>(
     unlock: &'a Unlock,
     index: u16,
     seen_signatures: &mut HashSet<&'a SignatureUnlock>,
-) -> Result<(), Error> {
+) -> Result<(), UnlockError> {
     match unlock {
         Unlock::Signature(signature) => {
             if !seen_signatures.insert(signature.as_ref()) {
-                return Err(Error::DuplicateSignatureUnlock(index));
+                return Err(UnlockError::DuplicateSignatureUnlock(index));
             }
         }
         Unlock::Reference(reference) => {
@@ -167,32 +209,32 @@ fn verify_non_multi_unlock<'a>(
                 || reference.index() >= index
                 || !matches!(unlocks[reference.index() as usize], Unlock::Signature(_))
             {
-                return Err(Error::InvalidUnlockReference(index));
+                return Err(UnlockError::InvalidUnlockReference(index));
             }
         }
         Unlock::Account(account) => {
             if index == 0 || account.index() >= index {
-                return Err(Error::InvalidUnlockAccount(index));
+                return Err(UnlockError::InvalidUnlockAccount(index));
             }
         }
         Unlock::Anchor(anchor) => {
             if index == 0 || anchor.index() >= index {
-                return Err(Error::InvalidUnlockAnchor(index));
+                return Err(UnlockError::InvalidUnlockAnchor(index));
             }
         }
         Unlock::Nft(nft) => {
             if index == 0 || nft.index() >= index {
-                return Err(Error::InvalidUnlockNft(index));
+                return Err(UnlockError::InvalidUnlockNft(index));
             }
         }
-        Unlock::Multi(_) => return Err(Error::MultiUnlockRecursion),
+        Unlock::Multi(_) => return Err(UnlockError::MultiUnlockRecursion),
         Unlock::Empty(_) => {}
     }
 
     Ok(())
 }
 
-fn verify_unlocks(unlocks: &[Unlock]) -> Result<(), Error> {
+fn verify_unlocks(unlocks: &[Unlock]) -> Result<(), UnlockError> {
     let mut seen_signatures = HashSet::new();
 
     for (index, unlock) in (0u16..).zip(unlocks.iter()) {

@@ -11,14 +11,14 @@
 use iota_sdk::{
     client::{
         mqtt::{BrokerOptions, MqttEvent, MqttPayload, Topic},
-        Client, Result,
+        Client,
     },
     types::block::address::Bech32Address,
 };
 
 // Connecting to a MQTT broker using raw ip doesn't work with TCP. This is a limitation of rustls.
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let num_events: usize = std::env::args().nth(1).map(|s| s.parse().unwrap()).unwrap_or(10);
 
     let address: Bech32Address = std::env::args()

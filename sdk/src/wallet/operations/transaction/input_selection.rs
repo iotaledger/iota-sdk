@@ -151,11 +151,7 @@ where
         .with_burn(options.burn);
 
         if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
-            input_selection = input_selection.with_min_mana_allotment(
-                account_id,
-                reference_mana_cost,
-                options.allow_allotting_from_account_mana,
-            );
+            input_selection = input_selection.with_min_mana_allotment(account_id, reference_mana_cost);
         }
 
         if !options.allow_additional_input_selection {
