@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let slot_index = client.get_info().await?.node_info.status.latest_finalized_slot;
+    let slot_index = client.get_node_info().await?.info.status.latest_finalized_slot;
     let cursor = list_index.map(|i| format!("{slot_index},{i}"));
 
     // Get validators.
