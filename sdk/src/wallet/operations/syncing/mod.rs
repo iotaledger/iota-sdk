@@ -99,16 +99,30 @@ where
             output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
         };
 
-        let address_to_sync = vec![
-            wallet_address_with_unspent_outputs,
-            AddressWithUnspentOutputs {
-                address: self.implicit_account_creation_address().await?,
-                output_ids: vec![],
-            },
-        ];
+        let mut addresses_to_sync = vec![wallet_address_with_unspent_outputs];
+        if options.sync_implicit_accounts {
+            if let Ok(implicit_account_creation_address) = self.implicit_account_creation_address().await {
+                addresses_to_sync.push(AddressWithUnspentOutputs {
+                    address: implicit_account_creation_address,
+                    output_ids: self
+                        .ledger()
+                        .await
+                        .unspent_outputs
+                        .values()
+                        .filter_map(|output_data| {
+                            if output_data.output.is_implicit_account() {
+                                Some(output_data.output_id)
+                            } else {
+                                None
+                            }
+                        })
+                        .collect(),
+                });
+            }
+        }
 
         let (_addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data) =
-            self.request_outputs_recursively(address_to_sync, options).await?;
+            self.request_outputs_recursively(addresses_to_sync, options).await?;
 
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
