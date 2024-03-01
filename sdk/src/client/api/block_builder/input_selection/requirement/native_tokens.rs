@@ -19,15 +19,14 @@ impl InputSelection {
     pub(crate) fn fulfill_native_tokens_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
         let (input_nts, output_nts) = self.get_input_output_native_tokens();
         let diffs = get_native_tokens_diff(output_nts, input_nts);
+        if self.burn.as_ref().map_or(false, |burn| !burn.native_tokens.is_empty()) {
+            self.transaction_capabilities
+                .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
+        }
         if diffs.is_empty() {
             log::debug!("Native tokens requirement already fulfilled");
 
             return Ok(Vec::new());
-        }
-
-        if self.burn.as_ref().map_or(false, |burn| !burn.native_tokens.is_empty()) {
-            self.transaction_capabilities
-                .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
         }
 
         log::debug!("Fulfilling native tokens requirement");
