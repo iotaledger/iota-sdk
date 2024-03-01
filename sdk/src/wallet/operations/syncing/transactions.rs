@@ -4,7 +4,7 @@
 use crate::{
     client::secret::SecretManage,
     types::{
-        api::core::TransactionState,
+        api::core::{BlockState, TransactionState},
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::{
@@ -100,7 +100,36 @@ where
             if let Some(block_id) = &transaction.block_id {
                 match self.client().get_block_metadata(block_id).await {
                     Ok(metadata) => {
-                        if let Some(tx_state) = metadata.transaction_metadata.map(|m| m.transaction_state) {
+                        // TODO: refactor, this is the same code as in `TransactionState::Failed` https://github.com/iotaledger/iota-sdk/issues/2111
+                        if metadata.block_state == BlockState::Failed {
+                            // try to get the included block, because maybe only this attachment is
+                            // conflicting because it got confirmed in another block
+                            if let Ok(included_block) = self
+                                .client()
+                                .get_included_block(&transaction.payload.transaction().id())
+                                .await
+                            {
+                                confirmed_unknown_output = true;
+                                updated_transaction_and_outputs(
+                                    transaction,
+                                    Some(self.client().block_id(&included_block).await?),
+                                    // block metadata was Conflicting, but it's confirmed in another attachment
+                                    InclusionState::Confirmed,
+                                    &mut updated_transactions,
+                                    &mut spent_output_ids,
+                                );
+                            } else {
+                                log::debug!("[SYNC] conflicting transaction {transaction_id}");
+                                updated_transaction_and_outputs(
+                                    transaction,
+                                    None,
+                                    InclusionState::Conflicting,
+                                    &mut updated_transactions,
+                                    &mut spent_output_ids,
+                                );
+                            }
+                        } else if let Some(tx_state) = metadata.transaction_metadata.map(|m| m.transaction_state) {
+                            println!("tx_state: {tx_state:?}");
                             match tx_state {
                                 // TODO: Separate TransactionState::Finalized, TransactionState::Accepted? https://github.com/iotaledger/iota-sdk/issues/1814
                                 TransactionState::Accepted
