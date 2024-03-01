@@ -275,3 +275,32 @@ pub mod mana_rewards {
             .collect::<Result<BTreeMap<_, u64>, _>>()
     }
 }
+
+#[cfg(feature = "client")]
+pub mod option_mana_rewards {
+    use alloc::collections::BTreeMap;
+
+    use serde::{Deserialize, Deserializer};
+
+    use crate::types::block::output::OutputId;
+
+    pub fn serialize<S: serde::Serializer>(
+        mana_rewards: &Option<BTreeMap<OutputId, u64>>,
+        s: S,
+    ) -> Result<S::Ok, S::Error> {
+        match mana_rewards {
+            Some(map) => super::mana_rewards::serialize(map, s),
+            None => s.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Option<BTreeMap<OutputId, u64>>, D::Error> {
+        Option::<BTreeMap<OutputId, String>>::deserialize(d)?
+            .map(|map| {
+                map.into_iter()
+                    .map(|(k, v)| Ok((k, v.parse().map_err(serde::de::Error::custom)?)))
+                    .collect::<Result<BTreeMap<_, u64>, _>>()
+            })
+            .transpose()
+    }
+}

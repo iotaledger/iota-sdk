@@ -30,7 +30,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
-    pub(crate) mana_rewards: BTreeMap<OutputId, u64>,
+    pub(crate) mana_rewards: Option<BTreeMap<OutputId, u64>>,
     pub(crate) commitment_context_input: Option<SlotCommitmentId>,
     pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -52,7 +52,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
-        mana_rewards: BTreeMap<OutputId, u64>,
+        mana_rewards: Option<BTreeMap<OutputId, u64>>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
@@ -239,8 +239,9 @@ impl<'a> SemanticValidationContext<'a> {
                 )
                 .ok_or(TransactionFailureReason::ManaOverflow)?;
 
-            if let Some(mana_rewards) = self.mana_rewards.get(*output_id) {
-                self.input_mana
+            if let Some(mana_rewards) = self.mana_rewards.as_ref().and_then(|r| r.get(*output_id)) {
+                self.input_mana = self
+                    .input_mana
                     .checked_add(*mana_rewards)
                     .ok_or(TransactionFailureReason::ManaOverflow)?;
             }
@@ -407,7 +408,7 @@ impl<'a> SemanticValidationContext<'a> {
                 if !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
                     return Err(TransactionFailureReason::CapabilitiesManaBurningNotAllowed);
                 }
-            } else {
+            } else if self.mana_rewards.is_some() || self.reward_context_inputs.is_empty() {
                 return Err(TransactionFailureReason::InputOutputManaMismatch);
             }
         }
