@@ -1,0 +1,23 @@
+{
+    "entryPoints": [
+        "./lib/index.ts"
+    ],
+    "disableSources": true,
+    "excludeInternal": true,
+    "excludePrivate": true,
+    "readme": "none",
+    "githubPages": false,
+    "hideGenerator": true,
+    "sort": [
+        "source-order"
+    ],
+    "plugin": [
+        "typedoc-plugin-markdown"
+    ],
+    "hidePageHeader": true,
+    "hideBreadcrumbs": true,
+    "entryFileName": "api_ref.md",
+    "textContentMappings": {
+        "title.memberPage": "{name}"
+    }
+}
