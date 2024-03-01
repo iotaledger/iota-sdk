@@ -273,7 +273,6 @@ pub enum Response {
     /// - [`BlockId`](crate::method::UtilsMethod::BlockId)
     /// - [`PostBlock`](crate::method::ClientMethod::PostBlock)
     /// - [`PostBlockRaw`](crate::method::ClientMethod::PostBlockRaw)
-    /// - [`WaitForTransactionAcceptance`](crate::method::WalletMethod::WaitForTransactionAcceptance)
     BlockId(BlockId),
     /// Response for:
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
@@ -297,6 +296,7 @@ pub enum Response {
     /// - [`StoreMnemonic`](crate::method::WalletMethod::StoreMnemonic),
     /// - [`StopBackgroundSync`](crate::method::WalletMethod::StopBackgroundSync),
     /// - [`VerifyTransactionSyntax`](crate::method::UtilsMethod::VerifyTransactionSyntax),
+    /// - [`WaitForTransactionAcceptance`](crate::method::WalletMethod::WaitForTransactionAcceptance)
     Ok,
     /// Response for any method that returns an error.
     Error(Error),
