@@ -159,14 +159,14 @@ where
         }
 
         if !options.allow_additional_input_selection {
-            transaction_builder = transaction_builder.disable_additional_transaction_builder();
+            transaction_builder = transaction_builder.disable_additional_input_selection();
         }
 
         if let Some(capabilities) = options.capabilities {
             transaction_builder = transaction_builder.with_transaction_capabilities(capabilities)
         }
 
-        let prepared_transaction_data = transaction_builder.select()?;
+        let prepared_transaction_data = transaction_builder.build()?;
 
         validate_transaction_length(&prepared_transaction_data.transaction)?;
 

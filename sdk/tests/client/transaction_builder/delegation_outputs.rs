@@ -83,7 +83,7 @@ fn remainder_needed_for_mana() {
     )
     .with_burn(Burn::from(delegation_id))
     .add_mana_rewards(delegation_output_id, mana_rewards)
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);

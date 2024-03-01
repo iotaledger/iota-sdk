@@ -376,7 +376,7 @@ async fn all_combined() -> Result<()> {
         slot_commitment_id,
         protocol_parameters.clone(),
     )
-    .select()
+    .build()
     .unwrap();
 
     let transaction = Transaction::builder(protocol_parameters.network_id())

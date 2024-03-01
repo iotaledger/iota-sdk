@@ -58,7 +58,7 @@ fn one_output_expiration_not_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
 }
@@ -100,7 +100,7 @@ fn expiration_equal_timestamp() {
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -144,7 +144,7 @@ fn one_output_expiration_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -202,7 +202,7 @@ fn two_outputs_one_expiration_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -261,7 +261,7 @@ fn two_outputs_one_unexpired_one_missing() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -332,7 +332,7 @@ fn two_outputs_two_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -394,7 +394,7 @@ fn two_outputs_two_expired_2() {
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -438,7 +438,7 @@ fn expiration_expired_with_sdr() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -482,7 +482,7 @@ fn expiration_expired_with_sdr_2() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -526,7 +526,7 @@ fn expiration_expired_with_sdr_and_timelock() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -570,7 +570,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -667,7 +667,7 @@ fn sender_in_expiration() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -716,7 +716,7 @@ fn sender_in_expiration_already_selected() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -763,7 +763,7 @@ fn remainder_in_expiration() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -818,7 +818,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -876,7 +876,7 @@ fn expiration_expired_only_account_addresses() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -921,7 +921,7 @@ fn one_nft_output_expiration_unexpired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -966,7 +966,7 @@ fn one_nft_output_expiration_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));

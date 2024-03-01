@@ -76,7 +76,7 @@ fn burn_account_present() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -136,7 +136,7 @@ fn burn_account_present_and_required() {
     )
     .with_burn(Burn::new().add_account(account_id_1))
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -198,7 +198,7 @@ fn burn_account_id_zero() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id))
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -245,7 +245,7 @@ fn burn_account_absent() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -315,7 +315,7 @@ fn burn_accounts_present() {
         protocol_parameters,
     )
     .with_burn(Burn::new().set_accounts(HashSet::from([account_id_1, account_id_2])))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -382,7 +382,7 @@ fn burn_account_in_outputs() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -443,7 +443,7 @@ fn burn_nft_present() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -505,7 +505,7 @@ fn burn_nft_present_and_required() {
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -565,7 +565,7 @@ fn burn_nft_id_zero() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id))
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -612,7 +612,7 @@ fn burn_nft_absent() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -686,7 +686,7 @@ fn burn_nfts_present() {
         protocol_parameters,
     )
     .with_burn(Burn::new().set_nfts(HashSet::from([nft_id_1, nft_id_2])))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -757,7 +757,7 @@ fn burn_nft_in_outputs() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -826,7 +826,7 @@ fn burn_foundry_present() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[0].output.as_foundry().id()))
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);
@@ -927,7 +927,7 @@ fn burn_foundry_absent() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -997,7 +997,7 @@ fn burn_foundries_present() {
         inputs[0].output.as_foundry().id(),
         inputs[1].output.as_foundry().id(),
     ])))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1080,7 +1080,7 @@ fn burn_foundry_in_outputs() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -1136,7 +1136,7 @@ fn burn_native_tokens() {
         (TokenId::from_str(TOKEN_ID_1).unwrap(), 20),
         (TokenId::from_str(TOKEN_ID_2).unwrap(), 30),
     ])))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1221,7 +1221,7 @@ fn burn_foundry_and_its_account() {
             .add_foundry(inputs[0].output.as_foundry().id())
             .add_account(account_id_1),
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);

@@ -62,7 +62,7 @@ fn missing_input_account_for_foundry() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -156,7 +156,7 @@ fn minted_native_tokens_in_new_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -232,7 +232,7 @@ fn minted_native_tokens_in_provided_output() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -305,7 +305,7 @@ fn melt_native_tokens() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -366,7 +366,7 @@ fn destroy_foundry_with_account_state_transition() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -427,7 +427,7 @@ fn destroy_foundry_with_account_burn() {
             .add_foundry(inputs[1].output.as_foundry().id())
             .add_account(account_id_2),
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -505,7 +505,7 @@ fn prefer_basic_to_foundry() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -574,7 +574,7 @@ fn simple_foundry_transition_basic_not_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);
@@ -658,7 +658,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);
@@ -809,7 +809,7 @@ fn mint_and_burn_at_the_same_time() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -881,7 +881,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -949,7 +949,7 @@ fn create_native_token_but_burn_account() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1016,7 +1016,7 @@ fn melted_tokens_not_provided() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -1076,7 +1076,7 @@ fn burned_tokens_not_provided() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -1134,7 +1134,7 @@ fn foundry_in_outputs_and_required() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1211,7 +1211,7 @@ fn melt_and_burn_native_tokens() {
     )
     // Burn 456 native tokens
     .with_burn(Burn::new().add_native_token(token_id, 456))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1272,7 +1272,7 @@ fn auto_transition_foundry_less_than_min() {
         protocol_parameters.clone(),
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap_err();
 
     let min_amount = FoundryOutputBuilder::from(inputs[0].output.as_foundry())
@@ -1353,7 +1353,7 @@ fn auto_transition_foundry_less_than_min_additional() {
         protocol_parameters.clone(),
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));

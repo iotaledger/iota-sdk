@@ -61,7 +61,7 @@ fn input_account_eq_output_account() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -103,7 +103,7 @@ fn transition_account_id_zero() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -280,7 +280,7 @@ fn create_account() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -333,7 +333,7 @@ fn burn_account() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -421,7 +421,7 @@ fn missing_input_for_account_output() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -478,7 +478,7 @@ fn missing_input_for_account_output_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -522,7 +522,7 @@ fn missing_input_for_account_output_but_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(selected.is_ok());
 }
@@ -581,7 +581,7 @@ fn account_in_output_and_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -622,7 +622,7 @@ fn missing_ed25519_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -666,7 +666,7 @@ fn missing_ed25519_issuer_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -708,7 +708,7 @@ fn missing_ed25519_issuer_transition() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(selected.is_ok());
 }
@@ -747,7 +747,7 @@ fn missing_account_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -791,7 +791,7 @@ fn missing_account_issuer_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -833,7 +833,7 @@ fn missing_account_issuer_transition() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(selected.is_ok());
 }
@@ -872,7 +872,7 @@ fn missing_nft_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -916,7 +916,7 @@ fn missing_nft_issuer_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(matches!(
         selected,
@@ -958,7 +958,7 @@ fn missing_nft_issuer_transition() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select();
+    .build();
 
     assert!(selected.is_ok());
 }
@@ -1011,7 +1011,7 @@ fn increase_account_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1066,7 +1066,7 @@ fn decrease_account_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1135,7 +1135,7 @@ fn prefer_basic_to_account() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1193,7 +1193,7 @@ fn take_amount_from_account_to_fund_basic() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1266,7 +1266,7 @@ fn account_burn_should_validate_account_sender() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1336,7 +1336,7 @@ fn account_burn_should_validate_account_address() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1391,7 +1391,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1462,7 +1462,7 @@ fn two_accounts_required() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1528,7 +1528,7 @@ fn state_controller_sender_required() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1582,7 +1582,7 @@ fn state_controller_sender_required_already_selected() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1624,7 +1624,7 @@ fn state_transition_and_required() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1665,7 +1665,7 @@ fn remainder_address_in_state_controller() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1724,7 +1724,7 @@ fn min_allot_account_mana() {
         protocol_parameters,
     )
     .with_min_mana_allotment(account_id_1, 2)
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1795,7 +1795,7 @@ fn min_allot_account_mana_additional() {
     )
     .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1862,8 +1862,8 @@ fn min_allot_account_mana_cannot_select_additional() {
     .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_2, provided_allotment)))
     .with_required_inputs([*inputs[0].output_id()])
-    .disable_additional_transaction_builder()
-    .select()
+    .disable_additional_input_selection()
+    .build()
     .unwrap_err();
 
     assert!(
@@ -1914,7 +1914,7 @@ fn min_allot_account_mana_requirement_twice() {
     )
     .with_min_mana_allotment(account_id_1, 2)
     .with_required_inputs([*inputs[1].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1995,7 +1995,7 @@ fn min_allot_account_mana_requirement_covered() {
     )
     .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2070,7 +2070,7 @@ fn min_allot_account_mana_requirement_covered_2() {
     )
     .with_min_mana_allotment(account_id_1, 2)
     .with_mana_allotments(Some((account_id_1, provided_allotment)))
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2128,7 +2128,7 @@ fn implicit_account_transition() {
     )
     .with_required_inputs(vec![input_output_id])
     .with_min_mana_allotment(account_id_1, 2)
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2173,7 +2173,7 @@ fn auto_transition_account_less_than_min() {
         protocol_parameters.clone(),
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap_err();
 
     let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
@@ -2235,7 +2235,7 @@ fn auto_transition_account_less_than_min_additional() {
         protocol_parameters.clone(),
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .select()
+    .build()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));

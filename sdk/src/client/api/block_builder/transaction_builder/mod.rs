@@ -153,14 +153,14 @@ impl Client {
         }
 
         if !options.allow_additional_input_selection {
-            transaction_builder = transaction_builder.disable_additional_transaction_builder();
+            transaction_builder = transaction_builder.disable_additional_input_selection();
         }
 
         if let Some(capabilities) = options.capabilities {
             transaction_builder = transaction_builder.with_transaction_capabilities(capabilities)
         }
 
-        let prepared_transaction_data = transaction_builder.select()?;
+        let prepared_transaction_data = transaction_builder.build()?;
 
         validate_transaction_length(&prepared_transaction_data.transaction)?;
 
@@ -315,7 +315,7 @@ impl TransactionBuilder {
 
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
-    pub fn select(mut self) -> Result<PreparedTransactionData, Error> {
+    pub fn build(mut self) -> Result<PreparedTransactionData, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
@@ -538,7 +538,7 @@ impl TransactionBuilder {
     }
 
     /// Disables selecting additional inputs.
-    pub fn disable_additional_transaction_builder(mut self) -> Self {
+    pub fn disable_additional_input_selection(mut self) -> Self {
         self.allow_additional_input_selection = false;
         self
     }
