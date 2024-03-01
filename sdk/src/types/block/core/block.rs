@@ -24,13 +24,6 @@ use crate::types::block::{
     BlockBody,
 };
 
-crate::impl_id!(
-    /// The signing hash of a [`Block`]'s signing input.
-    pub BlockSigningHash {
-        pub const LENGTH: usize = 32;
-    }
-);
-
 /// Block without a signature. Can be finished into a [`Block`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct UnsignedBlock {
@@ -62,11 +55,6 @@ impl UnsignedBlock {
     /// Get the signing input that can be used to generate a [`Signature`] for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
         [self.header.hash(), self.body.hash()].concat()
-    }
-
-    /// Return the Blake2b hash of the block's signing input.
-    pub fn signing_hash(&self) -> BlockSigningHash {
-        BlockSigningHash::new(Blake2b256::digest(self.signing_input()).into())
     }
 
     /// Finishes an [`UnsignedBlock`] into a [`Block`].

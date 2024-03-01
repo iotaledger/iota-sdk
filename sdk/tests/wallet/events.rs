@@ -150,7 +150,7 @@ fn wallet_events_serde() {
         );
 
         assert_serde_eq(WalletEvent::TransactionProgress(
-            TransactionProgressEvent::PreparedBlockSigningHash(block.signing_hash().to_string()),
+            TransactionProgressEvent::PreparedBlockSigningInput(block.signing_input()),
         ));
     }
 
