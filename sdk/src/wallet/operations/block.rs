@@ -1,13 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "events")]
+use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::{SecretManage, SignBlock},
     types::block::{output::AccountId, payload::Payload, BlockId},
-    wallet::{
-        events::{types::TransactionProgressEvent, WalletEvent},
-        Error, Result, Wallet,
-    },
+    wallet::{Error, Result, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
