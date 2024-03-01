@@ -14,9 +14,9 @@ use iota_sdk::{
             unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder,
             Output, SimpleTokenScheme, TokenId,
         },
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
-        semantic::TransactionFailureReason,
     },
 };
 use pretty_assertions::assert_eq;
@@ -370,6 +370,10 @@ fn destroy_foundry_with_account_state_transition() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyFoundryOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state
     assert_eq!(selected.transaction.outputs().len(), 1);
@@ -431,6 +435,13 @@ fn destroy_foundry_with_account_burn() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([
+            TransactionCapabilityFlag::DestroyAccountOutputs,
+            TransactionCapabilityFlag::DestroyFoundryOutputs
+        ])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
@@ -815,7 +826,7 @@ fn mint_and_burn_at_the_same_time() {
 
     assert_eq!(
         selected,
-        TransactionBuilderError::Semantic(TransactionFailureReason::NativeTokenSumUnbalanced)
+        TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(foundry_id))
     );
 }
 
@@ -954,6 +965,10 @@ fn create_native_token_but_burn_account() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
     assert_eq!(selected.transaction.outputs().len(), 2);
@@ -1078,15 +1093,17 @@ fn burned_tokens_not_provided() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
-        token_id,
-            found,
-            required,
-        }) if token_id == token_id_1 && found.as_u32() == 0 && required.as_u32() == 100));
+        TransactionBuilderError::InsufficientNativeTokenAmount {
+            token_id: token_id_1,
+            found: 0.into(),
+            required: 100.into(),
+        }
+    );
 }
 
 #[test]
@@ -1216,6 +1233,10 @@ fn melt_and_burn_native_tokens() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnNativeTokens])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.transaction.outputs().len(), 3);

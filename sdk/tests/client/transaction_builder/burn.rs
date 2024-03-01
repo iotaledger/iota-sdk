@@ -7,11 +7,20 @@ use std::{
 };
 
 use iota_sdk::{
-    client::api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
+    client::{
+        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
+        secret::types::InputSigningData,
+    },
     types::block::{
         address::Address,
-        output::{AccountId, ChainId, NftId, SimpleTokenScheme, TokenId},
+        output::{
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId,
+            NftId, SimpleTokenScheme, TokenId,
+        },
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
+        slot::SlotIndex,
     },
 };
 use pretty_assertions::assert_eq;
@@ -79,6 +88,10 @@ fn burn_account_present() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[0]);
     assert_eq!(selected.transaction.outputs(), outputs);
@@ -139,6 +152,10 @@ fn burn_account_present_and_required() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[0]);
     assert_eq!(selected.transaction.outputs(), outputs);
@@ -201,6 +218,10 @@ fn burn_account_id_zero() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[0]);
     assert_eq!(selected.transaction.outputs(), outputs);
@@ -245,12 +266,13 @@ fn burn_account_absent() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
-    ));
+        TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(account_id_1))
+    );
 }
 
 #[test]
@@ -318,6 +340,10 @@ fn burn_accounts_present() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
@@ -382,12 +408,13 @@ fn burn_account_in_outputs() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::BurnAndTransition(ChainId::Account(account_id))) if account_id == account_id_1
-    ));
+        TransactionBuilderError::BurnAndTransition(ChainId::Account(account_id_1))
+    );
 }
 
 #[test]
@@ -446,6 +473,10 @@ fn burn_nft_present() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[0]);
     assert_eq!(selected.transaction.outputs(), outputs);
@@ -508,6 +539,10 @@ fn burn_nft_present_and_required() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[0]);
     assert_eq!(selected.transaction.outputs(), outputs);
@@ -568,6 +603,10 @@ fn burn_nft_id_zero() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[0]);
     assert_eq!(selected.transaction.outputs(), outputs);
@@ -612,12 +651,13 @@ fn burn_nft_absent() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(nft_id))) if nft_id == nft_id_1
-    ));
+        TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(nft_id_1))
+    );
 }
 
 #[test]
@@ -689,6 +729,10 @@ fn burn_nfts_present() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
@@ -757,12 +801,13 @@ fn burn_nft_in_outputs() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::BurnAndTransition(ChainId::Nft(nft_id))) if nft_id == nft_id_1
-    ));
+        TransactionBuilderError::BurnAndTransition(ChainId::Nft(nft_id_1))
+    );
 }
 
 #[test]
@@ -829,6 +874,10 @@ fn burn_foundry_present() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyFoundryOutputs])
+    );
     assert_eq!(selected.inputs_data.len(), 2);
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert!(selected.inputs_data.contains(&inputs[1]));
@@ -927,12 +976,13 @@ fn burn_foundry_absent() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(foundry_id))) if foundry_id == foundry_id_1
-    ));
+        TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(foundry_id_1))
+    );
 }
 
 #[test]
@@ -1000,6 +1050,10 @@ fn burn_foundries_present() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyFoundryOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
@@ -1080,12 +1134,13 @@ fn burn_foundry_in_outputs() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(foundry_id_1))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::BurnAndTransition(ChainId::Foundry(foundry_id))) if foundry_id == foundry_id_1
-    ));
+        TransactionBuilderError::BurnAndTransition(ChainId::Foundry(foundry_id_1))
+    );
 }
 
 #[test]
@@ -1139,6 +1194,10 @@ fn burn_native_tokens() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnNativeTokens])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
 
@@ -1224,6 +1283,13 @@ fn burn_foundry_and_its_account() {
     .finish()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([
+            TransactionCapabilityFlag::DestroyAccountOutputs,
+            TransactionCapabilityFlag::DestroyFoundryOutputs
+        ])
+    );
     assert_eq!(selected.inputs_data.len(), 2);
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert!(selected.inputs_data.contains(&inputs[1]));
@@ -1240,4 +1306,336 @@ fn burn_foundry_and_its_account() {
             );
         }
     });
+}
+
+#[test]
+fn burn_mana() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+
+    let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .with_mana(1000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .finish_output()
+        .unwrap()];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(500)
+        .finish_output()
+        .unwrap()];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .with_burn(Burn::new().set_mana(true))
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs(), &outputs);
+}
+
+#[test]
+fn burn_mana_need_additional() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+
+    let inputs = [
+        BasicOutputBuilder::new_with_amount(100_000)
+            .with_mana(1000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(200)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [BasicOutputBuilder::new_with_amount(1_100_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(500)
+        .finish_output()
+        .unwrap()];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .with_burn(Burn::new().set_mana(true))
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    assert_eq!(selected.transaction.outputs()[0].mana(), 700);
+}
+
+#[test]
+fn burn_mana_need_additional_account() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let inputs = [
+        BasicOutputBuilder::new_with_amount(100_000)
+            .with_mana(1000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+        AccountOutputBuilder::new_with_amount(1_200_000, account_id_1)
+            .with_mana(200)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [BasicOutputBuilder::new_with_amount(1_100_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(500)
+        .finish_output()
+        .unwrap()];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_required_inputs([*inputs[0].output_id()])
+    .with_burn(Burn::new().set_mana(true))
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(selected.transaction.outputs()[0].mana(), 500);
+    assert_eq!(selected.transaction.outputs()[1].mana(), 200);
+}
+
+#[test]
+fn burn_generated_mana() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+
+    let inputs = [
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(1000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(200)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SlotIndex(5))),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [BasicOutputBuilder::new_with_amount(2_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_mana(1200)
+        .finish_output()
+        .unwrap()];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_burn(Burn::new().set_generated_mana(true))
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+}
+
+#[test]
+fn burn_generated_mana_remainder() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+
+    let inputs = [
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(1000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(200)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SlotIndex(5))),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_burn(Burn::new().set_generated_mana(true))
+    .with_required_inputs(inputs.iter().map(|i| *i.output_id()))
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    assert_eq!(selected.transaction.outputs()[0].mana(), 1200);
+}
+
+#[test]
+fn burn_generated_mana_account() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let inputs = [
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(1000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+        AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
+            .with_mana(200)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SlotIndex(5))),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        None,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_burn(Burn::new().set_generated_mana(true))
+    .with_required_inputs(inputs.iter().map(|i| *i.output_id()))
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
+        1200
+    );
 }

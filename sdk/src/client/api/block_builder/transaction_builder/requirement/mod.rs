@@ -23,6 +23,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{AccountId, ChainId, DelegationId, Features, FoundryId, NftId, Output},
+        payload::signed_transaction::TransactionCapabilityFlag,
     },
 };
 
@@ -166,6 +167,11 @@ impl TransactionBuilder {
     /// Gets requirements from burn.
     pub(crate) fn burn_requirements(&mut self) -> Result<(), TransactionBuilderError> {
         if let Some(burn) = self.burn.as_ref() {
+            if burn.mana() && self.initial_mana_excess()? > 0 {
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::BurnMana);
+            }
+
             for account_id in &burn.accounts {
                 if self
                     .non_remainder_outputs()
@@ -177,6 +183,8 @@ impl TransactionBuilder {
                 let requirement = Requirement::Account(*account_id);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::DestroyAccountOutputs);
             }
 
             for foundry_id in &burn.foundries {
@@ -190,6 +198,8 @@ impl TransactionBuilder {
                 let requirement = Requirement::Foundry(*foundry_id);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::DestroyFoundryOutputs);
             }
 
             for nft_id in &burn.nfts {
@@ -203,6 +213,8 @@ impl TransactionBuilder {
                 let requirement = Requirement::Nft(*nft_id);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::DestroyNftOutputs);
             }
 
             for delegation_id in &burn.delegations {

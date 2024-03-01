@@ -161,10 +161,6 @@ where
             transaction_builder = transaction_builder.disable_additional_input_selection();
         }
 
-        if let Some(capabilities) = options.capabilities {
-            transaction_builder = transaction_builder.with_transaction_capabilities(capabilities)
-        }
-
         let prepared_transaction_data = transaction_builder.finish()?;
 
         prepared_transaction_data.transaction.validate_length()?;

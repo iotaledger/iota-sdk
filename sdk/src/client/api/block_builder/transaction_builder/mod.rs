@@ -35,7 +35,7 @@ use crate::{
             OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
-            signed_transaction::{Transaction, TransactionCapabilities},
+            signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
             TaggedDataPayload,
         },
         protocol::{CommittableAgeRange, ProtocolParameters},
@@ -151,10 +151,6 @@ impl Client {
 
         if !options.allow_additional_input_selection {
             transaction_builder = transaction_builder.disable_additional_input_selection();
-        }
-
-        if let Some(capabilities) = options.capabilities {
-            transaction_builder = transaction_builder.with_transaction_capabilities(capabilities)
         }
 
         let prepared_transaction_data = transaction_builder.finish()?;
@@ -283,10 +279,7 @@ impl TransactionBuilder {
             Requirement::NativeTokens,
         ]);
 
-        // This is to avoid a borrow of self since there is a mutable borrow in the loop already.
-        let required_inputs = std::mem::take(&mut self.required_inputs);
-
-        for required_input in required_inputs {
+        for required_input in self.required_inputs.clone() {
             // Checks that required input is available.
             match self
                 .available_inputs
@@ -385,6 +378,19 @@ impl TransactionBuilder {
                     Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
                     _ => unreachable!(),
                 };
+            }
+        }
+
+        // If we're burning generated mana, set the capability flag.
+        if self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
+            // Get the mana sums with generated mana to see whether there's a difference.
+            if !self
+                .transaction_capabilities
+                .has_capability(TransactionCapabilityFlag::BurnMana)
+                && input_mana < self.total_selected_mana(true)?
+            {
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::BurnMana);
             }
         }
 
@@ -546,15 +552,6 @@ impl TransactionBuilder {
     /// Disables selecting additional inputs.
     pub fn disable_additional_input_selection(mut self) -> Self {
         self.allow_additional_input_selection = false;
-        self
-    }
-
-    /// Sets the transaction capabilities.
-    pub fn with_transaction_capabilities(
-        mut self,
-        transaction_capabilities: impl Into<TransactionCapabilities>,
-    ) -> Self {
-        self.transaction_capabilities = transaction_capabilities.into();
         self
     }
 
