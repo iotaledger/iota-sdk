@@ -18,7 +18,6 @@ use crate::{
             unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
             NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
         },
-        Error as BlockError,
     },
 };
 
@@ -125,12 +124,8 @@ impl InputSelection {
 
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
-        let amount_diff = input_amount
-            .checked_sub(output_amount)
-            .ok_or(BlockError::ConsumedAmountOverflow)?;
-        let mut mana_diff = input_mana
-            .checked_sub(output_mana)
-            .ok_or(BlockError::ConsumedManaOverflow)?;
+        let amount_diff = input_amount.checked_sub(output_amount).expect("amount underflow");
+        let mut mana_diff = input_mana.checked_sub(output_mana).expect("mana underflow");
 
         // If we are burning mana, then we can subtract out the burned amount.
         if self.burn.as_ref().map_or(false, |b| b.mana()) {

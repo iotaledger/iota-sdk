@@ -406,6 +406,18 @@ name = "block_tagged_data"
 path = "examples/client/block/04_block_tagged_data.rs"
 required-features = ["client"]
 
+# High Level examples
+
+[[example]]
+name = "inputs_from_transaction_id"
+path = "examples/client/high_level/inputs_from_transaction_id.rs"
+required-features = ["client"]
+
+[[example]]
+name = "search_address"
+path = "examples/client/high_level/search_address.rs"
+required-features = ["client"]
+
 # Node API core examples
 
 [[example]]
@@ -580,6 +592,16 @@ required-features = ["client"]
 [[example]]
 name = "build_basic_output"
 path = "examples/client/output/build_basic_output.rs"
+required-features = ["client"]
+
+[[example]]
+name = "send_all"
+path = "examples/client/send_all.rs"
+required-features = ["client"]
+
+[[example]]
+name = "tagged_data_to_utf8"
+path = "examples/client/tagged_data_to_utf8.rs"
 required-features = ["client"]
 
 ### Wallet
