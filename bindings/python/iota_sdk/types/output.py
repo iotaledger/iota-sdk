@@ -10,7 +10,7 @@ from iota_sdk.types.common import HexStr, json, EpochIndex
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature, NativeTokenFeature
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
-from iota_sdk.types.address import Address, AccountAddress
+from iota_sdk.types.address import AccountAddress
 
 
 class OutputType(IntEnum):
