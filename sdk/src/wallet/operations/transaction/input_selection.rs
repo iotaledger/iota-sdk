@@ -160,10 +160,6 @@ where
             input_selection = input_selection.disable_additional_input_selection();
         }
 
-        if let Some(capabilities) = options.capabilities {
-            input_selection = input_selection.with_transaction_capabilities(capabilities)
-        }
-
         let prepared_transaction_data = input_selection.select()?;
 
         validate_transaction_length(&prepared_transaction_data.transaction)?;
