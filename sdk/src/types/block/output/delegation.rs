@@ -255,7 +255,7 @@ pub struct DelegationOutput {
     delegation_id: DelegationId,
     /// Account address of the validator to which this output is delegating.
     #[packable(verify_with = verify_validator_address_packable)]
-    #[packable(unpack_error_with = |err| OutputError::ValidatorAddress(err))]
+    #[packable(unpack_error_with = OutputError::ValidatorAddress)]
     validator_address: Address,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
