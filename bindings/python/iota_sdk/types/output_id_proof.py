@@ -15,7 +15,7 @@ class OutputCommitmentProofType(IntEnum):
     Attributes:
         HashableNode (0): Denotes a HashableNode.
         LeafHash (1): Denotes a LeafHash.
-        Valuehash (2): Denotes a Valuehash.
+        ValueHash (2): Denotes a ValueHash.
     """
     HashableNode = 0
     LeafHash = 1
@@ -88,7 +88,9 @@ class OutputIdProof:
     slot: SlotIndex
     output_index: int
     transaction_commitment: HexStr
-    output_commitment_proof: OutputCommitmentProof
+    output_commitment_proof: OutputCommitmentProof = field(metadata=config(
+        decoder=deserialize_proof
+    ))
 
 
 OutputCommitmentProof: TypeAlias = Union[HashableNode, LeafHash, ValueHash]

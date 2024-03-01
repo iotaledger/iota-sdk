@@ -30,7 +30,7 @@ where
                             match client.foundry_output_id(foundry_id).await {
                                 Ok(output_id) => Ok(Some(client.get_output(&output_id).await?)),
                                 Err(crate::client::Error::NoOutput(_)) => Ok(None),
-                                Err(e) => Err(crate::wallet::Error::Client(e.into())),
+                                Err(e) => Err(crate::wallet::Error::Client(e)),
                             }
                         })
                         .await?
