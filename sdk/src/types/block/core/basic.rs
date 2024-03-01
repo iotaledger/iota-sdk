@@ -4,10 +4,9 @@
 use packable::Packable;
 
 use crate::types::block::{
-    core::{parent::verify_parents_sets, BlockBody, Parents},
+    core::{parent::verify_parents_sets, BlockBody, BlockError, Parents},
     payload::{OptionalPayload, Payload},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    Error,
 };
 
 pub type StrongParents = Parents<1, 8>;
@@ -90,7 +89,7 @@ impl BasicBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`BasicBlockBody`].
-    pub fn finish(self) -> Result<BasicBlockBody, Error> {
+    pub fn finish(self) -> Result<BasicBlockBody, BlockError> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
         let mut body = BasicBlockBody {
@@ -113,7 +112,7 @@ impl BasicBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`BlockBody`].
-    pub fn finish_block_body(self) -> Result<BlockBody, Error> {
+    pub fn finish_block_body(self) -> Result<BlockBody, BlockError> {
         Ok(BlockBody::from(self.finish()?))
     }
 }
@@ -131,7 +130,7 @@ impl From<BasicBlockBody> for BasicBlockBodyBuilder {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = BlockError)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(verify_with = verify_basic_block_body)]
 pub struct BasicBlockBody {
@@ -193,7 +192,7 @@ impl WorkScore for BasicBlockBody {
     }
 }
 
-fn verify_basic_block_body(basic_block_body: &BasicBlockBody, _: &ProtocolParameters) -> Result<(), Error> {
+fn verify_basic_block_body(basic_block_body: &BasicBlockBody, _: &ProtocolParameters) -> Result<(), BlockError> {
     verify_parents_sets(
         &basic_block_body.strong_parents,
         &basic_block_body.weak_parents,
@@ -211,7 +210,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{payload::dto::PayloadDto, BlockId, Error},
+        block::{core::BlockError, payload::dto::PayloadDto, BlockId},
         TryFromDto,
     };
 
@@ -245,7 +244,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<BasicBlockBodyDto> for BasicBlockBody {
-        type Error = Error;
+        type Error = BlockError;
 
         fn try_from_dto_with_params_inner(
             dto: BasicBlockBodyDto,

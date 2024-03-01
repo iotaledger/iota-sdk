@@ -11,10 +11,7 @@
 //! cargo run --release --all-features --example send_micro_transaction
 //! ```
 
-use iota_sdk::{
-    wallet::{Result, TransactionOptions},
-    Wallet,
-};
+use iota_sdk::{wallet::TransactionOptions, Wallet};
 
 // The base coin micro amount to send
 const SEND_MICRO_AMOUNT: u64 = 1;
@@ -22,7 +19,7 @@ const SEND_MICRO_AMOUNT: u64 = 1;
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

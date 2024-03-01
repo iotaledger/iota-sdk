@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod cli;
-mod error;
 mod helper;
 mod wallet_cli;
 
 use clap::Parser;
+use eyre::Error;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
 use log::LevelFilter;
 
-use self::{
-    cli::{new_wallet, Cli},
-    error::Error,
-};
+use self::cli::{new_wallet, Cli};
 
 #[macro_export]
 macro_rules! println_log_info {

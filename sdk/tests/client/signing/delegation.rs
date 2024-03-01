@@ -12,7 +12,7 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         context_input::{CommitmentContextInput, RewardContextInput},
@@ -36,7 +36,7 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn valid_creation() -> Result<()> {
+async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -121,7 +121,7 @@ async fn valid_creation() -> Result<()> {
 }
 
 #[tokio::test]
-async fn creation_missing_commitment_input() -> Result<()> {
+async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -210,7 +210,7 @@ async fn creation_missing_commitment_input() -> Result<()> {
 }
 
 #[tokio::test]
-async fn non_null_id_creation() -> Result<()> {
+async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -296,7 +296,7 @@ async fn non_null_id_creation() -> Result<()> {
 }
 
 #[tokio::test]
-async fn mismatch_amount_creation() -> Result<()> {
+async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -382,7 +382,7 @@ async fn mismatch_amount_creation() -> Result<()> {
 }
 
 #[tokio::test]
-async fn non_zero_end_epoch_creation() -> Result<()> {
+async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -468,7 +468,7 @@ async fn non_zero_end_epoch_creation() -> Result<()> {
 }
 
 #[tokio::test]
-async fn invalid_start_epoch_creation() -> Result<()> {
+async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -555,7 +555,7 @@ async fn invalid_start_epoch_creation() -> Result<()> {
 }
 
 #[tokio::test]
-async fn delay_not_null_id() -> Result<()> {
+async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -656,7 +656,7 @@ async fn delay_not_null_id() -> Result<()> {
 }
 
 #[tokio::test]
-async fn delay_modified_amount() -> Result<()> {
+async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -754,7 +754,7 @@ async fn delay_modified_amount() -> Result<()> {
 }
 
 #[tokio::test]
-async fn delay_modified_validator() -> Result<()> {
+async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -852,7 +852,7 @@ async fn delay_modified_validator() -> Result<()> {
 }
 
 #[tokio::test]
-async fn delay_modified_start_epoch() -> Result<()> {
+async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -950,7 +950,7 @@ async fn delay_modified_start_epoch() -> Result<()> {
 }
 
 #[tokio::test]
-async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
+async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1048,7 +1048,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<()> {
 }
 
 #[tokio::test]
-async fn destroy_null_id() -> Result<()> {
+async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -1145,7 +1145,7 @@ async fn destroy_null_id() -> Result<()> {
 }
 
 #[tokio::test]
-async fn destroy_reward_missing() -> Result<()> {
+async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager

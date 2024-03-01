@@ -15,7 +15,6 @@ use iota_sdk::{
         Client,
     },
     types::{block::payload::signed_transaction::TransactionId, TryFromDto},
-    wallet::Result,
     Wallet,
 };
 
@@ -23,7 +22,7 @@ const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-o
 const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -49,7 +48,9 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTransactionData> {
+async fn read_signed_transaction_from_file(
+    client: &Client,
+) -> Result<SignedTransactionData, Box<dyn std::error::Error>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(SIGNED_TRANSACTION_FILE_PATH).await?);
@@ -64,7 +65,7 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
     )?)
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),

@@ -131,6 +131,8 @@ export interface WalletSyncOptions {
     accountOutputs?: boolean;
     /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
+    /** Whether to sync delegation outputs. */
+    delegationOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an account output. */
@@ -139,10 +141,12 @@ export interface AccountSyncOptions {
     basicOutputs?: boolean;
     /** Whether to sync Account outputs. */
     accountOutputs?: boolean;
-    /** Whether to sync NFT outputs. */
-    nftOutputs?: boolean;
     /** Whether to sync foundry outputs. */
     foundryOutputs?: boolean;
+    /** Whether to sync NFT outputs. */
+    nftOutputs?: boolean;
+    /** Whether to sync delegation outputs. */
+    delegationOutputs?: boolean;
 }
 
 /** Specifies what outputs should be synced for the address of an nft output. */
@@ -153,6 +157,8 @@ export interface NftSyncOptions {
     accountOutputs?: boolean;
     /** Whether to sync NFT outputs. */
     nftOutputs?: boolean;
+    /** Whether to sync delegation outputs. */
+    delegationOutputs?: boolean;
 }
 
 /** Options to filter outputs */
