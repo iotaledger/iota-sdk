@@ -6,7 +6,7 @@ use crate::{
     client::secret::types::InputSigningData,
     types::block::{
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
-        output::{AccountId, DelegationOutputBuilder, Output},
+        output::{AccountId, Output},
     },
 };
 
@@ -53,33 +53,17 @@ impl InputSelection {
                 needs_commitment_context = true;
             }
         }
-        for output in self
+
+        if self
             .provided_outputs
-            .iter_mut()
-            .chain(&mut self.added_outputs)
-            .filter(|o| o.is_delegation())
+            .iter()
+            .chain(&self.added_outputs)
+            .any(|o| o.is_delegation())
         {
-            // Created delegations have their start epoch set, and delayed delegations have their end set
-            if output.as_delegation().delegation_id().is_null() {
-                let start_epoch = self
-                    .protocol_parameters
-                    .delegation_start_epoch(self.latest_slot_commitment_id);
-                log::debug!("Setting created delegation start epoch to {start_epoch}");
-                *output = DelegationOutputBuilder::from(output.as_delegation())
-                    .with_start_epoch(start_epoch)
-                    .finish_output()?;
-            } else {
-                let end_epoch = self
-                    .protocol_parameters
-                    .delegation_end_epoch(self.latest_slot_commitment_id);
-                log::debug!("Setting delayed delegation end epoch to {end_epoch}");
-                *output = DelegationOutputBuilder::from(output.as_delegation())
-                    .with_end_epoch(end_epoch)
-                    .finish_output()?;
-            }
             log::debug!("Adding commitment context input for delegation output");
             needs_commitment_context = true;
         }
+
         // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
         if self
             .context_inputs

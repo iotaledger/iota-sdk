@@ -15,7 +15,7 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        output::{Output, OutputId},
+        output::{DelegationOutputBuilder, Output, OutputId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
@@ -33,7 +33,7 @@ where
     /// Selects inputs for a transaction and locks them in the wallet, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
-        outputs: Vec<Output>,
+        mut outputs: Vec<Output>,
         mut options: TransactionOptions,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] select_inputs");
@@ -130,6 +130,24 @@ where
                             .rewards,
                     );
                 }
+            }
+        }
+
+        // Update start/end epoch of delegation outputs
+        for output in outputs.iter_mut().filter(|o| o.is_delegation()) {
+            // Created delegations have their start epoch set, and delayed delegations have their end set
+            if output.as_delegation().delegation_id().is_null() {
+                let start_epoch = protocol_parameters.delegation_start_epoch(slot_commitment_id);
+                log::debug!("Setting created delegation start epoch to {start_epoch}");
+                *output = DelegationOutputBuilder::from(output.as_delegation())
+                    .with_start_epoch(start_epoch)
+                    .finish_output()?;
+            } else {
+                let end_epoch = protocol_parameters.delegation_end_epoch(slot_commitment_id);
+                log::debug!("Setting delayed delegation end epoch to {end_epoch}");
+                *output = DelegationOutputBuilder::from(output.as_delegation())
+                    .with_end_epoch(end_epoch)
+                    .finish_output()?;
             }
         }
 
