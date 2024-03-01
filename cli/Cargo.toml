@@ -41,7 +41,7 @@ dialoguer = { version = "0.11.0", default-features = false, features = [
     "password",
 ] }
 dotenvy = { version = "0.15.7", default-features = false }
-eyre = { version = "0.6.12", default-features = false }
+eyre = { version = "0.6.12", default-features = false, features = ["auto-install"] }
 fern-logger = { version = "0.5.0", default-features = false }
 log = { version = "0.4.20", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false, features = ["std"] }
