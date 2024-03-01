@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from iota_sdk.types.address import Address
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.context_input import ContextInput
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
 
