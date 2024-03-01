@@ -34,7 +34,7 @@ where
     }
 
     /// Get the balance of the wallet.
-    pub async fn balance_inner(&self) -> Result<Balance> {
+    async fn balance_inner(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
