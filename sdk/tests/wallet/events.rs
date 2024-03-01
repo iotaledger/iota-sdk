@@ -24,7 +24,7 @@ use iota_sdk::{
             output::{rand_basic_output, rand_output_metadata},
         },
         slot::{SlotCommitmentId, SlotIndex},
-        unlock::Unlocks,
+        unlock::{EmptyUnlock, Unlock, Unlocks},
         BlockBody, UnsignedBlock,
     },
     wallet::{
@@ -125,7 +125,11 @@ fn wallet_events_serde() {
             })),
         ));
 
-        let block_payload = SignedTransactionPayload::new(transaction, Unlocks::new([]).unwrap()).unwrap();
+        let block_payload = SignedTransactionPayload::new(
+            transaction,
+            Unlocks::new([Unlock::Empty(EmptyUnlock), Unlock::Empty(EmptyUnlock)]).unwrap(),
+        )
+        .unwrap();
         let payload = Payload::from(block_payload);
         let block = UnsignedBlock::new(
             BlockHeader::new(
