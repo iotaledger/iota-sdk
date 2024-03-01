@@ -46,7 +46,7 @@ fn no_inputs() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -83,7 +83,7 @@ fn no_outputs() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(selected, Err(TransactionBuilderError::InvalidOutputCount(0))));
 }
@@ -118,7 +118,7 @@ fn no_outputs_but_required_input() {
         protocol_parameters,
     )
     .with_required_inputs(HashSet::from([*inputs[0].output_id()]))
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data, inputs);
@@ -161,7 +161,7 @@ fn no_outputs_but_burn() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data, inputs);
@@ -211,7 +211,7 @@ fn no_address_provided() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -256,7 +256,7 @@ fn no_matching_address_provided() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -315,7 +315,7 @@ fn two_addresses_one_missing() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -380,7 +380,7 @@ fn two_addresses() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -442,7 +442,7 @@ fn consolidate_with_min_allotment() {
     )
     .with_min_mana_allotment(account_id_1, 10)
     .with_required_inputs(inputs.iter().map(|i| *i.output_id()))
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.transaction.outputs().len(), 1);

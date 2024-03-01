@@ -53,7 +53,7 @@ fn sdruc_output_not_provided_no_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -119,7 +119,7 @@ fn sdruc_output_provided_no_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -163,7 +163,7 @@ fn sdruc_output_provided_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -232,7 +232,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -301,7 +301,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -371,7 +371,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -452,7 +452,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -508,7 +508,7 @@ fn insufficient_amount_because_of_sdruc() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -573,7 +573,7 @@ fn useless_sdruc_required_for_sender_feature() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -641,7 +641,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -721,7 +721,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);

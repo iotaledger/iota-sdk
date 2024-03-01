@@ -375,7 +375,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         slot_commitment_id,
         protocol_parameters.clone(),
     )
-    .build()
+    .finish()
     .unwrap();
 
     let transaction = Transaction::builder(protocol_parameters.network_id())

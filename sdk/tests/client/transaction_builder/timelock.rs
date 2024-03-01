@@ -52,7 +52,7 @@ fn one_output_timelock_not_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -97,7 +97,7 @@ fn timelock_equal_timestamp() {
         SlotCommitmentHash::null().into_slot_commitment_id(199),
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -155,7 +155,7 @@ fn two_outputs_one_timelock_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -214,7 +214,7 @@ fn two_outputs_one_timelocked_one_missing() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -259,7 +259,7 @@ fn one_output_timelock_expired() {
         SlotCommitmentHash::null().into_slot_commitment_id(99),
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));

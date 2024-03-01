@@ -63,7 +63,7 @@ fn input_amount_equal_output_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -107,7 +107,7 @@ fn input_amount_lower_than_output_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -169,7 +169,7 @@ fn input_amount_lower_than_output_amount_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -217,7 +217,7 @@ fn input_amount_greater_than_output_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -275,7 +275,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
         protocol_parameters,
     )
     .with_remainder_address(remainder_address)
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -345,7 +345,7 @@ fn two_same_inputs_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     // One input has enough amount.
@@ -416,7 +416,7 @@ fn two_inputs_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data, [inputs[0].clone()]);
@@ -474,7 +474,7 @@ fn two_inputs_one_needed_reversed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data, [inputs[1].clone()]);
@@ -532,7 +532,7 @@ fn two_inputs_both_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -590,7 +590,7 @@ fn two_inputs_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -742,7 +742,7 @@ fn ed25519_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     // Sender + another for amount
@@ -794,7 +794,7 @@ fn missing_ed25519_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -888,7 +888,7 @@ fn account_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     // Sender + another for amount
@@ -955,7 +955,7 @@ fn account_sender_zero_id() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1006,7 +1006,7 @@ fn missing_account_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -1102,7 +1102,7 @@ fn nft_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     // Sender + another for amount
@@ -1172,7 +1172,7 @@ fn nft_sender_zero_id() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1223,7 +1223,7 @@ fn missing_nft_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -1268,7 +1268,7 @@ fn simple_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1403,7 +1403,7 @@ fn one_provided_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1447,7 +1447,7 @@ fn insufficient_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -1509,7 +1509,7 @@ fn two_inputs_remainder_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1579,7 +1579,7 @@ fn two_inputs_remainder_3() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1678,7 +1678,7 @@ fn sender_already_selected() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1726,7 +1726,7 @@ fn single_mandatory_input() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1774,7 +1774,7 @@ fn too_many_inputs() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert_eq!(
         selected.unwrap_err(),
@@ -1841,7 +1841,7 @@ fn more_than_max_inputs_only_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &needed_input));
@@ -1888,7 +1888,7 @@ fn too_many_outputs() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert_eq!(
         selected.unwrap_err(),
@@ -1937,7 +1937,7 @@ fn too_many_outputs_with_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert_eq!(
         selected.unwrap_err(),
@@ -2035,7 +2035,7 @@ fn restricted_ed25519() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -2097,7 +2097,7 @@ fn restricted_nft() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2157,7 +2157,7 @@ fn restricted_account() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2257,7 +2257,7 @@ fn restricted_ed25519_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     // Sender + another for amount
@@ -2354,7 +2354,7 @@ fn multi_address_sender_already_fulfilled() {
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id(), *inputs[1].output_id(), *inputs[2].output_id()])
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2430,7 +2430,7 @@ fn ed25519_backed_available_address() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -2478,7 +2478,7 @@ fn automatic_allotment_provided_in_and_output() {
         protocol_parameters,
     )
     .with_min_mana_allotment(account_id_1, 2)
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));

@@ -160,7 +160,7 @@ impl Client {
             transaction_builder = transaction_builder.with_transaction_capabilities(capabilities)
         }
 
-        let prepared_transaction_data = transaction_builder.build()?;
+        let prepared_transaction_data = transaction_builder.finish()?;
 
         validate_transaction_length(&prepared_transaction_data.transaction)?;
 
@@ -315,7 +315,7 @@ impl TransactionBuilder {
 
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
-    pub fn build(mut self) -> Result<PreparedTransactionData, TransactionBuilderError> {
+    pub fn finish(mut self) -> Result<PreparedTransactionData, TransactionBuilderError> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.

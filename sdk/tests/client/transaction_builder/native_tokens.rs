@@ -70,7 +70,7 @@ fn two_native_tokens_one_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data[0], inputs[0]);
@@ -140,7 +140,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -221,7 +221,7 @@ fn three_inputs_two_needed_plus_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);
@@ -302,7 +302,7 @@ fn three_inputs_two_needed_no_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 2);
@@ -346,7 +346,7 @@ fn insufficient_native_tokens_one_input() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -420,7 +420,7 @@ fn insufficient_native_tokens_three_inputs() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -487,7 +487,7 @@ fn burn_and_send_at_the_same_time() {
             .add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 10)
             .add_native_token(TokenId::from_str(TOKEN_ID_2).unwrap(), 100),
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -534,7 +534,7 @@ fn burn_one_input_no_output() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(TokenId::from_str(TOKEN_ID_1).unwrap(), 50))
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -598,7 +598,7 @@ fn multiple_native_tokens() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -643,7 +643,7 @@ fn insufficient_native_tokens() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -691,7 +691,7 @@ fn insufficient_native_tokens_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -741,7 +741,7 @@ fn insufficient_amount_for_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert_eq!(
         selected.unwrap_err(),
@@ -789,7 +789,7 @@ fn single_output_native_token_no_remainder() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -833,7 +833,7 @@ fn single_output_native_token_remainder_1() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -884,7 +884,7 @@ fn single_output_native_token_remainder_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -949,7 +949,7 @@ fn two_basic_outputs_1() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1015,7 +1015,7 @@ fn two_basic_outputs_2() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1081,7 +1081,7 @@ fn two_basic_outputs_3() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1147,7 +1147,7 @@ fn two_basic_outputs_4() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1213,7 +1213,7 @@ fn two_basic_outputs_5() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1279,7 +1279,7 @@ fn two_basic_outputs_6() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1344,7 +1344,7 @@ fn two_basic_outputs_7() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1409,7 +1409,7 @@ fn two_basic_outputs_8() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
             selected,
@@ -1471,7 +1471,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1563,7 +1563,7 @@ fn multiple_remainders() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 4);

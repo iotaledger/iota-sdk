@@ -62,7 +62,7 @@ fn input_nft_eq_output_nft() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -108,7 +108,7 @@ fn transition_nft_id_zero() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -241,7 +241,7 @@ fn mint_nft() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -296,7 +296,7 @@ fn burn_nft() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_2))
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -386,7 +386,7 @@ fn missing_input_for_nft_output() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -432,7 +432,7 @@ fn missing_input_for_nft_output_but_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(selected.is_ok());
 }
@@ -500,7 +500,7 @@ fn nft_in_output_and_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -553,7 +553,7 @@ fn missing_ed25519_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -599,7 +599,7 @@ fn missing_ed25519_issuer_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -645,7 +645,7 @@ fn missing_ed25519_issuer_transition() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(selected.is_ok());
 }
@@ -688,7 +688,7 @@ fn missing_account_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -734,7 +734,7 @@ fn missing_account_issuer_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -780,7 +780,7 @@ fn missing_account_issuer_transition() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(selected.is_ok());
 }
@@ -823,7 +823,7 @@ fn missing_nft_sender() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -869,7 +869,7 @@ fn missing_nft_issuer_created() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -915,7 +915,7 @@ fn missing_nft_issuer_transition() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(selected.is_ok());
 }
@@ -972,7 +972,7 @@ fn increase_nft_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1031,7 +1031,7 @@ fn decrease_nft_amount() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1102,7 +1102,7 @@ fn prefer_basic_to_nft() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
@@ -1162,7 +1162,7 @@ fn take_amount_from_nft_to_fund_basic() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1235,7 +1235,7 @@ fn nft_burn_should_validate_nft_sender() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1295,7 +1295,7 @@ fn nft_burn_should_validate_nft_address() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1340,7 +1340,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
@@ -1418,7 +1418,7 @@ fn changed_immutable_metadata() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .build();
+    .finish();
 
     assert!(matches!(
         selected,
@@ -1460,7 +1460,7 @@ fn auto_transition_nft_less_than_min() {
         protocol_parameters.clone(),
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .build()
+    .finish()
     .unwrap_err();
 
     let min_amount = NftOutputBuilder::from(inputs[0].output.as_nft())
@@ -1524,7 +1524,7 @@ fn auto_transition_nft_less_than_min_additional() {
         protocol_parameters.clone(),
     )
     .with_required_inputs([*inputs[0].output_id()])
-    .build()
+    .finish()
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));

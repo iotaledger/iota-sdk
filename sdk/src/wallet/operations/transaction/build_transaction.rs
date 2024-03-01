@@ -166,7 +166,7 @@ where
             transaction_builder = transaction_builder.with_transaction_capabilities(capabilities)
         }
 
-        let prepared_transaction_data = transaction_builder.build()?;
+        let prepared_transaction_data = transaction_builder.finish()?;
 
         validate_transaction_length(&prepared_transaction_data.transaction)?;
 
