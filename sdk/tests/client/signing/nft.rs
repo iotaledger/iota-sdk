@@ -6,10 +6,7 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
-        },
+        api::{GetAddressesOptions, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Client,
@@ -49,7 +46,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let nft_id = NftId::from_str(NFT_ID_1)?;
     let nft_address = Address::Nft(NftAddress::new(nft_id));
     let slot_index = SlotIndex::from(10);
@@ -127,7 +124,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -157,14 +154,9 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }

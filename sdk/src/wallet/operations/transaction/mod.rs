@@ -13,7 +13,7 @@ pub(crate) mod submit_transaction;
 use crate::wallet::core::WalletLedgerDto;
 use crate::{
     client::{
-        api::{options::TransactionOptions, verify_semantic, PreparedTransactionData, SignedTransactionData},
+        api::{options::TransactionOptions, PreparedTransactionData, SignedTransactionData},
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
@@ -113,12 +113,8 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        if let Err(conflict) = verify_semantic(
-            &signed_transaction_data.inputs_data,
-            &signed_transaction_data.payload,
-            signed_transaction_data.mana_rewards,
-            self.client().get_protocol_parameters().await?,
-        ) {
+        if let Err(conflict) = signed_transaction_data.verify_semantic(&self.client().get_protocol_parameters().await?)
+        {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload

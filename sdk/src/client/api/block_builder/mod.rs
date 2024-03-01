@@ -5,7 +5,6 @@ pub mod options;
 pub mod transaction;
 pub mod transaction_builder;
 
-pub use self::transaction::verify_semantic;
 use crate::{
     client::{constants::FIVE_MINUTES_IN_NANOSECONDS, Client, Error, Result},
     types::block::{

@@ -14,9 +14,7 @@ use {
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
-        },
+        api::{PreparedTransactionData, SignedTransactionData},
         secret::SecretManage,
     },
     wallet::{operations::transaction::SignedTransactionPayload, Wallet},
@@ -93,7 +91,7 @@ where
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", payload);
 
-        validate_signed_transaction_payload_length(&payload)?;
+        payload.validate_length()?;
 
         Ok(SignedTransactionData {
             payload,

@@ -5,7 +5,7 @@ use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
-        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, RewardContextInput},
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{AccountId, DelegationOutputBuilder, Output},
     },
 };
@@ -16,13 +16,13 @@ impl TransactionBuilder {
     ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         let mut needs_commitment_context = false;
 
-        for (idx, input) in self.selected_inputs.iter().enumerate() {
+        for input in &self.selected_inputs {
             match &input.output {
                 // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
                 Output::Account(account) => {
                     if account.features().block_issuer().is_some() {
                         log::debug!("Adding block issuance context input for transitioned account output");
-                        self.context_inputs.insert(
+                        self.bic_context_inputs.insert(
                             BlockIssuanceCreditContextInput::from(account.account_id_non_null(input.output_id()))
                                 .into(),
                         );
@@ -32,7 +32,7 @@ impl TransactionBuilder {
                 Output::Basic(basic) => {
                     if basic.is_implicit_account() {
                         log::debug!("Adding block issuance context input for transitioned implicit account output");
-                        self.context_inputs
+                        self.bic_context_inputs
                             .insert(BlockIssuanceCreditContextInput::from(AccountId::from(input.output_id())).into());
                     }
                 }
@@ -51,7 +51,7 @@ impl TransactionBuilder {
 
             if self.mana_rewards.get(input.output_id()).is_some() {
                 log::debug!("Adding reward and commitment context input for output claiming mana rewards");
-                self.context_inputs.insert(RewardContextInput::new(idx as _)?.into());
+                self.reward_context_inputs.insert(*input.output_id());
                 needs_commitment_context = true;
             }
         }
@@ -83,25 +83,16 @@ impl TransactionBuilder {
             needs_commitment_context = true;
         }
         // BlockIssuanceCreditContextInput requires a CommitmentContextInput.
-        if self
-            .context_inputs
-            .iter()
-            .any(|c| c.kind() == BlockIssuanceCreditContextInput::KIND)
-        {
+        if !self.bic_context_inputs.is_empty() {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
             log::debug!("Adding commitment context input for output with block issuance credit context input");
             needs_commitment_context = true;
         }
 
-        if needs_commitment_context
-            && !self
-                .context_inputs
-                .iter()
-                .any(|c| c.kind() == CommitmentContextInput::KIND)
-        {
+        if needs_commitment_context && self.commitment_context_input.is_none() {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
-            self.context_inputs
-                .insert(CommitmentContextInput::new(self.latest_slot_commitment_id).into());
+            self.commitment_context_input
+                .replace(CommitmentContextInput::new(self.latest_slot_commitment_id).into());
         }
         Ok(Vec::new())
     }

@@ -10,18 +10,15 @@ pub(crate) mod requirement;
 pub(crate) mod transition;
 
 use alloc::collections::BTreeMap;
-use core::ops::Deref;
 use std::collections::{HashMap, HashSet};
 
 use packable::PackableExt;
 
-use self::requirement::account::is_account_with_id;
 pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement};
 use crate::{
     client::{
         api::{
             options::{RemainderValueStrategy, TransactionOptions},
-            transaction::validate_transaction_length,
             PreparedTransactionData, RemainderData,
         },
         node_api::indexer::query_parameters::OutputQueryParameters,
@@ -30,12 +27,12 @@ use crate::{
     },
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
-        context_input::ContextInput,
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput, RewardContextInput},
         input::{Input, UtxoInput, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
-            AccountId, AccountOutput, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, FoundryOutput,
-            NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
+            AccountId, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, NftOutputBuilder, Output,
+            OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
             signed_transaction::{Transaction, TransactionCapabilities},
@@ -59,7 +56,29 @@ impl Client {
         // Voting output needs to be requested before to prevent a deadlock
         let protocol_parameters = self.get_protocol_parameters().await?;
         let creation_slot = self.get_slot_index().await?;
-        let slot_commitment_id = self.get_issuance().await?.latest_commitment.id();
+
+        let (bic_context_inputs, commitment_context_input) = options.context_inputs.into_iter().fold(
+            (HashSet::new(), None),
+            |(mut bic_context_inputs, mut commitment_context_input), i| {
+                match i {
+                    ContextInput::BlockIssuanceCredit(i) => {
+                        bic_context_inputs.insert(i);
+                    }
+                    ContextInput::Commitment(i) => {
+                        commitment_context_input.replace(i);
+                    }
+                    // TODO: It's not really possible to accurately provide a reward context input,
+                    // so should we forbid it in transaction options?
+                    ContextInput::Reward(_) => (),
+                }
+                (bic_context_inputs, commitment_context_input)
+            },
+        );
+
+        let slot_commitment_id = match commitment_context_input {
+            Some(c) => c.slot_commitment_id(),
+            None => self.get_issuance().await?.latest_commitment.id(),
+        };
         let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
             Some(self.get_account_congestion(&issuer_id, None).await?.reference_mana_cost)
         } else {
@@ -141,7 +160,8 @@ impl Client {
             protocol_parameters.clone(),
         )
         .with_required_inputs(options.required_inputs)
-        .with_context_inputs(options.context_inputs)
+        .with_block_issuance_credit_context_inputs(bic_context_inputs)
+        .with_commitment_context_input(commitment_context_input)
         .with_mana_rewards(mana_rewards)
         .with_payload(options.tagged_data_payload)
         .with_mana_allotments(options.mana_allotments)
@@ -162,7 +182,7 @@ impl Client {
 
         let prepared_transaction_data = transaction_builder.finish()?;
 
-        validate_transaction_length(&prepared_transaction_data.transaction)?;
+        prepared_transaction_data.transaction.validate_length()?;
 
         Ok(prepared_transaction_data)
     }
@@ -174,7 +194,9 @@ pub struct TransactionBuilder {
     available_inputs: Vec<InputSigningData>,
     required_inputs: HashSet<OutputId>,
     selected_inputs: Vec<InputSigningData>,
-    context_inputs: HashSet<ContextInput>,
+    bic_context_inputs: HashSet<BlockIssuanceCreditContextInput>,
+    commitment_context_input: Option<CommitmentContextInput>,
+    reward_context_inputs: HashSet<OutputId>,
     provided_outputs: Vec<Output>,
     added_outputs: Vec<Output>,
     addresses: HashSet<Address>,
@@ -244,7 +266,9 @@ impl TransactionBuilder {
             available_inputs,
             required_inputs: HashSet::new(),
             selected_inputs: Vec::new(),
-            context_inputs: HashSet::new(),
+            bic_context_inputs: HashSet::new(),
+            commitment_context_input: None,
+            reward_context_inputs: HashSet::new(),
             provided_outputs: outputs.into_iter().collect(),
             added_outputs: Vec::new(),
             addresses,
@@ -400,8 +424,6 @@ impl TransactionBuilder {
             return Err(TransactionBuilderError::InvalidOutputCount(outputs.len()));
         }
 
-        Self::validate_transitions(&self.selected_inputs, &outputs)?;
-
         for output_id in self.mana_rewards.keys() {
             if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
                 return Err(TransactionBuilderError::ExtraManaRewards(*output_id));
@@ -415,9 +437,18 @@ impl TransactionBuilder {
         )?;
 
         let mut inputs: Vec<Input> = Vec::new();
+        let mut context_inputs = self
+            .bic_context_inputs
+            .into_iter()
+            .map(ContextInput::from)
+            .chain(self.commitment_context_input.map(ContextInput::from))
+            .collect::<Vec<_>>();
 
-        for input in &inputs_data {
+        for (idx, input) in inputs_data.iter().enumerate() {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+            if self.reward_context_inputs.contains(input.output_id()) {
+                context_inputs.push(RewardContextInput::new(idx as u16).unwrap().into());
+            }
         }
 
         let mana_allotments = self
@@ -432,7 +463,7 @@ impl TransactionBuilder {
             .with_inputs(inputs)
             .with_outputs(outputs)
             .with_mana_allotments(mana_allotments)
-            .with_context_inputs(self.context_inputs)
+            .with_context_inputs(context_inputs)
             .with_creation_slot(self.creation_slot)
             .with_capabilities(self.transaction_capabilities);
 
@@ -442,12 +473,16 @@ impl TransactionBuilder {
 
         let transaction = builder.finish_with_params(&self.protocol_parameters)?;
 
-        Ok(PreparedTransactionData {
+        let data = PreparedTransactionData {
             transaction,
             inputs_data,
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
-        })
+        };
+
+        data.verify_semantic(&self.protocol_parameters)?;
+
+        Ok(data)
     }
 
     fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, TransactionBuilderError> {
@@ -485,9 +520,21 @@ impl TransactionBuilder {
         self
     }
 
-    /// Sets the context inputs of an [`TransactionBuilder`].
-    pub fn with_context_inputs(mut self, context_inputs: impl IntoIterator<Item = ContextInput>) -> Self {
-        self.context_inputs = context_inputs.into_iter().collect();
+    /// Sets the block issance credit context inputs of an [`TransactionBuilder`].
+    pub fn with_block_issuance_credit_context_inputs(
+        mut self,
+        bic_context_inputs: impl IntoIterator<Item = BlockIssuanceCreditContextInput>,
+    ) -> Self {
+        self.bic_context_inputs = bic_context_inputs.into_iter().collect();
+        self
+    }
+
+    /// Sets the commitment context input of an [`TransactionBuilder`].
+    pub fn with_commitment_context_input(
+        mut self,
+        commitment_context_input: impl Into<Option<CommitmentContextInput>>,
+    ) -> Self {
+        self.commitment_context_input = commitment_context_input.into();
         self
     }
 
@@ -566,6 +613,19 @@ impl TransactionBuilder {
             .iter()
             .map(|r| &r.output)
             .chain(&self.remainders.storage_deposit_returns)
+    }
+
+    pub(crate) fn context_inputs(&self) -> impl Iterator<Item = ContextInput> + '_ {
+        self.bic_context_inputs
+            .iter()
+            .copied()
+            .map(ContextInput::from)
+            .chain(self.commitment_context_input.map(ContextInput::from))
+            .chain(self.selected_inputs.iter().enumerate().filter_map(|(idx, input)| {
+                self.reward_context_inputs
+                    .contains(input.output_id())
+                    .then_some(RewardContextInput::new(idx as u16).unwrap().into())
+            }))
     }
 
     fn required_account_nft_addresses(
@@ -751,136 +811,5 @@ impl TransactionBuilder {
         }
 
         Ok(sorted_inputs)
-    }
-
-    fn validate_transitions(inputs: &[InputSigningData], outputs: &[Output]) -> Result<(), TransactionBuilderError> {
-        let mut input_native_tokens_builder = NativeTokensBuilder::new();
-        let mut output_native_tokens_builder = NativeTokensBuilder::new();
-        let mut input_accounts = Vec::new();
-        let mut input_chains_foundries = hashbrown::HashMap::new();
-        let mut input_foundries = Vec::new();
-        let mut input_nfts = Vec::new();
-
-        for input in inputs {
-            if let Some(native_token) = input.output.native_token() {
-                input_native_tokens_builder.add_native_token(*native_token)?;
-            }
-            match &input.output {
-                Output::Basic(basic) => {
-                    if basic.is_implicit_account() {
-                        input_accounts.push(input);
-                    }
-                }
-                Output::Account(_) => {
-                    input_accounts.push(input);
-                }
-                Output::Foundry(foundry) => {
-                    input_chains_foundries.insert(foundry.chain_id(), (input.output_id(), &input.output));
-                    input_foundries.push(input);
-                }
-                Output::Nft(_) => {
-                    input_nfts.push(input);
-                }
-                _ => {}
-            }
-        }
-
-        for output in outputs {
-            if let Some(native_token) = output.native_token() {
-                output_native_tokens_builder.add_native_token(*native_token)?;
-            }
-        }
-
-        // Validate utxo chain transitions
-        for output in outputs {
-            match output {
-                Output::Account(account_output) => {
-                    // Null id outputs are just minted and can't be a transition
-                    if account_output.account_id().is_null() {
-                        continue;
-                    }
-
-                    let account_input = input_accounts
-                        .iter()
-                        .find(|i| is_account_with_id(&i.output, account_output.account_id(), i.output_id()))
-                        .expect("ISA is broken because there is no account input");
-
-                    match &account_input.output {
-                        Output::Account(account) => {
-                            if let Err(err) = AccountOutput::transition_inner(
-                                account,
-                                account_output,
-                                &input_chains_foundries,
-                                outputs,
-                            ) {
-                                log::debug!("validate_transitions error {err:?}");
-                                return Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(
-                                    *account_output.account_id(),
-                                )));
-                            }
-                        }
-                        Output::Basic(_) => {
-                            // TODO https://github.com/iotaledger/iota-sdk/issues/1664
-                        }
-                        _ => panic!(
-                            "unreachable: \"input_accounts\" only contains account outputs and implicit account (basic) outputs"
-                        ),
-                    }
-                }
-                Output::Foundry(foundry_output) => {
-                    let foundry_id = foundry_output.id();
-                    let foundry_input = input_foundries.iter().find(|i| {
-                        if let Output::Foundry(foundry_input) = &i.output {
-                            foundry_id == foundry_input.id()
-                        } else {
-                            false
-                        }
-                    });
-                    if let Some(foundry_input) = foundry_input {
-                        if let Err(err) = FoundryOutput::transition_inner(
-                            foundry_input.output.as_foundry(),
-                            foundry_output,
-                            input_native_tokens_builder.deref(),
-                            output_native_tokens_builder.deref(),
-                            // We use `all` capabilities here because this transition may be burning
-                            // native tokens, and validation will fail without the capability.
-                            &TransactionCapabilities::all(),
-                        ) {
-                            log::debug!("validate_transitions error {err:?}");
-                            return Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(
-                                foundry_output.id(),
-                            )));
-                        }
-                    }
-                }
-                Output::Nft(nft_output) => {
-                    // Null id outputs are just minted and can't be a transition
-                    if nft_output.nft_id().is_null() {
-                        continue;
-                    }
-
-                    let nft_input = input_nfts
-                        .iter()
-                        .find(|i| {
-                            if let Output::Nft(nft_input) = &i.output {
-                                *nft_output.nft_id() == nft_input.nft_id_non_null(i.output_id())
-                            } else {
-                                false
-                            }
-                        })
-                        .expect("ISA is broken because there is no nft input");
-
-                    if let Err(err) = NftOutput::transition_inner(nft_input.output.as_nft(), nft_output) {
-                        log::debug!("validate_transitions error {err:?}");
-                        return Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(
-                            *nft_output.nft_id(),
-                        )));
-                    }
-                }
-                // other output types don't do transitions
-                _ => {}
-            }
-        }
-        Ok(())
     }
 }

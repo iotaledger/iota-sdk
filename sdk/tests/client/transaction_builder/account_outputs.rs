@@ -12,7 +12,9 @@ use iota_sdk::{
         address::{Address, ImplicitAccountCreationAddress},
         mana::ManaAllotment,
         output::{
-            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
+            feature::{BlockIssuerFeature, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
+            unlock_condition::AddressUnlockCondition,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
         },
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
@@ -2088,14 +2090,13 @@ fn min_allot_account_mana_requirement_covered_2() {
 fn implicit_account_transition() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let ed25519_address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
 
     let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         .add_unlock_condition(AddressUnlockCondition::new(Address::ImplicitAccountCreation(
-            ImplicitAccountCreationAddress::new(
-                **Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap().as_ed25519(),
-            ),
+            ImplicitAccountCreationAddress::new(**ed25519_address.as_ed25519()),
         )))
-        .with_mana(7871)
+        .with_mana(10000)
         .finish_output()
         .unwrap()];
     let inputs = inputs
@@ -2114,6 +2115,14 @@ fn implicit_account_transition() {
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
+            .with_features([BlockIssuerFeature::new(
+                u32::MAX,
+                BlockIssuerKeys::from_vec(vec![
+                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
+                ])
+                .unwrap(),
+            )
+            .unwrap()])
             .finish_output()
             .unwrap(),
     ];
@@ -2137,10 +2146,10 @@ fn implicit_account_transition() {
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
-        ManaAllotment::new(account_id_1, 7870).unwrap()
+        ManaAllotment::new(account_id_1, 9948).unwrap()
     );
     // One remainder Mana
-    assert_eq!(selected.transaction.outputs()[0].mana(), 1);
+    assert_eq!(selected.transaction.outputs()[0].mana(), 52);
 }
 
 #[test]

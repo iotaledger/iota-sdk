@@ -63,7 +63,7 @@ impl TransactionBuilder {
 
             // If the transaction fails to build, just keep going in case another requirement helps
             let transaction = builder
-                .with_context_inputs(self.context_inputs.clone())
+                .with_context_inputs(self.context_inputs())
                 .with_mana_allotments(
                     self.mana_allotments
                         .iter()

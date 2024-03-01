@@ -13,6 +13,7 @@ use crate::types::block::{
     mana::ManaError,
     output::{ChainId, NativeTokenError, OutputError, OutputId, TokenId},
     payload::PayloadError,
+    semantic::TransactionFailureReason,
     signature::SignatureError,
     unlock::UnlockError,
     BlockError,
@@ -104,4 +105,7 @@ pub enum TransactionBuilderError {
     /// Unlock errors.
     #[error("{0}")]
     Unlock(#[from] UnlockError),
+    /// Semantic errors.
+    #[error("{0}")]
+    Semantic(#[from] TransactionFailureReason),
 }

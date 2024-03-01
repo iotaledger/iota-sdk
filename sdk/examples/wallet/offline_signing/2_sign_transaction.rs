@@ -10,10 +10,7 @@
 
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
-            SignedTransactionDataDto,
-        },
+        api::{PreparedTransactionData, SignedTransactionData, SignedTransactionDataDto},
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
     types::{block::payload::SignedTransactionPayload, TryFromDto},
@@ -51,7 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&signed_transaction)?;
+    signed_transaction.validate_length()?;
 
     let signed_transaction_data = SignedTransactionData {
         payload: signed_transaction,

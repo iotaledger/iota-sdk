@@ -13,6 +13,7 @@ use iota_sdk::{
         output::{feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
+        semantic::TransactionFailureReason,
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
@@ -1418,14 +1419,13 @@ fn changed_immutable_metadata() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(
-            nft_id,
-        ))) if nft_id == nft_id_1
-    ));
+        TransactionBuilderError::Semantic(TransactionFailureReason::ChainOutputImmutableFeaturesChanged)
+    );
 }
 
 #[test]

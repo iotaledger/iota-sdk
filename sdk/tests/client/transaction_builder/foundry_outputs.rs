@@ -16,6 +16,7 @@ use iota_sdk::{
         },
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
+        semantic::TransactionFailureReason,
     },
 };
 use pretty_assertions::assert_eq;
@@ -809,12 +810,13 @@ fn mint_and_burn_at_the_same_time() {
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
-    .finish();
+    .finish()
+    .unwrap_err();
 
-    assert!(matches!(
+    assert_eq!(
         selected,
-        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(id))) if id == foundry_id
-    ));
+        TransactionBuilderError::Semantic(TransactionFailureReason::NativeTokenSumUnbalanced)
+    );
 }
 
 #[test]

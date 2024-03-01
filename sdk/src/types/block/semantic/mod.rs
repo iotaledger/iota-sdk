@@ -30,7 +30,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
-    pub(crate) mana_rewards: Option<BTreeMap<OutputId, u64>>,
+    pub(crate) mana_rewards: Option<&'a BTreeMap<OutputId, u64>>,
     pub(crate) commitment_context_input: Option<SlotCommitmentId>,
     pub(crate) reward_context_inputs: HashMap<OutputId, RewardContextInput>,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -43,7 +43,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
-    pub(crate) protocol_parameters: ProtocolParameters,
+    pub(crate) protocol_parameters: &'a ProtocolParameters,
 }
 
 impl<'a> SemanticValidationContext<'a> {
@@ -52,8 +52,8 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
-        mana_rewards: Option<BTreeMap<OutputId, u64>>,
-        protocol_parameters: ProtocolParameters,
+        mana_rewards: Option<&'a BTreeMap<OutputId, u64>>,
+        protocol_parameters: &'a ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
         let input_chains = inputs
@@ -334,9 +334,11 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, None),
             };
 
-            if let Some(sender) = features.and_then(Features::sender) {
-                if !self.unlocked_addresses.contains(sender.address()) {
-                    return Err(TransactionFailureReason::SenderFeatureNotUnlocked);
+            if self.unlocks.is_some() {
+                if let Some(sender) = features.and_then(Features::sender) {
+                    if !self.unlocked_addresses.contains(sender.address()) {
+                        return Err(TransactionFailureReason::SenderFeatureNotUnlocked);
+                    }
                 }
             }
 
