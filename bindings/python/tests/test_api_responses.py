@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, ManaRewardsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockMetadataResponse, BlockWithMetadataResponse, OutputMetadata, OutputResponse, TransactionMetadataResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk import RoutesResponse, CongestionResponse, OutputWithMetadataResponse, ManaRewardsResponse, ValidatorsResponse, ValidatorResponse, InfoResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockMetadataResponse, BlockWithMetadataResponse, OutputMetadata, OutputResponse, TransactionMetadataResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -27,16 +27,14 @@ def test_api_responses():
     # GET /api/routes
     test_api_response(RoutesResponse, "get-routes-response-example.json")
     # GET /api/core/v3/info
-    # TODO: enable when the fixture is updated https://github.com/iotaledger/iota-sdk/issues/2015
-    # test_api_response(InfoResponse, "get-info-response-example.json")
+    test_api_response(InfoResponse, "get-info-response-example.json")
     # GET /api/core/v3/accounts/{bech32Address}/congestion
     test_api_response(CongestionResponse,
                       "get-congestion-estimate-response-example.json")
     # GET /api/core/v3/rewards/{outputId}
     test_api_response(ManaRewardsResponse, "get-mana-rewards-example.json")
     # GET /api/core/v3/validators
-    # TODO: enable when TIP is updated
-    # test_api_response(ValidatorsResponse, "get-validators-example.json")
+    test_api_response(ValidatorsResponse, "get-validators-example.json")
     # GET /api/core/v3/validators/{bech32Address}
     test_api_response(ValidatorResponse, "get-validator-example.json")
     # GET /api/core/v3/committee
@@ -73,9 +71,8 @@ def test_api_responses():
     test_api_response(
         OutputMetadata, "get-output-metadata-by-id-response-spent-example.json")
     # GET /api/core/v3/outputs/{outputId}/full
-    # TODO: enable when OutputWithMetadata is updated with OutputIdProof https://github.com/iotaledger/iota-sdk/issues/2021
-    # test_api_response(OutputWithMetadata,
-    #                   "get-full-output-metadata-example.json")
+    test_api_response(OutputWithMetadataResponse,
+                      "get-full-output-metadata-example.json")
     # GET /api/core/v3/transactions/{transactionId}/metadata
     test_api_response(TransactionMetadataResponse,
                       "get-transaction-metadata-by-id-response-example.json")
