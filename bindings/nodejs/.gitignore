@@ -7,4 +7,3 @@ prebuilds/
 out/
 **/dist
 offline_signing*.json
-docs
