@@ -1471,8 +1471,8 @@ export class Wallet {
      * @returns The transaction data.
      */
     async sendTransaction(
-        immutableOutputs: Output[],
-        mutableOutputs: Output[],
+        immutableOutputs?: Output[],
+        mutableOutputs?: Output[],
         options?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
         return (
@@ -1493,8 +1493,8 @@ export class Wallet {
      * @returns The prepared transaction data.
      */
     async prepareTransaction(
-        immutableOutputs: Output[],
-        mutableOutputs: Output[],
+        immutableOutputs?: Output[],
+        mutableOutputs?: Output[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({

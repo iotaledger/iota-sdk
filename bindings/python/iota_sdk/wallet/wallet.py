@@ -702,13 +702,13 @@ class Wallet:
         ))
 
     def send_transaction(
-            self, immutable_outputs: List[Output], mutable_outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+            self, immutable_outputs: Optional[List[Output]] = None, mutable_outputs: Optional[List[Output]] = None, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send a transaction.
         """
         return self.prepare_transaction(immutable_outputs, mutable_outputs, options).send()
 
     def prepare_transaction(
-            self, immutable_outputs: List[Output], mutable_outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+            self, immutable_outputs: Optional[List[Output]] = None, mutable_outputs: Optional[List[Output]] = None, options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Prepare transaction.
             Immutable outputs are not allowed to be changed in any way.
             Mutable outputs may have amount/mana changes made to fulfill requirements.
