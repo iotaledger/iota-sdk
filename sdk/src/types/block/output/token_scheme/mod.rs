@@ -3,16 +3,35 @@
 
 mod simple;
 
+use core::convert::Infallible;
+
+use primitive_types::U256;
+
 pub use self::simple::SimpleTokenScheme;
-use crate::types::block::{
-    protocol::{WorkScore, WorkScoreParameters},
-    Error,
-};
+use crate::types::block::protocol::{WorkScore, WorkScoreParameters};
+
+#[derive(Debug, PartialEq, Eq, derive_more::Display)]
+#[allow(missing_docs)]
+pub enum TokenSchemeError {
+    #[display(fmt = "invalid token scheme kind {_0}")]
+    InvalidTokenSchemeKind(u8),
+    #[display(fmt = "invalid foundry output supply: minted {minted}, melted {melted} max {max}")]
+    InvalidFoundryOutputSupply { minted: U256, melted: U256, max: U256 },
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for TokenSchemeError {}
+
+impl From<Infallible> for TokenSchemeError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
 
 ///
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
-#[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidTokenSchemeKind)]
+#[packable(unpack_error = TokenSchemeError)]
+#[packable(tag_type = u8, with_error = TokenSchemeError::InvalidTokenSchemeKind)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum TokenScheme {
     ///

@@ -10,12 +10,12 @@
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::address::{AccountAddress, ToBech32Ext},
-    wallet::{AccountSyncOptions, Result, SyncOptions},
+    wallet::{AccountSyncOptions, SyncOptions},
     Wallet,
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

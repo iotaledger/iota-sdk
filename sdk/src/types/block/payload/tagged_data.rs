@@ -14,8 +14,8 @@ use packable::{
 };
 
 use crate::types::block::{
+    payload::PayloadError,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
 };
 
 pub(crate) type TagLength =
@@ -25,11 +25,11 @@ pub(crate) type TaggedDataLength =
 
 /// A payload which holds optional data with an optional tag.
 #[derive(Clone, Eq, PartialEq, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = PayloadError)]
 pub struct TaggedDataPayload {
-    #[packable(unpack_error_with = |err| Error::InvalidTagLength(err.into_prefix_err().into()))]
+    #[packable(unpack_error_with = |err| PayloadError::InvalidTagLength(err.into_prefix_err().into()))]
     tag: BoxedSlicePrefix<u8, TagLength>,
-    #[packable(unpack_error_with = |err| Error::InvalidTaggedDataLength(err.into_prefix_err().into()))]
+    #[packable(unpack_error_with = |err| PayloadError::InvalidTaggedDataLength(err.into_prefix_err().into()))]
     data: BoxedSlicePrefix<u8, TaggedDataLength>,
 }
 
@@ -42,10 +42,10 @@ impl TaggedDataPayload {
     pub const DATA_LENGTH_RANGE: RangeInclusive<u32> = 0..=8192;
 
     /// Creates a new [`TaggedDataPayload`].
-    pub fn new(tag: impl Into<Box<[u8]>>, data: impl Into<Box<[u8]>>) -> Result<Self, Error> {
+    pub fn new(tag: impl Into<Box<[u8]>>, data: impl Into<Box<[u8]>>) -> Result<Self, PayloadError> {
         Ok(Self {
-            tag: tag.into().try_into().map_err(Error::InvalidTagLength)?,
-            data: data.into().try_into().map_err(Error::InvalidTaggedDataLength)?,
+            tag: tag.into().try_into().map_err(PayloadError::InvalidTagLength)?,
+            data: data.into().try_into().map_err(PayloadError::InvalidTaggedDataLength)?,
         })
     }
 
@@ -81,7 +81,7 @@ pub mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{types::block::Error, utils::serde::prefix_hex_bytes};
+    use crate::utils::serde::prefix_hex_bytes;
 
     /// The payload type to define a tagged data payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -105,7 +105,7 @@ pub mod dto {
     }
 
     impl TryFrom<TaggedDataPayloadDto> for TaggedDataPayload {
-        type Error = Error;
+        type Error = PayloadError;
 
         fn try_from(value: TaggedDataPayloadDto) -> Result<Self, Self::Error> {
             Self::new(value.tag, value.data)

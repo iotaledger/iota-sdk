@@ -17,7 +17,6 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
     types::{block::payload::SignedTransactionPayload, TryFromDto},
-    wallet::Result,
 };
 
 const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
@@ -26,7 +25,7 @@ const PROTOCOL_PARAMETERS_FILE_PATH: &str = "./examples/wallet/offline_signing/e
 const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -67,7 +66,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_data_from_file(path: &str) -> Result<String> {
+async fn read_data_from_file(path: &str) -> Result<String, Box<dyn std::error::Error>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(path).await?);
@@ -77,7 +76,9 @@ async fn read_data_from_file(path: &str) -> Result<String> {
     Ok(json)
 }
 
-async fn write_signed_transaction_to_file(signed_transaction_data: &SignedTransactionData) -> Result<()> {
+async fn write_signed_transaction_to_file(
+    signed_transaction_data: &SignedTransactionData,
+) -> Result<(), Box<dyn std::error::Error>> {
     use tokio::io::AsyncWriteExt;
 
     let dto = SignedTransactionDataDto::from(signed_transaction_data);

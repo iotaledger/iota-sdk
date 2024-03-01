@@ -1,15 +1,18 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
+use crate::types::block::{
+    protocol::WorkScore,
+    unlock::{UnlockError, UnlockIndex},
+};
 
 /// An [`Unlock`](crate::types::block::unlock::Unlock) that refers to another unlock.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = Error, with = Error::InvalidReferenceIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::InvalidReferenceIndex)]
 pub struct ReferenceUnlock(UnlockIndex);
 
 impl TryFrom<u16> for ReferenceUnlock {
-    type Error = Error;
+    type Error = UnlockError;
 
     fn try_from(index: u16) -> Result<Self, Self::Error> {
         Self::new(index)
@@ -22,8 +25,8 @@ impl ReferenceUnlock {
 
     /// Creates a new [`ReferenceUnlock`].
     #[inline(always)]
-    pub fn new(index: u16) -> Result<Self, Error> {
-        index.try_into().map(Self).map_err(Error::InvalidReferenceIndex)
+    pub fn new(index: u16) -> Result<Self, UnlockError> {
+        index.try_into().map(Self).map_err(UnlockError::InvalidReferenceIndex)
     }
 
     /// Return the index of a [`ReferenceUnlock`].
@@ -59,7 +62,7 @@ pub(crate) mod dto {
     }
 
     impl TryFrom<ReferenceUnlockDto> for ReferenceUnlock {
-        type Error = Error;
+        type Error = UnlockError;
 
         fn try_from(value: ReferenceUnlockDto) -> Result<Self, Self::Error> {
             Self::new(value.index)

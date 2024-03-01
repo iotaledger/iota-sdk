@@ -20,7 +20,6 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     #[derive(Serialize, Deserialize)]
     struct EmptyUnlockDto {
@@ -36,11 +35,9 @@ mod dto {
         }
     }
 
-    impl TryFrom<EmptyUnlockDto> for EmptyUnlock {
-        type Error = Error;
-
-        fn try_from(_: EmptyUnlockDto) -> Result<Self, Self::Error> {
-            Ok(Self)
+    impl From<EmptyUnlockDto> for EmptyUnlock {
+        fn from(_: EmptyUnlockDto) -> Self {
+            Self
         }
     }
 

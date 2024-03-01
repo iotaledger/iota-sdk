@@ -8,8 +8,7 @@ mod signature;
 
 use iota_sdk::types::block::{
     rand::signature::rand_signature,
-    unlock::{AccountUnlock, AnchorUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-    Error,
+    unlock::{AccountUnlock, AnchorUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, UnlockError, Unlocks},
 };
 use packable::bounded::TryIntoBoundedU16Error;
 use pretty_assertions::assert_eq;
@@ -27,7 +26,7 @@ fn kind() {
 fn new_invalid_first_reference() {
     assert!(matches!(
         Unlocks::new([ReferenceUnlock::new(42).unwrap().into()]),
-        Err(Error::InvalidUnlockReference(0)),
+        Err(UnlockError::InvalidUnlockReference(0)),
     ));
 }
 
@@ -38,7 +37,7 @@ fn new_invalid_self_reference() {
             SignatureUnlock::from(rand_signature()).into(),
             ReferenceUnlock::new(1).unwrap().into()
         ]),
-        Err(Error::InvalidUnlockReference(1)),
+        Err(UnlockError::InvalidUnlockReference(1)),
     ));
 }
 
@@ -50,7 +49,7 @@ fn new_invalid_future_reference() {
             ReferenceUnlock::new(2).unwrap().into(),
             SignatureUnlock::from(rand_signature()).into(),
         ]),
-        Err(Error::InvalidUnlockReference(1)),
+        Err(UnlockError::InvalidUnlockReference(1)),
     ));
 }
 
@@ -62,7 +61,7 @@ fn new_invalid_reference_reference() {
             ReferenceUnlock::new(0).unwrap().into(),
             ReferenceUnlock::new(1).unwrap().into()
         ]),
-        Err(Error::InvalidUnlockReference(2)),
+        Err(UnlockError::InvalidUnlockReference(2)),
     ));
 }
 
@@ -80,7 +79,7 @@ fn new_invalid_duplicate_signature() {
             SignatureUnlock::from(rand_signature()).into(),
             ReferenceUnlock::new(3).unwrap().into()
         ]),
-        Err(Error::DuplicateSignatureUnlock(5)),
+        Err(UnlockError::DuplicateSignatureUnlock(5)),
     ));
 }
 
@@ -88,7 +87,7 @@ fn new_invalid_duplicate_signature() {
 fn new_invalid_too_many_blocks() {
     assert!(matches!(
         Unlocks::new(vec![ReferenceUnlock::new(0).unwrap().into(); 300]),
-        Err(Error::InvalidUnlockCount(TryIntoBoundedU16Error::Invalid(300))),
+        Err(UnlockError::InvalidUnlockCount(TryIntoBoundedU16Error::Invalid(300))),
     ));
 }
 
@@ -151,7 +150,7 @@ fn invalid_account_0() {
             AccountUnlock::new(0).unwrap().into(),
             SignatureUnlock::from(rand_signature()).into(),
         ]),
-        Err(Error::InvalidUnlockAccount(0)),
+        Err(UnlockError::InvalidUnlockAccount(0)),
     ));
 }
 
@@ -162,7 +161,7 @@ fn invalid_account_index() {
             SignatureUnlock::from(rand_signature()).into(),
             AccountUnlock::new(2).unwrap().into(),
         ]),
-        Err(Error::InvalidUnlockAccount(1)),
+        Err(UnlockError::InvalidUnlockAccount(1)),
     ));
 }
 
@@ -173,7 +172,7 @@ fn invalid_nft_0() {
             NftUnlock::new(0).unwrap().into(),
             SignatureUnlock::from(rand_signature()).into(),
         ]),
-        Err(Error::InvalidUnlockNft(0)),
+        Err(UnlockError::InvalidUnlockNft(0)),
     ));
 }
 
@@ -184,6 +183,6 @@ fn invalid_nft_index() {
             SignatureUnlock::from(rand_signature()).into(),
             NftUnlock::new(2).unwrap().into(),
         ]),
-        Err(Error::InvalidUnlockNft(1)),
+        Err(UnlockError::InvalidUnlockNft(1)),
     ));
 }

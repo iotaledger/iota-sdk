@@ -6,8 +6,8 @@ use core::str::FromStr;
 use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
+    address::AddressError,
     output::{NftId, OutputId, StorageScore},
-    Error,
 };
 
 /// An [`Address`](super::Address) derived from an NFT ID which can be unlocked by unlocking the corresponding NFT.
@@ -46,7 +46,7 @@ impl NftAddress {
 impl StorageScore for NftAddress {}
 
 impl FromStr for NftAddress {
-    type Err = Error;
+    type Err = AddressError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(NftId::from_str(s)?))
