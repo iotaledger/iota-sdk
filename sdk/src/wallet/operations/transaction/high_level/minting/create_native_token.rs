@@ -120,28 +120,26 @@ where
             );
             let token_id = TokenId::from(foundry_id);
 
-            let outputs = [
-                {
-                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
-                        storage_score_params,
-                        account_output.foundry_counter() + 1,
-                        TokenScheme::Simple(SimpleTokenScheme::new(
-                            params.circulating_supply,
-                            0,
-                            params.maximum_supply,
-                        )?),
-                    )
-                    .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
-                        account_id,
-                    )));
+            let outputs = [{
+                let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
+                    storage_score_params,
+                    account_output.foundry_counter() + 1,
+                    TokenScheme::Simple(SimpleTokenScheme::new(
+                        params.circulating_supply,
+                        0,
+                        params.maximum_supply,
+                    )?),
+                )
+                .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
+                    account_id,
+                )));
 
-                    if let Some(foundry_metadata) = params.foundry_metadata {
-                        foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
-                    }
+                if let Some(foundry_metadata) = params.foundry_metadata {
+                    foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
+                }
 
-                    foundry_builder.finish_output()?
-                }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
-            ];
+                foundry_builder.finish_output()?
+            }];
 
             self.prepare_transaction(outputs, options)
                 .await
