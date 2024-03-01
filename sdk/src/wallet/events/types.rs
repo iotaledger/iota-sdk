@@ -288,7 +288,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
         #[derive(Deserialize)]
         #[serde(rename_all = "camelCase")]
         struct PreparedBlockSigningHash_ {
-            signing_hash: String,
+            block_signing_hash: String,
         }
 
         let value = serde_json::Value::deserialize(d)?;
@@ -319,7 +319,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                         .map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize PreparedBlockSigningHash: {e}"))
                         })?
-                        .signing_hash,
+                        .block_signing_hash,
                 ),
                 6 => Self::Broadcasting,
                 _ => return Err(serde::de::Error::custom("invalid transaction progress event type")),

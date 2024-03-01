@@ -25,7 +25,7 @@ use iota_sdk::{
         },
         slot::{SlotCommitmentId, SlotIndex},
         unlock::{EmptyUnlock, Unlock, Unlocks},
-        BlockBody, UnsignedBlock,
+        BlockBody, BlockId, UnsignedBlock,
     },
     wallet::{
         events::types::{
@@ -141,7 +141,7 @@ fn wallet_events_serde() {
                 AccountId::new([0; 32]),
             ),
             BlockBody::build_basic(
-                StrongParents::from_vec(Vec::default()).unwrap(),
+                StrongParents::from_vec(vec![BlockId::new([0; 36])]).unwrap(),
                 MaxBurnedManaAmount::Amount(0),
             )
             .with_payload(payload)
