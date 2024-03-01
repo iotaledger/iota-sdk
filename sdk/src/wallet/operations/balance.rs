@@ -20,6 +20,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
+    /// Get the balance of the wallet.
     pub async fn balance(&self) -> Result<Balance> {
         #[cfg(not(target_family = "wasm"))]
         {
@@ -33,7 +34,6 @@ where
         }
     }
 
-    /// Get the balance of the wallet.
     async fn balance_inner(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
 
