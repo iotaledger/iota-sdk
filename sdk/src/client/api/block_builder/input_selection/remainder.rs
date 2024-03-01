@@ -16,7 +16,6 @@ use crate::{
             unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
             NativeToken, NftOutput, Output, StorageScoreParameters, TokenId,
         },
-        Error as BlockError,
     },
 };
 
@@ -103,12 +102,8 @@ impl InputSelection {
             return Ok((storage_deposit_returns, Vec::new()));
         }
 
-        let amount_diff = input_amount
-            .checked_sub(output_amount)
-            .ok_or(BlockError::ConsumedAmountOverflow)?;
-        let mut mana_diff = input_mana
-            .checked_sub(output_mana)
-            .ok_or(BlockError::ConsumedManaOverflow)?;
+        let amount_diff = input_amount.checked_sub(output_amount).expect("amount underflow");
+        let mut mana_diff = input_mana.checked_sub(output_mana).expect("mana underflow");
 
         let (remainder_address, chain) = self
             .get_remainder_address()?

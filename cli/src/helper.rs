@@ -6,6 +6,7 @@ use std::path::Path;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
+use eyre::{bail, eyre, Error};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
     crypto::keys::bip39::Mnemonic,
@@ -16,7 +17,7 @@ use tokio::{
 };
 use zeroize::Zeroize;
 
-use crate::{error::Error, println_log_error, println_log_info};
+use crate::{println_log_error, println_log_info};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
@@ -62,7 +63,7 @@ pub async fn get_alias(prompt: &str) -> Result<String, Error> {
 
 pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -> Result<Option<Vec<u8>>, Error> {
     Ok(if let Some(hex) = hex {
-        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex)?)
     } else if let Some(file) = file {
         Some(tokio::fs::read(file).await?)
     } else {
@@ -156,7 +157,7 @@ pub async fn import_mnemonic(path: &str) -> Result<Mnemonic, Error> {
     let mut mnemonics = read_mnemonics_from_file(path).await?;
     if mnemonics.is_empty() {
         println_log_error!("No valid mnemonics found in '{path}'.");
-        Err(Error::Miscellaneous("No valid mnemonics found".to_string()))
+        bail!("No valid mnemonics found".to_string())
     } else if mnemonics.len() == 1 {
         Ok(mnemonics.swap_remove(0))
     } else {
@@ -278,9 +279,7 @@ async fn read_mnemonics_from_file(path: &str) -> Result<Vec<Mnemonic>, Error> {
         if verify_mnemonic(&*trimmed).is_ok() {
             mnemonics.push(trimmed);
         } else {
-            return Err(Error::Miscellaneous(format!(
-                "Invalid mnemonic in file '{path}' at line '{line_index}'."
-            )));
+            bail!("Invalid mnemonic in file '{path}' at line '{line_index}'.");
         }
         line_index += 1;
     }
@@ -293,29 +292,21 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     let millis = ts_millis % 1000;
     let secs = (ts_millis - millis) / 1000;
 
-    let secs_int =
-        i64::try_from(secs).map_err(|e| Error::Miscellaneous(format!("Failed to convert timestamp to i64: {e}")))?;
-    let nanos = u32::try_from(millis * 1000000)
-        .map_err(|e| Error::Miscellaneous(format!("Failed to convert timestamp to u32: {e}")))?;
+    let secs_int = i64::try_from(secs).map_err(|e| eyre!("Failed to convert timestamp to i64: {e}"))?;
+    let nanos = u32::try_from(millis * 1000000).map_err(|e| eyre!("Failed to convert timestamp to u32: {e}"))?;
 
-    let naive_time = NaiveDateTime::from_timestamp_opt(secs_int, nanos).ok_or(Error::Miscellaneous(
-        "Failed to convert timestamp to NaiveDateTime".to_string(),
-    ))?;
+    let naive_time = NaiveDateTime::from_timestamp_opt(secs_int, nanos)
+        .ok_or(eyre!("Failed to convert timestamp to NaiveDateTime"))?;
 
     Ok(naive_time.and_utc())
 }
 
 pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
-    if !fs::try_exists(path).await.map_err(|e| {
-        Error::Miscellaneous(format!(
-            "Error while accessing the file '{path}': '{e}'",
-            path = path.display()
-        ))
-    })? {
-        return Err(Error::Miscellaneous(format!(
-            "File '{path}' does not exist.",
-            path = path.display()
-        )));
+    if !fs::try_exists(path)
+        .await
+        .map_err(|e| eyre!("Error while accessing the file '{path}': '{e}'", path = path.display()))?
+    {
+        bail!("File '{path}' does not exist.", path = path.display());
     }
     Ok(())
 }

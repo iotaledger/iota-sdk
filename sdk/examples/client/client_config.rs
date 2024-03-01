@@ -8,10 +8,10 @@
 //! cargo run --release --example client_config
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::Client;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client instance
     let client = Client::builder()
         .from_json(

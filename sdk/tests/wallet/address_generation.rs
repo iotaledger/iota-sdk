@@ -16,14 +16,14 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::{address::ToBech32Ext, protocol::iota_mainnet_protocol_parameters},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
 
 #[tokio::test]
-async fn wallet_address_generation_mnemonic() -> Result<()> {
+async fn wallet_address_generation_mnemonic() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/wallet_address_generation_mnemonic";
     setup(storage_path)?;
 
@@ -57,7 +57,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
 
 #[cfg(feature = "stronghold")]
 #[tokio::test]
-async fn wallet_address_generation_stronghold() -> Result<()> {
+async fn wallet_address_generation_stronghold() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/wallet_address_generation_stronghold";
     setup(storage_path)?;
 
@@ -98,7 +98,7 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
 #[tokio::test]
 #[cfg(all(feature = "ledger_nano", feature = "events"))]
 #[ignore = "requires ledger nano instance"]
-async fn wallet_address_generation_ledger() -> Result<()> {
+async fn wallet_address_generation_ledger() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/wallet_address_generation_ledger";
     setup(storage_path)?;
 
@@ -181,7 +181,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 }
 
 // #[tokio::test]
-// async fn wallet_address_generation_placeholder() -> Result<()> {
+// async fn wallet_address_generation_placeholder() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path = "test-storage/wallet_address_generation_placeholder";
 //     setup(storage_path)?;
 

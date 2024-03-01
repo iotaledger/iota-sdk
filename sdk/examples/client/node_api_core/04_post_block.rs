@@ -13,13 +13,13 @@ use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
         secret::{SecretManager, SignBlock},
-        Client, Result,
+        Client,
     },
     types::block::output::AccountId,
 };
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 

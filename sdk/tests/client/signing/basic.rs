@@ -10,7 +10,7 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         input::{Input, UtxoInput},
@@ -28,7 +28,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{build_inputs, build_outputs, Build::Basic};
 
 #[tokio::test]
-async fn single_ed25519_unlock() -> Result<()> {
+async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
@@ -111,7 +111,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 }
 
 #[tokio::test]
-async fn ed25519_reference_unlocks() -> Result<()> {
+async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
@@ -232,7 +232,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 }
 
 #[tokio::test]
-async fn two_signature_unlocks() -> Result<()> {
+async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
