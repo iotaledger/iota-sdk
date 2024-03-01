@@ -16,7 +16,7 @@ use std::collections::{HashMap, HashSet};
 use packable::PackableExt;
 
 use self::requirement::account::is_account_with_id;
-pub use self::{burn::Burn, error::Error, requirement::Requirement};
+pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement};
 use crate::{
     client::{
         api::{
@@ -263,7 +263,7 @@ impl TransactionBuilder {
         }
     }
 
-    fn init(&mut self) -> Result<(), Error> {
+    fn init(&mut self) -> Result<(), TransactionBuilderError> {
         // If automatic min mana allotment is enabled, we need to initialize the allotment debt.
         if let Some(MinManaAllotment {
             issuer_id,
@@ -299,7 +299,7 @@ impl TransactionBuilder {
                     // Selects required input.
                     self.select_input(input)?;
                 }
-                None => return Err(Error::RequiredInputIsNotAvailable(required_input)),
+                None => return Err(TransactionBuilderError::RequiredInputIsNotAvailable(required_input)),
             }
         }
 
@@ -315,21 +315,21 @@ impl TransactionBuilder {
 
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
-    pub fn build(mut self) -> Result<PreparedTransactionData, Error> {
+    pub fn build(mut self) -> Result<PreparedTransactionData, TransactionBuilderError> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.provided_outputs.len() as u16)) {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
             if !self.provided_outputs.is_empty()
                 || (self.burn.is_none() && self.mana_allotments.is_empty() && self.required_inputs.is_empty())
             {
-                return Err(Error::InvalidOutputCount(self.provided_outputs.len()));
+                return Err(TransactionBuilderError::InvalidOutputCount(self.provided_outputs.len()));
             }
         }
 
         self.filter_inputs();
 
         if self.available_inputs.is_empty() {
-            return Err(Error::NoAvailableInputsProvided);
+            return Err(TransactionBuilderError::NoAvailableInputsProvided);
         }
 
         // Creates the initial state, selected inputs and requirements, based on the provided outputs.
@@ -341,7 +341,7 @@ impl TransactionBuilder {
             let inputs = self.fulfill_requirement(&requirement)?;
 
             if !self.allow_additional_input_selection && !inputs.is_empty() {
-                return Err(Error::AdditionalInputsRequired(requirement));
+                return Err(TransactionBuilderError::AdditionalInputsRequired(requirement));
             }
 
             // Select suggested inputs.
@@ -353,7 +353,7 @@ impl TransactionBuilder {
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
         if input_mana < output_mana {
-            return Err(Error::InsufficientMana {
+            return Err(TransactionBuilderError::InsufficientMana {
                 found: input_mana,
                 required: output_mana,
             });
@@ -365,13 +365,13 @@ impl TransactionBuilder {
         }
 
         if !INPUT_COUNT_RANGE.contains(&(self.selected_inputs.len() as u16)) {
-            return Err(Error::InvalidInputCount(self.selected_inputs.len()));
+            return Err(TransactionBuilderError::InvalidInputCount(self.selected_inputs.len()));
         }
 
         if self.remainders.added_mana > 0 {
             let remainder_address = self
                 .get_remainder_address()?
-                .ok_or(Error::MissingInputWithEd25519Address)?
+                .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
                 .0;
             let added_mana = self.remainders.added_mana;
             if let Some(output) = self.get_output_for_added_mana(&remainder_address) {
@@ -397,14 +397,14 @@ impl TransactionBuilder {
 
         // Check again, because more outputs may have been added.
         if !OUTPUT_COUNT_RANGE.contains(&(outputs.len() as u16)) {
-            return Err(Error::InvalidOutputCount(outputs.len()));
+            return Err(TransactionBuilderError::InvalidOutputCount(outputs.len()));
         }
 
         Self::validate_transitions(&self.selected_inputs, &outputs)?;
 
         for output_id in self.mana_rewards.keys() {
             if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
-                return Err(Error::ExtraManaRewards(*output_id));
+                return Err(TransactionBuilderError::ExtraManaRewards(*output_id));
             }
         }
 
@@ -450,7 +450,7 @@ impl TransactionBuilder {
         })
     }
 
-    fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, Error> {
+    fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, TransactionBuilderError> {
         log::debug!("Selecting input {:?}", input.output_id());
 
         let mut added_output = None;
@@ -568,7 +568,10 @@ impl TransactionBuilder {
             .chain(&self.remainders.storage_deposit_returns)
     }
 
-    fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
+    fn required_account_nft_addresses(
+        &self,
+        input: &InputSigningData,
+    ) -> Result<Option<Requirement>, TransactionBuilderError> {
         let required_address = input
             .output
             .required_address(
@@ -660,7 +663,7 @@ impl TransactionBuilder {
         mut inputs: Vec<InputSigningData>,
         commitment_slot_index: SlotIndex,
         committable_age_range: CommittableAgeRange,
-    ) -> Result<Vec<InputSigningData>, Error> {
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
         // might be a more efficient way to do this
@@ -750,7 +753,7 @@ impl TransactionBuilder {
         Ok(sorted_inputs)
     }
 
-    fn validate_transitions(inputs: &[InputSigningData], outputs: &[Output]) -> Result<(), Error> {
+    fn validate_transitions(inputs: &[InputSigningData], outputs: &[Output]) -> Result<(), TransactionBuilderError> {
         let mut input_native_tokens_builder = NativeTokensBuilder::new();
         let mut output_native_tokens_builder = NativeTokensBuilder::new();
         let mut input_accounts = Vec::new();
@@ -811,7 +814,7 @@ impl TransactionBuilder {
                                 outputs,
                             ) {
                                 log::debug!("validate_transitions error {err:?}");
-                                return Err(Error::UnfulfillableRequirement(Requirement::Account(
+                                return Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(
                                     *account_output.account_id(),
                                 )));
                             }
@@ -844,7 +847,7 @@ impl TransactionBuilder {
                             &TransactionCapabilities::all(),
                         ) {
                             log::debug!("validate_transitions error {err:?}");
-                            return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
+                            return Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(
                                 foundry_output.id(),
                             )));
                         }
@@ -869,7 +872,9 @@ impl TransactionBuilder {
 
                     if let Err(err) = NftOutput::transition_inner(nft_input.output.as_nft(), nft_output) {
                         log::debug!("validate_transitions error {err:?}");
-                        return Err(Error::UnfulfillableRequirement(Requirement::Nft(*nft_output.nft_id())));
+                        return Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(
+                            *nft_output.nft_id(),
+                        )));
                     }
                 }
                 // other output types don't do transitions

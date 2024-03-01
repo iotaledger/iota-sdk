@@ -7,7 +7,7 @@ use std::{
 };
 
 use iota_sdk::{
-    client::api::transaction_builder::{Burn, Error, Requirement, TransactionBuilder},
+    client::api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
     types::block::{
         address::Address,
         output::{AccountId, ChainId, NftId, SimpleTokenScheme, TokenId},
@@ -249,7 +249,7 @@ fn burn_account_absent() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
     ));
 }
 
@@ -386,7 +386,7 @@ fn burn_account_in_outputs() {
 
     assert!(matches!(
         selected,
-        Err(Error::BurnAndTransition(ChainId::Account(account_id))) if account_id == account_id_1
+        Err(TransactionBuilderError::BurnAndTransition(ChainId::Account(account_id))) if account_id == account_id_1
     ));
 }
 
@@ -616,7 +616,7 @@ fn burn_nft_absent() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Nft(nft_id))) if nft_id == nft_id_1
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(nft_id))) if nft_id == nft_id_1
     ));
 }
 
@@ -761,7 +761,7 @@ fn burn_nft_in_outputs() {
 
     assert!(matches!(
         selected,
-        Err(Error::BurnAndTransition(ChainId::Nft(nft_id))) if nft_id == nft_id_1
+        Err(TransactionBuilderError::BurnAndTransition(ChainId::Nft(nft_id))) if nft_id == nft_id_1
     ));
 }
 
@@ -931,7 +931,7 @@ fn burn_foundry_absent() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Foundry(foundry_id))) if foundry_id == foundry_id_1
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(foundry_id))) if foundry_id == foundry_id_1
     ));
 }
 
@@ -1084,7 +1084,7 @@ fn burn_foundry_in_outputs() {
 
     assert!(matches!(
         selected,
-        Err(Error::BurnAndTransition(ChainId::Foundry(foundry_id))) if foundry_id == foundry_id_1
+        Err(TransactionBuilderError::BurnAndTransition(ChainId::Foundry(foundry_id))) if foundry_id == foundry_id_1
     ));
 }
 

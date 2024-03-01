@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{Error, Requirement, TransactionBuilder};
+use super::{Requirement, TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{DelegationId, Output, OutputId},
@@ -34,7 +34,7 @@ impl TransactionBuilder {
     pub(crate) fn fulfill_delegation_requirement(
         &mut self,
         delegation_id: DelegationId,
-    ) -> Result<Vec<InputSigningData>, Error> {
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -53,7 +53,9 @@ impl TransactionBuilder {
             .available_inputs
             .iter()
             .position(|input| is_delegation_with_id(&input.output, &delegation_id, input.output_id()))
-            .ok_or(Error::UnfulfillableRequirement(Requirement::Delegation(delegation_id)))?;
+            .ok_or(TransactionBuilderError::UnfulfillableRequirement(
+                Requirement::Delegation(delegation_id),
+            ))?;
         // Remove the input from the available inputs, swap to make it O(1).
         let input = self.available_inputs.swap_remove(index);
 

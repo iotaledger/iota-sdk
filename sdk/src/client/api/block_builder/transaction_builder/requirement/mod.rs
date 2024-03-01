@@ -17,7 +17,7 @@ use self::{
     account::is_account_with_id_non_null, delegation::is_delegation_with_id_non_null, foundry::is_foundry_with_id,
     nft::is_nft_with_id_non_null,
 };
-use super::{Error, TransactionBuilder};
+use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
@@ -56,7 +56,10 @@ pub enum Requirement {
 impl TransactionBuilder {
     /// Fulfills a requirement by selecting the appropriate available inputs.
     /// Returns the selected inputs and an optional new requirement.
-    pub(crate) fn fulfill_requirement(&mut self, requirement: &Requirement) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_requirement(
+        &mut self,
+        requirement: &Requirement,
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {
@@ -161,14 +164,14 @@ impl TransactionBuilder {
     }
 
     /// Gets requirements from burn.
-    pub(crate) fn burn_requirements(&mut self) -> Result<(), Error> {
+    pub(crate) fn burn_requirements(&mut self) -> Result<(), TransactionBuilderError> {
         if let Some(burn) = self.burn.as_ref() {
             for account_id in &burn.accounts {
                 if self
                     .non_remainder_outputs()
                     .any(|output| is_account_with_id_non_null(output, account_id))
                 {
-                    return Err(Error::BurnAndTransition(ChainId::from(*account_id)));
+                    return Err(TransactionBuilderError::BurnAndTransition(ChainId::from(*account_id)));
                 }
 
                 let requirement = Requirement::Account(*account_id);
@@ -181,7 +184,7 @@ impl TransactionBuilder {
                     .non_remainder_outputs()
                     .any(|output| is_foundry_with_id(output, foundry_id))
                 {
-                    return Err(Error::BurnAndTransition(ChainId::from(*foundry_id)));
+                    return Err(TransactionBuilderError::BurnAndTransition(ChainId::from(*foundry_id)));
                 }
 
                 let requirement = Requirement::Foundry(*foundry_id);
@@ -194,7 +197,7 @@ impl TransactionBuilder {
                     .non_remainder_outputs()
                     .any(|output| is_nft_with_id_non_null(output, nft_id))
                 {
-                    return Err(Error::BurnAndTransition(ChainId::from(*nft_id)));
+                    return Err(TransactionBuilderError::BurnAndTransition(ChainId::from(*nft_id)));
                 }
 
                 let requirement = Requirement::Nft(*nft_id);
@@ -207,7 +210,9 @@ impl TransactionBuilder {
                     .non_remainder_outputs()
                     .any(|output| is_delegation_with_id_non_null(output, delegation_id))
                 {
-                    return Err(Error::BurnAndTransition(ChainId::from(*delegation_id)));
+                    return Err(TransactionBuilderError::BurnAndTransition(ChainId::from(
+                        *delegation_id,
+                    )));
                 }
 
                 let requirement = Requirement::Delegation(*delegation_id);

@@ -8,7 +8,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{CreateNativeTokenParams, MintNftParams, Result, Wallet},
+    wallet::{CreateNativeTokenParams, MintNftParams, Wallet},
     U256,
 };
 use pretty_assertions::assert_eq;
@@ -17,7 +17,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_nft() -> Result<()> {
+async fn mint_and_burn_nft() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/mint_and_burn_outputs";
     setup(storage_path)?;
 
@@ -59,7 +59,7 @@ async fn mint_and_burn_nft() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_expired_nft() -> Result<()> {
+async fn mint_and_burn_expired_nft() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/mint_and_burn_expired_nft";
     setup(storage_path)?;
 
@@ -98,7 +98,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn create_and_melt_native_token() -> Result<()> {
+async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/create_and_melt_native_token";
     setup(storage_path)?;
 
@@ -178,7 +178,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     tear_down(storage_path)
 }
 
-async fn destroy_foundry(wallet: &Wallet) -> Result<()> {
+async fn destroy_foundry(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     let balance = wallet.sync(None).await?;
     println!("wallet balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -201,7 +201,7 @@ async fn destroy_foundry(wallet: &Wallet) -> Result<()> {
     Ok(())
 }
 
-async fn destroy_account(wallet: &Wallet) -> Result<()> {
+async fn destroy_account(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     let balance = wallet.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -225,7 +225,7 @@ async fn destroy_account(wallet: &Wallet) -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn create_and_burn_native_tokens() -> Result<()> {
+async fn create_and_burn_native_tokens() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/create_and_burn_native_tokens";
     setup(storage_path)?;
 
@@ -272,7 +272,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn mint_and_burn_nft_with_account() -> Result<()> {
+async fn mint_and_burn_nft_with_account() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/mint_and_burn_nft_with_account";
     setup(storage_path)?;
 

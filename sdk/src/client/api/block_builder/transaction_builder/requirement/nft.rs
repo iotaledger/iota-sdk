@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{Error, Requirement, TransactionBuilder};
+use super::{Requirement, TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{NftId, Output, OutputId},
@@ -31,7 +31,10 @@ pub(crate) fn is_nft_with_id_non_null(output: &Output, nft_id: &NftId) -> bool {
 
 impl TransactionBuilder {
     /// Fulfills an nft requirement by selecting the appropriate nft from the available inputs.
-    pub(crate) fn fulfill_nft_requirement(&mut self, nft_id: NftId) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_nft_requirement(
+        &mut self,
+        nft_id: NftId,
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -47,7 +50,9 @@ impl TransactionBuilder {
             .available_inputs
             .iter()
             .position(|input| is_nft_with_id(&input.output, &nft_id, input.output_id()))
-            .ok_or(Error::UnfulfillableRequirement(Requirement::Nft(nft_id)))?;
+            .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Nft(
+                nft_id,
+            )))?;
         // Remove the input from the available inputs, swap to make it O(1).
         let input = self.available_inputs.swap_remove(index);
 

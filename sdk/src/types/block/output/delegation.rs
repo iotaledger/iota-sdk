@@ -6,19 +6,19 @@ use alloc::collections::BTreeSet;
 use packable::{Packable, PackableExt};
 
 use crate::types::block::{
-    address::{AccountAddress, Address},
+    address::{AccountAddress, Address, AddressError},
     output::{
         chain_id::ChainId,
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
             UnlockConditions,
         },
-        DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        DecayedMana, MinimumOutputAmount, Output, OutputBuilderAmount, OutputError, OutputId, StorageScore,
+        StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::TransactionFailureReason,
     slot::{EpochIndex, SlotIndex},
-    Error,
 };
 
 crate::impl_id!(
@@ -178,7 +178,7 @@ impl DelegationOutputBuilder {
     }
 
     /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
-    pub fn finish(self) -> Result<DelegationOutput, Error> {
+    pub fn finish(self) -> Result<DelegationOutput, OutputError> {
         let validator_address = Address::from(self.validator_address);
 
         verify_validator_address(&validator_address)?;
@@ -222,7 +222,7 @@ impl DelegationOutputBuilder {
     }
 
     /// Finishes the [`DelegationOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, OutputError> {
         Ok(Output::Delegation(self.finish()?))
     }
 }
@@ -243,7 +243,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 
 /// An output which delegates its contained IOTA coins as voting power to a validator.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = OutputError)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(verify_with = verify_delegation_output)]
 pub struct DelegationOutput {
@@ -255,6 +255,7 @@ pub struct DelegationOutput {
     delegation_id: DelegationId,
     /// Account address of the validator to which this output is delegating.
     #[packable(verify_with = verify_validator_address_packable)]
+    #[packable(unpack_error_with = OutputError::ValidatorAddress)]
     validator_address: Address,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
@@ -356,13 +357,13 @@ impl DelegationOutput {
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
         target_index: SlotIndex,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, OutputError> {
         let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
 
         decayed_mana
             .stored
             .checked_add(decayed_mana.potential)
-            .ok_or(Error::ConsumedManaOverflow)
+            .ok_or(OutputError::ConsumedManaOverflow)
     }
 
     /// Returns the decayed stored and potential mana of the output.
@@ -371,7 +372,7 @@ impl DelegationOutput {
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
         target_index: SlotIndex,
-    ) -> Result<DecayedMana, Error> {
+    ) -> Result<DecayedMana, OutputError> {
         let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
         let generation_amount = self.amount().saturating_sub(min_deposit);
         let potential_mana =
@@ -418,39 +419,49 @@ impl WorkScore for DelegationOutput {
 
 impl MinimumOutputAmount for DelegationOutput {}
 
-fn verify_validator_address(validator_address: &Address) -> Result<(), Error> {
+fn verify_validator_address(validator_address: &Address) -> Result<(), OutputError> {
     if let Address::Account(validator_address) = validator_address {
         if validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId);
+            return Err(OutputError::NullDelegationValidatorId);
         }
     } else {
-        return Err(Error::InvalidAddressKind(validator_address.kind()));
+        return Err(OutputError::ValidatorAddress(AddressError::InvalidAddressKind(
+            validator_address.kind(),
+        )));
     }
 
     Ok(())
 }
 
-fn verify_validator_address_packable(validator_address: &Address, _: &ProtocolParameters) -> Result<(), Error> {
+fn verify_validator_address_packable(validator_address: &Address, _: &ProtocolParameters) -> Result<(), OutputError> {
     verify_validator_address(validator_address)
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), OutputError> {
     if unlock_conditions.address().is_none() {
-        Err(Error::MissingAddressUnlockCondition)
+        Err(OutputError::MissingAddressUnlockCondition)
     } else {
-        verify_allowed_unlock_conditions(unlock_conditions, DelegationOutput::ALLOWED_UNLOCK_CONDITIONS)
+        Ok(verify_allowed_unlock_conditions(
+            unlock_conditions,
+            DelegationOutput::ALLOWED_UNLOCK_CONDITIONS,
+        )?)
     }
 }
 
 fn verify_unlock_conditions_packable(
     unlock_conditions: &UnlockConditions,
     _: &ProtocolParameters,
-) -> Result<(), Error> {
+) -> Result<(), OutputError> {
     verify_unlock_conditions(unlock_conditions)
 }
 
-fn verify_delegation_output(output: &DelegationOutput, _: &ProtocolParameters) -> Result<(), Error> {
-    verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
+fn verify_delegation_output(output: &DelegationOutput, _: &ProtocolParameters) -> Result<(), OutputError> {
+    Ok(verify_restricted_addresses(
+        output.unlock_conditions(),
+        DelegationOutput::KIND,
+        None,
+        0,
+    )?)
 }
 
 #[cfg(feature = "serde")]
@@ -460,10 +471,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{output::unlock_condition::UnlockCondition, Error},
-        utils::serde::string,
-    };
+    use crate::{types::block::output::unlock_condition::UnlockCondition, utils::serde::string};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -497,7 +505,7 @@ mod dto {
     }
 
     impl TryFrom<DelegationOutputDto> for DelegationOutput {
-        type Error = Error;
+        type Error = OutputError;
 
         fn try_from(dto: DelegationOutputDto) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(

@@ -4,7 +4,7 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::transaction_builder::{Error, TransactionBuilder},
+    client::api::transaction_builder::{TransactionBuilder, TransactionBuilderError},
     types::block::{address::Address, output::AccountId, protocol::iota_mainnet_protocol_parameters},
 };
 use pretty_assertions::assert_eq;
@@ -512,7 +512,7 @@ fn insufficient_amount_because_of_sdruc() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientAmount {
+        Err(TransactionBuilderError::InsufficientAmount {
             found: 2_000_000,
             required: 3_000_000,
         })

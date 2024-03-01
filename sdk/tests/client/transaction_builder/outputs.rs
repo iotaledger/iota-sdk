@@ -5,7 +5,7 @@ use std::{collections::HashSet, str::FromStr};
 
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Burn, Error, TransactionBuilder},
+        api::transaction_builder::{Burn, TransactionBuilder, TransactionBuilderError},
         secret::types::InputSigningData,
     },
     types::block::{
@@ -48,7 +48,10 @@ fn no_inputs() {
     )
     .build();
 
-    assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
+    assert!(matches!(
+        selected,
+        Err(TransactionBuilderError::NoAvailableInputsProvided)
+    ));
 }
 
 #[test]
@@ -82,7 +85,7 @@ fn no_outputs() {
     )
     .build();
 
-    assert!(matches!(selected, Err(Error::InvalidOutputCount(0))));
+    assert!(matches!(selected, Err(TransactionBuilderError::InvalidOutputCount(0))));
 }
 
 #[test]
@@ -210,7 +213,10 @@ fn no_address_provided() {
     )
     .build();
 
-    assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
+    assert!(matches!(
+        selected,
+        Err(TransactionBuilderError::NoAvailableInputsProvided)
+    ));
 }
 
 #[test]
@@ -252,7 +258,10 @@ fn no_matching_address_provided() {
     )
     .build();
 
-    assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
+    assert!(matches!(
+        selected,
+        Err(TransactionBuilderError::NoAvailableInputsProvided)
+    ));
 }
 
 #[test]
@@ -310,7 +319,7 @@ fn two_addresses_one_missing() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientAmount {
+        Err(TransactionBuilderError::InsufficientAmount {
             found: 1_000_000,
             required: 2_000_000,
         })

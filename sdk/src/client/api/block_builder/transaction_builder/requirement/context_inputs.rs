@@ -1,7 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{Error, TransactionBuilder};
+use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
@@ -11,7 +11,9 @@ use crate::{
 };
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_context_inputs_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_context_inputs_requirement(
+        &mut self,
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         let mut needs_commitment_context = false;
 
         for (idx, input) in self.selected_inputs.iter().enumerate() {

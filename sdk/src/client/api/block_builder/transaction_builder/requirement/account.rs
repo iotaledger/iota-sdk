@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{Error, Requirement, TransactionBuilder};
+use super::{Requirement, TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{AccountId, Output, OutputId},
@@ -31,7 +31,7 @@ impl TransactionBuilder {
     pub(crate) fn fulfill_account_requirement(
         &mut self,
         account_id: AccountId,
-    ) -> Result<Vec<InputSigningData>, Error> {
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -50,7 +50,9 @@ impl TransactionBuilder {
             .available_inputs
             .iter()
             .position(|input| is_account_with_id(&input.output, &account_id, input.output_id()))
-            .ok_or(Error::UnfulfillableRequirement(Requirement::Account(account_id)))?;
+            .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(
+                account_id,
+            )))?;
         // Remove the input from the available inputs, swap to make it O(1).
         let input = self.available_inputs.swap_remove(index);
 

@@ -4,7 +4,7 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::transaction_builder::{Burn, Error, TransactionBuilder},
+    client::api::transaction_builder::{Burn, TransactionBuilder, TransactionBuilderError},
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
@@ -350,7 +350,7 @@ fn insufficient_native_tokens_one_input() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientNativeTokenAmount {
+        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
             token_id,
             found,
             required,
@@ -424,7 +424,7 @@ fn insufficient_native_tokens_three_inputs() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientNativeTokenAmount {
+        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
             token_id,
             found,
             required,
@@ -647,7 +647,7 @@ fn insufficient_native_tokens() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientNativeTokenAmount {
+        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
             token_id,
             found,
             required,
@@ -695,7 +695,7 @@ fn insufficient_native_tokens_2() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientNativeTokenAmount {
+        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
             token_id,
             found,
             required,
@@ -745,7 +745,7 @@ fn insufficient_amount_for_remainder() {
 
     assert_eq!(
         selected.unwrap_err(),
-        Error::InsufficientAmount {
+        TransactionBuilderError::InsufficientAmount {
             found: 1_000_000,
             required: 1_000_000 + nt_remainder_min_storage_deposit,
         }
@@ -1413,7 +1413,7 @@ fn two_basic_outputs_8() {
 
     assert!(matches!(
             selected,
-            Err(Error::InsufficientNativeTokenAmount {
+            Err(TransactionBuilderError::InsufficientNativeTokenAmount {
                 token_id,
                 found,
                 required,

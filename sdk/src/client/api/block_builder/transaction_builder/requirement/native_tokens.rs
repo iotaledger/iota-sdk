@@ -5,13 +5,15 @@ use std::{cmp::Ordering, collections::HashSet};
 
 use primitive_types::U256;
 
-use super::{Error, TransactionBuilder};
+use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
 };
 
-pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -> Result<NativeTokensBuilder, Error> {
+pub(crate) fn get_native_tokens<'a>(
+    outputs: impl Iterator<Item = &'a Output>,
+) -> Result<NativeTokensBuilder, TransactionBuilderError> {
     let mut required_native_tokens = NativeTokensBuilder::new();
 
     for output in outputs {
@@ -27,7 +29,7 @@ pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -
 pub(crate) fn get_native_tokens_diff(
     inputs: &NativeTokensBuilder,
     outputs: &NativeTokensBuilder,
-) -> Result<Option<NativeTokens>, Error> {
+) -> Result<Option<NativeTokens>, TransactionBuilderError> {
     let mut native_tokens_diff = NativeTokensBuilder::new();
 
     for (token_id, input_amount) in inputs.iter() {
@@ -51,7 +53,9 @@ pub(crate) fn get_native_tokens_diff(
 }
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_native_tokens_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_native_tokens_requirement(
+        &mut self,
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
@@ -100,7 +104,7 @@ impl TransactionBuilder {
                 }
 
                 if amount < diff.amount() {
-                    return Err(Error::InsufficientNativeTokenAmount {
+                    return Err(TransactionBuilderError::InsufficientNativeTokenAmount {
                         token_id: *diff.token_id(),
                         found: amount,
                         required: diff.amount(),
@@ -123,7 +127,7 @@ impl TransactionBuilder {
 
     pub(crate) fn get_minted_and_melted_native_tokens(
         &self,
-    ) -> Result<(NativeTokensBuilder, NativeTokensBuilder), Error> {
+    ) -> Result<(NativeTokensBuilder, NativeTokensBuilder), TransactionBuilderError> {
         let mut minted_native_tokens = NativeTokensBuilder::new();
         let mut melted_native_tokens = NativeTokensBuilder::new();
 

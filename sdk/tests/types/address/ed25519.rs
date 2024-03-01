@@ -130,10 +130,12 @@ fn serde_invalid_ed25519_address() {
         "pubKeyHash": ED25519_ADDRESS_INVALID,
     });
 
-    assert!(matches!(
-        serde_json::from_value::<Ed25519Address>(ed25519_address_ser),
-        Err(e) if e.to_string() == "hex error: Invalid hex string length for slice: expected 64 got 63"
-    ));
+    assert_eq!(
+        serde_json::from_value::<Ed25519Address>(ed25519_address_ser)
+            .unwrap_err()
+            .to_string(),
+        "Invalid hex string length for slice: expected 64 got 63"
+    );
 }
 
 #[test]

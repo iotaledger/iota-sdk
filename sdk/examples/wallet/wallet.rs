@@ -21,7 +21,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::payload::signed_transaction::TransactionId,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 
 // The amount of coins to send
@@ -30,7 +30,7 @@ const SEND_AMOUNT: u64 = 1_000_000;
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -53,19 +53,19 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn create_wallet() -> Result<Wallet> {
+async fn create_wallet() -> Result<Wallet, Box<dyn std::error::Error>> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
-    Wallet::builder()
+    Ok(Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
-        .await
+        .await?)
 }
 
-async fn sync_print_balance(wallet: &Wallet, full_report: bool) -> Result<()> {
+async fn sync_print_balance(wallet: &Wallet, full_report: bool) -> Result<(), Box<dyn std::error::Error>> {
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
     println!("Wallet synced in: {:.2?}", now.elapsed());
@@ -77,7 +77,7 @@ async fn sync_print_balance(wallet: &Wallet, full_report: bool) -> Result<()> {
     Ok(())
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),

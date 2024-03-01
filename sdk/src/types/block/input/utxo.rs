@@ -6,10 +6,10 @@ use core::str::FromStr;
 use derive_more::From;
 
 use crate::types::block::{
+    input::InputError,
     output::OutputId,
     payload::signed_transaction::TransactionId,
     protocol::{WorkScore, WorkScoreParameters},
-    Error,
 };
 
 /// Represents an input referencing an output.
@@ -38,7 +38,7 @@ impl WorkScore for UtxoInput {
 }
 
 impl FromStr for UtxoInput {
-    type Err = Error;
+    type Err = InputError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(OutputId::from_str(s)?))

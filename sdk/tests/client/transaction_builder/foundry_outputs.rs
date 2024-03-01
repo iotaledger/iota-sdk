@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Burn, Error, Requirement, TransactionBuilder},
+        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
         secret::types::InputSigningData,
     },
     types::block::{
@@ -66,7 +66,7 @@ fn missing_input_account_for_foundry() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
     ));
 }
 
@@ -813,7 +813,7 @@ fn mint_and_burn_at_the_same_time() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Foundry(id))) if id == foundry_id
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Foundry(id))) if id == foundry_id
     ));
 }
 
@@ -1020,7 +1020,7 @@ fn melted_tokens_not_provided() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientNativeTokenAmount {
+        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
         token_id,
             found,
             required,
@@ -1080,7 +1080,7 @@ fn burned_tokens_not_provided() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientNativeTokenAmount {
+        Err(TransactionBuilderError::InsufficientNativeTokenAmount {
         token_id,
             found,
             required,
@@ -1288,7 +1288,7 @@ fn auto_transition_foundry_less_than_min() {
 
     assert_eq!(
         selected,
-        Error::InsufficientAmount {
+        TransactionBuilderError::InsufficientAmount {
             found: small_amount_foundry + small_amount_account,
             required: min_amount
         },

@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0
 use std::collections::HashMap;
 
-use super::{Error, TransactionBuilder};
+use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::{
         api::transaction_builder::{MinManaAllotment, Requirement},
@@ -19,12 +19,12 @@ use crate::{
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError,
+        BlockError,
     },
 };
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         let Some(MinManaAllotment {
             issuer_id,
             reference_mana_cost,
@@ -85,7 +85,7 @@ impl TransactionBuilder {
             } = self
                 .min_mana_allotment
                 .as_mut()
-                .ok_or(Error::UnfulfillableRequirement(Requirement::Mana))?;
+                .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
 
             // Add the required allotment to the issuing allotment
             if required_allotment_mana > self.mana_allotments[issuer_id] {
@@ -122,7 +122,7 @@ impl TransactionBuilder {
         Ok(Vec::new())
     }
 
-    fn reduce_account_output(&mut self) -> Result<(), Error> {
+    fn reduce_account_output(&mut self) -> Result<(), TransactionBuilderError> {
         let MinManaAllotment {
             issuer_id,
             allotment_debt,
@@ -130,7 +130,7 @@ impl TransactionBuilder {
         } = self
             .min_mana_allotment
             .as_mut()
-            .ok_or(Error::UnfulfillableRequirement(Requirement::Mana))?;
+            .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
         if let Some(output) = self
             .provided_outputs
             .iter_mut()
@@ -153,7 +153,7 @@ impl TransactionBuilder {
         Ok(())
     }
 
-    pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, Error> {
+    pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, TransactionBuilderError> {
         let mut blocks = Vec::new();
         let mut block_indexes = HashMap::<Address, usize>::new();
 
@@ -193,7 +193,7 @@ impl TransactionBuilder {
                     // than the current block index
                     match &required_address {
                         Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                        _ => Err(Error::MissingInputWithEd25519Address)?,
+                        _ => Err(TransactionBuilderError::MissingInputWithEd25519Address)?,
                     }
 
                     let block = SignatureUnlock::new(
@@ -231,7 +231,7 @@ impl TransactionBuilder {
         Ok(Unlocks::new(blocks)?)
     }
 
-    pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<bool, Error> {
+    pub(crate) fn get_inputs_for_mana_balance(&mut self) -> Result<bool, TransactionBuilderError> {
         let (mut selected_mana, mut required_mana) = self.mana_sums(true)?;
 
         log::debug!("Mana requirement selected mana: {selected_mana}, required mana: {required_mana}");
@@ -241,7 +241,7 @@ impl TransactionBuilder {
             log::debug!("Mana requirement already fulfilled");
         } else {
             if !self.allow_additional_input_selection {
-                return Err(Error::AdditionalInputsRequired(Requirement::Mana));
+                return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Mana));
             }
             // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
@@ -259,7 +259,7 @@ impl TransactionBuilder {
         Ok(added_inputs)
     }
 
-    pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {
+    pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), TransactionBuilderError> {
         let mut required_mana =
             self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
         if include_remainders {
@@ -276,7 +276,7 @@ impl TransactionBuilder {
         Ok((selected_mana, required_mana))
     }
 
-    fn total_mana(&self, input: &InputSigningData) -> Result<u64, Error> {
+    fn total_mana(&self, input: &InputSigningData) -> Result<u64, TransactionBuilderError> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
             + input.output.available_mana(
                 &self.protocol_parameters,

@@ -13,13 +13,15 @@ class WalletSyncOptions:
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
-        nft_outputs: Whether to sync NFT outputs.
         account_outputs: whether to sync account outputs.
+        nft_outputs: Whether to sync NFT outputs.
+        delegation_outputs: Whether to sync delegation outputs.
     """
 
     basic_outputs: Optional[bool] = None
-    nft_outputs: Optional[bool] = None
     account_outputs: Optional[bool] = None
+    nft_outputs: Optional[bool] = None
+    delegation_outputs: Optional[bool] = None
 
 
 @json
@@ -29,15 +31,17 @@ class AccountSyncOptions:
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
-        nft_outputs: Whether to sync NFT outputs.
         account_outputs: Whether to sync account outputs.
         foundry_outputs: Whether to sync foundry outputs.
+        nft_outputs: Whether to sync NFT outputs.
+        delegation_outputs: Whether to sync delegation outputs.
     """
 
     basic_outputs: Optional[bool] = None
-    nft_outputs: Optional[bool] = None
     account_outputs: Optional[bool] = None
     foundry_outputs: Optional[bool] = None
+    nft_outputs: Optional[bool] = None
+    delegation_outputs: Optional[bool] = None
 
 
 @json
@@ -47,13 +51,15 @@ class NftSyncOptions:
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
-        nft_outputs: Whether to sync NFT outputs.
         account_outputs: Whether to sync account outputs.
+        nft_outputs: Whether to sync NFT outputs.
+        delegation_outputs: Whether to sync delegation outputs.
     """
 
     basic_outputs: Optional[bool] = None
-    nft_outputs: Optional[bool] = None
     account_outputs: Optional[bool] = None
+    nft_outputs: Optional[bool] = None
+    delegation_outputs: Optional[bool] = None
 
 
 @json

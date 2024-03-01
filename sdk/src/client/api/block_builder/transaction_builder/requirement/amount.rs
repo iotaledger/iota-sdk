@@ -3,7 +3,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use super::{native_tokens::get_native_tokens, Error, Requirement, TransactionBuilder};
+use super::{native_tokens::get_native_tokens, Requirement, TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
@@ -88,7 +88,7 @@ struct AmountSelection {
 }
 
 impl AmountSelection {
-    fn new(transaction_builder: &TransactionBuilder) -> Result<Self, Error> {
+    fn new(transaction_builder: &TransactionBuilder) -> Result<Self, TransactionBuilderError> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = transaction_builder.amount_sums();
         let selected_native_tokens = HashSet::<TokenId>::from_iter(
             transaction_builder
@@ -134,7 +134,7 @@ impl AmountSelection {
         &mut self,
         transaction_builder: &TransactionBuilder,
         inputs: impl Iterator<Item = &'a InputSigningData>,
-    ) -> Result<bool, Error> {
+    ) -> Result<bool, TransactionBuilderError> {
         for input in inputs {
             if self.newly_selected_inputs.contains_key(input.output_id()) {
                 continue;
@@ -190,7 +190,7 @@ impl AmountSelection {
     pub(crate) fn remainder_amount(
         &self,
         transaction_builder: &TransactionBuilder,
-    ) -> Result<(u64, bool, bool), Error> {
+    ) -> Result<(u64, bool, bool), TransactionBuilderError> {
         let input_native_tokens =
             get_native_tokens(self.newly_selected_inputs.values().map(|input| &input.output))?.finish()?;
 
@@ -207,7 +207,7 @@ impl TransactionBuilder {
         &self,
         base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
         amount_selection: &mut AmountSelection,
-    ) -> Result<bool, Error> {
+    ) -> Result<bool, TransactionBuilderError> {
         let slot_index = self.latest_slot_commitment_id.slot_index();
 
         // No native token, expired SDRUC.
@@ -254,7 +254,10 @@ impl TransactionBuilder {
         Ok(false)
     }
 
-    fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
+    fn reduce_funds_of_chains(
+        &mut self,
+        amount_selection: &mut AmountSelection,
+    ) -> Result<(), TransactionBuilderError> {
         // Only consider automatically transitioned outputs.
         for output in self.added_outputs.iter_mut() {
             let diff = amount_selection.missing_amount();
@@ -297,13 +300,13 @@ impl TransactionBuilder {
             }
         }
 
-        Err(Error::InsufficientAmount {
+        Err(TransactionBuilderError::InsufficientAmount {
             found: amount_selection.inputs_sum,
             required: amount_selection.inputs_sum + amount_selection.missing_amount(),
         })
     }
 
-    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         let mut amount_selection = AmountSelection::new(self)?;
 
         if amount_selection.missing_amount() == 0 {
@@ -349,7 +352,7 @@ impl TransactionBuilder {
         }
 
         if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into() {
-            return Err(Error::InvalidInputCount(
+            return Err(TransactionBuilderError::InvalidInputCount(
                 self.selected_inputs.len() + amount_selection.newly_selected_inputs.len(),
             ));
         }
@@ -372,7 +375,7 @@ impl TransactionBuilder {
     fn fulfill_amount_requirement_inner(
         &mut self,
         amount_selection: &mut AmountSelection,
-    ) -> Result<Option<Vec<InputSigningData>>, Error> {
+    ) -> Result<Option<Vec<InputSigningData>>, TransactionBuilderError> {
         let slot_index = self.latest_slot_commitment_id.slot_index();
 
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {

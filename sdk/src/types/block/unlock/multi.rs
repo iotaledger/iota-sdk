@@ -9,15 +9,14 @@ use packable::{prefix::BoxedSlicePrefix, Packable};
 use crate::types::block::{
     address::WeightedAddressCount,
     protocol::{WorkScore, WorkScoreParameters},
-    unlock::Unlock,
-    Error,
+    unlock::{Unlock, UnlockError},
 };
 
 pub(crate) type UnlocksCount = WeightedAddressCount;
 
 /// Unlocks a [`MultiAddress`](crate::types::block::address::MultiAddress) with a list of other unlocks.
 #[derive(Clone, Debug, Deref, Eq, PartialEq, Hash, Packable)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidMultiUnlockCount(p.into())))]
+#[packable(unpack_error = UnlockError, with = |e| e.unwrap_item_err_or_else(|p| UnlockError::InvalidMultiUnlockCount(p.into())))]
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
 
 impl MultiUnlock {
@@ -26,13 +25,14 @@ impl MultiUnlock {
 
     /// Creates a new [`MultiUnlock`].
     #[inline(always)]
-    pub fn new(unlocks: impl IntoIterator<Item = Unlock>) -> Result<Self, Error> {
+    pub fn new(unlocks: impl IntoIterator<Item = Unlock>) -> Result<Self, UnlockError> {
         let unlocks = unlocks.into_iter().collect::<Box<[_]>>();
 
         verify_unlocks(&unlocks)?;
 
         Ok(Self(
-            BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks).map_err(Error::InvalidMultiUnlockCount)?,
+            BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks)
+                .map_err(UnlockError::InvalidMultiUnlockCount)?,
         ))
     }
 
@@ -49,9 +49,9 @@ impl WorkScore for MultiUnlock {
     }
 }
 
-fn verify_unlocks(unlocks: &[Unlock]) -> Result<(), Error> {
+fn verify_unlocks(unlocks: &[Unlock]) -> Result<(), UnlockError> {
     if unlocks.iter().any(Unlock::is_multi) {
-        Err(Error::MultiUnlockRecursion)
+        Err(UnlockError::MultiUnlockRecursion)
     } else {
         Ok(())
     }
@@ -82,7 +82,7 @@ mod dto {
     }
 
     impl TryFrom<MultiUnlockDto> for MultiUnlock {
-        type Error = Error;
+        type Error = UnlockError;
 
         fn try_from(value: MultiUnlockDto) -> Result<Self, Self::Error> {
             Self::new(value.unlocks)

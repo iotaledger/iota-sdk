@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Burn, Error, Requirement, TransactionBuilder},
+        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
         secret::types::InputSigningData,
     },
     types::block::{
@@ -425,7 +425,7 @@ fn missing_input_for_account_output() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
     ));
 }
 
@@ -482,7 +482,7 @@ fn missing_input_for_account_output_2() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
     ));
 }
 
@@ -626,7 +626,7 @@ fn missing_ed25519_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -670,7 +670,7 @@ fn missing_ed25519_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -751,7 +751,7 @@ fn missing_account_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -795,7 +795,7 @@ fn missing_account_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -876,7 +876,7 @@ fn missing_nft_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 
@@ -920,7 +920,7 @@ fn missing_nft_issuer_created() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Issuer(issuer))) if issuer == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 
@@ -1867,7 +1867,7 @@ fn min_allot_account_mana_cannot_select_additional() {
     .unwrap_err();
 
     assert!(
-        matches!(selected, Error::AdditionalInputsRequired(_)),
+        matches!(selected, TransactionBuilderError::AdditionalInputsRequired(_)),
         "expected AdditionalInputsRequired, found {selected:?}"
     );
 }
@@ -2184,7 +2184,7 @@ fn auto_transition_account_less_than_min() {
 
     assert_eq!(
         selected,
-        Error::InsufficientAmount {
+        TransactionBuilderError::InsufficientAmount {
             found: small_amount,
             required: min_amount
         },

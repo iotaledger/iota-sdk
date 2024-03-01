@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{Error, Requirement, TransactionBuilder};
+use super::{Requirement, TransactionBuilder, TransactionBuilderError};
 use crate::{client::secret::types::InputSigningData, types::block::address::Address};
 
 impl TransactionBuilder {
@@ -39,7 +39,10 @@ impl TransactionBuilder {
     }
 
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_ed25519_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_ed25519_requirement(
+        &mut self,
+        address: &Address,
+    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
         // Checks if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -77,7 +80,9 @@ impl TransactionBuilder {
 
                 Ok(vec![input])
             }
-            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address.clone()))),
+            None => Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Ed25519(
+                address.clone(),
+            ))),
         }
     }
 }

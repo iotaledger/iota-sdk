@@ -3,7 +3,7 @@
 
 use super::{
     requirement::{account::is_account_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null},
-    Error, TransactionBuilder,
+    TransactionBuilder, TransactionBuilderError,
 };
 use crate::{
     client::secret::types::InputSigningData,
@@ -19,7 +19,7 @@ impl TransactionBuilder {
         &mut self,
         input: &AccountOutput,
         output_id: &OutputId,
-    ) -> Result<Option<Output>, Error> {
+    ) -> Result<Option<Output>, TransactionBuilderError> {
         let account_id = input.account_id_non_null(output_id);
 
         // Do not create an account output if the account input is to be burned.
@@ -76,7 +76,11 @@ impl TransactionBuilder {
     }
 
     /// Transitions an nft input by creating a new nft output if required.
-    fn transition_nft_input(&mut self, input: &NftOutput, output_id: &OutputId) -> Result<Option<Output>, Error> {
+    fn transition_nft_input(
+        &mut self,
+        input: &NftOutput,
+        output_id: &OutputId,
+    ) -> Result<Option<Output>, TransactionBuilderError> {
         let nft_id = input.nft_id_non_null(output_id);
 
         // Do not create an nft output if the nft input is to be burned.
@@ -118,7 +122,7 @@ impl TransactionBuilder {
         &mut self,
         input: &FoundryOutput,
         output_id: &OutputId,
-    ) -> Result<Option<Output>, Error> {
+    ) -> Result<Option<Output>, TransactionBuilderError> {
         let foundry_id = input.id();
 
         // Do not create a foundry output if the foundry input is to be burned.
@@ -152,7 +156,10 @@ impl TransactionBuilder {
 
     /// Transitions an input by creating a new output if required.
     /// If no `account_transition` is provided, assumes a state transition.
-    pub(crate) fn transition_input(&mut self, input: &InputSigningData) -> Result<Option<Output>, Error> {
+    pub(crate) fn transition_input(
+        &mut self,
+        input: &InputSigningData,
+    ) -> Result<Option<Output>, TransactionBuilderError> {
         match &input.output {
             Output::Account(account_input) => self.transition_account_input(account_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),

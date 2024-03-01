@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Error, Requirement, TransactionBuilder},
+        api::transaction_builder::{Requirement, TransactionBuilder, TransactionBuilderError},
         secret::types::InputSigningData,
     },
     types::block::{
@@ -111,7 +111,7 @@ fn input_amount_lower_than_output_amount() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientAmount {
+        Err(TransactionBuilderError::InsufficientAmount {
             found: 1_000_000,
             required: 2_000_000,
         })
@@ -173,7 +173,7 @@ fn input_amount_lower_than_output_amount_2() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientAmount {
+        Err(TransactionBuilderError::InsufficientAmount {
             found: 3_000_000,
             required: 3_500_000,
         })
@@ -798,7 +798,7 @@ fn missing_ed25519_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
     ));
 }
 
@@ -1010,7 +1010,7 @@ fn missing_account_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
     ));
 }
 
@@ -1227,7 +1227,7 @@ fn missing_nft_sender() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
+        Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()
     ));
 }
 
@@ -1451,7 +1451,7 @@ fn insufficient_amount() {
 
     assert!(matches!(
         selected,
-        Err(Error::InsufficientAmount {
+        Err(TransactionBuilderError::InsufficientAmount {
             found: 1_000_000,
             required: 1_250_000,
         })
@@ -1778,7 +1778,7 @@ fn too_many_inputs() {
 
     assert_eq!(
         selected.unwrap_err(),
-        iota_sdk::client::api::transaction_builder::Error::InvalidInputCount(129)
+        iota_sdk::client::api::transaction_builder::TransactionBuilderError::InvalidInputCount(129)
     )
 }
 
@@ -1892,7 +1892,7 @@ fn too_many_outputs() {
 
     assert_eq!(
         selected.unwrap_err(),
-        iota_sdk::client::api::transaction_builder::Error::InvalidOutputCount(129)
+        iota_sdk::client::api::transaction_builder::TransactionBuilderError::InvalidOutputCount(129)
     )
 }
 
@@ -1942,7 +1942,7 @@ fn too_many_outputs_with_remainder() {
     assert_eq!(
         selected.unwrap_err(),
         // 129 because of required remainder
-        iota_sdk::client::api::transaction_builder::Error::InvalidOutputCount(129)
+        iota_sdk::client::api::transaction_builder::TransactionBuilderError::InvalidOutputCount(129)
     )
 }
 

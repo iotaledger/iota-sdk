@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
 
-use super::{Error, TransactionBuilder};
+use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::api::{
         transaction_builder::requirement::native_tokens::{get_native_tokens, get_native_tokens_diff},
@@ -18,13 +18,12 @@ use crate::{
             unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
             NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
         },
-        Error as BlockError,
     },
 };
 
 impl TransactionBuilder {
     /// Updates the remainders, overwriting old values.
-    pub(crate) fn update_remainders(&mut self) -> Result<(), Error> {
+    pub(crate) fn update_remainders(&mut self) -> Result<(), TransactionBuilderError> {
         let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
 
         self.remainders.storage_deposit_returns = storage_deposit_returns;
@@ -34,7 +33,7 @@ impl TransactionBuilder {
     }
 
     /// Gets the remainder address from configuration of finds one from the inputs.
-    pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
+    pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, TransactionBuilderError> {
         if let Some(remainder_address) = &self.remainders.address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
@@ -70,7 +69,7 @@ impl TransactionBuilder {
         Ok(None)
     }
 
-    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), Error> {
+    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), TransactionBuilderError> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
         let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
@@ -89,7 +88,7 @@ impl TransactionBuilder {
 
     pub(crate) fn storage_deposit_returns_and_remainders(
         &mut self,
-    ) -> Result<(Vec<Output>, Vec<RemainderData>), Error> {
+    ) -> Result<(Vec<Output>, Vec<RemainderData>), TransactionBuilderError> {
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) = self.amount_sums();
         let mut storage_deposit_returns = Vec::new();
 
@@ -130,16 +129,12 @@ impl TransactionBuilder {
             return Ok((storage_deposit_returns, Vec::new()));
         }
 
-        let amount_diff = input_amount
-            .checked_sub(output_amount)
-            .ok_or(BlockError::ConsumedAmountOverflow)?;
-        let mut mana_diff = input_mana
-            .checked_sub(output_mana)
-            .ok_or(BlockError::ConsumedManaOverflow)?;
+        let amount_diff = input_amount.checked_sub(output_amount).expect("amount underflow");
+        let mut mana_diff = input_mana.checked_sub(output_mana).expect("mana underflow");
 
         let (remainder_address, chain) = self
             .get_remainder_address()?
-            .ok_or(Error::MissingInputWithEd25519Address)?;
+            .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?;
 
         // If there is a mana remainder, try to fit it in an existing output
         if input_mana > output_mana && self.output_for_added_mana_exists(&remainder_address) {
@@ -211,7 +206,7 @@ impl TransactionBuilder {
     pub(crate) fn required_remainder_amount(
         &self,
         remainder_native_tokens: Option<NativeTokens>,
-    ) -> Result<(u64, bool, bool), Error> {
+    ) -> Result<(u64, bool, bool), TransactionBuilderError> {
         let native_tokens_remainder = remainder_native_tokens.is_some();
 
         let remainder_builder =
@@ -253,7 +248,7 @@ fn create_remainder_outputs(
     remainder_address: Address,
     remainder_address_chain: Option<Bip44>,
     storage_score_parameters: StorageScoreParameters,
-) -> Result<Vec<RemainderData>, Error> {
+) -> Result<Vec<RemainderData>, TransactionBuilderError> {
     let mut remainder_outputs = Vec::new();
     let mut remaining_amount = amount_diff;
     let mut catchall_native_token = None;

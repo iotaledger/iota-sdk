@@ -7,7 +7,7 @@ use futures::{StreamExt, TryStreamExt};
 
 use crate::{
     client::{
-        api::transaction_builder::Error as TransactionBuilderError,
+        api::transaction_builder::TransactionBuilderError,
         constants::FIVE_MINUTES_IN_NANOSECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::BasicOutputQueryParameters,

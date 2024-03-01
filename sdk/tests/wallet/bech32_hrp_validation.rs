@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::Error as ClientError,
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{Error, OutputParams, Result, SendParams},
+    wallet::{Error, OutputParams, SendParams},
 };
 use pretty_assertions::assert_eq;
 
@@ -12,7 +12,7 @@ use crate::wallet::common::{make_wallet, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
-async fn bech32_hrp_send_amount() -> Result<()> {
+async fn bech32_hrp_send_amount() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/bech32_hrp_send_amount";
     setup(storage_path)?;
 
@@ -32,7 +32,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let bech32_hrp = wallet.client().get_bech32_hrp().await?;
 
     match error {
-        Error::Client(error) => match *error {
+        Error::Client(error) => match error {
             ClientError::Bech32HrpMismatch { provided, expected } => {
                 assert_eq!(provided, "wronghrp");
                 assert_eq!(expected, bech32_hrp.to_string());
@@ -47,7 +47,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn bech32_hrp_prepare_output() -> Result<()> {
+async fn bech32_hrp_prepare_output() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/bech32_hrp_prepare_output";
     setup(storage_path)?;
 
@@ -71,7 +71,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let bech32_hrp = wallet.client().get_bech32_hrp().await?;
 
     match error {
-        Error::Client(error) => match *error {
+        Error::Client(error) => match error {
             ClientError::Bech32HrpMismatch { provided, expected } => {
                 assert_eq!(provided, "wronghrp");
                 assert_eq!(expected, bech32_hrp.to_string());

@@ -4,7 +4,7 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::api::transaction_builder::{Error, TransactionBuilder},
+    client::api::transaction_builder::{TransactionBuilder, TransactionBuilderError},
     types::block::{
         address::Address,
         output::{AccountId, NftId},
@@ -60,7 +60,10 @@ fn one_output_expiration_not_expired() {
     )
     .build();
 
-    assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
+    assert!(matches!(
+        selected,
+        Err(TransactionBuilderError::NoAvailableInputsProvided)
+    ));
 }
 
 #[test]

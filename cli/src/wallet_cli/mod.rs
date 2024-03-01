@@ -7,6 +7,7 @@ use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
+use eyre::Error;
 use iota_sdk::{
     client::{api::options::TransactionOptions, request_funds_from_faucet, secret::SecretManager},
     types::block::{
@@ -20,6 +21,7 @@ use iota_sdk::{
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
+        IdentifierError,
     },
     utils::ConvertTo,
     wallet::{
@@ -33,7 +35,6 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    error::Error,
     helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
@@ -358,7 +359,7 @@ pub enum WalletCommand {
 }
 
 fn parse_u256(s: &str) -> Result<U256, Error> {
-    U256::from_dec_str(s).map_err(|e| Error::Miscellaneous(e.to_string()))
+    Ok(U256::from_dec_str(s)?)
 }
 
 /// Select by transaction ID or list index
@@ -369,7 +370,7 @@ pub enum TransactionSelector {
 }
 
 impl FromStr for TransactionSelector {
-    type Err = Error;
+    type Err = IdentifierError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(if let Ok(index) = s.parse() {
@@ -388,7 +389,7 @@ pub enum OutputSelector {
 }
 
 impl FromStr for OutputSelector {
-    type Err = Error;
+    type Err = IdentifierError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(if let Ok(index) = s.parse() {
@@ -944,7 +945,7 @@ pub async fn mint_nft_command(
     issuer: Option<Bech32Address>,
 ) -> Result<(), Error> {
     let tag = if let Some(hex) = tag {
-        Some(prefix_hex::decode(hex).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+        Some(prefix_hex::decode(hex)?)
     } else {
         None
     };

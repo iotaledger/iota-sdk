@@ -1,6 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use iota_sdk::types::block::{
+    mana::ManaError, output::OutputError, payload::PayloadError, semantic::TransactionFailureReason,
+    signature::SignatureError, BlockError,
+};
 use packable::error::UnexpectedEOF;
 use serde::{Serialize, Serializer};
 
@@ -14,7 +18,22 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     /// Block errors.
     #[error("{0}")]
-    Block(#[from] iota_sdk::types::block::Error),
+    Block(#[from] BlockError),
+    /// Output errors.
+    #[error("{0}")]
+    Output(#[from] OutputError),
+    /// Payload errors.
+    #[error("{0}")]
+    Payload(#[from] PayloadError),
+    /// Signature errors.
+    #[error("{0}")]
+    Signature(#[from] SignatureError),
+    /// Mana errors.
+    #[error("{0}")]
+    Mana(#[from] ManaError),
+    /// Semantic errors.
+    #[error("{0}")]
+    TransactionSemantic(#[from] TransactionFailureReason),
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
@@ -29,7 +48,7 @@ pub enum Error {
     SerdeJson(#[from] serde_json::error::Error),
     /// Unpack errors.
     #[error("{0}")]
-    Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),
+    Unpack(#[from] packable::error::UnpackError<BlockError, UnexpectedEOF>),
 }
 
 #[cfg(feature = "stronghold")]

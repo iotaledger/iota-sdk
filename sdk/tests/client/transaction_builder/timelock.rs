@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::api::transaction_builder::{Error, TransactionBuilder},
+    client::api::transaction_builder::{TransactionBuilder, TransactionBuilderError},
     types::block::{
         address::Address,
         protocol::iota_mainnet_protocol_parameters,
@@ -54,7 +54,10 @@ fn one_output_timelock_not_expired() {
     )
     .build();
 
-    assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
+    assert!(matches!(
+        selected,
+        Err(TransactionBuilderError::NoAvailableInputsProvided)
+    ));
 }
 
 #[test]
