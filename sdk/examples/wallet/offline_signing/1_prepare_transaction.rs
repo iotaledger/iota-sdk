@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
-    wallet::{ClientOptions, Result, SendParams, Wallet},
+    wallet::{ClientOptions, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -28,7 +28,7 @@ const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpu
 const SEND_AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -75,7 +75,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_address_from_file() -> Result<Bech32Address> {
+async fn read_address_from_file() -> Result<Bech32Address, Box<dyn std::error::Error>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(ADDRESS_FILE_PATH).await?);
@@ -85,7 +85,7 @@ async fn read_address_from_file() -> Result<Bech32Address> {
     Ok(serde_json::from_str(&json)?)
 }
 
-async fn write_data_to_file(data: impl serde::Serialize, path: &str) -> Result<()> {
+async fn write_data_to_file(data: impl serde::Serialize, path: &str) -> Result<(), Box<dyn std::error::Error>> {
     use tokio::io::AsyncWriteExt;
 
     let json = serde_json::to_string_pretty(&data)?;

@@ -18,7 +18,6 @@
 
 use iota_sdk::{
     types::block::output::{NativeToken, TokenId},
-    wallet::Result,
     Wallet, U256,
 };
 
@@ -28,7 +27,7 @@ const MIN_AVAILABLE_AMOUNT: u64 = 11;
 const BURN_AMOUNT: u64 = 1;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

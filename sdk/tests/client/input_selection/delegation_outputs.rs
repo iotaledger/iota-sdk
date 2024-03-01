@@ -86,6 +86,33 @@ fn remainder_needed_for_mana() {
     .select()
     .unwrap();
 
+    let inputs = inputs
+        .iter()
+        .map(|input| (input.output_id(), &input.output))
+        .collect::<Vec<_>>();
+
+    // validating without rewards
+    iota_sdk::types::block::semantic::SemanticValidationContext::new(
+        &selected.transaction,
+        &inputs,
+        None,
+        None,
+        protocol_parameters.clone(),
+    )
+    .validate()
+    .unwrap();
+
+    // validating with rewards
+    iota_sdk::types::block::semantic::SemanticValidationContext::new(
+        &selected.transaction,
+        &inputs,
+        None,
+        Some(std::collections::BTreeMap::from([(delegation_output_id, mana_rewards)])),
+        protocol_parameters.clone(),
+    )
+    .validate()
+    .unwrap();
+
     assert_eq!(selected.inputs_data.len(), 2);
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));

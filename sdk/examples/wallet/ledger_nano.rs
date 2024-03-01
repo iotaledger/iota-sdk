@@ -20,14 +20,14 @@ use iota_sdk::{
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 
 // The amount of base coins we'll send
 const SEND_AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

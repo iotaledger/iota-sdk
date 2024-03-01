@@ -10,7 +10,7 @@ use iota_sdk::{
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
-    wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
+    wallet::{Assets, Features, MintNftParams, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
 };
 use pretty_assertions::assert_eq;
 
@@ -18,7 +18,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
-async fn output_preparation() -> Result<()> {
+async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
@@ -432,7 +432,7 @@ async fn output_preparation() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn output_preparation_sdr() -> Result<()> {
+async fn output_preparation_sdr() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/output_preparation_sdr";
     setup(storage_path)?;
 
@@ -542,7 +542,7 @@ async fn output_preparation_sdr() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn prepare_nft_output_features_update() -> Result<()> {
+async fn prepare_nft_output_features_update() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/prepare_nft_output_features_update";
     setup(storage_path)?;
 
@@ -615,7 +615,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn prepare_output_remainder_dust() -> Result<()> {
+async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/prepare_output_remainder_dust_0";
     let storage_path_1 = "test-storage/prepare_output_remainder_dust_1";
     setup(storage_path_0)?;
@@ -755,7 +755,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn prepare_output_only_single_nft() -> Result<()> {
+async fn prepare_output_only_single_nft() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/prepare_output_only_single_nft_0";
     let storage_path_1 = "test-storage/prepare_output_only_single_nft_1";
     setup(storage_path_0)?;
@@ -827,7 +827,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
 
 #[ignore]
 #[tokio::test]
-async fn prepare_existing_nft_output_gift() -> Result<()> {
+async fn prepare_existing_nft_output_gift() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/prepare_existing_nft_output_gift";
     setup(storage_path)?;
 

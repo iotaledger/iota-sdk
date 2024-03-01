@@ -20,7 +20,7 @@ use iota_sdk::{
         output::BasicOutput,
         payload::signed_transaction::TransactionId,
     },
-    wallet::{ClientOptions, FilterOptions, Result, SendParams, Wallet},
+    wallet::{ClientOptions, FilterOptions, SendParams, Wallet},
 };
 
 // The number of spamming rounds.
@@ -31,7 +31,7 @@ const SEND_AMOUNT: u64 = 1_000_000;
 const NUM_SIMULTANEOUS_TXS: usize = 16;
 
 #[tokio::main(flavor = "multi_thread")]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -150,7 +150,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn ensure_enough_funds(wallet: &Wallet, bech32_address: &Bech32Address) -> Result<()> {
+async fn ensure_enough_funds(
+    wallet: &Wallet,
+    bech32_address: &Bech32Address,
+) -> Result<(), Box<dyn std::error::Error>> {
     let balance = wallet.sync(None).await?;
     let available_funds = balance.base_coin().available();
     println!("Available funds: {available_funds}");
@@ -191,7 +194,7 @@ async fn ensure_enough_funds(wallet: &Wallet, bech32_address: &Bech32Address) ->
     }
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),

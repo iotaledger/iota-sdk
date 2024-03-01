@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
     types::block::address::Bech32Address,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 
 const OFFLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-offline-walletdb";
@@ -23,7 +23,7 @@ const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/exampl
 const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
@@ -58,8 +58,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-// Backups the Bech32 wallet address to JSON file.
-async fn write_wallet_address_to_file(address: &Bech32Address) -> Result<()> {
+async fn write_wallet_address_to_file(address: &Bech32Address) -> Result<(), Box<dyn std::error::Error>> {
     use tokio::io::AsyncWriteExt;
 
     let json = serde_json::to_string_pretty(address)?;

@@ -11,7 +11,7 @@ use crate::{
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
-            address::{AccountAddress, Bech32Address, ToBech32Ext},
+            address::{AccountAddress, AddressError, Bech32Address, ToBech32Ext},
             output::{Output, OutputId},
         },
     },
@@ -31,7 +31,10 @@ where
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_account_and_foundry_output_ids");
-        let bech32_address = bech32_address.convert()?;
+        let bech32_address = bech32_address
+            .convert()
+            .map_err(AddressError::from)
+            .map_err(crate::client::Error::Address)?;
 
         let mut output_ids = self
             .client()

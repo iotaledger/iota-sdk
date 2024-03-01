@@ -11,12 +11,11 @@ mod restricted;
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{AccountAddress, Address, Ed25519Address, NftAddress},
+    address::{AccountAddress, Address, AddressError, Ed25519Address, NftAddress},
     rand::address::{
         rand_account_address, rand_anchor_address, rand_ed25519_address, rand_implicit_address, rand_multi_address,
         rand_nft_address, rand_restricted_address,
     },
-    Error,
 };
 use pretty_assertions::assert_eq;
 
@@ -29,7 +28,7 @@ const ED25519_ADDRESS_INVALID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74
 fn invalid_bech32() {
     let address = Address::try_from_bech32(ED25519_ADDRESS_INVALID);
 
-    assert!(matches!(address, Err(Error::InvalidAddress)));
+    assert!(matches!(address, Err(AddressError::InvalidAddress)));
 }
 
 #[test]

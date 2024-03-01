@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::{address::Bech32Address, protocol::iota_mainnet_protocol_parameters},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 use pretty_assertions::assert_eq;
 #[cfg(feature = "storage")]
@@ -27,7 +27,7 @@ use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NOD
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn update_client_options() -> Result<()> {
+async fn update_client_options() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
@@ -61,7 +61,7 @@ async fn update_client_options() -> Result<()> {
 
 // #[cfg(feature = "storage")]
 // #[tokio::test]
-// async fn different_seed() -> Result<()> {
+// async fn different_seed() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path = "test-storage/different_seed";
 //     setup(storage_path)?;
 
@@ -78,7 +78,7 @@ async fn update_client_options() -> Result<()> {
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn changed_bip_path() -> Result<()> {
+async fn changed_bip_path() -> Result<(), Box<dyn std::error::Error>> {
     use iota_sdk::crypto::keys::bip44::Bip44;
 
     let storage_path = "test-storage/changed_coin_type";
@@ -121,7 +121,7 @@ async fn changed_bip_path() -> Result<()> {
 }
 
 #[tokio::test]
-async fn shimmer_coin_type() -> Result<()> {
+async fn shimmer_coin_type() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
@@ -138,7 +138,7 @@ async fn shimmer_coin_type() -> Result<()> {
 }
 
 #[tokio::test]
-async fn iota_coin_type() -> Result<()> {
+async fn iota_coin_type() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/iota_coin_type";
     setup(storage_path)?;
 
@@ -171,7 +171,7 @@ async fn iota_coin_type() -> Result<()> {
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn update_node_auth() -> Result<()> {
+async fn update_node_auth() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/update_node_auth";
     setup(storage_path)?;
 

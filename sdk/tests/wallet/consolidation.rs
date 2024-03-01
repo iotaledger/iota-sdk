@@ -1,14 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{ConsolidationParams, Result, SendParams};
+use iota_sdk::wallet::{ConsolidationParams, SendParams};
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
-async fn consolidation() -> Result<()> {
+async fn consolidation() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/consolidation_0";
     let storage_path_1 = "test-storage/consolidation_1";
     setup(storage_path_0)?;

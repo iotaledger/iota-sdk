@@ -16,7 +16,6 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
     crypto::keys::bip39::Mnemonic,
-    wallet::Result,
 };
 
 const FOUNDRY_METADATA: &str = r#"{"standard":"IRC30","name":"NativeToken","description":"A native token","symbol":"NT","decimals":6,"logoUrl":"https://my.website/nativeToken.png"}"#;
@@ -25,7 +24,7 @@ const INTERNAL_ADDRESS: bool = false;
 const ADDRESS_INDEX: u32 = 0;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

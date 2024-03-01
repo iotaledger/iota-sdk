@@ -3,10 +3,7 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{
-    address::{Address, Bech32Address, Ed25519Address, Hrp},
-    Error,
-};
+use iota_sdk::types::block::address::{Address, AddressError, Bech32Address, Ed25519Address, Hrp};
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
@@ -40,7 +37,7 @@ fn ctors() {
 fn hrp_from_str() {
     Hrp::from_str("rms").unwrap();
 
-    assert!(matches!(Hrp::from_str("中國"), Err(Error::InvalidBech32Hrp(_))));
+    assert!(matches!(Hrp::from_str("中國"), Err(AddressError::InvalidBech32Hrp(_))));
 }
 
 #[test]

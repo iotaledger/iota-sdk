@@ -6,13 +6,10 @@
 //!
 //! `cargo run --release --all-features --example claim_transaction`
 
-use iota_sdk::{
-    wallet::{OutputsToClaim, Result},
-    Wallet,
-};
+use iota_sdk::{wallet::OutputsToClaim, Wallet};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
