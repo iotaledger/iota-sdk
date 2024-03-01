@@ -43,8 +43,8 @@ pub mod unlock;
 pub use self::core::dto::{BlockBodyDto, BlockDto, UnsignedBlockDto};
 pub use self::{
     block_id::{BlockHash, BlockId},
-    core::{Block, BlockBody, UnsignedBlock},
-    error::Error,
+    core::{Block, BlockBody, BlockError, UnsignedBlock},
+    error::IdentifierError,
 };
 
 pub const PROTOCOL_VERSION: u8 = 3;

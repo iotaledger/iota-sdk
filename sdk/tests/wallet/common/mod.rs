@@ -12,7 +12,7 @@ use iota_sdk::{
         Client,
     },
     types::block::protocol::iota_mainnet_protocol_parameters,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Wallet},
 };
 
 pub use self::constants::*;
@@ -34,7 +34,7 @@ pub(crate) async fn make_wallet(
     storage_path: &str,
     mnemonic: impl Into<Option<Mnemonic>>,
     node: Option<&str>,
-) -> Result<Wallet> {
+) -> Result<Wallet, Box<dyn std::error::Error>> {
     let client_options = ClientOptions::new()
         .with_node(node.unwrap_or(NODE_LOCAL))?
         .with_protocol_parameters(iota_mainnet_protocol_parameters().clone());
@@ -53,12 +53,15 @@ pub(crate) async fn make_wallet(
         wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
 
-    wallet_builder.finish().await
+    Ok(wallet_builder.finish().await?)
 }
 
 #[allow(dead_code, unused_variables)]
 #[cfg(feature = "ledger_nano")]
-pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&str>) -> Result<Wallet> {
+pub(crate) async fn make_ledger_nano_wallet(
+    storage_path: &str,
+    node: Option<&str>,
+) -> Result<Wallet, Box<dyn std::error::Error>> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
     let mut secret_manager = iota_sdk::client::secret::ledger_nano::LedgerSecretManager::new(true);
     secret_manager.non_interactive = true;
@@ -73,12 +76,12 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
         wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
 
-    wallet_builder.finish().await
+    Ok(wallet_builder.finish().await?)
 }
 
 /// Request funds from the faucet and sync the wallet.
 #[allow(dead_code)]
-pub(crate) async fn request_funds(wallet: &Wallet) -> Result<()> {
+pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
     request_funds_from_faucet(FAUCET_URL, &wallet.address().await).await?;
 
     // Continue only after funds are received
@@ -93,13 +96,13 @@ pub(crate) async fn request_funds(wallet: &Wallet) -> Result<()> {
 }
 
 #[allow(dead_code)]
-pub(crate) fn setup(path: &str) -> Result<()> {
+pub(crate) fn setup(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::remove_dir_all(path).ok();
     Ok(())
 }
 
 #[allow(dead_code)]
-pub(crate) fn tear_down(path: &str) -> Result<()> {
+pub(crate) fn tear_down(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::remove_dir_all(path).ok();
     Ok(())
 }

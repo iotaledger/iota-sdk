@@ -12,7 +12,7 @@ use iota_sdk::{
         },
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
-        Client, Result,
+        Client,
     },
     types::block::{
         address::{AccountAddress, Address},
@@ -36,7 +36,7 @@ use crate::client::{
 };
 
 #[tokio::test]
-async fn sign_account_state_transition() -> Result<()> {
+async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
@@ -116,7 +116,7 @@ async fn sign_account_state_transition() -> Result<()> {
 }
 
 #[tokio::test]
-async fn account_reference_unlocks() -> Result<()> {
+async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager

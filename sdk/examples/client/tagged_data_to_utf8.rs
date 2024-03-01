@@ -8,13 +8,10 @@
 //! cargo run --release --example tagged_data_to_utf8
 //! ```
 
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::payload::TaggedDataPayload,
-};
+use iota_sdk::{client::Client, types::block::payload::TaggedDataPayload};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // `hello` in hexadecimal.
     let tag = prefix_hex::decode::<Vec<u8>>("0x68656c6c6f")?;
     // `world` in hexadecimal.

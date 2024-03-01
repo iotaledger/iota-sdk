@@ -10,13 +10,10 @@
 //! cargo run --release --example node_api_core_get_output_metadata <OUTPUT ID> [NODE URL]
 //! ```
 
-use iota_sdk::{
-    client::{Client, Result},
-    types::block::output::OutputId,
-};
+use iota_sdk::{client::Client, types::block::output::OutputId};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 

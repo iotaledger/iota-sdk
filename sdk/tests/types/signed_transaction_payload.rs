@@ -5,12 +5,14 @@ use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-    payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
+    payload::{
+        signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
+        PayloadError,
+    },
     protocol::iota_mainnet_protocol_parameters,
     rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-    Error,
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
@@ -58,7 +60,7 @@ fn builder_too_few_unlocks() {
 
     assert!(matches!(
             SignedTransactionPayload::new(transaction, unlocks),
-            Err(Error::InputUnlockCountMismatch{input_count, unlock_count})
+            Err(PayloadError::InputUnlockCountMismatch{input_count, unlock_count})
             if input_count == 2 && unlock_count == 1));
 }
 
@@ -96,7 +98,7 @@ fn builder_too_many_unlocks() {
 
     assert!(matches!(
             SignedTransactionPayload::new(transaction, unlocks),
-            Err(Error::InputUnlockCountMismatch{input_count, unlock_count})
+            Err(PayloadError::InputUnlockCountMismatch{input_count, unlock_count})
             if input_count == 1 && unlock_count == 2));
 }
 

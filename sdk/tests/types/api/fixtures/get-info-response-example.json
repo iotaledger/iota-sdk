@@ -24,27 +24,27 @@
       "parameters": {
         "type": 0,
         "version": 3,
-        "networkName": "TestJungle",
-        "bech32Hrp": "tgl",
+        "networkName": "testnet",
+        "bech32Hrp": "rms",
         "storageScoreParameters": {
-          "storageCost": "0",
-          "factorData": 0,
-          "offsetOutputOverhead": "0",
-          "offsetEd25519BlockIssuerKey": "0",
-          "offsetStakingFeature": "0",
-          "offsetDelegation": "0"
+          "storageCost": "100",
+          "factorData": 1,
+          "offsetOutputOverhead": "10",
+          "offsetEd25519BlockIssuerKey": "100",
+          "offsetStakingFeature": "100",
+          "offsetDelegation": "100"
         },
         "workScoreParameters": {
-          "dataByte": 0,
-          "block": 1,
-          "input": 0,
-          "contextInput": 0,
-          "output": 0,
-          "nativeToken": 0,
-          "staking": 0,
-          "blockIssuer": 0,
-          "allotment": 0,
-          "signatureEd25519": 0
+          "dataByte": 1,
+          "block": 2,
+          "input": 3,
+          "contextInput": 4,
+          "output": 5,
+          "nativeToken": 6,
+          "staking": 7,
+          "blockIssuer": 8,
+          "allotment": 9,
+          "signatureEd25519": 10
         },
         "manaParameters": {
           "bitsCount": 63,
@@ -55,11 +55,11 @@
             20
           ],
           "decayFactorsExponent": 32,
-          "decayFactorEpochsSum": 2420916375,
+          "decayFactorEpochsSum": 2262417561,
           "decayFactorEpochsSumExponent": 21,
-          "annualDecayFactorPercentage": 50
+          "annualDecayFactorPercentage": 70
         },
-        "tokenSupply": "2779530283277761",
+        "tokenSupply": "1813620509061365",
         "genesisSlot": 0,
         "genesisUnixTimestamp": "1695275822",
         "slotDurationInSeconds": 10,
@@ -71,7 +71,7 @@
         "livenessThresholdUpperBound": 30,
         "minCommittableAge": 10,
         "maxCommittableAge": 20,
-        "epochNearingThreshold": 24,
+        "epochNearingThreshold": 60,
         "congestionControlParameters": {
           "minReferenceManaCost": "1",
           "increase": "0",
@@ -89,15 +89,15 @@
         },
         "rewardsParameters": {
           "profitMarginExponent": 8,
-          "bootstrappingDuration": 1154,
-          "manaShareCoefficient": "2",
-          "decayBalancingConstantExponent": 8,
-          "decayBalancingConstant": "1",
+          "bootstrappingDuration": 1079,
+          "rewardToGenerationRatio": 5,
+          "initialTargetRewardsRate": "10",
+          "finalTargetRewardsRate": "20",
           "poolCoefficientExponent": 11,
-          "retentionPeriod": 684
+          "retentionPeriod": 384
         },
         "targetCommitteeSize": 32,
-        "chainSwitchingThreshold": 2
+        "chainSwitchingThreshold": 3
       }
     }
   ],
