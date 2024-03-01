@@ -47,27 +47,27 @@ pub struct SyncOptions {
     pub sync_implicit_accounts: bool,
 }
 
-fn default_force_syncing() -> bool {
+const fn default_force_syncing() -> bool {
     DEFAULT_FORCE_SYNCING
 }
 
-fn default_sync_incoming_transactions() -> bool {
+const fn default_sync_incoming_transactions() -> bool {
     DEFAULT_SYNC_INCOMING_TRANSACTIONS
 }
 
-fn default_sync_only_most_basic_outputs() -> bool {
+const fn default_sync_only_most_basic_outputs() -> bool {
     DEFAULT_SYNC_ONLY_MOST_BASIC_OUTPUTS
 }
 
-fn default_sync_pending_transactions() -> bool {
+const fn default_sync_pending_transactions() -> bool {
     DEFAULT_SYNC_PENDING_TRANSACTIONS
 }
 
-fn default_sync_native_token_foundries() -> bool {
+const fn default_sync_native_token_foundries() -> bool {
     DEFAULT_SYNC_NATIVE_TOKEN_FOUNDRIES
 }
 
-fn default_sync_implicit_accounts() -> bool {
+const fn default_sync_implicit_accounts() -> bool {
     DEFAULT_SYNC_IMPLICIT_ACCOUNTS
 }
 
