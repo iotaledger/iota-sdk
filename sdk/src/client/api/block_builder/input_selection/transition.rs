@@ -7,9 +7,12 @@ use super::{
 };
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{
-        AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder, Output,
-        OutputId,
+    types::block::{
+        output::{
+            AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
+            Output, OutputId,
+        },
+        payload::signed_transaction::TransactionCapabilityFlag,
     },
 };
 
@@ -61,11 +64,16 @@ impl InputSelection {
             .with_features(features);
 
         if input.is_block_issuer() {
-            builder = builder.with_mana(input.available_mana(
-                &self.protocol_parameters,
-                output_id.transaction_id().slot_index(),
-                self.creation_slot,
-            )?)
+            if !self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
+                builder = builder.with_mana(input.available_mana(
+                    &self.protocol_parameters,
+                    output_id.transaction_id().slot_index(),
+                    self.creation_slot,
+                )?)
+            } else {
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::BurnMana);
+            }
         }
 
         let output = builder.finish_output()?;

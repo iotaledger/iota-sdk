@@ -8,7 +8,10 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
+    types::block::{
+        output::{NativeToken, NativeTokens, NativeTokensBuilder, Output, TokenScheme},
+        payload::signed_transaction::TransactionCapabilityFlag,
+    },
 };
 
 pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -> Result<NativeTokensBuilder, Error> {
@@ -59,7 +62,9 @@ impl InputSelection {
         input_native_tokens.merge(minted_native_tokens)?;
         output_native_tokens.merge(melted_native_tokens)?;
 
-        if let Some(burn) = self.burn.as_ref() {
+        if let Some(burn) = self.burn.as_ref().filter(|burn| !burn.native_tokens.is_empty()) {
+            self.transaction_capabilities
+                .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
             output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
         }
 
