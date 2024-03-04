@@ -2,7 +2,6 @@ import os
 import time
 
 from dotenv import load_dotenv
-
 from iota_sdk import Wallet, WalletOptions
 
 # In this example we will create an account output.

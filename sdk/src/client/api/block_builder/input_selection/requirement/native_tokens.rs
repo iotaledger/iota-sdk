@@ -11,7 +11,10 @@ use primitive_types::U256;
 use super::{Error, InputSelection};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{Output, TokenId, TokenScheme},
+    types::block::{
+        output::{Output, TokenId, TokenScheme},
+        payload::signed_transaction::TransactionCapabilityFlag,
+    },
 };
 
 pub(crate) fn get_native_tokens<'a>(
@@ -71,7 +74,9 @@ impl InputSelection {
             (*output_native_tokens.entry(melted_native_token_id).or_default()) += melted_native_token_amount;
         }
 
-        if let Some(burn) = &self.burn {
+        if let Some(burn) = self.burn.as_ref().filter(|burn| !burn.native_tokens.is_empty()) {
+            self.transaction_capabilities
+                .add_capability(TransactionCapabilityFlag::BurnNativeTokens);
             for (burnt_native_token_id, burnt_native_token_amount) in &burn.native_tokens {
                 (*output_native_tokens.entry(*burnt_native_token_id).or_default()) += *burnt_native_token_amount;
             }

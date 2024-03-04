@@ -14,14 +14,14 @@ use std::collections::BTreeMap;
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters,
-        secret::SecretManager, Client, Result,
+        secret::SecretManager, Client,
     },
     types::block::output::TokenId,
 };
 use primitive_types::U256;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

@@ -11,7 +11,7 @@ use crate::{
         address::Address,
         context_input::ContextInput,
         output::{AccountId, OutputId},
-        payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
+        payload::tagged_data::TaggedDataPayload,
     },
 };
 
@@ -36,8 +36,6 @@ pub struct TransactionOptions {
     pub allow_micro_amount: bool,
     /// Whether to allow the selection of additional inputs for this transaction.
     pub allow_additional_input_selection: bool,
-    /// Transaction capabilities.
-    pub capabilities: Option<TransactionCapabilities>,
     /// Mana allotments for the transaction.
     pub mana_allotments: BTreeMap<AccountId, u64>,
     /// Optional block issuer to which the transaction will have required mana allotted.
@@ -55,7 +53,6 @@ impl Default for TransactionOptions {
             note: Default::default(),
             allow_micro_amount: false,
             allow_additional_input_selection: true,
-            capabilities: Default::default(),
             mana_allotments: Default::default(),
             issuer_id: Default::default(),
         }

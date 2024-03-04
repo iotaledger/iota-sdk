@@ -16,17 +16,21 @@ pub trait QueryParameter: Serialize + Send + Sync {
 
         for (field, v) in value.as_object().unwrap().iter() {
             if !v.is_null() {
-                if let Some(v_str) = v.as_str() {
+                if let Some(v_bool) = v.as_bool() {
                     if !query_string.is_empty() {
                         query_string.push('&');
                     }
-                    query_string.push_str(&format!("{}={}", field, v_str));
-                }
-                if let Some(v_u64) = v.as_u64() {
+                    query_string.push_str(&format!("{field}={v_bool}"));
+                } else if let Some(v_str) = v.as_str() {
                     if !query_string.is_empty() {
                         query_string.push('&');
                     }
-                    query_string.push_str(&format!("{}={}", field, v_u64));
+                    query_string.push_str(&format!("{field}={v_str}"));
+                } else if let Some(v_u64) = v.as_u64() {
+                    if !query_string.is_empty() {
+                        query_string.push('&');
+                    }
+                    query_string.push_str(&format!("{field}={v_u64}"));
                 }
             }
         }
@@ -322,16 +326,21 @@ mod tests {
                 Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
                     .unwrap(),
             )
+            .created_after(5.into())
+            .has_timelock(true)
             .cursor("".into());
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),
-            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=".into())
+            Some(
+                "address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&createdAfter=5&cursor=&hasTimelock=true"
+                    .into()
+            )
         );
 
         basic_outputs_query_parameters.replace_cursor("newCursor".into());
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),
-            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=newCursor".into())
+            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&createdAfter=5&cursor=newCursor&hasTimelock=true".into())
         );
     }
 }

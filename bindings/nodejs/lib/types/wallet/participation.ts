@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { INode } from '../client';
+import type { Node } from '../client';
 import { HexEncodedString } from '../utils';
 
 /**
@@ -51,7 +51,7 @@ export interface ParticipationEvent {
  */
 export interface ParticipationEventRegistrationOptions {
     /** The node to register participation events. */
-    node: INode;
+    node: Node;
     /**
      * The events to register.
      * If empty, then every event being tracked by the node will be registered. */
@@ -69,7 +69,7 @@ export interface ParticipationEventWithNodes {
     /** Information about a voting or staking event */
     data: ParticipationEventData;
     /** Provided client nodes for this event. */
-    nodes: INode[];
+    nodes: Node[];
 }
 
 /**

@@ -6,8 +6,8 @@ use core::str::FromStr;
 use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
+    address::AddressError,
     output::{AnchorId, OutputId, StorageScore},
-    Error,
 };
 
 /// An [`Address`](super::Address) derived from an anchor ID which can be unlocked by unlocking the corresponding
@@ -47,7 +47,7 @@ impl AnchorAddress {
 impl StorageScore for AnchorAddress {}
 
 impl FromStr for AnchorAddress {
-    type Err = Error;
+    type Err = AddressError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(AnchorId::from_str(s)?))

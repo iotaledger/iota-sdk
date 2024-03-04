@@ -1,7 +1,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import MintNftParams, Wallet, WalletOptions, utf8_to_hex
 
 # This example uses secrets in environment variables for simplicity which

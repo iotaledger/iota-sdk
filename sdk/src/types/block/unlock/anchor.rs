@@ -1,11 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
+use crate::types::block::{
+    protocol::WorkScore,
+    unlock::{UnlockError, UnlockIndex},
+};
 
 /// Points to the unlock of a consumed anchor output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = Error, with = Error::InvalidAnchorIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::InvalidAnchorIndex)]
 pub struct AnchorUnlock(
     /// Index of input and unlock corresponding to an [`AnchorOutput`](crate::types::block::output::AnchorOutput).
     UnlockIndex,
@@ -17,8 +20,8 @@ impl AnchorUnlock {
 
     /// Creates a new [`AnchorUnlock`].
     #[inline(always)]
-    pub fn new(index: u16) -> Result<Self, Error> {
-        index.try_into().map(Self).map_err(Error::InvalidAnchorIndex)
+    pub fn new(index: u16) -> Result<Self, UnlockError> {
+        index.try_into().map(Self).map_err(UnlockError::InvalidAnchorIndex)
     }
 
     /// Return the index of an [`AnchorUnlock`].
@@ -31,7 +34,7 @@ impl AnchorUnlock {
 impl WorkScore for AnchorUnlock {}
 
 impl TryFrom<u16> for AnchorUnlock {
-    type Error = Error;
+    type Error = UnlockError;
 
     fn try_from(index: u16) -> Result<Self, Self::Error> {
         Self::new(index)
@@ -62,7 +65,7 @@ mod dto {
     }
 
     impl TryFrom<AnchorUnlockDto> for AnchorUnlock {
-        type Error = Error;
+        type Error = UnlockError;
 
         fn try_from(value: AnchorUnlockDto) -> Result<Self, Self::Error> {
             Self::new(value.index)

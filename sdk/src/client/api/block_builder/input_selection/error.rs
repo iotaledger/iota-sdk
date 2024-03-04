@@ -8,7 +8,15 @@ use std::fmt::Debug;
 use primitive_types::U256;
 
 use super::Requirement;
-use crate::types::block::output::{ChainId, OutputId, TokenId};
+use crate::types::block::{
+    context_input::ContextInputError,
+    mana::ManaError,
+    output::{ChainId, NativeTokenError, OutputError, OutputId, TokenId},
+    payload::PayloadError,
+    signature::SignatureError,
+    unlock::UnlockError,
+    BlockError,
+};
 
 /// Errors related to input selection.
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
@@ -16,9 +24,6 @@ use crate::types::block::output::{ChainId, OutputId, TokenId};
 pub enum Error {
     #[error("additional inputs required for {0:?}, but additional input selection is disabled")]
     AdditionalInputsRequired(Requirement),
-    /// Block error.
-    #[error("{0}")]
-    Block(#[from] crate::types::block::Error),
     /// Can't burn and transition an output at the same time.
     #[error("can't burn and transition an output at the same time, chain ID: {0}")]
     BurnAndTransition(ChainId),
@@ -75,4 +80,28 @@ pub enum Error {
     #[error("unsupported address type {0}")]
     // TODO replace with string when 2.0 has Address::kind_str
     UnsupportedAddressType(u8),
+    /// Block error.
+    #[error("{0}")]
+    Block(#[from] BlockError),
+    /// Output errors.
+    #[error("{0}")]
+    Output(#[from] OutputError),
+    /// Payload errors.
+    #[error("{0}")]
+    Payload(#[from] PayloadError),
+    /// Signature errors.
+    #[error("{0}")]
+    Signature(#[from] SignatureError),
+    /// Mana errors.
+    #[error("{0}")]
+    Mana(#[from] ManaError),
+    /// Native token errors.
+    #[error("{0}")]
+    NativeToken(#[from] NativeTokenError),
+    /// Context input errors.
+    #[error("{0}")]
+    ContextInput(#[from] ContextInputError),
+    /// Unlock errors.
+    #[error("{0}")]
+    Unlock(#[from] UnlockError),
 }

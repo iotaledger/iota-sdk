@@ -19,7 +19,7 @@ use crate::{
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError,
+        BlockError,
     },
 };
 
@@ -243,9 +243,10 @@ impl InputSelection {
             if !self.allow_additional_input_selection {
                 return Err(Error::AdditionalInputsRequired(Requirement::Mana));
             }
+            let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
             // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
-                selected_mana += self.total_mana(&input)?;
+                selected_mana += self.total_mana(&input, include_generated)?;
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();
                 }
@@ -259,6 +260,22 @@ impl InputSelection {
         Ok(added_inputs)
     }
 
+    pub(crate) fn initial_mana_excess(&self) -> Result<u64, Error> {
+        let output_mana = self.provided_outputs.iter().map(|o| o.mana()).sum::<u64>();
+        let mut input_mana = 0;
+        let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
+
+        for input in self
+            .selected_inputs
+            .iter()
+            .filter(|i| self.required_inputs.contains(i.output_id()))
+        {
+            input_mana += self.total_mana(input, include_generated)?;
+        }
+
+        Ok(input_mana.saturating_sub(output_mana))
+    }
+
     pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), Error> {
         let mut required_mana =
             self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
@@ -268,20 +285,32 @@ impl InputSelection {
             required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana;
         }
 
-        let mut selected_mana = 0;
-
-        for input in &self.selected_inputs {
-            selected_mana += self.total_mana(input)?;
-        }
-        Ok((selected_mana, required_mana))
+        Ok((self.total_selected_mana(None)?, required_mana))
     }
 
-    fn total_mana(&self, input: &InputSigningData) -> Result<u64, Error> {
+    pub(crate) fn total_selected_mana(&self, include_generated: impl Into<Option<bool>> + Copy) -> Result<u64, Error> {
+        let mut selected_mana = 0;
+        let include_generated = include_generated
+            .into()
+            .unwrap_or(self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
+
+        for input in &self.selected_inputs {
+            selected_mana += self.total_mana(input, include_generated)?;
+        }
+
+        Ok(selected_mana)
+    }
+
+    fn total_mana(&self, input: &InputSigningData, include_generated: bool) -> Result<u64, Error> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
-            + input.output.available_mana(
-                &self.protocol_parameters,
-                input.output_id().transaction_id().slot_index(),
-                self.creation_slot,
-            )?)
+            + if include_generated {
+                input.output.available_mana(
+                    &self.protocol_parameters,
+                    input.output_id().transaction_id().slot_index(),
+                    self.creation_slot,
+                )?
+            } else {
+                input.output.mana()
+            })
     }
 }

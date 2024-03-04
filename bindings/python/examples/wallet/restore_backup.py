@@ -2,7 +2,6 @@ import json
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import ClientOptions, CoinType, Wallet, WalletOptions, Bip44
 
 load_dotenv()
@@ -28,6 +27,8 @@ wallet = Wallet(wallet_options)
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
-wallet.restore_from_stronghold_snapshot("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
+wallet.restore_from_stronghold_snapshot(
+    "backup.stronghold",
+    os.environ['STRONGHOLD_PASSWORD'])
 
 print(f'Restored wallet: {json.dumps(wallet, indent=4)}')

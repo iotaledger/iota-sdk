@@ -8,10 +8,10 @@
 //! cargo run --release --all-features --example get_info [NODE URL]
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::Client;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
@@ -27,8 +27,8 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Get node info.
-    let info = client.get_info().await?.node_info;
+    // Get info.
+    let info = client.get_node_info().await?.info;
 
     println!("{info}");
 

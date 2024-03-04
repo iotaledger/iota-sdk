@@ -52,15 +52,15 @@ macro_rules! impl_id {
         }
 
         impl core::str::FromStr for $hash_name {
-            type Err = $crate::types::block::Error;
+            type Err = $crate::types::block::IdentifierError;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Ok(Self::new(prefix_hex::decode(s).map_err($crate::types::block::Error::Hex)?))
+                Ok(Self::new(prefix_hex::decode(s).map_err($crate::types::block::IdentifierError)?))
             }
         }
 
         impl TryFrom<&alloc::string::String> for $hash_name {
-            type Error = $crate::types::block::Error;
+            type Error = $crate::types::block::IdentifierError;
 
             fn try_from(s: &alloc::string::String) -> Result<Self, Self::Error> {
                 core::str::FromStr::from_str(s.as_str())
@@ -68,7 +68,7 @@ macro_rules! impl_id {
         }
 
         impl TryFrom<&str> for $hash_name {
-            type Error = $crate::types::block::Error;
+            type Error = $crate::types::block::IdentifierError;
 
             fn try_from(s: &str) -> Result<Self, Self::Error> {
                 core::str::FromStr::from_str(s)
@@ -76,14 +76,14 @@ macro_rules! impl_id {
         }
 
         impl $crate::utils::ConvertTo<$hash_name> for &alloc::string::String {
-            fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
-                self.try_into()
+            fn convert(self) -> Result<$hash_name, $crate::utils::ConversionError> {
+                self.try_into().map_err($crate::utils::ConversionError::new)
             }
         }
 
         impl $crate::utils::ConvertTo<$hash_name> for &str {
-            fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
-                self.try_into()
+            fn convert(self) -> Result<$hash_name, $crate::utils::ConversionError> {
+                self.try_into().map_err($crate::utils::ConversionError::new)
             }
         }
 
@@ -131,7 +131,6 @@ macro_rules! impl_id {
 
             $(#[$id_meta])*
             #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
-            #[packable(unpack_error = $crate::types::block::Error)]
             #[repr(C)]
             $id_vis struct $id_name {
                 pub(crate) hash: $hash_name,
@@ -174,10 +173,10 @@ macro_rules! impl_id {
             }
 
             impl core::str::FromStr for $id_name {
-                type Err = $crate::types::block::Error;
+                type Err = $crate::types::block::IdentifierError;
 
                 fn from_str(s: &str) -> Result<Self, Self::Err> {
-                    Ok(Self::new(prefix_hex::decode(s).map_err($crate::types::block::Error::Hex)?))
+                    Ok(Self::new(prefix_hex::decode(s).map_err($crate::types::block::IdentifierError)?))
                 }
             }
 
@@ -197,7 +196,7 @@ macro_rules! impl_id {
             }
 
             impl TryFrom<&alloc::string::String> for $id_name {
-                type Error = $crate::types::block::Error;
+                type Error = $crate::types::block::IdentifierError;
 
                 fn try_from(s: &alloc::string::String) -> Result<Self, Self::Error> {
                     core::str::FromStr::from_str(s.as_str())
@@ -205,7 +204,7 @@ macro_rules! impl_id {
             }
 
             impl TryFrom<&str> for $id_name {
-                type Error = $crate::types::block::Error;
+                type Error = $crate::types::block::IdentifierError;
 
                 fn try_from(s: &str) -> Result<Self, Self::Error> {
                     core::str::FromStr::from_str(s)
@@ -213,14 +212,14 @@ macro_rules! impl_id {
             }
 
             impl $crate::utils::ConvertTo<$id_name> for &alloc::string::String {
-                fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
-                    self.try_into()
+                fn convert(self) -> Result<$id_name, $crate::utils::ConversionError> {
+                    self.try_into().map_err($crate::utils::ConversionError::new)
                 }
             }
 
             impl $crate::utils::ConvertTo<$id_name> for &str {
-                fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
-                    self.try_into()
+                fn convert(self) -> Result<$id_name, $crate::utils::ConversionError> {
+                    self.try_into().map_err($crate::utils::ConversionError::new)
                 }
             }
 
@@ -395,4 +394,17 @@ macro_rules! impl_deserialize_untagged {
             }
         }
     }
+}
+
+#[macro_export]
+macro_rules! impl_from_error_via {
+    ($self:ident via $via:ident: $($err:ident),+$(,)?) => {
+        $(
+        impl From<$err> for $self {
+            fn from(error: $err) -> Self {
+                Self::from($via::from(error))
+            }
+        }
+        )+
+    };
 }
