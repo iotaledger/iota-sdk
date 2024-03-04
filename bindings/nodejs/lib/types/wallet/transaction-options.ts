@@ -6,7 +6,6 @@ import {
     AccountId,
     Address,
     Bech32Address,
-    ContextInput,
     OutputId,
 } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
