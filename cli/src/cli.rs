@@ -1,8 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::str::FromStr;
-use std::path::Path;
+use std::{path::Path, str::FromStr};
 
 use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
 use eyre::{bail, Error};
