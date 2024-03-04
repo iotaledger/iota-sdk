@@ -40,7 +40,7 @@ pub use self::{
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
     metadata::{OutputConsumptionMetadata, OutputInclusionMetadata, OutputMetadata},
-    native_token::{NativeToken, NativeTokenError, NativeTokens, NativeTokensBuilder, TokenId},
+    native_token::{NativeToken, NativeTokenError, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ProofError, ValueHash},

@@ -60,7 +60,7 @@ pub(crate) fn get_native_tokens_diff(
 
 impl InputSelection {
     pub(crate) fn input_output_native_tokens(
-        &self,
+        &mut self,
     ) -> Result<(BTreeMap<TokenId, U256>, BTreeMap<TokenId, U256>), Error> {
         let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
         let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;

@@ -67,7 +67,7 @@ impl InputSelection {
         Ok(None)
     }
 
-    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), Error> {
+    pub(crate) fn remainder_amount(&mut self) -> Result<(u64, bool, bool), Error> {
         let (input_native_tokens, output_native_tokens) = self.input_output_native_tokens()?;
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;

@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::convert::Infallible;
+
 use packable::Packable;
 use primitive_types::U256;
 
@@ -27,8 +29,6 @@ impl From<FoundryId> for TokenId {
 #[derive(Debug, PartialEq, Eq, derive_more::Display)]
 #[allow(missing_docs)]
 pub enum NativeTokenError {
-    #[display(fmt = "invalid native token count: {_0}")]
-    InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     #[display(fmt = "native tokens are not unique and/or sorted")]
     NativeTokensNotUniqueSorted,
     #[display(fmt = "native tokens null amount")]

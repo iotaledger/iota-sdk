@@ -88,7 +88,7 @@ struct AmountSelection {
 }
 
 impl AmountSelection {
-    fn new(input_selection: &InputSelection) -> Result<Self, Error> {
+    fn new(input_selection: &mut InputSelection) -> Result<Self, Error> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = input_selection.amount_sums();
         let selected_native_tokens = HashSet::<TokenId>::from_iter(
             input_selection
