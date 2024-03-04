@@ -107,12 +107,9 @@ where
                     output_ids: self
                         .ledger()
                         .await
-                        .unspent_outputs
-                        .values()
+                        .implicit_accounts()
                         .filter_map(|output_data| {
-                            if output_data.output.is_implicit_account()
-                                && output_data.output.as_basic().address() == implicit_account_creation_address.inner()
-                            {
+                            if output_data.output.as_basic().address() == implicit_account_creation_address.inner() {
                                 Some(output_data.output_id)
                             } else {
                                 None
