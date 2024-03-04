@@ -27,12 +27,11 @@ params = MintNftParams(
 
 tx = wallet.mint_nfts([params])
 
-# Wait for transaction to get accepted
-block_id = wallet.wait_for_transaction_acceptance(
+wallet.wait_for_transaction_acceptance(
     tx.transaction_id)
 
 print(
-    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{tx.transaction_id}')
 
 transaction = tx.payload.transaction
 
