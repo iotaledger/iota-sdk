@@ -12,7 +12,6 @@ use iota_sdk::{
         api::{PreparedTransactionData, SignedTransactionDataDto},
         node_api::core::routes::NodeInfoResponse,
         node_manager::node::Node,
-        NetworkInfo,
     },
     types::{
         api::{
@@ -70,9 +69,6 @@ pub enum Response {
     /// Response for:
     /// - [`GetNode`](crate::method::ClientMethod::GetNode)
     Node(Node),
-    /// Response for:
-    /// - [`GetNetworkInfo`](crate::method::ClientMethod::GetNetworkInfo)
-    NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
     NetworkId(String),
