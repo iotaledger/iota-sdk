@@ -84,7 +84,7 @@ async function run() {
                 transaction.transactionId,
             );
             console.log(
-                `Tx accepted: ${process.env.EXPLORER_URL}/transaction/${transaction.transactionId}`,
+                `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
             );
 
             // Sync so the new outputs are available again for new transactions

@@ -32,7 +32,7 @@ wallet.wait_for_transaction_acceptance(
     tx.transaction_id)
 
 print(
-    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transaction/{tx.transaction_id}')
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{tx.transaction_id}')
 
 transaction = tx.payload.transaction
 

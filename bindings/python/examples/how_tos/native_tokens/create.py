@@ -29,7 +29,7 @@ if not balance.accounts:
     wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
     print(
-        f'Tx accepted: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
+        f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
 
     wallet.sync()
     print("Wallet synced")
@@ -54,7 +54,7 @@ print(f'Transaction sent: {transaction.transaction_id}')
 wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(
-    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
 
 print(f'Created token: {transaction.token_id}')
 

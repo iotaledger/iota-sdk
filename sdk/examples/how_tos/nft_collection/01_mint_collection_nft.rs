@@ -123,7 +123,7 @@ async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> 
         .await?;
 
     println!(
-        "Tx accepted: {}/transaction/{}",
+        "Tx accepted: {}/transactions/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );

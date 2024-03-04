@@ -63,7 +63,7 @@ async function run() {
         await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(
-            `Tx accepted: ${process.env.EXPLORER_URL}/transaction/${transaction.transactionId}`,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
 
         // To send an NFT with expiration unlock condition prepareOutput() can be used like this:

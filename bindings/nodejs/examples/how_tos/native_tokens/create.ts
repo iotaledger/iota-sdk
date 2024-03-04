@@ -44,7 +44,7 @@ async function run() {
             );
 
             console.log(
-                `Tx accepted: ${process.env.EXPLORER_URL}/transaction/${transaction.transactionId}`,
+                `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
             );
 
             await wallet.sync();
@@ -75,7 +75,7 @@ async function run() {
         await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(
-            `Tx accepted: ${process.env.EXPLORER_URL}/transaction/${transaction.transactionId}`,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
 
         console.log(`Created token: ${prepared.tokenId()}`);

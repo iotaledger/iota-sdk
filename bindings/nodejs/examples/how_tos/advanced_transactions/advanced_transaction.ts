@@ -65,7 +65,7 @@ async function run() {
         console.log('Waiting until transaction is accepted...');
         await wallet.waitForTransactionAcceptance(transaction.transactionId);
         console.log(
-            `Tx accepted: ${process.env.EXPLORER_URL}/transaction/${transaction.transactionId}`,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
     } catch (error) {
         console.error('Error: ', error);

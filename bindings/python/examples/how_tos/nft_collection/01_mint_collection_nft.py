@@ -69,7 +69,7 @@ while nft_mint_params:
         transaction.transaction_id)
 
     print(
-        f'Tx accepted: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
+        f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
 
     # Sync so the new outputs are available again for new transactions
     wallet.sync()
