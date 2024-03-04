@@ -14,7 +14,7 @@ use crate::{
         input::{Input, UtxoInput},
         mana::ManaAllotment,
         output::{AccountOutputBuilder, Output},
-        payload::{signed_transaction::Transaction, SignedTransactionPayload},
+        payload::{dto::SignedTransactionPayloadDto, signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         BlockError,
@@ -33,6 +33,8 @@ impl TransactionBuilder {
             self.get_inputs_for_mana_balance()?;
             return Ok(Vec::new());
         };
+
+        let mut should_recalculate = false;
 
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
             self.selected_inputs = Self::sort_input_signing_data(
@@ -59,7 +61,6 @@ impl TransactionBuilder {
             // Add the empty allotment so the work score includes it
             self.mana_allotments.entry(issuer_id).or_default();
 
-            // If the transaction fails to build, just keep going in case another requirement helps
             let transaction = builder
                 .with_context_inputs(self.context_inputs())
                 .with_mana_allotments(
@@ -70,6 +71,11 @@ impl TransactionBuilder {
                 .finish_with_params(&self.protocol_parameters)?;
 
             let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
+
+            log::debug!(
+                "signed_transaction: {}",
+                serde_json::to_string_pretty(&SignedTransactionPayloadDto::from(&signed_transaction)).unwrap()
+            );
 
             let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
                 + self.protocol_parameters.work_score_parameters().block();
@@ -94,14 +100,22 @@ impl TransactionBuilder {
                 *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
                 log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
                 *allotment_debt += additional_allotment;
+                should_recalculate = true;
             } else {
                 log::debug!("Setting allotment debt to {}", self.mana_allotments[issuer_id]);
                 *allotment_debt = self.mana_allotments[issuer_id];
+                // Since the allotment is fine, check if the mana balance is good because
+                // we can exit early in that case.
+                let (input_mana, output_mana) = self.mana_sums(true)?;
+                if input_mana == output_mana {
+                    log::debug!("allotments and mana are both correct, no further action needed");
+                    return Ok(Vec::new());
+                }
             }
 
-            self.reduce_account_output()?;
-        } else if !self.requirements.contains(&Requirement::Mana) {
-            self.requirements.push(Requirement::Mana);
+            should_recalculate |= self.reduce_account_output()?;
+        } else {
+            should_recalculate = true;
         }
 
         // Remainders can only be calculated when the input mana is >= the output mana
@@ -110,17 +124,16 @@ impl TransactionBuilder {
             self.update_remainders()?;
         }
 
-        let additional_inputs = self.get_inputs_for_mana_balance()?;
-        // If we needed more inputs to cover the additional allotment mana
-        // then update remainders and re-run this requirement
-        if additional_inputs && !self.requirements.contains(&Requirement::Mana) {
+        should_recalculate |= self.get_inputs_for_mana_balance()?;
+
+        if should_recalculate && !self.requirements.contains(&Requirement::Mana) {
             self.requirements.push(Requirement::Mana);
         }
 
         Ok(Vec::new())
     }
 
-    fn reduce_account_output(&mut self) -> Result<(), TransactionBuilderError> {
+    fn reduce_account_output(&mut self) -> Result<bool, TransactionBuilderError> {
         let MinManaAllotment {
             issuer_id,
             allotment_debt,
@@ -147,8 +160,9 @@ impl TransactionBuilder {
                 .finish_output()?;
             *allotment_debt = allotment_debt.saturating_sub(output_mana);
             log::debug!("Allotment debt after reduction: {}", allotment_debt);
+            return Ok(true);
         }
-        Ok(())
+        Ok(false)
     }
 
     pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, TransactionBuilderError> {
