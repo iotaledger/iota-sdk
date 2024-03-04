@@ -94,10 +94,8 @@ where
     async fn sync_internal(&self, options: &SyncOptions) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] sync_internal");
 
-        let wallet_address = self.address().await;
-
         let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
-            address: wallet_address.clone(),
+            address: self.address().await,
             output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
         };
 
@@ -106,7 +104,6 @@ where
         if options.sync_implicit_accounts {
             if let Ok(implicit_account_creation_address) = self.implicit_account_creation_address().await {
                 addresses_to_sync.push(AddressWithUnspentOutputs {
-                    address: implicit_account_creation_address,
                     output_ids: self
                         .ledger()
                         .await
@@ -114,7 +111,7 @@ where
                         .values()
                         .filter_map(|output_data| {
                             if output_data.output.is_implicit_account()
-                                && output_data.output.as_basic().address() == wallet_address.inner()
+                                && output_data.output.as_basic().address() == implicit_account_creation_address.inner()
                             {
                                 Some(output_data.output_id)
                             } else {
@@ -122,6 +119,7 @@ where
                             }
                         })
                         .collect(),
+                    address: implicit_account_creation_address,
                 });
             }
         }
