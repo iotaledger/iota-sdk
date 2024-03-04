@@ -1,8 +1,6 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// Copyright 2024 IOTA Stiftung
-// SPDX-License-Identifier: Apache-2.0
 use std::collections::HashMap;
 
 use super::{TransactionBuilder, TransactionBuilderError};
