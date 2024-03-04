@@ -3,7 +3,7 @@
 
 import { TransactionState } from '../state';
 import { TransactionId } from '../../block';
-import { TransactionFailureReason } from '../transaction-failure-reason';
+import { TransactionFailureReason } from './transaction-failure-reason';
 
 /**
  * Metadata of a transaction.
