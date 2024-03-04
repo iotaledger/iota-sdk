@@ -39,9 +39,9 @@ where
 
 #[cfg(target_family = "wasm")]
 #[allow(clippy::future_not_send)]
-pub(crate) async fn convert_async_panics<F>(f: impl FnOnce() -> F) -> Result<Response>
+pub(crate) async fn convert_async_panics<F>(f: impl FnOnce() -> F) -> Result<Response, crate::Error>
 where
-    F: Future<Output = Result<Response>>,
+    F: Future<Output = Result<Response, crate::Error>>,
 {
     AssertUnwindSafe(f())
         .catch_unwind()
