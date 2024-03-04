@@ -53,7 +53,6 @@ impl Client {
     ) -> crate::client::Result<PreparedTransactionData> {
         let outputs = outputs.into_iter().collect::<Vec<_>>();
         let addresses = addresses.into_iter().collect::<Vec<_>>();
-        // Voting output needs to be requested before to prevent a deadlock
         let protocol_parameters = self.get_protocol_parameters().await?;
         let creation_slot = self.get_slot_index().await?;
 
@@ -68,7 +67,7 @@ impl Client {
             RemainderValueStrategy::CustomAddress(address) => Some(address),
         };
 
-        let hrp = self.get_bech32_hrp().await?;
+        let hrp = protocol_parameters.bech32_hrp();
 
         let mut available_input_ids = HashSet::new();
         for address in &addresses {
