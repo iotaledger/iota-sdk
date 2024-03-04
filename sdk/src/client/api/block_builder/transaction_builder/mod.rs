@@ -71,19 +71,11 @@ impl Client {
 
         let mut available_input_ids = HashSet::new();
         for address in &addresses {
-            let mut cursor = None;
-            loop {
-                let mut query = OutputQueryParameters::new().unlockable_by_address(address.clone().to_bech32(hrp));
-                if let Some(cursor) = cursor {
-                    query = query.cursor(cursor);
-                }
-                let res = self.output_ids(query).await?;
-                cursor = res.cursor;
-                available_input_ids.extend(res.items);
-                if cursor.is_none() {
-                    break;
-                }
-            }
+            available_input_ids.extend(
+                self.output_ids(OutputQueryParameters::new().unlockable_by_address(address.clone().to_bech32(hrp)))
+                    .await?
+                    .items,
+            );
         }
         let available_inputs = self
             .get_outputs_with_metadata(&available_input_ids.into_iter().collect::<Vec<_>>())

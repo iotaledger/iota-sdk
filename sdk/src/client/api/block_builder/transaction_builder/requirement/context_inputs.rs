@@ -22,10 +22,9 @@ impl TransactionBuilder {
                 Output::Account(account) => {
                     if account.features().block_issuer().is_some() {
                         log::debug!("Adding block issuance context input for transitioned account output");
-                        self.bic_context_inputs.insert(
-                            BlockIssuanceCreditContextInput::from(account.account_id_non_null(input.output_id()))
-                                .into(),
-                        );
+                        self.bic_context_inputs.insert(BlockIssuanceCreditContextInput::from(
+                            account.account_id_non_null(input.output_id()),
+                        ));
                     }
                 }
                 // Transitioning an implicit account requires a BlockIssuanceCreditContextInput.
@@ -33,7 +32,9 @@ impl TransactionBuilder {
                     if basic.is_implicit_account() {
                         log::debug!("Adding block issuance context input for transitioned implicit account output");
                         self.bic_context_inputs
-                            .insert(BlockIssuanceCreditContextInput::from(AccountId::from(input.output_id())).into());
+                            .insert(BlockIssuanceCreditContextInput::from(AccountId::from(
+                                input.output_id(),
+                            )));
                     }
                 }
                 _ => (),
@@ -92,7 +93,7 @@ impl TransactionBuilder {
         if needs_commitment_context && self.commitment_context_input.is_none() {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
             self.commitment_context_input
-                .replace(CommitmentContextInput::new(self.latest_slot_commitment_id).into());
+                .replace(CommitmentContextInput::new(self.latest_slot_commitment_id));
         }
         Ok(Vec::new())
     }
