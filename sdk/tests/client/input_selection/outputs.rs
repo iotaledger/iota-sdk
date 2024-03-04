@@ -11,6 +11,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder},
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
@@ -161,6 +162,10 @@ fn no_outputs_but_burn() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert_eq!(selected.inputs_data, inputs);
     assert_eq!(selected.transaction.outputs().len(), 1);
     assert_remainder_or_return(
@@ -431,7 +436,7 @@ fn consolidate_with_min_allotment() {
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
-    .with_min_mana_allotment(account_id_1, 10, true)
+    .with_min_mana_allotment(account_id_1, 10)
     .with_required_inputs(inputs.iter().map(|i| *i.output_id()))
     .select()
     .unwrap();

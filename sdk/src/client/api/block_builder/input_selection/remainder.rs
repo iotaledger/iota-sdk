@@ -18,7 +18,6 @@ use crate::{
             unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
             NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
         },
-        Error as BlockError,
     },
 };
 
@@ -125,31 +124,27 @@ impl InputSelection {
 
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
-        if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
-            log::debug!("No remainder required");
-            return Ok((storage_deposit_returns, Vec::new()));
-        }
+        let amount_diff = input_amount.checked_sub(output_amount).expect("amount underflow");
+        let mut mana_diff = input_mana.checked_sub(output_mana).expect("mana underflow");
 
-        let amount_diff = input_amount
-            .checked_sub(output_amount)
-            .ok_or(BlockError::ConsumedAmountOverflow)?;
-        let mut mana_diff = input_mana
-            .checked_sub(output_mana)
-            .ok_or(BlockError::ConsumedManaOverflow)?;
+        // If we are burning mana, then we can subtract out the burned amount.
+        if self.burn.as_ref().map_or(false, |b| b.mana()) {
+            mana_diff = mana_diff.saturating_sub(self.initial_mana_excess()?);
+        }
 
         let (remainder_address, chain) = self
             .get_remainder_address()?
             .ok_or(Error::MissingInputWithEd25519Address)?;
 
         // If there is a mana remainder, try to fit it in an existing output
-        if input_mana > output_mana && self.output_for_added_mana_exists(&remainder_address) {
+        if mana_diff > 0 && self.output_for_added_mana_exists(&remainder_address) {
             log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
             self.remainders.added_mana = std::mem::take(&mut mana_diff);
-            // If we have no other remainders, we are done
-            if input_amount == output_amount && native_tokens_diff.is_none() {
-                log::debug!("No more remainder required");
-                return Ok((storage_deposit_returns, Vec::new()));
-            }
+        }
+
+        if input_amount == output_amount && mana_diff == 0 && native_tokens_diff.is_none() {
+            log::debug!("No remainder required");
+            return Ok((storage_deposit_returns, Vec::new()));
         }
 
         let remainder_outputs = create_remainder_outputs(
@@ -237,10 +232,15 @@ impl InputSelection {
         let remainder_address = self.get_remainder_address()?.map(|v| v.0);
 
         // Mana can potentially be added to an appropriate existing output instead of a new remainder output
-        let mana_remainder = selected_mana > required_mana
+        let mut mana_remainder = selected_mana > required_mana
             && remainder_address.map_or(true, |remainder_address| {
                 !self.output_for_added_mana_exists(&remainder_address)
             });
+        // If we are burning mana, we may not need a mana remainder
+        if self.burn.as_ref().map_or(false, |b| b.mana()) {
+            let initial_excess = self.initial_mana_excess()?;
+            mana_remainder &= selected_mana > required_mana + initial_excess;
+        }
 
         Ok((remainder_amount, native_tokens_remainder, mana_remainder))
     }

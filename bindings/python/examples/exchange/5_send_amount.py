@@ -6,7 +6,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import SyncOptions, Wallet, WalletOptions
 
 # This example uses secrets in environment variables for simplicity which

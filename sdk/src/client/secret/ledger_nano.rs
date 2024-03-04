@@ -20,7 +20,10 @@ use iota_ledger_nano::{
     get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index, Packable as LedgerNanoPackable,
     TransportTypes,
 };
-use packable::{error::UnexpectedEOF, PackableExt};
+use packable::{
+    error::{UnexpectedEOF, UnpackErrorExt},
+    PackableExt,
+};
 use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
@@ -31,12 +34,12 @@ use crate::{
     },
     types::block::{
         address::{AccountAddress, Address, NftAddress},
-        output::Output,
+        output::{Output, OutputError},
         payload::signed_transaction::SignedTransactionPayload,
         protocol::ProtocolParameters,
-        signature::{Ed25519Signature, Signature},
-        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError,
+        signature::{Ed25519Signature, Signature, SignatureError},
+        unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, UnlockError, Unlocks},
+        BlockError,
     },
 };
 
@@ -64,7 +67,7 @@ pub enum Error {
     UnsupportedOperation,
     /// Block error
     #[error("{0}")]
-    Block(Box<crate::types::block::Error>),
+    Block(#[from] BlockError),
     /// Missing input with ed25519 address
     #[error("missing input with ed25519 address")]
     MissingInputWithEd25519Address,
@@ -76,7 +79,7 @@ pub enum Error {
     Bip32ChainMismatch,
     /// Unpack error
     #[error("{0}")]
-    Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),
+    Unpack(#[from] packable::error::UnpackError<BlockError, UnexpectedEOF>),
     /// No available inputs provided
     #[error("No available inputs provided")]
     NoAvailableInputsProvided,
@@ -85,11 +88,7 @@ pub enum Error {
     ExpirationDeadzone,
 }
 
-impl From<crate::types::block::Error> for Error {
-    fn from(error: crate::types::block::Error) -> Self {
-        Self::Block(Box::new(error))
-    }
-}
+crate::impl_from_error_via!(Error via BlockError: OutputError, UnlockError, SignatureError);
 
 // map most errors to a single error but there are some errors that
 // need special care.
@@ -231,7 +230,7 @@ impl SecretManage for LedgerSecretManager {
         drop(lock);
 
         // Unpack and return signature.
-        return match Unlock::unpack_bytes_verified(signature_bytes, &())? {
+        return match Unlock::unpack_bytes_verified(signature_bytes, &()).coerce()? {
             Unlock::Signature(s) => match *s {
                 SignatureUnlock(Signature::Ed25519(signature)) => Ok(signature),
             },
@@ -390,7 +389,7 @@ impl SecretManage for LedgerSecretManager {
         // unpack signature to unlocks
         let mut unlocks = Vec::new();
         for _ in 0..input_len {
-            let unlock = Unlock::unpack_bytes_verified(&signature_bytes, &())?;
+            let unlock = Unlock::unpack_bytes_verified(&signature_bytes, &()).coerce()?;
             // The ledger nano can return the same SignatureUnlocks multiple times, so only insert it once
             match unlock {
                 Unlock::Signature(_) => {

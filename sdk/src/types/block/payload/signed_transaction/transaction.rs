@@ -5,22 +5,25 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
-use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
+use packable::{
+    bounded::BoundedU16,
+    prefix::{BoxedSlicePrefix, UnpackPrefixError},
+    Packable, PackableExt,
+};
 
 use crate::{
     types::block::{
         capabilities::{Capabilities, CapabilityFlag},
         context_input::{ContextInput, ContextInputs},
-        input::{Input, INPUT_COUNT_RANGE},
+        input::{Input, InputError, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{Output, OutputCommitmentProof, OutputIdProof, ProofError, OUTPUT_COUNT_RANGE},
+        output::{Output, OutputCommitmentProof, OutputError, OutputIdProof, ProofError, OUTPUT_COUNT_RANGE},
         payload::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
-            OptionalPayload, Payload,
+            OptionalPayload, Payload, PayloadError,
         },
         protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
         slot::SlotIndex,
-        Error,
     },
     utils::merkle_hasher,
 };
@@ -128,12 +131,12 @@ impl TransactionBuilder {
     pub fn finish_with_params<'a>(
         self,
         params: impl Into<Option<&'a ProtocolParameters>>,
-    ) -> Result<Transaction, Error> {
+    ) -> Result<Transaction, PayloadError> {
         let params = params.into();
 
         if let Some(protocol_parameters) = params {
             if self.network_id != protocol_parameters.network_id() {
-                return Err(Error::NetworkIdMismatch {
+                return Err(PayloadError::NetworkIdMismatch {
                     expected: protocol_parameters.network_id(),
                     actual: self.network_id,
                 });
@@ -156,13 +159,13 @@ impl TransactionBuilder {
                 let creation_slot = None;
                 creation_slot
             })
-            .ok_or(Error::InvalidField("creation slot"))?;
+            .ok_or(PayloadError::MissingCreationSlot)?;
 
         let inputs: BoxedSlicePrefix<Input, InputCount> = self
             .inputs
             .into_boxed_slice()
             .try_into()
-            .map_err(Error::InvalidInputCount)?;
+            .map_err(PayloadError::InvalidInputCount)?;
 
         verify_inputs(&inputs)?;
 
@@ -178,7 +181,7 @@ impl TransactionBuilder {
             .outputs
             .into_boxed_slice()
             .try_into()
-            .map_err(Error::InvalidOutputCount)?;
+            .map_err(PayloadError::InvalidOutputCount)?;
 
         if let Some(protocol_parameters) = params {
             verify_outputs(&outputs, protocol_parameters)?;
@@ -198,7 +201,7 @@ impl TransactionBuilder {
 
     /// Finishes a [`TransactionBuilder`] into a [`Transaction`] without protocol
     /// validation.
-    pub fn finish(self) -> Result<Transaction, Error> {
+    pub fn finish(self) -> Result<Transaction, PayloadError> {
         self.finish_with_params(None)
     }
 }
@@ -208,7 +211,7 @@ pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUT
 
 /// A transaction consuming inputs, creating outputs and carrying an optional payload.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = PayloadError)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct Transaction {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
@@ -218,15 +221,33 @@ pub struct Transaction {
     creation_slot: SlotIndex,
     context_inputs: ContextInputs,
     #[packable(verify_with = verify_inputs_packable)]
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
+    #[packable(unpack_error_with = unpack_inputs_err)]
     inputs: BoxedSlicePrefix<Input, InputCount>,
     allotments: ManaAllotments,
     capabilities: TransactionCapabilities,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
     #[packable(verify_with = verify_outputs)]
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
+    #[packable(unpack_error_with = unpack_outputs_err)]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
+}
+
+fn unpack_inputs_err<E: Into<<InputCount as TryFrom<usize>>::Error>>(
+    e: UnpackPrefixError<InputError, E>,
+) -> PayloadError {
+    match e {
+        UnpackPrefixError::Item(i) => i.into(),
+        UnpackPrefixError::Prefix(p) => PayloadError::InvalidInputCount(p.into()),
+    }
+}
+
+fn unpack_outputs_err<E: Into<<OutputCount as TryFrom<usize>>::Error>>(
+    e: UnpackPrefixError<OutputError, E>,
+) -> PayloadError {
+    match e {
+        UnpackPrefixError::Item(i) => i.into(),
+        UnpackPrefixError::Prefix(p) => PayloadError::InvalidOutputCount(p.into()),
+    }
 }
 
 impl Transaction {
@@ -340,11 +361,11 @@ impl WorkScore for Transaction {
     }
 }
 
-fn verify_network_id(network_id: &u64, visitor: &ProtocolParameters) -> Result<(), Error> {
+fn verify_network_id(network_id: &u64, visitor: &ProtocolParameters) -> Result<(), PayloadError> {
     let expected = visitor.network_id();
 
     if *network_id != expected {
-        return Err(Error::NetworkIdMismatch {
+        return Err(PayloadError::NetworkIdMismatch {
             expected,
             actual: *network_id,
         });
@@ -353,37 +374,37 @@ fn verify_network_id(network_id: &u64, visitor: &ProtocolParameters) -> Result<(
     Ok(())
 }
 
-fn verify_inputs(inputs: &[Input]) -> Result<(), Error> {
+fn verify_inputs(inputs: &[Input]) -> Result<(), PayloadError> {
     let mut seen_utxos = HashSet::new();
 
     for input in inputs.iter() {
         let Input::Utxo(utxo) = input;
         if !seen_utxos.insert(utxo) {
-            return Err(Error::DuplicateUtxo(*utxo));
+            return Err(PayloadError::DuplicateUtxo(*utxo));
         }
     }
 
     Ok(())
 }
 
-fn verify_inputs_packable(inputs: &[Input], _visitor: &ProtocolParameters) -> Result<(), Error> {
+fn verify_inputs_packable(inputs: &[Input], _visitor: &ProtocolParameters) -> Result<(), PayloadError> {
     verify_inputs(inputs)?;
     Ok(())
 }
 
-fn verify_payload(payload: &OptionalPayload) -> Result<(), Error> {
+fn verify_payload(payload: &OptionalPayload) -> Result<(), PayloadError> {
     match &payload.0 {
         Some(Payload::TaggedData(_)) | None => Ok(()),
-        Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
+        Some(payload) => Err(PayloadError::InvalidPayloadKind(payload.kind())),
     }
 }
 
-fn verify_payload_packable(payload: &OptionalPayload, _visitor: &ProtocolParameters) -> Result<(), Error> {
+fn verify_payload_packable(payload: &OptionalPayload, _visitor: &ProtocolParameters) -> Result<(), PayloadError> {
     verify_payload(payload)?;
     Ok(())
 }
 
-fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
+fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), PayloadError> {
     let mut amount_sum: u64 = 0;
     let mut chain_ids = HashSet::new();
 
@@ -399,16 +420,18 @@ fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<()
 
         amount_sum = amount_sum
             .checked_add(amount)
-            .ok_or(Error::InvalidTransactionAmountSum(amount_sum as u128 + amount as u128))?;
+            .ok_or(PayloadError::InvalidTransactionAmountSum(
+                amount_sum as u128 + amount as u128,
+            ))?;
 
         // Accumulated output balance must not exceed the total supply of tokens.
         if amount_sum > visitor.token_supply() {
-            return Err(Error::InvalidTransactionAmountSum(amount_sum as u128));
+            return Err(PayloadError::InvalidTransactionAmountSum(amount_sum as u128));
         }
 
         if let Some(chain_id) = chain_id {
             if !chain_id.is_null() && !chain_ids.insert(chain_id) {
-                return Err(Error::DuplicateOutputChain(chain_id));
+                return Err(PayloadError::DuplicateOutputChain(chain_id));
             }
         }
 
@@ -486,7 +509,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{payload::dto::PayloadDto, Error},
+        block::payload::{dto::PayloadDto, CandidacyAnnouncementPayload, SignedTransactionPayload},
         TryFromDto,
     };
 
@@ -527,7 +550,7 @@ pub(crate) mod dto {
     }
 
     impl TryFromDto<TransactionDto> for Transaction {
-        type Error = Error;
+        type Error = PayloadError;
 
         fn try_from_dto_with_params_inner(
             dto: TransactionDto,
@@ -536,7 +559,7 @@ pub(crate) mod dto {
             let network_id = dto
                 .network_id
                 .parse::<u64>()
-                .map_err(|_| Error::InvalidField("network_id"))?;
+                .map_err(|e| PayloadError::InvalidNetworkId(e.to_string()))?;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)
@@ -547,10 +570,14 @@ pub(crate) mod dto {
                 .with_outputs(dto.outputs);
 
             builder = if let Some(p) = dto.payload {
-                if let PayloadDto::TaggedData(i) = p {
-                    builder.with_payload(*i)
-                } else {
-                    return Err(Error::InvalidField("payload"));
+                match p {
+                    PayloadDto::TaggedData(i) => builder.with_payload(*i),
+                    PayloadDto::SignedTransaction(_) => {
+                        return Err(PayloadError::InvalidPayloadKind(SignedTransactionPayload::KIND));
+                    }
+                    PayloadDto::CandidacyAnnouncement => {
+                        return Err(PayloadError::InvalidPayloadKind(CandidacyAnnouncementPayload::KIND));
+                    }
                 }
             } else {
                 builder

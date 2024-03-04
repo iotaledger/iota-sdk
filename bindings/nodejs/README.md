@@ -71,7 +71,7 @@ Prebuild requires that the binary is in `build/Release` as though it was built w
 The following example creates a [`Client`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Client/)
 instance connected to
 the [Shimmer Testnet](https://api.testnet.shimmer.network), and retrieves the node's information by
-calling [`Client.getInfo()`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Client/#getinfo),
+calling [`Client.getNodeInfo()`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Client/#getnodeinfo),
 and then print the node's information.
 
 ```javascript
@@ -85,7 +85,7 @@ async function run() {
     });
 
     try {
-        const nodeInfo = await client.getInfo();
+        const nodeInfo = await client.getNodeInfo();
         console.log('Node info: ', nodeInfo);
     } catch (error) {
         console.error('Error: ', error);

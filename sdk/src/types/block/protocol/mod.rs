@@ -5,7 +5,8 @@
 mod samples;
 mod work_score;
 
-use core::borrow::Borrow;
+use alloc::string::FromUtf8Error;
+use core::{borrow::Borrow, convert::Infallible};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
@@ -15,17 +16,44 @@ pub use samples::{iota_mainnet_protocol_parameters, shimmer_mainnet_protocol_par
 
 pub use self::work_score::{WorkScore, WorkScoreParameters};
 use crate::types::block::{
-    address::Hrp,
+    address::{AddressError, Hrp},
     helper::network_name_to_id,
-    mana::{ManaParameters, RewardsParameters},
+    mana::{ManaError, ManaParameters, RewardsParameters},
     output::{StorageScore, StorageScoreParameters},
     slot::{EpochIndex, SlotCommitmentId, SlotIndex},
-    Error,
 };
+
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum ProtocolParametersError {
+    #[display(fmt = "invalid network name: {_0}")]
+    InvalidNetworkName(FromUtf8Error),
+    #[display(fmt = "invalid mana decay factors")]
+    InvalidManaDecayFactors,
+    InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
+    #[display(fmt = "invalid protocol parameters hash: expected {expected} but got {actual}")]
+    InvalidProtocolParametersHash {
+        expected: ProtocolParametersHash,
+        actual: ProtocolParametersHash,
+    },
+    #[from]
+    ManaParameters(ManaError),
+    #[from]
+    Address(AddressError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ProtocolParametersError {}
+
+impl From<Infallible> for ProtocolParametersError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -39,7 +67,7 @@ pub struct ProtocolParameters {
     /// The version of the protocol running.
     pub(crate) version: u8,
     /// The human friendly name of the network.
-    #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
+    #[packable(unpack_error_with = |err| ProtocolParametersError::InvalidNetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
     #[getset(skip)]
     pub(crate) network_name: StringPrefix<u8>,
@@ -300,7 +328,7 @@ pub struct CommittableAgeRange {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
     /// Minimum value of the reference Mana cost.
@@ -331,7 +359,7 @@ pub struct CongestionControlParameters {
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = ProtocolParametersError)]
 #[getset(get_copy = "pub")]
 pub struct VersionSignalingParameters {
     /// The size of the window in epochs that is used to find which version of protocol parameters was

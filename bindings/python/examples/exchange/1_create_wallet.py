@@ -6,7 +6,6 @@
 import os
 
 from dotenv import load_dotenv
-
 from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager,
                       SecretManager, SyncOptions, Wallet, WalletOptions, Bip44)
 

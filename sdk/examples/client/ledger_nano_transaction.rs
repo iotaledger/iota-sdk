@@ -20,13 +20,13 @@
 use iota_sdk::client::{
     api::GetAddressesOptions,
     secret::{ledger_nano::LedgerSecretManager, SecretManager},
-    Client, Result,
+    Client,
 };
 
 // const AMOUNT: u64 = 1_000_000;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 

@@ -10,7 +10,7 @@ use crypto::{
 use derive_more::{AsRef, Deref, From};
 use packable::Packable;
 
-use crate::types::block::{output::StorageScore, Error};
+use crate::types::block::{address::AddressError, output::StorageScore};
 
 /// An [`Address`](super::Address) derived from an Ed25519 public key.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
@@ -45,10 +45,10 @@ impl Ed25519Address {
 impl StorageScore for Ed25519Address {}
 
 impl FromStr for Ed25519Address {
-    type Err = Error;
+    type Err = AddressError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::new(prefix_hex::decode(s).map_err(Error::Hex)?))
+        Ok(Self::new(prefix_hex::decode(s).map_err(AddressError::Hex)?))
     }
 }
 

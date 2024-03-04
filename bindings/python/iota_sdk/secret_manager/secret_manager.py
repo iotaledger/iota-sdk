@@ -4,7 +4,6 @@
 from json import dumps, loads
 from typing import Optional, Union
 import humps
-
 from iota_sdk.external import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.block.block import Block, UnsignedBlock
 from iota_sdk.types.common import HexStr

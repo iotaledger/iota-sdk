@@ -4,16 +4,16 @@
 use derive_more::From;
 
 use crate::types::block::{
-    address::Address,
-    output::{StorageScore, StorageScoreParameters},
+    address::{Address, AddressError},
+    output::{unlock_condition::UnlockConditionError, StorageScore, StorageScoreParameters},
     protocol::CommittableAgeRange,
     slot::SlotIndex,
-    Error,
 };
 
 /// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
 /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[packable(unpack_error = UnlockConditionError)]
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
     #[packable(verify_with = verify_return_address)]
@@ -29,7 +29,10 @@ impl ExpirationUnlockCondition {
 
     /// Creates a new [`ExpirationUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: impl Into<Address>, slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
+    pub fn new(
+        return_address: impl Into<Address>,
+        slot_index: impl Into<SlotIndex>,
+    ) -> Result<Self, UnlockConditionError> {
         let slot_index = slot_index.into();
         let return_address = return_address.into();
 
@@ -95,18 +98,18 @@ impl StorageScore for ExpirationUnlockCondition {
 }
 
 #[inline]
-fn verify_return_address(return_address: &Address) -> Result<(), Error> {
+fn verify_return_address(return_address: &Address) -> Result<(), UnlockConditionError> {
     if return_address.is_implicit_account_creation() {
-        Err(Error::InvalidAddressKind(return_address.kind()))
+        Err(AddressError::InvalidAddressKind(return_address.kind()).into())
     } else {
         Ok(())
     }
 }
 
 #[inline]
-fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), Error> {
+fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), UnlockConditionError> {
     if *slot_index == 0 {
-        Err(Error::ExpirationUnlockConditionZero)
+        Err(UnlockConditionError::ExpirationUnlockConditionZero)
     } else {
         Ok(())
     }
@@ -117,7 +120,6 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -139,10 +141,10 @@ pub(crate) mod dto {
     }
 
     impl TryFrom<ExpirationUnlockConditionDto> for ExpirationUnlockCondition {
-        type Error = Error;
+        type Error = UnlockConditionError;
 
-        fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.return_address, value.slot).map_err(|_| Error::InvalidField("expirationUnlockCondition"))
+        fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, UnlockConditionError> {
+            Self::new(value.return_address, value.slot)
         }
     }
 

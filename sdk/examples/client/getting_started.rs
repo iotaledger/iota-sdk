@@ -7,17 +7,17 @@
 //! cargo run --release --example client_getting_started
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::Client;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::builder()
         .with_node("https://api.testnet.shimmer.network")? // Insert your node URL here
         .finish()
         .await?;
 
-    let info = client.get_info().await?;
-    println!("Node Info: {info:?}");
+    let node_info = client.get_node_info().await?;
+    println!("Node Info: {node_info:?}");
 
     Ok(())
 }

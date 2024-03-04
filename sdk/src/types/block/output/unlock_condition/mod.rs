@@ -10,6 +10,7 @@ mod storage_deposit_return;
 mod timelock;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use core::convert::Infallible;
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
@@ -24,22 +25,51 @@ pub use self::{
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
 use crate::types::block::{
-    address::{Address, AddressCapabilityFlag, RestrictedAddress},
+    address::{Address, AddressCapabilityFlag, AddressError, RestrictedAddress},
     output::{
         feature::NativeTokenFeature, AccountOutput, AnchorOutput, DelegationOutput, NftOutput, StorageScore,
         StorageScoreParameters,
     },
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore},
     slot::SlotIndex,
-    Error,
 };
+
+#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
+#[allow(missing_docs)]
+pub enum UnlockConditionError {
+    #[display(fmt = "invalid unlock condition kind: {_0}")]
+    InvalidUnlockConditionKind(u8),
+    #[display(fmt = "invalid unlock condition count: {_0}")]
+    InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
+    #[display(fmt = "expiration unlock condition with slot index set to 0")]
+    ExpirationUnlockConditionZero,
+    #[display(fmt = "timelock unlock condition with slot index set to 0")]
+    TimelockUnlockConditionZero,
+    #[display(fmt = "unlock conditions are not unique and/or sorted")]
+    UnlockConditionsNotUniqueSorted,
+    #[display(fmt = "disallowed unlock condition at index {index} with kind {kind}")]
+    DisallowedUnlockCondition { index: usize, kind: u8 },
+    #[display(fmt = "missing slot index")]
+    MissingSlotIndex,
+    #[from]
+    Address(AddressError),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for UnlockConditionError {}
+
+impl From<Infallible> for UnlockConditionError {
+    fn from(error: Infallible) -> Self {
+        match error {}
+    }
+}
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
-#[packable(unpack_error = Error)]
+#[packable(unpack_error = UnlockConditionError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = Error::InvalidUnlockConditionKind)]
+#[packable(tag_type = u8, with_error = UnlockConditionError::InvalidUnlockConditionKind)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     #[packable(tag = AddressUnlockCondition::KIND)]
@@ -163,14 +193,14 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditionFlags::ALL_
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidUnlockConditionCount(p.into())))]
+#[packable(unpack_error = UnlockConditionError, with = |e| e.unwrap_item_err_or_else(|p| UnlockConditionError::InvalidUnlockConditionCount(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct UnlockConditions(
     #[packable(verify_with = verify_unique_sorted_packable)] BoxedSlicePrefix<UnlockCondition, UnlockConditionCount>,
 );
 
 impl TryFrom<Vec<UnlockCondition>> for UnlockConditions {
-    type Error = Error;
+    type Error = UnlockConditionError;
 
     #[inline(always)]
     fn try_from(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Self::Error> {
@@ -179,7 +209,7 @@ impl TryFrom<Vec<UnlockCondition>> for UnlockConditions {
 }
 
 impl TryFrom<BTreeSet<UnlockCondition>> for UnlockConditions {
-    type Error = Error;
+    type Error = UnlockConditionError;
 
     #[inline(always)]
     fn try_from(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Self::Error> {
@@ -198,10 +228,10 @@ impl IntoIterator for UnlockConditions {
 
 impl UnlockConditions {
     /// Creates a new [`UnlockConditions`] from a vec.
-    pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
+    pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, UnlockConditionError> {
         let mut unlock_conditions =
             BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(unlock_conditions.into_boxed_slice())
-                .map_err(Error::InvalidUnlockConditionCount)?;
+                .map_err(UnlockConditionError::InvalidUnlockConditionCount)?;
 
         unlock_conditions.sort_by_key(UnlockCondition::kind);
         // Sort is obviously fine now but uniqueness still needs to be checked.
@@ -211,13 +241,13 @@ impl UnlockConditions {
     }
 
     /// Creates a new [`UnlockConditions`] from an ordered set.
-    pub fn from_set(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, Error> {
+    pub fn from_set(unlock_conditions: BTreeSet<UnlockCondition>) -> Result<Self, UnlockConditionError> {
         Ok(Self(
             unlock_conditions
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(Error::InvalidUnlockConditionCount)?,
+                .map_err(UnlockConditionError::InvalidUnlockConditionCount)?,
         ))
     }
 
@@ -307,9 +337,9 @@ impl UnlockConditions {
         address: &'a Address,
         slot_index: impl Into<Option<SlotIndex>>,
         committable_age_range: CommittableAgeRange,
-    ) -> Result<Option<&'a Address>, Error> {
+    ) -> Result<Option<&'a Address>, UnlockConditionError> {
         let address = if let Some(expiration) = self.expiration() {
-            let slot_index = slot_index.into().ok_or(Error::MissingSlotIndex)?;
+            let slot_index = slot_index.into().ok_or(UnlockConditionError::MissingSlotIndex)?;
             expiration.return_address_expired(address, slot_index, committable_age_range)
         } else {
             Some(address)
@@ -342,26 +372,29 @@ impl StorageScore for UnlockConditions {
 }
 
 #[inline]
-fn verify_unique_sorted(unlock_conditions: &[UnlockCondition]) -> Result<(), Error> {
+fn verify_unique_sorted(unlock_conditions: &[UnlockCondition]) -> Result<(), UnlockConditionError> {
     if !is_unique_sorted(unlock_conditions.iter().map(UnlockCondition::kind)) {
-        Err(Error::UnlockConditionsNotUniqueSorted)
+        Err(UnlockConditionError::UnlockConditionsNotUniqueSorted)
     } else {
         Ok(())
     }
 }
 
 #[inline]
-fn verify_unique_sorted_packable(unlock_conditions: &[UnlockCondition], _: &ProtocolParameters) -> Result<(), Error> {
+fn verify_unique_sorted_packable(
+    unlock_conditions: &[UnlockCondition],
+    _: &ProtocolParameters,
+) -> Result<(), UnlockConditionError> {
     verify_unique_sorted(unlock_conditions)
 }
 
 pub(crate) fn verify_allowed_unlock_conditions(
     unlock_conditions: &UnlockConditions,
     allowed_unlock_conditions: UnlockConditionFlags,
-) -> Result<(), Error> {
+) -> Result<(), UnlockConditionError> {
     for (index, unlock_condition) in unlock_conditions.iter().enumerate() {
         if !allowed_unlock_conditions.contains(unlock_condition.flag()) {
-            return Err(Error::UnallowedUnlockCondition {
+            return Err(UnlockConditionError::DisallowedUnlockCondition {
                 index,
                 kind: unlock_condition.kind(),
             });
@@ -376,61 +409,52 @@ pub(crate) fn verify_restricted_addresses(
     output_kind: u8,
     native_token: Option<&NativeTokenFeature>,
     mana: u64,
-) -> Result<(), Error> {
+) -> Result<(), UnlockConditionError> {
     let addresses = unlock_conditions.restricted_addresses();
 
     for address in addresses {
         if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
-            return Err(Error::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithNativeTokens,
-            ));
+            return Err(
+                AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithNativeTokens).into(),
+            );
         }
 
         if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
-            return Err(Error::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithMana,
-            ));
+            return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithMana).into());
         }
 
         if unlock_conditions.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
         {
-            return Err(Error::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithTimelock,
-            ));
+            return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithTimelock).into());
         }
 
         if unlock_conditions.expiration().is_some()
             && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
         {
-            return Err(Error::RestrictedAddressCapability(
-                AddressCapabilityFlag::OutputsWithExpiration,
-            ));
+            return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::OutputsWithExpiration).into());
         }
 
         if unlock_conditions.storage_deposit_return().is_some()
             && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
         {
-            return Err(Error::RestrictedAddressCapability(
+            return Err(AddressError::RestrictedAddressCapability(
                 AddressCapabilityFlag::OutputsWithStorageDepositReturn,
-            ));
+            )
+            .into());
         }
 
         match output_kind {
             AccountOutput::KIND if !address.has_capability(AddressCapabilityFlag::AccountOutputs) => {
-                return Err(Error::RestrictedAddressCapability(
-                    AddressCapabilityFlag::AccountOutputs,
-                ));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::AccountOutputs).into());
             }
             AnchorOutput::KIND if !address.has_capability(AddressCapabilityFlag::AnchorOutputs) => {
-                return Err(Error::RestrictedAddressCapability(AddressCapabilityFlag::AnchorOutputs));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::AnchorOutputs).into());
             }
             NftOutput::KIND if !address.has_capability(AddressCapabilityFlag::NftOutputs) => {
-                return Err(Error::RestrictedAddressCapability(AddressCapabilityFlag::NftOutputs));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::NftOutputs).into());
             }
             DelegationOutput::KIND if !address.has_capability(AddressCapabilityFlag::DelegationOutputs) => {
-                return Err(Error::RestrictedAddressCapability(
-                    AddressCapabilityFlag::DelegationOutputs,
-                ));
+                return Err(AddressError::RestrictedAddressCapability(AddressCapabilityFlag::DelegationOutputs).into());
             }
             _ => {}
         }

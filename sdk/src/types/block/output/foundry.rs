@@ -18,14 +18,13 @@ use crate::types::block::{
         account::AccountId,
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, DecayedMana, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore,
+        ChainId, DecayedMana, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputError, StorageScore,
         StorageScoreParameters, TokenId, TokenScheme,
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::TransactionFailureReason,
     slot::SlotIndex,
-    Error,
 };
 
 crate::impl_id!(
@@ -258,9 +257,9 @@ impl FoundryOutputBuilder {
     }
 
     ///
-    pub fn finish(self) -> Result<FoundryOutput, Error> {
+    pub fn finish(self) -> Result<FoundryOutput, OutputError> {
         if self.serial_number == 0 {
-            return Err(Error::InvalidFoundryZeroSerialNumber);
+            return Err(OutputError::InvalidFoundryZeroSerialNumber);
         }
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -294,7 +293,7 @@ impl FoundryOutputBuilder {
     }
 
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, OutputError> {
         Ok(Output::Foundry(self.finish()?))
     }
 }
@@ -430,13 +429,13 @@ impl FoundryOutput {
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
         target_index: SlotIndex,
-    ) -> Result<u64, Error> {
+    ) -> Result<u64, OutputError> {
         let decayed_mana = self.decayed_mana(protocol_parameters, creation_index, target_index)?;
 
         decayed_mana
             .stored
             .checked_add(decayed_mana.potential)
-            .ok_or(Error::ConsumedManaOverflow)
+            .ok_or(OutputError::ConsumedManaOverflow)
     }
 
     /// Returns the decayed stored and potential mana of the output.
@@ -445,7 +444,7 @@ impl FoundryOutput {
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,
         target_index: SlotIndex,
-    ) -> Result<DecayedMana, Error> {
+    ) -> Result<DecayedMana, OutputError> {
         let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
         let generation_amount = self.amount().saturating_sub(min_deposit);
         let potential_mana =
@@ -568,7 +567,7 @@ impl WorkScore for FoundryOutput {
 impl MinimumOutputAmount for FoundryOutput {}
 
 impl Packable for FoundryOutput {
-    type UnpackError = Error;
+    type UnpackError = OutputError;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
@@ -589,25 +588,28 @@ impl Packable for FoundryOutput {
         let amount = u64::unpack_inner(unpacker, visitor).coerce()?;
 
         let serial_number = u32::unpack_inner(unpacker, visitor).coerce()?;
-        let token_scheme = TokenScheme::unpack_inner(unpacker, visitor)?;
+        let token_scheme = TokenScheme::unpack_inner(unpacker, visitor).coerce()?;
 
-        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor)?;
+        let unlock_conditions = UnlockConditions::unpack(unpacker, visitor).coerce()?;
 
         if visitor.is_some() {
             verify_unlock_conditions(&unlock_conditions).map_err(UnpackError::Packable)?;
         }
 
-        let features = Features::unpack_inner(unpacker, visitor)?;
+        let features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
         if visitor.is_some() {
-            verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
+            verify_allowed_features(&features, Self::ALLOWED_FEATURES)
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
-        let immutable_features = Features::unpack_inner(unpacker, visitor)?;
+        let immutable_features = Features::unpack_inner(unpacker, visitor).coerce()?;
 
         if visitor.is_some() {
             verify_allowed_features(&immutable_features, Self::ALLOWED_IMMUTABLE_FEATURES)
-                .map_err(UnpackError::Packable)?;
+                .map_err(UnpackError::Packable)
+                .coerce()?;
         }
 
         Ok(Self {
@@ -621,11 +623,14 @@ impl Packable for FoundryOutput {
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), OutputError> {
     if unlock_conditions.immutable_account_address().is_none() {
-        Err(Error::MissingAddressUnlockCondition)
+        Err(OutputError::MissingAddressUnlockCondition)
     } else {
-        verify_allowed_unlock_conditions(unlock_conditions, FoundryOutput::ALLOWED_UNLOCK_CONDITIONS)
+        Ok(verify_allowed_unlock_conditions(
+            unlock_conditions,
+            FoundryOutput::ALLOWED_UNLOCK_CONDITIONS,
+        )?)
     }
 }
 
@@ -636,10 +641,7 @@ mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::block::{output::unlock_condition::UnlockCondition, Error},
-        utils::serde::string,
-    };
+    use crate::{types::block::output::unlock_condition::UnlockCondition, utils::serde::string};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -672,7 +674,7 @@ mod dto {
     }
 
     impl TryFrom<FoundryOutputDto> for FoundryOutput {
-        type Error = Error;
+        type Error = OutputError;
 
         fn try_from(dto: FoundryOutputDto) -> Result<Self, Self::Error> {
             let mut builder: FoundryOutputBuilder =

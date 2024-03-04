@@ -11,6 +11,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
@@ -299,6 +300,10 @@ fn burn_nft() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
@@ -1238,6 +1243,10 @@ fn nft_burn_should_validate_nft_sender() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
@@ -1298,6 +1307,10 @@ fn nft_burn_should_validate_nft_address() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }

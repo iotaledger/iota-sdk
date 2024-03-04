@@ -17,10 +17,9 @@ use crate::{
                     dto::{SignedTransactionPayloadDto, TransactionDto},
                     Transaction,
                 },
-                SignedTransactionPayload,
+                PayloadError, SignedTransactionPayload,
             },
             protocol::ProtocolParameters,
-            Error,
         },
         TryFromDto,
     },
@@ -68,15 +67,14 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
 }
 
 impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
-    type Error = Error;
+    type Error = PayloadError;
 
     fn try_from_dto_with_params_inner(
         dto: PreparedTransactionDataDto,
         params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            transaction: Transaction::try_from_dto_with_params_inner(dto.transaction, params)
-                .map_err(|_| Error::InvalidField("transaction"))?,
+            transaction: Transaction::try_from_dto_with_params_inner(dto.transaction, params)?,
             inputs_data: dto.inputs_data,
             remainders: dto.remainders,
             mana_rewards: dto.mana_rewards,
@@ -128,15 +126,14 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
 }
 
 impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
-    type Error = Error;
+    type Error = PayloadError;
 
     fn try_from_dto_with_params_inner(
         dto: SignedTransactionDataDto,
         params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)
-                .map_err(|_| Error::InvalidField("transaction_payload"))?,
+            payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)?,
             inputs_data: dto.inputs_data,
             mana_rewards: dto.mana_rewards,
         })

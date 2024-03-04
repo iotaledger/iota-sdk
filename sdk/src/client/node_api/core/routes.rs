@@ -17,13 +17,13 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, PermanodeInfoResponse, RoutesResponse,
-            SubmitBlockResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-            ValidatorResponse, ValidatorsResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
+            PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse, TransactionMetadataResponse,
+            UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
-            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{AccountId, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -35,13 +35,13 @@ use crate::{
 /// Info path is the exact path extension for node APIs to request their info.
 pub(crate) static INFO_PATH: &str = "api/core/v3/info";
 
-/// NodeInfo wrapper which contains the node info and the url from the node (useful when multiple nodes are used)
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+/// Contains the info and the url from the node (useful when multiple nodes are used)
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NodeInfoWrapper {
-    /// The returned node info
-    pub node_info: InfoResponse,
-    /// The url from the node which returned the node info
+pub struct NodeInfoResponse {
+    /// The returned info
+    pub info: InfoResponse,
+    /// The url from the node which returned the info
     pub url: String,
 }
 
@@ -84,7 +84,7 @@ impl ClientInner {
 
     /// Returns general information about the node.
     /// GET /api/core/v3/info
-    pub async fn get_info(&self) -> Result<NodeInfoWrapper> {
+    pub async fn get_node_info(&self) -> Result<NodeInfoResponse> {
         self.get_request(INFO_PATH, None, false).await
     }
 }
@@ -264,7 +264,7 @@ impl Client {
 
     /// Finds an output with its metadata by output ID.
     /// GET /api/core/v3/outputs/{outputId}/full
-    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadataResponse> {
         let path = &format!("api/core/v3/outputs/{output_id}/full");
 
         self.get_request(path, None, false).await
@@ -312,80 +312,66 @@ impl Client {
 
     // Commitments routes.
 
-    // TODO: rename this to `get_commitment`
-    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Finds a slot commitment by its ID and returns it as object.
     /// GET /api/core/v3/commitments/{commitmentId}
-    pub async fn get_slot_commitment_by_id(&self, slot_commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
-        let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
+    pub async fn get_commitment(&self, commitment_id: &SlotCommitmentId) -> Result<SlotCommitment> {
+        let path = &format!("api/core/v3/commitments/{commitment_id}");
 
         self.get_request(path, None, false).await
     }
 
-    // TODO: rename this to `get_commitment_raw`
-    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Finds a slot commitment by its ID and returns it as raw bytes.
     /// GET /api/core/v3/commitments/{commitmentId}
-    pub async fn get_slot_commitment_by_id_raw(&self, slot_commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v3/commitments/{slot_commitment_id}");
+    pub async fn get_commitment_raw(&self, commitment_id: &SlotCommitmentId) -> Result<Vec<u8>> {
+        let path = &format!("api/core/v3/commitments/{commitment_id}");
 
         self.get_request_bytes(path, None).await
     }
 
-    // TODO: rename this to `get_utxo_changes`
-    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Get all UTXO changes of a given slot by slot commitment ID.
     /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-    pub async fn get_utxo_changes_by_slot_commitment_id(
-        &self,
-        slot_commitment_id: &SlotCommitmentId,
-    ) -> Result<UtxoChangesResponse> {
-        let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes");
+    pub async fn get_utxo_changes(&self, commitment_id: &SlotCommitmentId) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/{commitment_id}/utxo-changes");
 
         self.get_request(path, None, false).await
     }
 
-    // TODO: rename this to `get_utxo_changes_full`
-    // https://github.com/iotaledger/iota-sdk/issues/1921
     /// Get all full UTXO changes of a given slot by slot commitment ID.
     /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
-    pub async fn get_utxo_changes_full_by_slot_commitment_id(
-        &self,
-        slot_commitment_id: &SlotCommitmentId,
-    ) -> Result<UtxoChangesFullResponse> {
-        let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes/full");
+    pub async fn get_utxo_changes_full(&self, commitment_id: &SlotCommitmentId) -> Result<UtxoChangesFullResponse> {
+        let path = &format!("api/core/v3/commitments/{commitment_id}/utxo-changes/full");
 
         self.get_request(path, None, false).await
     }
 
     /// Finds a slot commitment by slot index and returns it as object.
     /// GET /api/core/v3/commitments/by-slot/{slot}
-    pub async fn get_slot_commitment_by_slot(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
-        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}");
+    pub async fn get_commitment_by_slot(&self, slot: SlotIndex) -> Result<SlotCommitment> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot}");
 
         self.get_request(path, None, false).await
     }
 
     /// Finds a slot commitment by slot index and returns it as raw bytes.
     /// GET /api/core/v3/commitments/by-slot/{slot}
-    pub async fn get_slot_commitment_by_slot_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}");
+    pub async fn get_commitment_by_slot_raw(&self, slot: SlotIndex) -> Result<Vec<u8>> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot}");
 
         self.get_request_bytes(path, None).await
     }
 
     /// Get all UTXO changes of a given slot by its index.
     /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
-    pub async fn get_utxo_changes_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
-        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes");
+    pub async fn get_utxo_changes_by_slot(&self, slot: SlotIndex) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot}/utxo-changes");
 
         self.get_request(path, None, false).await
     }
 
     /// Get all full UTXO changes of a given slot by its index.
     /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
-    pub async fn get_utxo_changes_full_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesFullResponse> {
-        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes/full");
+    pub async fn get_utxo_changes_full_by_slot(&self, slot: SlotIndex) -> Result<UtxoChangesFullResponse> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot}/utxo-changes/full");
 
         self.get_request(path, None, false).await
     }
@@ -393,37 +379,7 @@ impl Client {
 
 impl Client {
     /// GET /api/core/v3/info endpoint
-    pub(crate) async fn get_permanode_info(mut node: Node) -> Result<PermanodeInfoResponse> {
-        log::debug!("get_permanode_info");
-        if let Some(auth) = &node.auth {
-            if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                node.url
-                    .set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
-                node.url
-                    .set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
-            }
-        }
-
-        if node.url.path().ends_with('/') {
-            node.url.set_path(&format!("{}{}", node.url.path(), INFO_PATH));
-        } else {
-            node.url.set_path(&format!("{}/{}", node.url.path(), INFO_PATH));
-        }
-
-        let resp: PermanodeInfoResponse =
-            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
-                .get(&node, DEFAULT_API_TIMEOUT)
-                .await?
-                .into_json()
-                .await?;
-
-        Ok(resp)
-    }
-
-    /// GET /api/core/v3/info endpoint
-    pub async fn get_node_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
+    pub async fn get_info(url: &str, auth: Option<NodeAuth>) -> Result<InfoResponse> {
         let mut url = crate::client::node_manager::builder::validate_url(Url::parse(url)?)?;
         if let Some(auth) = &auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
@@ -451,6 +407,36 @@ impl Client {
                     },
                     DEFAULT_API_TIMEOUT,
                 )
+                .await?
+                .into_json()
+                .await?;
+
+        Ok(resp)
+    }
+
+    /// GET /api/core/v3/info endpoint
+    pub(crate) async fn get_permanode_info(mut node: Node) -> Result<PermanodeInfoResponse> {
+        log::debug!("get_permanode_info");
+        if let Some(auth) = &node.auth {
+            if let Some((name, password)) = &auth.basic_auth_name_pwd {
+                node.url
+                    .set_username(name)
+                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                node.url
+                    .set_password(Some(password))
+                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+            }
+        }
+
+        if node.url.path().ends_with('/') {
+            node.url.set_path(&format!("{}{}", node.url.path(), INFO_PATH));
+        } else {
+            node.url.set_path(&format!("{}/{}", node.url.path(), INFO_PATH));
+        }
+
+        let resp: PermanodeInfoResponse =
+            crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
+                .get(&node, DEFAULT_API_TIMEOUT)
                 .await?
                 .into_json()
                 .await?;

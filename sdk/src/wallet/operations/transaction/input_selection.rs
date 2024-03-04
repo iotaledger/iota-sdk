@@ -30,7 +30,9 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Selects inputs for a transaction and locks them in the wallet, so they don't get used again
+    /// Selects inputs for a transaction. Locking of the inputs only happens in `submit_and_store_transaction()`, so
+    /// calling this multiple times before submitting can result in conflicting transactions.
+    /// If this gets problematic we could add a bool in the TransactionOptions to lock them here already.
     pub(crate) async fn select_inputs(
         &self,
         outputs: Vec<Output>,
@@ -60,8 +62,8 @@ where
             RemainderValueStrategy::ReuseAddress => None,
             RemainderValueStrategy::CustomAddress(address) => Some(address),
         };
-        // lock so the same inputs can't be selected in multiple transactions
-        let mut wallet_ledger = self.ledger_mut().await;
+
+        let wallet_ledger = self.ledger().await;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -151,30 +153,16 @@ where
         .with_burn(options.burn);
 
         if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
-            input_selection = input_selection.with_min_mana_allotment(
-                account_id,
-                reference_mana_cost,
-                options.allow_allotting_from_account_mana,
-            );
+            input_selection = input_selection.with_min_mana_allotment(account_id, reference_mana_cost);
         }
 
         if !options.allow_additional_input_selection {
             input_selection = input_selection.disable_additional_input_selection();
         }
 
-        if let Some(capabilities) = options.capabilities {
-            input_selection = input_selection.with_transaction_capabilities(capabilities)
-        }
-
         let prepared_transaction_data = input_selection.select()?;
 
         validate_transaction_length(&prepared_transaction_data.transaction)?;
-
-        // lock outputs so they don't get used by another transaction
-        for output in &prepared_transaction_data.inputs_data {
-            log::debug!("[TRANSACTION] locking: {}", output.output_id());
-            wallet_ledger.locked_outputs.insert(*output.output_id());
-        }
 
         Ok(prepared_transaction_data)
     }
