@@ -170,12 +170,12 @@ where
 
         // May use a previously stored secret manager if it wasn't provided
         if self.secret_manager.is_none() {
-            self.secret_manager = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.secret_manager.clone());
-            if self.secret_manager.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("secret_manager"));
-            }
+            self.secret_manager.replace(
+                loaded_wallet_builder
+                    .as_ref()
+                    .and_then(|builder| builder.secret_manager.clone())
+                    .ok_or(crate::wallet::Error::MissingParameter("secret_manager"))?,
+            );
         }
 
         let mut verify_address = false;
