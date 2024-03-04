@@ -44,7 +44,7 @@ impl SecretManage for PrivateKeySecretManager {
         _address_indexes: Range<u32>,
         _options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        Result::Ok(vec![self.0.public_key()])
+        Ok(vec![self.0.public_key()])
     }
 
     async fn generate_evm_addresses(
