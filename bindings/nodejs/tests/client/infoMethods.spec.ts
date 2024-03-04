@@ -60,13 +60,6 @@ describe.skip('Client info methods', () => {
         expect(tips.length).toBeGreaterThan(0);
     });
 
-    it('gets networkInfo', async () => {
-        const client = await makeClient();
-        const networkInfo = await client.getNetworkInfo();
-
-        expect(networkInfo.protocolParameters.bech32Hrp).toBe('rms');
-    });
-
     it('gets networkId', async () => {
         const client = await makeClient();
         const networkId = await client.getNetworkId();
@@ -88,8 +81,8 @@ describe('Offline client info methods', () => {
         const client = await Client.create({
             protocolParameters
         });
-        const networkInfo = await client.getNetworkInfo();
+        const params = await client.getProtocolParameters();
 
-        expect(networkInfo.protocolParameters).toStrictEqual(protocolParameters);
+        expect(params).toStrictEqual(protocolParameters);
     });
 })
