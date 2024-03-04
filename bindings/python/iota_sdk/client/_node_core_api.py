@@ -84,7 +84,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Accounts routes.
 
-    def get_account_congestion(self, account_id: HexStr, work_score: Optional[int]) -> CongestionResponse:
+    def get_account_congestion(self, account_id: HexStr, work_score: Optional[int] = None) -> CongestionResponse:
         """Checks if the account is ready to issue a block.
         GET /api/core/v3/accounts/{bech32Address}/congestion
         """
@@ -163,7 +163,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block
         })
 
-    def post_block_raw(self, block_bytes: List[int]) -> BlockId:
+    def post_block_raw(self, block_bytes: bytes) -> BlockId:
         """Returns the BlockId of the submitted block.
         POST /api/core/v3/blocks
 
