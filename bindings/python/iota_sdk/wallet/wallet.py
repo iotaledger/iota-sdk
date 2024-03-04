@@ -721,8 +721,7 @@ class Wallet:
 
     def wait_for_transaction_acceptance(
             self, transaction_id: TransactionId, interval=None, max_attempts=None):
-        """Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds. Returns the block id that
-        contains this transaction.
+        """Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds.
         """
         return self._call_method(
             'waitForTransactionAcceptance', {

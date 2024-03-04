@@ -13,7 +13,6 @@ pub(crate) const DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_ATTEMPTS: u64 = 80;
 
 impl Client {
     /// Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds.
-    /// Returns the block id that contains this transaction.
     pub async fn wait_for_transaction_acceptance(
         &self,
         transaction_id: &TransactionId,
