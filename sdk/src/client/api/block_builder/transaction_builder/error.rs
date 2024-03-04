@@ -68,9 +68,6 @@ pub enum TransactionBuilderError {
     /// No available inputs were provided to transaction builder.
     #[error("no available inputs provided")]
     NoAvailableInputsProvided,
-    /// Required input is forbidden.
-    #[error("required input {0} is forbidden")]
-    RequiredInputIsForbidden(OutputId),
     /// Required input is not available.
     #[error("required input {0} is not available")]
     RequiredInputIsNotAvailable(OutputId),
