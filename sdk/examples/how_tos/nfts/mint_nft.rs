@@ -81,7 +81,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let transaction = wallet.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for transaction to get accepted
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -105,7 +104,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let transaction = wallet.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for transaction to get accepted
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;

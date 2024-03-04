@@ -24,7 +24,6 @@ foundry_id = balance.foundries[0]
 transaction = wallet.prepare_destroy_foundry(foundry_id).send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get accepted
 wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(

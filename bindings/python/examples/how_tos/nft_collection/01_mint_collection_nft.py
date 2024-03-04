@@ -64,7 +64,6 @@ while nft_mint_params:
     )
     transaction = wallet.mint_nfts(chunk)
 
-    # Wait for transaction to get accepted
     wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
 

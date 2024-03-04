@@ -29,7 +29,6 @@ mint_amount = 10
 transaction = wallet.mint_native_token(token_id, mint_amount)
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get accepted
 wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(

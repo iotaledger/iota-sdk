@@ -73,7 +73,6 @@ async function run() {
         let transaction = await wallet.mintNfts([params]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get accepted
         await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(
@@ -102,7 +101,6 @@ async function run() {
         transaction = await wallet.sendOutputs([output]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get accepted
         await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(

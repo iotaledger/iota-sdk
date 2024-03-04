@@ -28,7 +28,6 @@ transaction = wallet.prepare_burn_native_token(
     token_id, burn_amount).send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get accepted
 wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(

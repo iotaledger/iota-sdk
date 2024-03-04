@@ -32,7 +32,6 @@ outputs = [SendNativeTokenParams(
 transaction = wallet.send_native_tokens(outputs, None)
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get accepted
 wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(

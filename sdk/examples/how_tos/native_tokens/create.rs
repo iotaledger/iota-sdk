@@ -46,7 +46,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let transaction = wallet.create_account_output(None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get accepted
         wallet
             .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
@@ -75,7 +74,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let transaction = wallet.create_native_token(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
-    // Wait for transaction to get accepted
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction.transaction_id, None, None)
         .await?;

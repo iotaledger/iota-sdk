@@ -25,7 +25,6 @@ if not balance.accounts:
     transaction = wallet.create_account_output(None, None)
     print(f'Transaction sent: {transaction.transaction_id}')
 
-    # Wait for transaction to get accepted
     wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
     print(
@@ -50,7 +49,6 @@ prepared_transaction = wallet.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
-# Wait for transaction to get accepted
 wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 print(
