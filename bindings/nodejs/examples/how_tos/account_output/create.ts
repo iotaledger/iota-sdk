@@ -49,12 +49,9 @@ async function run() {
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get accepted
-        const blockId = await wallet.waitForTransactionAcceptance(
-            transaction.transactionId,
-        );
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
         console.log(
-            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
 
         balance = await wallet.sync();

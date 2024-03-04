@@ -46,14 +46,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let transaction = wallet.create_account_output(None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get accepted
-        let block_id = wallet
+        wallet
             .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         println!(
-            "Tx accepted in block: {}/block/{}",
+            "Tx accepted: {}/transactions/{}",
             std::env::var("EXPLORER_URL").unwrap(),
-            block_id
+            transaction.transaction_id
         );
 
         wallet.sync(None).await?;
@@ -75,14 +74,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let transaction = wallet.create_native_token(params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
-    // Wait for transaction to get accepted
-    let block_id = wallet
+    wallet
         .wait_for_transaction_acceptance(&transaction.transaction.transaction_id, None, None)
         .await?;
+
     println!(
-        "Tx accepted in block: {}/block/{}",
+        "Tx accepted: {}/transactions/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block_id
+        transaction.transaction.transaction_id
     );
     println!("Created token: {}", transaction.token_id);
 

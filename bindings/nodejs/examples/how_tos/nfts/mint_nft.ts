@@ -73,13 +73,10 @@ async function run() {
         let transaction = await wallet.mintNfts([params]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get accepted
-        let blockId = await wallet.waitForTransactionAcceptance(
-            transaction.transactionId,
-        );
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(
-            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
         console.log('Minted NFT 1');
 
@@ -104,13 +101,10 @@ async function run() {
         transaction = await wallet.sendOutputs([output]);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        // Wait for transaction to get accepted
-        blockId = await wallet.waitForTransactionAcceptance(
-            transaction.transactionId,
-        );
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(
-            `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
 
         console.log('Minted NFT 2');
