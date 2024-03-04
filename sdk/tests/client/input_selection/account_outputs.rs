@@ -14,6 +14,7 @@ use iota_sdk::{
         output::{
             unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
         },
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
@@ -336,6 +337,10 @@ fn burn_account() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
 }
@@ -1269,6 +1274,10 @@ fn account_burn_should_validate_account_sender() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
     assert_eq!(selected.transaction.outputs().len(), 2);
@@ -1339,6 +1348,10 @@ fn account_burn_should_validate_account_address() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     // One output should be added for the remainder.
     assert_eq!(selected.transaction.outputs().len(), 2);
