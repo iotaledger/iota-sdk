@@ -49,8 +49,8 @@ basic_output = Client().build_basic_output(
 transaction = wallet.send_outputs([basic_output])
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = wallet.wait_for_transaction_acceptance(
+wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 
 print(
-    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
