@@ -32,7 +32,7 @@ use crate::{
             NativeTokensBuilder, NftOutput, NftOutputBuilder, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
-            signed_transaction::{Transaction, TransactionCapabilities},
+            signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
             TaggedDataPayload,
         },
         protocol::{CommittableAgeRange, ProtocolParameters},
@@ -160,10 +160,7 @@ impl InputSelection {
         self.available_inputs
             .retain(|input| !self.forbidden_inputs.contains(input.output_id()));
 
-        // This is to avoid a borrow of self since there is a mutable borrow in the loop already.
-        let required_inputs = std::mem::take(&mut self.required_inputs);
-
-        for required_input in required_inputs {
+        for required_input in self.required_inputs.clone() {
             // Checks that required input is not forbidden.
             if self.forbidden_inputs.contains(&required_input) {
                 return Err(Error::RequiredInputIsForbidden(required_input));
@@ -267,6 +264,19 @@ impl InputSelection {
                     Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
                     _ => unreachable!(),
                 };
+            }
+        }
+
+        // If we're burning generated mana, set the capability flag.
+        if self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
+            // Get the mana sums with generated mana to see whether there's a difference.
+            if !self
+                .transaction_capabilities
+                .has_capability(TransactionCapabilityFlag::BurnMana)
+                && input_mana < self.total_selected_mana(true)?
+            {
+                self.transaction_capabilities
+                    .add_capability(TransactionCapabilityFlag::BurnMana);
             }
         }
 
@@ -429,15 +439,6 @@ impl InputSelection {
     /// Disables selecting additional inputs.
     pub fn disable_additional_input_selection(mut self) -> Self {
         self.allow_additional_input_selection = false;
-        self
-    }
-
-    /// Sets the transaction capabilities.
-    pub fn with_transaction_capabilities(
-        mut self,
-        transaction_capabilities: impl Into<TransactionCapabilities>,
-    ) -> Self {
-        self.transaction_capabilities = transaction_capabilities.into();
         self
     }
 
