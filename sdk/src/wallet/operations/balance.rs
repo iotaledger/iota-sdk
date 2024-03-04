@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashSet;
+
 use primitive_types::U256;
 
 use crate::{
@@ -22,19 +24,6 @@ where
 {
     /// Get the balance of the wallet.
     pub async fn balance(&self) -> Result<Balance> {
-        #[cfg(not(target_family = "wasm"))]
-        {
-            let wallet = self.clone();
-            tokio::task::spawn_blocking(move || tokio::runtime::Handle::current().block_on(wallet.balance_inner()))
-                .await?
-        }
-        #[cfg(target_family = "wasm")]
-        {
-            self.balance_inner().await
-        }
-    }
-
-    async fn balance_inner(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -64,6 +53,8 @@ where
             }
         }
 
+        let mut reward_outputs = HashSet::new();
+
         for (output_id, output_data) in &wallet_ledger.unspent_outputs {
             // Check if output is from the network we're currently connected to
             if output_data.network_id != network_id {
@@ -85,11 +76,7 @@ where
                         slot_index,
                     )?;
                     // Add mana rewards
-                    // NOTE: Block here because we really don't want to yield to the executor while we are holding the
-                    // ledger lock
-                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
-                        balance.mana.rewards += response.rewards;
-                    }
+                    reward_outputs.insert(*output_id);
 
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
@@ -120,11 +107,7 @@ where
                     // Add amount
                     balance.base_coin.total += delegation.amount();
                     // Add mana rewards
-                    // NOTE: Block here because we really don't want to yield to the executor while we are holding the
-                    // ledger lock
-                    if let Ok(response) = self.client().get_output_mana_rewards(output_id, slot_index).await {
-                        balance.mana.rewards += response.rewards;
-                    }
+                    reward_outputs.insert(*output_id);
                     // Add storage deposit
                     balance.required_storage_deposit.delegation += storage_cost;
                     if !wallet_ledger.locked_outputs.contains(output_id) {
@@ -342,6 +325,14 @@ where
                     metadata,
                 },
             );
+        }
+
+        drop(wallet_ledger);
+
+        for output_id in reward_outputs {
+            if let Ok(response) = self.client().get_output_mana_rewards(&output_id, slot_index).await {
+                balance.mana.rewards += response.rewards;
+            }
         }
 
         #[cfg(not(feature = "participation"))]
