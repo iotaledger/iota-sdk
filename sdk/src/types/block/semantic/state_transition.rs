@@ -130,9 +130,11 @@ impl BasicOutput {
             return Err(TransactionFailureReason::BlockIssuerNotExpired);
         }
 
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+        if context.unlocks.is_some() {
+            if let Some(issuer) = next_state.immutable_features().issuer() {
+                if !context.unlocked_addresses.contains(issuer.address()) {
+                    return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+                }
             }
         }
 
@@ -172,9 +174,11 @@ impl StateTransitionVerifier for AccountOutput {
             }
         }
 
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+        if context.unlocks.is_some() {
+            if let Some(issuer) = next_state.immutable_features().issuer() {
+                if !context.unlocked_addresses.contains(issuer.address()) {
+                    return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+                }
             }
         }
 
@@ -351,9 +355,11 @@ impl StateTransitionVerifier for AnchorOutput {
             return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+        if context.unlocks.is_some() {
+            if let Some(issuer) = next_state.immutable_features().issuer() {
+                if !context.unlocked_addresses.contains(issuer.address()) {
+                    return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+                }
             }
         }
 
@@ -487,9 +493,11 @@ impl StateTransitionVerifier for NftOutput {
             return Err(TransactionFailureReason::NewChainOutputHasNonZeroedId);
         }
 
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+        if context.unlocks.is_some() {
+            if let Some(issuer) = next_state.immutable_features().issuer() {
+                if !context.unlocked_addresses.contains(issuer.address()) {
+                    return Err(TransactionFailureReason::IssuerFeatureNotUnlocked);
+                }
             }
         }
 

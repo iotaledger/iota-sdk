@@ -49,7 +49,7 @@ class TransactionOptions:
         remainder_value_strategy: The strategy applied for base coin remainders.
         tagged_data_payload: An optional tagged data payload.
         required_inputs: Inputs that must be used for the transaction.
-        burn: Specifies what needs to be burned during input selection.
+        burn: Specifies what needs to be burned in the transaction.
         note: A string attached to the transaction.
         allow_micro_amount: Whether to allow sending a micro amount.
         allow_additional_input_selection: Whether to allow the selection of additional inputs for this transaction.

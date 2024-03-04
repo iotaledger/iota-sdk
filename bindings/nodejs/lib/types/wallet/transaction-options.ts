@@ -20,7 +20,7 @@ export interface TransactionOptions {
     taggedDataPayload?: TaggedDataPayload;
     /** Inputs that must be used for the transaction. */
     requiredInputs?: OutputId[];
-    /** Specifies what needs to be burned during input selection. */
+    /** Specifies what needs to be burned in the transaction. */
     burn?: Burn;
     /** Optional note, that is only stored locally. */
     note?: string;
