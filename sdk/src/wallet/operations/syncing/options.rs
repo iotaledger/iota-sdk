@@ -14,9 +14,9 @@ const DEFAULT_SYNC_IMPLICIT_ACCOUNTS: bool = false;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncOptions {
-    /// Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
-    /// milestone and calling it twice "at the same time" will not return new data
-    /// When this to true, we will sync anyways, even if it's called 0ms after the las sync finished.
+    /// Syncing is usually skipped if it's called repeatedly in a short amount of time as there can only be new changes
+    /// every slot and calling it twice "at the same time" will not return new data.
+    /// When this to true, we sync anyways, even if it's called 0ms after the last sync finished.
     #[serde(default)]
     pub force_syncing: bool,
     /// Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
