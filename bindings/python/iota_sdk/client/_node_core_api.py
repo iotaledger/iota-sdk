@@ -288,7 +288,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
-    def get_included_block_raw(self, transaction_id: TransactionId) -> List[int]:
+    def get_included_block_raw(
+            self, transaction_id: TransactionId) -> List[int]:
         """Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
         GET /api/core/v3/transactions/{transactionId}/included-block
 
