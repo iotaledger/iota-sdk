@@ -285,10 +285,6 @@ export interface __GetUtxoChangesFullBySlotMethod__ {
 
 // Other routes.
 
-export interface __GetNetworkInfoMethod__ {
-    name: 'getNetworkInfo';
-}
-
 export interface __FindInputsMethod__ {
     name: 'findInputs';
     data: {

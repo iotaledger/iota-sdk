@@ -4,7 +4,6 @@
 import { ClientMethodHandler } from './client-method-handler';
 import {
     ClientOptions,
-    NetworkInfo,
     Node,
     Auth,
     AccountOutputBuilderParams,
@@ -762,17 +761,6 @@ export class Client {
     }
 
     // Other routes.
-
-    /**
-     * Get the network related information such as network_id.
-     */
-    async getNetworkInfo(): Promise<NetworkInfo> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getNetworkInfo',
-        });
-
-        return JSON.parse(response).payload;
-    }
 
     /**
      * Build an unsigned block.

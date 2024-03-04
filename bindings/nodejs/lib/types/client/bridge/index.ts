@@ -14,7 +14,6 @@ import type {
     __GetOutputWithMetadataMethod__,
     __PostBlockMethod__,
     __PostBlockRawMethod__,
-    __GetNetworkInfoMethod__,
     __GetAccountCongestionMethod__,
     __GetOutputManaRewardsMethod__,
     __GetCommitteeMethod__,
@@ -87,7 +86,6 @@ export type __ClientMethods__ =
     | __GetOutputWithMetadataMethod__
     | __PostBlockMethod__
     | __PostBlockRawMethod__
-    | __GetNetworkInfoMethod__
     | __GetAccountCongestionMethod__
     | __GetOutputManaRewardsMethod__
     | __GetCommitteeMethod__
