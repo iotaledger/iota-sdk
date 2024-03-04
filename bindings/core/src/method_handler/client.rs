@@ -186,7 +186,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetAccountCongestion { account_id, work_score } => {
             Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)
         }
-        ClientMethod::GetRewards { output_id, slot_index } => {
+        ClientMethod::GetOutputManaRewards { output_id, slot_index } => {
             Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
         }
         ClientMethod::GetValidators { page_size, cursor } => {

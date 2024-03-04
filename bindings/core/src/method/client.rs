@@ -162,7 +162,7 @@ pub enum ClientMethod {
     },
     /// Returns all the available Mana rewards of an account or delegation output in the returned range of epochs.
     #[serde(rename_all = "camelCase")]
-    GetRewards {
+    GetOutputManaRewards {
         /// Output ID of an account or delegation output.
         output_id: OutputId,
         /// A client can specify a slot index explicitly, which should be equal to the slot it uses as the commitment
@@ -205,7 +205,7 @@ pub enum ClientMethod {
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
     PostBlockRaw {
-        /// Block
+        /// Block as raw bytes
         block_bytes: Vec<u8>,
     },
     /// Get block
