@@ -173,7 +173,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Ok
         }
         ClientMethod::GetNode => Response::Node(client.get_node().await?),
-        ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
@@ -186,7 +185,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetAccountCongestion { account_id, work_score } => {
             Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)
         }
-        ClientMethod::GetRewards { output_id, slot_index } => {
+        ClientMethod::GetOutputManaRewards { output_id, slot_index } => {
             Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
         }
         ClientMethod::GetValidators { page_size, cursor } => {
