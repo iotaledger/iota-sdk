@@ -31,8 +31,6 @@ export class TransactionWithMetadata {
     blockId?: BlockId;
     /** The inclusion state of the transaction */
     inclusionState!: InclusionState;
-    /** The creation time */
-    timestamp!: string;
     /** The transaction id */
     transactionId!: TransactionId;
     /** The network id in which the transaction was sent */
