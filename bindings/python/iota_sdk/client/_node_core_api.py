@@ -112,7 +112,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Validators routes.
 
-    def get_validators(self, page_size: Optional[int], cursor: Optional[str]) -> ValidatorsResponse:
+    def get_validators(self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ValidatorsResponse:
         """Returns information of all stakers (registered validators) and if they are active, ordered by their holding stake.
         GET /api/core/v3/validators
         """
@@ -131,7 +131,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Committee routes.
 
-    def get_committee(self, epoch_index: Optional[EpochIndex]) -> CommitteeResponse:
+    def get_committee(self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
         current committee members are returned.
         GET /api/core/v3/committee/?epochIndex
