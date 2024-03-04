@@ -100,6 +100,7 @@ where
         };
 
         let mut addresses_to_sync = vec![wallet_address_with_unspent_outputs];
+
         if options.sync_implicit_accounts {
             if let Ok(implicit_account_creation_address) = self.implicit_account_creation_address().await {
                 addresses_to_sync.push(AddressWithUnspentOutputs {
