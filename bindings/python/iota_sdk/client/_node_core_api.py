@@ -96,7 +96,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # Rewards routes.
 
     def get_output_mana_rewards(
-            self, output_id: OutputId, slot_index: Optional[SlotIndex]) -> ManaRewardsResponse:
+            self, output_id: OutputId, slot_index: Optional[SlotIndex] = None) -> ManaRewardsResponse:
         """Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
         provided in the response.
         Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a

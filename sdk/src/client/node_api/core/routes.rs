@@ -129,7 +129,8 @@ impl Client {
     // Validators routes.
 
     /// Returns information of all stakers (registered validators) and if they are active, ordered by their holding
-    /// stake. GET /api/core/v3/validators
+    /// stake. 
+    /// GET /api/core/v3/validators
     pub async fn get_validators(
         &self,
         page_size: impl Into<Option<u32>> + Send,
