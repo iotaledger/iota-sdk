@@ -23,7 +23,7 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Returns an account's total voting power (voting or NOT voting).
-    pub async fn get_voting_power(&self) -> Result<u64> {
+    pub async fn get_voting_power(&self) -> Result<u64, WalletError> {
         Ok(self
             .get_voting_output()
             .await?
@@ -41,14 +41,14 @@ where
     /// cached event information, checks event milestones in there against latest network milestone).
     /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
     /// increases voting power then increases again immediately after).
-    pub async fn increase_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
+    pub async fn increase_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata, WalletError> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
 
         self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::increase_voting_power()].
-    pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
+    pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData, WalletError> {
         let (new_output, tx_options) = match self.get_voting_output().await? {
             Some(current_output_data) => {
                 let output = current_output_data.output.as_basic();
@@ -89,14 +89,14 @@ where
     /// milestones in there against latest network milestone).
     /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
     /// increases voting power then decreases immediately after).
-    pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
+    pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata, WalletError> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
 
         self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::decrease_voting_power()].
-    pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
+    pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData, WalletError> {
         let current_output_data = self
             .get_voting_output()
             .await?

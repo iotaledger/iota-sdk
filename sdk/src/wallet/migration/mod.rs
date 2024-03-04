@@ -10,10 +10,7 @@ use async_trait::async_trait;
 use once_cell::sync::Lazy;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::{
-    client::storage::StorageAdapter,
-    wallet::{Error, Result},
-};
+use crate::{client::storage::StorageAdapter, wallet::WalletError};
 
 pub(crate) const MIGRATION_VERSION_KEY: &str = "migration-version";
 
@@ -79,27 +76,27 @@ pub(crate) trait MigrationData {
 
 #[async_trait]
 pub(crate) trait Migration<S: StorageAdapter>: MigrationData {
-    async fn migrate(storage: &S) -> Result<()>;
+    async fn migrate(storage: &S) -> Result<(), WalletError>;
 }
 
 #[async_trait]
 trait DynMigration<S: StorageAdapter>: Send + Sync {
     fn version(&self) -> MigrationVersion;
 
-    async fn migrate(&self, storage: &S) -> Result<()>;
+    async fn migrate(&self, storage: &S) -> Result<(), WalletError>;
 }
 
 #[async_trait]
 impl<S: StorageAdapter, T: Migration<S> + Send + Sync> DynMigration<S> for T
 where
-    crate::wallet::Error: From<S::Error>,
+    WalletError: From<S::Error>,
     S::Error: From<serde_json::Error>,
 {
     fn version(&self) -> MigrationVersion {
         T::version()
     }
 
-    async fn migrate(&self, storage: &S) -> Result<()> {
+    async fn migrate(&self, storage: &S) -> Result<(), WalletError> {
         let version = self.version();
         log::info!("Migrating to version {}", version);
         T::migrate(storage).await?;
@@ -108,9 +105,9 @@ where
     }
 }
 
-pub async fn migrate<S: 'static + StorageAdapter>(storage: &S) -> Result<()>
+pub async fn migrate<S: 'static + StorageAdapter>(storage: &S) -> Result<(), WalletError>
 where
-    crate::wallet::Error: From<S::Error>,
+    WalletError: From<S::Error>,
     S::Error: From<serde_json::Error>,
 {
     let last_migration = storage.get::<MigrationVersion>(MIGRATION_VERSION_KEY).await?;
@@ -122,11 +119,11 @@ where
 
 fn migrations<S: 'static + StorageAdapter>(
     mut last_migration: Option<MigrationVersion>,
-) -> Result<Vec<&'static dyn DynMigration<S>>> {
+) -> Result<Vec<&'static dyn DynMigration<S>>, WalletError> {
     let migrations = MIGRATIONS
         .get::<HashMap<Option<usize>, &'static dyn DynMigration<S>>>()
         .ok_or_else(|| {
-            Error::Migration(format!(
+            WalletError::Migration(format!(
                 "invalid migration storage kind: {}",
                 std::any::type_name::<S>()
             ))
@@ -148,12 +145,12 @@ trait Convert {
     type New: Serialize + DeserializeOwned;
     type Old: DeserializeOwned;
 
-    fn check(value: &mut serde_json::Value) -> crate::wallet::Result<()> {
+    fn check(value: &mut serde_json::Value) -> Result<(), WalletError> {
         if Self::New::deserialize(&*value).is_err() {
             *value = serde_json::to_value(Self::convert(Self::Old::deserialize(&*value)?)?)?;
         }
         Ok(())
     }
 
-    fn convert(old: Self::Old) -> crate::wallet::Result<Self::New>;
+    fn convert(old: Self::Old) -> Result<Self::New, WalletError>;
 }

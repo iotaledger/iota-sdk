@@ -8,7 +8,7 @@ use crate::types::block::{
 
 /// An [`Unlock`](crate::types::block::unlock::Unlock) that refers to another unlock.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = UnlockError, with = UnlockError::InvalidReferenceIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::ReferenceIndex)]
 pub struct ReferenceUnlock(UnlockIndex);
 
 impl TryFrom<u16> for ReferenceUnlock {
@@ -26,7 +26,7 @@ impl ReferenceUnlock {
     /// Creates a new [`ReferenceUnlock`].
     #[inline(always)]
     pub fn new(index: u16) -> Result<Self, UnlockError> {
-        index.try_into().map(Self).map_err(UnlockError::InvalidReferenceIndex)
+        index.try_into().map(Self).map_err(UnlockError::ReferenceIndex)
     }
 
     /// Return the index of a [`ReferenceUnlock`].

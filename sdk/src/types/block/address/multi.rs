@@ -55,7 +55,7 @@ fn verify_address(address: &Address) -> Result<(), AddressError> {
         address,
         Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_)
     ) {
-        Err(AddressError::InvalidAddressKind(address.kind()))
+        Err(AddressError::Kind(address.kind()))
     } else {
         Ok(())
     }
@@ -63,7 +63,7 @@ fn verify_address(address: &Address) -> Result<(), AddressError> {
 
 fn verify_weight(weight: &u8) -> Result<(), AddressError> {
     if *weight == 0 {
-        Err(AddressError::InvalidAddressWeight(*weight))
+        Err(AddressError::Weight(*weight))
     } else {
         Ok(())
     }
@@ -81,7 +81,7 @@ pub struct MultiAddress {
     /// The weighted unlocked addresses.
     #[deref]
     #[packable(verify_with = verify_addresses)]
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| AddressError::InvalidWeightedAddressCount(p.into())))]
+    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| AddressError::WeightedAddressCount(p.into())))]
     addresses: BoxedSlicePrefix<WeightedAddress, WeightedAddressCount>,
     /// The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
     #[packable(verify_with = verify_threshold)]
@@ -109,7 +109,7 @@ impl MultiAddress {
         verify_threshold(&threshold)?;
 
         let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)
-            .map_err(AddressError::InvalidWeightedAddressCount)?;
+            .map_err(AddressError::WeightedAddressCount)?;
 
         let multi_address = Self { addresses, threshold };
 
@@ -152,7 +152,7 @@ fn verify_addresses(addresses: &[WeightedAddress]) -> Result<(), AddressError> {
 
 fn verify_threshold(threshold: &u16) -> Result<(), AddressError> {
     if *threshold == 0 {
-        Err(AddressError::InvalidMultiAddressThreshold(*threshold))
+        Err(AddressError::MultiAddressThreshold(*threshold))
     } else {
         Ok(())
     }
@@ -162,7 +162,7 @@ fn verify_multi_address(address: &MultiAddress) -> Result<(), AddressError> {
     let cumulative_weight = address.iter().map(|address| address.weight as u16).sum::<u16>();
 
     if cumulative_weight < address.threshold {
-        return Err(AddressError::InvalidMultiAddressCumulativeWeight {
+        return Err(AddressError::MultiAddressCumulativeWeight {
             cumulative_weight,
             threshold: address.threshold,
         });
