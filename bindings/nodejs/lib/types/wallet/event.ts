@@ -159,11 +159,11 @@ abstract class TransactionProgress {
 }
 
 /**
- * A 'selecting inputs' progress.
+ * A 'building transaction' progress.
  */
-class SelectingInputsProgress extends TransactionProgress {
+class BuildingTransactionProgress extends TransactionProgress {
     constructor() {
-        super(TransactionProgressType.SelectingInputs);
+        super(TransactionProgressType.BuildingTransaction);
     }
 }
 
@@ -249,7 +249,7 @@ export {
     TransactionInclusionWalletEvent,
     TransactionProgressWalletEvent,
     TransactionProgress,
-    SelectingInputsProgress,
+    BuildingTransactionProgress,
     GeneratingRemainderDepositAddressProgress,
     PreparedTransactionProgress,
     PreparedTransactionSigningHashProgress,

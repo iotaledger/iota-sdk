@@ -4,7 +4,7 @@
 import {
     WalletEvent,
     TransactionProgressWalletEvent,
-    SelectingInputsProgress,
+    BuildingTransactionProgress,
 } from '@iota/sdk';
 import { getUnlockedWallet } from './common';
 require('dotenv').config({ path: '.env' });
@@ -30,7 +30,9 @@ async function run() {
         await wallet.listen([], callback);
 
         await wallet.emitTestEvent(
-            new TransactionProgressWalletEvent(new SelectingInputsProgress()),
+            new TransactionProgressWalletEvent(
+                new BuildingTransactionProgress(),
+            ),
         );
 
         await wallet.destroy();
