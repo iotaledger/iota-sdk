@@ -126,7 +126,7 @@ enum TransactionProgressType {
     /** Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano. */
     PreparedTransactionSigningHash = 4,
     /** Prepared block signing input, required for blindsigning with a Ledger Nano. */
-    PrepareBlockSigningInput = 5,
+    PreparedBlockSigningInput = 5,
     /** Broadcasting. */
     Broadcasting = 6,
 }
@@ -243,7 +243,7 @@ class PreparedBlockSigningInputProgress extends TransactionProgress {
      * @param signingHash The signing hash of the block.
      */
     constructor(signingInput: Array<number>) {
-        super(TransactionProgressType.PrepareBlockSigningInput);
+        super(TransactionProgressType.PreparedBlockSigningInput);
         this.blockSigningInput = signingInput;
     }
 }
