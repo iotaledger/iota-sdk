@@ -13,9 +13,10 @@ import type {
     __GetOutputMetadataMethod__,
     __GetOutputWithMetadataMethod__,
     __PostBlockMethod__,
+    __PostBlockRawMethod__,
     __GetNetworkInfoMethod__,
     __GetAccountCongestionMethod__,
-    __GetRewardsMethod__,
+    __GetOutputManaRewardsMethod__,
     __GetCommitteeMethod__,
     __GetValidatorsMethod__,
     __GetValidatorMethod__,
@@ -31,15 +32,17 @@ import type {
     __GetProtocolParametersMethod__,
     __GetHealthMethod__,
     __GetNodeInfoMethod__,
-    __PostBlockRawMethod__,
     __GetBlockRawMethod__,
     __GetIncludedBlockMethod__,
+    __GetIncludedBlockRawMethod__,
     __GetIncludedBlockMetadataMethod__,
     __GetTransactionMetadataMethod__,
     __GetCommitmentMethod__,
+    __GetCommitmentRawMethod__,
     __GetUtxoChangesMethod__,
     __GetUtxoChangesFullMethod__,
     __GetCommitmentBySlotMethod__,
+    __GetCommitmentBySlotRawMethod__,
     __GetUtxoChangesBySlotMethod__,
     __GetUtxoChangesFullBySlotMethod__,
     __HexToBech32Method__,
@@ -83,9 +86,10 @@ export type __ClientMethods__ =
     | __GetOutputMetadataMethod__
     | __GetOutputWithMetadataMethod__
     | __PostBlockMethod__
+    | __PostBlockRawMethod__
     | __GetNetworkInfoMethod__
     | __GetAccountCongestionMethod__
-    | __GetRewardsMethod__
+    | __GetOutputManaRewardsMethod__
     | __GetCommitteeMethod__
     | __GetValidatorsMethod__
     | __GetValidatorMethod__
@@ -101,15 +105,17 @@ export type __ClientMethods__ =
     | __GetProtocolParametersMethod__
     | __GetHealthMethod__
     | __GetNodeInfoMethod__
-    | __PostBlockRawMethod__
     | __GetBlockRawMethod__
     | __GetIncludedBlockMethod__
+    | __GetIncludedBlockRawMethod__
     | __GetIncludedBlockMetadataMethod__
     | __GetTransactionMetadataMethod__
     | __GetCommitmentMethod__
+    | __GetCommitmentRawMethod__
     | __GetUtxoChangesMethod__
     | __GetUtxoChangesFullMethod__
     | __GetCommitmentBySlotMethod__
+    | __GetCommitmentBySlotRawMethod__
     | __GetUtxoChangesBySlotMethod__
     | __GetUtxoChangesFullBySlotMethod__
     | __HexToBech32Method__
