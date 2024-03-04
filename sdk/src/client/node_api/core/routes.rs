@@ -90,6 +90,8 @@ impl ClientInner {
 }
 
 impl Client {
+    // Accounts routes.
+
     /// Checks if the account is ready to issue a block.
     /// GET /api/core/v3/accounts/{bech32Address}/congestion
     pub async fn get_account_congestion(
@@ -124,22 +126,10 @@ impl Client {
         self.get_request(path, query.as_deref(), false).await
     }
 
-    // Committee routes.
-
-    /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
-    /// current committee members are returned.
-    /// GET /api/core/v3/committee/?epochIndex
-    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>> + Send) -> Result<CommitteeResponse> {
-        const PATH: &str = "api/core/v3/committee";
-        let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
-
-        self.get_request(PATH, query.as_deref(), false).await
-    }
-
     // Validators routes.
 
-    /// Returns information of all registered validators and if they are active.
-    /// GET JSON to /api/core/v3/validators
+    /// Returns information of all stakers (registered validators) and if they are active, ordered by their holding
+    /// stake. GET /api/core/v3/validators
     pub async fn get_validators(
         &self,
         page_size: impl Into<Option<u32>> + Send,
@@ -154,13 +144,25 @@ impl Client {
         self.get_request(PATH, query.as_deref(), false).await
     }
 
-    /// Return information about a validator.
+    /// Return information about a staker (registered validator).
     /// GET /api/core/v3/validators/{bech32Address}
     pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
         let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
         let path = &format!("api/core/v3/validators/{bech32_address}");
 
         self.get_request(path, None, false).await
+    }
+
+    // Committee routes.
+
+    /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+    /// current committee members are returned.
+    /// GET /api/core/v3/committee/?epochIndex
+    pub async fn get_committee(&self, epoch_index: impl Into<Option<EpochIndex>> + Send) -> Result<CommitteeResponse> {
+        const PATH: &str = "api/core/v3/committee";
+        let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
+
+        self.get_request(PATH, query.as_deref(), false).await
     }
 
     // Blocks routes.
@@ -174,7 +176,7 @@ impl Client {
     }
 
     /// Returns the BlockId of the submitted block.
-    /// POST JSON to /api/core/v3/blocks
+    /// POST /api/core/v3/blocks
     pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
