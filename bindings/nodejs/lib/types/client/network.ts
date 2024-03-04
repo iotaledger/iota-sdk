@@ -1,8 +1,6 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProtocolParameters } from '../models/api/info';
-
 /**
  * Network types.
  */
@@ -51,12 +49,4 @@ export interface Node {
     disabled?: boolean;
     /** Whether the node is a permanode or not. */
     permanode?: boolean;
-}
-
-/**
- * Struct containing network related information
- */
-export interface NetworkInfo {
-    /** Protocol parameters */
-    protocolParameters: ProtocolParameters;
 }

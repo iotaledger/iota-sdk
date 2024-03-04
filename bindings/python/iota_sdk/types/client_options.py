@@ -54,7 +54,7 @@ class ClientOptions:
         ignore_node_health (bool):
             If the node health should be ignored.
         node_sync_interval (Duration):
-            Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated.
+            Interval in which nodes will be checked for their sync status and the network info gets updated.
         quorum (bool):
             If node quorum is enabled. Will compare the responses from multiple nodes
             and only returns the response if `quorum_threshold`% of the nodes return the same one.
