@@ -12,7 +12,7 @@ export interface ClientOptions {
     nodes?: Array<string | Node>;
     /** If the node health status should be ignored */
     ignoreNodeHealth?: boolean;
-    /** Interval in which nodes will be checked for their sync status and the NetworkInfo gets updated */
+    /** Interval in which nodes will be checked for their sync status and the network info gets updated */
     nodeSyncInterval?: Duration;
     /** If node quorum is enabled. Will compare the responses from multiple nodes and only returns the
      * response if quorum_threshold of the nodes return the same one

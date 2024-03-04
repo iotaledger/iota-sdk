@@ -84,18 +84,19 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Accounts routes.
 
-    def get_account_congestion(self, account_id: HexStr) -> CongestionResponse:
+    def get_account_congestion(self, account_id: HexStr, work_score: Optional[int] = None) -> CongestionResponse:
         """Checks if the account is ready to issue a block.
         GET /api/core/v3/accounts/{bech32Address}/congestion
         """
         return CongestionResponse.from_dict(self._call_method('getAccountCongestion', {
-            'accountId': account_id
+            'accountId': account_id,
+            'workScore': work_score
         }))
 
     # Rewards routes.
 
     def get_output_mana_rewards(
-            self, output_id: OutputId, slot_index: SlotIndex) -> ManaRewardsResponse:
+            self, output_id: OutputId, slot_index: Optional[SlotIndex] = None) -> ManaRewardsResponse:
         """Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
         provided in the response.
         Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
@@ -109,22 +110,11 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotIndex': slot_index
         }))
 
-    # Committee routes.
-
-    def get_committee(self, epoch_index: EpochIndex) -> CommitteeResponse:
-        """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
-        current committee members are returned.
-        GET /api/core/v3/committee/?epochIndex
-        """
-        return CommitteeResponse.from_dict(self._call_method('getCommittee', {
-            'epochIndex': epoch_index
-        }))
-
     # Validators routes.
 
-    def get_validators(self, page_size, cursor) -> ValidatorsResponse:
-        """Returns information of all registered validators and if they are active.
-        GET JSON to /api/core/v3/validators
+    def get_validators(self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ValidatorsResponse:
+        """Returns information of all stakers (registered validators) and if they are active, ordered by their holding stake.
+        GET /api/core/v3/validators
         """
         return ValidatorsResponse.from_dict(self._call_method('getValidators', {
             'pageSize': page_size,
@@ -132,11 +122,22 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def get_validator(self, account_id: HexStr) -> ValidatorResponse:
-        """Return information about a validator.
+        """Return information about a staker (registered validator).
         GET /api/core/v3/validators/{bech32Address}
         """
         return ValidatorResponse.from_dict(self._call_method('getValidator', {
             'accountId': account_id
+        }))
+
+    # Committee routes.
+
+    def get_committee(self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
+        """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+        current committee members are returned.
+        GET /api/core/v3/committee/?epochIndex
+        """
+        return CommitteeResponse.from_dict(self._call_method('getCommittee', {
+            'epochIndex': epoch_index
         }))
 
     # Block routes.
@@ -150,7 +151,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     def post_block(self, block: Block) -> BlockId:
         """Returns the BlockId of the submitted block.
-        POST JSON to /api/core/v3/blocks
+        POST /api/core/v3/blocks
 
         Args:
             block: The block to post.
@@ -162,7 +163,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block
         })
 
-    def post_block_raw(self, block: Block) -> BlockId:
+    def post_block_raw(self, block_bytes: bytes) -> BlockId:
         """Returns the BlockId of the submitted block.
         POST /api/core/v3/blocks
 
@@ -170,7 +171,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             The corresponding block id of the block.
         """
         return self._call_method('postBlockRaw', {
-            'block': block
+            'blockBytes': block_bytes
         })
 
     def get_block(self, block_id: BlockId) -> Block:
@@ -268,7 +269,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         GET /api/core/v3/outputs/{outputId}/full
 
         Returns:
-            The corresponding output.
+            The corresponding output with its metadata.
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
