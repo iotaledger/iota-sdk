@@ -10,7 +10,7 @@ mod constants;
 // };
 use iota_sdk::client::{Client, Result};
 
-pub use self::constants::*;
+pub use self::constants::{DEFAULT_MNEMONIC, FAUCET_URL, NODE_LOCAL};
 
 /// Sets up a Client with node health ignored.
 pub async fn setup_client_with_node_health_ignored() -> Client {
