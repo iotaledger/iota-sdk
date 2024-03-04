@@ -11,7 +11,7 @@ import {
 import { DecayedMana, HexEncodedString, u256, u64 } from '../utils';
 import { ClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
-import { Bech32Address } from '../block';
+import { Bech32Address, SlotIndex } from '../block';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {
@@ -163,10 +163,10 @@ export interface NftSyncOptions {
 
 /** Options to filter outputs */
 export interface FilterOptions {
-    /** Filter all outputs where the booked milestone index is below the specified timestamp */
-    lowerBoundBookedTimestamp?: number;
-    /** Filter all outputs where the booked milestone index is above the specified timestamp */
-    upperBoundBookedTimestamp?: number;
+    /** Filter all outputs where the included slot is below the specified slot */
+    includedBelowSlot?: SlotIndex;
+    /** Filter all outputs where the included slot is above the specified slot */
+    includedAboveSlot?: SlotIndex;
     /** Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6) */
     outputTypes?: number[];
     /** Return all account outputs matching these IDs. */

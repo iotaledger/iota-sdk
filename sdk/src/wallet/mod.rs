@@ -79,6 +79,7 @@ use crate::{
         block::{
             output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata},
             payload::signed_transaction::{SignedTransactionPayload, TransactionId},
+            slot::SlotIndex,
         },
     },
     wallet::types::InclusionState,
@@ -91,10 +92,10 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
-    /// Filter all outputs where the booked milestone index is below the specified timestamp
-    pub lower_bound_booked_timestamp: Option<u32>,
-    /// Filter all outputs where the booked milestone index is above the specified timestamp
-    pub upper_bound_booked_timestamp: Option<u32>,
+    /// Filter all outputs where the included slot is below the specified slot.
+    pub included_below_slot: Option<SlotIndex>,
+    /// Filter all outputs where the included slot is above the specified slot.
+    pub included_above_slot: Option<SlotIndex>,
     /// Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
     /// Return all account outputs matching these IDs.
