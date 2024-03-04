@@ -104,8 +104,6 @@ pub enum ClientMethod {
     },
     /// Get a node candidate from the healthy node pool.
     GetNode,
-    /// Gets the network related information such as network_id.
-    GetNetworkInfo,
     /// Gets the network id of the node we're connecting to.
     GetNetworkId,
     /// Returns the bech32_hrp
