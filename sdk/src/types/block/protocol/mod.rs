@@ -1,12 +1,12 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod error;
 #[cfg(feature = "protocol_parameters_samples")]
 mod samples;
 mod work_score;
 
-use alloc::string::FromUtf8Error;
-use core::{borrow::Borrow, convert::Infallible};
+use core::borrow::Borrow;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
@@ -14,42 +14,17 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 #[cfg(feature = "protocol_parameters_samples")]
 pub use samples::{iota_mainnet_protocol_parameters, shimmer_mainnet_protocol_parameters};
 
-pub use self::work_score::{WorkScore, WorkScoreParameters};
+pub use self::{
+    error::ProtocolParametersError,
+    work_score::{WorkScore, WorkScoreParameters},
+};
 use crate::types::block::{
-    address::{AddressError, Hrp},
+    address::Hrp,
     helper::network_name_to_id,
-    mana::{ManaError, ManaParameters, RewardsParameters},
+    mana::{ManaParameters, RewardsParameters},
     output::{StorageScore, StorageScoreParameters},
     slot::{EpochIndex, SlotCommitmentId, SlotIndex},
 };
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
-#[allow(missing_docs)]
-pub enum ProtocolParametersError {
-    #[display(fmt = "invalid network name: {_0}")]
-    InvalidNetworkName(FromUtf8Error),
-    #[display(fmt = "invalid mana decay factors")]
-    InvalidManaDecayFactors,
-    InvalidStringPrefix(<u8 as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid protocol parameters hash: expected {expected} but got {actual}")]
-    InvalidProtocolParametersHash {
-        expected: ProtocolParametersHash,
-        actual: ProtocolParametersHash,
-    },
-    #[from]
-    ManaParameters(ManaError),
-    #[from]
-    Address(AddressError),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ProtocolParametersError {}
-
-impl From<Infallible> for ProtocolParametersError {
-    fn from(error: Infallible) -> Self {
-        match error {}
-    }
-}
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -67,7 +42,7 @@ pub struct ProtocolParameters {
     /// The version of the protocol running.
     pub(crate) version: u8,
     /// The human friendly name of the network.
-    #[packable(unpack_error_with = |err| ProtocolParametersError::InvalidNetworkName(err.into_item_err()))]
+    #[packable(unpack_error_with = |err| ProtocolParametersError::NetworkName(err.into_item_err()))]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
     #[getset(skip)]
     pub(crate) network_name: StringPrefix<u8>,

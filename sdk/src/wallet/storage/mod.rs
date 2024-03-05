@@ -23,7 +23,7 @@ use zeroize::Zeroizing;
 use self::adapter::DynStorageAdapter;
 pub(crate) use self::manager::StorageManager;
 pub use self::{kind::StorageKind, options::StorageOptions};
-use crate::client::storage::StorageAdapter;
+use crate::{client::storage::StorageAdapter, wallet::WalletError};
 
 #[derive(Debug)]
 pub struct Storage {
@@ -33,7 +33,7 @@ pub struct Storage {
 
 #[async_trait]
 impl StorageAdapter for Storage {
-    type Error = crate::wallet::Error;
+    type Error = WalletError;
 
     async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error> {
         match self.inner.as_ref().get_bytes(key).await? {

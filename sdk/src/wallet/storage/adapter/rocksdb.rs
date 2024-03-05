@@ -6,7 +6,7 @@ use std::{path::Path, sync::Arc};
 use rocksdb::{DBCompressionType, Options, DB};
 use tokio::sync::Mutex;
 
-use crate::client::storage::StorageAdapter;
+use crate::{client::storage::StorageAdapter, wallet::WalletError};
 
 /// Key value storage adapter.
 #[derive(Clone, Debug)]
@@ -16,7 +16,7 @@ pub struct RocksdbStorageAdapter {
 
 impl RocksdbStorageAdapter {
     /// Initialises the storage adapter.
-    pub fn new(path: impl AsRef<Path>) -> crate::wallet::Result<Self> {
+    pub fn new(path: impl AsRef<Path>) -> Result<Self, WalletError> {
         let mut opts = Options::default();
         opts.set_compression_type(DBCompressionType::Lz4);
         opts.create_if_missing(true);
@@ -30,18 +30,18 @@ impl RocksdbStorageAdapter {
 
 #[async_trait::async_trait]
 impl StorageAdapter for RocksdbStorageAdapter {
-    type Error = crate::wallet::Error;
+    type Error = WalletError;
 
-    async fn get_bytes(&self, key: &str) -> crate::wallet::Result<Option<Vec<u8>>> {
+    async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, WalletError> {
         Ok(self.db.lock().await.get(key)?)
     }
 
-    async fn set_bytes(&self, key: &str, record: &[u8]) -> crate::wallet::Result<()> {
+    async fn set_bytes(&self, key: &str, record: &[u8]) -> Result<(), WalletError> {
         self.db.lock().await.put(key, record)?;
         Ok(())
     }
 
-    async fn delete(&self, key: &str) -> crate::wallet::Result<()> {
+    async fn delete(&self, key: &str) -> Result<(), WalletError> {
         self.db.lock().await.delete(key)?;
         Ok(())
     }

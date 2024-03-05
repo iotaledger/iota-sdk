@@ -16,7 +16,7 @@ pub(crate) type UnlocksCount = WeightedAddressCount;
 
 /// Unlocks a [`MultiAddress`](crate::types::block::address::MultiAddress) with a list of other unlocks.
 #[derive(Clone, Debug, Deref, Eq, PartialEq, Hash, Packable)]
-#[packable(unpack_error = UnlockError, with = |e| e.unwrap_item_err_or_else(|p| UnlockError::InvalidMultiUnlockCount(p.into())))]
+#[packable(unpack_error = UnlockError, with = |e| e.unwrap_item_err_or_else(|p| UnlockError::MultiUnlockCount(p.into())))]
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
 
 impl MultiUnlock {
@@ -31,8 +31,7 @@ impl MultiUnlock {
         verify_unlocks(&unlocks)?;
 
         Ok(Self(
-            BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks)
-                .map_err(UnlockError::InvalidMultiUnlockCount)?,
+            BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks).map_err(UnlockError::MultiUnlockCount)?,
         ))
     }
 

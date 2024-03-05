@@ -8,7 +8,7 @@ use crate::types::block::{
 
 /// Points to the unlock of a consumed account output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = UnlockError, with = UnlockError::InvalidAccountIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::AccountIndex)]
 pub struct AccountUnlock(
     /// Index of input and unlock corresponding to an [`AccountOutput`](crate::types::block::output::AccountOutput).
     UnlockIndex,
@@ -21,7 +21,7 @@ impl AccountUnlock {
     /// Creates a new [`AccountUnlock`].
     #[inline(always)]
     pub fn new(index: u16) -> Result<Self, UnlockError> {
-        index.try_into().map(Self).map_err(UnlockError::InvalidAccountIndex)
+        index.try_into().map(Self).map_err(UnlockError::AccountIndex)
     }
 
     /// Return the index of an [`AccountUnlock`].
