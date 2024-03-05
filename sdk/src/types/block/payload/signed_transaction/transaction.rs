@@ -187,7 +187,7 @@ impl TransactionBuilder {
             verify_outputs(&outputs, protocol_parameters)?;
         }
 
-        Ok(Transaction {
+        let transaction = Transaction {
             network_id: self.network_id,
             creation_slot,
             context_inputs: ContextInputs::from_vec(self.context_inputs)?,
@@ -196,7 +196,13 @@ impl TransactionBuilder {
             capabilities: self.capabilities,
             payload: self.payload,
             outputs,
-        })
+        };
+
+        if let Some(protocol_parameters) = params {
+            verify_transaction(&transaction, protocol_parameters)?;
+        }
+
+        Ok(transaction)
     }
 
     /// Finishes a [`TransactionBuilder`] into a [`Transaction`] without protocol
@@ -213,6 +219,7 @@ pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUT
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = PayloadError)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_transaction)]
 pub struct Transaction {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
@@ -436,6 +443,20 @@ fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<()
         }
 
         output.verify_storage_deposit(visitor.storage_score_parameters())?;
+    }
+
+    Ok(())
+}
+
+fn verify_transaction(transaction: &Transaction, _: &ProtocolParameters) -> Result<(), PayloadError> {
+    let has_commitment_input = transaction.context_inputs().commitment().is_some();
+
+    for output in transaction.outputs.iter() {
+        if output.features().is_some_and(|f| f.staking().is_some()) && !has_commitment_input {}
+
+        if output.features().is_some_and(|f| f.block_issuer().is_some()) && !has_commitment_input {}
+
+        if output.is_delegation() && !has_commitment_input {}
     }
 
     Ok(())
