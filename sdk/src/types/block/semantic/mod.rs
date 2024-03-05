@@ -297,9 +297,6 @@ impl<'a> SemanticValidationContext<'a> {
                     if output.features().block_issuer().is_some() {
                         let account_id = output.account_id_non_null(&OutputId::new(self.transaction_id, index as u16));
 
-                        if self.commitment_context_input.is_none() {
-                            return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing);
-                        }
                         if !bic_context_inputs.contains(&account_id) {
                             return Err(TransactionFailureReason::BlockIssuanceCreditInputMissing);
                         }
@@ -318,9 +315,6 @@ impl<'a> SemanticValidationContext<'a> {
                         }
                     }
                     if output.features().staking().is_some() {
-                        if self.commitment_context_input.is_none() {
-                            return Err(TransactionFailureReason::StakingCommitmentInputMissing);
-                        }
                         if output.features().block_issuer().is_none() {
                             return Err(TransactionFailureReason::StakingBlockIssuerFeatureMissing);
                         }
