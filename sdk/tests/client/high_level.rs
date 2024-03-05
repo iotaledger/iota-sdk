@@ -8,7 +8,7 @@ use crate::client::{common::setup_client_with_node_health_ignored, node_api::set
 
 #[ignore]
 #[tokio::test]
-async fn test_find_get_transaction_inputs() {
+async fn test_get_transaction_inputs() {
     let client = setup_client_with_node_health_ignored().await;
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
     let inputs = client.get_transaction_inputs(&transaction_id).await.unwrap();
