@@ -277,12 +277,12 @@ pub enum Response {
     /// - [`VerifySecp256k1EcdsaSignature`](crate::method::UtilsMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// Response for:
-    /// - [`Backup`](crate::method::WalletMethod::Backup),
+    /// - [`BackupToStrongholdSnapshot`](crate::method::WalletMethod::BackupToStrongholdSnapshot),
     /// - [`ClearListeners`](crate::method::WalletMethod::ClearListeners)
     /// - [`ClearStrongholdPassword`](crate::method::WalletMethod::ClearStrongholdPassword),
     /// - [`DeregisterParticipationEvent`](crate::method::WalletMethod::DeregisterParticipationEvent),
     /// - [`EmitTestEvent`](crate::method::WalletMethod::EmitTestEvent),
-    /// - [`RestoreBackup`](crate::method::WalletMethod::RestoreBackup),
+    /// - [`RestoreFromStrongholdSnapshot`](crate::method::WalletMethod::RestoreFromStrongholdSnapshot),
     /// - [`SetAlias`](crate::method::WalletMethod::SetAlias),
     /// - [`SetClientOptions`](crate::method::WalletMethod::SetClientOptions),
     /// - [`SetDefaultSyncOptions`](crate::method::WalletMethod::SetDefaultSyncOptions),
@@ -332,12 +332,12 @@ pub enum Response {
     /// - [`PrepareMeltNativeToken`](crate::method::WalletMethod::PrepareMeltNativeToken)
     /// - [`PrepareMintNativeToken`](crate::method::WalletMethod::PrepareMintNativeToken),
     /// - [`PrepareMintNfts`](crate::method::WalletMethod::PrepareMintNfts),
-    /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
     /// - [`PrepareSendMana`](crate::method::WalletMethod::PrepareSendMana),
     /// - [`PrepareSendNativeTokens`](crate::method::WalletMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::WalletMethod::PrepareSendNft),
+    /// - [`PrepareSendWithParams`](crate::method::WalletMethod::PrepareSendWithParams),
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)
-    /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
+    /// - [`PrepareSendOutputs`](crate::method::WalletMethod::PrepareSendOutputs)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
     /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
     PreparedTransaction(PreparedTransactionData),
@@ -364,9 +364,6 @@ pub enum Response {
     /// - [`Sync`](crate::method::WalletMethod::Sync)
     Balance(Balance),
     /// Response for:
-    /// - [`ClaimOutputs`](crate::method::WalletMethod::ClaimOutputs)
-    /// - [`Send`](crate::method::WalletMethod::Send)
-    /// - [`SendOutputs`](crate::method::WalletMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::WalletMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::WalletMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionWithMetadataDto),

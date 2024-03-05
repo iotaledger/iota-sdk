@@ -119,10 +119,6 @@ pub enum WalletMethod {
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
     ClaimableOutputs { outputs_to_claim: OutputsToClaim },
-    /// Claim outputs.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    ClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     // /// Removes a previously registered participation event from local storage.
     // /// Expected response: [`Ok`](crate::Response::Ok)
     // #[cfg(feature = "participation")]
@@ -308,13 +304,6 @@ pub enum WalletMethod {
         #[serde(default)]
         transaction_options: Option<TransactionOptions>,
     },
-    /// Prepare to send base coins.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareSend {
-        params: Vec<SendParams>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
     /// Prepare to send mana.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendMana {
@@ -333,6 +322,13 @@ pub enum WalletMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNft {
         params: Vec<SendNftParams>,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
+    /// Prepare to send base coins to multiple addresses, or with additional parameters.
+    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    PrepareSendWithParams {
+        params: Vec<SendParams>,
         #[serde(default)]
         options: Option<TransactionOptions>,
     },
@@ -387,7 +383,7 @@ pub enum WalletMethod {
     // PrepareStopParticipating { event_id: ParticipationEventId },
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareTransaction {
+    PrepareSendOutputs {
         outputs: Vec<Output>,
         #[serde(default)]
         options: Option<TransactionOptions>,
@@ -420,29 +416,6 @@ pub enum WalletMethod {
         interval: Option<u64>,
         /// Maximum attempts
         max_attempts: Option<u64>,
-    },
-    /// Send base coins.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    Send {
-        #[serde(with = "string")]
-        amount: u64,
-        address: Bech32Address,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Send base coins to multiple addresses, or with additional parameters.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendWithParams {
-        params: Vec<SendParams>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Send outputs in a transaction.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendOutputs {
-        outputs: Vec<Output>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
     },
     /// Set the alias of the wallet.
     /// Expected response: [`Ok`](crate::Response::Ok)
