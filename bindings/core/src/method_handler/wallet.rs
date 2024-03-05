@@ -365,10 +365,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             interval,
             max_attempts,
         } => {
-            let block_id = wallet
+            wallet
                 .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
-            Response::BlockId(block_id)
+            Response::Ok
         }
         WalletMethod::Send {
             amount,
