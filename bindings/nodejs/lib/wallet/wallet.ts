@@ -1462,7 +1462,6 @@ export class Wallet {
         return parsed.payload;
     }
 
-
     /**
      * Send outputs in a transaction.
      *
