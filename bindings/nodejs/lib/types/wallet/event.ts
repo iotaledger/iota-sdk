@@ -237,12 +237,12 @@ class PreparedTransactionSigningHashProgress extends TransactionProgress {
  * A 'prepared block input' progress.
  */
 class PreparedBlockSigningInputProgress extends TransactionProgress {
-    blockSigningInput: Array<number>;
+    blockSigningInput: string;
 
     /**
      * @param signingHash The signing hash of the block.
      */
-    constructor(signingInput: Array<number>) {
+    constructor(signingInput: string) {
         super(TransactionProgressType.PreparedBlockSigningInput);
         this.blockSigningInput = signingInput;
     }

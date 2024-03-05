@@ -203,7 +203,7 @@ pub enum TransactionProgressEvent {
     /// Prepared transaction signing hash hex encoded, required for blindsigning with a ledger nano
     PreparedTransactionSigningHash(String),
     /// Prepared block signing input, required for blind signing with ledger nano
-    PreparedBlockSigningInput(Vec<u8>),
+    PreparedBlockSigningInput(String),
     /// Broadcasting.
     Broadcasting,
 }
@@ -222,7 +222,7 @@ impl Serialize for TransactionProgressEvent {
         #[derive(Serialize)]
         #[serde(rename_all = "camelCase")]
         struct PreparedBlockSigningInput_<'a> {
-            block_signing_input: &'a [u8],
+            block_signing_input: &'a str,
         }
 
         #[derive(Serialize)]
@@ -288,7 +288,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
         #[derive(Deserialize)]
         #[serde(rename_all = "camelCase")]
         struct PreparedBlockSigningInput_ {
-            block_signing_input: Vec<u8>,
+            block_signing_input: String,
         }
 
         let value = serde_json::Value::deserialize(d)?;

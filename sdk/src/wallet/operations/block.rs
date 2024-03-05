@@ -43,7 +43,7 @@ where
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
-            TransactionProgressEvent::PreparedBlockSigningInput(unsigned_block.signing_input()),
+            TransactionProgressEvent::PreparedBlockSigningInput(prefix_hex::encode(unsigned_block.signing_input())),
         ))
         .await;
 
