@@ -1,9 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! This example returns the validators of the node by querying its `/validators` endpoint.
-//! The result is paginated with a page size of 1. You can provide a LIST_INDEX to request
-//! a particular validator.
+//! This example returns the validators known by the node by querying the corresponding endpoint.
+//! You can provide a custom PAGE_SIZE and additionally a CURSOR from a previous request.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -17,8 +16,8 @@ async fn main() -> Result<()> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
-    let page_size = std::env::args().nth(1).map(|s| s.parse::<u32>().unwrap()).unwrap_or(1);
-    let cursor = std::env::args().nth(2).unwrap_or_default();
+    let page_size = std::env::args().nth(1).map(|s| s.parse::<u32>().unwrap());
+    let cursor = std::env::args().nth(2);
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
@@ -33,9 +32,9 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get validators.
-    let res = client.get_validators(page_size, cursor).await?;
+    let validators = client.get_validators(page_size, cursor).await?;
 
-    println!("{res:#?}");
+    println!("{validators:#?}");
 
     Ok(())
 }
