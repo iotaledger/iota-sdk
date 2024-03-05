@@ -14,24 +14,23 @@ use {
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
-        },
+        api::{PreparedTransactionData, SignedTransactionData},
         secret::SecretManage,
+        ClientError,
     },
-    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
+    wallet::{operations::transaction::SignedTransactionPayload, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Signs a transaction.
     pub async fn sign_transaction(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-    ) -> crate::wallet::Result<SignedTransactionData> {
+    ) -> Result<SignedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] sign_transaction");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
@@ -85,7 +84,7 @@ where
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", payload);
 
-        validate_signed_transaction_payload_length(&payload)?;
+        payload.validate_length()?;
 
         Ok(SignedTransactionData {
             payload,

@@ -10,7 +10,7 @@ use url::Url;
 
 use crate::client::{
     constants::{DEFAULT_MIN_QUORUM_SIZE, DEFAULT_QUORUM_THRESHOLD, DEFAULT_USER_AGENT, NODE_SYNC_INTERVAL},
-    error::{Error, Result},
+    error::ClientError,
     node_manager::{
         http_client::HttpClient,
         node::{Node, NodeAuth, NodeDto},
@@ -71,21 +71,20 @@ impl NodeManagerBuilder {
         Default::default()
     }
 
-    pub(crate) fn with_primary_node(mut self, mut node: Node) -> Result<Self> {
+    pub(crate) fn with_primary_node(mut self, mut node: Node) -> Result<Self, ClientError> {
         let mut url = validate_url(node.url.clone())?;
         if let Some(auth) = &node.auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                url.set_username(name).map_err(|_| ClientError::UrlAuth("username"))?;
                 url.set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+                    .map_err(|_| ClientError::UrlAuth("password"))?;
             }
             node.url = url;
         }
         self.primary_nodes.push(NodeDto::Node(node));
         Ok(self)
     }
-    pub(crate) fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
+    pub(crate) fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self, ClientError> {
         for url in urls {
             let url = validate_url(Url::parse(url)?)?;
             self.primary_nodes.push(NodeDto::Node(Node {
@@ -98,7 +97,7 @@ impl NodeManagerBuilder {
         Ok(self)
     }
 
-    pub(crate) fn with_node(mut self, url: &str) -> Result<Self> {
+    pub(crate) fn with_node(mut self, url: &str) -> Result<Self, ClientError> {
         let url = validate_url(Url::parse(url)?)?;
         self.nodes.insert(NodeDto::Node(Node {
             url,
@@ -109,15 +108,14 @@ impl NodeManagerBuilder {
         Ok(self)
     }
 
-    pub(crate) fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
+    pub(crate) fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self, ClientError> {
         let mut url = validate_url(Url::parse(url)?)?;
         let auth = auth.into();
         if let Some(auth) = &auth {
             if let Some((name, password)) = &auth.basic_auth_name_pwd {
-                url.set_username(name)
-                    .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                url.set_username(name).map_err(|_| ClientError::UrlAuth("username"))?;
                 url.set_password(Some(password))
-                    .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+                    .map_err(|_| ClientError::UrlAuth("password"))?;
             }
         }
         self.nodes.insert(NodeDto::Node(Node {
@@ -129,7 +127,7 @@ impl NodeManagerBuilder {
         Ok(self)
     }
 
-    pub(crate) fn with_nodes(mut self, urls: &[&str]) -> Result<Self> {
+    pub(crate) fn with_nodes(mut self, urls: &[&str]) -> Result<Self, ClientError> {
         for url in urls {
             let url = validate_url(Url::parse(url)?)?;
             self.nodes.insert(NodeDto::Node(Node {
@@ -203,9 +201,9 @@ impl Default for NodeManagerBuilder {
 }
 
 /// Validates if the url starts with http or https
-pub fn validate_url(url: Url) -> Result<Url> {
+pub fn validate_url(url: Url) -> Result<Url, ClientError> {
     if url.scheme() != "http" && url.scheme() != "https" {
-        return Err(Error::UrlValidation(format!("invalid scheme: {}", url.scheme())));
+        return Err(ClientError::UrlValidation(format!("invalid scheme: {}", url.scheme())));
     }
     Ok(url)
 }

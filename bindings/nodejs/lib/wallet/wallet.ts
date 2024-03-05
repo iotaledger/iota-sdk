@@ -1472,20 +1472,9 @@ export class Wallet {
      */
     async sendOutputs(
         outputs: Output[],
-        transactionOptions?: TransactionOptions,
+        options?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        const response = await this.methodHandler.callMethod({
-            name: 'sendOutputs',
-            data: {
-                outputs,
-                options: transactionOptions,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        return (await this.prepareSendOutputs(outputs, options)).send();
     }
 
     /**

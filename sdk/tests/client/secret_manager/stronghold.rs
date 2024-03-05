@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{
-    api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
+    api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, ClientError,
 };
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-async fn stronghold_secret_manager() -> Result<()> {
+async fn stronghold_secret_manager() -> Result<(), ClientError> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     let dto = r#"{"stronghold": {"password": "some_hopefully_secure_password", "snapshotPath": "snapshot_test_dir/test.stronghold"}}"#;
@@ -52,7 +52,7 @@ async fn stronghold_secret_manager() -> Result<()> {
 }
 
 #[tokio::test]
-async fn stronghold_mnemonic_missing() -> Result<()> {
+async fn stronghold_mnemonic_missing() -> Result<(), ClientError> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     // Cleanup of a possibly failed run
@@ -73,7 +73,7 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
         .unwrap_err();
 
     match error {
-        iota_sdk::client::Error::Stronghold(iota_sdk::client::stronghold::Error::MnemonicMissing) => {}
+        iota_sdk::client::ClientError::Stronghold(iota_sdk::client::stronghold::Error::MnemonicMissing) => {}
         _ => panic!("expected StrongholdMnemonicMissing error"),
     }
 

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::Error as ClientError,
+    client::ClientError,
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{Error, OutputParams, SendParams},
+    wallet::{OutputParams, SendParams, WalletError},
 };
 use pretty_assertions::assert_eq;
 
@@ -32,7 +32,7 @@ async fn bech32_hrp_send_amount() -> Result<(), Box<dyn std::error::Error>> {
     let bech32_hrp = wallet.client().get_bech32_hrp().await?;
 
     match error {
-        Error::Client(error) => match error {
+        WalletError::Client(error) => match error {
             ClientError::Bech32HrpMismatch { provided, expected } => {
                 assert_eq!(provided, "wronghrp");
                 assert_eq!(expected, bech32_hrp.to_string());
@@ -71,7 +71,7 @@ async fn bech32_hrp_prepare_output() -> Result<(), Box<dyn std::error::Error>> {
     let bech32_hrp = wallet.client().get_bech32_hrp().await?;
 
     match error {
-        Error::Client(error) => match error {
+        WalletError::Client(error) => match error {
             ClientError::Bech32HrpMismatch { provided, expected } => {
                 assert_eq!(provided, "wronghrp");
                 assert_eq!(expected, bech32_hrp.to_string());

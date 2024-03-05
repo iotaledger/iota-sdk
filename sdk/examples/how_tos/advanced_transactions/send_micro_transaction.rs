@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example send_micro_transaction
 //! ```
 
-use iota_sdk::{wallet::TransactionOptions, Wallet};
+use iota_sdk::{client::api::options::TransactionOptions, Wallet};
 
 // The base coin micro amount to send
 const SEND_MICRO_AMOUNT: u64 = 1;

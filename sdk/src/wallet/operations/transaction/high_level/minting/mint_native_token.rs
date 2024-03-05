@@ -4,15 +4,15 @@
 use primitive_types::U256;
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::output::{FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet},
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Mints additional native tokens.
     ///
@@ -34,7 +34,7 @@ where
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())
@@ -50,7 +50,7 @@ where
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] mint_native_token");
 
         let mint_amount = mint_amount.into();
@@ -64,14 +64,14 @@ where
         });
 
         let existing_foundry_output = existing_foundry_output
-            .ok_or_else(|| Error::MintingFailed(format!("foundry output {token_id} is not available")))?
+            .ok_or_else(|| WalletError::MintingFailed(format!("foundry output {token_id} is not available")))?
             .clone();
 
         let existing_account_output = if let Output::Foundry(foundry_output) = &existing_foundry_output.output {
             let TokenScheme::Simple(token_scheme) = foundry_output.token_scheme();
             // Check if we can mint the provided amount without exceeding the maximum_supply
             if token_scheme.maximum_supply() - token_scheme.circulating_supply() < mint_amount {
-                return Err(Error::MintingFailed(format!(
+                return Err(WalletError::MintingFailed(format!(
                     "minting additional {mint_amount} tokens would exceed the maximum supply: {}",
                     token_scheme.maximum_supply()
                 )));
@@ -86,10 +86,12 @@ where
                 }
             });
             existing_account_output
-                .ok_or_else(|| Error::MintingFailed("account output is not available".to_string()))?
+                .ok_or_else(|| WalletError::MintingFailed("account output is not available".to_string()))?
                 .clone()
         } else {
-            return Err(Error::MintingFailed("account output is not available".to_string()));
+            return Err(WalletError::MintingFailed(
+                "account output is not available".to_string(),
+            ));
         };
 
         drop(wallet_ledger);
@@ -119,11 +121,8 @@ where
         let new_foundry_output_builder =
             FoundryOutputBuilder::from(foundry_output).with_token_scheme(updated_token_scheme);
 
-        let outputs = [
-            new_foundry_output_builder.finish_output()?,
-            // Native Tokens will be added automatically in the remainder output in try_select_inputs()
-        ];
+        let outputs = [new_foundry_output_builder.finish_output()?];
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

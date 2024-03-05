@@ -6,7 +6,7 @@
 // They become spendable again when the user reduces the “voting power”.
 // This is done by creating a special “voting output” that adheres to the following rules, NOT by sending to a different
 // address.
-// If the user has designated funds to vote with, the resulting output MUST NOT be used for input selection.
+// If the user has designated funds to vote with, the resulting output MUST NOT be used for building the transaction.
 
 // pub(crate) mod event;
 // pub(crate) mod voting;
@@ -25,7 +25,7 @@ use crate::{
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
-    wallet::{core::WalletLedger, types::OutputData, Result, Wallet},
+    wallet::{core::WalletLedger, types::OutputData, Wallet},
 };
 
 /// An object containing an account's entire participation overview.
@@ -46,17 +46,13 @@ pub struct ParticipationEventWithNodes {
     pub nodes: Vec<Node>,
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     // /// Calculates the voting overview of a wallet. If event_ids are provided, only return outputs and tracked
     // /// participations for them.
     // pub async fn get_participation_overview(
     //     &self,
     //     event_ids: Option<Vec<ParticipationEventId>>,
-    // ) -> Result<ParticipationOverview> {
+    // ) -> Result<ParticipationOverview, WalletError> {
     //     log::debug!("[get_participation_overview]");
     //     // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
@@ -217,13 +213,13 @@ where
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
-    pub async fn get_voting_output(&self) -> Result<Option<OutputData>> {
+    pub async fn get_voting_output(&self) -> Option<OutputData> {
         self.ledger().await.get_voting_output()
     }
 
     // /// Gets client for an event.
     // /// If event isn't found, the client from the account will be returned.
-    // pub(crate) async fn get_client_for_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<Client> {
+    // pub(crate) async fn get_client_for_event(&self, id: &ParticipationEventId) -> Result<Client, WalletError> {
     //     log::debug!("[get_client_for_event]");
     //     let events = self.storage_manager().get_participation_events().await?;
 
@@ -244,7 +240,7 @@ where
     // pub(crate) async fn remove_ended_participation_events(
     //     &self,
     //     participations: &mut Participations,
-    // ) -> crate::wallet::Result<()> {
+    // ) -> Result<(), WalletError> {
     //     log::debug!("[remove_ended_participation_events]");
     //     // TODO change to one of the new timestamps, which ones ?
     //     let latest_milestone_index = 0;
@@ -275,14 +271,13 @@ impl WalletLedger {
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
-    pub(crate) fn get_voting_output(&self) -> Result<Option<OutputData>> {
+    pub(crate) fn get_voting_output(&self) -> Option<OutputData> {
         log::debug!("[get_voting_output]");
-        Ok(self
-            .unspent_outputs
+        self.unspent_outputs
             .values()
             .filter(|output_data| is_valid_participation_output(&output_data.output))
             .max_by_key(|output_data| output_data.output.amount())
-            .cloned())
+            .cloned()
     }
 }
 

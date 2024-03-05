@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::Bech32Address,
         output::{
@@ -17,7 +17,7 @@ use crate::{
     utils::ConvertTo,
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -53,7 +53,7 @@ impl MintNftParams {
     }
 
     /// Set the address and try convert to [`Bech32Address`]
-    pub fn try_with_address(mut self, address: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+    pub fn try_with_address(mut self, address: impl ConvertTo<Bech32Address>) -> Result<Self, WalletError> {
         self.address = Some(address.convert()?);
         Ok(self)
     }
@@ -65,7 +65,7 @@ impl MintNftParams {
     }
 
     /// Set the sender address and try convert to [`Bech32Address`]
-    pub fn try_with_sender(mut self, sender: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+    pub fn try_with_sender(mut self, sender: impl ConvertTo<Bech32Address>) -> Result<Self, WalletError> {
         self.sender = Some(sender.convert()?);
         Ok(self)
     }
@@ -89,7 +89,7 @@ impl MintNftParams {
     }
 
     /// Set the issuer address and try convert to [`Bech32Address`]
-    pub fn try_with_issuer(mut self, issuer: impl ConvertTo<Bech32Address>) -> crate::wallet::Result<Self> {
+    pub fn try_with_issuer(mut self, issuer: impl ConvertTo<Bech32Address>) -> Result<Self, WalletError> {
         self.issuer = Some(issuer.convert()?);
         Ok(self)
     }
@@ -109,12 +109,12 @@ impl MintNftParams {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Mints NFTs.
     ///
-    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally. The options may
+    /// Calls [Wallet::prepare_send_outputs()](crate::wallet::Wallet::prepare_send_outputs) internally. The options may
     /// define the remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
@@ -138,7 +138,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata>
+    ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -153,7 +153,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -207,6 +207,6 @@ where
             outputs.push(nft_builder.finish_output()?);
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

@@ -24,7 +24,7 @@ fn new_valid_max_index() {
 fn new_invalid_more_than_max_index() {
     assert!(matches!(
         ReferenceUnlock::new(128),
-        Err(UnlockError::InvalidReferenceIndex(InvalidBoundedU16(128)))
+        Err(UnlockError::ReferenceIndex(InvalidBoundedU16(128)))
     ));
 }
 
@@ -37,7 +37,7 @@ fn try_from_valid() {
 fn try_from_invalid() {
     assert!(matches!(
         ReferenceUnlock::try_from(128),
-        Err(UnlockError::InvalidReferenceIndex(InvalidBoundedU16(128)))
+        Err(UnlockError::ReferenceIndex(InvalidBoundedU16(128)))
     ));
 }
 
@@ -61,8 +61,8 @@ fn pack_unpack_valid() {
 fn pack_unpack_invalid_index() {
     assert!(matches!(
         ReferenceUnlock::unpack_bytes_verified([0x2a, 0x2a], &()),
-        Err(UnpackError::Packable(UnlockError::InvalidReferenceIndex(
-            InvalidBoundedU16(10794)
-        )))
+        Err(UnpackError::Packable(UnlockError::ReferenceIndex(InvalidBoundedU16(
+            10794
+        ))))
     ));
 }

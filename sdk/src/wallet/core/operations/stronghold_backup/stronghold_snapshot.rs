@@ -10,7 +10,7 @@ use crate::{
         self,
         core::{WalletLedger, WalletLedgerDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
-        ClientOptions, Wallet,
+        ClientOptions, Wallet, WalletError,
     },
 };
 
@@ -21,15 +21,11 @@ pub(crate) const WALLET_ADDRESS_KEY: &str = "wallet_address";
 pub(crate) const WALLET_BIP_PATH_KEY: &str = "wallet_bip_path";
 pub(crate) const WALLET_ALIAS_KEY: &str = "wallet_alias";
 
-impl<S: 'static + SecretManagerConfig> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManagerConfig> Wallet<S> {
     pub(crate) async fn write_fields_to_stronghold_snapshot(
         &self,
         stronghold: &StrongholdAdapter,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         // Set migration version
         stronghold
             .set(MIGRATION_VERSION_KEY, &latest_backup_migration_version())
@@ -64,14 +60,17 @@ where
 
 pub(crate) async fn read_fields_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
-) -> crate::wallet::Result<(
-    Bech32Address,
-    Option<Bip44>,
-    Option<String>,
-    Option<ClientOptions>,
-    Option<S::Config>,
-    Option<WalletLedger>,
-)> {
+) -> Result<
+    (
+        Bech32Address,
+        Option<Bip44>,
+        Option<String>,
+        Option<ClientOptions>,
+        Option<S::Config>,
+        Option<WalletLedger>,
+    ),
+    WalletError,
+> {
     migrate(stronghold).await?;
 
     // Get client_options
@@ -84,7 +83,7 @@ pub(crate) async fn read_fields_from_stronghold_snapshot<S: 'static + SecretMana
     let wallet_address = stronghold
         .get(WALLET_ADDRESS_KEY)
         .await?
-        .ok_or(wallet::Error::Backup("missing non-optional wallet address"))?;
+        .ok_or(wallet::WalletError::Backup("missing non-optional wallet address"))?;
 
     // Get the wallet bip path
     let wallet_bip_path = stronghold.get(WALLET_BIP_PATH_KEY).await?;

@@ -13,7 +13,7 @@ use crate::{
     },
     wallet::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 #[cfg(feature = "events")]
@@ -22,13 +22,9 @@ use crate::{
     wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Update the wallet address with a possible new Bech32 HRP and clear the inaccessible incoming transactions.
-    pub(crate) async fn update_address_hrp(&self) -> crate::wallet::Result<()> {
+    pub(crate) async fn update_address_hrp(&self) -> Result<(), WalletError> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         log::debug!("updating wallet with new bech32 hrp: {}", bech32_hrp);
 
@@ -51,7 +47,7 @@ where
     }
 
     /// Set the wallet alias.
-    pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
+    pub async fn set_alias(&self, alias: &str) -> Result<(), WalletError> {
         log::debug!("setting wallet alias to: {}", alias);
 
         *self.alias_mut().await = Some(alias.to_string());
@@ -64,7 +60,7 @@ where
         &self,
         unspent_outputs: Vec<OutputData>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("[SYNC] Update wallet ledger with new synced transactions");
 
         let network_id = self.client().get_network_id().await?;
@@ -163,7 +159,7 @@ where
         updated_transactions: Vec<TransactionWithMetadata>,
         spent_output_ids: Vec<OutputId>,
         output_ids_to_unlock: Vec<OutputId>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("[SYNC] Update wallet with new synced transactions");
 
         let mut wallet_ledger = self.ledger_mut().await;

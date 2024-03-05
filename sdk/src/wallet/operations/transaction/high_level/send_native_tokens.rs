@@ -6,7 +6,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
@@ -19,7 +19,7 @@ use crate::{
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Error, Result, Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -45,7 +45,7 @@ pub struct SendNativeTokenParams {
 
 impl SendNativeTokenParams {
     /// Creates a new instance of [`SendNativeTokenParams`]
-    pub fn new(address: impl ConvertTo<Bech32Address>, native_token: (TokenId, U256)) -> Result<Self> {
+    pub fn new(address: impl ConvertTo<Bech32Address>, native_token: (TokenId, U256)) -> Result<Self, WalletError> {
         Ok(Self {
             address: address.convert()?,
             native_token,
@@ -55,7 +55,10 @@ impl SendNativeTokenParams {
     }
 
     /// Set the return address and try convert to [`Bech32Address`]
-    pub fn try_with_return_address(mut self, return_address: impl ConvertTo<Bech32Address>) -> Result<Self> {
+    pub fn try_with_return_address(
+        mut self,
+        return_address: impl ConvertTo<Bech32Address>,
+    ) -> Result<Self, WalletError> {
         self.return_address = Some(return_address.convert()?);
         Ok(self)
     }
@@ -75,8 +78,8 @@ impl SendNativeTokenParams {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Sends native tokens in basic outputs with a
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition)
@@ -104,7 +107,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata>
+    ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -119,7 +122,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -143,12 +146,12 @@ where
             let return_address = return_address
                 .map(|addr| {
                     if address.hrp() != addr.hrp() {
-                        Err(crate::client::Error::Bech32HrpMismatch {
+                        Err(ClientError::Bech32HrpMismatch {
                             provided: addr.hrp().to_string(),
                             expected: address.hrp().to_string(),
                         })?;
                     }
-                    Ok::<_, Error>(addr)
+                    Ok::<_, WalletError>(addr)
                 })
                 .transpose()?
                 .unwrap_or_else(|| default_return_address.clone());
@@ -173,6 +176,6 @@ where
             )
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

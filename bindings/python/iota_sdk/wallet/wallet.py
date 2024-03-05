@@ -689,15 +689,15 @@ class Wallet:
             }
         ))
 
-    def send_transaction(
+    def send_outputs(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
-        """Send a transaction.
+        """Send outputs.
         """
-        return self.prepare_transaction(outputs, options).send()
+        return self.prepare_send_outputs(outputs, options).send()
 
-    def prepare_transaction(
+    def prepare_send_outputs(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
-        """Prepare transaction.
+        """Prepare to send outputs.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
             'prepareSendOutputs', {
@@ -780,17 +780,6 @@ class Wallet:
             }
         ))
         return PreparedTransaction(self, prepared)
-
-    def send_outputs(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
-        """Send outputs in a transaction.
-        """
-        return TransactionWithMetadata.from_dict(self._call_method(
-            'sendOutputs', {
-                'outputs': outputs,
-                'options': options,
-            }
-        ))
 
     def send_mana(
             self, params: SendManaParams, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:

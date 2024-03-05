@@ -6,9 +6,9 @@ use std::path::PathBuf;
 
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
-use iota_sdk::utils::serde::string;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
+use iota_sdk::{client::api::options::TransactionOptions, utils::serde::string};
 // #[cfg(feature = "participation")]
 // use iota_sdk::{
 //     client::node_manager::node::Node,
@@ -17,7 +17,7 @@ use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 // };
 use iota_sdk::{
     client::{
-        api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{transaction_builder::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::NodeAuth,
         secret::GenerateAddressOptions,
     },
@@ -29,7 +29,7 @@ use iota_sdk::{
     wallet::{
         BeginStakingParams, ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams,
         CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendManaParams,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
     },
     U256,
 };
@@ -381,7 +381,7 @@ pub enum WalletMethod {
     // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     // #[serde(rename_all = "camelCase")]
     // PrepareStopParticipating { event_id: ParticipationEventId },
-    /// Prepare transaction.
+    /// Prepare to send outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendOutputs {
         outputs: Vec<Output>,
