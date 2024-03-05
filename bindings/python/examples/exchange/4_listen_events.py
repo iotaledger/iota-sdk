@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# This example listens to the SelectingInputs event.
+# This example listens to the NewOutput event.
 
 import json
 import os
@@ -35,8 +35,8 @@ def callback(event):
     received_event = True
 
 
-# Only interested when inputs are being selected.
-wallet.listen(callback, [WalletEventType.SelectingInputs])
+# Only interested in new outputs here.
+wallet.listen(callback, [WalletEventType.NewOutput])
 
 # Use the faucet to send testnet tokens to your address.
 print(f'Fill your address with the Faucet: {os.environ["FAUCET_URL"]}')
