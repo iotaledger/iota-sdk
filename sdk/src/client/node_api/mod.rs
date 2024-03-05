@@ -19,8 +19,8 @@ pub(crate) fn query_tuples_to_query_string(
 ) -> Option<String> {
     let query = tuples
         .into_iter()
-        .filter_map(|tuple| tuple.map(|(key, value)| format!("{}={}", key, value)))
+        .filter_map(|tuple| tuple.map(|(key, value)| format!("{key}={value}")))
         .collect::<Vec<_>>();
 
-    if query.is_empty() { None } else { Some(query.join("&")) }
+    (!query.is_empty()).then_some(query.join("&"))
 }
