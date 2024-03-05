@@ -321,9 +321,6 @@ pub(crate) async fn call_client_method_internal(
         ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
             Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)
         }
-        ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
-            Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
-        }
         ClientMethod::ComputeMinimumOutputAmount { output } => {
             let storage_score_params = client.get_storage_score_parameters().await?;
 

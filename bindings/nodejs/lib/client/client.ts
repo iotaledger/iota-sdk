@@ -947,28 +947,6 @@ export class Client {
     }
 
     /**
-     * Convert a hex encoded public key to a Bech32 encoded address.
-     *
-     * @param hex The hexadecimal string representation of a public key.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
-     * @returns The corresponding Bech32 address.
-     */
-    async hexPublicKeyToBech32Address(
-        hex: HexEncodedString,
-        bech32Hrp?: string,
-    ): Promise<Bech32Address> {
-        const response = await this.methodHandler.callMethod({
-            name: 'hexPublicKeyToBech32Address',
-            data: {
-                hex,
-                bech32Hrp,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Return the unhealthy nodes.
      */
     async unhealthyNodes(): Promise<Set<Node>> {

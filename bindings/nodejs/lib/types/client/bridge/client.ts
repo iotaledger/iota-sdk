@@ -357,8 +357,8 @@ export interface __NftIdToBech32Method__ {
     };
 }
 
-export interface __HexPublicKeyToBech32AddressMethod__ {
-    name: 'hexPublicKeyToBech32Address';
+export interface __PublicKeyHashMethod__ {
+    name: 'publicKeyHash';
     data: {
         hex: HexEncodedString;
         bech32Hrp?: string;

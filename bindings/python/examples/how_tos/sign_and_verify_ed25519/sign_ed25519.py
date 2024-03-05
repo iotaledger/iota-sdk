@@ -38,6 +38,7 @@ ed25519_signature = secret_manager.sign_ed25519(message, bip44_chain)
 print(
     f'Public key: {ed25519_signature.public_key}\nSignature: {ed25519_signature.signature}')
 
-bech32_address = Utils.hex_public_key_to_bech32_address(
-    ed25519_signature.public_key, "rms")
+bech32_address = Utils.address_to_bech32(
+    Utils.public_kex_hash(ed25519_signature.public_key),
+    "rms")
 print(f'Address: {bech32_address}')
