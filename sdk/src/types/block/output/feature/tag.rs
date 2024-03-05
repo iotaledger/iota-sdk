@@ -16,7 +16,7 @@ pub(crate) type TagFeatureLength =
 
 /// Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[packable(unpack_error = FeatureError, with = |e| FeatureError::InvalidTagFeatureLength(e.into_prefix_err().into()))]
+#[packable(unpack_error = FeatureError, with = |e| FeatureError::TagFeatureLength(e.into_prefix_err().into()))]
 pub struct TagFeature(
     // Binary tag.
     pub(crate) BoxedSlicePrefix<u8, TagFeatureLength>,
@@ -57,7 +57,7 @@ impl TryFrom<Box<[u8]>> for TagFeature {
     type Error = FeatureError;
 
     fn try_from(tag: Box<[u8]>) -> Result<Self, Self::Error> {
-        tag.try_into().map(Self).map_err(FeatureError::InvalidTagFeatureLength)
+        tag.try_into().map(Self).map_err(FeatureError::TagFeatureLength)
     }
 }
 

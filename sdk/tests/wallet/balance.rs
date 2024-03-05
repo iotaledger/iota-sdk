@@ -260,7 +260,7 @@ async fn balance_transfer() -> Result<(), Box<dyn std::error::Error>> {
 // #[ignore]
 // #[tokio::test]
 // #[cfg(feature = "participation")]
-// async fn balance_voting_power() -> Result<()> {
+// async fn balance_voting_power() -> Result<(), WalletError> {
 //     let storage_path = "test-storage/balance_voting_power";
 //     setup(storage_path)?;
 

@@ -3,7 +3,7 @@
 
 use crate::{
     types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex},
-    wallet::types::OutputData,
+    wallet::{types::OutputData, WalletError},
 };
 
 // Check if an output can be unlocked by the wallet address at the current time
@@ -12,7 +12,7 @@ pub(crate) fn can_output_be_unlocked_now(
     output_data: &OutputData,
     commitment_slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
-) -> crate::wallet::Result<bool> {
+) -> Result<bool, WalletError> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
         if unlock_conditions.is_timelocked(commitment_slot_index, committable_age_range.min) {
             return Ok(false);

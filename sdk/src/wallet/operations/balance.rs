@@ -11,17 +11,13 @@ use crate::{
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
-        Result, Wallet,
+        Wallet, WalletError,
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Get the balance of the wallet.
-    pub async fn balance(&self) -> Result<Balance> {
+    pub async fn balance(&self) -> Result<Balance, WalletError> {
         log::debug!("[BALANCE] balance");
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -40,7 +36,7 @@ where
             let mut total_native_tokens = NativeTokensBuilder::default();
 
             #[cfg(feature = "participation")]
-            let voting_output = wallet_ledger.get_voting_output()?;
+            let voting_output = wallet_ledger.get_voting_output();
 
             let claimable_outputs =
                 wallet_ledger.claimable_outputs(&wallet_address, OutputsToClaim::All, slot_index, &protocol_parameters)?;

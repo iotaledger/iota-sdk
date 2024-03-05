@@ -9,18 +9,18 @@ use {
 };
 
 use super::{Node, NodeManager};
-use crate::client::{Client, ClientInner, Error, Result};
+use crate::client::{Client, ClientError, ClientInner};
 
 impl ClientInner {
     /// Get a node candidate from the healthy node pool.
-    pub async fn get_node(&self) -> Result<Node> {
+    pub async fn get_node(&self) -> Result<Node, ClientError> {
         if let Some(primary_node) = self.node_manager.read().await.primary_nodes.first() {
             return Ok(primary_node.clone());
         }
 
         let pool = self.node_manager.read().await.nodes.clone();
 
-        pool.into_iter().next().ok_or(Error::HealthyNodePoolEmpty)
+        pool.into_iter().next().ok_or(ClientError::HealthyNodePoolEmpty)
     }
 
     /// returns the unhealthy nodes.
@@ -61,7 +61,7 @@ impl Client {
         }
     }
 
-    pub(crate) async fn sync_nodes(&self, nodes: &HashSet<Node>, ignore_node_health: bool) -> Result<()> {
+    pub(crate) async fn sync_nodes(&self, nodes: &HashSet<Node>, ignore_node_health: bool) -> Result<(), ClientError> {
         use std::collections::HashMap;
 
         log::debug!("sync_nodes");
@@ -163,12 +163,12 @@ impl Client {
             .await
             .healthy_nodes
             .write()
-            .map_err(|_| crate::client::Error::PoisonError)? = healthy_nodes;
+            .map_err(|_| ClientError::PoisonError)? = healthy_nodes;
 
         Ok(())
     }
 
-    pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
+    pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<(), ClientError> {
         let node_sync_interval = node_manager.node_sync_interval;
         let ignore_node_health = node_manager.ignore_node_health;
         let nodes = node_manager
@@ -196,7 +196,7 @@ impl Client {
 
 #[cfg(target_family = "wasm")]
 impl Client {
-    pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<()> {
+    pub async fn update_node_manager(&self, node_manager: NodeManager) -> Result<(), ClientError> {
         *self.node_manager.write().await = node_manager;
         Ok(())
     }

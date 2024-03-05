@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::output::{AddressUnlockCondition, DelegationId, DelegationOutputBuilder, MinimumOutputAmount},
-    wallet::{types::TransactionWithMetadata, Wallet},
+    wallet::{types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Delay a delegation's claiming. The `reclaim_excess` flag indicates whether excess value over the minimum storage
     /// requirements will be moved to a basic output that is unlockable by the same address which controls the
@@ -20,7 +20,7 @@ where
         &self,
         delegation_id: DelegationId,
         reclaim_excess: bool,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let prepared_transaction = self
             .prepare_delay_delegation_claiming(delegation_id, reclaim_excess)
             .await?;
@@ -37,12 +37,12 @@ where
         &self,
         delegation_id: DelegationId,
         reclaim_excess: bool,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         let delegation_output = self
             .ledger()
             .await
             .unspent_delegation_output(&delegation_id)
-            .ok_or(crate::wallet::Error::MissingDelegation(delegation_id))?
+            .ok_or(WalletError::MissingDelegation(delegation_id))?
             .output
             .clone();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
