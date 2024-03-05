@@ -39,6 +39,6 @@ print(
     f'Public key: {ed25519_signature.public_key}\nSignature: {ed25519_signature.signature}')
 
 bech32_address = Utils.address_to_bech32(
-    Utils.public_kex_hash(ed25519_signature.public_key),
+    Utils.public_key_hash(ed25519_signature.public_key),
     "rms")
 print(f'Address: {bech32_address}')

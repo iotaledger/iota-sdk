@@ -375,7 +375,7 @@ export class Utils {
      * @param hex The hexadecimal string representation of a public key.
      * @returns The Ed25519 address with the hashed public key.
      */
-    async publicKeyHash(hex: HexEncodedString): Promise<Ed25519Address> {
+    static publicKeyHash(hex: HexEncodedString): Ed25519Address {
         return new Ed25519Address(
             callUtilsMethod({
                 name: 'blake2b256Hash',
