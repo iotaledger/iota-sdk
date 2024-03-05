@@ -449,19 +449,19 @@ fn verify_transaction_packable(transaction: &Transaction, _: &ProtocolParameters
 }
 
 fn verify_transaction(transaction: &Transaction) -> Result<(), PayloadError> {
-    let has_commitment_input = transaction.context_inputs().commitment().is_some();
+    if transaction.context_inputs().commitment().is_none() {
+        for output in transaction.outputs.iter() {
+            if output.features().is_some_and(|f| f.staking().is_some()) {
+                return Err(PayloadError::MissingCommitmentInputForStakingFeature);
+            }
 
-    for output in transaction.outputs.iter() {
-        if output.features().is_some_and(|f| f.staking().is_some()) && !has_commitment_input {
-            return Err(PayloadError::MissingCommitmentInputForStakingFeature);
-        }
+            if output.features().is_some_and(|f| f.block_issuer().is_some()) {
+                return Err(PayloadError::MissingCommitmentInputForBlockIssuerFeature);
+            }
 
-        if output.features().is_some_and(|f| f.block_issuer().is_some()) && !has_commitment_input {
-            return Err(PayloadError::MissingCommitmentInputForBlockIssuerFeature);
-        }
-
-        if output.is_delegation() && !has_commitment_input {
-            return Err(PayloadError::MissingCommitmentInputForDelegationOutput);
+            if output.is_delegation() {
+                return Err(PayloadError::MissingCommitmentInputForDelegationOutput);
+            }
         }
     }
 
