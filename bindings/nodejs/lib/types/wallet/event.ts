@@ -115,8 +115,8 @@ class TransactionInclusionWalletEvent extends WalletEvent {
  * All of the transaction progress types.
  */
 enum TransactionProgressType {
-    /** Performing input selection. */
-    SelectingInputs = 0,
+    /** Building a transaction. */
+    BuildingTransaction = 0,
     /** Generating remainder value deposit address. */
     GeneratingRemainderDepositAddress = 1,
     /** Prepared transaction. */
@@ -161,11 +161,11 @@ abstract class TransactionProgress {
 }
 
 /**
- * A 'selecting inputs' progress.
+ * A 'building transaction' progress.
  */
-class SelectingInputsProgress extends TransactionProgress {
+class BuildingTransactionProgress extends TransactionProgress {
     constructor() {
-        super(TransactionProgressType.SelectingInputs);
+        super(TransactionProgressType.BuildingTransaction);
     }
 }
 
@@ -266,7 +266,7 @@ export {
     TransactionInclusionWalletEvent,
     TransactionProgressWalletEvent,
     TransactionProgress,
-    SelectingInputsProgress,
+    BuildingTransactionProgress,
     GeneratingRemainderDepositAddressProgress,
     PreparedTransactionProgress,
     SigningTransactionProgress,

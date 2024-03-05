@@ -192,8 +192,8 @@ pub struct TransactionInclusionEvent {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum TransactionProgressEvent {
-    /// Performing input selection.
-    SelectingInputs,
+    /// Building a transaction.
+    BuildingTransaction,
     /// Generating remainder value deposit address.
     GeneratingRemainderDepositAddress(AddressData),
     /// Prepared transaction.
@@ -244,7 +244,7 @@ impl Serialize for TransactionProgressEvent {
             event: TransactionProgressEvent_<'a>,
         }
         let event = match self {
-            Self::SelectingInputs => TypedTransactionProgressEvent_ {
+            Self::BuildingTransaction => TypedTransactionProgressEvent_ {
                 kind: 0,
                 event: TransactionProgressEvent_::T0,
             },
@@ -299,7 +299,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                 .ok_or_else(|| serde::de::Error::custom("invalid transaction progress event type"))?
                 as u8
             {
-                0 => Self::SelectingInputs,
+                0 => Self::BuildingTransaction,
                 1 => Self::GeneratingRemainderDepositAddress(AddressData::deserialize(value).map_err(|e| {
                     serde::de::Error::custom(format!("cannot deserialize GeneratingRemainderDepositAddress: {e}"))
                 })?),
