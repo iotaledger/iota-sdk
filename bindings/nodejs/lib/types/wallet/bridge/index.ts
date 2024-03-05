@@ -31,7 +31,7 @@ import type {
     __PrepareBeginStakingMethod__,
     __PrepareExtendStakingMethod__,
     __PrepareEndStakingMethod__,
-    __PrepareTransactionMethod__,
+    __PrepareSendOutputsMethod__,
     __RegisterParticipationEventsMethod__,
     __WaitForTransactionAcceptanceMethod__,
     __SendMethod__,
@@ -112,7 +112,7 @@ export type __WalletMethod__ =
     | __PrepareBeginStakingMethod__
     | __PrepareExtendStakingMethod__
     | __PrepareEndStakingMethod__
-    | __PrepareTransactionMethod__
+    | __PrepareSendOutputsMethod__
     | __RegisterParticipationEventsMethod__
     | __WaitForTransactionAcceptanceMethod__
     | __SendMethod__
