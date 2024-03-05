@@ -20,5 +20,5 @@ if len(sys.argv) > 1:
 # Create a Client instance
 client = Client(nodes=[node_url])
 
-validators_response = client.get_validators(page_size, cursor)
-print(f'{json.dumps(dataclasses.asdict(validators_response), indent=4)}')
+validators = client.get_validators(page_size, cursor)
+print(f'{json.dumps(dataclasses.asdict(validators), indent=4)}')
