@@ -205,24 +205,24 @@ pub struct BaseTokenResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorResponse {
     /// Account address of the validator.
-    address: Bech32Address,
+    pub address: Bech32Address,
     /// The epoch index until which the validator registered to stake.
-    staking_end_epoch: EpochIndex,
+    pub staking_end_epoch: EpochIndex,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
-    pool_stake: u64,
+    pub pool_stake: u64,
     /// The stake of a validator.
     #[serde(with = "string")]
-    validator_stake: u64,
+    pub validator_stake: u64,
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
     #[serde(with = "string")]
-    fixed_cost: u64,
+    pub fixed_cost: u64,
     /// Shows whether the validator was active recently.
-    active: bool,
+    pub active: bool,
     /// The latest protocol version the validator supported.
-    latest_supported_protocol_version: u8,
+    pub latest_supported_protocol_version: u8,
     /// The protocol hash of the latest supported protocol of the validator.
-    latest_supported_protocol_hash: ProtocolParametersHash,
+    pub latest_supported_protocol_hash: ProtocolParametersHash,
 }
 
 /// Response of GET /api/core/v3/blocks/validators.
@@ -232,13 +232,13 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
     /// List of registered validators ready for the next epoch.
-    validators: Vec<ValidatorResponse>,
+    pub validators: Vec<ValidatorResponse>,
     /// The number of validators returned per one API request with pagination.
-    page_size: u32,
+    pub page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
     /// last page.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    cursor: Option<String>,
+    pub cursor: Option<String>,
 }
 
 /// Response of GET /api/core/v3/rewards/{outputId}.
