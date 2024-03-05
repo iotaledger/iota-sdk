@@ -425,7 +425,7 @@ fn verify_validator_address(validator_address: &Address) -> Result<(), OutputErr
             return Err(OutputError::NullDelegationValidatorId);
         }
     } else {
-        return Err(OutputError::ValidatorAddress(AddressError::InvalidAddressKind(
+        return Err(OutputError::ValidatorAddress(AddressError::Kind(
             validator_address.kind(),
         )));
     }

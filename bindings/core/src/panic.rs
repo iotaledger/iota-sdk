@@ -9,7 +9,7 @@ use std::{
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 
-use crate::{response::Response, Result};
+use crate::response::Response;
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
     let msg = panic.downcast_ref::<String>().map_or_else(
@@ -27,9 +27,9 @@ fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
 }
 
 #[cfg(not(target_family = "wasm"))]
-pub(crate) async fn convert_async_panics<F>(f: impl FnOnce() -> F + Send) -> Result<Response>
+pub(crate) async fn convert_async_panics<F>(f: impl FnOnce() -> F + Send) -> Result<Response, crate::Error>
 where
-    F: Future<Output = Result<Response>> + Send,
+    F: Future<Output = Result<Response, crate::Error>> + Send,
 {
     AssertUnwindSafe(f())
         .catch_unwind()
@@ -39,9 +39,9 @@ where
 
 #[cfg(target_family = "wasm")]
 #[allow(clippy::future_not_send)]
-pub(crate) async fn convert_async_panics<F>(f: impl FnOnce() -> F) -> Result<Response>
+pub(crate) async fn convert_async_panics<F>(f: impl FnOnce() -> F) -> Result<Response, crate::Error>
 where
-    F: Future<Output = Result<Response>>,
+    F: Future<Output = Result<Response, crate::Error>>,
 {
     AssertUnwindSafe(f())
         .catch_unwind()
@@ -49,7 +49,7 @@ where
         .unwrap_or_else(|panic| Ok(panic_to_response_message(panic)))
 }
 
-pub(crate) fn convert_panics<F: FnOnce() -> Result<Response>>(f: F) -> Result<Response> {
+pub(crate) fn convert_panics<F: FnOnce() -> Result<Response, crate::Error>>(f: F) -> Result<Response, crate::Error> {
     match catch_unwind(AssertUnwindSafe(f)) {
         Ok(result) => result,
         Err(panic) => Ok(panic_to_response_message(panic)),

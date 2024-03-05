@@ -8,6 +8,7 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, TokenId},
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::{iota_mainnet_protocol_parameters, ProtocolParameters},
     },
 };
@@ -490,6 +491,10 @@ fn burn_and_send_at_the_same_time() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnNativeTokens])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
@@ -537,6 +542,10 @@ fn burn_one_input_no_output() {
     .select()
     .unwrap();
 
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::BurnNativeTokens])
+    );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 1);
     assert_remainder_or_return(

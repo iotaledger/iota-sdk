@@ -3,8 +3,8 @@
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, Error as ClientError},
-    wallet::Error as WalletError,
+    client::{constants::SHIMMER_COIN_TYPE, ClientError},
+    wallet::WalletError,
 };
 use iota_sdk_bindings_core::Error;
 use pretty_assertions::assert_eq;

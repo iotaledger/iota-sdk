@@ -7,6 +7,7 @@ mod address;
 mod block_builder;
 mod high_level;
 mod types;
+mod wait_for_tx_acceptance;
 
 pub use self::{address::*, block_builder::*, types::*};
 

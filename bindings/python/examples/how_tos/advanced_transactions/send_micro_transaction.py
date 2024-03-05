@@ -29,8 +29,8 @@ params = [SendParams(
 transaction = wallet.send_with_params(params, {"allowMicroAmount": True})
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = wallet.wait_for_transaction_acceptance(
+wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
 
 print(
-    f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')

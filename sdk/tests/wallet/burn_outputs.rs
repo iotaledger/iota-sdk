@@ -108,7 +108,6 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
     // First create an account output, this needs to be done only once, because an account can have many foundry outputs
     let transaction = wallet.create_account_output(None, None).await?;
 
-    // Wait for transaction to get accepted
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;

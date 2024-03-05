@@ -66,7 +66,7 @@ impl WorkScore for ManaAllotment {
 
 fn verify_mana(mana: &u64) -> Result<(), ManaError> {
     if *mana == 0 {
-        return Err(ManaError::InvalidManaValue(*mana));
+        return Err(ManaError::Value(*mana));
     }
 
     Ok(())
@@ -78,7 +78,7 @@ pub(crate) type ManaAllotmentCount =
 /// A list of [`ManaAllotment`]s with unique [`AccountId`]s.
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(unpack_error = ManaError, with = |e| e.unwrap_item_err_or_else(|p| ManaError::InvalidManaAllotmentCount(p.into())))]
+#[packable(unpack_error = ManaError, with = |e| e.unwrap_item_err_or_else(|p| ManaError::AllotmentCount(p.into())))]
 pub struct ManaAllotments(
     #[packable(verify_with = verify_mana_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
 );
@@ -99,7 +99,7 @@ impl ManaAllotments {
             allotments
                 .into_boxed_slice()
                 .try_into()
-                .map_err(ManaError::InvalidManaAllotmentCount)?,
+                .map_err(ManaError::AllotmentCount)?,
         ))
     }
 
@@ -110,7 +110,7 @@ impl ManaAllotments {
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(ManaError::InvalidManaAllotmentCount)?,
+                .map_err(ManaError::AllotmentCount)?,
         ))
     }
 
@@ -132,7 +132,7 @@ fn verify_mana_allotments_unique_sorted<'a>(
     allotments: impl IntoIterator<Item = &'a ManaAllotment>,
 ) -> Result<(), ManaError> {
     if !is_unique_sorted(allotments.into_iter()) {
-        return Err(ManaError::ManaAllotmentsNotUniqueSorted);
+        return Err(ManaError::AllotmentsNotUniqueSorted);
     }
     Ok(())
 }
@@ -145,13 +145,13 @@ pub(crate) fn verify_mana_allotments_sum<'a>(
     let max_mana = protocol_params.mana_parameters().max_mana();
 
     for ManaAllotment { mana, .. } in allotments {
-        mana_sum = mana_sum.checked_add(*mana).ok_or(ManaError::InvalidManaAllotmentSum {
+        mana_sum = mana_sum.checked_add(*mana).ok_or(ManaError::AllotmentSum {
             sum: mana_sum as u128 + *mana as u128,
             max: max_mana,
         })?;
 
         if mana_sum > max_mana {
-            return Err(ManaError::InvalidManaAllotmentSum {
+            return Err(ManaError::AllotmentSum {
                 sum: mana_sum as u128,
                 max: max_mana,
             });

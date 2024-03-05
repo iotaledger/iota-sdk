@@ -8,7 +8,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_amount() -> Result<()> {
+// async fn send_amount() -> Result<(), WalletError> {
 //     let storage_path_0 = "test-storage/send_amount_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_amount_1";
@@ -36,7 +36,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_amount_127_outputs() -> Result<()> {
+// async fn send_amount_127_outputs() -> Result<(), WalletError> {
 //     let storage_path_0 = "test-storage/send_amount_127_outputs_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_amount_127_outputs_1";
@@ -74,7 +74,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_amount_custom_input() -> Result<()> {
+// async fn send_amount_custom_input() -> Result<(), WalletError> {
 //     let storage_path_0 = "test-storage/send_amount_custom_input_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_amount_custom_input_1";
@@ -121,7 +121,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_nft() -> Result<()> {
+// async fn send_nft() -> Result<(), WalletError> {
 //     let storage_path_0 = "test-storage/send_nft_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_nft_1";
@@ -164,7 +164,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_with_note() -> Result<()> {
+// async fn send_with_note() -> Result<(), WalletError> {
 //     let storage_path_0 = "test-storage/send_with_note_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_with_note_1";
@@ -193,7 +193,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn conflicting_transaction() -> Result<()> {
+// async fn conflicting_transaction() -> Result<(), WalletError> {
 //     let storage_path_0 = "test-storage/conflicting_transaction_0";
 //     let storage_path_1 = "test-storage/conflicting_transaction_1";
 //     setup(storage_path_0)?;
@@ -265,7 +265,7 @@
 // #[tokio::test]
 // #[cfg(all(feature = "ledger_nano", feature = "events"))]
 // #[ignore = "requires ledger nano instance"]
-// async fn prepare_transaction_ledger() -> Result<()> {
+// async fn prepare_transaction_ledger() -> Result<(), WalletError> {
 //     use iota_sdk::wallet::events::{types::TransactionProgressEvent, WalletEvent, WalletEventType};
 
 //     let storage_path_0 = "test-storage/wallet_address_generation_ledger_0";

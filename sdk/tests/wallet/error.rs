@@ -1,27 +1,27 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::Error;
+use iota_sdk::wallet::WalletError;
 use pretty_assertions::assert_eq;
 
 #[test]
 fn stringified_error() {
     // testing a unit-type-like error
-    let error = Error::MissingBipPath;
+    let error = WalletError::MissingBipPath;
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
         "{\"type\":\"missingBipPath\",\"error\":\"missing BIP path\"}"
     );
 
     // testing a tuple-like error
-    let error = Error::InvalidMnemonic("nilly willy".to_string());
+    let error = WalletError::InvalidMnemonic("nilly willy".to_string());
     assert_eq!(
         serde_json::to_string(&error).unwrap(),
         "{\"type\":\"invalidMnemonic\",\"error\":\"invalid mnemonic: nilly willy\"}"
     );
 
     // testing a struct-like error
-    let error = Error::NoOutputsToConsolidate {
+    let error = WalletError::NoOutputsToConsolidate {
         available_outputs: 0,
         consolidation_threshold: 0,
     };

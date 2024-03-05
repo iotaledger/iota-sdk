@@ -540,7 +540,10 @@ async fn claim_basic_micro_output_error() -> Result<(), Box<dyn std::error::Erro
     let result = wallet_1
         .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await;
-    assert!(matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds { .. })));
+    assert!(matches!(
+        result,
+        Err(iota_sdk::wallet::WalletError::InsufficientFunds { .. })
+    ));
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;

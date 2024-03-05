@@ -35,7 +35,6 @@ from .types.irc_27 import *
 from .types.irc_30 import *
 from .types.filter_options import *
 from .types.native_token import *
-from .types.network_info import *
 from .types.node_info import *
 from .types.output import *
 from .types.output_data import *

@@ -11,7 +11,7 @@ use std::collections::{HashMap, HashSet};
 
 pub use self::options::SyncOptions;
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, ClientError},
     types::block::{
         address::{AccountAddress, Address, Bech32Address, NftAddress},
         output::{FoundryId, Output, OutputId, OutputMetadata},
@@ -19,18 +19,14 @@ use crate::{
     wallet::{
         constants::MIN_SYNC_INTERVAL,
         types::{address::AddressWithUnspentOutputs, Balance, OutputData},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
-    pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
+    pub async fn set_default_sync_options(&self, options: SyncOptions) -> Result<(), WalletError> {
         #[cfg(feature = "storage")]
         {
             self.storage_manager().set_default_sync_options(&options).await?;
@@ -45,116 +41,6 @@ where
         self.default_sync_options.lock().await.clone()
     }
 
-    /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
-    /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {
-        let options = match options {
-            Some(opt) => opt,
-            None => self.default_sync_options().await,
-        };
-
-        log::debug!("[SYNC] start syncing with {:?}", options);
-        let syc_start_time = instant::Instant::now();
-
-        // Prevent syncing the account multiple times simultaneously
-        let time_now = crate::client::unix_timestamp_now().as_millis();
-        let mut last_synced = self.last_synced.lock().await;
-        log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
-        if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
-            log::debug!(
-                "[SYNC] synced within the latest {} ms, only calculating balance",
-                MIN_SYNC_INTERVAL
-            );
-            // Calculate the balance because if we created a transaction in the meantime, the amount for the inputs
-            // is not available anymore
-            return self.balance().await;
-        }
-
-        self.sync_internal(&options).await?;
-
-        // Sync transactions after updating account with outputs, so we can use them to check the transaction
-        // status
-        if options.sync_pending_transactions {
-            let confirmed_tx_with_unknown_output = self.sync_pending_transactions().await?;
-            // Sync again if we don't know the output yet, to prevent having no unspent outputs after syncing
-            if confirmed_tx_with_unknown_output {
-                log::debug!("[SYNC] a transaction for which no output is known got confirmed, syncing outputs again");
-                self.sync_internal(&options).await?;
-            }
-        };
-
-        let balance = self.balance().await?;
-        // Update last_synced mutex
-        let time_now = crate::client::unix_timestamp_now().as_millis();
-        *last_synced = time_now;
-        log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
-        Ok(balance)
-    }
-
-    async fn sync_internal(&self, options: &SyncOptions) -> crate::wallet::Result<()> {
-        log::debug!("[SYNC] sync_internal");
-
-        let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
-            address: self.address().await,
-            output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
-        };
-
-        let address_to_sync = vec![
-            wallet_address_with_unspent_outputs,
-            AddressWithUnspentOutputs {
-                address: self.implicit_account_creation_address().await?,
-                output_ids: vec![],
-            },
-        ];
-
-        let (_addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data) =
-            self.request_outputs_recursively(address_to_sync, options).await?;
-
-        // Request possible spent outputs
-        log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
-        let spent_or_unsynced_output_metadata_responses = self
-            .client()
-            .get_outputs_metadata_ignore_not_found(&spent_or_not_synced_output_ids)
-            .await?;
-
-        // Add the output response to the output ids, the output response is optional, because an output could be
-        // pruned and then we can't get the metadata
-        let mut spent_or_unsynced_output_metadata: HashMap<OutputId, Option<OutputMetadata>> =
-            spent_or_not_synced_output_ids.into_iter().map(|o| (o, None)).collect();
-        for output_metadata_response in spent_or_unsynced_output_metadata_responses {
-            let output_id = output_metadata_response.output_id();
-            spent_or_unsynced_output_metadata.insert(*output_id, Some(output_metadata_response));
-        }
-
-        if options.sync_incoming_transactions {
-            let transaction_ids = outputs_data
-                .iter()
-                .map(|output| *output.output_id.transaction_id())
-                .collect();
-            // Request and store transaction payload for newly received unspent outputs
-            self.request_incoming_transaction_data(transaction_ids).await?;
-        }
-
-        if options.sync_native_token_foundries {
-            let native_token_foundry_ids = outputs_data
-                .iter()
-                .filter_map(|output| {
-                    output
-                        .output
-                        .native_token()
-                        .map(|native_token| FoundryId::from(*native_token.token_id()))
-                })
-                .collect::<HashSet<_>>();
-
-            // Request and store foundry outputs
-            self.request_and_store_foundry_outputs(native_token_foundry_ids).await?;
-        }
-
-        // Updates wallet with balances, output ids, outputs
-        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata)
-            .await
-    }
-
     // First request all outputs directly related to the wallet address, then for each nft and account output we got,
     // request all outputs that are related to their account/nft addresses in a loop until no new account or nft outputs
     // are found.
@@ -162,7 +48,7 @@ where
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>)> {
+    ) -> Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>), WalletError> {
         // Cache account and nft addresses with the related Ed25519 address, so we can update the account
         // address with the new output ids.
         let mut addresses_to_scan: HashMap<Address, Address> = HashMap::new();
@@ -253,5 +139,135 @@ where
             spent_or_not_synced_output_ids,
             unspent_outputs_data_all,
         ))
+    }
+}
+
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
+{
+    /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
+    /// if necessary. A custom default can be set using set_default_sync_options.
+    pub async fn sync(&self, options: Option<SyncOptions>) -> Result<Balance, WalletError> {
+        let options = match options {
+            Some(opt) => opt,
+            None => self.default_sync_options().await,
+        };
+
+        log::debug!("[SYNC] start syncing with {:?}", options);
+        let syc_start_time = instant::Instant::now();
+
+        // Prevent syncing the account multiple times simultaneously
+        let time_now = crate::client::unix_timestamp_now().as_millis();
+        let mut last_synced = self.last_synced.lock().await;
+        log::debug!("[SYNC] last time synced before {}ms", time_now - *last_synced);
+        if !options.force_syncing && time_now - *last_synced < MIN_SYNC_INTERVAL {
+            log::debug!(
+                "[SYNC] synced within the latest {} ms, only calculating balance",
+                MIN_SYNC_INTERVAL
+            );
+            // Calculate the balance because if we created a transaction in the meantime, the amount for the inputs
+            // is not available anymore
+            return self.balance().await;
+        }
+
+        self.sync_internal(&options).await?;
+
+        // Sync transactions after updating account with outputs, so we can use them to check the transaction
+        // status
+        if options.sync_pending_transactions {
+            let confirmed_tx_with_unknown_output = self.sync_pending_transactions().await?;
+            // Sync again if we don't know the output yet, to prevent having no unspent outputs after syncing
+            if confirmed_tx_with_unknown_output {
+                log::debug!("[SYNC] a transaction for which no output is known got confirmed, syncing outputs again");
+                self.sync_internal(&options).await?;
+            }
+        };
+
+        let balance = self.balance().await?;
+        // Update last_synced mutex
+        let time_now = crate::client::unix_timestamp_now().as_millis();
+        *last_synced = time_now;
+        log::debug!("[SYNC] finished syncing in {:.2?}", syc_start_time.elapsed());
+        Ok(balance)
+    }
+
+    async fn sync_internal(&self, options: &SyncOptions) -> Result<(), WalletError> {
+        log::debug!("[SYNC] sync_internal");
+
+        let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
+            address: self.address().await,
+            output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
+        };
+
+        let mut addresses_to_sync = vec![wallet_address_with_unspent_outputs];
+
+        if options.sync_implicit_accounts {
+            if let Ok(implicit_account_creation_address) = self.implicit_account_creation_address().await {
+                addresses_to_sync.push(AddressWithUnspentOutputs {
+                    output_ids: self
+                        .ledger()
+                        .await
+                        .implicit_accounts()
+                        .filter_map(|output_data| {
+                            if output_data.output.as_basic().address() == implicit_account_creation_address.inner() {
+                                Some(output_data.output_id)
+                            } else {
+                                None
+                            }
+                        })
+                        .collect(),
+                    address: implicit_account_creation_address,
+                });
+            }
+        }
+
+        let (_addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data) =
+            self.request_outputs_recursively(addresses_to_sync, options).await?;
+
+        // Request possible spent outputs
+        log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
+        let spent_or_unsynced_output_metadata_responses = self
+            .client()
+            .get_outputs_metadata_ignore_not_found(&spent_or_not_synced_output_ids)
+            .await?;
+
+        // Add the output response to the output ids, the output response is optional, because an output could be
+        // pruned and then we can't get the metadata
+        let mut spent_or_unsynced_output_metadata: HashMap<OutputId, Option<OutputMetadata>> =
+            spent_or_not_synced_output_ids.into_iter().map(|o| (o, None)).collect();
+        for output_metadata_response in spent_or_unsynced_output_metadata_responses {
+            let output_id = output_metadata_response.output_id();
+            spent_or_unsynced_output_metadata.insert(*output_id, Some(output_metadata_response));
+        }
+
+        if options.sync_incoming_transactions {
+            let transaction_ids = outputs_data
+                .iter()
+                .map(|output| *output.output_id.transaction_id())
+                .collect();
+            // Request and store transaction payload for newly received unspent outputs
+            self.request_incoming_transaction_data(transaction_ids).await?;
+        }
+
+        if options.sync_native_token_foundries {
+            let native_token_foundry_ids = outputs_data
+                .iter()
+                .filter_map(|output| {
+                    output
+                        .output
+                        .native_token()
+                        .map(|native_token| FoundryId::from(*native_token.token_id()))
+                })
+                .collect::<HashSet<_>>();
+
+            // Request and store foundry outputs
+            self.request_and_store_foundry_outputs(native_token_foundry_ids).await?;
+        }
+
+        // Updates wallet with balances, output ids, outputs
+        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata)
+            .await
     }
 }

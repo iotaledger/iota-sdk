@@ -5,18 +5,15 @@ use crate::{
     client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId},
     utils::ConvertTo,
-    wallet::Wallet,
+    wallet::{Wallet, WalletError},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Returns output ids of basic outputs that have only the address unlock condition
     pub(crate) async fn get_basic_output_ids_with_address_unlock_condition_only(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
-    ) -> crate::client::Result<Vec<OutputId>> {
+    ) -> Result<Vec<OutputId>, WalletError> {
         let bech32_address = bech32_address.convert()?;
 
         Ok(self
@@ -33,7 +30,7 @@ where
     pub(crate) async fn get_basic_output_ids_with_any_unlock_condition(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> Result<Vec<OutputId>, WalletError> {
         let bech32_address = bech32_address.convert()?;
 
         Ok(self
