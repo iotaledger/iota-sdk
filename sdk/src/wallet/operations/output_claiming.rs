@@ -288,7 +288,7 @@ where
             }
         }
 
-        self.prepare_transaction(
+        self.prepare_send_outputs(
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
             TransactionOptions {
