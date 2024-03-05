@@ -198,9 +198,7 @@ impl TransactionBuilder {
             outputs,
         };
 
-        if let Some(protocol_parameters) = params {
-            verify_transaction(&transaction, protocol_parameters)?;
-        }
+        verify_transaction(&transaction)?;
 
         Ok(transaction)
     }
@@ -219,7 +217,7 @@ pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUT
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = PayloadError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(verify_with = verify_transaction)]
+#[packable(verify_with = verify_transaction_packable)]
 pub struct Transaction {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
@@ -446,7 +444,11 @@ fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<()
     Ok(())
 }
 
-fn verify_transaction(transaction: &Transaction, _: &ProtocolParameters) -> Result<(), PayloadError> {
+fn verify_transaction_packable(transaction: &Transaction, _: &ProtocolParameters) -> Result<(), PayloadError> {
+    verify_transaction(transaction)
+}
+
+fn verify_transaction(transaction: &Transaction) -> Result<(), PayloadError> {
     let has_commitment_input = transaction.context_inputs().commitment().is_some();
 
     for output in transaction.outputs.iter() {
