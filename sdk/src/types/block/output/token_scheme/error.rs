@@ -11,7 +11,7 @@ pub enum TokenSchemeError {
     #[display(fmt = "invalid token scheme kind {_0}")]
     Kind(u8),
     #[display(fmt = "invalid foundry output supply: minted {minted}, melted {melted} max {max}")]
-    FoundryOutputSupply { minted: U256, melted: U256, max: U256 },
+    Supply { minted: U256, melted: U256, max: U256 },
 }
 
 #[cfg(feature = "std")]
