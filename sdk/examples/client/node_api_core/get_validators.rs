@@ -7,7 +7,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example node_api_core_get_validators [LIST_INDEX] [NODE_URL]
+//! cargo run --release --all-features --example node_api_core_get_validators [PAGE_SIZE] [CURSOR] [NODE_URL]
 //! ```
 
 use iota_sdk::client::{Client, Result};
@@ -17,11 +17,12 @@ async fn main() -> Result<()> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
-    let list_index = std::env::args().nth(1).map(|s| s.parse::<u32>().unwrap());
+    let page_size = std::env::args().nth(1).map(|s| s.parse::<u32>().unwrap()).unwrap_or(1);
+    let cursor = std::env::args().nth(2).unwrap_or_default();
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
-        .nth(2)
+        .nth(3)
         .unwrap_or_else(|| std::env::var("NODE_URL").expect("NODE_URL not set"));
 
     // Create a node client.
@@ -31,13 +32,10 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let slot_index = client.get_node_info().await?.info.status.latest_finalized_slot;
-    let cursor = list_index.map(|i| format!("{slot_index},{i}"));
-
     // Get validators.
-    let res = client.get_validators(1, cursor).await?;
+    let res = client.get_validators(page_size, cursor).await?;
 
-    println!("{res:?}");
+    println!("{res:#?}");
 
     Ok(())
 }
