@@ -17,7 +17,7 @@ use zeroize::{Zeroize, Zeroizing};
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{api::PreparedTransactionData, Error},
+    client::{api::PreparedTransactionData, ClientError},
     types::block::{
         payload::signed_transaction::SignedTransactionPayload, protocol::ProtocolParameters,
         signature::Ed25519Signature, unlock::Unlocks,
@@ -35,7 +35,7 @@ impl std::fmt::Debug for PrivateKeySecretManager {
 
 #[async_trait]
 impl SecretManage for PrivateKeySecretManager {
-    type Error = Error;
+    type Error = ClientError;
 
     async fn generate_ed25519_public_keys(
         &self,
@@ -44,7 +44,7 @@ impl SecretManage for PrivateKeySecretManager {
         _address_indexes: Range<u32>,
         _options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        crate::client::Result::Ok(vec![self.0.public_key()])
+        Ok(vec![self.0.public_key()])
     }
 
     async fn generate_evm_addresses(
@@ -55,7 +55,7 @@ impl SecretManage for PrivateKeySecretManager {
         _options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
         // TODO replace with a more fitting variant.
-        Err(Error::SecretManagerMismatch)
+        Err(ClientError::SecretManagerMismatch)
     }
 
     async fn sign_ed25519(&self, msg: &[u8], _chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
@@ -71,7 +71,7 @@ impl SecretManage for PrivateKeySecretManager {
         _chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
         // TODO replace with a more fitting variant.
-        Err(Error::SecretManagerMismatch)
+        Err(ClientError::SecretManagerMismatch)
     }
 
     async fn transaction_unlocks(
@@ -93,7 +93,7 @@ impl SecretManage for PrivateKeySecretManager {
 
 impl PrivateKeySecretManager {
     /// Create a new [`PrivateKeySecretManager`] from a base 58 encoded private key.
-    pub fn try_from_b58<T: AsRef<[u8]>>(b58: T) -> Result<Self, Error> {
+    pub fn try_from_b58<T: AsRef<[u8]>>(b58: T) -> Result<Self, ClientError> {
         let mut bytes = [0u8; ed25519::SecretKey::LENGTH];
 
         // TODO replace with a more fitting variant.
@@ -114,7 +114,7 @@ impl PrivateKeySecretManager {
     }
 
     /// Create a new [`PrivateKeySecretManager`] from an hex encoded private key.
-    pub fn try_from_hex(hex: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+    pub fn try_from_hex(hex: impl Into<Zeroizing<String>>) -> Result<Self, ClientError> {
         let mut bytes = prefix_hex::decode(hex.into())?;
 
         let private_key = Self(ed25519::SecretKey::from_bytes(&bytes));

@@ -8,9 +8,6 @@ use iota_sdk::types::block::{
 use packable::error::UnexpectedEOF;
 use serde::{Serialize, Serializer};
 
-/// Result type of the bindings core crate.
-pub type Result<T> = std::result::Result<T, Error>;
-
 /// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error, strum::AsRefStr)]
 #[strum(serialize_all = "camelCase")]
@@ -36,10 +33,10 @@ pub enum Error {
     TransactionSemantic(#[from] TransactionFailureReason),
     /// Client errors.
     #[error("{0}")]
-    Client(#[from] iota_sdk::client::Error),
+    Client(#[from] iota_sdk::client::ClientError),
     /// Wallet errors.
     #[error("{0}")]
-    Wallet(#[from] iota_sdk::wallet::Error),
+    Wallet(#[from] iota_sdk::wallet::WalletError),
     /// Prefix hex errors.
     #[error("{0}")]
     PrefixHex(#[from] prefix_hex::Error),
@@ -54,14 +51,14 @@ pub enum Error {
 #[cfg(feature = "stronghold")]
 impl From<iota_sdk::client::stronghold::Error> for Error {
     fn from(error: iota_sdk::client::stronghold::Error) -> Self {
-        Self::Client(iota_sdk::client::Error::Stronghold(error))
+        Self::Client(iota_sdk::client::ClientError::Stronghold(error))
     }
 }
 
 #[cfg(feature = "mqtt")]
 impl From<iota_sdk::client::node_api::mqtt::Error> for Error {
     fn from(error: iota_sdk::client::node_api::mqtt::Error) -> Self {
-        Self::Client(iota_sdk::client::Error::Mqtt(error))
+        Self::Client(iota_sdk::client::ClientError::Mqtt(error))
     }
 }
 

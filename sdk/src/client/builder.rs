@@ -12,12 +12,11 @@ use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
     client::{
         constants::DEFAULT_API_TIMEOUT,
-        error::Result,
         node_manager::{
             builder::validate_url,
             node::{Node, NodeAuth},
         },
-        Client,
+        Client, ClientError,
     },
     types::block::protocol::ProtocolParameters,
 };
@@ -78,7 +77,7 @@ impl ClientBuilder {
 
     /// Set the fields from a client JSON config
     #[allow(unused_assignments)]
-    pub fn from_json(mut self, client_config: &str) -> Result<Self> {
+    pub fn from_json(mut self, client_config: &str) -> Result<Self, ClientError> {
         self = serde_json::from_str::<Self>(client_config)?;
         // validate URLs
         for node_dto in &self.node_manager_builder.primary_nodes {
@@ -93,31 +92,31 @@ impl ClientBuilder {
     }
 
     /// Adds an IOTA node by its URL.
-    pub fn with_node(mut self, url: &str) -> Result<Self> {
+    pub fn with_node(mut self, url: &str) -> Result<Self, ClientError> {
         self.node_manager_builder = self.node_manager_builder.with_node(url)?;
         Ok(self)
     }
 
     // Adds a node as primary node.
-    pub fn with_primary_node(mut self, node: Node) -> Result<Self> {
+    pub fn with_primary_node(mut self, node: Node) -> Result<Self, ClientError> {
         self.node_manager_builder = self.node_manager_builder.with_primary_node(node)?;
         Ok(self)
     }
 
     /// Adds a list of IOTA nodes by their URLs to the primary nodes list.
-    pub fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self> {
+    pub fn with_primary_nodes(mut self, urls: &[&str]) -> Result<Self, ClientError> {
         self.node_manager_builder = self.node_manager_builder.with_primary_nodes(urls)?;
         Ok(self)
     }
 
     /// Adds an IOTA node by its URL with optional jwt and or basic authentication
-    pub fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self> {
+    pub fn with_node_auth(mut self, url: &str, auth: impl Into<Option<NodeAuth>>) -> Result<Self, ClientError> {
         self.node_manager_builder = self.node_manager_builder.with_node_auth(url, auth)?;
         Ok(self)
     }
 
     /// Adds a list of IOTA nodes by their URLs.
-    pub fn with_nodes(mut self, urls: &[&str]) -> Result<Self> {
+    pub fn with_nodes(mut self, urls: &[&str]) -> Result<Self, ClientError> {
         self.node_manager_builder = self.node_manager_builder.with_nodes(urls)?;
         Ok(self)
     }
@@ -190,7 +189,7 @@ impl ClientBuilder {
 
     /// Build the Client instance.
     #[cfg(not(target_family = "wasm"))]
-    pub async fn finish(self) -> Result<Client> {
+    pub async fn finish(self) -> Result<Client, ClientError> {
         use tokio::sync::RwLock;
 
         let node_sync_interval = self.node_manager_builder.node_sync_interval;
@@ -251,7 +250,7 @@ impl ClientBuilder {
 
     /// Build the Client instance.
     #[cfg(target_family = "wasm")]
-    pub async fn finish(self) -> Result<Client> {
+    pub async fn finish(self) -> Result<Client, ClientError> {
         use tokio::sync::RwLock;
 
         #[cfg(feature = "mqtt")]

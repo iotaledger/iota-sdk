@@ -143,7 +143,7 @@ fn build_invalid_payload_kind() {
         .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters);
 
-    assert!(matches!(transaction, Err(PayloadError::InvalidPayloadKind(1))));
+    assert!(matches!(transaction, Err(PayloadError::Kind(1))));
 }
 
 #[test]
@@ -165,7 +165,7 @@ fn build_invalid_input_count_low() {
 
     assert!(matches!(
         transaction,
-        Err(PayloadError::InvalidInputCount(TryIntoBoundedU16Error::Invalid(0)))
+        Err(PayloadError::InputCount(TryIntoBoundedU16Error::Invalid(0)))
     ));
 }
 
@@ -191,7 +191,7 @@ fn build_invalid_input_count_high() {
 
     assert!(matches!(
         transaction,
-        Err(PayloadError::InvalidInputCount(TryIntoBoundedU16Error::Invalid(129)))
+        Err(PayloadError::InputCount(TryIntoBoundedU16Error::Invalid(129)))
     ));
 }
 
@@ -208,7 +208,7 @@ fn build_invalid_output_count_low() {
 
     assert!(matches!(
         transaction,
-        Err(PayloadError::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(0)))
+        Err(PayloadError::OutputCount(TryIntoBoundedU16Error::Invalid(0)))
     ));
 }
 
@@ -234,7 +234,7 @@ fn build_invalid_output_count_high() {
 
     assert!(matches!(
         transaction,
-        Err(PayloadError::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(129)))
+        Err(PayloadError::OutputCount(TryIntoBoundedU16Error::Invalid(129)))
     ));
 }
 
@@ -293,7 +293,7 @@ fn build_invalid_accumulated_output() {
         .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters);
 
-    assert!(matches!(transaction, Err(PayloadError::InvalidTransactionAmountSum(_))));
+    assert!(matches!(transaction, Err(PayloadError::TransactionAmountSum(_))));
 }
 
 #[test]

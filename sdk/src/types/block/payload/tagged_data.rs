@@ -27,9 +27,9 @@ pub(crate) type TaggedDataLength =
 #[derive(Clone, Eq, PartialEq, Packable)]
 #[packable(unpack_error = PayloadError)]
 pub struct TaggedDataPayload {
-    #[packable(unpack_error_with = |err| PayloadError::InvalidTagLength(err.into_prefix_err().into()))]
+    #[packable(unpack_error_with = |err| PayloadError::TagLength(err.into_prefix_err().into()))]
     tag: BoxedSlicePrefix<u8, TagLength>,
-    #[packable(unpack_error_with = |err| PayloadError::InvalidTaggedDataLength(err.into_prefix_err().into()))]
+    #[packable(unpack_error_with = |err| PayloadError::TaggedDataLength(err.into_prefix_err().into()))]
     data: BoxedSlicePrefix<u8, TaggedDataLength>,
 }
 
@@ -44,8 +44,8 @@ impl TaggedDataPayload {
     /// Creates a new [`TaggedDataPayload`].
     pub fn new(tag: impl Into<Box<[u8]>>, data: impl Into<Box<[u8]>>) -> Result<Self, PayloadError> {
         Ok(Self {
-            tag: tag.into().try_into().map_err(PayloadError::InvalidTagLength)?,
-            data: data.into().try_into().map_err(PayloadError::InvalidTaggedDataLength)?,
+            tag: tag.into().try_into().map_err(PayloadError::TagLength)?,
+            data: data.into().try_into().map_err(PayloadError::TaggedDataLength)?,
         })
     }
 

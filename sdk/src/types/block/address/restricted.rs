@@ -86,7 +86,7 @@ fn verify_address(address: &Address) -> Result<(), AddressError> {
         address,
         Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
     ) {
-        Err(AddressError::InvalidAddressKind(address.kind()))
+        Err(AddressError::Kind(address.kind()))
     } else {
         Ok(())
     }
