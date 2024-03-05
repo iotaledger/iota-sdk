@@ -114,7 +114,7 @@ where
 {
     /// Mints NFTs.
     ///
-    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally. The options may
+    /// Calls [Wallet::prepare_send_outputs()](crate::wallet::Wallet::prepare_send_outputs) internally. The options may
     /// define the remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
@@ -207,6 +207,6 @@ where
             outputs.push(nft_builder.finish_output()?);
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

@@ -101,7 +101,7 @@ impl Client {
     ) -> Result<CongestionResponse, ClientError> {
         let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
         let path = &format!("api/core/v3/accounts/{bech32_address}/congestion");
-        let query = query_tuples_to_query_string([work_score.into().map(|i| ("workScore", i.to_string()))]);
+        let query = query_tuples_to_query_string([work_score.into().map(|s| ("workScore", s.to_string()))]);
 
         self.get_request(path, query.as_deref(), false).await
     }
@@ -138,8 +138,8 @@ impl Client {
     ) -> Result<ValidatorsResponse, ClientError> {
         const PATH: &str = "api/core/v3/validators";
         let query = query_tuples_to_query_string([
-            page_size.into().map(|i| ("pageSize", i.to_string())),
-            cursor.into().map(|i| ("cursor", i)),
+            page_size.into().map(|n| ("pageSize", n.to_string())),
+            cursor.into().map(|c| ("cursor", c)),
         ]);
 
         self.get_request(PATH, query.as_deref(), false).await

@@ -54,7 +54,7 @@ where
 {
     /// Creates a new foundry output with minted native tokens.
     ///
-    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally, the options may
+    /// Calls [Wallet::prepare_send_outputs()](crate::wallet::Wallet::prepare_send_outputs) internally, the options may
     /// define the remainder value strategy or custom inputs.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
@@ -120,30 +120,28 @@ where
             );
             let token_id = TokenId::from(foundry_id);
 
-            let outputs = [
-                {
-                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
-                        storage_score_params,
-                        account_output.foundry_counter() + 1,
-                        TokenScheme::Simple(SimpleTokenScheme::new(
-                            params.circulating_supply,
-                            0,
-                            params.maximum_supply,
-                        )?),
-                    )
-                    .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
-                        account_id,
-                    )));
+            let outputs = [{
+                let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
+                    storage_score_params,
+                    account_output.foundry_counter() + 1,
+                    TokenScheme::Simple(SimpleTokenScheme::new(
+                        params.circulating_supply,
+                        0,
+                        params.maximum_supply,
+                    )?),
+                )
+                .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
+                    account_id,
+                )));
 
-                    if let Some(foundry_metadata) = params.foundry_metadata {
-                        foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
-                    }
+                if let Some(foundry_metadata) = params.foundry_metadata {
+                    foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
+                }
 
-                    foundry_builder.finish_output()?
-                }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
-            ];
+                foundry_builder.finish_output()?
+            }];
 
-            self.prepare_transaction(outputs, options)
+            self.prepare_send_outputs(outputs, options)
                 .await
                 .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {

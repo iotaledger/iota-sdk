@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "events")]
+use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
         secret::{SecretManage, SignBlock},
@@ -46,12 +48,22 @@ where
             }
         }
 
+        #[cfg(feature = "events")]
+        self.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::PreparedBlockSigningInput(prefix_hex::encode(unsigned_block.signing_input())),
+        ))
+        .await;
+
         let block = unsigned_block
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,
                 self.bip_path().await.ok_or(WalletError::MissingBipPath)?,
             )
             .await?;
+
+        #[cfg(feature = "events")]
+        self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
+            .await;
 
         let block_id = self.client().post_block(&block).await?;
 

@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "events")]
-use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{secret::SecretManage, ClientError},
     types::block::{output::AccountId, payload::Payload, BlockId},
@@ -21,10 +19,6 @@ where
         issuer_id: impl Into<Option<AccountId>> + Send,
     ) -> Result<BlockId, WalletError> {
         log::debug!("[TRANSACTION] submit_signed_transaction");
-
-        #[cfg(feature = "events")]
-        self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
-            .await;
 
         self.submit_basic_block(Some(Payload::from(payload)), issuer_id, true)
             .await

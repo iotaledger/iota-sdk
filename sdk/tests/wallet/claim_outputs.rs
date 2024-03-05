@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
+    client::api::options::TransactionOptions,
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{CreateNativeTokenParams, OutputsToClaim, SendNativeTokenParams, SendParams, TransactionOptions},
+    wallet::{CreateNativeTokenParams, OutputsToClaim, SendNativeTokenParams, SendParams},
     U256,
 };
 use pretty_assertions::assert_eq;
