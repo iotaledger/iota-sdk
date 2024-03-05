@@ -106,7 +106,7 @@ where
             ])
             .finish_output()?;
 
-        self.prepare_transaction(
+        self.prepare_send_outputs(
             [new_output],
             Some(TransactionOptions {
                 // Only use previous voting output as input.
@@ -183,7 +183,7 @@ where
             ])
             .finish_output()?;
 
-        self.prepare_transaction(
+        self.prepare_send_outputs(
             [new_output],
             Some(TransactionOptions {
                 // Only use previous voting output as input.

@@ -366,8 +366,8 @@ pub(crate) async fn call_wallet_method_internal(
         //     let data = wallet.prepare_stop_participating(event_id).await?;
         //     Response::PreparedTransaction(data)
         // }
-        WalletMethod::PrepareTransaction { outputs, options } => {
-            let data = wallet.prepare_transaction(outputs, options).await?;
+        WalletMethod::PrepareSendOutputs { outputs, options } => {
+            let data = wallet.prepare_send_outputs(outputs, options).await?;
             Response::PreparedTransaction(data)
         }
         // #[cfg(feature = "participation")]
