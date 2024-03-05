@@ -5,7 +5,7 @@ pub(crate) mod account;
 mod build_transaction;
 pub(crate) mod high_level;
 pub(crate) mod prepare_output;
-mod prepare_transaction;
+mod send_outputs;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
@@ -17,10 +17,7 @@ use crate::{
         secret::SecretManage,
         ClientError,
     },
-    types::block::{
-        output::{Output, OutputWithMetadata},
-        payload::signed_transaction::SignedTransactionPayload,
-    },
+    types::block::{output::OutputWithMetadata, payload::signed_transaction::SignedTransactionPayload},
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
         Wallet, WalletError,
@@ -32,54 +29,6 @@ where
     WalletError: From<S::Error>,
     ClientError: From<S::Error>,
 {
-    /// Sends a transaction by specifying its outputs.
-    ///
-    /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
-    /// will reissue the transaction during syncing.
-    /// ```ignore
-    /// let outputs = [
-    ///    BasicOutputBuilder::new_with_amount(1_000_000)?
-    ///    .add_unlock_condition(AddressUnlockCondition::new(
-    ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-    ///    ))
-    ///    .finish_output(account.client.get_token_supply().await?;)?,
-    /// ];
-    /// let tx = account
-    ///     .send_outputs(
-    ///         outputs,
-    ///         Some(TransactionOptions {
-    ///             remainder_value_strategy: RemainderValueStrategy::ReuseAddress,
-    ///             ..Default::default()
-    ///         }),
-    ///     )
-    ///     .await?;
-    /// println!("Transaction created: {}", tx.transaction_id);
-    /// if let Some(block_id) = tx.block_id {
-    ///     println!("Block sent: {}", block_id);
-    /// }
-    /// ```
-    pub async fn send_outputs(
-        &self,
-        outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> Result<TransactionWithMetadata, WalletError> {
-        let outputs = outputs.into();
-        let options = options.into();
-        // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
-        // Checking it also here is good to return earlier if something is invalid
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
-
-        // Check if the outputs have enough amount to cover the storage deposit
-        for output in &outputs {
-            output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
-        }
-
-        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
-
-        self.sign_and_submit_transaction(prepared_transaction_data, options)
-            .await
-    }
-
     /// Signs a transaction, submit it to a node and store it in the wallet
     pub async fn sign_and_submit_transaction(
         &self,

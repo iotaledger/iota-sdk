@@ -78,7 +78,7 @@ where
             )?))
             .finish_output()?];
         // Transaction builder will detect that we're melting native tokens and add the required inputs if available
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 
     /// Find and return unspent `OutputData` for given `account_id` and `foundry_id`
