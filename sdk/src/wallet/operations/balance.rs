@@ -72,7 +72,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         slot_index,
                     )?;
                     // Add mana rewards
-                    reward_outputs.insert(*output_id);
+                    if account.features().staking().is_some() {
+                        reward_outputs.insert(*output_id);
+                    }
 
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
