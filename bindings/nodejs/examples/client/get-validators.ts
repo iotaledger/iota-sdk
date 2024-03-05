@@ -5,9 +5,10 @@ import { Client, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./client/get-validators.ts
+// yarn run-example ./client/get-validators.ts [PAGE_SIZE] [CURSOR]
 
-// In this example we will get the validators of the node in a paginated way.
+// This example returns the validators known by the node by querying the corresponding endpoint.
+// You can provide a custom PAGE_SIZE and additionally a CURSOR from a previous request.
 async function run() {
     initLogger();
     for (const envVar of ['NODE_URL']) {
@@ -21,14 +22,18 @@ async function run() {
         nodes: [process.env.NODE_URL as string],
     });
 
-    const pageSize = 1;
-    const listIndex = 1;
+    let pageSize = 1;
+    let cursor = '';
+    if (process.argv.length > 1) {
+        pageSize = parseInt(process.argv[2]);
+        if (process.argv.length > 2) {
+            cursor = process.argv[3];
+        }
+    }
+
     try {
-        const slotIndex = (await client.getNodeInfo()).info.status
-            .latestFinalizedSlot;
-        const cursor = `${slotIndex},${listIndex}`;
-        const validatorsResponse = await client.getValidators(pageSize, cursor);
-        console.log(validatorsResponse);
+        const validators = await client.getValidators(pageSize, cursor);
+        console.log(validators);
     } catch (error) {
         console.error('Error: ', error);
     }
