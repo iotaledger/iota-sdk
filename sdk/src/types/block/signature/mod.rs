@@ -2,42 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod ed25519;
-
-use alloc::string::String;
-use core::convert::Infallible;
+mod error;
 
 use derive_more::From;
 
-pub use self::ed25519::Ed25519Signature;
+pub use self::{ed25519::Ed25519Signature, error::SignatureError};
 use crate::types::block::protocol::{WorkScore, WorkScoreParameters};
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display)]
-#[allow(missing_docs)]
-pub enum SignatureError {
-    #[display(fmt = "invalid signature kind: {_0}")]
-    InvalidSignatureKind(u8),
-    #[display(fmt = "signature public key mismatch: expected {expected} but got {actual}")]
-    SignaturePublicKeyMismatch { expected: String, actual: String },
-    #[display(fmt = "invalid public key hex: {_0}")]
-    InvalidPublicKeyHex(prefix_hex::Error),
-    #[display(fmt = "invalid signature hex: {_0}")]
-    InvalidSignatureHex(prefix_hex::Error),
-    #[display(fmt = "invalid public key bytes: {_0}")]
-    InvalidPublicKeyBytes(crypto::Error),
-    #[display(fmt = "invalid signature bytes: {_0}")]
-    InvalidSignatureBytes(crypto::Error),
-    #[display(fmt = "signature does not match the message: {_0}")]
-    SignatureMismatch(String),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for SignatureError {}
-
-impl From<Infallible> for SignatureError {
-    fn from(error: Infallible) -> Self {
-        match error {}
-    }
-}
 
 /// A `Signature` contains a signature which is used to unlock a transaction input.
 ///
@@ -46,7 +16,7 @@ impl From<Infallible> for SignatureError {
 /// RFC: <https://github.com/luca-moser/protocol-rfcs/blob/signed-tx-payload/text/0000-transaction-payload/0000-transaction-payload.md#signature-unlock-block>
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable, From)]
 #[packable(unpack_error = SignatureError)]
-#[packable(tag_type = u8, with_error = SignatureError::InvalidSignatureKind)]
+#[packable(tag_type = u8, with_error = SignatureError::Kind)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Signature {
     /// An Ed25519 signature.

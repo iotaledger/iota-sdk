@@ -1,9 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Type alias of `Result` in Node errors
-pub type Result<T> = std::result::Result<T, Error>;
-
 /// Node errors.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]

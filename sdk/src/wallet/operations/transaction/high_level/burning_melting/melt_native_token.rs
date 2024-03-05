@@ -4,21 +4,21 @@
 use primitive_types::U256;
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::output::{
         AccountId, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
         operations::transaction::TransactionOptions,
         types::{OutputData, TransactionWithMetadata},
-        Error, Wallet,
+        Wallet, WalletError,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Melts native tokens.
     ///
@@ -30,7 +30,7 @@ where
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared_transaction = self
             .prepare_melt_native_token(token_id, melt_amount, options.clone())
@@ -45,7 +45,7 @@ where
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_melt_native_token");
 
         let foundry_id = FoundryId::from(token_id);
@@ -86,7 +86,7 @@ where
         &self,
         account_id: AccountId,
         foundry_id: FoundryId,
-    ) -> crate::wallet::Result<(OutputData, OutputData)> {
+    ) -> Result<(OutputData, OutputData), WalletError> {
         let mut existing_account_output_data = None;
         let mut existing_foundry_output = None;
 
@@ -112,11 +112,11 @@ where
         }
 
         let existing_account_output_data = existing_account_output_data.ok_or_else(|| {
-            Error::BurningOrMeltingFailed("required account output for foundry not found".to_string())
+            WalletError::BurningOrMeltingFailed("required account output for foundry not found".to_string())
         })?;
 
         let existing_foundry_output_data = existing_foundry_output
-            .ok_or_else(|| Error::BurningOrMeltingFailed("required foundry output not found".to_string()))?;
+            .ok_or_else(|| WalletError::BurningOrMeltingFailed("required foundry output not found".to_string()))?;
 
         Ok((existing_account_output_data, existing_foundry_output_data))
     }

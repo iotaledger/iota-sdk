@@ -25,7 +25,7 @@ where
     pub async fn register_participation_events(
         &self,
         options: &ParticipationEventRegistrationOptions,
-    ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
+    ) -> Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>, WalletError> {
         let client = Client::builder()
             .with_ignore_node_health()
             .with_node_auth(options.node.url.as_str(), options.node.auth.clone())?
@@ -71,7 +71,7 @@ where
     }
 
     /// Removes a previously registered participation event from local storage.
-    pub async fn deregister_participation_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<()> {
+    pub async fn deregister_participation_event(&self, id: &ParticipationEventId) -> Result<(), WalletError> {
         self.storage_manager().remove_participation_event(id).await?;
         Ok(())
     }
@@ -80,7 +80,7 @@ where
     pub async fn get_participation_event(
         &self,
         id: ParticipationEventId,
-    ) -> crate::wallet::Result<Option<ParticipationEventWithNodes>> {
+    ) -> Result<Option<ParticipationEventWithNodes>, WalletError> {
         Ok(self
             .storage_manager()
             .get_participation_events()
@@ -92,7 +92,7 @@ where
     /// Retrieves information for all registered participation events.
     pub async fn get_participation_events(
         &self,
-    ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
+    ) -> Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>, WalletError> {
         self.storage_manager().get_participation_events().await
     }
 
@@ -101,7 +101,7 @@ where
         &self,
         node: &Node,
         event_type: Option<ParticipationEventType>,
-    ) -> crate::wallet::Result<Vec<ParticipationEventId>> {
+    ) -> Result<Vec<ParticipationEventId>, WalletError> {
         let client = Client::builder()
             .with_ignore_node_health()
             .with_node_auth(node.url.as_str(), node.auth.clone())?
@@ -114,7 +114,7 @@ where
     pub async fn get_participation_event_status(
         &self,
         id: &ParticipationEventId,
-    ) -> crate::wallet::Result<ParticipationEventStatus> {
+    ) -> Result<ParticipationEventStatus, WalletError> {
         Ok(self.get_client_for_event(id).await?.event_status(id, None).await?)
     }
 }

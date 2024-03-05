@@ -7,7 +7,7 @@ use core::str::FromStr;
 
 use reqwest::Method;
 
-use crate::client::{ClientInner, Result};
+use crate::client::{ClientError, ClientInner};
 
 impl ClientInner {
     /// Extension method which provides request methods for plugins.
@@ -18,7 +18,7 @@ impl ClientInner {
         endpoint: &str,
         query_params: Vec<String>,
         request_object: Option<String>,
-    ) -> Result<T>
+    ) -> Result<T, ClientError>
     where
         T: serde::de::DeserializeOwned + std::fmt::Debug + serde::Serialize,
     {
@@ -32,9 +32,9 @@ impl ClientInner {
         match req_method {
             Ok(Method::GET) => self.get_request(&path, None, false).await,
             Ok(Method::POST) => self.post_request(&path, request_object.into()).await,
-            _ => Err(crate::client::Error::Node(
-                crate::client::node_api::error::Error::NotSupported(method.to_string()),
-            )),
+            _ => Err(ClientError::Node(crate::client::node_api::error::Error::NotSupported(
+                method.to_string(),
+            ))),
         }
     }
 }

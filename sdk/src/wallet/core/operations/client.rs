@@ -13,9 +13,9 @@ use crate::{
             node::{Node, NodeAuth, NodeDto},
         },
         secret::SecretManage,
-        Client, ClientBuilder, NetworkInfo,
+        Client, ClientBuilder, ClientError, NetworkInfo,
     },
-    wallet::{Wallet, WalletBuilder},
+    wallet::{Wallet, WalletBuilder, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
@@ -30,11 +30,11 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::client::Error: From<S::Error>,
-    crate::wallet::Error: From<S::Error>,
+    ClientError: From<S::Error>,
+    WalletError: From<S::Error>,
     WalletBuilder<S>: SaveLoadWallet,
 {
-    pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
+    pub async fn set_client_options(&self, client_options: ClientBuilder) -> Result<(), WalletError> {
         let ClientBuilder {
             node_manager_builder,
             #[cfg(feature = "mqtt")]
@@ -88,7 +88,7 @@ where
     }
 
     /// Update the authentication for a node.
-    pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> crate::wallet::Result<()> {
+    pub async fn update_node_auth(&self, url: Url, auth: Option<NodeAuth>) -> Result<(), WalletError> {
         log::debug!("[update_node_auth]");
         let mut node_manager_builder = NodeManagerBuilder::from(&*self.client.node_manager.read().await);
 

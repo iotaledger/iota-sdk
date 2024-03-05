@@ -13,7 +13,7 @@ use crate::{
     },
     wallet::{
         types::{InclusionState, OutputData},
-        Error,
+        WalletError,
     },
 };
 
@@ -147,7 +147,7 @@ pub enum WalletEventType {
 }
 
 impl TryFrom<u8> for WalletEventType {
-    type Error = Error;
+    type Error = WalletError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let event_type = match value {
@@ -157,7 +157,7 @@ impl TryFrom<u8> for WalletEventType {
             2 => Self::SpentOutput,
             3 => Self::TransactionInclusion,
             4 => Self::TransactionProgress,
-            _ => return Err(Error::InvalidEventType(value)),
+            _ => return Err(WalletError::InvalidEventType(value)),
         };
         Ok(event_type)
     }

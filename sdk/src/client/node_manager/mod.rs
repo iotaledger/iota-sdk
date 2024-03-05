@@ -24,11 +24,7 @@ use super::ClientInner;
 #[cfg(not(target_family = "wasm"))]
 use crate::client::request_pool::RateLimitExt;
 use crate::{
-    client::{
-        error::{Error, Result},
-        node_api::core::routes::NodeInfoResponse,
-        node_manager::builder::NodeManagerBuilder,
-    },
+    client::{error::ClientError, node_api::core::routes::NodeInfoResponse, node_manager::builder::NodeManagerBuilder},
     types::api::core::InfoResponse,
 };
 
@@ -66,7 +62,7 @@ impl ClientInner {
         path: &str,
         query: Option<&str>,
         need_quorum: bool,
-    ) -> Result<T> {
+    ) -> Result<T, ClientError> {
         let node_manager = self.node_manager.read().await;
         let request = node_manager.get_request(path, query, self.get_timeout().await, need_quorum);
         #[cfg(not(target_family = "wasm"))]
@@ -74,7 +70,7 @@ impl ClientInner {
         request.await
     }
 
-    pub(crate) async fn get_request_bytes(&self, path: &str, query: Option<&str>) -> Result<Vec<u8>> {
+    pub(crate) async fn get_request_bytes(&self, path: &str, query: Option<&str>) -> Result<Vec<u8>, ClientError> {
         let node_manager = self.node_manager.read().await;
         let request = node_manager.get_request_bytes(path, query, self.get_timeout().await);
         #[cfg(not(target_family = "wasm"))]
@@ -82,7 +78,7 @@ impl ClientInner {
         request.await
     }
 
-    pub(crate) async fn post_request<T: DeserializeOwned>(&self, path: &str, json: Value) -> Result<T> {
+    pub(crate) async fn post_request<T: DeserializeOwned>(&self, path: &str, json: Value) -> Result<T, ClientError> {
         let node_manager = self.node_manager.read().await;
         let request = node_manager.post_request(path, self.get_timeout().await, json);
         #[cfg(not(target_family = "wasm"))]
@@ -90,7 +86,11 @@ impl ClientInner {
         request.await
     }
 
-    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(&self, path: &str, body: &[u8]) -> Result<T> {
+    pub(crate) async fn post_request_bytes<T: DeserializeOwned>(
+        &self,
+        path: &str,
+        body: &[u8],
+    ) -> Result<T, ClientError> {
         let node_manager = self.node_manager.read().await;
         let request = node_manager.post_request_bytes(path, self.get_timeout().await, body);
         #[cfg(not(target_family = "wasm"))]
@@ -104,7 +104,7 @@ impl NodeManager {
         NodeManagerBuilder::new()
     }
 
-    fn get_nodes(&self, path: &str, query: Option<&str>) -> Result<Vec<Node>> {
+    fn get_nodes(&self, path: &str, query: Option<&str>) -> Result<Vec<Node>, ClientError> {
         let mut nodes_with_modified_url: Vec<Node> = Vec::new();
 
         // Set primary nodes first, so they will also be used first for requests.
@@ -120,7 +120,7 @@ impl NodeManager {
             {
                 self.healthy_nodes
                     .read()
-                    .map_err(|_| crate::client::Error::PoisonError)?
+                    .map_err(|_| ClientError::PoisonError)?
                     .iter()
                     .cloned()
                     .collect()
@@ -144,7 +144,7 @@ impl NodeManager {
         nodes_with_modified_url.retain(|n| !n.disabled);
 
         if nodes_with_modified_url.is_empty() {
-            return Err(crate::client::Error::HealthyNodePoolEmpty);
+            return Err(ClientError::HealthyNodePoolEmpty);
         }
 
         // Set path and query parameters
@@ -159,10 +159,10 @@ impl NodeManager {
                 if let Some((name, password)) = &auth.basic_auth_name_pwd {
                     node.url
                         .set_username(name)
-                        .map_err(|_| crate::client::Error::UrlAuth("username"))?;
+                        .map_err(|_| ClientError::UrlAuth("username"))?;
                     node.url
                         .set_password(Some(password))
-                        .map_err(|_| crate::client::Error::UrlAuth("password"))?;
+                        .map_err(|_| ClientError::UrlAuth("password"))?;
                 }
             }
         }
@@ -176,12 +176,12 @@ impl NodeManager {
         query: Option<&str>,
         timeout: Duration,
         need_quorum: bool,
-    ) -> Result<T> {
+    ) -> Result<T, ClientError> {
         let mut result: HashMap<String, usize> = HashMap::new();
         // Get node urls and set path
         let nodes = self.get_nodes(path, query)?;
         if self.quorum && need_quorum && nodes.len() < self.min_quorum_size {
-            return Err(Error::QuorumPoolSizeError {
+            return Err(ClientError::QuorumPoolSizeError {
                 available_nodes: nodes.len(),
                 minimum_threshold: self.min_quorum_size,
             });
@@ -189,7 +189,7 @@ impl NodeManager {
 
         // Track amount of results for quorum
         let mut result_counter = 0;
-        let mut error: Option<Error> = None;
+        let mut error: Option<ClientError> = None;
         // Send requests parallel for quorum
         #[cfg(target_family = "wasm")]
         let wasm = true;
@@ -279,7 +279,7 @@ impl NodeManager {
         {
             Ok(serde_json::from_str(&res.0)?)
         } else {
-            Err(Error::QuorumThresholdError {
+            Err(ClientError::QuorumThresholdError {
                 quorum_size: res.1,
                 minimum_threshold: self.min_quorum_size,
             })
@@ -292,7 +292,7 @@ impl NodeManager {
         path: &str,
         query: Option<&str>,
         timeout: Duration,
-    ) -> Result<Vec<u8>> {
+    ) -> Result<Vec<u8>, ClientError> {
         // Get node urls and set path
         let nodes = self.get_nodes(path, query)?;
         let mut error = None;
@@ -320,7 +320,7 @@ impl NodeManager {
         path: &str,
         timeout: Duration,
         body: &[u8],
-    ) -> Result<T> {
+    ) -> Result<T, ClientError> {
         let nodes = self.get_nodes(path, None)?;
         let mut error = None;
         // Send requests
@@ -333,7 +333,7 @@ impl NodeManager {
                     };
                 }
                 Err(e) => {
-                    error.replace(Error::Node(e));
+                    error.replace(ClientError::Node(e));
                 }
             }
         }
@@ -347,7 +347,7 @@ impl NodeManager {
         path: &str,
         timeout: Duration,
         json: Value,
-    ) -> Result<T> {
+    ) -> Result<T, ClientError> {
         let nodes = self.get_nodes(path, None)?;
         let mut error = None;
         // Send requests
@@ -360,7 +360,7 @@ impl NodeManager {
                     };
                 }
                 Err(e) => {
-                    error.replace(Error::Node(e));
+                    error.replace(ClientError::Node(e));
                 }
             }
         }

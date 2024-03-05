@@ -24,7 +24,7 @@ fn new_valid_max_index() {
 fn new_invalid_more_than_max_index() {
     assert!(matches!(
         NftUnlock::new(128),
-        Err(UnlockError::InvalidNftIndex(InvalidBoundedU16(128)))
+        Err(UnlockError::NftIndex(InvalidBoundedU16(128)))
     ));
 }
 
@@ -37,7 +37,7 @@ fn try_from_valid() {
 fn try_from_invalid() {
     assert!(matches!(
         NftUnlock::try_from(128),
-        Err(UnlockError::InvalidNftIndex(InvalidBoundedU16(128)))
+        Err(UnlockError::NftIndex(InvalidBoundedU16(128)))
     ));
 }
 

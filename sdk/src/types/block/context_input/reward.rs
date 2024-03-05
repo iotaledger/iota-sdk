@@ -15,9 +15,7 @@ pub(crate) type RewardContextInputIndex =
 /// A Reward Context Input indicates which transaction Input is claiming Mana rewards.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
 #[packable(unpack_error = ContextInputError)]
-pub struct RewardContextInput(
-    #[packable(unpack_error_with = ContextInputError::InvalidRewardInputIndex)] RewardContextInputIndex,
-);
+pub struct RewardContextInput(#[packable(unpack_error_with = ContextInputError::RewardIndex)] RewardContextInputIndex);
 
 impl RewardContextInput {
     /// The context input kind of a [`RewardContextInput`].
@@ -25,10 +23,7 @@ impl RewardContextInput {
 
     /// Creates a new [`RewardContextInput`].
     pub fn new(index: u16) -> Result<Self, ContextInputError> {
-        index
-            .try_into()
-            .map(Self)
-            .map_err(ContextInputError::InvalidRewardInputIndex)
+        index.try_into().map(Self).map_err(ContextInputError::RewardIndex)
     }
 
     /// Returns the index of a [`RewardContextInput`].

@@ -33,6 +33,7 @@ use crate::{
         api::PreparedTransactionData,
         secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
         stronghold::Error,
+        ClientError,
     },
     types::block::{
         payload::signed_transaction::SignedTransactionPayload, protocol::ProtocolParameters,
@@ -42,7 +43,7 @@ use crate::{
 
 #[async_trait]
 impl SecretManage for StrongholdAdapter {
-    type Error = crate::client::Error;
+    type Error = ClientError;
 
     async fn generate_ed25519_public_keys(
         &self,
