@@ -107,7 +107,7 @@ where
             ..Default::default()
         });
 
-        self.prepare_transaction([], options).await
+        self.prepare_send_outputs([], options).await
     }
 
     /// Determines whether an output should be consolidated or not.

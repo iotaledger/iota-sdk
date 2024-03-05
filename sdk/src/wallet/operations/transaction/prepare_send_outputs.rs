@@ -16,15 +16,15 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Get inputs and build the transaction
-    pub async fn prepare_transaction(
+    pub async fn prepare_send_outputs(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
-        log::debug!("[TRANSACTION] prepare_transaction");
+        log::debug!("[TRANSACTION] prepare_send_outputs");
         let options = options.into().unwrap_or_default();
         let outputs = outputs.into();
-        let prepare_transaction_start_time = Instant::now();
+        let prepare_send_outputs_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
@@ -41,8 +41,8 @@ where
         let prepared_transaction_data = self.select_inputs(outputs, options).await?;
 
         log::debug!(
-            "[TRANSACTION] finished prepare_transaction in {:.2?}",
-            prepare_transaction_start_time.elapsed()
+            "[TRANSACTION] finished prepare_send_outputs in {:.2?}",
+            prepare_send_outputs_start_time.elapsed()
         );
         Ok(prepared_transaction_data)
     }

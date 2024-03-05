@@ -6,7 +6,7 @@ pub(crate) mod high_level;
 mod input_selection;
 mod options;
 pub(crate) mod prepare_output;
-mod prepare_transaction;
+mod prepare_send_outputs;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
@@ -67,7 +67,7 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let outputs = outputs.into();
         let options = options.into();
-        // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
+        // here to check before syncing, how to prevent duplicated verification (also in prepare_send_outputs())?
         // Checking it also here is good to return earlier if something is invalid
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
@@ -76,7 +76,7 @@ where
             output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
-        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
+        let prepared_transaction_data = self.prepare_send_outputs(outputs, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction_data, options)
             .await

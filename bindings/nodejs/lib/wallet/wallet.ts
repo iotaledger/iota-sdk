@@ -1463,17 +1463,17 @@ export class Wallet {
     }
 
     /**
-     * Send a transaction.
+     * Send outputs.
      *
      * @param outputs Outputs to use in the transaction.
      * @param options Additional transaction options.
      * @returns The transaction data.
      */
-    async sendTransaction(
+    async sendOutputs(
         outputs: Output[],
         options?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        return (await this.prepareTransaction(outputs, options)).send();
+        return (await this.prepareSendOutputs(outputs, options)).send();
     }
 
     /**
@@ -1483,12 +1483,12 @@ export class Wallet {
      * @param options Additional transaction options.
      * @returns The prepared transaction data.
      */
-    async prepareTransaction(
+    async prepareSendOutputs(
         outputs: Output[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
-            name: 'prepareTransaction',
+            name: 'prepareSendOutputs',
             data: {
                 outputs,
                 options,
@@ -1680,31 +1680,6 @@ export class Wallet {
             plainToInstance(PreparedTransactionData, parsed.payload),
             this,
         );
-    }
-
-    /**
-     * Send outputs in a transaction.
-     *
-     * @param outputs The outputs to send.
-     * @param transactionOptions Additional transaction options.
-     * @returns The sent transaction.
-     */
-    async sendOutputs(
-        outputs: Output[],
-        transactionOptions?: TransactionOptions,
-    ): Promise<TransactionWithMetadata> {
-        const response = await this.methodHandler.callMethod({
-            name: 'sendOutputs',
-            data: {
-                outputs,
-                options: transactionOptions,
-            },
-        });
-
-        const parsed = JSON.parse(
-            response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**

@@ -70,7 +70,7 @@ where
             .with_features(features)
             .finish_output()?;
 
-        let transaction = self.prepare_transaction([output], options).await?;
+        let transaction = self.prepare_send_outputs([output], options).await?;
 
         Ok(transaction)
     }

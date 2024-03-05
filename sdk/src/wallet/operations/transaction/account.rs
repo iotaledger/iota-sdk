@@ -103,7 +103,7 @@ where
             ..Default::default()
         };
 
-        self.prepare_transaction(vec![account], transaction_options.clone())
+        self.prepare_send_outputs(vec![account], transaction_options.clone())
             .await
     }
 }

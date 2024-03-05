@@ -385,9 +385,9 @@ pub enum WalletMethod {
     // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     // #[serde(rename_all = "camelCase")]
     // PrepareStopParticipating { event_id: ParticipationEventId },
-    /// Prepare transaction.
+    /// Prepare to send outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareTransaction {
+    PrepareSendOutputs {
         outputs: Vec<Output>,
         #[serde(default)]
         options: Option<TransactionOptions>,

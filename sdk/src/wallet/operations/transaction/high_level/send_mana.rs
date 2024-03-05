@@ -90,6 +90,6 @@ where
 
         let output = output_builder.finish_output()?;
 
-        self.prepare_transaction(vec![output], options).await
+        self.prepare_send_outputs(vec![output], options).await
     }
 }

@@ -124,6 +124,6 @@ where
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

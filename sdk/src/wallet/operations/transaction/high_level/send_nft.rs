@@ -48,7 +48,7 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Sends an NFT to the provided address.
-    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally. The
+    /// Calls [Wallet::prepare_send_outputs()](crate::wallet::Wallet::prepare_send_outputs) internally. The
     /// options may define the remainder value strategy. Note that custom inputs will be replaced with the required
     /// nft inputs and addresses need to be bech32-encoded.
     /// ```ignore
@@ -109,6 +109,6 @@ where
             };
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

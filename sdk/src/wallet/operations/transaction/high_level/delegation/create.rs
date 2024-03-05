@@ -104,7 +104,7 @@ where
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()?;
 
-        let transaction = self.prepare_transaction([output], options).await?;
+        let transaction = self.prepare_send_outputs([output], options).await?;
 
         Ok(PreparedCreateDelegationTransaction {
             delegation_id: DelegationId::from(&transaction.transaction.id().into_output_id(0)),

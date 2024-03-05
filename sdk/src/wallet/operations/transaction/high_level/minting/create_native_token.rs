@@ -54,7 +54,7 @@ where
 {
     /// Creates a new foundry output with minted native tokens.
     ///
-    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally, the options may
+    /// Calls [Wallet::prepare_send_outputs()](crate::wallet::Wallet::prepare_send_outputs) internally, the options may
     /// define the remainder value strategy or custom inputs.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
@@ -143,7 +143,7 @@ where
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
             ];
 
-            self.prepare_transaction(outputs, options)
+            self.prepare_send_outputs(outputs, options)
                 .await
                 .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {

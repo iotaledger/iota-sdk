@@ -100,7 +100,7 @@ where
 
         let outputs = [account_output_builder.finish_output()?];
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 
     /// Gets an existing account output.

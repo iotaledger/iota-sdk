@@ -77,7 +77,7 @@ where
             ),
         };
 
-        self.prepare_transaction([new_output], tx_options).await
+        self.prepare_send_outputs([new_output], tx_options).await
     }
 
     /// Reduces an account's "voting power" by a given amount.
@@ -114,7 +114,7 @@ where
             (new_output, Some(tagged_data_payload))
         };
 
-        self.prepare_transaction(
+        self.prepare_send_outputs(
             [new_output],
             Some(TransactionOptions {
                 // Use the previous voting output and additionally others for possible additional required amount for

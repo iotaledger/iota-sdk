@@ -41,6 +41,6 @@ where
             *options.mana_allotments.entry(account_id).or_default() += mana;
         }
 
-        self.prepare_transaction([], options).await
+        self.prepare_send_outputs([], options).await
     }
 }
