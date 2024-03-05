@@ -452,11 +452,17 @@ fn verify_transaction(transaction: &Transaction) -> Result<(), PayloadError> {
     let has_commitment_input = transaction.context_inputs().commitment().is_some();
 
     for output in transaction.outputs.iter() {
-        if output.features().is_some_and(|f| f.staking().is_some()) && !has_commitment_input {}
+        if output.features().is_some_and(|f| f.staking().is_some()) && !has_commitment_input {
+            return Err(PayloadError::MissingCommitmentInputForStakingFeature);
+        }
 
-        if output.features().is_some_and(|f| f.block_issuer().is_some()) && !has_commitment_input {}
+        if output.features().is_some_and(|f| f.block_issuer().is_some()) && !has_commitment_input {
+            return Err(PayloadError::MissingCommitmentInputForBlockIssuerFeature);
+        }
 
-        if output.is_delegation() && !has_commitment_input {}
+        if output.is_delegation() && !has_commitment_input {
+            return Err(PayloadError::MissingCommitmentInputForDelegationOutput);
+        }
     }
 
     Ok(())

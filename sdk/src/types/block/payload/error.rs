@@ -52,6 +52,12 @@ pub enum PayloadError {
     MissingCreationSlot,
     #[display(fmt = "input count and unlock count mismatch: {input_count} != {unlock_count}")]
     InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
+    #[display(fmt = "missing commitment context input for staking feature")]
+    MissingCommitmentInputForStakingFeature,
+    #[display(fmt = "missing commitment context input for block issuer feature")]
+    MissingCommitmentInputForBlockIssuerFeature,
+    #[display(fmt = "missing commitment context input for delegation output")]
+    MissingCommitmentInputForDelegationOutput,
     #[from]
     TransactionSemantic(TransactionFailureReason),
     #[from]
