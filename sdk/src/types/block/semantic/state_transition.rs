@@ -716,12 +716,11 @@ impl StateTransitionVerifier for DelegationOutput {
             return Err(TransactionFailureReason::DelegationModified);
         }
 
-        let protocol_parameters = &context.protocol_parameters;
         let slot_commitment_id = context
             .commitment_context_input
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
-        if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
+        if next_state.end_epoch() != context.protocol_parameters.delegation_end_epoch(slot_commitment_id) {
             return Err(TransactionFailureReason::DelegationEndEpochInvalid);
         }
 
