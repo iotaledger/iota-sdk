@@ -23,6 +23,7 @@
         "web3": "^1.10.0"
     },
     "resolutions": {
-        "tough-cookie": "^4.1.3"
+        "tough-cookie": "^4.1.3",
+        "es5-ext": "^0.10.63"
     }
 }

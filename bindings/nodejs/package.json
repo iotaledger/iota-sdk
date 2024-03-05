@@ -62,7 +62,9 @@
         "semver": "^7.6.0",
         "tough-cookie": "^4.1.3",
         "word-wrap": "^1.2.4",
-        "@babel/traverse": "^7.23.2"
+        "@babel/traverse": "^7.23.2",
+        "ip": "^2.0.1",
+        "es5-ext": "^0.10.63"
     },
     "repository": {
         "type": "git",
