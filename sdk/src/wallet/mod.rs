@@ -41,7 +41,7 @@ pub use self::operations::participation::{ParticipationEventWithNodes, Participa
 use self::types::TransactionWithMetadata;
 pub use self::{
     core::{Wallet, WalletBuilder},
-    error::Error,
+    error::WalletError,
     operations::{
         output_claiming::OutputsToClaim,
         output_consolidation::ConsolidationParams,
@@ -83,9 +83,6 @@ use crate::{
     wallet::types::InclusionState,
 };
 
-/// The wallet Result type.
-pub type Result<T> = std::result::Result<T, Error>;
-
 /// Options to filter outputs
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -112,7 +109,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
     tx_payload: SignedTransactionPayload,
     inputs: Vec<OutputWithMetadataResponse>,
-) -> crate::wallet::Result<TransactionWithMetadata> {
+) -> Result<TransactionWithMetadata, WalletError> {
     Ok(TransactionWithMetadata {
         payload: tx_payload.clone(),
         block_id: inputs.first().map(|i| *i.metadata.block_id()),

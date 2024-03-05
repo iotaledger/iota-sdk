@@ -23,24 +23,22 @@ use crate::{
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
-    wallet::{operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData, Wallet},
+    wallet::{
+        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData, Wallet, WalletError,
+    },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Builds a transaction using the given outputs and options.
     pub(crate) async fn build_transaction(
         &self,
         outputs: Vec<Output>,
         mut options: TransactionOptions,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] build_transaction");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = self.get_voting_output().await;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let creation_slot = self.client().get_slot_index().await?;
 
@@ -115,7 +113,7 @@ where
         // Check that no input got already locked
         for output_id in &options.required_inputs {
             if wallet_ledger.locked_outputs.contains(output_id) {
-                return Err(crate::wallet::Error::CustomInput(format!(
+                return Err(WalletError::CustomInput(format!(
                     "provided custom input {output_id} is already used in another transaction",
                 )));
             }
@@ -180,7 +178,7 @@ fn filter_inputs<'a>(
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
     required_inputs: &BTreeSet<OutputId>,
-) -> crate::wallet::Result<Vec<InputSigningData>> {
+) -> Result<Vec<InputSigningData>, WalletError> {
     let mut available_outputs_signing_data = Vec::new();
 
     for output_data in available_outputs {

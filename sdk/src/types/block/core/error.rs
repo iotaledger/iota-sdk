@@ -21,9 +21,9 @@ use crate::types::block::{
 #[allow(missing_docs)]
 pub enum BlockError {
     #[display(fmt = "invalid block body kind: {_0}")]
-    InvalidBlockBodyKind(u8),
+    Kind(u8),
     #[display(fmt = "invalid block length {_0}")]
-    InvalidBlockLength(usize),
+    Length(usize),
     #[display(fmt = "remaining bytes after block")]
     RemainingBytesAfterBlock,
     #[display(fmt = "invalid parent count")]

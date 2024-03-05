@@ -28,14 +28,11 @@ use crate::{
     utils::ConversionError,
 };
 
-/// Type alias of `Result` in iota-client
-pub type Result<T> = std::result::Result<T, Error>;
-
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error, strum::AsRefStr)]
 #[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
-pub enum Error {
+pub enum ClientError {
     /// Invalid bech32 HRP, should match the one from the used network
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
     Bech32HrpMismatch {
@@ -206,7 +203,7 @@ pub enum Error {
 }
 
 // Serialize type with Display error
-impl Serialize for Error {
+impl Serialize for ClientError {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -226,7 +223,7 @@ impl Serialize for Error {
     }
 }
 
-crate::impl_from_error_via!(Error via BlockError:
+crate::impl_from_error_via!(ClientError via BlockError:
     PayloadError,
     OutputError,
     InputError,

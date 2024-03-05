@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{secret::SecretManage, Error as ClientError},
+    client::{secret::SecretManage, ClientError},
     types::block::payload::signed_transaction::TransactionId,
-    wallet::{types::InclusionState, Error, Wallet},
+    wallet::{types::InclusionState, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Checks the transaction state for a provided transaction id until it's accepted. Interval in milliseconds.
     pub async fn wait_for_transaction_acceptance(
@@ -18,7 +18,7 @@ where
         transaction_id: &TransactionId,
         interval: Option<u64>,
         max_attempts: Option<u64>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("[wait_for_transaction_acceptance]");
 
         let transaction = self
@@ -27,7 +27,7 @@ where
             .transactions
             .get(transaction_id)
             .cloned()
-            .ok_or_else(|| Error::TransactionNotFound(*transaction_id))?;
+            .ok_or_else(|| WalletError::TransactionNotFound(*transaction_id))?;
 
         if matches!(
             transaction.inclusion_state,

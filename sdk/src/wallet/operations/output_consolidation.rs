@@ -14,6 +14,7 @@ use crate::{
             PreparedTransactionData,
         },
         secret::SecretManage,
+        ClientError,
     },
     types::block::{
         address::{Address, Bech32Address},
@@ -25,7 +26,7 @@ use crate::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::helpers::time::can_output_be_unlocked_now,
         types::{OutputData, TransactionWithMetadata},
-        Result, Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -75,13 +76,16 @@ impl ConsolidationParams {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Consolidates basic outputs from an account by sending them to a provided address or to an own address again if
     /// the output amount is >= the output_threshold. When `force` is set to `true`, the threshold is ignored. Only
     /// consolidates the amount of outputs that fit into a single transaction.
-    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
+    pub async fn consolidate_outputs(
+        &self,
+        params: ConsolidationParams,
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
         let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
@@ -95,7 +99,10 @@ where
     }
 
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
-    pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
+    pub async fn prepare_consolidate_outputs(
+        &self,
+        params: ConsolidationParams,
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         let wallet_address = self.address().await;
 
@@ -122,7 +129,7 @@ where
         output_data: &OutputData,
         slot_index: SlotIndex,
         wallet_address: &Address,
-    ) -> Result<bool> {
+    ) -> Result<bool, WalletError> {
         Ok(if let Output::Basic(basic_output) = &output_data.output {
             let protocol_parameters = self.client().get_protocol_parameters().await?;
             let unlock_conditions = basic_output.unlock_conditions();
@@ -161,7 +168,7 @@ where
     }
 
     /// Returns all outputs that should be consolidated.
-    async fn get_outputs_to_consolidate(&self, params: &ConsolidationParams) -> Result<Vec<OutputData>> {
+    async fn get_outputs_to_consolidate(&self, params: &ConsolidationParams) -> Result<Vec<OutputData>, WalletError> {
         // #[cfg(feature = "participation")]
         // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
@@ -227,7 +234,7 @@ where
                 outputs_to_consolidate.len(),
                 output_threshold
             );
-            return Err(crate::wallet::Error::NoOutputsToConsolidate {
+            return Err(WalletError::NoOutputsToConsolidate {
                 available_outputs: outputs_to_consolidate.len(),
                 consolidation_threshold: output_threshold,
             });
@@ -246,7 +253,7 @@ where
 
     /// Returns the max amount of inputs that can be used in a consolidation transaction. For Ledger Nano it's more
     /// limited.
-    async fn get_max_inputs(&self) -> Result<u16> {
+    async fn get_max_inputs(&self) -> Result<u16, WalletError> {
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
             use crate::client::secret::SecretManager;
@@ -287,7 +294,7 @@ where
 
     /// Returns the threshold value above which outputs should be consolidated. Lower for ledger nano secret manager, as
     /// their memory size is limited.
-    async fn get_output_consolidation_threshold(&self, params: &ConsolidationParams) -> Result<usize> {
+    async fn get_output_consolidation_threshold(&self, params: &ConsolidationParams) -> Result<usize, WalletError> {
         #[allow(clippy::option_if_let_else)]
         let output_threshold = match params.output_threshold {
             Some(t) => t,

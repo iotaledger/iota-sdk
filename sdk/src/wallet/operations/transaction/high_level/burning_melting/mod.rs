@@ -3,7 +3,7 @@
 
 use crate::{
     client::api::{transaction_builder::Burn, PreparedTransactionData},
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 pub(crate) mod melt_native_token;
@@ -18,7 +18,7 @@ impl Wallet {
         &self,
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared = self.prepare_burn(burn, options.clone()).await?;
 
@@ -35,7 +35,7 @@ impl Wallet {
         &self,
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         let mut options = options.into().unwrap_or_default();
         options.burn = Some(burn.into());
 

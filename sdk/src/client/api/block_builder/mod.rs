@@ -6,7 +6,7 @@ pub mod transaction;
 pub mod transaction_builder;
 
 use crate::{
-    client::{constants::FIVE_MINUTES_IN_NANOSECONDS, Client, Error, Result},
+    client::{constants::FIVE_MINUTES_IN_NANOSECONDS, Client, ClientError},
     types::block::{
         core::{BlockHeader, UnsignedBlock},
         output::AccountId,
@@ -20,7 +20,7 @@ impl Client {
         &self,
         issuer_id: AccountId,
         payload: impl Into<Option<Payload>> + Send,
-    ) -> Result<UnsignedBlock> {
+    ) -> Result<UnsignedBlock, ClientError> {
         let issuance = self.get_issuance().await?;
 
         let issuing_time = {
@@ -39,7 +39,7 @@ impl Client {
                 ..issuance.latest_parent_block_issuing_time + FIVE_MINUTES_IN_NANOSECONDS)
                 .contains(&issuing_time)
             {
-                return Err(Error::TimeNotSynced {
+                return Err(ClientError::TimeNotSynced {
                     current_time: issuing_time,
                     tangle_time: issuance.latest_parent_block_issuing_time,
                 });

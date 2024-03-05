@@ -23,7 +23,7 @@ use crate::{
         },
         node_api::indexer::query_parameters::OutputQueryParameters,
         secret::types::InputSigningData,
-        Client,
+        Client, ClientError,
     },
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
@@ -50,7 +50,7 @@ impl Client {
         addresses: impl IntoIterator<Item = Address>,
         outputs: impl IntoIterator<Item = Output>,
         options: TransactionOptions,
-    ) -> crate::client::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, ClientError> {
         let outputs = outputs.into_iter().collect::<Vec<_>>();
         let addresses = addresses.into_iter().collect::<Vec<_>>();
         let protocol_parameters = self.get_protocol_parameters().await?;

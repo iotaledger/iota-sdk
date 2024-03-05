@@ -5,13 +5,13 @@ mod account;
 mod anchor;
 mod bech32;
 mod ed25519;
+mod error;
 mod implicit_account_creation;
 mod multi;
 mod nft;
 mod restricted;
 
 use alloc::boxed::Box;
-use core::convert::Infallible;
 
 use derive_more::{Display, From};
 use packable::Packable;
@@ -22,63 +22,20 @@ pub use self::{
     anchor::AnchorAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
+    error::AddressError,
     implicit_account_creation::ImplicitAccountCreationAddress,
     multi::{MultiAddress, WeightedAddress},
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
 use crate::{
-    types::block::{
-        capabilities::CapabilityError,
-        output::{StorageScore, StorageScoreParameters},
-        IdentifierError,
-    },
-    utils::{ConversionError, ConvertTo},
+    types::block::output::{StorageScore, StorageScoreParameters},
+    utils::ConvertTo,
 };
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
-#[allow(missing_docs)]
-pub enum AddressError {
-    #[display(fmt = "invalid address provided")]
-    InvalidAddress,
-    #[display(fmt = "invalid address kind: {_0}")]
-    InvalidAddressKind(u8),
-    #[display(fmt = "invalid address weight: {_0}")]
-    InvalidAddressWeight(u8),
-    #[display(fmt = "invalid multi address threshold: {_0}")]
-    InvalidMultiAddressThreshold(u16),
-    #[display(fmt = "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}")]
-    InvalidMultiAddressCumulativeWeight { cumulative_weight: u16, threshold: u16 },
-    #[display(fmt = "invalid weighted address count: {_0}")]
-    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
-    #[display(fmt = "weighted addresses are not unique and/or sorted")]
-    WeightedAddressesNotUniqueSorted,
-    #[display(fmt = "restricted address capability: {_0:?}")]
-    RestrictedAddressCapability(AddressCapabilityFlag),
-    #[from]
-    InvalidBech32Hrp(::bech32::primitives::hrp::Error),
-    #[from]
-    Hex(prefix_hex::Error),
-    #[from]
-    Identifier(IdentifierError),
-    #[from]
-    Convert(ConversionError),
-    #[from]
-    Capability(CapabilityError),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for AddressError {}
-
-impl From<Infallible> for AddressError {
-    fn from(error: Infallible) -> Self {
-        match error {}
-    }
-}
 
 /// A generic address supporting different address kinds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
-#[packable(tag_type = u8, with_error = AddressError::InvalidAddressKind)]
+#[packable(tag_type = u8, with_error = AddressError::Kind)]
 #[packable(unpack_error = AddressError)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Address {

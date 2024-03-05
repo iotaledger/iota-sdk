@@ -224,7 +224,7 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .unwrap_err();
     match error {
-        iota_sdk::wallet::Error::NftNotFoundInUnspentOutputs => {}
+        iota_sdk::wallet::WalletError::NftNotFoundInUnspentOutputs => {}
         _ => panic!("should return NftNotFoundInUnspentOutputs error"),
     }
 
@@ -308,7 +308,7 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .unwrap_err();
     match error {
-        iota_sdk::wallet::Error::MissingParameter(_) => {}
+        iota_sdk::wallet::WalletError::MissingParameter(_) => {}
         _ => panic!("should return MissingParameter error"),
     }
 
@@ -693,7 +693,7 @@ async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error
         )
         .await;
     assert!(
-        matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == 85199)
+        matches!(result, Err(iota_sdk::wallet::WalletError::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == 85199)
     );
 
     let output = wallet_0

@@ -5,21 +5,22 @@ use crate::{
     client::{
         api::{options::TransactionOptions, PreparedTransactionData},
         secret::SecretManage,
+        ClientError,
     },
     types::block::output::{AccountId, AccountOutputBuilder},
-    wallet::{types::TransactionWithMetadata, Wallet},
+    wallet::{types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     pub async fn end_staking(
         &self,
         account_id: AccountId,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared = self.prepare_end_staking(account_id, options.clone()).await?;
 
@@ -31,7 +32,7 @@ where
         &self,
         account_id: AccountId,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_end_staking");
 
         let account_output_data = self
@@ -39,13 +40,13 @@ where
             .await
             .unspent_account_output(&account_id)
             .cloned()
-            .ok_or_else(|| crate::wallet::Error::AccountNotFound)?;
+            .ok_or_else(|| WalletError::AccountNotFound)?;
 
         let staking_feature = account_output_data
             .output
             .features()
             .and_then(|f| f.staking())
-            .ok_or_else(|| crate::wallet::Error::StakingFailed(format!("account id {account_id} is not staking")))?;
+            .ok_or_else(|| WalletError::StakingFailed(format!("account id {account_id} is not staking")))?;
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
@@ -55,7 +56,7 @@ where
         if future_bounded_epoch <= staking_feature.end_epoch() {
             let end_epoch = protocol_parameters.epoch_index_of(slot_commitment_id.slot_index())
                 + (staking_feature.end_epoch() - future_bounded_epoch);
-            return Err(crate::wallet::Error::StakingFailed(format!(
+            return Err(WalletError::StakingFailed(format!(
                 "account id {account_id} cannot end staking until {end_epoch}"
             )));
         }

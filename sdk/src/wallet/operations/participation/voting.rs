@@ -38,7 +38,7 @@ where
         &self,
         event_id: impl Into<Option<ParticipationEventId>> + Send,
         answers: impl Into<Option<Vec<u8>>> + Send,
-    ) -> Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let prepared = self.prepare_vote(event_id, answers).await?;
 
         self.sign_and_submit_transaction(prepared, None, None).await
@@ -49,7 +49,7 @@ where
         &self,
         event_id: impl Into<Option<ParticipationEventId>> + Send,
         answers: impl Into<Option<Vec<u8>>> + Send,
-    ) -> Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         let event_id = event_id.into();
         let answers = answers.into();
         if let Some(event_id) = event_id {
@@ -128,14 +128,20 @@ where
     /// Removes metadata for any event that has expired (use event IDs to get cached event information, checks event
     /// milestones in there against latest network milestone).
     /// If NOT already voting for this event, throws an error.
-    pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<TransactionWithMetadata> {
+    pub async fn stop_participating(
+        &self,
+        event_id: ParticipationEventId,
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let prepared = self.prepare_stop_participating(event_id).await?;
 
         self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::stop_participating()].
-    pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
+    pub async fn prepare_stop_participating(
+        &self,
+        event_id: ParticipationEventId,
+    ) -> Result<PreparedTransactionData, WalletError> {
         let voting_output = self
             .get_voting_output()
             .await?

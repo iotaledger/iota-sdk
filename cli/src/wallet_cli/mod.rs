@@ -26,8 +26,8 @@ use iota_sdk::{
     utils::ConvertTo,
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        Error as WalletError, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
-        SendNftParams, SendParams, SyncOptions, Wallet,
+        MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams, SendNftParams,
+        SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };

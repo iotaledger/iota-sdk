@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    client::{
+        secret::{GenerateAddressOptions, SecretManage, SecretManager},
+        ClientError,
+    },
     types::block::address::Ed25519Address,
-    wallet::{Error, Wallet},
+    wallet::{Wallet, WalletError},
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::{
@@ -24,10 +27,10 @@ impl Wallet {
         account_index: u32,
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> crate::wallet::Result<Ed25519Address> {
+    ) -> Result<Ed25519Address, WalletError> {
         // TODO: not sure yet whether we also should allow this method to generate addresses for different bip
         // paths.
-        let coin_type = self.bip_path().await.ok_or(Error::MissingBipPath)?.coin_type;
+        let coin_type = self.bip_path().await.ok_or(WalletError::MissingBipPath)?.coin_type;
 
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
@@ -82,11 +85,9 @@ impl Wallet {
                     .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
                     .await?
             }
-            SecretManager::Placeholder => return Err(crate::client::Error::PlaceholderSecretManager.into()),
+            SecretManager::Placeholder => return Err(ClientError::PlaceholderSecretManager.into()),
         };
 
-        Ok(*address
-            .first()
-            .ok_or(crate::wallet::Error::MissingParameter("address"))?)
+        Ok(*address.first().ok_or(WalletError::MissingParameter("address"))?)
     }
 }

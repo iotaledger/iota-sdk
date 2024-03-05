@@ -11,7 +11,7 @@ where
 }
 
 #[cfg(target_family = "wasm")]
-pub(crate) async fn spawn<F>(future: F) -> crate::wallet::Result<F::Output>
+pub(crate) async fn spawn<F>(future: F) -> Result<F::Output, crate::wallet::WalletError>
 where
     F: futures::Future + 'static,
     F::Output: 'static,
