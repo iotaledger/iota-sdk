@@ -304,6 +304,13 @@ pub enum WalletMethod {
         #[serde(default)]
         transaction_options: Option<TransactionOptions>,
     },
+    /// Prepare to send base coins to multiple addresses, or with additional parameters.
+    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    PrepareSend {
+        params: Vec<SendParams>,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
     /// Prepare to send mana.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendMana {
@@ -322,13 +329,6 @@ pub enum WalletMethod {
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNft {
         params: Vec<SendNftParams>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Prepare to send base coins to multiple addresses, or with additional parameters.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    PrepareSendWithParams {
-        params: Vec<SendParams>,
         #[serde(default)]
         options: Option<TransactionOptions>,
     },

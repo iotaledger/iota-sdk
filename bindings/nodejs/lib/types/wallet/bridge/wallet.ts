@@ -367,8 +367,8 @@ export type __WaitForTransactionAcceptanceMethod__ = {
     };
 };
 
-export type __PrepareSendWithParamsMethod__ = {
-    name: 'prepareSendWithParams';
+export type __PrepareSendMethod__ = {
+    name: 'prepareSend';
     data: {
         params: SendParams[];
         options?: TransactionOptions;

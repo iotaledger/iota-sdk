@@ -116,13 +116,13 @@ where
         I::IntoIter: Send,
     {
         let options = options.into();
-        let prepared_transaction = self.prepare_send_with_params(params, options.clone()).await?;
+        let prepared_transaction = self.prepare_send(params, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for [Wallet::send()].
-    pub async fn prepare_send_with_params<I: IntoIterator<Item = SendParams> + Send>(
+    pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -130,7 +130,7 @@ where
     where
         I::IntoIter: Send,
     {
-        log::debug!("[TRANSACTION] prepare_send_with_params");
+        log::debug!("[TRANSACTION] prepare_send");
         let options = options.into();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 

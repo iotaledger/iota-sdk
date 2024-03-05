@@ -307,6 +307,10 @@ pub(crate) async fn call_wallet_method_internal(
             let output = wallet.prepare_output(*params, transaction_options).await?;
             Response::Output(output)
         }
+        WalletMethod::PrepareSend { params, options } => {
+            let data = wallet.prepare_send(params, options).await?;
+            Response::PreparedTransaction(data)
+        }
         WalletMethod::PrepareSendMana { params, options } => {
             let data = wallet.prepare_send_mana(params, options).await?;
             Response::PreparedTransaction(data)
@@ -317,10 +321,6 @@ pub(crate) async fn call_wallet_method_internal(
         }
         WalletMethod::PrepareSendNft { params, options } => {
             let data = wallet.prepare_send_nft(params.clone(), options).await?;
-            Response::PreparedTransaction(data)
-        }
-        WalletMethod::PrepareSendWithParams { params, options } => {
-            let data = wallet.prepare_send_with_params(params, options).await?;
             Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareCreateDelegation { params, options } => {

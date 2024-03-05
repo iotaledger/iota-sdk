@@ -1192,7 +1192,7 @@ export class Wallet {
      * @param options Additional transaction options.
      * @returns The prepared transaction data.
      */
-    async prepareSendWithParams(
+    async prepareSend(
         params: SendParams[],
         options?: TransactionOptions,
     ): Promise<PreparedTransaction> {
@@ -1202,7 +1202,7 @@ export class Wallet {
             }
         }
         const response = await this.methodHandler.callMethod({
-            name: 'prepareSendWithParams',
+            name: 'prepareSend',
             data: {
                 params,
                 options,
@@ -1556,10 +1556,7 @@ export class Wallet {
             amount = amount.toString(10);
         }
         return (
-            await this.prepareSendWithParams(
-                [{ address, amount }],
-                transactionOptions,
-            )
+            await this.prepareSend([{ address, amount }], transactionOptions)
         ).send();
     }
 
@@ -1574,9 +1571,7 @@ export class Wallet {
         params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        return (
-            await this.prepareSendWithParams(params, transactionOptions)
-        ).send();
+        return (await this.prepareSend(params, transactionOptions)).send();
     }
 
     /**

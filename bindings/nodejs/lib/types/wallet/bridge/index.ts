@@ -25,7 +25,7 @@ import type {
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
     __PrepareSendManaMethod__,
-    __PrepareSendWithParamsMethod__,
+    __PrepareSendMethod__,
     __PrepareCreateDelegationMethod__,
     __PrepareDelayDelegationClaimingMethod__,
     __PrepareBeginStakingMethod__,
@@ -104,7 +104,7 @@ export type __WalletMethod__ =
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
     | __PrepareSendManaMethod__
-    | __PrepareSendWithParamsMethod__
+    | __PrepareSendMethod__
     | __PrepareCreateDelegationMethod__
     | __PrepareDelayDelegationClaimingMethod__
     | __PrepareBeginStakingMethod__

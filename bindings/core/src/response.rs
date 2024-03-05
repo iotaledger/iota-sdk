@@ -335,7 +335,7 @@ pub enum Response {
     /// - [`PrepareSendMana`](crate::method::WalletMethod::PrepareSendMana),
     /// - [`PrepareSendNativeTokens`](crate::method::WalletMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::WalletMethod::PrepareSendNft),
-    /// - [`PrepareSendWithParams`](crate::method::WalletMethod::PrepareSendWithParams),
+    /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)
     /// - [`PrepareSendOutputs`](crate::method::WalletMethod::PrepareSendOutputs)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)

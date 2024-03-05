@@ -723,20 +723,20 @@ class Wallet:
              options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send base coins.
         """
-        return self.prepare_send_with_params([SendParams(address, amount)], options).send()
+        return self.prepare_send([SendParams(address, amount)], options).send()
 
     def send_with_params(
             self, params: List[SendParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send base coins to multiple addresses or with additional parameters.
         """
-        return self.prepare_send_with_params(params, options).send()
+        return self.prepare_send(params, options).send()
 
-    def prepare_send_with_params(self, params: List[SendParams],
-                                 options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+    def prepare_send(self, params: List[SendParams],
+                     options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Prepare to send with params.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
-            'prepareSendWithParams', {
+            'prepareSend', {
                 'params': params,
                 'options': options
             }
