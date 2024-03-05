@@ -7,7 +7,7 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --example inputs_from_transaction_id <TRANSACTION_ID>
+//! cargo run --release --example get_transaction_inputs <TRANSACTION_ID>
 //! ```
 
 use iota_sdk::{client::Client, types::block::payload::signed_transaction::TransactionId};
@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("missing example argument: TRANSACTION ID")
         .parse::<TransactionId>()?;
 
-    let inputs = client.inputs_from_transaction_id(&transaction_id).await?;
+    let inputs = client.get_transaction_inputs(&transaction_id).await?;
 
     println!("Transaction inputs:\n{:#?}", inputs);
 

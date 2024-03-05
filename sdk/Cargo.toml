@@ -409,8 +409,8 @@ required-features = ["client"]
 # High Level examples
 
 [[example]]
-name = "inputs_from_transaction_id"
-path = "examples/client/high_level/inputs_from_transaction_id.rs"
+name = "get_transaction_inputs"
+path = "examples/client/high_level/get_transaction_inputs.rs"
 required-features = ["client"]
 
 [[example]]
