@@ -198,10 +198,12 @@ pub enum TransactionProgressEvent {
     GeneratingRemainderDepositAddress(AddressData),
     /// Prepared transaction.
     PreparedTransaction(Box<PreparedTransactionDataDto>),
-    /// Prepared transaction signing hash hex encoded, required for blindsigning with a ledger nano
-    PreparedTransactionSigningHash(String),
     /// Signing the transaction.
     SigningTransaction,
+    /// Prepared transaction signing hash hex encoded, required for blindsigning with a ledger nano
+    PreparedTransactionSigningHash(String),
+    /// Prepared block signing input, required for blind signing with ledger nano
+    PreparedBlockSigningInput(String),
     /// Broadcasting.
     Broadcasting,
 }
@@ -218,14 +220,21 @@ impl Serialize for TransactionProgressEvent {
         }
 
         #[derive(Serialize)]
+        #[serde(rename_all = "camelCase")]
+        struct PreparedBlockSigningInput_<'a> {
+            block_signing_input: &'a str,
+        }
+
+        #[derive(Serialize)]
         #[serde(untagged)]
         enum TransactionProgressEvent_<'a> {
             T0,
             T1(&'a AddressData),
             T2(&'a PreparedTransactionDataDto),
-            T3(PreparedTransactionSigningHash_<'a>),
-            T4,
-            T5,
+            T3,
+            T4(PreparedTransactionSigningHash_<'a>),
+            T5(PreparedBlockSigningInput_<'a>),
+            T6,
         }
         #[derive(Serialize)]
         struct TypedTransactionProgressEvent_<'a> {
@@ -247,17 +256,21 @@ impl Serialize for TransactionProgressEvent {
                 kind: 2,
                 event: TransactionProgressEvent_::T2(e),
             },
-            Self::PreparedTransactionSigningHash(e) => TypedTransactionProgressEvent_ {
-                kind: 3,
-                event: TransactionProgressEvent_::T3(PreparedTransactionSigningHash_ { signing_hash: e }),
-            },
             Self::SigningTransaction => TypedTransactionProgressEvent_ {
+                kind: 3,
+                event: TransactionProgressEvent_::T3,
+            },
+            Self::PreparedTransactionSigningHash(e) => TypedTransactionProgressEvent_ {
                 kind: 4,
-                event: TransactionProgressEvent_::T4,
+                event: TransactionProgressEvent_::T4(PreparedTransactionSigningHash_ { signing_hash: e }),
+            },
+            Self::PreparedBlockSigningInput(e) => TypedTransactionProgressEvent_ {
+                kind: 5,
+                event: TransactionProgressEvent_::T5(PreparedBlockSigningInput_ { block_signing_input: e }),
             },
             Self::Broadcasting => TypedTransactionProgressEvent_ {
-                kind: 5,
-                event: TransactionProgressEvent_::T5,
+                kind: 6,
+                event: TransactionProgressEvent_::T6,
             },
         };
         event.serialize(serializer)
@@ -270,6 +283,12 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
         #[serde(rename_all = "camelCase")]
         struct PreparedTransactionSigningHash_ {
             signing_hash: String,
+        }
+
+        #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        struct PreparedBlockSigningInput_ {
+            block_signing_input: String,
         }
 
         let value = serde_json::Value::deserialize(d)?;
@@ -287,15 +306,22 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                 2 => Self::PreparedTransaction(Box::new(PreparedTransactionDataDto::deserialize(value).map_err(
                     |e| serde::de::Error::custom(format!("cannot deserialize PreparedTransactionDataDto: {e}")),
                 )?)),
-                3 => Self::PreparedTransactionSigningHash(
+                3 => Self::SigningTransaction,
+                4 => Self::PreparedTransactionSigningHash(
                     PreparedTransactionSigningHash_::deserialize(value)
                         .map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize PreparedTransactionSigningHash: {e}"))
                         })?
                         .signing_hash,
                 ),
-                4 => Self::SigningTransaction,
-                5 => Self::Broadcasting,
+                5 => Self::PreparedBlockSigningInput(
+                    PreparedBlockSigningInput_::deserialize(value)
+                        .map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize PreparedBlockSigningInput: {e}"))
+                        })?
+                        .block_signing_input,
+                ),
+                6 => Self::Broadcasting,
                 _ => return Err(serde::de::Error::custom("invalid transaction progress event type")),
             },
         )

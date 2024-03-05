@@ -485,6 +485,11 @@ name = "node_api_core_get_included_block_raw"
 path = "examples/client/node_api_core/16_get_included_block_raw.rs"
 required-features = ["client"]
 
+[[example]]
+name = "node_api_core_get_validators"
+path = "examples/client/node_api_core/get_validators.rs"
+required-features = ["client"]
+
 # Node API indexer examples
 
 [[example]]
