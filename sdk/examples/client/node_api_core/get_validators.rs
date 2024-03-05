@@ -9,10 +9,10 @@
 //! cargo run --release --all-features --example node_api_core_get_validators [PAGE_SIZE] [CURSOR] [NODE_URL]
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::{Client, ClientError};
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), ClientError> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
