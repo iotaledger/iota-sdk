@@ -3,7 +3,6 @@
 
 use alloc::collections::BTreeSet;
 
-use hashbrown::HashMap;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -23,7 +22,6 @@ use crate::types::block::{
         StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::TransactionFailureReason,
     slot::SlotIndex,
 };
 
@@ -441,61 +439,6 @@ impl AccountOutput {
             stored: stored_mana,
             potential: potential_mana,
         })
-    }
-
-    // Transition, just without full SemanticValidationContext
-    pub(crate) fn transition_inner(
-        current_state: &Self,
-        next_state: &Self,
-        input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
-        outputs: &[Output],
-    ) -> Result<(), TransactionFailureReason> {
-        if current_state.immutable_features != next_state.immutable_features {
-            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
-        }
-
-        // TODO update when TIP is updated
-        // // Governance transition.
-        // if current_state.amount != next_state.amount
-        //     || current_state.foundry_counter != next_state.foundry_counter
-        // {
-        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
-        // }
-
-        // // State transition.
-        // if current_state.features.metadata() != next_state.features.metadata() {
-        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
-        // }
-
-        let created_foundries = outputs.iter().filter_map(|output| {
-            if let Output::Foundry(foundry) = output {
-                if foundry.account_address().account_id() == &next_state.account_id
-                    && !input_chains.contains_key(&foundry.chain_id())
-                {
-                    Some(foundry)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        });
-
-        let mut created_foundries_count = 0;
-
-        for foundry in created_foundries {
-            created_foundries_count += 1;
-
-            if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                return Err(TransactionFailureReason::FoundrySerialInvalid);
-            }
-        }
-
-        if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-            return Err(TransactionFailureReason::AccountInvalidFoundryCounter);
-        }
-
-        Ok(())
     }
 }
 
