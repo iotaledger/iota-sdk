@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod block_issuer;
+mod error;
 mod issuer;
 mod metadata;
 mod native_token;
@@ -10,8 +11,7 @@ mod staking;
 mod state_metadata;
 mod tag;
 
-use alloc::{boxed::Box, collections::BTreeSet, string::String, vec::Vec};
-use core::convert::Infallible;
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
@@ -31,6 +31,7 @@ pub use self::{
     block_issuer::{
         BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeySource, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey,
     },
+    error::FeatureError,
     issuer::IssuerFeature,
     metadata::{MetadataFeature, MetadataFeatureMap},
     native_token::NativeTokenFeature,
@@ -40,72 +41,14 @@ pub use self::{
     tag::TagFeature,
 };
 use crate::types::block::{
-    address::AddressError,
-    output::{native_token::NativeTokenError, StorageScore, StorageScoreParameters},
+    output::{StorageScore, StorageScoreParameters},
     protocol::{WorkScore, WorkScoreParameters},
 };
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display)]
-#[allow(missing_docs)]
-pub enum FeatureError {
-    #[display(fmt = "invalid feature kind: {_0}")]
-    InvalidFeatureKind(u8),
-    #[display(fmt = "invalid feature count: {_0}")]
-    InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid tag feature length {_0}")]
-    InvalidTagFeatureLength(<TagFeatureLength as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid metadata feature: {_0}")]
-    InvalidMetadataFeature(String),
-    #[display(fmt = "invalid metadata feature entry count: {_0}")]
-    InvalidMetadataFeatureEntryCount(<MetadataFeatureEntryCount as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid metadata feature key length: {_0}")]
-    InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid metadata feature value length: {_0}")]
-    InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
-    #[display(fmt = "features are not unique and/or sorted")]
-    FeaturesNotUniqueSorted,
-    #[display(fmt = "disallowed feature at index {index} with kind {kind}")]
-    DisallowedFeature {
-        index: usize,
-        kind: u8,
-    },
-    #[display(fmt = "non graphic ASCII key: {_0:?}")]
-    NonGraphicAsciiMetadataKey(Vec<u8>),
-    #[display(fmt = "invalid block issuer key kind: {_0}")]
-    InvalidBlockIssuerKeyKind(u8),
-    #[display(fmt = "invalid block issuer key count: {_0}")]
-    InvalidBlockIssuerKeyCount(<BlockIssuerKeyCount as TryFrom<usize>>::Error),
-    #[display(fmt = "block issuer keys are not unique and/or sorted")]
-    BlockIssuerKeysNotUniqueSorted,
-    NativeToken(NativeTokenError),
-    Address(AddressError),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FeatureError {}
-
-impl From<NativeTokenError> for FeatureError {
-    fn from(error: NativeTokenError) -> Self {
-        Self::NativeToken(error)
-    }
-}
-
-impl From<AddressError> for FeatureError {
-    fn from(error: AddressError) -> Self {
-        Self::Address(error)
-    }
-}
-
-impl From<Infallible> for FeatureError {
-    fn from(error: Infallible) -> Self {
-        match error {}
-    }
-}
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[packable(unpack_error = FeatureError)]
-#[packable(tag_type = u8, with_error = FeatureError::InvalidFeatureKind)]
+#[packable(tag_type = u8, with_error = FeatureError::Kind)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 pub enum Feature {
     /// A sender feature.
@@ -243,7 +186,7 @@ pub(crate) type FeatureCount = BoundedU8<0, { FeatureFlags::ALL_FLAGS.len() as u
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[packable(unpack_error = FeatureError, with = |e| e.unwrap_item_err_or_else(|p| FeatureError::InvalidFeatureCount(p.into())))]
+#[packable(unpack_error = FeatureError, with = |e| e.unwrap_item_err_or_else(|p| FeatureError::Count(p.into())))]
 pub struct Features(#[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<Feature, FeatureCount>);
 
 impl TryFrom<Vec<Feature>> for Features {
@@ -277,7 +220,7 @@ impl Features {
     /// Creates a new [`Features`] from a vec.
     pub fn from_vec(features: Vec<Feature>) -> Result<Self, FeatureError> {
         let mut features = BoxedSlicePrefix::<Feature, FeatureCount>::try_from(features.into_boxed_slice())
-            .map_err(FeatureError::InvalidFeatureCount)?;
+            .map_err(FeatureError::Count)?;
 
         features.sort_by_key(Feature::kind);
         // Sort is obviously fine now but uniqueness still needs to be checked.
@@ -293,7 +236,7 @@ impl Features {
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(FeatureError::InvalidFeatureCount)?,
+                .map_err(FeatureError::Count)?,
         ))
     }
 
@@ -357,7 +300,7 @@ impl StorageScore for Features {
 #[inline]
 fn verify_unique_sorted(features: &[Feature]) -> Result<(), FeatureError> {
     if !is_unique_sorted(features.iter().map(Feature::kind)) {
-        Err(FeatureError::FeaturesNotUniqueSorted)
+        Err(FeatureError::NotUniqueSorted)
     } else {
         Ok(())
     }
@@ -366,7 +309,7 @@ fn verify_unique_sorted(features: &[Feature]) -> Result<(), FeatureError> {
 pub(crate) fn verify_allowed_features(features: &Features, allowed_features: FeatureFlags) -> Result<(), FeatureError> {
     for (index, feature) in features.iter().enumerate() {
         if !allowed_features.contains(feature.flag()) {
-            return Err(FeatureError::DisallowedFeature {
+            return Err(FeatureError::Disallowed {
                 index,
                 kind: feature.kind(),
             });

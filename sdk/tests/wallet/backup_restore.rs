@@ -21,7 +21,7 @@
 
 // // Backup and restore with Stronghold
 // #[tokio::test]
-// async fn backup_and_restore() -> Result<()> {
+// async fn backup_and_restore() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/backup_and_restore";
@@ -128,7 +128,7 @@
 
 // // Backup and restore with Stronghold and MnemonicSecretManager
 // #[tokio::test]
-// async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
+// async fn backup_and_restore_mnemonic_secret_manager() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/backup_and_restore_mnemonic_secret_manager";
@@ -208,7 +208,7 @@
 
 // // Backup and restore with Stronghold
 // #[tokio::test]
-// async fn backup_and_restore_different_coin_type() -> Result<()> {
+// async fn backup_and_restore_different_coin_type() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/backup_and_restore_different_coin_type";
@@ -290,7 +290,7 @@
 
 // // Backup and restore with Stronghold
 // #[tokio::test]
-// async fn backup_and_restore_same_coin_type() -> Result<()> {
+// async fn backup_and_restore_same_coin_type() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/backup_and_restore_same_coin_type";
@@ -371,7 +371,7 @@
 
 // // Backup and restore with Stronghold
 // #[tokio::test]
-// async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
+// async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/backup_and_restore_different_coin_type_dont_ignore";
@@ -455,7 +455,7 @@
 // }
 
 // #[tokio::test]
-// async fn backup_and_restore_bech32_hrp_mismatch() -> Result<()> {
+// async fn backup_and_restore_bech32_hrp_mismatch() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/backup_and_restore_bech32_hrp_mismatch";
@@ -537,7 +537,7 @@
 
 // // Restore a Stronghold snapshot without secret manager data
 // #[tokio::test]
-// async fn restore_no_secret_manager_data() -> Result<()> {
+// async fn restore_no_secret_manager_data() -> Result<(), WalletError> {
 //     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
 //     let storage_path = "test-storage/restore_no_secret_manager_data";

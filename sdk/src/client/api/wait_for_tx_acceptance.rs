@@ -4,7 +4,7 @@
 use std::time::Duration;
 
 use crate::{
-    client::{Client, Error},
+    client::{Client, ClientError},
     types::{api::core::TransactionState, block::payload::signed_transaction::TransactionId},
 };
 
@@ -18,7 +18,7 @@ impl Client {
         transaction_id: &TransactionId,
         interval: Option<u64>,
         max_attempts: Option<u64>,
-    ) -> crate::client::Result<()> {
+    ) -> Result<(), ClientError> {
         log::debug!("[wait_for_transaction_acceptance]");
 
         let duration = interval
@@ -32,7 +32,7 @@ impl Client {
                 TransactionState::Accepted | TransactionState::Confirmed | TransactionState::Finalized => {
                     return Ok(());
                 }
-                TransactionState::Failed => return Err(Error::TransactionAcceptance(transaction_id.to_string())),
+                TransactionState::Failed => return Err(ClientError::TransactionAcceptance(transaction_id.to_string())),
                 TransactionState::Pending => {} // Just need to wait longer
             };
 
@@ -42,6 +42,6 @@ impl Client {
             tokio::time::sleep(duration).await;
         }
 
-        Err(Error::TransactionAcceptance(transaction_id.to_string()).into())
+        Err(ClientError::TransactionAcceptance(transaction_id.to_string()).into())
     }
 }

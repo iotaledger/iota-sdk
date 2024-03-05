@@ -85,7 +85,7 @@ fn verify_simple_token_scheme(token_scheme: &SimpleTokenScheme) -> Result<(), To
         || token_scheme.melted_tokens > token_scheme.minted_tokens
         || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply
     {
-        return Err(TokenSchemeError::InvalidFoundryOutputSupply {
+        return Err(TokenSchemeError::Supply {
             minted: token_scheme.minted_tokens,
             melted: token_scheme.melted_tokens,
             max: token_scheme.maximum_supply,
