@@ -13,8 +13,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
-            NativeToken, NftOutput, Output, StorageScoreParameters, TokenId,
+            unlock_condition::AddressUnlockCondition, AccountOutput, BasicOutput, BasicOutputBuilder, NativeToken,
+            NftOutput, Output, StorageScoreParameters, TokenId,
         },
     },
 };
@@ -147,15 +147,10 @@ impl InputSelection {
 
     pub(crate) fn get_output_for_added_mana(&mut self, remainder_address: &Address) -> Option<&mut Output> {
         // Establish the order in which we want to pick an output
-        let sort_order = [
-            AccountOutput::KIND,
-            BasicOutput::KIND,
-            NftOutput::KIND,
-            AnchorOutput::KIND,
-        ]
-        .into_iter()
-        .zip(0..)
-        .collect::<HashMap<_, _>>();
+        let sort_order = [AccountOutput::KIND, BasicOutput::KIND, NftOutput::KIND]
+            .into_iter()
+            .zip(0..)
+            .collect::<HashMap<_, _>>();
         // Remove those that do not have an ordering and sort
         let ordered_outputs = self
             .provided_outputs
