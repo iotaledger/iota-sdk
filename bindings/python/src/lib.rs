@@ -18,12 +18,7 @@ use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};
 use tokio::runtime::Runtime;
 
-use self::{
-    client::*,
-    error::{Error, Result},
-    secret_manager::*,
-    wallet::*,
-};
+use self::{client::*, error::Error, secret_manager::*, wallet::*};
 
 /// Use one runtime.
 pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
@@ -34,13 +29,13 @@ pub(crate) fn block_on<C: futures::Future>(cb: C) -> C::Output {
 
 /// Init the Rust logger.
 #[pyfunction]
-pub fn init_logger(config: String) -> Result<()> {
+pub fn init_logger(config: String) -> Result<(), Error> {
     rust_init_logger(config).map_err(|err| Error::from(format!("{:?}", err)))?;
     Ok(())
 }
 
 #[pyfunction]
-pub fn call_utils_method(method: String) -> Result<String> {
+pub fn call_utils_method(method: String) -> Result<String, Error> {
     let method = serde_json::from_str::<UtilsMethod>(&method)?;
     let response = rust_call_utils_method(method);
     Ok(serde_json::to_string(&response)?)
@@ -55,7 +50,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
     rounds: u32,
     new_path: Option<String>,
     new_password: Option<String>,
-) -> Result<()> {
+) -> Result<(), Error> {
     Ok(StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
         current_password.into(),
@@ -64,7 +59,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
         new_path.as_ref(),
         new_password.map(Into::into),
     )
-    .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::Stronghold)?)
+    .map_err(iota_sdk_bindings_core::iota_sdk::client::ClientError::Stronghold)?)
 }
 
 /// IOTA SDK implemented in Rust for Python binding.

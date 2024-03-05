@@ -37,17 +37,17 @@ impl From<FoundryId> for TokenId {
 #[allow(missing_docs)]
 pub enum NativeTokenError {
     #[display(fmt = "invalid native token count: {_0}")]
-    InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
+    Count(<NativeTokenCount as TryFrom<usize>>::Error),
     #[display(fmt = "native tokens are not unique and/or sorted")]
-    NativeTokensNotUniqueSorted,
+    NotUniqueSorted,
     #[display(fmt = "native tokens null amount")]
-    NativeTokensNullAmount,
+    NullAmount,
     #[display(fmt = "native tokens overflow")]
-    NativeTokensOverflow,
+    Overflow,
     #[display(fmt = "consumed native tokens amount overflow")]
-    ConsumedNativeTokensAmountOverflow,
+    ConsumedAmountOverflow,
     #[display(fmt = "created native tokens amount overflow")]
-    CreatedNativeTokensAmountOverflow,
+    CreatedAmountOverflow,
 }
 
 #[cfg(feature = "std")]
@@ -116,7 +116,7 @@ impl Ord for NativeToken {
 #[inline]
 fn verify_amount(amount: &U256) -> Result<(), NativeTokenError> {
     if amount.is_zero() {
-        Err(NativeTokenError::NativeTokensNullAmount)
+        Err(NativeTokenError::NullAmount)
     } else {
         Ok(())
     }
@@ -139,7 +139,7 @@ impl NativeTokensBuilder {
         let entry = self.0.entry(*native_token.token_id()).or_default();
         *entry = entry
             .checked_add(native_token.amount())
-            .ok_or(NativeTokenError::NativeTokensOverflow)?;
+            .ok_or(NativeTokenError::Overflow)?;
 
         Ok(())
     }
@@ -204,7 +204,7 @@ pub(crate) type NativeTokenCount = BoundedU8<0, 255>;
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[packable(unpack_error = NativeTokenError, with = |e| e.unwrap_item_err_or_else(|p| NativeTokenError::InvalidNativeTokenCount(p.into())))]
+#[packable(unpack_error = NativeTokenError, with = |e| e.unwrap_item_err_or_else(|p| NativeTokenError::Count(p.into())))]
 pub struct NativeTokens(
     #[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<NativeToken, NativeTokenCount>,
 );
@@ -241,7 +241,7 @@ impl NativeTokens {
     pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, NativeTokenError> {
         let mut native_tokens =
             BoxedSlicePrefix::<NativeToken, NativeTokenCount>::try_from(native_tokens.into_boxed_slice())
-                .map_err(NativeTokenError::InvalidNativeTokenCount)?;
+                .map_err(NativeTokenError::Count)?;
 
         native_tokens.sort_by(|a, b| a.token_id().cmp(b.token_id()));
         // Sort is obviously fine now but uniqueness still needs to be checked.
@@ -257,7 +257,7 @@ impl NativeTokens {
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(NativeTokenError::InvalidNativeTokenCount)?,
+                .map_err(NativeTokenError::Count)?,
         ))
     }
 
@@ -287,7 +287,7 @@ impl NativeTokens {
 #[inline]
 fn verify_unique_sorted(native_tokens: &[NativeToken]) -> Result<(), NativeTokenError> {
     if !is_unique_sorted(native_tokens.iter().map(NativeToken::token_id)) {
-        Err(NativeTokenError::NativeTokensNotUniqueSorted)
+        Err(NativeTokenError::NotUniqueSorted)
     } else {
         Ok(())
     }

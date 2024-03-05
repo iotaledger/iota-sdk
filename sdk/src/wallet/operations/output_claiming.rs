@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         output::{
@@ -19,7 +19,7 @@ use crate::{
         core::WalletLedger,
         operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -47,7 +47,7 @@ impl WalletLedger {
         outputs_to_claim: OutputsToClaim,
         slot_index: SlotIndex,
         protocol_parameters: &ProtocolParameters,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> Result<Vec<OutputId>, WalletError> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
 
         // Get outputs for the claim
@@ -133,8 +133,8 @@ impl WalletLedger {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
@@ -142,7 +142,7 @@ where
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
-    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
+    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> Result<Vec<OutputId>, WalletError> {
         let wallet_ledger = self.ledger().await;
 
         let slot_index = self.client().get_slot_index().await?;
@@ -158,10 +158,10 @@ where
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
     /// additional inputs
-    pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> crate::wallet::Result<Vec<OutputData>> {
+    pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> Result<Vec<OutputData>, WalletError> {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = self.get_voting_output().await;
         let wallet_ledger = self.ledger().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
@@ -199,7 +199,7 @@ where
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-    ) -> crate::wallet::Result<TransactionWithMetadata>
+    ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -220,7 +220,7 @@ where
     pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -242,7 +242,7 @@ where
         }
 
         if outputs_to_claim.is_empty() {
-            return Err(crate::wallet::Error::CustomInput(
+            return Err(WalletError::CustomInput(
                 "provided outputs can't be claimed".to_string(),
             ));
         }

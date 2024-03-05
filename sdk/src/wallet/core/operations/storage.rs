@@ -13,17 +13,15 @@ mod storage_stub {
         wallet::{
             core::builder::dto::WalletBuilderDto,
             storage::constants::{SECRET_MANAGER_KEY, WALLET_BUILDER_KEY},
-            WalletBuilder,
+            WalletBuilder, WalletError,
         },
     };
 
     #[async_trait]
     pub trait SaveLoadWallet {
-        async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()>;
+        async fn save(&self, storage: &impl StorageAdapter<Error = WalletError>) -> Result<(), WalletError>;
 
-        async fn load(
-            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
-        ) -> crate::wallet::Result<Option<Self>>
+        async fn load(storage: &impl StorageAdapter<Error = WalletError>) -> Result<Option<Self>, WalletError>
         where
             Self: Sized;
     }
@@ -31,9 +29,9 @@ mod storage_stub {
     #[async_trait]
     impl<S: 'static + SecretManagerConfig> SaveLoadWallet for WalletBuilder<S>
     where
-        crate::wallet::Error: From<S::Error>,
+        WalletError: From<S::Error>,
     {
-        async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
+        async fn save(&self, storage: &impl StorageAdapter<Error = WalletError>) -> Result<(), WalletError> {
             log::debug!("[save] wallet builder");
             storage.set(WALLET_BUILDER_KEY, self).await?;
 
@@ -47,9 +45,7 @@ mod storage_stub {
             Ok(())
         }
 
-        async fn load(
-            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
-        ) -> crate::wallet::Result<Option<Self>> {
+        async fn load(storage: &impl StorageAdapter<Error = WalletError>) -> Result<Option<Self>, WalletError> {
             log::debug!("[load] wallet builder");
             if let Some(wallet_builder_dto) = storage.get::<WalletBuilderDto>(WALLET_BUILDER_KEY).await? {
                 log::debug!("[load] wallet builder dto: {wallet_builder_dto:?}");
@@ -68,15 +64,13 @@ mod storage_stub {
 
     #[async_trait]
     impl SaveLoadWallet for WalletBuilder<MnemonicSecretManager> {
-        async fn save(&self, storage: &impl StorageAdapter<Error = crate::wallet::Error>) -> crate::wallet::Result<()> {
+        async fn save(&self, storage: &impl StorageAdapter<Error = WalletError>) -> Result<(), WalletError> {
             log::debug!("[save] wallet builder");
             storage.set(WALLET_BUILDER_KEY, self).await?;
             Ok(())
         }
 
-        async fn load(
-            storage: &impl StorageAdapter<Error = crate::wallet::Error>,
-        ) -> crate::wallet::Result<Option<Self>> {
+        async fn load(storage: &impl StorageAdapter<Error = WalletError>) -> Result<Option<Self>, WalletError> {
             log::debug!("[load] wallet builder");
             let res = storage.get::<WalletBuilderDto>(WALLET_BUILDER_KEY).await?;
             log::debug!("[load] wallet builder: {res:?}");

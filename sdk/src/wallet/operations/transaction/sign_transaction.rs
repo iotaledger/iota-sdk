@@ -18,20 +18,21 @@ use crate::{
             transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
         },
         secret::SecretManage,
+        ClientError,
     },
-    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
+    wallet::{operations::transaction::SignedTransactionPayload, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Signs a transaction.
     pub async fn sign_transaction(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-    ) -> crate::wallet::Result<SignedTransactionData> {
+    ) -> Result<SignedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] sign_transaction");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]

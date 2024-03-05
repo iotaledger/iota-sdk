@@ -8,7 +8,7 @@ use crate::types::block::{
 
 /// Points to the unlock of a consumed NFT output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = UnlockError, with = UnlockError::InvalidNftIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::NftIndex)]
 pub struct NftUnlock(
     /// Index of input and unlock corresponding to an [`NftOutput`](crate::types::block::output::NftOutput).
     UnlockIndex,
@@ -21,7 +21,7 @@ impl NftUnlock {
     /// Creates a new [`NftUnlock`].
     #[inline(always)]
     pub fn new(index: u16) -> Result<Self, UnlockError> {
-        index.try_into().map(Self).map_err(UnlockError::InvalidNftIndex)
+        index.try_into().map(Self).map_err(UnlockError::NftIndex)
     }
 
     /// Return the index of a [`NftUnlock`].
