@@ -19,7 +19,7 @@ use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     types::block::address::Bech32Address,
     utils::serde::bip44::option_bip44,
-    wallet::{ClientOptions, Wallet},
+    wallet::{ClientOptions, Wallet, WalletError},
 };
 use serde::Deserialize;
 
@@ -28,7 +28,7 @@ pub use self::method_handler::listen_mqtt;
 #[cfg(not(target_family = "wasm"))]
 pub use self::method_handler::CallMethod;
 pub use self::{
-    error::{Error, Result},
+    error::Error,
     method::{ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
     method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
@@ -86,7 +86,7 @@ impl WalletOptions {
         self
     }
 
-    pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
+    pub async fn build(self) -> Result<Wallet, WalletError> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
             .with_address(self.address)

@@ -6,7 +6,7 @@ use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::constants::SHIMMER_COIN_TYPE,
     client::node_manager::node::{Node, NodeDto},
-    wallet::Error,
+    wallet::WalletError,
 };
 use iota_sdk::{
     client::{
@@ -100,7 +100,7 @@ async fn changed_bip_path() -> Result<(), Box<dyn std::error::Error>> {
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    assert!(matches!(result, Err(Error::BipPathMismatch {
+    assert!(matches!(result, Err(WalletError::BipPathMismatch {
         new_bip_path: Some(new_bip_path),
         old_bip_path: Some(old_bip_path),
     }) if new_bip_path == Bip44::new(IOTA_COIN_TYPE) && old_bip_path == Bip44::new(SHIMMER_COIN_TYPE)));

@@ -9,6 +9,7 @@ use iota_sdk::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionData},
         secret::{DowncastSecretManager, SecretManage, SignBlock},
+        ClientError,
     },
     types::{
         block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, BlockDto},
@@ -16,15 +17,15 @@ use iota_sdk::{
     },
 };
 
-use crate::{method::SecretManagerMethod, response::Response, Result};
+use crate::{method::SecretManagerMethod, response::Response};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal<S: SecretManage + DowncastSecretManager>(
     secret_manager: &S,
     method: SecretManagerMethod,
-) -> Result<Response>
+) -> Result<Response, crate::Error>
 where
-    iota_sdk::client::Error: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     let response = match method {
         SecretManagerMethod::GenerateEd25519Addresses {
@@ -40,7 +41,7 @@ where
             let addresses = secret_manager
                 .generate_ed25519_addresses(coin_type, account_index, range, options)
                 .await
-                .map_err(iota_sdk::client::Error::from)?
+                .map_err(ClientError::from)?
                 .into_iter()
                 .map(|a| a.to_bech32(bech32_hrp))
                 .collect();
@@ -59,7 +60,7 @@ where
             let addresses = secret_manager
                 .generate_evm_addresses(coin_type, account_index, range, options)
                 .await
-                .map_err(iota_sdk::client::Error::from)?
+                .map_err(ClientError::from)?
                 .into_iter()
                 .map(|a| prefix_hex::encode(a.as_ref()))
                 .collect();
@@ -72,7 +73,7 @@ where
             } else if let Some(SecretManager::LedgerNano(secret_manager)) = secret_manager.downcast::<SecretManager>() {
                 secret_manager
             } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
+                return Err(ClientError::SecretManagerMismatch.into());
             };
             Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
         }
@@ -86,7 +87,7 @@ where
                     &protocol_parameters,
                 )
                 .await
-                .map_err(iota_sdk::client::Error::from)?;
+                .map_err(ClientError::from)?;
             Response::SignedTransaction(transaction.into())
         }
         SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::Block(BlockDto::from(
@@ -102,7 +103,7 @@ where
             let unlock: Unlock = secret_manager
                 .signature_unlock(&transaction_signing_hash, chain)
                 .await
-                .map_err(iota_sdk::client::Error::from)?;
+                .map_err(ClientError::from)?;
 
             Response::SignatureUnlock(unlock)
         }
@@ -111,7 +112,7 @@ where
             let signature = secret_manager
                 .sign_ed25519(&msg, chain)
                 .await
-                .map_err(iota_sdk::client::Error::from)?;
+                .map_err(ClientError::from)?;
             Response::Ed25519Signature(signature)
         }
         SecretManagerMethod::SignSecp256k1Ecdsa { message, chain } => {
@@ -119,7 +120,7 @@ where
             let (public_key, signature) = secret_manager
                 .sign_secp256k1_ecdsa(&msg, chain)
                 .await
-                .map_err(iota_sdk::client::Error::from)?;
+                .map_err(ClientError::from)?;
             Response::Secp256k1EcdsaSignature {
                 public_key: prefix_hex::encode(public_key.to_bytes()),
                 signature: prefix_hex::encode(signature.to_bytes()),
@@ -135,7 +136,7 @@ where
                 secret_manager.store_mnemonic(mnemonic).await?;
                 Response::Ok
             } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
+                return Err(ClientError::SecretManagerMismatch.into());
             }
         }
         #[cfg(feature = "stronghold")]
@@ -145,7 +146,7 @@ where
             } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
                 secret_manager
             } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
+                return Err(ClientError::SecretManagerMismatch.into());
             };
             stronghold.set_password(password).await?;
             Response::Ok
@@ -157,7 +158,7 @@ where
             } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
                 secret_manager
             } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
+                return Err(ClientError::SecretManagerMismatch.into());
             };
             stronghold.change_password(password).await?;
             Response::Ok
@@ -169,7 +170,7 @@ where
             } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
                 secret_manager
             } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
+                return Err(ClientError::SecretManagerMismatch.into());
             };
             stronghold.clear_key().await;
             Response::Ok

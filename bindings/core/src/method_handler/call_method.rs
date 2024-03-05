@@ -85,7 +85,7 @@ pub async fn call_secret_manager_method<S: SecretManage + DowncastSecretManager>
     method: SecretManagerMethod,
 ) -> Response
 where
-    iota_sdk::client::Error: From<S::Error>,
+    iota_sdk::client::ClientError: From<S::Error>,
 {
     log::debug!("Secret manager method: {method:?}");
     let result =

@@ -108,14 +108,14 @@ impl StateMetadataFeatureMap {
                             BoxedSlicePrefix::<u8, MetadataFeatureKeyLength>::try_from(
                                 k.as_bytes().to_vec().into_boxed_slice(),
                             )
-                            .map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
+                            .map_err(|e| FeatureError::MetadataFeature(e.to_string()))?,
                             BoxedSlicePrefix::<u8, MetadataFeatureValueLength>::try_from(v.clone().into_boxed_slice())
-                                .map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
+                                .map_err(|e| FeatureError::MetadataFeature(e.to_string()))?,
                         ))
                     })
                     .collect::<Result<MetadataBTreeMap, FeatureError>>()?,
             )
-            .map_err(FeatureError::InvalidMetadataFeatureEntryCount)?,
+            .map_err(FeatureError::MetadataFeatureEntryCount)?,
         );
 
         verify_keys(&res.0)?;
@@ -158,7 +158,7 @@ impl Packable for StateMetadataFeature {
         let mut unpacker = CounterUnpacker::new(unpacker);
         let res = Self(
             MetadataBTreeMapPrefix::unpack(&mut unpacker, visitor)
-                .map_packable_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
+                .map_packable_err(|e| FeatureError::MetadataFeature(e.to_string()))?,
         );
 
         if visitor.is_some() {

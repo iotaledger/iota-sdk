@@ -11,7 +11,7 @@ use iota_sdk_bindings_core::{
 };
 use pyo3::{prelude::*, types::PyTuple};
 
-use crate::error::Result;
+use crate::Error;
 
 #[pyclass]
 pub struct Client {
@@ -20,10 +20,10 @@ pub struct Client {
 
 /// Create client for python-side usage.
 #[pyfunction]
-pub fn create_client(options: Option<String>) -> Result<Client> {
+pub fn create_client(options: Option<String>) -> Result<Client, Error> {
     let runtime = tokio::runtime::Runtime::new()?;
     let client = runtime.block_on(async move {
-        Result::Ok(match options {
+        Result::<_, Error>::Ok(match options {
             Some(options) => ClientBuilder::new().from_json(&options)?.finish().await?,
             None => ClientBuilder::new().finish().await?,
         })
@@ -33,7 +33,7 @@ pub fn create_client(options: Option<String>) -> Result<Client> {
 }
 
 #[pyfunction]
-pub fn call_client_method(client: &Client, method: String) -> Result<String> {
+pub fn call_client_method(client: &Client, method: String) -> Result<String, Error> {
     let method = serde_json::from_str::<ClientMethod>(&method)?;
     let response = crate::block_on(async { rust_call_client_method(&client.client, method).await });
 
@@ -41,7 +41,7 @@ pub fn call_client_method(client: &Client, method: String) -> Result<String> {
 }
 
 #[pyfunction]
-pub fn listen_mqtt(client: &Client, topics: Vec<String>, handler: PyObject) -> Result<()> {
+pub fn listen_mqtt(client: &Client, topics: Vec<String>, handler: PyObject) -> Result<(), Error> {
     let topics = topics
         .iter()
         .map(Topic::new)

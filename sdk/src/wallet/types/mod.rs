@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 pub use self::balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::{secret::types::InputSigningData, ClientError},
     types::{
         block::{
             address::Bech32Address,
@@ -29,6 +29,7 @@ use crate::{
         },
         TryFromDto,
     },
+    wallet::WalletError,
 };
 
 /// An output with metadata
@@ -59,11 +60,11 @@ impl OutputData {
         wallet_bip_path: Option<Bip44>,
         commitment_slot_index: impl Into<SlotIndex>,
         committable_age_range: CommittableAgeRange,
-    ) -> crate::wallet::Result<Option<InputSigningData>> {
+    ) -> Result<Option<InputSigningData>, WalletError> {
         let required_address = self
             .output
             .required_address(commitment_slot_index.into(), committable_age_range)?
-            .ok_or(crate::client::Error::ExpirationDeadzone)?;
+            .ok_or(ClientError::ExpirationDeadzone)?;
 
         let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {
             if let Some(backing_ed25519) = wallet_address.inner().backing_ed25519() {
@@ -163,12 +164,12 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
             timestamp: dto
                 .timestamp
                 .parse::<u128>()
-                .map_err(|e| PayloadError::InvalidTimestamp(e.to_string()))?,
+                .map_err(|e| PayloadError::Timestamp(e.to_string()))?,
             transaction_id: dto.transaction_id,
             network_id: dto
                 .network_id
                 .parse::<u64>()
-                .map_err(|e| PayloadError::InvalidNetworkId(e.to_string()))?,
+                .map_err(|e| PayloadError::NetworkId(e.to_string()))?,
             incoming: dto.incoming,
             note: dto.note,
             inputs: dto.inputs,
@@ -211,7 +212,7 @@ pub enum OutputKind {
 }
 
 impl FromStr for OutputKind {
-    type Err = crate::wallet::Error;
+    type Err = WalletError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let kind = match s {
@@ -219,7 +220,7 @@ impl FromStr for OutputKind {
             "Basic" => Self::Basic,
             "Foundry" => Self::Foundry,
             "Nft" => Self::Nft,
-            _ => return Err(crate::wallet::Error::InvalidOutputKind(s.to_string())),
+            _ => return Err(WalletError::InvalidOutputKind(s.to_string())),
         };
         Ok(kind)
     }

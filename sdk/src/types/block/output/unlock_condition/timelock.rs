@@ -44,7 +44,7 @@ impl StorageScore for TimelockUnlockCondition {}
 #[inline]
 fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), UnlockConditionError> {
     if *slot_index == 0 {
-        Err(UnlockConditionError::TimelockUnlockConditionZero)
+        Err(UnlockConditionError::TimelockZero)
     } else {
         Ok(())
     }

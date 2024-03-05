@@ -57,7 +57,7 @@ impl StorageScore for StorageDepositReturnUnlockCondition {
 #[inline]
 fn verify_return_address(return_address: &Address) -> Result<(), UnlockConditionError> {
     if return_address.is_implicit_account_creation() {
-        Err(AddressError::InvalidAddressKind(return_address.kind()).into())
+        Err(AddressError::Kind(return_address.kind()).into())
     } else {
         Ok(())
     }

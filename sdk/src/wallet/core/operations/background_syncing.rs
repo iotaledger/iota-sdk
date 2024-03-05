@@ -6,8 +6,8 @@ use std::time::Duration;
 use tokio::time::timeout;
 
 use crate::{
-    client::secret::SecretManage,
-    wallet::{operations::syncing::SyncOptions, task, Wallet},
+    client::{secret::SecretManage, ClientError},
+    wallet::{operations::syncing::SyncOptions, task, Wallet, WalletError},
 };
 
 /// The default interval for background syncing
@@ -22,15 +22,15 @@ pub(crate) enum BackgroundSyncStatus {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
         &self,
         options: Option<SyncOptions>,
         interval: Option<Duration>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("[start_background_syncing]");
 
         let (tx_background_sync, mut rx_background_sync) = self.background_syncing_status.clone();
@@ -89,7 +89,7 @@ where
     }
 
     /// Stop the background syncing of the wallet
-    pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
+    pub async fn stop_background_syncing(&self) -> Result<(), WalletError> {
         log::debug!("[stop_background_syncing]");
 
         let mut rx_background_sync = self.background_syncing_status.1.clone();

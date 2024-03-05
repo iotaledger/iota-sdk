@@ -15,7 +15,7 @@ impl MigrationData for Migrate {
 #[async_trait]
 #[cfg(feature = "storage")]
 impl Migration<crate::wallet::storage::Storage> for Migrate {
-    async fn migrate(_storage: &crate::wallet::storage::Storage) -> Result<()> {
+    async fn migrate(_storage: &crate::wallet::storage::Storage) -> Result<(), WalletError> {
         Ok(())
     }
 }
@@ -23,7 +23,7 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
 #[async_trait]
 #[cfg(feature = "stronghold")]
 impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
-    async fn migrate(_storage: &crate::client::stronghold::StrongholdAdapter) -> Result<()> {
+    async fn migrate(_storage: &crate::client::stronghold::StrongholdAdapter) -> Result<(), WalletError> {
         Ok(())
     }
 }
