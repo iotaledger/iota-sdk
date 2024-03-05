@@ -40,14 +40,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let transaction = wallet.claim_outputs(output_ids).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for transaction to get accepted
-    let block_id = wallet
+    wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
+
     println!(
-        "Block sent: {}/block/{}",
+        "Tx accepted: {}/transactions/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block_id
+        transaction.transaction_id
     );
 
     Ok(())
