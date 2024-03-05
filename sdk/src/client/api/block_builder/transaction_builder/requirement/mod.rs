@@ -13,6 +13,8 @@ pub(crate) mod native_tokens;
 pub(crate) mod nft;
 pub(crate) mod sender;
 
+use alloc::collections::BTreeMap;
+
 use self::{
     account::is_account_with_id_non_null, delegation::is_delegation_with_id_non_null, foundry::is_foundry_with_id,
     nft::is_nft_with_id_non_null,
@@ -234,5 +236,32 @@ impl TransactionBuilder {
         }
 
         Ok(())
+    }
+}
+
+/// A mapping of prioritized inputs.
+/// This allows us to avoid sorting all available inputs every loop, and instead we iterate once and sort
+/// only the smaller index vectors as needed.
+#[derive(Debug)]
+struct PriorityMap<P>(BTreeMap<P, Vec<InputSigningData>>);
+
+impl<P: Ord> PriorityMap<P>
+where
+    for<'a> Option<P>: From<&'a InputSigningData>,
+{
+    fn generate(available_inputs: &mut Vec<InputSigningData>) -> Self {
+        let inputs = core::mem::take(available_inputs);
+        Self(inputs.into_iter().fold(BTreeMap::new(), |mut map, i| {
+            if let Some(priority) = Option::<P>::from(&i) {
+                map.entry(priority).or_default().push(i);
+            } else {
+                available_inputs.push(i);
+            }
+            map
+        }))
+    }
+
+    fn into_inputs(self) -> impl Iterator<Item = InputSigningData> {
+        self.0.into_values().flatten()
     }
 }
