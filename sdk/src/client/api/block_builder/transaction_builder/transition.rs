@@ -8,6 +8,7 @@ use super::{
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{
+        context_input::CommitmentContextInput,
         output::{
             AccountOutput, AccountOutputBuilder, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
             Output, OutputId,
@@ -64,6 +65,12 @@ impl TransactionBuilder {
             .with_features(features);
 
         if input.is_block_issuer() {
+            if self.commitment_context_input.is_none() {
+                // TODO https://github.com/iotaledger/iota-sdk/issues/1740
+                self.commitment_context_input
+                    .replace(CommitmentContextInput::new(self.latest_slot_commitment_id));
+            }
+
             if !self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
                 builder = builder.with_mana(input.available_mana(
                     &self.protocol_parameters,
