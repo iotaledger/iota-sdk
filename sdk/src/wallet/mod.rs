@@ -68,7 +68,6 @@ pub use self::{
                 staking::begin::BeginStakingParams,
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions,
         },
     },
     types::OutputData,

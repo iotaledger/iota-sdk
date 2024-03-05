@@ -6,7 +6,7 @@
 // They become spendable again when the user reduces the “voting power”.
 // This is done by creating a special “voting output” that adheres to the following rules, NOT by sending to a different
 // address.
-// If the user has designated funds to vote with, the resulting output MUST NOT be used for input selection.
+// If the user has designated funds to vote with, the resulting output MUST NOT be used for building the transaction.
 
 // pub(crate) mod event;
 // pub(crate) mod voting;

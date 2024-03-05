@@ -133,8 +133,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 &transaction,
                 &inputs,
                 unlocks.as_deref(),
-                mana_rewards,
-                protocol_parameters,
+                mana_rewards.as_ref(),
+                &protocol_parameters,
             );
             context.validate()?;
 

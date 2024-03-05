@@ -121,10 +121,7 @@ where
         let new_foundry_output_builder =
             FoundryOutputBuilder::from(foundry_output).with_token_scheme(updated_token_scheme);
 
-        let outputs = [
-            new_foundry_output_builder.finish_output()?,
-            // Native Tokens will be added automatically in the remainder output in try_select_inputs()
-        ];
+        let outputs = [new_foundry_output_builder.finish_output()?];
 
         self.prepare_transaction(outputs, options).await
     }
