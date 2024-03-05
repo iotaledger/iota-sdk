@@ -3,7 +3,6 @@
 
 use alloc::collections::BTreeSet;
 
-use hashbrown::HashMap;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -497,39 +496,6 @@ impl AnchorOutput {
             stored: stored_mana,
             potential: potential_mana,
         })
-    }
-
-    // Transition, just without full ValidationContext
-    pub(crate) fn transition_inner(
-        current_state: &Self,
-        next_state: &Self,
-        _input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
-        _outputs: &[Output],
-    ) -> Result<(), TransactionFailureReason> {
-        if current_state.immutable_features != next_state.immutable_features {
-            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
-        }
-
-        if next_state.state_index == current_state.state_index + 1 {
-            // State transition.
-            if current_state.state_controller_address() != next_state.state_controller_address()
-                || current_state.governor_address() != next_state.governor_address()
-                || current_state.features.metadata() != next_state.features.metadata()
-            {
-                return Err(TransactionFailureReason::AnchorInvalidStateTransition);
-            }
-        } else if next_state.state_index == current_state.state_index {
-            // Governance transition.
-            if current_state.amount != next_state.amount
-                || current_state.features().state_metadata() != next_state.features().state_metadata()
-            {
-                return Err(TransactionFailureReason::AnchorInvalidGovernanceTransition);
-            }
-        } else {
-            return Err(TransactionFailureReason::AnchorInvalidStateTransition);
-        }
-
-        Ok(())
     }
 }
 

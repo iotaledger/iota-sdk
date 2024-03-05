@@ -1,8 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::collections::{BTreeMap, BTreeSet};
-use core::cmp::Ordering;
+use alloc::collections::BTreeSet;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -10,7 +9,6 @@ use packable::{
     unpacker::Unpacker,
     Packable, PackableExt,
 };
-use primitive_types::U256;
 
 use crate::types::block::{
     address::{AccountAddress, Address},
@@ -21,9 +19,7 @@ use crate::types::block::{
         ChainId, DecayedMana, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputError, StorageScore,
         StorageScoreParameters, TokenId, TokenScheme,
     },
-    payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::TransactionFailureReason,
     slot::SlotIndex,
 };
 
@@ -454,92 +450,6 @@ impl FoundryOutput {
             stored: 0,
             potential: potential_mana,
         })
-    }
-
-    // Transition, just without full SemanticValidationContext
-    pub(crate) fn transition_inner(
-        current_state: &Self,
-        next_state: &Self,
-        input_native_tokens: &BTreeMap<TokenId, U256>,
-        output_native_tokens: &BTreeMap<TokenId, U256>,
-        capabilities: &TransactionCapabilities,
-    ) -> Result<(), TransactionFailureReason> {
-        if current_state.account_address() != next_state.account_address()
-            || current_state.serial_number != next_state.serial_number
-            || current_state.immutable_features != next_state.immutable_features
-        {
-            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
-        }
-
-        let token_id = next_state.token_id();
-        let input_tokens = input_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let output_tokens = output_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme;
-        let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
-
-        if current_token_scheme.maximum_supply() != next_token_scheme.maximum_supply() {
-            return Err(TransactionFailureReason::SimpleTokenSchemeMaximumSupplyChanged);
-        }
-
-        if current_token_scheme.minted_tokens() > next_token_scheme.minted_tokens()
-            || current_token_scheme.melted_tokens() > next_token_scheme.melted_tokens()
-        {
-            return Err(TransactionFailureReason::SimpleTokenSchemeMintedMeltedTokenDecrease);
-        }
-
-        match input_tokens.cmp(&output_tokens) {
-            Ordering::Less => {
-                // Mint
-
-                // This can't underflow as it is known that current_minted_tokens <= next_minted_tokens.
-                let minted_diff = next_token_scheme.minted_tokens() - current_token_scheme.minted_tokens();
-                // This can't underflow as it is known that input_tokens < output_tokens (Ordering::Less).
-                let token_diff = output_tokens - input_tokens;
-
-                if minted_diff != token_diff {
-                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
-                }
-
-                if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens() {
-                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
-                }
-            }
-            Ordering::Equal => {
-                // Transition
-
-                if current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
-                    || current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
-                {
-                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
-                }
-            }
-            Ordering::Greater => {
-                // Melt / Burn
-
-                if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
-                    && current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
-                {
-                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
-                }
-
-                // This can't underflow as it is known that current_melted_tokens <= next_melted_tokens.
-                let melted_diff = next_token_scheme.melted_tokens() - current_token_scheme.melted_tokens();
-                // This can't underflow as it is known that input_tokens > output_tokens (Ordering::Greater).
-                let token_diff = input_tokens - output_tokens;
-
-                if melted_diff > token_diff {
-                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
-                }
-
-                let burned_diff = token_diff - melted_diff;
-
-                if !burned_diff.is_zero() && !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
-                    return Err(TransactionFailureReason::CapabilitiesNativeTokenBurningNotAllowed)?;
-                }
-            }
-        }
-
-        Ok(())
     }
 }
 
