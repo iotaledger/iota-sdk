@@ -86,7 +86,7 @@ where
             )))?;
         }
 
-        let prepared_transaction_data = self.select_inputs(outputs, options).await?;
+        let prepared_transaction_data = self.build_transaction(outputs, options).await?;
 
         log::debug!(
             "[TRANSACTION] finished prepare_send_outputs in {:.2?}",

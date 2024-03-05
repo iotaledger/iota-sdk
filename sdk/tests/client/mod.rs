@@ -6,7 +6,6 @@ mod client_builder;
 mod common;
 mod error;
 mod high_level;
-mod input_selection;
 mod input_signing_data;
 mod mnemonic;
 #[cfg(feature = "mqtt")]
@@ -14,6 +13,7 @@ mod mqtt;
 mod node_api;
 mod secret_manager;
 mod signing;
+mod transaction_builder;
 
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{api::input_selection::Error as IsaError, ClientError},
+    client::{api::transaction_builder::TransactionBuilderError, ClientError},
     types::block::BlockError,
 };
 use pretty_assertions::assert_eq;
@@ -30,18 +30,18 @@ fn stringified_error() {
         "{\"type\":\"placeholderSecretManager\",\"error\":\"placeholderSecretManager can't be used for address generation or signing\"}"
     );
 
-    let error = ClientError::InputSelection(IsaError::InsufficientAmount {
+    let error = ClientError::TransactionBuilder(TransactionBuilderError::InsufficientAmount {
         found: 0,
         required: 100,
     });
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"inputSelection\",\"error\":\"insufficient amount: found 0, required 100\"}"
+        "{\"type\":\"transactionBuilder\",\"error\":\"insufficient amount: found 0, required 100\"}"
     );
 
-    let error = ClientError::InputSelection(IsaError::Block(BlockError::UnsupportedAddressKind(6)));
+    let error = ClientError::TransactionBuilder(TransactionBuilderError::Block(BlockError::UnsupportedAddressKind(6)));
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"inputSelection\",\"error\":\"unsupported address kind: 6\"}"
+        "{\"type\":\"transactionBuilder\",\"error\":\"unsupported address kind: 6\"}"
     );
 }

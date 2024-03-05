@@ -85,7 +85,7 @@ fn wallet_events_serde() {
     }));
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::SelectingInputs,
+        TransactionProgressEvent::BuildingTransaction,
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(

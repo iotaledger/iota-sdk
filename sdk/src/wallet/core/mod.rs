@@ -406,11 +406,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.ledger.write().await
     }
 
-    /// Get the wallet's ledger RwLock.
-    pub(crate) fn ledger_rw(&self) -> &Arc<tokio::sync::RwLock<WalletLedger>> {
-        &self.ledger
-    }
-
     #[cfg(feature = "storage")]
     pub(crate) fn storage_manager(&self) -> &StorageManager {
         &self.storage_manager

@@ -77,7 +77,7 @@ where
                 token_scheme.maximum_supply(),
             )?))
             .finish_output()?];
-        // Input selection will detect that we're melting native tokens and add the required inputs if available
+        // Transaction builder will detect that we're melting native tokens and add the required inputs if available
         self.prepare_send_outputs(outputs, options).await
     }
 
