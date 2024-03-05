@@ -12,6 +12,7 @@ pub(crate) mod transition;
 use alloc::collections::BTreeMap;
 use std::collections::{HashMap, HashSet};
 
+use crypto::keys::bip44::Bip44;
 use packable::PackableExt;
 
 pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement};
@@ -47,12 +48,12 @@ impl Client {
     /// Builds a transaction using the given inputs, outputs, addresses, and options.
     pub async fn build_transaction(
         &self,
-        addresses: impl IntoIterator<Item = Address>,
+        addresses: impl IntoIterator<Item = (Address, Bip44)>,
         outputs: impl IntoIterator<Item = Output>,
         options: TransactionOptions,
     ) -> Result<PreparedTransactionData, ClientError> {
         let outputs = outputs.into_iter().collect::<Vec<_>>();
-        let addresses = addresses.into_iter().collect::<Vec<_>>();
+        let addresses = addresses.into_iter().collect::<HashMap<_, _>>();
         let protocol_parameters = self.get_protocol_parameters().await?;
         let creation_slot = self.get_slot_index().await?;
 
@@ -69,24 +70,26 @@ impl Client {
 
         let hrp = protocol_parameters.bech32_hrp();
 
-        let mut available_input_ids = HashSet::new();
-        for address in &addresses {
-            available_input_ids.extend(
-                self.output_ids(OutputQueryParameters::new().unlockable_by_address(address.clone().to_bech32(hrp)))
+        let mut available_inputs = Vec::new();
+        for (address, chain) in &addresses {
+            let output_ids = self
+                .output_ids(OutputQueryParameters::new().unlockable_by_address(address.clone().to_bech32(hrp)))
+                .await?
+                .items;
+            available_inputs.extend(
+                self.get_outputs_with_metadata(&output_ids)
                     .await?
-                    .items,
+                    .into_iter()
+                    .map(|res| {
+                        Ok(InputSigningData {
+                            output: res.output,
+                            output_metadata: res.metadata,
+                            chain: Some(*chain),
+                        })
+                    })
+                    .collect::<Result<Vec<_>, ClientError>>()?,
             );
         }
-        let available_inputs = self
-            .get_outputs_with_metadata(&available_input_ids.into_iter().collect::<Vec<_>>())
-            .await?
-            .into_iter()
-            .map(|res| InputSigningData {
-                output: res.output,
-                output_metadata: res.metadata,
-                chain: None,
-            })
-            .collect::<Vec<_>>();
 
         let mut mana_rewards = HashMap::new();
 
@@ -124,7 +127,7 @@ impl Client {
         let mut transaction_builder = TransactionBuilder::new(
             available_inputs,
             outputs,
-            addresses,
+            addresses.into_keys(),
             creation_slot,
             slot_commitment_id,
             protocol_parameters.clone(),

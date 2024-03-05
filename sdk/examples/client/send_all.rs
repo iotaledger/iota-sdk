@@ -21,6 +21,7 @@ use iota_sdk::{
         Client,
     },
     types::block::{
+        address::{Address, Ed25519Address, ToBech32Ext},
         output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder},
         payload::{Payload, SignedTransactionPayload},
     },
@@ -47,10 +48,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager_2 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC_2").unwrap())?;
     let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
-    let from_address = secret_manager_1
-        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
-        .await?[0]
-        .clone();
+    let chain = Bip44::new(IOTA_COIN_TYPE);
+
+    let from_address = Address::from(Ed25519Address::from_public_key_bytes(
+        secret_manager_1
+            .generate_ed25519_public_keys(
+                chain.coin_type,
+                chain.account,
+                chain.address_index..chain.address_index + 1,
+                None,
+            )
+            .await?[0]
+            .to_bytes(),
+    ))
+    .to_bech32(client.get_bech32_hrp().await?);
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
@@ -101,7 +112,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let prepared_transaction = client
         .build_transaction(
-            [from_address.into_inner()],
+            [(from_address.into_inner(), chain)],
             outputs,
             TransactionOptions {
                 required_inputs: inputs,
