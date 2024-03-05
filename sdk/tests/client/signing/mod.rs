@@ -11,10 +11,7 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            input_selection::InputSelection, transaction::validate_signed_transaction_payload_length, verify_semantic,
-            GetAddressesOptions, PreparedTransactionData,
-        },
+        api::{transaction_builder::TransactionBuilder, GetAddressesOptions, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
     },
@@ -43,7 +40,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         "mirror add nothing long orphan hat this rough scare gallery fork twelve old shrug voyage job table obscure mimic holiday possible proud giraffe fan".to_owned(),
     )?;
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
 
     let ed25519_bech32_addresses = secret_manager
         .generate_ed25519_addresses(
@@ -366,7 +363,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
     ]);
 
-    let selected = InputSelection::new(
+    let selected = TransactionBuilder::new(
         inputs.clone(),
         outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],
@@ -374,7 +371,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         slot_commitment_id,
         protocol_parameters.clone(),
     )
-    .select()
+    .finish()
     .unwrap();
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -390,7 +387,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index)
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -411,14 +408,9 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }

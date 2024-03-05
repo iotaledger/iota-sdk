@@ -148,7 +148,7 @@ mod tests {
 
         // emit events
         emitter.emit(WalletEvent::TransactionProgress(
-            TransactionProgressEvent::SelectingInputs,
+            TransactionProgressEvent::BuildingTransaction,
         ));
         emitter.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
             transaction_id: TransactionId::from_str(
@@ -164,7 +164,7 @@ mod tests {
         emitter.clear([WalletEventType::TransactionProgress]);
         // emit event of removed type
         emitter.emit(WalletEvent::TransactionProgress(
-            TransactionProgressEvent::SelectingInputs,
+            TransactionProgressEvent::BuildingTransaction,
         ));
 
         assert_eq!(2, event_counter.load(Ordering::SeqCst));
@@ -173,7 +173,7 @@ mod tests {
         emitter.clear([]);
         // emit events
         emitter.emit(WalletEvent::TransactionProgress(
-            TransactionProgressEvent::SelectingInputs,
+            TransactionProgressEvent::BuildingTransaction,
         ));
         emitter.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
             transaction_id: TransactionId::from_str(
@@ -193,7 +193,7 @@ mod tests {
 
         for _ in 0..1_000_000 {
             emitter.emit(WalletEvent::TransactionProgress(
-                TransactionProgressEvent::SelectingInputs,
+                TransactionProgressEvent::BuildingTransaction,
             ));
         }
         assert_eq!(1_000_002, event_counter.load(Ordering::SeqCst));

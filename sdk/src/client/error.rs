@@ -9,7 +9,7 @@ use packable::error::UnexpectedEOF;
 use serde::{ser::Serializer, Serialize};
 
 use crate::{
-    client::api::input_selection::Error as InputSelectionError,
+    client::api::transaction_builder::TransactionBuilderError,
     types::block::{
         address::AddressError,
         context_input::ContextInputError,
@@ -159,9 +159,9 @@ pub enum ClientError {
     /// URL validation error
     #[error("{0}")]
     UrlValidation(String),
-    /// Input selection error.
+    /// Transaction builder error.
     #[error("{0}")]
-    InputSelection(#[from] InputSelectionError),
+    TransactionBuilder(#[from] TransactionBuilderError),
     /// Missing BIP32 chain to sign with.
     #[error("missing BIP32 chain to sign with")]
     MissingBip32Chain,
