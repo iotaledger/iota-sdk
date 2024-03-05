@@ -108,7 +108,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 // TODO uncomment
 
 // // helper function to get the output id for the first alias output
-// fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
+// fn get_alias_output_id(payload: &Payload) -> Result<OutputId, ClientError> {
 //     match payload {
 //         Payload::Transaction(tx_payload) => {
 //             for (index, output) in tx_payload.transaction().as_regular().outputs().iter().enumerate() {
@@ -123,7 +123,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 // }
 
 // // helper function to get the output id for the first foundry output
-// fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
+// fn get_foundry_output_id(payload: &Payload) -> Result<OutputId, ClientError> {
 //     match payload {
 //         Payload::Transaction(tx_payload) => {
 //             for (index, output) in tx_payload.transaction().as_regular().outputs().iter().enumerate() {
@@ -138,7 +138,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 // }
 
 // // helper function to get the output id for the first NFT output
-// fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
+// fn get_nft_output_id(payload: &Payload) -> Result<OutputId, ClientError> {
 //     match payload {
 //         Payload::Transaction(tx_payload) => {
 //             for (index, output) in tx_payload.transaction().as_regular().outputs().iter().enumerate() {

@@ -59,7 +59,7 @@ fn new_valid_tag_length_min() {
 fn new_invalid_tag_length_more_than_max() {
     assert!(matches!(
         TaggedDataPayload::new(rand_bytes(65), [0x42, 0xff, 0x84, 0xa2, 0x42, 0xff, 0x84, 0xa2]),
-        Err(PayloadError::InvalidTagLength(TryIntoBoundedU8Error::Invalid(65)))
+        Err(PayloadError::TagLength(TryIntoBoundedU8Error::Invalid(65)))
     ));
 }
 
@@ -68,7 +68,7 @@ fn new_invalid_data_length_more_than_max() {
     assert!(matches!(
         // TODO https://github.com/iotaledger/iota-sdk/issues/1226
         TaggedDataPayload::new(rand_bytes(32), [0u8; Block::LENGTH_MAX + 42]),
-        Err(PayloadError::InvalidTaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == Block::LENGTH_MAX as u32 + 42
+        Err(PayloadError::TaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == Block::LENGTH_MAX as u32 + 42
     ));
 }
 
@@ -111,7 +111,7 @@ fn unpack_invalid_tag_length_more_than_max() {
             ],
             &()
         ),
-        Err(UnpackError::Packable(PayloadError::InvalidTagLength(
+        Err(UnpackError::Packable(PayloadError::TagLength(
             TryIntoBoundedU8Error::Invalid(65)
         )))
     ));
@@ -121,7 +121,7 @@ fn unpack_invalid_tag_length_more_than_max() {
 fn unpack_invalid_data_length_more_than_max() {
     assert!(matches!(
         TaggedDataPayload::unpack_bytes_verified([0x02, 0x00, 0x00, 0x35, 0x82, 0x00, 0x00], &()),
-        Err(UnpackError::Packable(PayloadError::InvalidTaggedDataLength(
+        Err(UnpackError::Packable(PayloadError::TaggedDataLength(
             TryIntoBoundedU32Error::Invalid(33333)
         )))
     ));

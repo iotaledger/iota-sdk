@@ -4,7 +4,7 @@
 use instant::Instant;
 
 use crate::{
-    client::{secret::SecretManage, Client, Error as ClientError},
+    client::{secret::SecretManage, Client, ClientError},
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
@@ -14,19 +14,15 @@ use crate::{
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
         },
     },
-    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet},
+    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet, WalletError},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_meta: Vec<OutputWithMetadataResponse>,
-    ) -> crate::wallet::Result<Vec<OutputData>> {
+    ) -> Result<Vec<OutputData>, WalletError> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
@@ -59,7 +55,7 @@ where
     pub(crate) async fn get_outputs(
         &self,
         output_ids: Vec<OutputId>,
-    ) -> crate::wallet::Result<Vec<OutputWithMetadataResponse>> {
+    ) -> Result<Vec<OutputWithMetadataResponse>, WalletError> {
         log::debug!("[SYNC] start get_outputs");
         let get_outputs_start_time = Instant::now();
         let mut outputs = Vec::new();
@@ -111,7 +107,7 @@ where
     pub(crate) async fn request_incoming_transaction_data(
         &self,
         mut transaction_ids: Vec<TransactionId>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("[SYNC] request_incoming_transaction_data");
 
         let wallet_ledger = self.ledger().await;
@@ -164,10 +160,10 @@ where
                                         .into())
                                     }
                                 }
-                                Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
+                                Err(ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                                     Ok((transaction_id, None))
                                 }
-                                Err(e) => Err(crate::wallet::Error::Client(e)),
+                                Err(e) => Err(WalletError::Client(e)),
                             }
                         }))
                         .await
@@ -198,7 +194,7 @@ where
 pub(crate) async fn get_inputs_for_transaction_payload(
     client: &Client,
     transaction_payload: &SignedTransactionPayload,
-) -> crate::wallet::Result<Vec<OutputWithMetadataResponse>> {
+) -> Result<Vec<OutputWithMetadataResponse>, WalletError> {
     let output_ids = transaction_payload
         .transaction()
         .inputs()

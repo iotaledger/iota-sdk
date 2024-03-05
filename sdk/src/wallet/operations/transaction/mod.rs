@@ -17,7 +17,7 @@ use crate::{
     client::{
         api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
         secret::SecretManage,
-        Error,
+        ClientError,
     },
     types::block::{
         output::{Output, OutputWithMetadata},
@@ -25,14 +25,14 @@ use crate::{
     },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Sends a transaction by specifying its outputs.
     ///
@@ -64,7 +64,7 @@ where
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let outputs = outputs.into();
         let options = options.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
@@ -87,14 +87,14 @@ where
         &self,
         prepared_transaction_data: PreparedTransactionData,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
         let wallet_ledger = self.ledger().await;
         // check if inputs got already used by another transaction
         for output in &prepared_transaction_data.inputs_data {
             if wallet_ledger.locked_outputs.contains(output.output_id()) {
-                return Err(crate::wallet::Error::CustomInput(format!(
+                return Err(WalletError::CustomInput(format!(
                     "provided input {} is already used in another transaction",
                     output.output_id()
                 )));
@@ -113,7 +113,7 @@ where
         &self,
         signed_transaction_data: SignedTransactionData,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
             signed_transaction_data.payload.transaction().id()
@@ -131,7 +131,7 @@ where
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload
             );
-            return Err(Error::TransactionSemantic(conflict).into());
+            return Err(ClientError::TransactionSemantic(conflict).into());
         }
 
         let mut wallet_ledger = self.ledger_mut().await;

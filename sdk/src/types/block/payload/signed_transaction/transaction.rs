@@ -165,7 +165,7 @@ impl TransactionBuilder {
             .inputs
             .into_boxed_slice()
             .try_into()
-            .map_err(PayloadError::InvalidInputCount)?;
+            .map_err(PayloadError::InputCount)?;
 
         verify_inputs(&inputs)?;
 
@@ -181,7 +181,7 @@ impl TransactionBuilder {
             .outputs
             .into_boxed_slice()
             .try_into()
-            .map_err(PayloadError::InvalidOutputCount)?;
+            .map_err(PayloadError::OutputCount)?;
 
         if let Some(protocol_parameters) = params {
             verify_outputs(&outputs, protocol_parameters)?;
@@ -237,7 +237,7 @@ fn unpack_inputs_err<E: Into<<InputCount as TryFrom<usize>>::Error>>(
 ) -> PayloadError {
     match e {
         UnpackPrefixError::Item(i) => i.into(),
-        UnpackPrefixError::Prefix(p) => PayloadError::InvalidInputCount(p.into()),
+        UnpackPrefixError::Prefix(p) => PayloadError::InputCount(p.into()),
     }
 }
 
@@ -246,7 +246,7 @@ fn unpack_outputs_err<E: Into<<OutputCount as TryFrom<usize>>::Error>>(
 ) -> PayloadError {
     match e {
         UnpackPrefixError::Item(i) => i.into(),
-        UnpackPrefixError::Prefix(p) => PayloadError::InvalidOutputCount(p.into()),
+        UnpackPrefixError::Prefix(p) => PayloadError::OutputCount(p.into()),
     }
 }
 
@@ -395,7 +395,7 @@ fn verify_inputs_packable(inputs: &[Input], _visitor: &ProtocolParameters) -> Re
 fn verify_payload(payload: &OptionalPayload) -> Result<(), PayloadError> {
     match &payload.0 {
         Some(Payload::TaggedData(_)) | None => Ok(()),
-        Some(payload) => Err(PayloadError::InvalidPayloadKind(payload.kind())),
+        Some(payload) => Err(PayloadError::Kind(payload.kind())),
     }
 }
 
@@ -420,13 +420,11 @@ fn verify_outputs(outputs: &[Output], visitor: &ProtocolParameters) -> Result<()
 
         amount_sum = amount_sum
             .checked_add(amount)
-            .ok_or(PayloadError::InvalidTransactionAmountSum(
-                amount_sum as u128 + amount as u128,
-            ))?;
+            .ok_or(PayloadError::TransactionAmountSum(amount_sum as u128 + amount as u128))?;
 
         // Accumulated output balance must not exceed the total supply of tokens.
         if amount_sum > visitor.token_supply() {
-            return Err(PayloadError::InvalidTransactionAmountSum(amount_sum as u128));
+            return Err(PayloadError::TransactionAmountSum(amount_sum as u128));
         }
 
         if let Some(chain_id) = chain_id {
@@ -559,7 +557,7 @@ pub(crate) mod dto {
             let network_id = dto
                 .network_id
                 .parse::<u64>()
-                .map_err(|e| PayloadError::InvalidNetworkId(e.to_string()))?;
+                .map_err(|e| PayloadError::NetworkId(e.to_string()))?;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)
@@ -573,10 +571,10 @@ pub(crate) mod dto {
                 match p {
                     PayloadDto::TaggedData(i) => builder.with_payload(*i),
                     PayloadDto::SignedTransaction(_) => {
-                        return Err(PayloadError::InvalidPayloadKind(SignedTransactionPayload::KIND));
+                        return Err(PayloadError::Kind(SignedTransactionPayload::KIND));
                     }
                     PayloadDto::CandidacyAnnouncement => {
-                        return Err(PayloadError::InvalidPayloadKind(CandidacyAnnouncementPayload::KIND));
+                        return Err(PayloadError::Kind(CandidacyAnnouncementPayload::KIND));
                     }
                 }
             } else {

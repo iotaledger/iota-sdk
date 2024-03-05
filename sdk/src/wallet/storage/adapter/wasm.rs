@@ -14,7 +14,7 @@ pub struct WasmAdapter(LocalStorage);
 
 impl WasmAdapter {
     /// Initialises the storage adapter.
-    pub fn new() -> crate::wallet::Result<Self> {
+    pub fn new() -> Result<Self, WalletError> {
         Ok(Self(LocalStorage::new()))
     }
 }
@@ -22,23 +22,23 @@ impl WasmAdapter {
 #[async_trait::async_trait]
 impl StorageAdapter for WasmAdapter {
     /// Gets the record associated with the given key from the storage.
-    async fn get(&self, key: &str) -> crate::wallet::Result<String> {
+    async fn get(&self, key: &str) -> Result<String, WalletError> {
         self.0.get(key)
     }
 
     /// Saves or updates a record on the storage.
-    async fn set(&mut self, key: &str, record: String) -> crate::wallet::Result<()> {
+    async fn set(&mut self, key: &str, record: String) -> Result<(), WalletError> {
         self.0.set(key, record)
     }
 
     /// Batch writes records to the storage.
-    async fn batch_set(&mut self, records: HashMap<String, String>) -> crate::wallet::Result<()> {
+    async fn batch_set(&mut self, records: HashMap<String, String>) -> Result<(), WalletError> {
         records.into_iter().map(|s| self.set(s.0, s.1));
         Ok(())
     }
 
     /// Removes a record from the storage.
-    async fn remove(&mut self, key: &str) -> crate::wallet::Result<()> {
+    async fn remove(&mut self, key: &str) -> Result<(), WalletError> {
         self.0.delete(key)
     }
 }

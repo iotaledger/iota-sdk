@@ -2,24 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::mana::ManaAllotment,
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     pub async fn allot_mana(
         &self,
         allotments: impl IntoIterator<Item = impl Into<ManaAllotment>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared_transaction = self.prepare_allot_mana(allotments, options.clone()).await?;
 
@@ -30,7 +30,7 @@ where
         &self,
         allotments: impl IntoIterator<Item = impl Into<ManaAllotment>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_allot_mana");
 
         let mut options = options.into().unwrap_or_default();
