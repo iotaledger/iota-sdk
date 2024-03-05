@@ -20,11 +20,12 @@ use iota_sdk::{
         output::DelegationId,
         payload::{
             signed_transaction::{Transaction, TransactionCapabilityFlag},
-            SignedTransactionPayload,
+            PayloadError, SignedTransactionPayload,
         },
         protocol::iota_mainnet_protocol_parameters,
         rand::{address::rand_account_address, output::rand_delegation_id, slot::rand_slot_commitment_id},
         semantic::TransactionFailureReason,
+        slot::SlotCommitmentHash,
         unlock::SignatureUnlock,
     },
 };
@@ -164,7 +165,7 @@ async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::E
         end_epoch: 0,
     }]);
 
-    let transaction = Transaction::builder(protocol_parameters.network_id())
+    let err = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -174,37 +175,10 @@ async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::E
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)
+        .unwrap_err();
 
-    let prepared_transaction_data = PreparedTransactionData {
-        transaction,
-        inputs_data: inputs,
-        remainders: Vec::new(),
-        mana_rewards: Default::default(),
-    };
-
-    let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
-        .await?;
-
-    assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
-
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    validate_signed_transaction_payload_length(&tx_payload)?;
-
-    let conflict = verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    );
-
-    assert_eq!(
-        conflict,
-        Err(TransactionFailureReason::DelegationCommitmentInputMissing)
-    );
+    assert_eq!(err, PayloadError::MissingCommitmentInputForDelegationOutput);
 
     Ok(())
 }
@@ -263,6 +237,9 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
+        .with_context_inputs([
+            CommitmentContextInput::new(SlotCommitmentHash::null().into_slot_commitment_id(0)).into(),
+        ])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -349,6 +326,9 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
+        .with_context_inputs([
+            CommitmentContextInput::new(SlotCommitmentHash::null().into_slot_commitment_id(0)).into(),
+        ])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -435,6 +415,9 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
+        .with_context_inputs([
+            CommitmentContextInput::new(SlotCommitmentHash::null().into_slot_commitment_id(0)).into(),
+        ])
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
