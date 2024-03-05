@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{api::GetAddressesOptions, constants::ETHER_COIN_TYPE, secret::SecretManager};
-use iota_sdk_bindings_core::{call_secret_manager_method, Response, Result, SecretManagerMethod};
+use iota_sdk_bindings_core::{call_secret_manager_method, Error, Response, SecretManagerMethod};
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-async fn generate_ed25519_addresses() -> Result<()> {
+async fn generate_ed25519_addresses() -> Result<(), Error> {
     let secret_manager = SecretManager::try_from_mnemonic(
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river".to_owned(),
     )?;
@@ -28,7 +28,7 @@ async fn generate_ed25519_addresses() -> Result<()> {
 }
 
 #[tokio::test]
-async fn generate_evm_addresses() -> Result<()> {
+async fn generate_evm_addresses() -> Result<(), Error> {
     let secret_manager = SecretManager::try_from_mnemonic(
         "endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river".to_owned(),
     )?;

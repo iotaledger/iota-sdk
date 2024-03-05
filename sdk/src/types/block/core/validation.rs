@@ -166,7 +166,7 @@ fn verify_protocol_parameters_hash(
     let params_hash = params.hash();
 
     if hash != &params_hash {
-        return Err(ProtocolParametersError::InvalidProtocolParametersHash {
+        return Err(ProtocolParametersError::Hash {
             expected: params_hash,
             actual: *hash,
         });

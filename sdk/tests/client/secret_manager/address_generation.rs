@@ -15,7 +15,7 @@ use iota_sdk::{
         api::GetAddressesOptions,
         constants::IOTA_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Error, Result,
+        ClientError,
     },
     types::block::address::{Hrp, ToBech32Ext},
     wallet::{ClientOptions, Wallet},
@@ -25,7 +25,7 @@ use pretty_assertions::assert_eq;
 use crate::client::common::{setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
 
 #[tokio::test]
-async fn address_generation_mnemonic() -> Result<()> {
+async fn address_generation_mnemonic() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager =
         SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?);
 
@@ -44,7 +44,7 @@ async fn address_generation_mnemonic() -> Result<()> {
 
 #[cfg(feature = "stronghold")]
 #[tokio::test]
-async fn address_generation_stronghold() -> Result<()> {
+async fn address_generation_stronghold() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path = "test-storage/address_generation_stronghold";
     setup(storage_path)?;
 
@@ -76,7 +76,7 @@ async fn address_generation_stronghold() -> Result<()> {
 #[tokio::test]
 #[cfg(feature = "ledger_nano")]
 #[ignore = "requires ledger nano instance"]
-async fn address_generation_ledger() -> Result<()> {
+async fn address_generation_ledger() -> Result<(), Box<dyn std::error::Error>> {
     let mut secret_manager = LedgerSecretManager::new(true);
     secret_manager.non_interactive = true;
 
@@ -99,15 +99,13 @@ async fn address_generation_ledger() -> Result<()> {
 }
 
 #[tokio::test]
-async fn address_generation_placeholder() -> Result<()> {
+async fn address_generation_placeholder() {
     let secret_manager = SecretManager::Placeholder;
 
     assert!(matches!(
         secret_manager
             .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
             .await,
-        Err(iota_sdk::client::Error::PlaceholderSecretManager)
+        Err(ClientError::PlaceholderSecretManager)
     ));
-
-    Ok(())
 }

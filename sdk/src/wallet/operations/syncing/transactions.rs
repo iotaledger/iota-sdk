@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, ClientError},
     types::{
         api::core::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
@@ -10,7 +10,7 @@ use crate::{
     wallet::{
         core::WalletLedger,
         types::{InclusionState, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -21,14 +21,14 @@ use crate::{
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Sync transactions. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
     /// be synced again
-    pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
+    pub(crate) async fn sync_pending_transactions(&self) -> Result<bool, WalletError> {
         log::debug!("[SYNC] sync pending transactions");
         let wallet_ledger = self.ledger().await;
 
@@ -159,7 +159,7 @@ where
                             )?;
                         }
                     }
-                    Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
+                    Err(ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                         if input_got_spent {
                             process_transaction_with_unknown_state(
                                 &wallet_ledger,
@@ -223,7 +223,7 @@ fn process_transaction_with_unknown_state(
     mut transaction: TransactionWithMetadata,
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,
-) -> crate::wallet::Result<()> {
+) -> Result<(), WalletError> {
     let mut all_inputs_spent = true;
     for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;

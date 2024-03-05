@@ -91,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("ROUND {i}/{NUM_ROUNDS}");
         let round_timer = tokio::time::Instant::now();
 
-        let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
+        let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::WalletError)>>::new();
 
         for n in 0..num_simultaneous_txs {
             let recv_address = recv_address.clone();

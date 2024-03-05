@@ -46,6 +46,6 @@ fn pack_unpack_invalid_kind() {
             ],
             &()
         ),
-        Err(UnpackError::Packable(SignatureError::InvalidSignatureKind(1)))
+        Err(UnpackError::Packable(SignatureError::Kind(1)))
     ));
 }

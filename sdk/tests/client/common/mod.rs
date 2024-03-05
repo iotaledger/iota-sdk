@@ -8,7 +8,7 @@ mod constants;
 //     api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
 //     request_funds_from_faucet, secret::SecretManager, Client, Result,
 // };
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::Client;
 
 pub use self::constants::{DEFAULT_MNEMONIC, FAUCET_URL, NODE_LOCAL};
 
@@ -64,13 +64,11 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 // }
 
 #[allow(dead_code)]
-pub(crate) fn setup(path: &str) -> Result<()> {
-    std::fs::remove_dir_all(path).ok();
-    Ok(())
+pub(crate) fn setup(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(std::fs::remove_dir_all(path)?)
 }
 
 #[allow(dead_code)]
-pub(crate) fn tear_down(path: &str) -> Result<()> {
-    std::fs::remove_dir_all(path).ok();
-    Ok(())
+pub(crate) fn tear_down(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(std::fs::remove_dir_all(path)?)
 }

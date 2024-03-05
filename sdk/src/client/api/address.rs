@@ -10,7 +10,7 @@ use crate::{
     client::{
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
-        Client, Result,
+        Client, ClientError,
     },
     types::block::address::{Address, Bech32Address, Hrp, ToBech32Ext},
     utils::ConvertTo,
@@ -33,7 +33,7 @@ pub struct GetAddressesOptions {
 }
 
 impl GetAddressesOptions {
-    pub async fn from_client(client: &Client) -> Result<Self> {
+    pub async fn from_client(client: &Client) -> Result<Self, ClientError> {
         Ok(Self::default().with_bech32_hrp(client.get_bech32_hrp().await?))
     }
 
@@ -62,7 +62,7 @@ impl GetAddressesOptions {
     }
 
     /// Set bech32 human readable part (hrp) from something that might be valid
-    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Self> {
+    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Self, ClientError> {
         self.bech32_hrp = bech32_hrp.convert()?;
         Ok(self)
     }
@@ -105,7 +105,7 @@ impl SecretManager {
         address_index: u32,
         bech32_hrp: impl ConvertTo<Hrp>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Bech32Address> {
+    ) -> Result<Bech32Address, ClientError> {
         let hrp = bech32_hrp.convert()?;
         Ok(SecretManage::generate_ed25519_addresses(
             self,
@@ -129,7 +129,7 @@ impl SecretManager {
             bech32_hrp,
             options,
         }: GetAddressesOptions,
-    ) -> Result<Vec<Bech32Address>> {
+    ) -> Result<Vec<Bech32Address>, ClientError> {
         Ok(
             SecretManage::generate_ed25519_addresses(self, coin_type, account_index, range, options)
                 .await?
@@ -146,7 +146,7 @@ impl SecretManager {
         account_index: u32,
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<String> {
+    ) -> Result<String, ClientError> {
         Ok(prefix_hex::encode(
             SecretManage::generate_evm_addresses(
                 self,
@@ -155,11 +155,9 @@ impl SecretManager {
                 address_index..address_index + 1,
                 options,
             )
-            .await?
-            .pop()
             // Panic: if the secret manager hasn't failed then there must be an address.
-            .unwrap()
-            .as_ref(),
+            .await?[0]
+                .as_ref(),
         ))
     }
 
@@ -173,7 +171,7 @@ impl SecretManager {
             options,
             ..
         }: GetAddressesOptions,
-    ) -> Result<Vec<String>> {
+    ) -> Result<Vec<String>, ClientError> {
         Ok(
             SecretManage::generate_evm_addresses(self, coin_type, account_index, range, options)
                 .await?
@@ -192,7 +190,7 @@ pub async fn search_address(
     account_index: u32,
     range: Range<u32>,
     address: &Address,
-) -> Result<(u32, bool)> {
+) -> Result<(u32, bool), ClientError> {
     let opts = GetAddressesOptions::default()
         .with_coin_type(coin_type)
         .with_account_index(account_index)
@@ -207,7 +205,7 @@ pub async fn search_address(
             return Ok((range.start + index as u32, true));
         }
     }
-    Err(crate::client::Error::InputAddressNotFound {
+    Err(ClientError::InputAddressNotFound {
         address: address.clone().to_bech32(bech32_hrp).to_string(),
         range: format!("{range:?}"),
     })

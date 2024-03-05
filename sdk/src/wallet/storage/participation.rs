@@ -20,7 +20,7 @@ impl StorageManager {
     pub(crate) async fn insert_participation_event(
         &self,
         event_with_nodes: ParticipationEventWithNodes,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("insert_participation_event {}", event_with_nodes.id);
 
         let mut events = self
@@ -36,7 +36,7 @@ impl StorageManager {
         Ok(())
     }
 
-    pub(crate) async fn remove_participation_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<()> {
+    pub(crate) async fn remove_participation_event(&self, id: &ParticipationEventId) -> Result<(), WalletError> {
         log::debug!("remove_participation_event {id}");
 
         let mut events = match self
@@ -57,7 +57,7 @@ impl StorageManager {
 
     pub(crate) async fn get_participation_events(
         &self,
-    ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
+    ) -> Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>, WalletError> {
         log::debug!("get_participation_events");
 
         Ok(self.storage.get(PARTICIPATION_EVENTS).await?.unwrap_or_default())
@@ -66,7 +66,7 @@ impl StorageManager {
     pub(crate) async fn set_cached_participation_output_status(
         &self,
         outputs_participation: &HashMap<OutputId, OutputStatusResponse>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("set_cached_participation");
 
         self.storage
@@ -78,7 +78,7 @@ impl StorageManager {
 
     pub(crate) async fn get_cached_participation_output_status(
         &self,
-    ) -> crate::wallet::Result<HashMap<OutputId, OutputStatusResponse>> {
+    ) -> Result<HashMap<OutputId, OutputStatusResponse>, WalletError> {
         log::debug!("get_cached_participation");
 
         Ok(self

@@ -52,7 +52,7 @@ use crate::{
             input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
-        Error,
+        ClientError,
     },
     types::block::{
         address::{Address, Ed25519Address},
@@ -239,9 +239,9 @@ impl fmt::Display for SecretManager {
 }
 
 impl FromStr for SecretManager {
-    type Err = Error;
+    type Err = ClientError;
 
-    fn from_str(s: &str) -> crate::client::Result<Self> {
+    fn from_str(s: &str) -> Result<Self, ClientError> {
         Self::try_from(serde_json::from_str::<SecretManagerDto>(s)?)
     }
 }
@@ -277,9 +277,9 @@ pub enum SecretManagerDto {
 }
 
 impl TryFrom<SecretManagerDto> for SecretManager {
-    type Error = Error;
+    type Error = ClientError;
 
-    fn try_from(value: SecretManagerDto) -> crate::client::Result<Self> {
+    fn try_from(value: SecretManagerDto) -> Result<Self, ClientError> {
         Ok(match value {
             #[cfg(feature = "stronghold")]
             SecretManagerDto::Stronghold(stronghold_dto) => {
@@ -351,7 +351,7 @@ impl From<&SecretManager> for SecretManagerDto {
 
 #[async_trait]
 impl SecretManage for SecretManager {
-    type Error = Error;
+    type Error = ClientError;
 
     async fn generate_ed25519_public_keys(
         &self,
@@ -380,7 +380,7 @@ impl SecretManage for SecretManager {
                     .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                     .await
             }
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(ClientError::PlaceholderSecretManager),
         }
     }
 
@@ -411,11 +411,11 @@ impl SecretManage for SecretManager {
                     .generate_evm_addresses(coin_type, account_index, address_indexes, options)
                     .await
             }
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(ClientError::PlaceholderSecretManager),
         }
     }
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> crate::client::Result<Ed25519Signature> {
+    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, ClientError> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
@@ -424,7 +424,7 @@ impl SecretManage for SecretManager {
             Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(ClientError::PlaceholderSecretManager),
         }
     }
 
@@ -441,7 +441,7 @@ impl SecretManage for SecretManager {
             Self::Mnemonic(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(ClientError::PlaceholderSecretManager),
         }
     }
 
@@ -470,7 +470,7 @@ impl SecretManage for SecretManager {
                     .transaction_unlocks(prepared_transaction_data, protocol_parameters)
                     .await
             }
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(ClientError::PlaceholderSecretManager),
         }
     }
 
@@ -499,7 +499,7 @@ impl SecretManage for SecretManager {
                     .sign_transaction(prepared_transaction_data, protocol_parameters)
                     .await
             }
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
+            Self::Placeholder => Err(ClientError::PlaceholderSecretManager),
         }
     }
 }
@@ -553,12 +553,12 @@ impl SecretManagerConfig for SecretManager {
 
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> crate::client::Result<Self> {
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, ClientError> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
     }
 
     /// Tries to create a [`SecretManager`] from a seed hex string.
-    pub fn try_from_hex_seed(seed: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
+    pub fn try_from_hex_seed(seed: impl Into<Zeroizing<String>>) -> Result<Self, ClientError> {
         Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
     }
 }
@@ -567,9 +567,9 @@ pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
     protocol_parameters: &ProtocolParameters,
-) -> crate::client::Result<Unlocks>
+) -> Result<Unlocks, ClientError>
 where
-    crate::client::Error: From<M::Error>,
+    ClientError: From<M::Error>,
 {
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
@@ -586,7 +586,7 @@ where
         let required_address = input
             .output
             .required_address(commitment_slot_index, protocol_parameters.committable_age_range())?
-            .ok_or(crate::client::Error::ExpirationDeadzone)?;
+            .ok_or(ClientError::ExpirationDeadzone)?;
 
         // Convert restricted and implicit addresses to Ed25519 address, so they're the same entry in `block_indexes`.
         let required_address = match required_address {
@@ -615,7 +615,7 @@ where
                     _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
                 }
 
-                let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
+                let chain = input.chain.ok_or(ClientError::MissingBip32Chain)?;
 
                 let block = secret_manager
                     .signature_unlock(&transaction_signing_hash, chain)
@@ -651,9 +651,9 @@ pub(crate) async fn default_sign_transaction<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: PreparedTransactionData,
     protocol_parameters: &ProtocolParameters,
-) -> crate::client::Result<SignedTransactionPayload>
+) -> Result<SignedTransactionPayload, ClientError>
 where
-    crate::client::Error: From<M::Error>,
+    ClientError: From<M::Error>,
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
 
@@ -680,16 +680,16 @@ where
 
 #[async_trait]
 pub trait SignBlock {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> Result<Block, ClientError>
     where
-        crate::client::Error: From<S::Error>;
+        ClientError: From<S::Error>;
 }
 
 #[async_trait]
 impl SignBlock for UnsignedBlock {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> Result<Block, ClientError>
     where
-        crate::client::Error: From<S::Error>,
+        ClientError: From<S::Error>,
     {
         let msg = self.signing_input();
         Ok(self.finish(secret_manager.sign_ed25519(&msg, chain).await?)?)

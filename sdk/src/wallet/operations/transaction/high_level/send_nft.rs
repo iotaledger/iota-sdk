@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
@@ -13,7 +13,7 @@ use crate::{
     utils::ConvertTo,
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -31,10 +31,7 @@ pub struct SendNftParams {
 
 impl SendNftParams {
     /// Creates a new instance of [`SendNftParams`]
-    pub fn new(
-        address: impl ConvertTo<Bech32Address>,
-        nft_id: impl ConvertTo<NftId>,
-    ) -> Result<Self, crate::wallet::Error> {
+    pub fn new(address: impl ConvertTo<Bech32Address>, nft_id: impl ConvertTo<NftId>) -> Result<Self, WalletError> {
         Ok(Self {
             address: address.convert()?,
             nft_id: nft_id.convert()?,
@@ -44,8 +41,8 @@ impl SendNftParams {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Sends an NFT to the provided address.
     /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally. The
@@ -69,7 +66,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata>
+    ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -84,7 +81,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -105,7 +102,7 @@ where
                     outputs.push(nft_builder.finish_output()?);
                 }
             } else {
-                return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);
+                return Err(WalletError::NftNotFoundInUnspentOutputs);
             };
         }
 

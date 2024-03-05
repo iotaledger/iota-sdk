@@ -8,7 +8,7 @@ use alloc::collections::BTreeMap;
 use packable::PackableExt;
 
 use crate::{
-    client::{secret::types::InputSigningData, Error},
+    client::{secret::types::InputSigningData, ClientError},
     types::block::{
         output::{Output, OutputId},
         payload::signed_transaction::{SignedTransactionPayload, Transaction},
@@ -53,10 +53,10 @@ pub fn verify_semantic(
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
 pub fn validate_signed_transaction_payload_length(
     signed_transaction_payload: &SignedTransactionPayload,
-) -> crate::client::error::Result<()> {
+) -> Result<(), ClientError> {
     let signed_transaction_payload_bytes = signed_transaction_payload.pack_to_vec();
     if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
-        return Err(Error::InvalidSignedTransactionPayloadLength {
+        return Err(ClientError::InvalidSignedTransactionPayloadLength {
             length: signed_transaction_payload_bytes.len(),
             max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS,
         });
@@ -67,7 +67,7 @@ pub fn validate_signed_transaction_payload_length(
 /// Verifies that the transaction doesn't exceed the block size limit with 8 parents.
 /// Assuming one signature unlock and otherwise reference/account/nft unlocks. `validate_transaction_payload_length()`
 /// should later be used to check the length again with the correct unlocks.
-pub fn validate_transaction_length(transaction: &Transaction) -> crate::client::error::Result<()> {
+pub fn validate_transaction_length(transaction: &Transaction) -> Result<(), ClientError> {
     let transaction_bytes = transaction.pack_to_vec();
 
     // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
@@ -80,7 +80,7 @@ pub fn validate_transaction_length(transaction: &Transaction) -> crate::client::
         - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
 
     if transaction_bytes.len() > max_length {
-        return Err(Error::InvalidTransactionLength {
+        return Err(ClientError::InvalidTransactionLength {
             length: transaction_bytes.len(),
             max_length,
         });

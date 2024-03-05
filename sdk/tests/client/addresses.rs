@@ -11,7 +11,7 @@ use iota_sdk::{
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         generate_mnemonic,
         secret::{GenerateAddressOptions, SecretManager},
-        Client, Result,
+        Client, ClientError,
     },
     types::block::{
         address::{Address, Hrp},
@@ -258,7 +258,7 @@ async fn address_generation() {
 }
 
 #[tokio::test]
-async fn search_address() -> Result<()> {
+async fn search_address() -> Result<(), ClientError> {
     let client = Client::builder()
         .with_protocol_parameters(iota_mainnet_protocol_parameters().clone())
         .finish()
@@ -322,7 +322,7 @@ async fn search_address() -> Result<()> {
             .await;
 
     match res {
-        Err(iota_sdk::client::Error::InputAddressNotFound { .. }) => {}
+        Err(iota_sdk::client::ClientError::InputAddressNotFound { .. }) => {}
         _ => panic!("should not have found search address range & public"),
     }
 

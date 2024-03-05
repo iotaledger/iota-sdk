@@ -16,7 +16,10 @@ use iota_sdk::{
 use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
+pub(crate) async fn call_wallet_method_internal(
+    wallet: &Wallet,
+    method: WalletMethod,
+) -> Result<Response, crate::Error> {
     let response = match method {
         WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
@@ -193,7 +196,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         } => {
             let data = if let Some(public_key_str) = public_key {
                 let public_key = PublicKey::try_from_bytes(prefix_hex::decode(public_key_str)?)
-                    .map_err(iota_sdk::wallet::Error::from)?;
+                    .map_err(iota_sdk::wallet::WalletError::from)?;
                 wallet
                     .prepare_implicit_account_transition(&output_id, public_key)
                     .await?
