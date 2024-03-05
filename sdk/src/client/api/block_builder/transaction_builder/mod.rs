@@ -52,21 +52,9 @@ impl Client {
         outputs: impl IntoIterator<Item = Output>,
         options: TransactionOptions,
     ) -> Result<PreparedTransactionData, ClientError> {
-        let outputs = outputs.into_iter().collect::<Vec<_>>();
         let addresses = addresses.into_iter().collect::<HashMap<_, _>>();
         let protocol_parameters = self.get_protocol_parameters().await?;
-        let creation_slot = self.get_slot_index().await?;
-
         let slot_commitment_id = self.get_issuance().await?.latest_commitment.id();
-        let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
-            Some(self.get_account_congestion(&issuer_id, None).await?.reference_mana_cost)
-        } else {
-            None
-        };
-        let remainder_address = match options.remainder_value_strategy {
-            RemainderValueStrategy::ReuseAddress => None,
-            RemainderValueStrategy::CustomAddress(address) => Some(address),
-        };
 
         let hrp = protocol_parameters.bech32_hrp();
 
@@ -91,6 +79,40 @@ impl Client {
             );
         }
 
+        self.build_transaction_inner(
+            addresses.into_keys(),
+            available_inputs,
+            outputs,
+            options,
+            slot_commitment_id,
+            protocol_parameters,
+        )
+        .await
+    }
+
+    /// Builds a transaction using the given inputs, outputs, addresses, and options.
+    pub(crate) async fn build_transaction_inner(
+        &self,
+        addresses: impl IntoIterator<Item = Address>,
+        available_inputs: impl IntoIterator<Item = InputSigningData>,
+        outputs: impl IntoIterator<Item = Output>,
+        options: TransactionOptions,
+        slot_commitment_id: SlotCommitmentId,
+        protocol_parameters: ProtocolParameters,
+    ) -> Result<PreparedTransactionData, ClientError> {
+        let outputs = outputs.into_iter().collect::<Vec<_>>();
+        let creation_slot = self.get_slot_index().await?;
+
+        let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
+            Some(self.get_account_congestion(&issuer_id, None).await?.reference_mana_cost)
+        } else {
+            None
+        };
+        let remainder_address = match options.remainder_value_strategy {
+            RemainderValueStrategy::ReuseAddress => None,
+            RemainderValueStrategy::CustomAddress(address) => Some(address),
+        };
+
         let mut mana_rewards = HashMap::new();
 
         if let Some(burn) = &options.burn {
@@ -105,7 +127,6 @@ impl Client {
             }
         }
 
-        // Check that no input got already locked
         for output_id in &options.required_inputs {
             let input = self.get_output(output_id).await?;
             if input.output.can_claim_rewards(outputs.iter().find(|o| {
@@ -127,10 +148,10 @@ impl Client {
         let mut transaction_builder = TransactionBuilder::new(
             available_inputs,
             outputs,
-            addresses.into_keys(),
+            addresses,
             creation_slot,
             slot_commitment_id,
-            protocol_parameters.clone(),
+            protocol_parameters,
         )
         .with_required_inputs(options.required_inputs)
         .with_mana_rewards(mana_rewards)

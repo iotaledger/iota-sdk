@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
-use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
 
@@ -10,11 +9,7 @@ use crypto::keys::bip44::Bip44;
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::{
-            options::{RemainderValueStrategy, TransactionOptions},
-            transaction_builder::TransactionBuilder,
-            PreparedTransactionData,
-        },
+        api::{options::TransactionOptions, PreparedTransactionData},
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
@@ -40,34 +35,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let creation_slot = self.client().get_slot_index().await?;
 
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         if options.issuer_id.is_none() {
             options.issuer_id = self.ledger().await.first_account_id();
         }
-        let reference_mana_cost = if let Some(issuer_id) = options.issuer_id {
-            Some(
-                self.client()
-                    .get_account_congestion(&issuer_id, None)
-                    .await?
-                    .reference_mana_cost,
-            )
-        } else {
-            None
-        };
-        let remainder_address = match options.remainder_value_strategy {
-            RemainderValueStrategy::ReuseAddress => None,
-            RemainderValueStrategy::CustomAddress(address) => Some(address),
-        };
-
-        let wallet_ledger = self.ledger().await;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
             TransactionProgressEvent::BuildingTransaction,
         ))
         .await;
+
+        let wallet_ledger = self.ledger().await;
 
         #[allow(unused_mut)]
         let mut forbidden_inputs = wallet_ledger.locked_outputs.clone();
@@ -82,7 +62,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
-        let available_outputs_signing_data = filter_inputs(
+        let available_inputs = filter_inputs(
             &self.address().await,
             self.bip_path().await,
             wallet_ledger
@@ -94,22 +74,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
             &options.required_inputs,
         )?;
 
-        let mut mana_rewards = HashMap::new();
-
-        if let Some(burn) = &options.burn {
-            for delegation_id in burn.delegations() {
-                if let Some(output) = wallet_ledger.unspent_delegation_output(delegation_id) {
-                    mana_rewards.insert(
-                        output.output_id,
-                        self.client()
-                            .get_output_mana_rewards(&output.output_id, slot_commitment_id.slot_index())
-                            .await?
-                            .rewards,
-                    );
-                }
-            }
-        }
-
         // Check that no input got already locked
         for output_id in &options.required_inputs {
             if wallet_ledger.locked_outputs.contains(output_id) {
@@ -117,53 +81,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     "provided custom input {output_id} is already used in another transaction",
                 )));
             }
-            if let Some(input) = wallet_ledger.outputs.get(output_id) {
-                if input.output.can_claim_rewards(outputs.iter().find(|o| {
-                    input
-                        .output
-                        .chain_id()
-                        .map(|chain_id| chain_id.or_from_output_id(output_id))
-                        == o.chain_id()
-                })) {
-                    mana_rewards.insert(
-                        *output_id,
-                        self.client()
-                            .get_output_mana_rewards(output_id, slot_commitment_id.slot_index())
-                            .await?
-                            .rewards,
-                    );
-                }
-            }
         }
 
-        let mut transaction_builder = TransactionBuilder::new(
-            available_outputs_signing_data,
-            outputs,
-            Some(self.address().await.into_inner()),
-            creation_slot,
-            slot_commitment_id,
-            protocol_parameters.clone(),
-        )
-        .with_required_inputs(options.required_inputs)
-        .with_mana_rewards(mana_rewards)
-        .with_payload(options.tagged_data_payload)
-        .with_mana_allotments(options.mana_allotments)
-        .with_remainder_address(remainder_address)
-        .with_burn(options.burn);
-
-        if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
-            transaction_builder = transaction_builder.with_min_mana_allotment(account_id, reference_mana_cost);
-        }
-
-        if !options.allow_additional_input_selection {
-            transaction_builder = transaction_builder.disable_additional_input_selection();
-        }
-
-        let prepared_transaction_data = transaction_builder.finish()?;
-
-        prepared_transaction_data.transaction.validate_length()?;
-
-        Ok(prepared_transaction_data)
+        Ok(self
+            .client()
+            .build_transaction_inner(
+                [self.address().await.into_inner()],
+                available_inputs,
+                outputs,
+                options,
+                slot_commitment_id,
+                protocol_parameters,
+            )
+            .await?)
     }
 }
 
