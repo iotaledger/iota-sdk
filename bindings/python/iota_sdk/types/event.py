@@ -8,14 +8,18 @@ class WalletEventType(IntEnum):
     """Types of wallet events.
 
     Attributes:
-        LedgerAddressGeneration (0): Nano Ledger has generated an address.
-        NewOutput (1): A new output was created.
-        SpentOutput (2): An output was spent.
-        TransactionInclusion (3): A transaction was included into the ledger.
-        TransactionProgress (4): A progress update while submitting a transaction.
+        SelectingInputs (0): Performing input selection.
+        GeneratingRemainderDepositAddress (1): Generating remainder value deposit address.
+        PreparedTransaction (2): Prepared transaction.
+        SigningTransaction (3): Signing the transaction.
+        PreparedTransactionSigningHash (4): Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano.
+        PreparedBlockSigningInput (5): Prepared block signing input, required for blindsigning with a Ledger Nano.
+        Broadcasting (6): Broadcasting.
     """
-    LedgerAddressGeneration = 0
-    NewOutput = 1
-    SpentOutput = 2
-    TransactionInclusion = 3
-    TransactionProgress = 4
+    SelectingInputs = 0
+    GeneratingRemainderDepositAddress = 1
+    PreparedTransaction = 2
+    SigningTransaction = 3
+    PreparedTransactionSigningHash = 4
+    PreparedBlockSigningInput = 5
+    Broadcasting = 6
