@@ -4,11 +4,12 @@
 //! The payload module defines the core data types for representing block payloads.
 
 pub mod candidacy_announcement;
+mod error;
 pub mod signed_transaction;
 pub mod tagged_data;
 
-use alloc::{boxed::Box, string::String};
-use core::{convert::Infallible, ops::Deref};
+use alloc::boxed::Box;
+use core::ops::Deref;
 
 use derive_more::From;
 use packable::{
@@ -20,91 +21,16 @@ use packable::{
 
 pub(crate) use self::signed_transaction::{InputCount, OutputCount};
 pub use self::{
-    candidacy_announcement::CandidacyAnnouncementPayload, signed_transaction::SignedTransactionPayload,
-    tagged_data::TaggedDataPayload,
+    candidacy_announcement::CandidacyAnnouncementPayload, error::PayloadError,
+    signed_transaction::SignedTransactionPayload, tagged_data::TaggedDataPayload,
 };
-use crate::types::block::{
-    capabilities::CapabilityError,
-    context_input::ContextInputError,
-    input::{InputError, UtxoInput},
-    mana::ManaError,
-    output::{
-        feature::FeatureError, unlock_condition::UnlockConditionError, ChainId, NativeTokenError, OutputError,
-        TokenSchemeError,
-    },
-    payload::tagged_data::{TagLength, TaggedDataLength},
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::TransactionFailureReason,
-    unlock::UnlockError,
-};
-
-#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
-#[allow(missing_docs)]
-pub enum PayloadError {
-    #[display(fmt = "invalid payload kind: {_0}")]
-    InvalidPayloadKind(u8),
-    #[display(fmt = "invalid payload length: expected {expected} but got {actual}")]
-    InvalidPayloadLength { expected: usize, actual: usize },
-    #[display(fmt = "invalid timestamp: {_0}")]
-    InvalidTimestamp(String),
-    #[display(fmt = "invalid network id: {_0}")]
-    InvalidNetworkId(String),
-    #[display(fmt = "network ID mismatch: expected {expected} but got {actual}")]
-    NetworkIdMismatch { expected: u64, actual: u64 },
-    #[display(fmt = "invalid tagged data length: {_0}")]
-    InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid tag length: {_0}")]
-    InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid input count: {_0}")]
-    InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid output count: {_0}")]
-    InvalidOutputCount(<OutputCount as TryFrom<usize>>::Error),
-    #[display(fmt = "invalid transaction amount sum: {_0}")]
-    InvalidTransactionAmountSum(u128),
-    #[display(fmt = "duplicate output chain: {_0}")]
-    DuplicateOutputChain(ChainId),
-    #[display(fmt = "duplicate UTXO {_0} in inputs")]
-    DuplicateUtxo(UtxoInput),
-    #[display(fmt = "missing creation slot")]
-    MissingCreationSlot,
-    #[display(fmt = "input count and unlock count mismatch: {input_count} != {unlock_count}")]
-    InputUnlockCountMismatch { input_count: usize, unlock_count: usize },
-    #[from]
-    TransactionSemantic(TransactionFailureReason),
-    #[from]
-    Input(InputError),
-    #[from]
-    Output(OutputError),
-    #[from]
-    Unlock(UnlockError),
-    #[from]
-    ContextInput(ContextInputError),
-    #[from]
-    Capabilities(CapabilityError),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for PayloadError {}
-
-crate::impl_from_error_via!(PayloadError via OutputError:
-    NativeTokenError,
-    ManaError,
-    UnlockConditionError,
-    FeatureError,
-    TokenSchemeError,
-);
-
-impl From<Infallible> for PayloadError {
-    fn from(value: Infallible) -> Self {
-        match value {}
-    }
-}
+use crate::types::block::protocol::{ProtocolParameters, WorkScore, WorkScoreParameters};
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq, From, Packable)]
 #[packable(unpack_error = PayloadError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = PayloadError::InvalidPayloadKind)]
+#[packable(tag_type = u8, with_error = PayloadError::Kind)]
 pub enum Payload {
     /// A tagged data payload.
     #[packable(tag = TaggedDataPayload::KIND)]
@@ -225,7 +151,7 @@ impl Packable for OptionalPayload {
             };
 
             if len != actual_len {
-                Err(UnpackError::Packable(PayloadError::InvalidPayloadLength {
+                Err(UnpackError::Packable(PayloadError::Length {
                     expected: len,
                     actual: actual_len,
                 }))

@@ -305,7 +305,7 @@ impl Packable for Block {
             };
 
             if block_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(BlockError::InvalidBlockLength(block_len)));
+                return Err(UnpackError::Packable(BlockError::Length(block_len)));
             }
         }
 

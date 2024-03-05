@@ -9,10 +9,7 @@ use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 
-use crate::client::{
-    node_api::error::{Error, Result},
-    node_manager::node::Node,
-};
+use crate::client::{node_api::error::Error, node_manager::node::Node};
 pub(crate) struct Response(reqwest::Response);
 
 impl Response {
@@ -20,16 +17,16 @@ impl Response {
         self.0.status().as_u16()
     }
 
-    pub(crate) async fn into_json<T: DeserializeOwned>(self) -> Result<T> {
+    pub(crate) async fn into_json<T: DeserializeOwned>(self) -> Result<T, Error> {
         self.0.json().await.map_err(Into::into)
     }
 
     #[cfg(not(target_family = "wasm"))]
-    pub(crate) async fn into_text(self) -> Result<String> {
+    pub(crate) async fn into_text(self) -> Result<String, Error> {
         self.0.text().await.map_err(Into::into)
     }
 
-    pub(crate) async fn into_bytes(self) -> Result<Vec<u8>> {
+    pub(crate) async fn into_bytes(self) -> Result<Vec<u8>, Error> {
         self.0.bytes().await.map(|b| b.to_vec()).map_err(Into::into)
     }
 }
@@ -48,7 +45,7 @@ impl HttpClient {
         }
     }
 
-    async fn parse_response(response: reqwest::Response, url: &url::Url) -> Result<Response> {
+    async fn parse_response(response: reqwest::Response, url: &url::Url) -> Result<Response, Error> {
         let status = response.status();
         if status.is_success() {
             Ok(Response(response))
@@ -82,7 +79,7 @@ impl HttpClient {
         request_builder
     }
 
-    pub(crate) async fn get(&self, node: &Node, timeout: Duration) -> Result<Response> {
+    pub(crate) async fn get(&self, node: &Node, timeout: Duration) -> Result<Response, Error> {
         let mut request_builder = self.client.get(node.url.clone());
         request_builder = self.build_request(request_builder, node, timeout);
         let start_time = instant::Instant::now();
@@ -97,7 +94,7 @@ impl HttpClient {
     }
 
     // Get with header: "accept", "application/vnd.iota.serializer-v2"
-    pub(crate) async fn get_bytes(&self, node: Node, timeout: Duration) -> Result<Response> {
+    pub(crate) async fn get_bytes(&self, node: Node, timeout: Duration) -> Result<Response, Error> {
         let mut request_builder = self.client.get(node.url.clone());
         request_builder = self.build_request(request_builder, &node, timeout);
         request_builder = request_builder.header("accept", "application/vnd.iota.serializer-v2");
@@ -105,13 +102,13 @@ impl HttpClient {
         Self::parse_response(resp, &node.url).await
     }
 
-    pub(crate) async fn post_json(&self, node: Node, timeout: Duration, json: Value) -> Result<Response> {
+    pub(crate) async fn post_json(&self, node: Node, timeout: Duration, json: Value) -> Result<Response, Error> {
         let mut request_builder = self.client.post(node.url.clone());
         request_builder = self.build_request(request_builder, &node, timeout);
         Self::parse_response(request_builder.json(&json).send().await?, &node.url).await
     }
 
-    pub(crate) async fn post_bytes(&self, node: Node, timeout: Duration, body: &[u8]) -> Result<Response> {
+    pub(crate) async fn post_bytes(&self, node: Node, timeout: Duration, body: &[u8]) -> Result<Response, Error> {
         let mut request_builder = self.client.post(node.url.clone());
         request_builder = self.build_request(request_builder, &node, timeout);
         request_builder = request_builder.header("Content-Type", "application/vnd.iota.serializer-v2");

@@ -8,7 +8,7 @@ use crate::types::block::{
 
 /// Points to the unlock of a consumed anchor output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
-#[packable(unpack_error = UnlockError, with = UnlockError::InvalidAnchorIndex)]
+#[packable(unpack_error = UnlockError, with = UnlockError::AnchorIndex)]
 pub struct AnchorUnlock(
     /// Index of input and unlock corresponding to an [`AnchorOutput`](crate::types::block::output::AnchorOutput).
     UnlockIndex,
@@ -21,7 +21,7 @@ impl AnchorUnlock {
     /// Creates a new [`AnchorUnlock`].
     #[inline(always)]
     pub fn new(index: u16) -> Result<Self, UnlockError> {
-        index.try_into().map(Self).map_err(UnlockError::InvalidAnchorIndex)
+        index.try_into().map(Self).map_err(UnlockError::AnchorIndex)
     }
 
     /// Return the index of an [`AnchorUnlock`].

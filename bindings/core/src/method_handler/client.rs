@@ -17,7 +17,7 @@ use iota_sdk::{
     },
 };
 
-use crate::{method::ClientMethod, response::Response, Result};
+use crate::{method::ClientMethod, response::Response};
 
 /// Listen to MQTT events
 #[cfg(feature = "mqtt")]
@@ -52,7 +52,10 @@ where
 }
 
 /// Call a client method.
-pub(crate) async fn call_client_method_internal(client: &Client, method: ClientMethod) -> Result<Response> {
+pub(crate) async fn call_client_method_internal(
+    client: &Client,
+    method: ClientMethod,
+) -> Result<Response, crate::Error> {
     let response = match method {
         ClientMethod::BuildAccountOutput {
             amount,

@@ -50,10 +50,8 @@ pub(crate) fn verify_keys(map: &MetadataBTreeMapPrefix) -> Result<(), FeatureErr
 }
 
 pub(crate) fn verify_packed_len(len: usize, bytes_length_range: RangeInclusive<u16>) -> Result<(), FeatureError> {
-    if !bytes_length_range
-        .contains(&u16::try_from(len).map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?)
-    {
-        return Err(FeatureError::InvalidMetadataFeature(format!(
+    if !bytes_length_range.contains(&u16::try_from(len).map_err(|e| FeatureError::MetadataFeature(e.to_string()))?) {
+        return Err(FeatureError::MetadataFeature(format!(
             "Out of bounds byte length: {len}"
         )));
     }
@@ -138,14 +136,14 @@ impl MetadataFeatureMap {
                             BoxedSlicePrefix::<u8, MetadataFeatureKeyLength>::try_from(
                                 k.as_bytes().to_vec().into_boxed_slice(),
                             )
-                            .map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
+                            .map_err(|e| FeatureError::MetadataFeature(e.to_string()))?,
                             BoxedSlicePrefix::<u8, MetadataFeatureValueLength>::try_from(v.clone().into_boxed_slice())
-                                .map_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
+                                .map_err(|e| FeatureError::MetadataFeature(e.to_string()))?,
                         ))
                     })
                     .collect::<Result<MetadataBTreeMap, FeatureError>>()?,
             )
-            .map_err(FeatureError::InvalidMetadataFeatureEntryCount)?,
+            .map_err(FeatureError::MetadataFeatureEntryCount)?,
         );
 
         verify_keys(&res.0)?;
@@ -188,7 +186,7 @@ impl Packable for MetadataFeature {
         let mut unpacker = CounterUnpacker::new(unpacker);
         let res = Self(
             MetadataBTreeMapPrefix::unpack(&mut unpacker, visitor)
-                .map_packable_err(|e| FeatureError::InvalidMetadataFeature(e.to_string()))?,
+                .map_packable_err(|e| FeatureError::MetadataFeature(e.to_string()))?,
         );
 
         if visitor.is_some() {

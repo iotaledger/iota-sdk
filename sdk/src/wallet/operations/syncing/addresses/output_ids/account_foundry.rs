@@ -7,6 +7,7 @@ use crate::{
     client::{
         node_api::indexer::query_parameters::{AccountOutputQueryParameters, FoundryOutputQueryParameters},
         secret::SecretManage,
+        ClientError,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
@@ -16,25 +17,21 @@ use crate::{
         },
     },
     utils::ConvertTo,
-    wallet::{operations::syncing::SyncOptions, task, Wallet},
+    wallet::{operations::syncing::SyncOptions, task, Wallet, WalletError},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Returns output ids of account outputs
     pub(crate) async fn get_account_and_foundry_output_ids(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
         sync_options: &SyncOptions,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> Result<Vec<OutputId>, WalletError> {
         log::debug!("[SYNC] get_account_and_foundry_output_ids");
         let bech32_address = bech32_address
             .convert()
             .map_err(AddressError::from)
-            .map_err(crate::client::Error::Address)?;
+            .map_err(ClientError::Address)?;
 
         let mut output_ids = self
             .client()
@@ -55,7 +52,7 @@ where
     pub(crate) async fn get_foundry_output_ids(
         &self,
         account_output_ids: &[OutputId],
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> Result<Vec<OutputId>, WalletError> {
         log::debug!("[SYNC] get_foundry_output_ids");
         // Get account outputs, so we can then get the foundry outputs with the account addresses
         let account_outputs_with_meta = self.get_outputs(account_output_ids.to_vec()).await?;
@@ -81,7 +78,7 @@ where
         }
 
         let mut output_ids = HashSet::new();
-        let results: Vec<crate::wallet::Result<OutputIdsResponse>> = futures::future::try_join_all(tasks).await?;
+        let results: Vec<Result<OutputIdsResponse, WalletError>> = futures::future::try_join_all(tasks).await?;
 
         for res in results {
             let foundry_output_ids = res?;
