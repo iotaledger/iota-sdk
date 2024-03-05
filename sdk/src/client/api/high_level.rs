@@ -25,7 +25,7 @@ use crate::{
 
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
-    pub async fn inputs_from_transaction_id(
+    pub async fn get_transaction_inputs(
         &self,
         transaction_id: &TransactionId,
     ) -> Result<Vec<OutputWithMetadataResponse>, ClientError> {
