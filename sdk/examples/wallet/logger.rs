@@ -43,9 +43,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::env::var("MNEMONIC").unwrap(),
     )?);
 
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     let wallet = Wallet::<MnemonicSecretManager>::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
+        .with_secret_manager(secret_manager)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
