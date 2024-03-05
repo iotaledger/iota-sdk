@@ -54,6 +54,10 @@ where
             )
             .await?;
 
+        #[cfg(feature = "events")]
+        self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
+            .await;
+
         let block_id = self.client().post_block(&block).await?;
 
         log::debug!("submitted block {}", block_id);

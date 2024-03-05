@@ -1,8 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "events")]
-use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
     types::block::{output::AccountId, payload::Payload, BlockId},
@@ -25,10 +23,6 @@ where
         let block_id = self
             .submit_basic_block(Some(Payload::from(payload)), issuer_id, true)
             .await?;
-
-        #[cfg(feature = "events")]
-        self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
-            .await;
 
         Ok(block_id)
     }
