@@ -396,71 +396,6 @@ pub enum TransactionState {
     Failed,
 }
 
-/// Describes the reason of a block failure.
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    PartialEq,
-    serde_repr::Serialize_repr,
-    serde_repr::Deserialize_repr,
-    strum::FromRepr,
-    strum::EnumString,
-    strum::AsRefStr,
-)]
-#[serde(rename_all = "camelCase")]
-#[strum(serialize_all = "camelCase")]
-#[non_exhaustive]
-#[repr(u8)]
-pub enum BlockFailureReason {
-    /// The block is too old to issue.
-    TooOldToIssue = 1,
-    /// One of the block's parents is too old.
-    ParentTooOld = 2,
-    /// One of the block's parents does not exist.
-    ParentDoesNotExist = 3,
-    /// The block's issuer account could not be found.
-    IssuerAccountNotFound = 4,
-    /// The mana cost could not be calculated.
-    ManaCostCalculationFailed = 5,
-    // The block's issuer account burned insufficient Mana for a block.
-    BurnedInsufficientMana = 6,
-    /// The account is locked.
-    AccountLocked = 7,
-    /// The account is locked.
-    AccountExpired = 8,
-    /// The block's signature is invalid.
-    SignatureInvalid = 9,
-    /// The block is dropped due to congestion.
-    DroppedDueToCongestion = 10,
-    /// The block payload is invalid.
-    PayloadInvalid = 11,
-    /// The block is invalid.
-    Invalid = 255,
-}
-
-impl core::fmt::Display for BlockFailureReason {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::TooOldToIssue => write!(f, "The block is too old to issue."),
-            Self::ParentTooOld => write!(f, "One of the block's parents is too old."),
-            Self::ParentDoesNotExist => write!(f, "One of the block's parents does not exist."),
-            Self::IssuerAccountNotFound => write!(f, "The block's issuer account could not be found."),
-            Self::ManaCostCalculationFailed => write!(f, "The mana cost could not be calculated."),
-            Self::BurnedInsufficientMana => {
-                write!(f, "The block's issuer account burned insufficient Mana for a block.")
-            }
-            Self::AccountLocked => write!(f, "The account is locked."),
-            Self::AccountExpired => write!(f, "The account is expired."),
-            Self::SignatureInvalid => write!(f, "The block's signature is invalid."),
-            Self::DroppedDueToCongestion => write!(f, "The block is dropped due to congestion."),
-            Self::PayloadInvalid => write!(f, "The block payload is invalid."),
-            Self::Invalid => write!(f, "The block is invalid."),
-        }
-    }
-}
-
 // Response of a GET transaction metadata REST API call.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -478,8 +413,6 @@ pub struct TransactionMetadataResponse {
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     pub block_state: BlockState,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub block_failure_reason: Option<BlockFailureReason>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transaction_metadata: Option<TransactionMetadataResponse>,
 }
