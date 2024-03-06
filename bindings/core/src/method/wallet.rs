@@ -305,7 +305,7 @@ pub enum WalletMethod {
         transaction_options: Option<TransactionOptions>,
     },
     /// Prepare to send base coins to multiple addresses, or with additional parameters.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSend {
         params: Vec<SendParams>,
         #[serde(default)]
