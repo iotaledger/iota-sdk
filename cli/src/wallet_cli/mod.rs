@@ -35,7 +35,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    helper::{bytes_from_hex_or_file, get_password},
+    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -1180,12 +1180,16 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
-                println_log_info!(
-                    "{:<5}{}\t{}",
-                    i,
-                    tx.transaction_id,
-                    tx.payload.transaction().creation_slot()
-                );
+                let protocol_parameters = wallet.client().get_protocol_parameters().await?;
+                let creation_slot = tx.payload.transaction().creation_slot();
+                let creation_time = to_utc_date_time(creation_slot.to_timestamp(
+                    protocol_parameters.genesis_unix_timestamp(),
+                    protocol_parameters.slot_duration_in_seconds(),
+                ) as u128)?
+                .format("%Y-%m-%d %H:%M:%S UTC")
+                .to_string();
+
+                println_log_info!("{:<5}{}\t{}\t{}", i, tx.transaction_id, creation_slot, creation_time);
             }
         }
     }
