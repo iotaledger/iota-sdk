@@ -6,10 +6,7 @@ use std::time::Duration;
 use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
     client::api::{PreparedTransactionData, SignedTransactionData, SignedTransactionDataDto},
-    types::{
-        block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
-        TryFromDto,
-    },
+    types::{block::output::feature::BlockIssuerKeySource, TryFromDto},
     wallet::{types::TransactionWithMetadataDto, Wallet},
 };
 

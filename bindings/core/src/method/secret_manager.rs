@@ -4,8 +4,11 @@
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
-    client::api::{GetAddressesOptions, PreparedTransactionDataDto},
-    types::block::{protocol::ProtocolParameters, UnsignedBlockDto},
+    client::{
+        api::{GetAddressesOptions, PreparedTransactionDataDto},
+        secret::GenerateAddressOptions,
+    },
+    types::block::{address::Hrp, protocol::ProtocolParameters, UnsignedBlockDto},
     utils::serde::bip44::Bip44Def,
 };
 use serde::{Deserialize, Serialize};
@@ -19,6 +22,14 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum SecretManagerMethod {
+    /// Generate a Bech32 formatted Ed25519 address.
+    GenerateEd25519AddressAsBech32 {
+        coin_type: u32,
+        account_index: u32,
+        address_index: u32,
+        options: GenerateAddressOptions,
+        bech32_hrp: Hrp,
+    },
     /// Generate Ed25519 addresses.
     GenerateEd25519Addresses {
         /// Addresses generation options

@@ -28,6 +28,26 @@ where
     ClientError: From<S::Error>,
 {
     let response = match method {
+        SecretManagerMethod::GenerateEd25519AddressAsBech32 {
+            coin_type,
+            account_index,
+            address_index,
+            options,
+            bech32_hrp,
+        } => {
+            let address_indexes = address_index..address_index + 1;
+            let address = secret_manager
+                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                .await
+                .map_err(ClientError::from)?
+                .into_iter()
+                .map(|a| a.to_bech32(bech32_hrp))
+                .collect::<Vec<_>>()
+                .pop()
+                // Panic: at this point there must be at least one address
+                .unwrap();
+            Response::Bech32Address(address)
+        }
         SecretManagerMethod::GenerateEd25519Addresses {
             options:
                 GetAddressesOptions {
