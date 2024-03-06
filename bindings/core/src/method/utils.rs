@@ -19,7 +19,7 @@ use iota_sdk::{
         unlock::Unlock,
         BlockDto,
     },
-    utils::serde::{option_mana_rewards, string},
+    utils::serde::{option_mana_rewards, prefix_hex_bytes, string},
 };
 use serde::{Deserialize, Serialize};
 
@@ -65,12 +65,6 @@ pub enum UtilsMethod {
         nft_id: NftId,
         bech32_hrp: Hrp,
     },
-    /// Transforms a hex encoded public key to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexPublicKeyToBech32Address {
-        hex: String,
-        bech32_hrp: Hrp,
-    },
     /// Returns a valid Address parsed from a String.
     ParseBech32Address {
         address: Bech32Address,
@@ -96,10 +90,11 @@ pub enum UtilsMethod {
     TransactionId {
         payload: SignedTransactionPayloadDto,
     },
-    /// Computes the account ID
+    /// Computes the Blake2b256 hash of the provided hex encoded bytes.
     #[serde(rename_all = "camelCase")]
-    ComputeAccountId {
-        output_id: OutputId,
+    Blake2b256Hash {
+        #[serde(with = "prefix_hex_bytes")]
+        bytes: Vec<u8>,
     },
     /// Computes the Foundry ID
     #[serde(rename_all = "camelCase")]
@@ -107,11 +102,6 @@ pub enum UtilsMethod {
         account_id: AccountId,
         serial_number: u32,
         token_scheme_type: u8,
-    },
-    /// Computes the NFT ID
-    #[serde(rename_all = "camelCase")]
-    ComputeNftId {
-        output_id: OutputId,
     },
     /// Computes the output ID from transaction id and output index
     ComputeOutputId {

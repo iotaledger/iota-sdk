@@ -37,6 +37,7 @@ fn missing_input_account_for_foundry() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -120,6 +121,7 @@ fn minted_native_tokens_in_new_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -132,6 +134,7 @@ fn minted_native_tokens_in_new_remainder() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -185,6 +188,7 @@ fn minted_native_tokens_in_provided_output() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -197,6 +201,7 @@ fn minted_native_tokens_in_provided_output() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -217,6 +222,7 @@ fn minted_native_tokens_in_provided_output() {
         },
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: Some((&token_id.to_string(), 100)),
             sender: None,
@@ -254,6 +260,7 @@ fn melt_native_tokens() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -332,6 +339,7 @@ fn destroy_foundry_with_account_state_transition() {
             (
                 Account {
                     amount: 50_300,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -390,6 +398,7 @@ fn destroy_foundry_with_account_burn() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -412,6 +421,7 @@ fn destroy_foundry_with_account_burn() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -468,6 +478,7 @@ fn prefer_basic_to_foundry() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -488,6 +499,7 @@ fn prefer_basic_to_foundry() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -502,6 +514,7 @@ fn prefer_basic_to_foundry() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -536,6 +549,7 @@ fn simple_foundry_transition_basic_not_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -621,6 +635,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -843,6 +858,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -879,6 +895,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     });
     let outputs = build_outputs([Basic {
         amount: 3_200_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -926,6 +943,7 @@ fn create_native_token_but_burn_account() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -998,6 +1016,7 @@ fn melted_tokens_not_provided() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1057,6 +1076,7 @@ fn burned_tokens_not_provided() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1179,6 +1199,7 @@ fn melt_and_burn_native_tokens() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1343,6 +1364,7 @@ fn auto_transition_foundry_less_than_min_additional() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
                     native_token: None,

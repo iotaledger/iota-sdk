@@ -29,6 +29,7 @@ fn one_output_expiration_not_expired() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -42,6 +43,7 @@ fn one_output_expiration_not_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -74,6 +76,7 @@ fn expiration_equal_timestamp() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -87,6 +90,7 @@ fn expiration_equal_timestamp() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -118,6 +122,7 @@ fn one_output_expiration_expired() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -131,6 +136,7 @@ fn one_output_expiration_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -163,6 +169,7 @@ fn two_outputs_one_expiration_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -175,6 +182,7 @@ fn two_outputs_one_expiration_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -189,6 +197,7 @@ fn two_outputs_one_expiration_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -222,6 +231,7 @@ fn two_outputs_one_unexpired_one_missing() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -234,6 +244,7 @@ fn two_outputs_one_unexpired_one_missing() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -248,6 +259,7 @@ fn two_outputs_one_unexpired_one_missing() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -281,6 +293,7 @@ fn two_outputs_two_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -293,6 +306,7 @@ fn two_outputs_two_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -305,6 +319,7 @@ fn two_outputs_two_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -319,6 +334,7 @@ fn two_outputs_two_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -352,6 +368,7 @@ fn two_outputs_two_expired_2() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -364,6 +381,7 @@ fn two_outputs_two_expired_2() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -378,6 +396,7 @@ fn two_outputs_two_expired_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 4_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -412,6 +431,7 @@ fn expiration_expired_with_sdr() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -425,6 +445,7 @@ fn expiration_expired_with_sdr() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -456,6 +477,7 @@ fn expiration_expired_with_sdr_2() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -469,6 +491,7 @@ fn expiration_expired_with_sdr_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -500,6 +523,7 @@ fn expiration_expired_with_sdr_and_timelock() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -513,6 +537,7 @@ fn expiration_expired_with_sdr_and_timelock() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -544,6 +569,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -557,6 +583,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -589,6 +616,7 @@ fn sender_in_expiration() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -601,6 +629,7 @@ fn sender_in_expiration() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -613,6 +642,7 @@ fn sender_in_expiration() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -625,6 +655,7 @@ fn sender_in_expiration() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -637,6 +668,7 @@ fn sender_in_expiration() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -651,6 +683,7 @@ fn sender_in_expiration() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -686,6 +719,7 @@ fn sender_in_expiration_already_selected() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -699,6 +733,7 @@ fn sender_in_expiration_already_selected() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -734,6 +769,7 @@ fn remainder_in_expiration() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -747,6 +783,7 @@ fn remainder_in_expiration() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -792,6 +829,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -805,6 +843,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -838,6 +877,7 @@ fn expiration_expired_only_account_addresses() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -850,6 +890,7 @@ fn expiration_expired_only_account_addresses() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -863,6 +904,7 @@ fn expiration_expired_only_account_addresses() {
 
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -895,6 +937,7 @@ fn one_nft_output_expiration_unexpired() {
         [(
             Nft {
                 amount: 2_000_000,
+                mana: 0,
                 nft_id: nft_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 sender: None,
@@ -908,6 +951,7 @@ fn one_nft_output_expiration_unexpired() {
     );
     let outputs = build_outputs([Nft {
         amount: 2_000_000,
+        mana: 0,
         nft_id: nft_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         sender: None,
@@ -940,6 +984,7 @@ fn one_nft_output_expiration_expired() {
         [(
             Nft {
                 amount: 2_000_000,
+                mana: 0,
                 nft_id: nft_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 sender: None,
@@ -953,6 +998,7 @@ fn one_nft_output_expiration_expired() {
     );
     let outputs = build_outputs([Nft {
         amount: 2_000_000,
+        mana: 0,
         nft_id: nft_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         sender: None,

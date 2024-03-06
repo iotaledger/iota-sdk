@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::cmp::Ordering;
+
 use crate::types::block::{
     output::{
         AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
@@ -192,6 +194,51 @@ impl StateTransitionVerifier for AccountOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
+        if current_state.immutable_features() != next_state.immutable_features() {
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
+        }
+
+        // TODO update when TIP is updated
+        // // Governance transition.
+        // if current_state.amount != next_state.amount
+        //     || current_state.foundry_counter != next_state.foundry_counter
+        // {
+        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
+        // }
+
+        // // State transition.
+        // if current_state.features.metadata() != next_state.features.metadata() {
+        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
+        // }
+
+        let created_foundries = context.transaction.outputs().iter().filter_map(|output| {
+            if let Output::Foundry(foundry) = output {
+                if foundry.account_address().account_id() == next_state.account_id()
+                    && !context.input_chains.contains_key(&foundry.chain_id())
+                {
+                    Some(foundry)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        });
+
+        let mut created_foundries_count = 0;
+
+        for foundry in created_foundries {
+            created_foundries_count += 1;
+
+            if foundry.serial_number() != current_state.foundry_counter() + created_foundries_count {
+                return Err(TransactionFailureReason::FoundrySerialInvalid);
+            }
+        }
+
+        if current_state.foundry_counter() + created_foundries_count != next_state.foundry_counter() {
+            return Err(TransactionFailureReason::AccountInvalidFoundryCounter);
+        }
+
         match (
             current_state.features().block_issuer(),
             next_state.features().block_issuer(),
@@ -299,12 +346,7 @@ impl StateTransitionVerifier for AccountOutput {
             _ => {}
         }
 
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
+        Ok(())
     }
 
     fn destruction(
@@ -371,14 +413,32 @@ impl StateTransitionVerifier for AnchorOutput {
         current_state: &Self,
         _next_output_id: &OutputId,
         next_state: &Self,
-        context: &SemanticValidationContext<'_>,
+        _context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
+        if current_state.immutable_features() != next_state.immutable_features() {
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
+        }
+
+        if next_state.state_index() == current_state.state_index() + 1 {
+            // State transition.
+            if current_state.state_controller_address() != next_state.state_controller_address()
+                || current_state.governor_address() != next_state.governor_address()
+                || current_state.features().metadata() != next_state.features().metadata()
+            {
+                return Err(TransactionFailureReason::AnchorInvalidStateTransition);
+            }
+        } else if next_state.state_index() == current_state.state_index() {
+            // Governance transition.
+            if current_state.amount() != next_state.amount()
+                || current_state.features().state_metadata() != next_state.features().state_metadata()
+            {
+                return Err(TransactionFailureReason::AnchorInvalidGovernanceTransition);
+            }
+        } else {
+            return Err(TransactionFailureReason::AnchorInvalidStateTransition);
+        }
+
+        Ok(())
     }
 
     fn destruction(
@@ -442,13 +502,86 @@ impl StateTransitionVerifier for FoundryOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_native_tokens,
-            &context.output_native_tokens,
-            context.transaction.capabilities(),
-        )
+        if current_state.account_address() != next_state.account_address()
+            || current_state.serial_number() != next_state.serial_number()
+            || current_state.immutable_features() != next_state.immutable_features()
+        {
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
+        }
+
+        let token_id = next_state.token_id();
+        let input_tokens = context.input_native_tokens.get(&token_id).copied().unwrap_or_default();
+        let output_tokens = context.output_native_tokens.get(&token_id).copied().unwrap_or_default();
+        let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme();
+        let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme();
+
+        if current_token_scheme.maximum_supply() != next_token_scheme.maximum_supply() {
+            return Err(TransactionFailureReason::SimpleTokenSchemeMaximumSupplyChanged);
+        }
+
+        if current_token_scheme.minted_tokens() > next_token_scheme.minted_tokens()
+            || current_token_scheme.melted_tokens() > next_token_scheme.melted_tokens()
+        {
+            return Err(TransactionFailureReason::SimpleTokenSchemeMintedMeltedTokenDecrease);
+        }
+
+        match input_tokens.cmp(&output_tokens) {
+            Ordering::Less => {
+                // Mint
+
+                // This can't underflow as it is known that current_minted_tokens <= next_minted_tokens.
+                let minted_diff = next_token_scheme.minted_tokens() - current_token_scheme.minted_tokens();
+                // This can't underflow as it is known that input_tokens < output_tokens (Ordering::Less).
+                let token_diff = output_tokens - input_tokens;
+
+                if minted_diff != token_diff {
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
+                }
+
+                if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens() {
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
+                }
+            }
+            Ordering::Equal => {
+                // Transition
+
+                if current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
+                    || current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
+                {
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
+                }
+            }
+            Ordering::Greater => {
+                // Melt / Burn
+
+                if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
+                    && current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
+                {
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
+                }
+
+                // This can't underflow as it is known that current_melted_tokens <= next_melted_tokens.
+                let melted_diff = next_token_scheme.melted_tokens() - current_token_scheme.melted_tokens();
+                // This can't underflow as it is known that input_tokens > output_tokens (Ordering::Greater).
+                let token_diff = input_tokens - output_tokens;
+
+                if melted_diff > token_diff {
+                    return Err(TransactionFailureReason::NativeTokenSumUnbalanced);
+                }
+
+                let burned_diff = token_diff - melted_diff;
+
+                if !burned_diff.is_zero()
+                    && !context
+                        .transaction
+                        .has_capability(TransactionCapabilityFlag::BurnNativeTokens)
+                {
+                    return Err(TransactionFailureReason::CapabilitiesNativeTokenBurningNotAllowed)?;
+                }
+            }
+        }
+
+        Ok(())
     }
 
     fn destruction(
@@ -511,7 +644,11 @@ impl StateTransitionVerifier for NftOutput {
         next_state: &Self,
         _context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Self::transition_inner(current_state, next_state)
+        if current_state.immutable_features() != next_state.immutable_features() {
+            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
+        }
+
+        Ok(())
     }
 
     fn destruction(
@@ -568,15 +705,22 @@ impl StateTransitionVerifier for DelegationOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Self::transition_inner(current_state, next_state)?;
+        if !current_state.delegation_id().is_null() || next_state.delegation_id().is_null() {
+            return Err(TransactionFailureReason::DelegationOutputTransitionedTwice);
+        }
 
-        let protocol_parameters = &context.protocol_parameters;
+        if current_state.delegated_amount() != next_state.delegated_amount()
+            || current_state.start_epoch() != next_state.start_epoch()
+            || current_state.validator_address() != next_state.validator_address()
+        {
+            return Err(TransactionFailureReason::DelegationModified);
+        }
 
         let slot_commitment_id = context
             .commitment_context_input
             .ok_or(TransactionFailureReason::DelegationCommitmentInputMissing)?;
 
-        if next_state.end_epoch() != protocol_parameters.delegation_end_epoch(slot_commitment_id) {
+        if next_state.end_epoch() != context.protocol_parameters.delegation_end_epoch(slot_commitment_id) {
             return Err(TransactionFailureReason::DelegationEndEpochInvalid);
         }
 
