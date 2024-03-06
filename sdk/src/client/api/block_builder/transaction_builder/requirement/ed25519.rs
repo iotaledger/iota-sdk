@@ -39,10 +39,7 @@ impl TransactionBuilder {
     }
 
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_ed25519_requirement(
-        &mut self,
-        address: &Address,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_ed25519_requirement(&mut self, address: &Address) -> Result<(), TransactionBuilderError> {
         // Checks if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -53,7 +50,13 @@ impl TransactionBuilder {
                 "{address:?} sender requirement already fulfilled by {:?}",
                 input.output_id()
             );
-            return Ok(Vec::new());
+            return Ok(());
+        }
+
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Ed25519(
+                address.clone(),
+            )));
         }
 
         // Checks if the requirement can be fulfilled by a basic output.
@@ -78,7 +81,9 @@ impl TransactionBuilder {
 
                 log::debug!("{address:?} sender requirement fulfilled by {:?}", input.output_id(),);
 
-                Ok(vec![input])
+                self.select_input(input)?;
+
+                Ok(())
             }
             None => Err(TransactionBuilderError::UnfulfillableRequirement(Requirement::Ed25519(
                 address.clone(),
