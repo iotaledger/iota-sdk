@@ -39,6 +39,7 @@ fn input_account_eq_output_account() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -50,6 +51,7 @@ fn input_account_eq_output_account() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -80,6 +82,7 @@ fn transition_account_id_zero() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -92,6 +95,7 @@ fn transition_account_id_zero() {
     let account_id = AccountId::from(inputs[0].output_id());
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -256,6 +260,7 @@ fn create_account() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -269,6 +274,7 @@ fn create_account() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -308,6 +314,7 @@ fn burn_account() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -319,6 +326,7 @@ fn burn_account() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -401,6 +409,7 @@ fn missing_input_for_account_output() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -414,6 +423,7 @@ fn missing_input_for_account_output() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -447,6 +457,7 @@ fn missing_input_for_account_output_2() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -457,6 +468,7 @@ fn missing_input_for_account_output_2() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -471,6 +483,7 @@ fn missing_input_for_account_output_2() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -502,6 +515,7 @@ fn missing_input_for_account_output_but_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -515,6 +529,7 @@ fn missing_input_for_account_output_but_created() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -544,6 +559,7 @@ fn account_in_output_and_sender() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -554,6 +570,7 @@ fn account_in_output_and_sender() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -571,6 +588,7 @@ fn account_in_output_and_sender() {
         .unwrap();
     let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -604,6 +622,7 @@ fn missing_ed25519_sender() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -615,6 +634,7 @@ fn missing_ed25519_sender() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -646,6 +666,7 @@ fn missing_ed25519_issuer_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -659,6 +680,7 @@ fn missing_ed25519_issuer_created() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -690,6 +712,7 @@ fn missing_ed25519_issuer_transition() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -701,6 +724,7 @@ fn missing_ed25519_issuer_transition() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -729,6 +753,7 @@ fn missing_account_sender() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -740,6 +765,7 @@ fn missing_account_sender() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -771,6 +797,7 @@ fn missing_account_issuer_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -784,6 +811,7 @@ fn missing_account_issuer_created() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -815,6 +843,7 @@ fn missing_account_issuer_transition() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -826,6 +855,7 @@ fn missing_account_issuer_transition() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -854,6 +884,7 @@ fn missing_nft_sender() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -865,6 +896,7 @@ fn missing_nft_sender() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
@@ -896,6 +928,7 @@ fn missing_nft_issuer_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -909,6 +942,7 @@ fn missing_nft_issuer_created() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -940,6 +974,7 @@ fn missing_nft_issuer_transition() {
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -951,6 +986,7 @@ fn missing_nft_issuer_transition() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -980,6 +1016,7 @@ fn increase_account_amount() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -990,6 +1027,7 @@ fn increase_account_amount() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1004,6 +1042,7 @@ fn increase_account_amount() {
     );
     let outputs = build_outputs([Account {
         amount: 3_000_000,
+        mana: 0,
         account_id: account_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -1035,6 +1074,7 @@ fn decrease_account_amount() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1045,6 +1085,7 @@ fn decrease_account_amount() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1059,6 +1100,7 @@ fn decrease_account_amount() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -1102,6 +1144,7 @@ fn prefer_basic_to_account() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1112,6 +1155,7 @@ fn prefer_basic_to_account() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1126,6 +1170,7 @@ fn prefer_basic_to_account() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1160,6 +1205,7 @@ fn take_amount_from_account_to_fund_basic() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1170,6 +1216,7 @@ fn take_amount_from_account_to_fund_basic() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1184,6 +1231,7 @@ fn take_amount_from_account_to_fund_basic() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_200_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1232,6 +1280,7 @@ fn account_burn_should_validate_account_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1244,6 +1293,7 @@ fn account_burn_should_validate_account_sender() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1256,6 +1306,7 @@ fn account_burn_should_validate_account_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -1306,6 +1357,7 @@ fn account_burn_should_validate_account_address() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1318,6 +1370,7 @@ fn account_burn_should_validate_account_address() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1330,6 +1383,7 @@ fn account_burn_should_validate_account_address() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1379,6 +1433,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1390,6 +1445,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1439,6 +1495,7 @@ fn two_accounts_required() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1449,6 +1506,7 @@ fn two_accounts_required() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1461,6 +1519,7 @@ fn two_accounts_required() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1516,6 +1575,7 @@ fn state_controller_sender_required() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1527,6 +1587,7 @@ fn state_controller_sender_required() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
@@ -1560,6 +1621,7 @@ fn state_controller_sender_required_already_selected() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1572,6 +1634,7 @@ fn state_controller_sender_required_already_selected() {
     let outputs = build_outputs([
         Account {
             amount: 1_000_000,
+            mana: 0,
             account_id: account_id_1,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             sender: None,
@@ -1579,6 +1642,7 @@ fn state_controller_sender_required_already_selected() {
         },
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
@@ -1613,6 +1677,7 @@ fn state_transition_and_required() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1624,6 +1689,7 @@ fn state_transition_and_required() {
     );
     let outputs = build_outputs([Account {
         amount: 2_000_000,
+        mana: 0,
         account_id: account_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -1655,6 +1721,7 @@ fn remainder_address_in_state_controller() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1666,6 +1733,7 @@ fn remainder_address_in_state_controller() {
     );
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -1722,6 +1790,7 @@ fn min_allot_account_mana() {
 
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
@@ -1991,6 +2060,7 @@ fn min_allot_account_mana_requirement_covered() {
 
     let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -2066,6 +2136,7 @@ fn min_allot_account_mana_requirement_covered_2() {
 
     let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -2176,6 +2247,7 @@ fn auto_transition_account_less_than_min() {
         [(
             Account {
                 amount: small_amount,
+                mana: 0,
                 account_id: account_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -2225,6 +2297,7 @@ fn auto_transition_account_less_than_min_additional() {
             (
                 Account {
                     amount: small_amount,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -2235,6 +2308,7 @@ fn auto_transition_account_less_than_min_additional() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
                     native_token: None,

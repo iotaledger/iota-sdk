@@ -34,6 +34,7 @@ fn input_amount_equal_output_amount() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -47,6 +48,7 @@ fn input_amount_equal_output_amount() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -78,6 +80,7 @@ fn input_amount_lower_than_output_amount() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -91,6 +94,7 @@ fn input_amount_lower_than_output_amount() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -127,6 +131,7 @@ fn input_amount_lower_than_output_amount_2() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -139,6 +144,7 @@ fn input_amount_lower_than_output_amount_2() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -153,6 +159,7 @@ fn input_amount_lower_than_output_amount_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -188,6 +195,7 @@ fn input_amount_greater_than_output_amount() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -201,6 +209,7 @@ fn input_amount_greater_than_output_amount() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -245,6 +254,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -258,6 +268,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -303,6 +314,7 @@ fn two_same_inputs_one_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -315,6 +327,7 @@ fn two_same_inputs_one_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -329,6 +342,7 @@ fn two_same_inputs_one_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -374,6 +388,7 @@ fn two_inputs_one_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -386,6 +401,7 @@ fn two_inputs_one_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -400,6 +416,7 @@ fn two_inputs_one_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -432,6 +449,7 @@ fn two_inputs_one_needed_reversed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -444,6 +462,7 @@ fn two_inputs_one_needed_reversed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -458,6 +477,7 @@ fn two_inputs_one_needed_reversed() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -490,6 +510,7 @@ fn two_inputs_both_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -502,6 +523,7 @@ fn two_inputs_both_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -516,6 +538,7 @@ fn two_inputs_both_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -548,6 +571,7 @@ fn two_inputs_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -560,6 +584,7 @@ fn two_inputs_remainder() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -574,6 +599,7 @@ fn two_inputs_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -661,6 +687,7 @@ fn ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -673,6 +700,7 @@ fn ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -685,6 +713,7 @@ fn ed25519_sender() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -697,6 +726,7 @@ fn ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -709,6 +739,7 @@ fn ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -723,6 +754,7 @@ fn ed25519_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -765,6 +797,7 @@ fn missing_ed25519_sender() {
         [(
             Basic {
                 amount: 5_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -778,6 +811,7 @@ fn missing_ed25519_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -812,6 +846,7 @@ fn account_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -824,6 +859,7 @@ fn account_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -836,6 +872,7 @@ fn account_sender() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -846,6 +883,7 @@ fn account_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -858,6 +896,7 @@ fn account_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -872,6 +911,7 @@ fn account_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -914,6 +954,7 @@ fn account_sender_zero_id() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -926,6 +967,7 @@ fn account_sender_zero_id() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -939,6 +981,7 @@ fn account_sender_zero_id() {
     let account_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::from(account_id)),
@@ -977,6 +1020,7 @@ fn missing_account_sender() {
         [(
             Basic {
                 amount: 5_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -990,6 +1034,7 @@ fn missing_account_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -1024,6 +1069,7 @@ fn nft_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1036,6 +1082,7 @@ fn nft_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1048,6 +1095,7 @@ fn nft_sender() {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1060,6 +1108,7 @@ fn nft_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1072,6 +1121,7 @@ fn nft_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1086,6 +1136,7 @@ fn nft_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
@@ -1129,6 +1180,7 @@ fn nft_sender_zero_id() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1141,6 +1193,7 @@ fn nft_sender_zero_id() {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1156,6 +1209,7 @@ fn nft_sender_zero_id() {
     let nft_id = NftId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::from(nft_id)),
@@ -1194,6 +1248,7 @@ fn missing_nft_sender() {
         [(
             Basic {
                 amount: 5_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1207,6 +1262,7 @@ fn missing_nft_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
@@ -1239,6 +1295,7 @@ fn simple_remainder() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1252,6 +1309,7 @@ fn simple_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1374,6 +1432,7 @@ fn one_provided_one_needed() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1387,6 +1446,7 @@ fn one_provided_one_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1418,6 +1478,7 @@ fn insufficient_amount() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1431,6 +1492,7 @@ fn insufficient_amount() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_250_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1467,6 +1529,7 @@ fn two_inputs_remainder_2() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1479,6 +1542,7 @@ fn two_inputs_remainder_2() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1493,6 +1557,7 @@ fn two_inputs_remainder_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1537,6 +1602,7 @@ fn two_inputs_remainder_3() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1549,6 +1615,7 @@ fn two_inputs_remainder_3() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1563,6 +1630,7 @@ fn two_inputs_remainder_3() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_750_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1645,6 +1713,7 @@ fn sender_already_selected() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1658,6 +1727,7 @@ fn sender_already_selected() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -1693,6 +1763,7 @@ fn single_mandatory_input() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1706,6 +1777,7 @@ fn single_mandatory_input() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1743,6 +1815,7 @@ fn too_many_inputs() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1758,6 +1831,7 @@ fn too_many_inputs() {
     );
     let outputs = build_outputs([Basic {
         amount: 129_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1792,6 +1866,7 @@ fn more_than_max_inputs_only_one_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1810,6 +1885,7 @@ fn more_than_max_inputs_only_one_needed() {
         [(
             Basic {
                 amount: 129_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1825,6 +1901,7 @@ fn more_than_max_inputs_only_one_needed() {
 
     let outputs = build_outputs([Basic {
         amount: 129_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1855,6 +1932,7 @@ fn too_many_outputs() {
     let inputs = build_inputs(
         [(
             Basic {
+                mana: 0,
                 amount: 2_000_000_000,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
@@ -1870,6 +1948,7 @@ fn too_many_outputs() {
     let outputs = build_outputs(
         std::iter::repeat_with(|| Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: None,
@@ -1904,6 +1983,7 @@ fn too_many_outputs_with_remainder() {
         [(
             Basic {
                 amount: 2_000_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -1919,6 +1999,7 @@ fn too_many_outputs_with_remainder() {
     let outputs = build_outputs(
         std::iter::repeat_with(|| Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: None,
@@ -1957,6 +2038,7 @@ fn restricted_ed25519() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1969,6 +2051,7 @@ fn restricted_ed25519() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1981,6 +2064,7 @@ fn restricted_ed25519() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: restricted,
                     native_token: None,
                     sender: None,
@@ -1993,6 +2077,7 @@ fn restricted_ed25519() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2005,6 +2090,7 @@ fn restricted_ed25519() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2019,6 +2105,7 @@ fn restricted_ed25519() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -2055,6 +2142,7 @@ fn restricted_nft() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: restricted,
                     native_token: None,
                     sender: None,
@@ -2067,6 +2155,7 @@ fn restricted_nft() {
             (
                 Nft {
                     amount: 2_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -2081,6 +2170,7 @@ fn restricted_nft() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -2117,6 +2207,7 @@ fn restricted_account() {
             (
                 Basic {
                     amount: 3_000_000,
+                    mana: 0,
                     address: restricted,
                     native_token: None,
                     sender: None,
@@ -2129,6 +2220,7 @@ fn restricted_account() {
             (
                 Account {
                     amount: 2_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -2141,6 +2233,7 @@ fn restricted_account() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -2176,6 +2269,7 @@ fn restricted_ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2188,6 +2282,7 @@ fn restricted_ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2200,6 +2295,7 @@ fn restricted_ed25519_sender() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2212,6 +2308,7 @@ fn restricted_ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2224,6 +2321,7 @@ fn restricted_ed25519_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2238,6 +2336,7 @@ fn restricted_ed25519_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(restricted_sender),
@@ -2295,6 +2394,7 @@ fn multi_address_sender_already_fulfilled() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2307,6 +2407,7 @@ fn multi_address_sender_already_fulfilled() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2319,6 +2420,7 @@ fn multi_address_sender_already_fulfilled() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
                     native_token: None,
                     sender: None,
@@ -2333,6 +2435,7 @@ fn multi_address_sender_already_fulfilled() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(multi),
@@ -2376,6 +2479,7 @@ fn ed25519_backed_available_address() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: restricted_address.clone(),
                     native_token: None,
                     sender: None,
@@ -2388,6 +2492,7 @@ fn ed25519_backed_available_address() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: ed25519.clone(),
                     native_token: None,
                     sender: None,
@@ -2403,6 +2508,7 @@ fn ed25519_backed_available_address() {
     let outputs = build_outputs([
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: None,
@@ -2412,6 +2518,7 @@ fn ed25519_backed_available_address() {
         },
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: Some(restricted_address.clone()),
