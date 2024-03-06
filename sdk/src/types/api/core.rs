@@ -362,18 +362,22 @@ pub struct SubmitBlockResponse {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BlockState {
-    /// Stored but not accepted/confirmed.
+    /// The block has been booked by the node but not yet accepted.
     Pending,
-    /// Valid block referenced by some validators.
+    /// The block has been referenced by the super majority of the online committee.
     Accepted,
-    /// Valid block referenced by more than 2/3 of the validators.
+    /// The block has been referenced by the super majority of the total committee.
     Confirmed,
-    /// Accepted/confirmed block and the slot was finalized, can no longer be reverted.
+    /// The commitment containing the block has been finalized.
+    /// This state is computed based on the accepted/confirmed block's slot being smaller or equal than the latest
+    /// finalized slot.
     Finalized,
-    /// Rejected by the node, and user should reissue payload if it contains one.
-    Rejected,
-    /// Not successfully issued due to failure reason.
-    Failed,
+    /// The block has been dropped due to congestion control.
+    Dropped,
+    /// The block's slot has been committed by the node without the block being included.
+    /// In this case, the block will never be finalized unless there is a chain switch.
+    /// This state is computed based on the pending block's slot being smaller or equal than the latest committed slot.
+    Orphaned,
 }
 
 /// Describes the state of a transaction.

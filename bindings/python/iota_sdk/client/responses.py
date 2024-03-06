@@ -258,19 +258,22 @@ class BlockState(str, Enum):
     """Describes the state of a block.
 
     Attributes:
-        Pending: Stored but not accepted/confirmed.
-        Accepted: Valid block referenced by some validators.
-        Confirmed: Valid block referenced by more than 2/3 of the validators.
-        Finalized: Accepted/confirmed block and the slot was finalized, can no longer be reverted.
-        Rejected: Rejected by the node, and user should reissue payload if it contains one.
-        Failed: Not successfully issued due to failure reason.
+        Pending:    The block has been booked by the node but not yet accepted.
+        Accepted:   The block has been referenced by the super majority of the online committee.
+        Confirmed:  The block has been referenced by the super majority of the total committee.
+        Finalized:  The commitment containing the block has been finalized.
+                    This state is computed based on the accepted/confirmed block's slot being smaller or equal than the latest finalized slot.
+        Dropped:    The block has been dropped due to congestion control.
+        Orphaned:   The block's slot has been committed by the node without the block being included.
+                    In this case, the block will never be finalized unless there is a chain switch.
+                    This state is computed based on the pending block's slot being smaller or equal than the latest committed slot.
     """
     Pending = 'pending'
     Accepted = 'accepted'
     Confirmed = 'confirmed'
     Finalized = 'finalized'
-    Rejected = 'rejected'
-    Failed = 'failed'
+    Dropped = 'dropped'
+    Orphaned = 'orphaned'
 
 
 class BlockFailureReason(IntEnum):

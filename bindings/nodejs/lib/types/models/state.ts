@@ -3,20 +3,23 @@
 
 /**
  * The different states of a block.
- * 'pending': stored but not accepted/confirmed.
- * 'accepted': valid block referenced by some validators.
- * 'confirmed': valid block referenced by more than 2/3 of the validators.
- * 'finalized': accepted/confirmed block and the slot was finalized, can no longer be reverted.
- * 'rejected': rejected by the node, and user should reissue payload if it contains one.
- * 'failed': not successfully issued due to failure reason.
+ * 'pending':   The block has been booked by the node but not yet accepted.
+ * 'accepted':  The block has been referenced by the super majority of the online committee.
+ * 'confirmed': The block has been referenced by the super majority of the total committee.
+ * 'finalized': The commitment containing the block has been finalized.
+ *              This state is computed based on the accepted/confirmed block's slot being smaller or equal than the latest finalized slot.
+ * 'dropped':   The block has been dropped due to congestion control.
+ * 'orphaned':  The block's slot has been committed by the node without the block being included.
+ *              In this case, the block will never be finalized unless there is a chain switch.
+ *              This state is computed based on the pending block's slot being smaller or equal than the latest committed slot.
  */
 export declare type BlockState =
     | 'pending'
     | 'accepted'
     | 'confirmed'
     | 'finalized'
-    | 'rejected'
-    | 'failed';
+    | 'dropped'
+    | 'orphaned';
 
 /**
  * The different states of a transaction.

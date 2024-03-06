@@ -99,9 +99,8 @@ async function run(): Promise<void> {
         // 6. Send signed transaction
         const hexSignedTransaction =
             getHexEncodedTransaction(signedTransaction);
-        const sentTransaction = await provider.eth.sendSignedTransaction(
-            hexSignedTransaction,
-        );
+        const sentTransaction =
+            await provider.eth.sendSignedTransaction(hexSignedTransaction);
         console.log('sent Transaction', sentTransaction);
     } catch (error) {
         console.error('Error: ', error);
