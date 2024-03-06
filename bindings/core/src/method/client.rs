@@ -469,14 +469,6 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
-    /// Transforms a hex encoded public key to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexPublicKeyToBech32Address {
-        /// Hex encoded public key
-        hex: String,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
     /// Calculate the minimum required amount for an output.
     /// Expected response:
     /// [`Amount`](crate::Response::Amount)

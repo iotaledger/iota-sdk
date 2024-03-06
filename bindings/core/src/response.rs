@@ -26,7 +26,7 @@ use iota_sdk::{
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
+            output::{DecayedMana, FoundryId, Output, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
@@ -216,15 +216,10 @@ pub enum Response {
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:
-    /// - [`ComputeAccountId`](crate::method::UtilsMethod::ComputeAccountId)
-    AccountId(AccountId),
-    /// Response for:
-    /// - [`ComputeNftId`](crate::method::UtilsMethod::ComputeNftId)
-    NftId(NftId),
-    /// Response for:
     /// - [`ComputeFoundryId`](crate::method::UtilsMethod::ComputeFoundryId)
     FoundryId(FoundryId),
     /// Response for:
+    /// - [`Blake2b256Hash`](crate::method::UtilsMethod::Blake2b256Hash)
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
     Hash(String),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
@@ -254,7 +249,6 @@ pub enum Response {
     /// - [`AnchorIdToBech32`](crate::method::UtilsMethod::AnchorIdToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
     /// - [`NftIdToBech32`](crate::method::UtilsMethod::NftIdToBech32)
-    /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`ImplicitAccountCreationAddress`](crate::method::WalletMethod::ImplicitAccountCreationAddress)
     Bech32Address(Bech32Address),
@@ -280,12 +274,12 @@ pub enum Response {
     /// - [`VerifySecp256k1EcdsaSignature`](crate::method::UtilsMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// Response for:
-    /// - [`Backup`](crate::method::WalletMethod::Backup),
+    /// - [`BackupToStrongholdSnapshot`](crate::method::WalletMethod::BackupToStrongholdSnapshot),
     /// - [`ClearListeners`](crate::method::WalletMethod::ClearListeners)
     /// - [`ClearStrongholdPassword`](crate::method::WalletMethod::ClearStrongholdPassword),
     /// - [`DeregisterParticipationEvent`](crate::method::WalletMethod::DeregisterParticipationEvent),
     /// - [`EmitTestEvent`](crate::method::WalletMethod::EmitTestEvent),
-    /// - [`RestoreBackup`](crate::method::WalletMethod::RestoreBackup),
+    /// - [`RestoreFromStrongholdSnapshot`](crate::method::WalletMethod::RestoreFromStrongholdSnapshot),
     /// - [`SetAlias`](crate::method::WalletMethod::SetAlias),
     /// - [`SetClientOptions`](crate::method::WalletMethod::SetClientOptions),
     /// - [`SetDefaultSyncOptions`](crate::method::WalletMethod::SetDefaultSyncOptions),
@@ -335,10 +329,10 @@ pub enum Response {
     /// - [`PrepareMeltNativeToken`](crate::method::WalletMethod::PrepareMeltNativeToken)
     /// - [`PrepareMintNativeToken`](crate::method::WalletMethod::PrepareMintNativeToken),
     /// - [`PrepareMintNfts`](crate::method::WalletMethod::PrepareMintNfts),
-    /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
     /// - [`PrepareSendMana`](crate::method::WalletMethod::PrepareSendMana),
     /// - [`PrepareSendNativeTokens`](crate::method::WalletMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::WalletMethod::PrepareSendNft),
+    /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)
     /// - [`PrepareSendOutputs`](crate::method::WalletMethod::PrepareSendOutputs)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
@@ -367,9 +361,6 @@ pub enum Response {
     /// - [`Sync`](crate::method::WalletMethod::Sync)
     Balance(Balance),
     /// Response for:
-    /// - [`ClaimOutputs`](crate::method::WalletMethod::ClaimOutputs)
-    /// - [`Send`](crate::method::WalletMethod::Send)
-    /// - [`SendOutputs`](crate::method::WalletMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::WalletMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::WalletMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionWithMetadataDto),

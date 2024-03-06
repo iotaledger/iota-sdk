@@ -50,7 +50,6 @@ import type {
     __AccountIdToBech32Method__,
     __AnchorIdToBech32Method__,
     __NftIdToBech32Method__,
-    __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
     __AnchorOutputIdsMethod__,
@@ -123,7 +122,6 @@ export type __ClientMethods__ =
     | __AccountIdToBech32Method__
     | __AnchorIdToBech32Method__
     | __NftIdToBech32Method__
-    | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
     | __AnchorOutputIdsMethod__
