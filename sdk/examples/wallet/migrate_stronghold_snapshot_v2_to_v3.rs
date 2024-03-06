@@ -48,7 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Generate addresses with custom account index and range
     let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_coin_type(SHIMMER_COIN_TYPE)

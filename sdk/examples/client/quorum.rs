@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Generate the first address
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)

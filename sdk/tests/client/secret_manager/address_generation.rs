@@ -13,7 +13,7 @@ use iota_sdk::wallet::events::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{
         api::GetAddressesOptions,
-        constants::IOTA_COIN_TYPE,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         ClientError,
     },
@@ -30,7 +30,7 @@ async fn address_generation_mnemonic() -> Result<(), Box<dyn std::error::Error>>
         SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?);
 
     let address = secret_manager
-        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+        .generate_ed25519_address_as_bech32(IOTA_COIN_TYPE, 0, 0, "smr", None)
         .await?;
 
     assert_eq!(
@@ -61,7 +61,7 @@ async fn address_generation_stronghold() -> Result<(), Box<dyn std::error::Error
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
     let address = secret_manager
-        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+        .generate_ed25519_address_as_bech32(IOTA_COIN_TYPE, 0, 0, "smr", None)
         .await?;
 
     assert_eq!(
@@ -83,7 +83,7 @@ async fn address_generation_ledger() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::LedgerNano(secret_manager);
 
     let address = secret_manager
-        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+        .generate_ed25519_address_as_bech32(IOTA_COIN_TYPE, 0, 0, "smr", None)
         .await?;
 
     assert_eq!(
@@ -104,7 +104,7 @@ async fn address_generation_placeholder() {
 
     assert!(matches!(
         secret_manager
-            .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, "smr", None)
+            .generate_ed25519_address_as_bech32(SHIMMER_COIN_TYPE, 0, 0, "smr", None)
             .await,
         Err(ClientError::PlaceholderSecretManager)
     ));

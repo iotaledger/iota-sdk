@@ -58,7 +58,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
     );
 
     let addresses = stronghold_secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -196,7 +196,7 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     assert_eq!(coin_type, SHIMMER_COIN_TYPE);
 
     let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_coin_type(SHIMMER_COIN_TYPE)

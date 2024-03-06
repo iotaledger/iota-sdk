@@ -40,7 +40,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address_0 = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),

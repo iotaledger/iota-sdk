@@ -117,7 +117,7 @@ async fn test_get_address_outputs() {
     let secret_manager = setup_secret_manager();
 
     let address = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::from_client(&client)
                 .await
                 .unwrap()

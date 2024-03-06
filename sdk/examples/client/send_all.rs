@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
     let from_address = secret_manager_1
-        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .generate_ed25519_addresses_as_bech32(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0]
         .clone();
 
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Total amount: {total_amount}");
 
     let to_address = secret_manager_2
-        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+        .generate_ed25519_addresses_as_bech32(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
         .await?[0]
         .clone();
 

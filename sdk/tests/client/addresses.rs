@@ -29,9 +29,12 @@ async fn ed25519_addresses() {
         .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
         .with_coin_type(IOTA_COIN_TYPE)
         .with_range(0..1);
-    let public = secret_manager.generate_ed25519_addresses(opts.clone()).await.unwrap();
+    let public = secret_manager
+        .generate_ed25519_addresses_as_bech32(opts.clone())
+        .await
+        .unwrap();
     let internal = secret_manager
-        .generate_ed25519_addresses(opts.internal())
+        .generate_ed25519_addresses_as_bech32(opts.internal())
         .await
         .unwrap();
 
@@ -90,7 +93,7 @@ async fn mnemonic_address_generation_iota() {
 
     // account 0, address 0 and 1
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(IOTA_BECH32_HRP)
                 .with_coin_type(IOTA_COIN_TYPE)
@@ -111,7 +114,7 @@ async fn mnemonic_address_generation_iota() {
 
     // account 1
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(IOTA_BECH32_HRP)
                 .with_coin_type(IOTA_COIN_TYPE)
@@ -134,7 +137,7 @@ async fn mnemonic_address_generation_shimmer() {
 
     // account 0, address 0 and 1
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_BECH32_HRP)
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -155,7 +158,7 @@ async fn mnemonic_address_generation_shimmer() {
 
     // account 1
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_BECH32_HRP)
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -194,7 +197,7 @@ async fn address_generation() {
     for address in &addresses_data {
         let secret_manager = SecretManager::try_from_mnemonic(address.mnemonic.clone()).unwrap();
         let addresses = secret_manager
-            .generate_ed25519_addresses(
+            .generate_ed25519_addresses_as_bech32(
                 GetAddressesOptions::default()
                     .with_bech32_hrp(address.bech32_hrp)
                     .with_coin_type(address.coin_type)
@@ -232,7 +235,7 @@ async fn address_generation() {
                 .unwrap();
 
             let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-                .generate_ed25519_addresses(
+                .generate_ed25519_addresses_as_bech32(
                     GetAddressesOptions::default()
                         .with_bech32_hrp(address.bech32_hrp)
                         .with_coin_type(address.coin_type)
@@ -269,7 +272,7 @@ async fn search_address() -> Result<(), ClientError> {
 
     // Public
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_coin_type(IOTA_COIN_TYPE)
@@ -293,7 +296,7 @@ async fn search_address() -> Result<(), ClientError> {
 
     // Internal
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .internal()

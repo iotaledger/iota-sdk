@@ -47,7 +47,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let ed25519_bech32_addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..3),

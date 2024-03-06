@@ -25,7 +25,7 @@ async fn stronghold_secret_manager() -> Result<(), ClientError> {
     }
 
     let addresses = secret_manager
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(0)
@@ -64,7 +64,7 @@ async fn stronghold_mnemonic_missing() -> Result<(), ClientError> {
 
     // Generating addresses will fail because no mnemonic has been stored
     let error = SecretManager::Stronghold(stronghold_secret_manager)
-        .generate_ed25519_addresses(
+        .generate_ed25519_addresses_as_bech32(
             GetAddressesOptions::default(),
             // .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
             // .with_coin_type(iota_sdk::client::constants::SHIMMER_COIN_TYPE)

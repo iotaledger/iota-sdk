@@ -58,7 +58,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
     let secret_manager = setup_secret_manager();
 
     let addresses = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await.unwrap().with_range(0..2))
+        .generate_ed25519_addresses_as_bech32(GetAddressesOptions::from_client(client).await.unwrap().with_range(0..2))
         .await
         .unwrap();
     println!(
