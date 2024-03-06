@@ -621,7 +621,6 @@ mod test {
             payload: tx_payload,
             block_id: None,
             network_id: 0,
-            timestamp: 0,
             inclusion_state: InclusionState::Pending,
             incoming: false,
             note: None,
