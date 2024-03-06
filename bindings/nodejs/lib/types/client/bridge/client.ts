@@ -59,6 +59,10 @@ export interface __GetInfoMethod__ {
     };
 }
 
+export interface __GetNetworkMetricsMethod__ {
+    name: 'getNetworkMetrics';
+}
+
 // Accounts routes.
 
 export interface __GetAccountCongestionMethod__ {

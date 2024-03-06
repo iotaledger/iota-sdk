@@ -31,6 +31,7 @@ import type {
     __GetProtocolParametersMethod__,
     __GetHealthMethod__,
     __GetNodeInfoMethod__,
+    __GetNetworkMetricsMethod__,
     __GetBlockRawMethod__,
     __GetIncludedBlockMethod__,
     __GetIncludedBlockRawMethod__,
@@ -103,6 +104,7 @@ export type __ClientMethods__ =
     | __GetProtocolParametersMethod__
     | __GetHealthMethod__
     | __GetNodeInfoMethod__
+    | __GetNetworkMetricsMethod__
     | __GetBlockRawMethod__
     | __GetIncludedBlockMethod__
     | __GetIncludedBlockRawMethod__
