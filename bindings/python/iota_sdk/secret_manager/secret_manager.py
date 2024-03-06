@@ -125,7 +125,45 @@ class SecretManager:
             return json_response['payload']
         return response
 
+    def generate_ed25519_address_as_bech32(self,
+                                           coin_type: int,
+                                           bech32_hrp: str,
+                                           account_index: Optional[int] = None,
+                                           address_index: Optional[int] = None,
+                                           internal: Optional[bool] = None,
+                                           legder_nano_prompt: Optional[bool] = None):
+        """Generate a Bech32 formatted Ed25519 address.
+
+        Args:
+            coin_type: The coin type to generate addresses for.
+            bech32_hrp: The bech32 HRP (human readable part) to use.
+            account_index: An account index.
+            address_index: An address index.
+            internal: Whether the generated address should be internal.
+            ledger_nano_prompt: Whether to display the address on Ledger Nano devices.
+
+        Returns:
+            The generated Bech32 address.
+        """
+
+        args = {}
+        args['coinType'] = coin_type
+        args['bech32Hrp'] = bech32_hrp
+        if account_index is not None:
+            args['accountIndex'] = account_index
+        if address_index is not None:
+            args['addressIndex'] = address_index
+        if internal is not None:
+            args['internal'] = internal
+        if legder_nano_prompt is not None:
+            args['ledgerNanoPrompot'] = legder_nano_prompt
+
+        return self._call_method('generateEd25519AddressAsBech32', args)
+
     # pylint: disable=unused-argument
+
+    # TODO: `coin_type` should probably not be optional;
+    # TODO: arg list should probably be re-ordered to match the expected order as close as possible;
     def generate_ed25519_addresses(self,
                                    account_index: Optional[int] = None,
                                    start: Optional[int] = None,
