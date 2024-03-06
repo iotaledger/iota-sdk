@@ -3,7 +3,6 @@
 
 pub(crate) mod account;
 pub(crate) mod amount;
-pub(crate) mod context_inputs;
 pub(crate) mod delegation;
 pub(crate) mod ed25519;
 pub(crate) mod foundry;
@@ -52,8 +51,6 @@ pub enum Requirement {
     Amount,
     /// Mana requirement.
     Mana,
-    /// Context inputs requirement.
-    ContextInputs,
 }
 
 impl TransactionBuilder {
@@ -76,7 +73,6 @@ impl TransactionBuilder {
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
             Requirement::Mana => self.fulfill_mana_requirement(),
-            Requirement::ContextInputs => self.fulfill_context_inputs_requirement(),
         }
     }
 
