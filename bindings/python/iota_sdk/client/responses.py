@@ -283,11 +283,9 @@ class BlockMetadataResponse:
     Attributes:
         block_id: The identifier of the block. Hex-encoded with 0x prefix.
         block_state: If pending, the block is stored but not confirmed. If confirmed, the block is confirmed with the first level of knowledge. If finalized, the block is included and cannot be reverted anymore. If rejected, the block is rejected by the node, and user should reissue payload if it contains one. If failed, the block is not successfully issued due to failure reason.
-        transaction_metadata: The optional metadata of a given transaction.
     """
     block_id: BlockId
     block_state: BlockState
-    transaction_metadata: Optional[TransactionMetadataResponse] = None
 
 
 @json

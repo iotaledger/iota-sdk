@@ -3,7 +3,6 @@
 
 import { BlockState } from '../state';
 import { Block, BlockId } from '../../block';
-import { TransactionMetadataResponse } from './transaction-response';
 
 /**
  * Response from the metadata endpoint.
@@ -17,10 +16,6 @@ export interface BlockMetadataResponse {
      * The block state.
      */
     blockState: BlockState;
-    /**
-     * The metadata of the transaction in the block.
-     */
-    transactionMetadata?: TransactionMetadataResponse;
 }
 
 /**

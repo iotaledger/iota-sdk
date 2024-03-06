@@ -420,8 +420,6 @@ pub struct TransactionMetadataResponse {
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     pub block_state: BlockState,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transaction_metadata: Option<TransactionMetadataResponse>,
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/full.
