@@ -36,12 +36,11 @@ where
             ledger_nano_prompt,
             bech32_hrp,
         } => {
-            let address_indexes = address_index..address_index + 1;
             let address = secret_manager
                 .generate_ed25519_addresses(
                     coin_type,
                     account_index,
-                    address_indexes,
+                    address_index..address_index + 1,
                     GenerateAddressOptions {
                         internal,
                         ledger_nano_prompt,
@@ -53,7 +52,7 @@ where
                 .map(|a| a.to_bech32(bech32_hrp))
                 .collect::<Vec<_>>()
                 .pop()
-                // Panic: at this point there must be at least one address
+                // Panic: if the secret manager method didn't fail then there must be at least one address
                 .unwrap();
             Response::Bech32Address(address)
         }

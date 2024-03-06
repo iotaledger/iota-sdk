@@ -4,10 +4,7 @@
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
-    client::{
-        api::{GetAddressesOptions, PreparedTransactionDataDto},
-        secret::GenerateAddressOptions,
-    },
+    client::api::{GetAddressesOptions, PreparedTransactionDataDto},
     types::block::{address::Hrp, protocol::ProtocolParameters, UnsignedBlockDto},
     utils::serde::bip44::Bip44Def,
 };
