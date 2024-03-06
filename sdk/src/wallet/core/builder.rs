@@ -168,9 +168,6 @@ where
             true
         };
 
-        // Panic: client options must exist at this point
-        let client_options = self.client_options.as_ref().unwrap();
-
         // May use a previously stored secret manager if it wasn't provided
         if self.secret_manager.is_none() {
             self.secret_manager.replace(
@@ -216,8 +213,6 @@ where
         } else {
             self.bip_path = loaded_bip_path;
         }
-        // Panic: a bip path must exist at this point
-        let bip_path = self.bip_path.as_ref().unwrap();
 
         // Create the node client.
         let client = self

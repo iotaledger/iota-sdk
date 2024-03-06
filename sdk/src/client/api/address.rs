@@ -33,6 +33,9 @@ pub struct GetAddressesOptions {
 }
 
 impl GetAddressesOptions {
+    // TODO: can we remove this function? It's not clear from the outside that it's just the default
+    // with a requested HRP. I think the caller can just do what this function does. Also ... this
+    // we do several API requests unnecessarily because oftentimes we could just re-use the HRP.
     pub async fn from_client(client: &Client) -> Result<Self, ClientError> {
         Ok(Self::default().with_bech32_hrp(client.get_bech32_hrp().await?))
     }
@@ -97,8 +100,8 @@ impl Default for GetAddressesOptions {
 }
 
 impl SecretManager {
-    /// Generates a single Ed25519 backed Bech32 address.
-    pub async fn generate_ed25519_address(
+    /// Generates a Bech32 formatted Ed25519 address.
+    pub async fn generate_ed25519_address_as_bech32(
         &self,
         coin_type: u32,
         account_index: u32,
@@ -119,8 +122,8 @@ impl SecretManager {
             .to_bech32(hrp))
     }
 
-    /// Generates a vector of Ed25519 backed Bech32 addresses.
-    pub async fn generate_ed25519_addresses(
+    /// Generates a vector of Bech32 formatted Ed25519 addresses.
+    pub async fn generate_ed25519_addresses_as_bech32(
         &self,
         GetAddressesOptions {
             coin_type,
@@ -195,8 +198,12 @@ pub async fn search_address(
         .with_coin_type(coin_type)
         .with_account_index(account_index)
         .with_range(range.clone());
-    let public = secret_manager.generate_ed25519_addresses(opts.clone()).await?;
-    let internal = secret_manager.generate_ed25519_addresses(opts.internal()).await?;
+    let public = secret_manager
+        .generate_ed25519_addresses_as_bech32(opts.clone())
+        .await?;
+    let internal = secret_manager
+        .generate_ed25519_addresses_as_bech32(opts.internal())
+        .await?;
     for index in 0..public.len() {
         if public[index].inner == *address {
             return Ok((range.start + index as u32, false));
