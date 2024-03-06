@@ -357,14 +357,6 @@ export interface __NftIdToBech32Method__ {
     };
 }
 
-export interface __PublicKeyHashMethod__ {
-    name: 'publicKeyHash';
-    data: {
-        hex: HexEncodedString;
-        bech32Hrp?: string;
-    };
-}
-
 export interface __FindBlocksMethod__ {
     name: 'findBlocks';
     data: {
