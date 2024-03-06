@@ -407,8 +407,12 @@ pub enum TransactionState {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TransactionMetadataResponse {
+    /// The transaction ID.
     pub transaction_id: TransactionId,
+    /// The transaction state.
     pub transaction_state: TransactionState,
+    /// The slot of the earliest included valid block that contains an attachment of the transaction.
+    pub earliest_attachment_slot: SlotIndex,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transaction_failure_reason: Option<TransactionFailureReason>,
 }
