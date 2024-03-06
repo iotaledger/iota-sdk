@@ -8,10 +8,10 @@ use crate::client::{common::setup_client_with_node_health_ignored, node_api::set
 
 #[ignore]
 #[tokio::test]
-async fn test_find_inputs_from_transaction_id() {
+async fn test_get_transaction_inputs() {
     let client = setup_client_with_node_health_ignored().await;
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
-    let inputs = client.inputs_from_transaction_id(&transaction_id).await.unwrap();
+    let inputs = client.get_transaction_inputs(&transaction_id).await.unwrap();
 
     assert_eq!(inputs.len(), 1);
 }

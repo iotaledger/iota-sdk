@@ -23,7 +23,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn get_alias_output_id_test() -> Result<()> {
+// async fn get_alias_output_id_test() -> Result<(), ClientError> {
 //     let (client, secret_manager) = create_client_and_secret_manager_with_funds(None).await?;
 //     let protocol_parameters = client.get_protocol_parameters().await?;
 
@@ -55,7 +55,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn get_nft_output_id_test() -> Result<()> {
+// async fn get_nft_output_id_test() -> Result<(), ClientError> {
 //     let (client, secret_manager) = create_client_and_secret_manager_with_funds(None).await?;
 //     let protocol_parameters = client.get_protocol_parameters().await?;
 
@@ -85,7 +85,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn get_foundry_output_id_test() -> Result<()> {
+// async fn get_foundry_output_id_test() -> Result<(), ClientError> {
 //     let (client, secret_manager) = create_client_and_secret_manager_with_funds(None).await?;
 //     let protocol_parameters = client.get_protocol_parameters().await?;
 

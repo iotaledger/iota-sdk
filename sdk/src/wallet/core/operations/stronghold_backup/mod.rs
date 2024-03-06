@@ -14,7 +14,7 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{core::WalletLedgerDto, Wallet},
+    wallet::{core::WalletLedgerDto, Wallet, WalletError},
 };
 
 impl Wallet {
@@ -25,7 +25,7 @@ impl Wallet {
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         let stronghold_password = stronghold_password.into();
 
         log::debug!("[backup] creating a stronghold backup");
@@ -72,20 +72,20 @@ impl Wallet {
         stronghold_password: impl Into<Password> + Send,
         ignore_if_bip_path_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         let stronghold_password = stronghold_password.into();
 
         log::debug!("[restore_backup] loading stronghold backup");
 
         if !backup_path.is_file() {
-            return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
+            return Err(WalletError::Backup("backup path doesn't exist"));
         }
 
         let wallet_ledger = self.ledger().await;
 
         // We don't want to overwrite a possible existing wallet
         if !wallet_ledger.outputs.is_empty() {
-            return Err(crate::wallet::Error::Backup(
+            return Err(WalletError::Backup(
                 "can't restore backup when there is already a wallet",
             ));
         }
@@ -131,7 +131,7 @@ impl Wallet {
             }
 
             let restored_secret_manager = SecretManager::from_config(&read_secret_manager)
-                .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
+                .map_err(|_| WalletError::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location
             fs::copy(backup_path, new_snapshot_path)?;
@@ -209,7 +209,7 @@ impl Wallet<StrongholdSecretManager> {
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
@@ -239,20 +239,20 @@ impl Wallet<StrongholdSecretManager> {
         stronghold_password: impl Into<Password> + Send,
         ignore_if_bip_path_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         let stronghold_password = stronghold_password.into();
 
         log::debug!("[restore_backup] loading stronghold backup");
 
         if !backup_path.is_file() {
-            return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
+            return Err(WalletError::Backup("backup path doesn't exist"));
         }
 
         let wallet_ledger = self.ledger().await;
 
         // We don't want to overwrite a possible existing wallet
         if !wallet_ledger.outputs.is_empty() {
-            return Err(crate::wallet::Error::Backup(
+            return Err(WalletError::Backup(
                 "can't restore backup when there is already a wallet",
             ));
         }
@@ -291,7 +291,7 @@ impl Wallet<StrongholdSecretManager> {
             read_secret_manager.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
 
             let restored_secret_manager = StrongholdSecretManager::from_config(&read_secret_manager)
-                .map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
+                .map_err(|_| WalletError::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location
             fs::copy(backup_path, new_snapshot_path)?;

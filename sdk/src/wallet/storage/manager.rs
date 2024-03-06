@@ -11,6 +11,7 @@ use crate::{
         migration::migrate,
         operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},
+        WalletError,
     },
 };
 
@@ -24,7 +25,7 @@ impl StorageManager {
     pub(crate) async fn new(
         storage: impl DynStorageAdapter + 'static,
         encryption_key: impl Into<Option<Zeroizing<[u8; 32]>>> + Send,
-    ) -> crate::wallet::Result<Self> {
+    ) -> Result<Self, WalletError> {
         let storage = Storage {
             inner: Box::new(storage) as _,
             encryption_key: encryption_key.into(),
@@ -34,7 +35,7 @@ impl StorageManager {
         // Get the db version or set it
         if let Some(db_schema_version) = storage.get::<u8>(DATABASE_SCHEMA_VERSION_KEY).await? {
             if db_schema_version != DATABASE_SCHEMA_VERSION {
-                return Err(crate::wallet::Error::Storage(format!(
+                return Err(WalletError::Storage(format!(
                     "unsupported database schema version {db_schema_version}"
                 )));
             }
@@ -49,12 +50,12 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub(crate) async fn save_wallet_ledger(&self, wallet_ledger: &WalletLedgerDto) -> crate::wallet::Result<()> {
+    pub(crate) async fn save_wallet_ledger(&self, wallet_ledger: &WalletLedgerDto) -> Result<(), WalletError> {
         self.set(WALLET_LEDGER_KEY, wallet_ledger).await?;
         Ok(())
     }
 
-    pub(crate) async fn load_wallet_ledger(&self) -> crate::wallet::Result<Option<WalletLedger>> {
+    pub(crate) async fn load_wallet_ledger(&self) -> Result<Option<WalletLedger>, WalletError> {
         if let Some(dto) = self.get::<WalletLedgerDto>(WALLET_LEDGER_KEY).await? {
             Ok(Some(WalletLedger::try_from_dto(dto)?))
         } else {
@@ -62,12 +63,12 @@ impl StorageManager {
         }
     }
 
-    pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
+    pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> Result<(), WalletError> {
         let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
     }
 
-    pub(crate) async fn get_default_sync_options(&self) -> crate::wallet::Result<Option<SyncOptions>> {
+    pub(crate) async fn get_default_sync_options(&self) -> Result<Option<SyncOptions>, WalletError> {
         let key = format!("{WALLET_LEDGER_KEY}-{WALLET_SYNC_OPTIONS}");
         self.get(&key).await
     }
@@ -75,7 +76,7 @@ impl StorageManager {
 
 #[async_trait::async_trait]
 impl StorageAdapter for StorageManager {
-    type Error = crate::wallet::Error;
+    type Error = WalletError;
 
     async fn get_bytes(&self, key: &str) -> Result<Option<Vec<u8>>, Self::Error> {
         self.storage.get_bytes(key).await

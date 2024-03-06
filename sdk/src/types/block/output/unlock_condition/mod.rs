@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod address;
+mod error;
 mod expiration;
 mod governor_address;
 mod immutable_account_address;
@@ -10,7 +11,6 @@ mod storage_deposit_return;
 mod timelock;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
-use core::convert::Infallible;
 
 use bitflags::bitflags;
 use derive_more::{Deref, From};
@@ -18,7 +18,7 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{
-    address::AddressUnlockCondition, expiration::ExpirationUnlockCondition,
+    address::AddressUnlockCondition, error::UnlockConditionError, expiration::ExpirationUnlockCondition,
     governor_address::GovernorAddressUnlockCondition,
     immutable_account_address::ImmutableAccountAddressUnlockCondition,
     state_controller_address::StateControllerAddressUnlockCondition,
@@ -34,42 +34,12 @@ use crate::types::block::{
     slot::SlotIndex,
 };
 
-#[derive(Debug, PartialEq, Eq, derive_more::Display, derive_more::From)]
-#[allow(missing_docs)]
-pub enum UnlockConditionError {
-    #[display(fmt = "invalid unlock condition kind: {_0}")]
-    InvalidUnlockConditionKind(u8),
-    #[display(fmt = "invalid unlock condition count: {_0}")]
-    InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
-    #[display(fmt = "expiration unlock condition with slot index set to 0")]
-    ExpirationUnlockConditionZero,
-    #[display(fmt = "timelock unlock condition with slot index set to 0")]
-    TimelockUnlockConditionZero,
-    #[display(fmt = "unlock conditions are not unique and/or sorted")]
-    UnlockConditionsNotUniqueSorted,
-    #[display(fmt = "disallowed unlock condition at index {index} with kind {kind}")]
-    DisallowedUnlockCondition { index: usize, kind: u8 },
-    #[display(fmt = "missing slot index")]
-    MissingSlotIndex,
-    #[from]
-    Address(AddressError),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnlockConditionError {}
-
-impl From<Infallible> for UnlockConditionError {
-    fn from(error: Infallible) -> Self {
-        match error {}
-    }
-}
-
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
 #[packable(unpack_error = UnlockConditionError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = UnlockConditionError::InvalidUnlockConditionKind)]
+#[packable(tag_type = u8, with_error = UnlockConditionError::Kind)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     #[packable(tag = AddressUnlockCondition::KIND)]
@@ -193,7 +163,7 @@ pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditionFlags::ALL_
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[packable(unpack_error = UnlockConditionError, with = |e| e.unwrap_item_err_or_else(|p| UnlockConditionError::InvalidUnlockConditionCount(p.into())))]
+#[packable(unpack_error = UnlockConditionError, with = |e| e.unwrap_item_err_or_else(|p| UnlockConditionError::Count(p.into())))]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct UnlockConditions(
     #[packable(verify_with = verify_unique_sorted_packable)] BoxedSlicePrefix<UnlockCondition, UnlockConditionCount>,
@@ -231,7 +201,7 @@ impl UnlockConditions {
     pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, UnlockConditionError> {
         let mut unlock_conditions =
             BoxedSlicePrefix::<UnlockCondition, UnlockConditionCount>::try_from(unlock_conditions.into_boxed_slice())
-                .map_err(UnlockConditionError::InvalidUnlockConditionCount)?;
+                .map_err(UnlockConditionError::Count)?;
 
         unlock_conditions.sort_by_key(UnlockCondition::kind);
         // Sort is obviously fine now but uniqueness still needs to be checked.
@@ -247,7 +217,7 @@ impl UnlockConditions {
                 .into_iter()
                 .collect::<Box<[_]>>()
                 .try_into()
-                .map_err(UnlockConditionError::InvalidUnlockConditionCount)?,
+                .map_err(UnlockConditionError::Count)?,
         ))
     }
 
@@ -374,7 +344,7 @@ impl StorageScore for UnlockConditions {
 #[inline]
 fn verify_unique_sorted(unlock_conditions: &[UnlockCondition]) -> Result<(), UnlockConditionError> {
     if !is_unique_sorted(unlock_conditions.iter().map(UnlockCondition::kind)) {
-        Err(UnlockConditionError::UnlockConditionsNotUniqueSorted)
+        Err(UnlockConditionError::NotUniqueSorted)
     } else {
         Ok(())
     }
@@ -394,7 +364,7 @@ pub(crate) fn verify_allowed_unlock_conditions(
 ) -> Result<(), UnlockConditionError> {
     for (index, unlock_condition) in unlock_conditions.iter().enumerate() {
         if !allowed_unlock_conditions.contains(unlock_condition.flag()) {
-            return Err(UnlockConditionError::DisallowedUnlockCondition {
+            return Err(UnlockConditionError::Disallowed {
                 index,
                 kind: unlock_condition.kind(),
             });

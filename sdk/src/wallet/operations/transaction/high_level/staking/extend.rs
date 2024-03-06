@@ -2,22 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{
+        api::{options::TransactionOptions, PreparedTransactionData},
+        secret::SecretManage,
+        ClientError,
+    },
     types::block::output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
-    wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet},
+    wallet::{types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     pub async fn extend_staking(
         &self,
         account_id: AccountId,
         additional_epochs: u32,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared = self
             .prepare_extend_staking(account_id, additional_epochs, options.clone())
@@ -32,7 +36,7 @@ where
         account_id: AccountId,
         additional_epochs: u32,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_extend_staking");
 
         let account_output_data = self
@@ -40,7 +44,7 @@ where
             .await
             .unspent_account_output(&account_id)
             .cloned()
-            .ok_or_else(|| crate::wallet::Error::AccountNotFound)?;
+            .ok_or_else(|| WalletError::AccountNotFound)?;
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
@@ -52,7 +56,7 @@ where
             .output
             .features()
             .and_then(|f| f.staking())
-            .ok_or_else(|| crate::wallet::Error::StakingFailed(format!("account id {account_id} is not staking")))?;
+            .ok_or_else(|| WalletError::StakingFailed(format!("account id {account_id} is not staking")))?;
 
         let mut output_builder =
             AccountOutputBuilder::from(account_output_data.output.as_account()).with_account_id(account_id);
@@ -68,7 +72,7 @@ where
         // Otherwise, we'll have to claim the rewards
         } else {
             if additional_epochs < protocol_parameters.staking_unbonding_period() {
-                return Err(crate::wallet::Error::StakingFailed(format!(
+                return Err(WalletError::StakingFailed(format!(
                     "new staking period {additional_epochs} is less than the minimum {}",
                     protocol_parameters.staking_unbonding_period()
                 )));
@@ -85,7 +89,7 @@ where
 
         let output = output_builder.finish_output()?;
 
-        let transaction = self.prepare_transaction([output], options).await?;
+        let transaction = self.prepare_send_outputs([output], options).await?;
 
         Ok(transaction)
     }

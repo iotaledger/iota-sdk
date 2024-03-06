@@ -2,99 +2,46 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub(crate) mod account;
+mod build_transaction;
 pub(crate) mod high_level;
-mod input_selection;
-mod options;
 pub(crate) mod prepare_output;
-mod prepare_transaction;
+mod send_outputs;
 mod sign_transaction;
 pub(crate) mod submit_transaction;
 
-pub use self::options::{RemainderValueStrategy, TransactionOptions};
 #[cfg(feature = "storage")]
 use crate::wallet::core::WalletLedgerDto;
 use crate::{
     client::{
-        api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
+        api::{options::TransactionOptions, PreparedTransactionData, SignedTransactionData},
         secret::SecretManage,
-        Error,
+        ClientError,
     },
-    types::block::{
-        output::{Output, OutputWithMetadata},
-        payload::signed_transaction::SignedTransactionPayload,
-    },
+    types::block::{output::OutputWithMetadata, payload::signed_transaction::SignedTransactionPayload},
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
-    /// Sends a transaction by specifying its outputs.
-    ///
-    /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
-    /// will reissue the transaction during syncing.
-    /// ```ignore
-    /// let outputs = [
-    ///    BasicOutputBuilder::new_with_amount(1_000_000)?
-    ///    .add_unlock_condition(AddressUnlockCondition::new(
-    ///        Address::try_from_bech32("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
-    ///    ))
-    ///    .finish_output(account.client.get_token_supply().await?;)?,
-    /// ];
-    /// let tx = account
-    ///     .send_outputs(
-    ///         outputs,
-    ///         Some(TransactionOptions {
-    ///             remainder_value_strategy: RemainderValueStrategy::ReuseAddress,
-    ///             ..Default::default()
-    ///         }),
-    ///     )
-    ///     .await?;
-    /// println!("Transaction created: {}", tx.transaction_id);
-    /// if let Some(block_id) = tx.block_id {
-    ///     println!("Block sent: {}", block_id);
-    /// }
-    /// ```
-    pub async fn send_outputs(
-        &self,
-        outputs: impl Into<Vec<Output>> + Send,
-        options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
-        let outputs = outputs.into();
-        let options = options.into();
-        // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
-        // Checking it also here is good to return earlier if something is invalid
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
-
-        // Check if the outputs have enough amount to cover the storage deposit
-        for output in &outputs {
-            output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
-        }
-
-        let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
-
-        self.sign_and_submit_transaction(prepared_transaction_data, options)
-            .await
-    }
-
     /// Signs a transaction, submit it to a node and store it in the wallet
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
         let wallet_ledger = self.ledger().await;
         // check if inputs got already used by another transaction
         for output in &prepared_transaction_data.inputs_data {
             if wallet_ledger.locked_outputs.contains(output.output_id()) {
-                return Err(crate::wallet::Error::CustomInput(format!(
+                return Err(WalletError::CustomInput(format!(
                     "provided input {} is already used in another transaction",
                     output.output_id()
                 )));
@@ -113,7 +60,7 @@ where
         &self,
         signed_transaction_data: SignedTransactionData,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
             signed_transaction_data.payload.transaction().id()
@@ -121,17 +68,13 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        if let Err(conflict) = verify_semantic(
-            &signed_transaction_data.inputs_data,
-            &signed_transaction_data.payload,
-            signed_transaction_data.mana_rewards,
-            self.client().get_protocol_parameters().await?,
-        ) {
+        if let Err(conflict) = signed_transaction_data.verify_semantic(&self.client().get_protocol_parameters().await?)
+        {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
                 signed_transaction_data.payload
             );
-            return Err(Error::TransactionSemantic(conflict).into());
+            return Err(ClientError::TransactionSemantic(conflict).into());
         }
 
         let mut wallet_ledger = self.ledger_mut().await;

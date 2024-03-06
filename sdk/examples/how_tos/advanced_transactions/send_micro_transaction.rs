@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example send_micro_transaction
 //! ```
 
-use iota_sdk::{wallet::TransactionOptions, Wallet};
+use iota_sdk::{client::api::options::TransactionOptions, Wallet};
 
 // The base coin micro amount to send
 const SEND_MICRO_AMOUNT: u64 = 1;
@@ -56,15 +56,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    // Wait for transaction to get accepted
-    let block_id = wallet
+    wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
 
     println!(
-        "Tx accepted in block: {}/block/{}",
+        "Tx accepted: {}/transactions/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block_id
+        transaction.transaction_id
     );
 
     Ok(())

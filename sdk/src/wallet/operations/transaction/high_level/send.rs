@@ -5,7 +5,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
@@ -18,7 +18,7 @@ use crate::{
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Error, Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -45,7 +45,7 @@ pub struct SendParams {
 }
 
 impl SendParams {
-    pub fn new(amount: u64, address: impl ConvertTo<Bech32Address>) -> Result<Self, crate::wallet::Error> {
+    pub fn new(amount: u64, address: impl ConvertTo<Bech32Address>) -> Result<Self, WalletError> {
         Ok(Self {
             amount,
             address: address.convert()?,
@@ -54,10 +54,7 @@ impl SendParams {
         })
     }
 
-    pub fn try_with_return_address(
-        mut self,
-        address: impl ConvertTo<Bech32Address>,
-    ) -> Result<Self, crate::wallet::Error> {
+    pub fn try_with_return_address(mut self, address: impl ConvertTo<Bech32Address>) -> Result<Self, WalletError> {
         self.return_address = Some(address.convert()?);
         Ok(self)
     }
@@ -75,8 +72,8 @@ impl SendParams {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Sends a certain amount of base coins to a single address.
     ///
@@ -88,7 +85,7 @@ where
         amount: u64,
         address: impl ConvertTo<Bech32Address>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let params = [SendParams::new(amount, address)?];
         self.send_with_params(params, options).await
     }
@@ -114,7 +111,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata>
+    ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -129,7 +126,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
     {
@@ -155,12 +152,12 @@ where
             let return_address = return_address
                 .map(|return_address| {
                     if return_address.hrp() != address.hrp() {
-                        Err(crate::client::Error::Bech32HrpMismatch {
+                        Err(ClientError::Bech32HrpMismatch {
                             provided: return_address.hrp().to_string(),
                             expected: address.hrp().to_string(),
                         })?;
                     }
-                    Ok::<_, Error>(return_address)
+                    Ok::<_, WalletError>(return_address)
                 })
                 .transpose()?
                 .unwrap_or_else(|| default_return_address.clone());
@@ -188,7 +185,7 @@ where
                     .finish_output()?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
-                    return Err(Error::InsufficientFunds {
+                    return Err(WalletError::InsufficientFunds {
                         available: amount,
                         required: output.amount(),
                     });
@@ -198,6 +195,6 @@ where
             }
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }

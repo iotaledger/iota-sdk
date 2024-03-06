@@ -61,13 +61,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await?;
             println!("Transaction sent: {}", transaction.transaction_id);
 
-            let block_id = wallet
+            wallet
                 .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
                 .await?;
+
             println!(
-                "Tx accepted in block: {}/block/{}",
+                "Tx accepted: {}/transactions/{}",
                 std::env::var("EXPLORER_URL").unwrap(),
-                block_id
+                transaction.transaction_id
             );
 
             // Sync to make the foundry output available again, because it was used in the melting transaction.
@@ -79,13 +80,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        let block_id = wallet
+        wallet
             .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
+
         println!(
-            "Tx accepted in block: {}/block/{}",
+            "Tx accepted: {}/transactions/{}",
             std::env::var("EXPLORER_URL").unwrap(),
-            block_id
+            transaction.transaction_id
         );
 
         // Resync to update the foundries list.

@@ -17,7 +17,7 @@ use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{api::PreparedTransactionData, Client, Error},
+    client::{api::PreparedTransactionData, Client, ClientError},
     types::block::{
         payload::signed_transaction::SignedTransactionPayload, protocol::ProtocolParameters,
         signature::Ed25519Signature, unlock::Unlocks,
@@ -37,7 +37,7 @@ impl std::fmt::Debug for MnemonicSecretManager {
 
 #[async_trait]
 impl SecretManage for MnemonicSecretManager {
-    type Error = Error;
+    type Error = ClientError;
 
     async fn generate_ed25519_public_keys(
         &self,
@@ -60,9 +60,9 @@ impl SecretManage for MnemonicSecretManager {
                     .secret_key()
                     .public_key();
 
-                crate::client::Result::Ok(public_key)
+                Ok(public_key)
             })
-            .collect::<Result<_, _>>()?)
+            .collect::<Result<_, ClientError>>()?)
     }
 
     async fn generate_evm_addresses(
@@ -86,9 +86,9 @@ impl SecretManage for MnemonicSecretManager {
                     .secret_key()
                     .public_key();
 
-                crate::client::Result::Ok(public_key.evm_address())
+                Ok(public_key.evm_address())
             })
-            .collect::<Result<_, _>>()?)
+            .collect::<Result<_, ClientError>>()?)
     }
 
     async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
@@ -136,12 +136,12 @@ impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
     ///
     /// For more information, see <https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki>.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, Error> {
+    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> Result<Self, ClientError> {
         Ok(Self(Client::mnemonic_to_seed(mnemonic.into())?.into()))
     }
 
     /// Create a new [`MnemonicSecretManager`] from a hex-encoded raw seed string.
-    pub fn try_from_hex_seed(hex: impl Into<Zeroizing<String>>) -> Result<Self, Error> {
+    pub fn try_from_hex_seed(hex: impl Into<Zeroizing<String>>) -> Result<Self, ClientError> {
         let hex = hex.into();
         let bytes = Zeroizing::new(prefix_hex::decode::<Vec<u8>>(hex.as_str())?);
         let seed = Seed::from_bytes(bytes.as_ref());

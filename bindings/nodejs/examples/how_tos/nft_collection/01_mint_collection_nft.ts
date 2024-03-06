@@ -79,12 +79,11 @@ async function run() {
             );
             const transaction = await wallet.mintNfts(chunk);
 
-            // Wait for transaction to get accepted
-            const blockId = await wallet.waitForTransactionAcceptance(
+            await wallet.waitForTransactionAcceptance(
                 transaction.transactionId,
             );
             console.log(
-                `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
+                `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
             );
 
             // Sync so the new outputs are available again for new transactions

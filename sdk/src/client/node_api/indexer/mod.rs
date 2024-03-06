@@ -8,7 +8,7 @@ pub mod routes;
 
 use self::query_parameters::QueryParameter;
 use crate::{
-    client::{ClientInner, Result},
+    client::{ClientError, ClientInner},
     types::api::plugins::indexer::OutputIdsResponse,
 };
 
@@ -20,7 +20,7 @@ impl ClientInner {
         route: &str,
         mut query_parameters: impl QueryParameter,
         need_quorum: bool,
-    ) -> Result<OutputIdsResponse> {
+    ) -> Result<OutputIdsResponse, ClientError> {
         let mut merged_output_ids_response = OutputIdsResponse {
             committed_slot: 0,
             page_size: 1000,

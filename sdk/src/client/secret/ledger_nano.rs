@@ -28,9 +28,12 @@ use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
-    client::secret::{
-        types::{LedgerApp, LedgerDeviceType},
-        LedgerNanoStatus, PreparedTransactionData,
+    client::{
+        secret::{
+            types::{LedgerApp, LedgerDeviceType},
+            LedgerNanoStatus, PreparedTransactionData,
+        },
+        ClientError,
     },
     types::block::{
         address::{AccountAddress, Address, NftAddress},
@@ -136,7 +139,7 @@ impl TryFrom<u8> for LedgerDeviceType {
 
 #[async_trait]
 impl SecretManage for LedgerSecretManager {
-    type Error = crate::client::Error;
+    type Error = ClientError;
 
     async fn generate_ed25519_public_keys(
         &self,

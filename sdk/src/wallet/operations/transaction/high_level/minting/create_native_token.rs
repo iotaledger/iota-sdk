@@ -5,7 +5,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::AccountAddress,
         output::{
@@ -13,7 +13,7 @@ use crate::{
             FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
     },
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 /// Address and foundry data for `create_native_token()`
@@ -49,12 +49,12 @@ pub struct PreparedCreateNativeTokenTransaction {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Creates a new foundry output with minted native tokens.
     ///
-    /// Calls [Wallet::prepare_transaction()](crate::wallet::Wallet::prepare_transaction) internally, the options may
+    /// Calls [Wallet::prepare_send_outputs()](crate::wallet::Wallet::prepare_send_outputs) internally, the options may
     /// define the remainder value strategy or custom inputs.
     /// ```ignore
     /// let params = CreateNativeTokenParams {
@@ -74,7 +74,7 @@ where
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<CreateNativeTokenTransaction> {
+    ) -> Result<CreateNativeTokenTransaction, WalletError> {
         let options = options.into();
         let prepared = self.prepare_create_native_token(params, options.clone()).await?;
 
@@ -91,7 +91,7 @@ where
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
+    ) -> Result<PreparedCreateNativeTokenTransaction, WalletError> {
         log::debug!("[TRANSACTION] create_native_token");
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let storage_score_params = protocol_parameters.storage_score_parameters();
@@ -99,7 +99,7 @@ where
         let (account_id, account_output_data) = self
             .get_account_output(params.account_id)
             .await
-            .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
+            .ok_or_else(|| WalletError::MintingFailed("Missing account output".to_string()))?;
 
         let mut options = options.into();
         if let Some(options) = options.as_mut() {
@@ -120,30 +120,28 @@ where
             );
             let token_id = TokenId::from(foundry_id);
 
-            let outputs = [
-                {
-                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
-                        storage_score_params,
-                        account_output.foundry_counter() + 1,
-                        TokenScheme::Simple(SimpleTokenScheme::new(
-                            params.circulating_supply,
-                            0,
-                            params.maximum_supply,
-                        )?),
-                    )
-                    .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
-                        account_id,
-                    )));
+            let outputs = [{
+                let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
+                    storage_score_params,
+                    account_output.foundry_counter() + 1,
+                    TokenScheme::Simple(SimpleTokenScheme::new(
+                        params.circulating_supply,
+                        0,
+                        params.maximum_supply,
+                    )?),
+                )
+                .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
+                    account_id,
+                )));
 
-                    if let Some(foundry_metadata) = params.foundry_metadata {
-                        foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
-                    }
+                if let Some(foundry_metadata) = params.foundry_metadata {
+                    foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
+                }
 
-                    foundry_builder.finish_output()?
-                }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
-            ];
+                foundry_builder.finish_output()?
+            }];
 
-            self.prepare_transaction(outputs, options)
+            self.prepare_send_outputs(outputs, options)
                 .await
                 .map(|transaction| PreparedCreateNativeTokenTransaction { token_id, transaction })
         } else {

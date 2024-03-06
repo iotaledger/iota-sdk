@@ -64,11 +64,11 @@ while nft_mint_params:
     )
     transaction = wallet.mint_nfts(chunk)
 
-    # Wait for transaction to get accepted
-    block_id = wallet.wait_for_transaction_acceptance(
+    wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
 
-    print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    print(
+        f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
 
     # Sync so the new outputs are available again for new transactions
     wallet.sync()

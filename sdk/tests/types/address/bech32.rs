@@ -37,7 +37,7 @@ fn ctors() {
 fn hrp_from_str() {
     Hrp::from_str("rms").unwrap();
 
-    assert!(matches!(Hrp::from_str("中國"), Err(AddressError::InvalidBech32Hrp(_))));
+    assert!(matches!(Hrp::from_str("中國"), Err(AddressError::Bech32Hrp(_))));
 }
 
 #[test]

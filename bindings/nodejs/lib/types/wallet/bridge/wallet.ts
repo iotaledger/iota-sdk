@@ -351,8 +351,8 @@ export type __PrepareSendMethod__ = {
     };
 };
 
-export type __PrepareTransactionMethod__ = {
-    name: 'prepareTransaction';
+export type __PrepareSendOutputsMethod__ = {
+    name: 'prepareSendOutputs';
     data: {
         outputs: Output[];
         options?: TransactionOptions;

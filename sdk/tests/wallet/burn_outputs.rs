@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::api::input_selection::Burn,
+    client::api::transaction_builder::Burn,
     types::block::output::{
         feature::MetadataFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
@@ -108,7 +108,6 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
     // First create an account output, this needs to be done only once, because an account can have many foundry outputs
     let transaction = wallet.create_account_output(None, None).await?;
 
-    // Wait for transaction to get accepted
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;

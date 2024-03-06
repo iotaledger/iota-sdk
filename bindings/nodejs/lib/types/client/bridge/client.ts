@@ -43,20 +43,20 @@ export interface __GetHealthMethod__ {
     };
 }
 
-export interface __GetInfoMethod__ {
-    name: 'getInfo';
-    data: {
-        url: string;
-        auth?: Auth;
-    };
+export interface __GetRoutesMethod__ {
+    name: 'getRoutes';
 }
 
 export interface __GetNodeInfoMethod__ {
     name: 'getNodeInfo';
 }
 
-export interface __GetRoutesMethod__ {
-    name: 'getRoutes';
+export interface __GetInfoMethod__ {
+    name: 'getInfo';
+    data: {
+        url: string;
+        auth?: Auth;
+    };
 }
 
 // Accounts routes.
@@ -71,8 +71,8 @@ export interface __GetAccountCongestionMethod__ {
 
 // Rewards routes.
 
-export interface __GetRewardsMethod__ {
-    name: 'getRewards';
+export interface __GetOutputManaRewardsMethod__ {
+    name: 'getOutputManaRewards';
     data: {
         outputId: OutputId;
         slotIndex?: SlotIndex;
@@ -135,7 +135,7 @@ export interface __PostBlockMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: Block;
+        blockBytes: Uint8Array;
     };
 }
 
@@ -157,6 +157,13 @@ export interface __GetBlockWithMetadataMethod__ {
 
 export interface __GetOutputMethod__ {
     name: 'getOutput';
+    data: {
+        outputId: OutputId;
+    };
+}
+
+export interface __GetOutputRawMethod__ {
+    name: 'getOutputRaw';
     data: {
         outputId: OutputId;
     };
@@ -197,6 +204,13 @@ export interface __GetIncludedBlockMethod__ {
     };
 }
 
+export interface __GetIncludedBlockRawMethod__ {
+    name: 'getIncludedBlockRaw';
+    data: {
+        transactionId: TransactionId;
+    };
+}
+
 export interface __GetIncludedBlockMetadataMethod__ {
     name: 'getIncludedBlockMetadata';
     data: {
@@ -215,6 +229,13 @@ export interface __GetTransactionMetadataMethod__ {
 
 export interface __GetCommitmentMethod__ {
     name: 'getCommitment';
+    data: {
+        commitmentId: SlotCommitmentId;
+    };
+}
+
+export interface __GetCommitmentRawMethod__ {
+    name: 'getCommitmentRaw';
     data: {
         commitmentId: SlotCommitmentId;
     };
@@ -241,6 +262,13 @@ export interface __GetCommitmentBySlotMethod__ {
     };
 }
 
+export interface __GetCommitmentBySlotRawMethod__ {
+    name: 'getCommitmentBySlotRaw';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
 export interface __GetUtxoChangesBySlotMethod__ {
     name: 'getUtxoChangesBySlot';
     data: {
@@ -256,10 +284,6 @@ export interface __GetUtxoChangesFullBySlotMethod__ {
 }
 
 // Other routes.
-
-export interface __GetNetworkInfoMethod__ {
-    name: 'getNetworkInfo';
-}
 
 export interface __FindInputsMethod__ {
     name: 'findInputs';
