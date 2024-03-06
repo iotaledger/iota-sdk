@@ -15,7 +15,7 @@ use std::collections::{HashMap, HashSet};
 use crypto::keys::bip44::Bip44;
 use packable::PackableExt;
 
-pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement};
+pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement, transition::Transitions};
 use crate::{
     client::{
         api::{
@@ -32,8 +32,8 @@ use crate::{
         input::{Input, UtxoInput, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
-            AccountId, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, NftOutputBuilder, Output,
-            OutputId, OUTPUT_COUNT_RANGE,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId, NftOutputBuilder, Output, OutputId,
+            OUTPUT_COUNT_RANGE,
         },
         payload::{
             signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
@@ -188,6 +188,7 @@ pub struct TransactionBuilder {
     provided_outputs: Vec<Output>,
     added_outputs: Vec<Output>,
     addresses: HashSet<Address>,
+    transitions: Option<Transitions>,
     burn: Option<Burn>,
     remainders: Remainders,
     creation_slot: SlotIndex,
@@ -215,7 +216,7 @@ pub(crate) struct Remainders {
     address: Option<Address>,
     data: Vec<RemainderData>,
     storage_deposit_returns: Vec<Output>,
-    added_mana: u64,
+    added_mana: HashMap<Option<ChainId>, u64>,
 }
 
 impl TransactionBuilder {
@@ -260,6 +261,7 @@ impl TransactionBuilder {
             provided_outputs: outputs.into_iter().collect(),
             added_outputs: Vec::new(),
             addresses,
+            transitions: None,
             burn: None,
             remainders: Default::default(),
             creation_slot: creation_slot_index.into(),
@@ -377,19 +379,28 @@ impl TransactionBuilder {
             return Err(TransactionBuilderError::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        if self.remainders.added_mana > 0 {
-            let remainder_address = self
-                .get_remainder_address()?
-                .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
-                .0;
-            let added_mana = self.remainders.added_mana;
-            if let Some(output) = self.get_output_for_added_mana(&remainder_address) {
+        let remainder_address = self
+            .get_remainder_address()?
+            .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
+            .0;
+        for (chain_id, added_mana) in core::mem::take(&mut self.remainders.added_mana) {
+            if let Some(output) = self.get_output_for_added_mana(chain_id, &remainder_address) {
+                log::debug!(
+                    "Adding {added_mana} excess input mana to output with address {remainder_address} and {chain_id:?}"
+                );
+                let new_mana = output.mana() + added_mana;
+                *output = match output {
+                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
+                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
+                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
+                    _ => unreachable!(),
+                };
+            } else if let Some(output) = self.get_output_for_added_mana(None, &remainder_address) {
                 log::debug!("Adding {added_mana} excess input mana to output with address {remainder_address}");
                 let new_mana = output.mana() + added_mana;
                 *output = match output {
                     Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
                     Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
                     Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
                     _ => unreachable!(),
                 };
@@ -512,25 +523,31 @@ impl TransactionBuilder {
         Ok(added_output)
     }
 
-    /// Sets the required inputs of an [`TransactionBuilder`].
+    /// Sets the required inputs of a [`TransactionBuilder`].
     pub fn with_required_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
         self.required_inputs = inputs.into_iter().collect();
         self
     }
 
-    /// Sets the burn of an [`TransactionBuilder`].
+    /// Sets the transitions of a [`TransactionBuilder`].
+    pub fn with_transitions(mut self, transitions: impl Into<Option<Transitions>>) -> Self {
+        self.transitions = transitions.into();
+        self
+    }
+
+    /// Sets the burn of a [`TransactionBuilder`].
     pub fn with_burn(mut self, burn: impl Into<Option<Burn>>) -> Self {
         self.burn = burn.into();
         self
     }
 
-    /// Sets the remainder address of an [`TransactionBuilder`].
+    /// Sets the remainder address of a [`TransactionBuilder`].
     pub fn with_remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
         self.remainders.address = address.into();
         self
     }
 
-    /// Sets the mana allotments of an [`TransactionBuilder`].
+    /// Sets the mana allotments of a [`TransactionBuilder`].
     pub fn with_mana_allotments(mut self, mana_allotments: impl IntoIterator<Item = (AccountId, u64)>) -> Self {
         self.mana_allotments = mana_allotments.into_iter().collect();
         self

@@ -2471,12 +2471,13 @@ fn automatic_allotment_provided_in_and_output() {
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
-        outputs.clone(),
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
         protocol_parameters,
     )
+    .with_required_inputs([*inputs[0].output_id()])
     .with_min_mana_allotment(account_id_1, 2)
     .finish()
     .unwrap();

@@ -1362,7 +1362,7 @@ fn burn_mana_need_additional() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = [
-        BasicOutputBuilder::new_with_amount(100_000)
+        BasicOutputBuilder::new_with_amount(114_100)
             .with_mana(1000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1412,8 +1412,11 @@ fn burn_mana_need_additional() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 1);
-    assert_eq!(selected.transaction.outputs()[0].mana(), 700);
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
+        700
+    );
 }
 
 #[test]

@@ -13,7 +13,7 @@ use crate::{
         address::Address,
         input::{Input, UtxoInput},
         mana::ManaAllotment,
-        output::{AccountOutput, AccountOutputBuilder, BasicOutput, FoundryOutput, NftOutput, Output},
+        output::{AccountOutput, AccountOutputBuilder, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -138,9 +138,8 @@ impl TransactionBuilder {
             .as_mut()
             .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
         if let Some(output) = self
-            .provided_outputs
+            .added_outputs
             .iter_mut()
-            .chain(&mut self.added_outputs)
             .filter(|o| o.is_account() && o.mana() != 0)
             .find(|o| o.as_account().account_id() == issuer_id)
         {
@@ -296,7 +295,8 @@ impl TransactionBuilder {
         if include_remainders {
             // Add the remainder outputs mana as well as the excess mana we've allocated to add to existing outputs
             // later.
-            required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana;
+            required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>()
+                + self.remainders.added_mana.values().sum::<u64>();
         }
 
         Ok((self.total_selected_mana(None)?, required_mana))
@@ -329,6 +329,24 @@ impl TransactionBuilder {
             } else {
                 input.output.mana()
             })
+    }
+
+    pub(crate) fn mana_chains(&self) -> Result<HashMap<ChainId, (u64, u64)>, TransactionBuilderError> {
+        let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
+        let mut res = self
+            .non_remainder_outputs()
+            .filter_map(|o| o.chain_id().map(|id| (id, (0, o.mana()))))
+            .collect::<HashMap<_, _>>();
+        for input in &self.selected_inputs {
+            if let Some(chain_id) = input
+                .output
+                .chain_id()
+                .map(|id| id.or_from_output_id(input.output_id()))
+            {
+                res.entry(chain_id).or_default().0 += self.total_mana(input, include_generated)?;
+            }
+        }
+        Ok(res)
     }
 }
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeMap;
-use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
 use primitive_types::U256;
@@ -13,8 +12,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutput, BasicOutput, BasicOutputBuilder, NativeToken,
-            NftOutput, Output, StorageScoreParameters, TokenId,
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, ChainId, NativeToken, Output,
+            StorageScoreParameters, TokenId,
         },
     },
 };
@@ -110,9 +109,26 @@ impl TransactionBuilder {
             .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?;
 
         // If there is a mana remainder, try to fit it in an existing output
-        if mana_diff > 0 && self.output_for_added_mana_exists(&remainder_address) {
-            log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
-            self.remainders.added_mana = std::mem::take(&mut mana_diff);
+        if mana_diff > 0 {
+            for (chain_id, (input_mana, output_mana)) in self.mana_chains()? {
+                if input_mana > output_mana
+                    && (self.output_for_added_mana_exists(Some(chain_id), &remainder_address)
+                        || self.output_for_added_mana_exists(None, &remainder_address))
+                {
+                    // Get the lowest of the total diff or the diff for this chain
+                    let mana_to_add = mana_diff.min(input_mana - output_mana);
+                    log::debug!(
+                        "Allocating {mana_to_add} excess input mana for output with address {remainder_address} and chain id {chain_id}"
+                    );
+                    mana_diff -= mana_to_add;
+                    self.remainders.added_mana.insert(Some(chain_id), mana_to_add);
+                }
+            }
+            // Any leftover mana diff can go in any basic output with the right address
+            if mana_diff > 0 && self.output_for_added_mana_exists(None, &remainder_address) {
+                log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
+                self.remainders.added_mana.insert(None, std::mem::take(&mut mana_diff));
+            }
         }
 
         if input_amount == output_amount && mana_diff == 0 && native_tokens_diff.is_empty() {
@@ -132,10 +148,10 @@ impl TransactionBuilder {
         Ok((storage_deposit_returns, remainder_outputs))
     }
 
-    fn output_for_added_mana_exists(&self, remainder_address: &Address) -> bool {
+    fn output_for_added_mana_exists(&self, chain_id: Option<ChainId>, remainder_address: &Address) -> bool {
         // Find the first value that matches the remainder address
-        self.non_remainder_outputs().any(|o| {
-            (o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
+        self.added_outputs.iter().any(|o| {
+            (o.chain_id() == chain_id || chain_id.is_none() && (o.is_basic() || o.is_account() || o.is_nft()))
                 && o.unlock_conditions()
                     .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
                 && matches!(o.required_address(
@@ -145,30 +161,19 @@ impl TransactionBuilder {
         })
     }
 
-    pub(crate) fn get_output_for_added_mana(&mut self, remainder_address: &Address) -> Option<&mut Output> {
-        // Establish the order in which we want to pick an output
-        let sort_order = [AccountOutput::KIND, BasicOutput::KIND, NftOutput::KIND]
-            .into_iter()
-            .zip(0..)
-            .collect::<HashMap<_, _>>();
-        // Remove those that do not have an ordering and sort
-        let ordered_outputs = self
-            .provided_outputs
-            .iter_mut()
-            .chain(&mut self.added_outputs)
-            .filter(|o| {
-                o.unlock_conditions()
+    pub(crate) fn get_output_for_added_mana(
+        &mut self,
+        chain_id: Option<ChainId>,
+        remainder_address: &Address,
+    ) -> Option<&mut Output> {
+        self.added_outputs.iter_mut().find(|o| {
+            (o.chain_id() == chain_id || chain_id.is_none() && (o.is_basic() || o.is_account() || o.is_nft()))
+                && o.unlock_conditions()
                     .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
-            })
-            .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
-            .collect::<BTreeMap<_, _>>();
-
-        // Find the first value that matches the remainder address
-        ordered_outputs.into_values().find(|o| {
-            matches!(o.required_address(
-                self.latest_slot_commitment_id.slot_index(),
-                self.protocol_parameters.committable_age_range(),
-            ), Ok(Some(address)) if &address == remainder_address)
+                && matches!(o.required_address(
+                            self.latest_slot_commitment_id.slot_index(),
+                            self.protocol_parameters.committable_age_range(),
+                        ), Ok(Some(address)) if &address == remainder_address)
         })
     }
 
@@ -203,16 +208,30 @@ impl TransactionBuilder {
 
         let (selected_mana, required_mana) = self.mana_sums(false)?;
 
+        log::debug!("selected mana: {selected_mana}, required: {required_mana}");
+
         let remainder_address = self.get_remainder_address()?.map(|v| v.0);
+
+        let mana_chains = self.mana_chains()?;
 
         // Mana can potentially be added to an appropriate existing output instead of a new remainder output
         let mut mana_remainder = selected_mana > required_mana
             && remainder_address.map_or(true, |remainder_address| {
-                !self.output_for_added_mana_exists(&remainder_address)
+                let mut mana_diff = selected_mana - required_mana;
+                for (chain_id, (mana_in, mana_out)) in mana_chains {
+                    if mana_in > mana_out && self.output_for_added_mana_exists(Some(chain_id), &remainder_address) {
+                        mana_diff -= mana_diff.min(mana_in - mana_out);
+                        if mana_diff == 0 {
+                            return false;
+                        }
+                    }
+                }
+                mana_diff > 0 && !self.output_for_added_mana_exists(None, &remainder_address)
             });
         // If we are burning mana, we may not need a mana remainder
         if self.burn.as_ref().map_or(false, |b| b.mana()) {
             let initial_excess = self.initial_mana_excess()?;
+            log::debug!("initial_mana_excess: {initial_excess}");
             mana_remainder &= selected_mana > required_mana + initial_excess;
         }
 

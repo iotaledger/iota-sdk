@@ -5,16 +5,15 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
+        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError, Transitions},
         secret::types::InputSigningData,
     },
     types::block::{
         address::{Address, ImplicitAccountCreationAddress},
         mana::ManaAllotment,
         output::{
-            feature::{BlockIssuerFeature, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
-            unlock_condition::AddressUnlockCondition,
-            AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
+            feature::Ed25519PublicKeyHashBlockIssuerKey, unlock_condition::AddressUnlockCondition, AccountId,
+            AccountOutputBuilder, BasicOutputBuilder, Output,
         },
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
@@ -2122,27 +2121,11 @@ fn implicit_account_transition() {
         .collect::<Vec<_>>();
 
     let input_output_id = *inputs[0].output_id();
-    let account_id = AccountId::from(&input_output_id);
-    let outputs = vec![
-        AccountOutputBuilder::new_with_amount(1_000_000, account_id)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_features([BlockIssuerFeature::new(
-                u32::MAX,
-                BlockIssuerKeys::from_vec(vec![
-                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
-                ])
-                .unwrap(),
-            )
-            .unwrap()])
-            .finish_output()
-            .unwrap(),
-    ];
+    let block_issuer_key = Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519());
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
-        outputs.clone(),
+        None,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         SLOT_INDEX,
         SLOT_COMMITMENT_ID,
@@ -2150,6 +2133,7 @@ fn implicit_account_transition() {
     )
     .with_required_inputs(vec![input_output_id])
     .with_min_mana_allotment(account_id_1, 2)
+    .with_transitions(Transitions::new().add_implicit_account(input_output_id, block_issuer_key.into()))
     .finish()
     .unwrap();
 
