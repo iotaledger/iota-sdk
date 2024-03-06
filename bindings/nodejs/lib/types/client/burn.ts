@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { u256 } from '../utils';
-import { AccountId, FoundryId, NftId, TokenId } from '../block/id';
+import {
+    AccountId,
+    DelegationId,
+    FoundryId,
+    NftId,
+    TokenId,
+} from '../block/id';
 
 /** A DTO for [`Burn`] */
 export interface Burn {
@@ -12,10 +18,12 @@ export interface Burn {
     generatedMana?: boolean;
     /** Accounts to burn */
     accounts?: AccountId[];
-    /** NFTs to burn */
-    nfts?: NftId[];
     /** Foundries to burn */
     foundries?: FoundryId[];
+    /** NFTs to burn */
+    nfts?: NftId[];
+    /** Delegations to burn */
+    delegations?: DelegationId[];
     /** Amounts of native tokens to burn */
     nativeTokens?: Map<TokenId, u256>;
 }

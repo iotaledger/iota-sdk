@@ -25,8 +25,9 @@ class Burn:
     mana: Optional[bool] = None
     generated_mana: Optional[bool] = None
     accounts: Optional[List[HexStr]] = None
-    nfts: Optional[List[HexStr]] = None
     foundries: Optional[List[HexStr]] = None
+    nfts: Optional[List[HexStr]] = None
+    delegations: Optional[List[HexStr]] = None
     native_tokens: Optional[List[NativeToken]] = None
 
     def set_mana(self, burn_mana: bool) -> Burn:
@@ -49,6 +50,14 @@ class Burn:
         self.accounts.append(account)
         return self
 
+    def add_foundry(self, foundry: HexStr) -> Burn:
+        """Add a foundry to the burn.
+        """
+        if self.foundries is None:
+            self.foundries = []
+        self.foundries.append(foundry)
+        return self
+
     def add_nft(self, nft: HexStr) -> Burn:
         """Add an NFT to the burn.
         """
@@ -57,12 +66,12 @@ class Burn:
         self.nfts.append(nft)
         return self
 
-    def add_foundry(self, foundry: HexStr) -> Burn:
-        """Add a foundry to the burn.
+    def add_delegation(self, delegation: HexStr) -> Burn:
+        """Add a delegation to the burn.
         """
-        if self.foundries is None:
-            self.foundries = []
-        self.foundries.append(foundry)
+        if self.delegations is None:
+            self.delegations = []
+        self.delegations.append(delegation)
         return self
 
     def add_native_token(self, native_token: NativeToken) -> Burn:
