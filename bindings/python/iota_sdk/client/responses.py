@@ -10,7 +10,6 @@ from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
 from iota_sdk.types.node_info import BaseTokenResponse, StatusResponse, ProtocolParameters
-from iota_sdk.types.network_metrics import NetworkMetricsResponse
 from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId, OutputWithId
 from iota_sdk.types.output_id_proof import OutputIdProof
