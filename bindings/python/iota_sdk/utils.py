@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, List, Optional
 from iota_sdk.common import custom_encoder
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.signature import Ed25519Signature
-from iota_sdk.types.address import Address, deserialize_address
+from iota_sdk.types.address import Address, Ed25519Address, deserialize_address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.decayed_mana import DecayedMana
 from iota_sdk.types.payload import Transaction, SignedTransactionPayload
@@ -86,14 +86,13 @@ class Utils:
 
     # pylint: disable=redefined-builtin
     @staticmethod
-    def hex_public_key_to_bech32_address(
-            hex_str: HexStr, bech32_hrp: str) -> str:
-        """Convert a hex encoded public key to a Bech32 encoded address.
+    def public_key_hash(
+            hex_str: HexStr) -> Ed25519Address:
+        """Hashes a hex encoded public key with Blake2b256.
         """
-        return _call_method('hexPublicKeyToBech32Address', {
-            'hex': hex_str,
-            'bech32Hrp': bech32_hrp
-        })
+        return Ed25519Address(_call_method('blake2b256Hash', {
+            'bytes': hex_str,
+        }))
 
     @staticmethod
     def parse_bech32_address(address: str) -> Address:
@@ -131,8 +130,8 @@ class Utils:
     def compute_account_id(output_id: OutputId) -> HexStr:
         """Compute the account id for the given account output id.
         """
-        return _call_method('computeAccountId', {
-            'outputId': repr(output_id)
+        return _call_method('blake2b256Hash', {
+            'bytes': repr(output_id)
         })
 
     @staticmethod
@@ -159,8 +158,8 @@ class Utils:
     def compute_nft_id(output_id: OutputId) -> HexStr:
         """Compute the NFT id for the given NFT output id.
         """
-        return _call_method('computeNftId', {
-            'outputId': repr(output_id)
+        return _call_method('blake2b256Hash', {
+            'bytes': repr(output_id)
         })
 
     @staticmethod

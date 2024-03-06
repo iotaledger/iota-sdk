@@ -31,13 +31,6 @@ export interface __MnemonicToHexSeedMethod__ {
     };
 }
 
-export interface __ComputeAccountIdMethod__ {
-    name: 'computeAccountId';
-    data: {
-        outputId: OutputId;
-    };
-}
-
 export interface __ComputeFoundryIdMethod__ {
     name: 'computeFoundryId';
     data: {
@@ -47,10 +40,10 @@ export interface __ComputeFoundryIdMethod__ {
     };
 }
 
-export interface __ComputeNftIdMethod__ {
-    name: 'computeNftId';
+export interface __Blake2b256HashMethod__ {
+    name: 'blake2b256Hash';
     data: {
-        outputId: OutputId;
+        bytes: HexEncodedString;
     };
 }
 
@@ -144,14 +137,6 @@ export interface __NftIdToBech32Method__ {
     name: 'nftIdToBech32';
     data: {
         nftId: NftId;
-        bech32Hrp: string;
-    };
-}
-
-export interface __HexPublicKeyToBech32AddressMethod__ {
-    name: 'hexPublicKeyToBech32Address';
-    data: {
-        hex: HexEncodedString;
         bech32Hrp: string;
     };
 }
