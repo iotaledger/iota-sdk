@@ -26,7 +26,7 @@ use iota_sdk::{
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
+            output::{DecayedMana, FoundryId, Output, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
@@ -213,15 +213,10 @@ pub enum Response {
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:
-    /// - [`ComputeAccountId`](crate::method::UtilsMethod::ComputeAccountId)
-    AccountId(AccountId),
-    /// Response for:
-    /// - [`ComputeNftId`](crate::method::UtilsMethod::ComputeNftId)
-    NftId(NftId),
-    /// Response for:
     /// - [`ComputeFoundryId`](crate::method::UtilsMethod::ComputeFoundryId)
     FoundryId(FoundryId),
     /// Response for:
+    /// - [`Blake2b256Hash`](crate::method::UtilsMethod::Blake2b256Hash)
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
     Hash(String),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
@@ -251,7 +246,6 @@ pub enum Response {
     /// - [`AnchorIdToBech32`](crate::method::UtilsMethod::AnchorIdToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
     /// - [`NftIdToBech32`](crate::method::UtilsMethod::NftIdToBech32)
-    /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`ImplicitAccountCreationAddress`](crate::method::WalletMethod::ImplicitAccountCreationAddress)
     Bech32Address(Bech32Address),
