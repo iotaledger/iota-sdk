@@ -7,6 +7,8 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: iotaledger/iota-core
+        # TODO: remove ref when inx plugins are updated to the latest commit
+        ref: 25995c84ccc4f4cd9041881035f338acca513b0a
         path: iota-core
 
     - name: Prepare files for start and stop
