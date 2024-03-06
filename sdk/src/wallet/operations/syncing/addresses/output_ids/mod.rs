@@ -63,6 +63,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         if (address.is_ed25519() && sync_options.wallet.basic_outputs)
             || (address.is_nft() && sync_options.nft.basic_outputs)
             || (address.is_account() && sync_options.account.basic_outputs)
+            || (address.is_implicit_account_creation() && sync_options.sync_implicit_accounts)
         {
             // basic outputs
             #[cfg(target_family = "wasm")]
