@@ -1771,22 +1771,23 @@ fn min_allot_account_mana() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let mut inputs = Vec::new();
     let mana_input_amount = 1_000_000;
     let required_allotment = 7864;
 
-    let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .with_mana(mana_input_amount)
-        .finish_output()
-        .unwrap();
-    inputs.push(InputSigningData {
-        output: account_output,
-        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-        chain: None,
-    });
+    let inputs = build_inputs(
+        [(
+            Account {
+                amount: 2_000_000,
+                mana: mana_input_amount,
+                account_id: account_id_1,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                sender: None,
+                issuer: None,
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
 
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
@@ -1963,30 +1964,35 @@ fn min_allot_account_mana_requirement_twice() {
 
     let required_allotment = 7900;
 
-    let inputs = [
-        AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(required_allotment)
-            .finish_output()
-            .unwrap(),
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(100)
-            .finish_output()
-            .unwrap(),
-    ];
-    let inputs = inputs
-        .into_iter()
-        .map(|input| InputSigningData {
-            output: input,
-            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-            chain: None,
-        })
-        .collect::<Vec<_>>();
+    let inputs = build_inputs(
+        [
+            (
+                Account {
+                    amount: 2_000_000,
+                    mana: required_allotment,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    mana: 100,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
@@ -2025,38 +2031,41 @@ fn min_allot_account_mana_requirement_covered() {
 
     let provided_allotment = 7900;
 
-    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .with_mana(provided_allotment - 100)
-        .finish_output()
-        .unwrap();
+    let inputs = build_inputs(
+        [
+            (
+                Account {
+                    amount: 2_000_000,
+                    mana: provided_allotment - 100,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    mana: 100,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
 
     // Must manually add account output with mana reduced for the manual allotment
-    let account_output = AccountOutputBuilder::from(account_input.as_account())
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_mana(0)
         .finish_output()
         .unwrap();
-
-    let inputs = [
-        account_input,
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(100)
-            .finish_output()
-            .unwrap(),
-    ];
-    let inputs = inputs
-        .into_iter()
-        .map(|input| InputSigningData {
-            output: input,
-            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-            chain: None,
-        })
-        .collect::<Vec<_>>();
 
     let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
@@ -2101,38 +2110,41 @@ fn min_allot_account_mana_requirement_covered_2() {
 
     let provided_allotment = 7900;
 
-    let account_input = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .with_mana(100)
-        .finish_output()
-        .unwrap();
+    let inputs = build_inputs(
+        [
+            (
+                Account {
+                    amount: 2_000_000,
+                    mana: 100,
+                    account_id: account_id_1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    sender: None,
+                    issuer: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    mana: provided_allotment - 100,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
 
     // Must manually add account output with mana reduced for the manual allotment
-    let account_output = AccountOutputBuilder::from(account_input.as_account())
+    let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_mana(0)
         .finish_output()
         .unwrap();
-
-    let inputs = [
-        account_input,
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            ))
-            .with_mana(provided_allotment - 100)
-            .finish_output()
-            .unwrap(),
-    ];
-    let inputs = inputs
-        .into_iter()
-        .map(|input| InputSigningData {
-            output: input,
-            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-            chain: None,
-        })
-        .collect::<Vec<_>>();
 
     let mut outputs = build_outputs([Basic {
         amount: 1_000_000,
@@ -2176,22 +2188,24 @@ fn implicit_account_transition() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let ed25519_address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
 
-    let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(Address::ImplicitAccountCreation(
-            ImplicitAccountCreationAddress::new(**ed25519_address.as_ed25519()),
-        )))
-        .with_mana(10000)
-        .finish_output()
-        .unwrap()];
-    let inputs = inputs
-        .into_iter()
-        .map(|input| InputSigningData {
-            output: input,
-            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-            chain: None,
-        })
-        .collect::<Vec<_>>();
-
+    let inputs = build_inputs(
+        [(
+            Basic {
+                amount: 1_000_000,
+                mana: 10000,
+                address: Address::ImplicitAccountCreation(ImplicitAccountCreationAddress::new(
+                    **ed25519_address.as_ed25519(),
+                )),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
     let input_output_id = *inputs[0].output_id();
     let account_id = AccountId::from(&input_output_id);
     let outputs = vec![

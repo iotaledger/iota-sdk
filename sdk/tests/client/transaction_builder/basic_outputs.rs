@@ -4,16 +4,12 @@
 use std::str::FromStr;
 
 use iota_sdk::{
-    client::{
-        api::transaction_builder::{Requirement, TransactionBuilder, TransactionBuilderError},
-        secret::types::InputSigningData,
-    },
+    client::api::transaction_builder::{Requirement, TransactionBuilder, TransactionBuilderError},
     types::block::{
         address::{Address, AddressCapabilities, MultiAddress, RestrictedAddress, WeightedAddress},
         mana::ManaAllotment,
         output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, NftId},
         protocol::iota_mainnet_protocol_parameters,
-        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::assert_eq;
@@ -2550,21 +2546,22 @@ fn automatic_allotment_provided_in_and_output() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
-    let inputs = [BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .with_mana(7577)
-        .finish_output()
-        .unwrap()];
-    let inputs = inputs
-        .into_iter()
-        .map(|input| InputSigningData {
-            output: input,
-            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
-            chain: None,
-        })
-        .collect::<Vec<_>>();
+    let inputs = build_inputs(
+        [(
+            Basic {
+                amount: 1_000_000,
+                mana: 7577,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    );
 
     let outputs = vec![
         BasicOutputBuilder::new_with_amount(1_000_000)
