@@ -125,7 +125,7 @@ where
                             match tx_state {
                                 // TODO: Separate TransactionState::Finalized, TransactionState::Accepted? https://github.com/iotaledger/iota-sdk/issues/1814
                                 TransactionState::Accepted
-                                | TransactionState::Confirmed
+                                | TransactionState::Committed
                                 | TransactionState::Finalized => {
                                     log::debug!(
                                         "[SYNC] confirmed transaction {transaction_id} in block {}",
