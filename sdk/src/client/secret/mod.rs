@@ -48,10 +48,7 @@ pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
 use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
-        api::{
-            input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
-            verify_semantic, PreparedTransactionData,
-        },
+        api::{transaction_builder::TransactionBuilderError, PreparedTransactionData, SignedTransactionData},
         ClientError,
     },
     types::block::{
@@ -612,7 +609,7 @@ where
                 // than the current block index
                 match &required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                    _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
+                    _ => Err(TransactionBuilderError::MissingInputWithEd25519Address)?,
                 }
 
                 let chain = input.chain.ok_or(ClientError::MissingBip32Chain)?;
@@ -669,13 +666,19 @@ where
     } = prepared_transaction_data;
     let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(&inputs_data, &tx_payload, mana_rewards, protocol_parameters.clone()).inspect_err(|e| {
-        log::debug!("[sign_transaction] conflict: {e:?} for {tx_payload:#?}");
+    let data = SignedTransactionData {
+        payload: tx_payload,
+        inputs_data,
+        mana_rewards,
+    };
+
+    data.verify_semantic(protocol_parameters).inspect_err(|e| {
+        log::debug!("[sign_transaction] conflict: {e:?} for {:#?}", data.payload);
     })?;
 
-    Ok(tx_payload)
+    Ok(data.payload)
 }
 
 #[async_trait]

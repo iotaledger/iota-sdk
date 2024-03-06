@@ -183,17 +183,18 @@ impl Serialize for WalletError {
     }
 }
 
-impl From<crate::client::api::input_selection::Error> for WalletError {
-    fn from(error: crate::client::api::input_selection::Error) -> Self {
+impl From<crate::client::api::transaction_builder::TransactionBuilderError> for WalletError {
+    fn from(error: crate::client::api::transaction_builder::TransactionBuilderError) -> Self {
         // Map "same" error so it's easier to handle
         match error {
-            crate::client::api::input_selection::Error::InsufficientAmount { found, required } => {
-                Self::InsufficientFunds {
-                    available: found,
-                    required,
-                }
-            }
-            _ => Self::Client(ClientError::InputSelection(error)),
+            crate::client::api::transaction_builder::TransactionBuilderError::InsufficientAmount {
+                found,
+                required,
+            } => Self::InsufficientFunds {
+                available: found,
+                required,
+            },
+            _ => Self::Client(ClientError::TransactionBuilder(error)),
         }
     }
 }

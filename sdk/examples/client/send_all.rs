@@ -9,16 +9,19 @@
 //! cargo run --release --example send_all
 //! ```
 
+use std::collections::BTreeSet;
+
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{input_selection::InputSelection, GetAddressesOptions},
+        api::{options::TransactionOptions, GetAddressesOptions},
         constants::IOTA_COIN_TYPE,
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
-        secret::{types::InputSigningData, SecretManage, SecretManager, SignBlock},
+        secret::{SecretManage, SecretManager, SignBlock},
         Client,
     },
     types::block::{
+        address::{Address, Ed25519Address, ToBech32Ext},
         output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder},
         payload::{Payload, SignedTransactionPayload},
     },
@@ -45,10 +48,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager_2 = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC_2").unwrap())?;
     let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
-    let from_address = secret_manager_1
-        .generate_ed25519_addresses_as_bech32(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
-        .await?[0]
-        .clone();
+    let chain = Bip44::new(IOTA_COIN_TYPE);
+
+    let from_address = Address::from(Ed25519Address::from_public_key_bytes(
+        secret_manager_1
+            .generate_ed25519_public_keys(
+                chain.coin_type,
+                chain.account,
+                chain.address_index..chain.address_index + 1,
+                None,
+            )
+            .await?[0]
+            .to_bytes(),
+    ))
+    .to_bech32(client.get_bech32_hrp().await?);
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
@@ -65,7 +78,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Calculate the total amount
     let mut total_amount = 0;
 
-    let mut inputs = Vec::new();
+    let mut inputs = BTreeSet::new();
     let mut outputs = Vec::new();
 
     for res in outputs_responses {
@@ -80,11 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             total_amount -= native_token_return.amount();
             outputs.push(native_token_return);
         }
-        inputs.push(InputSigningData {
-            output: res.output,
-            output_metadata: res.metadata,
-            chain: None,
-        });
+        inputs.insert(*res.metadata().output_id());
     }
 
     println!("Total amount: {total_amount}");
@@ -101,15 +110,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .finish_output()?,
     );
 
-    let prepared_transaction = InputSelection::new(
-        inputs,
-        outputs,
-        [from_address.into_inner()],
-        client.get_slot_index().await?,
-        client.get_issuance().await?.latest_commitment.id(),
-        protocol_parameters.clone(),
-    )
-    .select()?;
+    let prepared_transaction = client
+        .build_transaction(
+            [(from_address.into_inner(), chain)],
+            outputs,
+            TransactionOptions {
+                required_inputs: inputs,
+                allow_additional_input_selection: false,
+                ..Default::default()
+            },
+        )
+        .await?;
     let unlocks = secret_manager_1
         .transaction_unlocks(&prepared_transaction, &protocol_parameters)
         .await?;

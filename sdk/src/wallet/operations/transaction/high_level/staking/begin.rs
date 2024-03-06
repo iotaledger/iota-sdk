@@ -4,13 +4,17 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
+    client::{
+        api::{options::TransactionOptions, PreparedTransactionData},
+        secret::SecretManage,
+        ClientError,
+    },
     types::block::{
         output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
         slot::EpochIndex,
     },
     utils::serde::string,
-    wallet::{types::TransactionWithMetadata, TransactionOptions, Wallet, WalletError},
+    wallet::{types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 /// Parameters for beginning a staking period.
@@ -98,7 +102,7 @@ where
             ))
             .finish_output()?;
 
-        let transaction = self.prepare_transaction([output], options).await?;
+        let transaction = self.prepare_send_outputs([output], options).await?;
 
         Ok(transaction)
     }

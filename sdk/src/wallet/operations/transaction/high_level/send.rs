@@ -195,6 +195,6 @@ where
             }
         }
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 }
