@@ -8,15 +8,20 @@ class TransactionState(str, Enum):
     """Describes the state of a transaction.
 
     Attributes:
-        Pending: Not included yet.
-        Accepted: Included.
-        Confirmed: Included and its included block is confirmed.
-        Finalized: Included, its included block is finalized and cannot be reverted anymore.
-        Failed: Not successfully issued due to failure reason.
+        Pending:    The transaction has been booked by the node but not yet accepted.
+        Accepted:   The transaction meets the following 4 conditions:
+                        - Signatures of the transaction are valid.
+                        - The transaction has been approved by the super majority of the online committee (potential conflicts are resolved by this time).
+                        - The transactions that created the inputs were accepted (monotonicity).
+                        - At least one valid attachment was accepted.
+        Committed:  The slot of the earliest accepted attachment of the transaction was committed.
+        Finalized:  The transaction is accepted and the slot containing the transaction has been finalized by the node.
+                    This state is computed based on the accepted transaction's earliest included attachment slot being smaller or equal than the latest finalized slot.
+        Failed:     The transaction has not been executed by the node due to a failure during processing.
     """
     Pending = 'pending'
     Accepted = 'accepted'
-    Confirmed = 'confirmed'
+    Committed = 'committed'
     Finalized = 'finalized'
     Failed = 'failed'
 

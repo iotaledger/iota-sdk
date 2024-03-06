@@ -384,15 +384,22 @@ pub enum BlockState {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionState {
-    /// Not included yet.
+    /// The transaction has been booked by the node but not yet accepted.
     Pending,
-    /// Included.
+    /// The transaction meets the following 4 conditions:
+    /// - Signatures of the transaction are valid.
+    /// - The transaction has been approved by the super majority of the online committee (potential conflicts are
+    ///   resolved by this time).
+    /// - The transactions that created the inputs were accepted (monotonicity).
+    /// - At least one valid attachment was accepted.
     Accepted,
-    /// Included and its included block is confirmed.
-    Confirmed,
-    /// Included, its included block is finalized and cannot be reverted anymore.
+    /// The slot of the earliest accepted attachment of the transaction was committed.
+    Committed,
+    /// The transaction is accepted and the slot containing the transaction has been finalized by the node.
+    /// This state is computed based on the accepted transaction's earliest included attachment slot being smaller or
+    /// equal than the latest finalized slot.
     Finalized,
-    /// The block is not successfully issued due to failure reason.
+    /// The transaction has not been executed by the node due to a failure during processing.
     Failed,
 }
 
