@@ -8,7 +8,7 @@ use iota_sdk::client::secret::{stronghold::StrongholdSecretManager, SecretManage
 use iota_sdk::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionData},
-        secret::{DowncastSecretManager, SecretManage, SignBlock},
+        secret::{DowncastSecretManager, GenerateAddressOptions, SecretManage, SignBlock},
         ClientError,
     },
     types::{
@@ -32,12 +32,21 @@ where
             coin_type,
             account_index,
             address_index,
-            options,
+            internal,
+            ledger_nano_prompt,
             bech32_hrp,
         } => {
             let address_indexes = address_index..address_index + 1;
             let address = secret_manager
-                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_addresses(
+                    coin_type,
+                    account_index,
+                    address_indexes,
+                    GenerateAddressOptions {
+                        internal,
+                        ledger_nano_prompt,
+                    },
+                )
                 .await
                 .map_err(ClientError::from)?
                 .into_iter()

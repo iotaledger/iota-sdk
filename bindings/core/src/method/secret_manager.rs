@@ -23,11 +23,17 @@ use crate::OmittedDebug;
 #[non_exhaustive]
 pub enum SecretManagerMethod {
     /// Generate a Bech32 formatted Ed25519 address.
+    #[serde(rename_all = "camelCase")]
     GenerateEd25519AddressAsBech32 {
         coin_type: u32,
+        #[serde(default)]
         account_index: u32,
+        #[serde(default)]
         address_index: u32,
-        options: GenerateAddressOptions,
+        #[serde(default)]
+        internal: bool,
+        #[serde(default)]
+        ledger_nano_prompt: bool,
         bech32_hrp: Hrp,
     },
     /// Generate Ed25519 addresses.
