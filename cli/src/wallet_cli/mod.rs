@@ -35,7 +35,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, get_password},
     println_log_error, println_log_info,
 };
 
@@ -1143,7 +1143,12 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
         TransactionSelector::Id(id) => wallet_ledger.get_transaction(&id),
         TransactionSelector::Index(index) => {
             let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
-            transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
+            transactions.sort_unstable_by(|a, b| {
+                b.payload
+                    .transaction()
+                    .creation_slot()
+                    .cmp(&a.payload.transaction().creation_slot())
+            });
             transactions.into_iter().nth(index)
         }
     };
@@ -1161,7 +1166,12 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
     let wallet_ledger = wallet.ledger().await;
     let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
-    transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    transactions.sort_unstable_by(|a, b| {
+        b.payload
+            .transaction()
+            .creation_slot()
+            .cmp(&a.payload.transaction().creation_slot())
+    });
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -1170,10 +1180,12 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
-                let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
-
-                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
+                println_log_info!(
+                    "{:<5}{}\t{}",
+                    i,
+                    tx.transaction_id,
+                    tx.payload.transaction().creation_slot()
+                );
             }
         }
     }
