@@ -54,6 +54,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
         [(
             Account {
                 amount: 1_000_000,
+                mana: 0,
                 account_id: account_id,
                 address: address.clone(),
                 sender: None,
@@ -66,6 +67,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
 
     let outputs = build_outputs([Account {
         amount: 1_000_000,
+        mana: 0,
         account_id: account_id,
         address: address.clone(),
         sender: None,
@@ -131,6 +133,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id,
                     address: address.clone(),
                     sender: None,
@@ -141,6 +144,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_address.clone(),
                     native_token: None,
                     sender: None,
@@ -153,6 +157,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_address.clone(),
                     native_token: None,
                     sender: None,
@@ -169,6 +174,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let outputs = build_outputs([
         Account {
             amount: 1_000_000,
+            mana: 0,
             account_id: account_id,
             address: address,
             sender: None,
@@ -176,6 +182,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         },
         Basic {
             amount: 2_000_000,
+            mana: 0,
             address: account_address,
             native_token: None,
             sender: None,
