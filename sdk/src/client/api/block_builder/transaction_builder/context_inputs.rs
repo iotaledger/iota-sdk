@@ -12,8 +12,6 @@ use crate::{
 
 impl TransactionBuilder {
     pub(crate) fn fulfill_context_inputs_requirements(&mut self, input: &InputSigningData) {
-        let mut needs_commitment_context = false;
-
         match &input.output {
             // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
             Output::Account(account) => {
@@ -36,6 +34,11 @@ impl TransactionBuilder {
             }
             _ => (),
         }
+
+        if self.commitment_context_input.is_some() {
+            return;
+        }
+        let mut needs_commitment_context = false;
 
         // Inputs with timelock or expiration unlock condition require a CommitmentContextInput
         if input
@@ -60,7 +63,7 @@ impl TransactionBuilder {
             needs_commitment_context = true;
         }
 
-        if needs_commitment_context && self.commitment_context_input.is_none() {
+        if needs_commitment_context {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1740
             self.commitment_context_input
                 .replace(CommitmentContextInput::new(self.latest_slot_commitment_id));
