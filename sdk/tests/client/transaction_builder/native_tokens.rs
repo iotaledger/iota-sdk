@@ -29,6 +29,7 @@ fn two_native_tokens_one_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 150)),
                     sender: None,
@@ -41,6 +42,7 @@ fn two_native_tokens_one_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_2, 100)),
                     sender: None,
@@ -55,6 +57,7 @@ fn two_native_tokens_one_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 150)),
         sender: None,
@@ -88,6 +91,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -100,6 +104,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_2, 150)),
                     sender: None,
@@ -115,6 +120,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
     let outputs = build_outputs([
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: Some((TOKEN_ID_1, 100)),
             sender: None,
@@ -124,6 +130,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
         },
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: Some((TOKEN_ID_2, 100)),
             sender: None,
@@ -168,6 +175,7 @@ fn three_inputs_two_needed_plus_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -180,6 +188,7 @@ fn three_inputs_two_needed_plus_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -192,6 +201,7 @@ fn three_inputs_two_needed_plus_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -206,6 +216,7 @@ fn three_inputs_two_needed_plus_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 120)),
         sender: None,
@@ -249,6 +260,7 @@ fn three_inputs_two_needed_no_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -261,6 +273,7 @@ fn three_inputs_two_needed_no_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -273,6 +286,7 @@ fn three_inputs_two_needed_no_remainder() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -287,6 +301,7 @@ fn three_inputs_two_needed_no_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 200)),
         sender: None,
@@ -318,6 +333,7 @@ fn insufficient_native_tokens_one_input() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -331,6 +347,7 @@ fn insufficient_native_tokens_one_input() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 150)),
         sender: None,
@@ -367,6 +384,7 @@ fn insufficient_native_tokens_three_inputs() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -379,6 +397,7 @@ fn insufficient_native_tokens_three_inputs() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -391,6 +410,7 @@ fn insufficient_native_tokens_three_inputs() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -405,6 +425,7 @@ fn insufficient_native_tokens_three_inputs() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 301)),
         sender: None,
@@ -441,6 +462,7 @@ fn burn_and_send_at_the_same_time() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -453,6 +475,7 @@ fn burn_and_send_at_the_same_time() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_2, 100)),
                     sender: None,
@@ -467,6 +490,7 @@ fn burn_and_send_at_the_same_time() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 50)),
         sender: None,
@@ -518,6 +542,7 @@ fn burn_one_input_no_output() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -565,6 +590,7 @@ fn multiple_native_tokens() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -577,6 +603,7 @@ fn multiple_native_tokens() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_2, 100)),
                     sender: None,
@@ -591,6 +618,7 @@ fn multiple_native_tokens() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 100)),
         sender: None,
@@ -623,6 +651,7 @@ fn insufficient_native_tokens() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -636,6 +665,7 @@ fn insufficient_native_tokens() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 150)),
         sender: None,
@@ -671,6 +701,7 @@ fn insufficient_native_tokens_2() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -684,6 +715,7 @@ fn insufficient_native_tokens_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 150)),
         sender: None,
@@ -719,6 +751,7 @@ fn insufficient_amount_for_remainder() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -732,6 +765,7 @@ fn insufficient_amount_for_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 50)),
         sender: None,
@@ -769,6 +803,7 @@ fn single_output_native_token_no_remainder() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -782,6 +817,7 @@ fn single_output_native_token_no_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 100)),
         sender: None,
@@ -813,6 +849,7 @@ fn single_output_native_token_remainder_1() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -826,6 +863,7 @@ fn single_output_native_token_remainder_1() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 50)),
         sender: None,
@@ -864,6 +902,7 @@ fn single_output_native_token_remainder_2() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: Some((TOKEN_ID_1, 100)),
                 sender: None,
@@ -877,6 +916,7 @@ fn single_output_native_token_remainder_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 100)),
         sender: None,
@@ -916,6 +956,7 @@ fn two_basic_outputs_1() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -928,6 +969,7 @@ fn two_basic_outputs_1() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -942,6 +984,7 @@ fn two_basic_outputs_1() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -991,6 +1034,7 @@ fn two_basic_outputs_2() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1003,6 +1047,7 @@ fn two_basic_outputs_2() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1017,6 +1062,7 @@ fn two_basic_outputs_2() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 50)),
         sender: None,
@@ -1057,6 +1103,7 @@ fn two_basic_outputs_3() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1069,6 +1116,7 @@ fn two_basic_outputs_3() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1083,6 +1131,7 @@ fn two_basic_outputs_3() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 75)),
         sender: None,
@@ -1123,6 +1172,7 @@ fn two_basic_outputs_4() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1135,6 +1185,7 @@ fn two_basic_outputs_4() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1149,6 +1200,7 @@ fn two_basic_outputs_4() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 100)),
         sender: None,
@@ -1189,6 +1241,7 @@ fn two_basic_outputs_5() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1201,6 +1254,7 @@ fn two_basic_outputs_5() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1215,6 +1269,7 @@ fn two_basic_outputs_5() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 100)),
         sender: None,
@@ -1255,6 +1310,7 @@ fn two_basic_outputs_6() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1267,6 +1323,7 @@ fn two_basic_outputs_6() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1281,6 +1338,7 @@ fn two_basic_outputs_6() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 250)),
         sender: None,
@@ -1320,6 +1378,7 @@ fn two_basic_outputs_7() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1332,6 +1391,7 @@ fn two_basic_outputs_7() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1346,6 +1406,7 @@ fn two_basic_outputs_7() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 300)),
         sender: None,
@@ -1385,6 +1446,7 @@ fn two_basic_outputs_8() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1397,6 +1459,7 @@ fn two_basic_outputs_8() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 200)),
                     sender: None,
@@ -1411,6 +1474,7 @@ fn two_basic_outputs_8() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: Some((TOKEN_ID_1, 350)),
         sender: None,
@@ -1447,6 +1511,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1459,6 +1524,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1473,6 +1539,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 500_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1513,6 +1580,7 @@ fn multiple_remainders() {
             (
                 Basic {
                     amount: 5_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1525,6 +1593,7 @@ fn multiple_remainders() {
             (
                 Basic {
                     amount: 5_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1537,6 +1606,7 @@ fn multiple_remainders() {
             (
                 Basic {
                     amount: 5_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_1, 100)),
                     sender: None,
@@ -1549,6 +1619,7 @@ fn multiple_remainders() {
             (
                 Basic {
                     amount: 5_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: Some((TOKEN_ID_2, 100)),
                     sender: None,
@@ -1563,6 +1634,7 @@ fn multiple_remainders() {
     );
     let outputs = build_outputs([Basic {
         amount: 15_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
