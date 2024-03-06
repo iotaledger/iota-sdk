@@ -8,7 +8,6 @@ import {
     UnlockCondition,
     AddressUnlockCondition,
     StorageDepositReturnUnlockCondition,
-    Ed25519Address,
     ExpirationUnlockCondition,
     TimelockUnlockCondition,
     SimpleTokenScheme,
@@ -27,13 +26,13 @@ async function run() {
     const client = await Client.create({});
 
     try {
-        const hexAddress = Utils.bech32ToHex(
+        const ed25519Address = Utils.parseBech32Address(
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
-        const accountHexAddress = Utils.bech32ToHex(
+        const accountAddress = Utils.parseBech32Address(
             'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux',
-        );
+        ) as AccountAddress;
 
         const tokenSchema = new SimpleTokenScheme(
             BigInt(50),
@@ -42,7 +41,7 @@ async function run() {
         );
 
         const addressUnlockCondition: UnlockCondition =
-            new AddressUnlockCondition(new Ed25519Address(hexAddress));
+            new AddressUnlockCondition(ed25519Address);
 
         // Most simple output
         const basicOutput = await client.buildBasicOutput({
@@ -54,7 +53,7 @@ async function run() {
             unlockConditions: [
                 addressUnlockCondition,
                 new StorageDepositReturnUnlockCondition(
-                    new Ed25519Address(hexAddress),
+                    ed25519Address,
                     '1000000',
                 ),
             ],
@@ -72,10 +71,7 @@ async function run() {
         const basicOutputWithExpiration = await client.buildBasicOutput({
             unlockConditions: [
                 addressUnlockCondition,
-                new ExpirationUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                    1,
-                ),
+                new ExpirationUnlockCondition(ed25519Address, 1),
             ],
         });
 
@@ -84,9 +80,7 @@ async function run() {
             serialNumber: 1,
             tokenScheme: tokenSchema,
             unlockConditions: [
-                new ImmutableAccountAddressUnlockCondition(
-                    new AccountAddress(accountHexAddress),
-                ),
+                new ImmutableAccountAddressUnlockCondition(accountAddress),
             ],
         });
 

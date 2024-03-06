@@ -15,13 +15,13 @@ address = wallet.address()
 output = wallet.prepare_output(OutputParams(
     address, 1000000))
 
-hexEncodedWalletAddress = Utils.bech32_to_hex(address)
+walletAddress = Utils.parse_bech32_address(address)
 
 controlled_by_wallet = False
 
 if len(
         output.unlock_conditions) == 1 and output.unlock_conditions[0].type == 0:
-    if output.unlock_conditions[0].address.pub_key_hash == hexEncodedWalletAddress:
+    if output.unlock_conditions[0].address.pub_key_hash == walletAddress.pub_key_hash:
         controlled_by_wallet = True
 
 print(

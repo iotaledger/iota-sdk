@@ -7,7 +7,6 @@ import {
     Utils,
     MetadataFeature,
     SenderFeature,
-    Ed25519Address,
     IssuerFeature,
     AddressUnlockCondition,
     utf8ToHex,
@@ -32,22 +31,20 @@ async function run() {
     });
 
     try {
-        const hexAddress = Utils.bech32ToHex(
+        const ed25519Address = Utils.parseBech32Address(
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
         const accountOutput = await client.buildAccountOutput({
             accountId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
-            unlockConditions: [
-                new AddressUnlockCondition(new Ed25519Address(hexAddress)),
-            ],
+            unlockConditions: [new AddressUnlockCondition(ed25519Address)],
             features: [
-                new SenderFeature(new Ed25519Address(hexAddress)),
+                new SenderFeature(ed25519Address),
                 new MetadataFeature({ data: utf8ToHex('hello') }),
             ],
             immutableFeatures: [
-                new IssuerFeature(new Ed25519Address(hexAddress)),
+                new IssuerFeature(ed25519Address),
                 new MetadataFeature({ data: utf8ToHex('hello') }),
             ],
         });

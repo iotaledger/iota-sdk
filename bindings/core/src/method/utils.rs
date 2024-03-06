@@ -8,7 +8,7 @@ use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
         address::{Address, Bech32Address, Hrp},
-        output::{AccountId, AnchorId, NftId, Output, OutputId, StorageScoreParameters},
+        output::{AccountId, Output, OutputId, StorageScoreParameters},
         payload::signed_transaction::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
             TransactionId,
@@ -31,38 +31,10 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum UtilsMethod {
-    /// Transforms bech32 to hex
-    Bech32ToHex {
-        bech32: Bech32Address,
-    },
-    /// Transforms a hex encoded address to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexToBech32 {
-        hex: String,
-        bech32_hrp: Hrp,
-    },
     /// Converts an address to its bech32 representation
     #[serde(rename_all = "camelCase")]
     AddressToBech32 {
         address: Address,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms an account id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AccountIdToBech32 {
-        account_id: AccountId,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms an anchor id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AnchorIdToBech32 {
-        anchor_id: AnchorId,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms an nft id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    NftIdToBech32 {
-        nft_id: NftId,
         bech32_hrp: Hrp,
     },
     /// Returns a valid Address parsed from a String.
