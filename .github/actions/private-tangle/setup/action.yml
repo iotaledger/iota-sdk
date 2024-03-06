@@ -7,8 +7,6 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: iotaledger/iota-core
-        # TODO: remove ref when inx plugins are updated to the latest commit
-        ref: 25995c84ccc4f4cd9041881035f338acca513b0a
         path: iota-core
 
     - name: Prepare files for start and stop
@@ -40,6 +38,6 @@ runs:
     - name: Wait for tangle to start
       shell: bash
       run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8050/health -- echo "Tangle is up"
-    - name: Wait for faucet to start
-      shell: bash
-      run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8088/health -- echo "Faucet is up"
+    # - name: Wait for faucet to start
+    #   shell: bash
+    #   run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8088/health -- echo "Faucet is up"
