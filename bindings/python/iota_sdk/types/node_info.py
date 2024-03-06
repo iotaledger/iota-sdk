@@ -48,8 +48,8 @@ class StatusResponse:
 
 @json
 @dataclass
-class MetricsResponse:
-    """Node metrics.
+class NetworkMetricsResponse:
+    """Network metrics.
 
     Attributes:
         blocks_per_second: The current rate of new blocks per second.

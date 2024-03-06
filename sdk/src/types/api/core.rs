@@ -104,11 +104,10 @@ pub struct StatusResponse {
     pub pruning_epoch: EpochIndex,
 }
 
-/// Returned in [`InfoResponse`].
-/// Metric information about the node.
+/// Metrics information about the network.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct MetricsResponse {
+pub struct NetworkMetricsResponse {
     #[serde(with = "string")]
     pub blocks_per_second: f64,
     #[serde(with = "string")]
