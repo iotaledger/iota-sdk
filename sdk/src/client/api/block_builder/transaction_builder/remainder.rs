@@ -5,18 +5,16 @@ use alloc::collections::BTreeMap;
 use std::collections::HashMap;
 
 use crypto::keys::bip44::Bip44;
+use primitive_types::U256;
 
 use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
-    client::api::{
-        transaction_builder::requirement::native_tokens::{get_native_tokens, get_native_tokens_diff},
-        RemainderData,
-    },
+    client::api::{transaction_builder::requirement::native_tokens::get_native_tokens_diff, RemainderData},
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutput, AnchorOutput, BasicOutput, BasicOutputBuilder,
-            NativeTokens, NativeTokensBuilder, NftOutput, Output, StorageScoreParameters,
+            unlock_condition::AddressUnlockCondition, AccountOutput, BasicOutput, BasicOutputBuilder, NativeToken,
+            NftOutput, Output, StorageScoreParameters, TokenId,
         },
     },
 };
@@ -69,23 +67,6 @@ impl TransactionBuilder {
         Ok(None)
     }
 
-    pub(crate) fn remainder_amount(&self) -> Result<(u64, bool, bool), TransactionBuilderError> {
-        let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
-        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
-
-        input_native_tokens.merge(minted_native_tokens)?;
-        output_native_tokens.merge(melted_native_tokens)?;
-
-        if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
-        }
-
-        let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
-
-        self.required_remainder_amount(native_tokens_diff)
-    }
-
     pub(crate) fn storage_deposit_returns_and_remainders(
         &mut self,
     ) -> Result<(Vec<Output>, Vec<RemainderData>), TransactionBuilderError> {
@@ -109,18 +90,10 @@ impl TransactionBuilder {
             }
         }
 
-        let mut input_native_tokens = get_native_tokens(self.selected_inputs.iter().map(|input| &input.output))?;
-        let mut output_native_tokens = get_native_tokens(self.non_remainder_outputs())?;
-        let (minted_native_tokens, melted_native_tokens) = self.get_minted_and_melted_native_tokens()?;
-
-        input_native_tokens.merge(minted_native_tokens)?;
-        output_native_tokens.merge(melted_native_tokens)?;
-
-        if let Some(burn) = self.burn.as_ref() {
-            output_native_tokens.merge(NativeTokensBuilder::from(burn.native_tokens.clone()))?;
-        }
-
-        let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
+        let (input_nts, output_nts) = self.get_input_output_native_tokens();
+        log::debug!("input_nts: {input_nts:#?}");
+        log::debug!("output_nts: {output_nts:#?}");
+        let native_tokens_diff = get_native_tokens_diff(input_nts, output_nts);
 
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
@@ -142,7 +115,7 @@ impl TransactionBuilder {
             self.remainders.added_mana = std::mem::take(&mut mana_diff);
         }
 
-        if input_amount == output_amount && mana_diff == 0 && native_tokens_diff.is_none() {
+        if input_amount == output_amount && mana_diff == 0 && native_tokens_diff.is_empty() {
             log::debug!("No remainder required");
             return Ok((storage_deposit_returns, Vec::new()));
         }
@@ -174,12 +147,10 @@ impl TransactionBuilder {
 
     pub(crate) fn get_output_for_added_mana(&mut self, remainder_address: &Address) -> Option<&mut Output> {
         // Establish the order in which we want to pick an output
-        let sort_order = HashMap::from([
-            (AccountOutput::KIND, 1),
-            (BasicOutput::KIND, 2),
-            (NftOutput::KIND, 3),
-            (AnchorOutput::KIND, 4),
-        ]);
+        let sort_order = [AccountOutput::KIND, BasicOutput::KIND, NftOutput::KIND]
+            .into_iter()
+            .zip(0..)
+            .collect::<HashMap<_, _>>();
         // Remove those that do not have an ordering and sort
         let ordered_outputs = self
             .provided_outputs
@@ -203,11 +174,9 @@ impl TransactionBuilder {
 
     /// Calculates the required amount for required remainder outputs (multiple outputs are required if multiple native
     /// tokens are remaining) and returns if there are native tokens as remainder.
-    pub(crate) fn required_remainder_amount(
-        &self,
-        remainder_native_tokens: Option<NativeTokens>,
-    ) -> Result<(u64, bool, bool), TransactionBuilderError> {
-        let native_tokens_remainder = remainder_native_tokens.is_some();
+    pub(crate) fn required_remainder_amount(&self) -> Result<(u64, bool, bool), TransactionBuilderError> {
+        let (input_nts, output_nts) = self.get_input_output_native_tokens();
+        let remainder_native_tokens = get_native_tokens_diff(input_nts, output_nts);
 
         let remainder_builder =
             BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
@@ -215,14 +184,19 @@ impl TransactionBuilder {
                     [0; 32],
                 ))));
 
-        let remainder_amount = if let Some(native_tokens) = remainder_native_tokens {
+        let remainder_amount = if !remainder_native_tokens.is_empty() {
             let nt_remainder_amount = remainder_builder
-                .with_native_token(*native_tokens.first().unwrap())
+                .with_native_token(
+                    remainder_native_tokens
+                        .first_key_value()
+                        .map(|(token_id, amount)| NativeToken::new(*token_id, amount))
+                        .unwrap()?,
+                )
                 .finish_output()?
                 .amount();
             // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
             // cost.
-            nt_remainder_amount * native_tokens.len() as u64
+            nt_remainder_amount * remainder_native_tokens.len() as u64
         } else {
             remainder_builder.finish_output()?.amount()
         };
@@ -242,14 +216,14 @@ impl TransactionBuilder {
             mana_remainder &= selected_mana > required_mana + initial_excess;
         }
 
-        Ok((remainder_amount, native_tokens_remainder, mana_remainder))
+        Ok((remainder_amount, !remainder_native_tokens.is_empty(), mana_remainder))
     }
 }
 
 fn create_remainder_outputs(
     amount_diff: u64,
     mana_diff: u64,
-    native_tokens_diff: Option<NativeTokens>,
+    mut native_tokens: BTreeMap<TokenId, U256>,
     remainder_address: Address,
     remainder_address_chain: Option<Bip44>,
     storage_score_parameters: StorageScoreParameters,
@@ -259,24 +233,22 @@ fn create_remainder_outputs(
     let mut catchall_native_token = None;
 
     // Start with the native tokens
-    if let Some(native_tokens) = native_tokens_diff {
-        if let Some((last, nts)) = native_tokens.split_last() {
-            // Save this one for the catchall
-            catchall_native_token.replace(*last);
-            // Create remainder outputs with min amount
-            for native_token in nts {
-                let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
-                    .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                    .with_native_token(*native_token)
-                    .finish_output()?;
-                log::debug!(
-                    "Created remainder output of amount {}, mana {} and native token {native_token:?} for {remainder_address:?}",
-                    output.amount(),
-                    output.mana()
-                );
-                remaining_amount = remaining_amount.saturating_sub(output.amount());
-                remainder_outputs.push(output);
-            }
+    if let Some((token_id, amount)) = native_tokens.pop_last() {
+        // Save this one for the catchall
+        catchall_native_token.replace(NativeToken::new(token_id, amount)?);
+        // Create remainder outputs with min amount
+        for (token_id, amount) in native_tokens {
+            let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
+                .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                .with_native_token(NativeToken::new(token_id, amount)?)
+                .finish_output()?;
+            log::debug!(
+                "Created remainder output of amount {}, mana {} and native token ({token_id}: {amount}) for {remainder_address:?}",
+                output.amount(),
+                output.mana()
+            );
+            remaining_amount = remaining_amount.saturating_sub(output.amount());
+            remainder_outputs.push(output);
         }
     }
     let mut catchall = BasicOutputBuilder::new_with_amount(remaining_amount)

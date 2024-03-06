@@ -962,15 +962,24 @@ fn two_basic_outputs_1() {
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
-    assert!(selected.inputs_data.contains(&inputs[0]));
+    assert!(selected.inputs_data.contains(&inputs[0]) || selected.inputs_data.contains(&inputs[1]));
     assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert_remainder_or_return(
-        &selected.transaction.outputs()[1],
-        500_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        Some((TOKEN_ID_1, 100)),
-    );
+    if selected.inputs_data.contains(&inputs[0]) {
+        assert_remainder_or_return(
+            &selected.transaction.outputs()[1],
+            500_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Some((TOKEN_ID_1, 100)),
+        );
+    } else {
+        assert_remainder_or_return(
+            &selected.transaction.outputs()[1],
+            500_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Some((TOKEN_ID_1, 200)),
+        );
+    }
 }
 
 #[test]
