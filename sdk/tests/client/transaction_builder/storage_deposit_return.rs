@@ -24,6 +24,7 @@ fn sdruc_output_not_provided_no_remainder() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -37,6 +38,7 @@ fn sdruc_output_not_provided_no_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -79,6 +81,7 @@ fn sdruc_output_provided_no_remainder() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -93,6 +96,7 @@ fn sdruc_output_provided_no_remainder() {
     let outputs = build_outputs([
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: None,
@@ -102,6 +106,7 @@ fn sdruc_output_provided_no_remainder() {
         },
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             native_token: None,
             sender: None,
@@ -134,6 +139,7 @@ fn sdruc_output_provided_remainder() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -147,6 +153,7 @@ fn sdruc_output_provided_remainder() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -190,6 +197,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -202,6 +210,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -216,6 +225,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -259,6 +269,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -271,6 +282,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -285,6 +297,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -329,6 +342,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -341,6 +355,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -355,6 +370,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -410,6 +426,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -422,6 +439,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -436,6 +454,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -479,6 +498,7 @@ fn insufficient_amount_because_of_sdruc() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -492,6 +512,7 @@ fn insufficient_amount_because_of_sdruc() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -528,6 +549,7 @@ fn useless_sdruc_required_for_sender_feature() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -540,6 +562,7 @@ fn useless_sdruc_required_for_sender_feature() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -554,6 +577,7 @@ fn useless_sdruc_required_for_sender_feature() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
@@ -601,6 +625,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -613,6 +638,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -625,6 +651,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -669,6 +696,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -681,6 +709,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -693,6 +722,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -705,6 +735,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         native_token: None,
         sender: None,
