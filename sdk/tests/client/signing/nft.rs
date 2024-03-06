@@ -56,6 +56,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id,
                     address: address_0.clone(),
                     sender: None,
@@ -68,6 +69,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: nft_address.clone(),
                     native_token: None,
                     sender: None,
@@ -80,6 +82,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: nft_address.clone(),
                     native_token: None,
                     sender: None,
@@ -96,6 +99,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let outputs = build_outputs([
         Nft {
             amount: 1_000_000,
+            mana: 0,
             nft_id: nft_id,
             address: address_0,
             sender: None,
@@ -105,6 +109,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         },
         Basic {
             amount: 2_000_000,
+            mana: 0,
             address: nft_address,
             native_token: None,
             sender: None,
