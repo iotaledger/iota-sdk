@@ -1932,19 +1932,14 @@ fn min_allot_account_mana_requirement_twice() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 2);
-    let account_output = selected
-        .transaction
-        .outputs()
-        .iter()
-        .filter_map(Output::as_account_opt)
-        .find(|o| o.account_id() == &account_id_1)
-        .unwrap();
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    let account_output = selected.transaction.outputs()[0].as_account();
     assert_eq!(selected.transaction.allotments().len(), 1);
     assert_eq!(
         selected.transaction.allotments()[0],
         ManaAllotment::new(account_id_1, required_allotment).unwrap()
     );
+    assert_eq!(account_output.account_id(), &account_id_1);
     assert_eq!(account_output.mana(), 100);
 }
 
@@ -2245,18 +2240,11 @@ fn auto_transition_account_less_than_min_additional() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 2);
-    let min_amount = AccountOutputBuilder::from(inputs[0].output.as_account())
-        .with_minimum_amount(protocol_parameters.storage_score_parameters())
-        .finish_output()
-        .unwrap()
-        .amount();
-    let account_output = selected
-        .transaction
-        .outputs()
-        .iter()
-        .filter_map(Output::as_account_opt)
-        .find(|o| o.account_id() == &account_id_1)
-        .unwrap();
-    assert_eq!(account_output.amount(), min_amount);
+    assert_eq!(selected.transaction.outputs().len(), 1);
+    let account_output = selected.transaction.outputs()[0].as_account();
+    assert_eq!(account_output.account_id(), &account_id_1);
+    assert_eq!(
+        account_output.amount(),
+        inputs.iter().map(|i| i.output.amount()).sum::<u64>()
+    );
 }

@@ -10,7 +10,7 @@ use crate::{
         address::Address,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutput, AccountOutputBuilder, BasicOutput,
-            FoundryOutput, FoundryOutputBuilder, MinimumOutputAmount, NftOutput, NftOutputBuilder, Output,
+            ChainId, FoundryOutput, FoundryOutputBuilder, MinimumOutputAmount, NftOutput, NftOutputBuilder, Output,
         },
         slot::{SlotCommitmentId, SlotIndex},
     },
@@ -184,6 +184,23 @@ impl TransactionBuilder {
         }
 
         Ok(input_amount >= *output_amount)
+    }
+
+    pub(crate) fn amount_chains(&self) -> Result<HashMap<ChainId, (u64, u64)>, TransactionBuilderError> {
+        let mut res = self
+            .non_remainder_outputs()
+            .filter_map(|o| o.chain_id().map(|id| (id, (0, o.amount()))))
+            .collect::<HashMap<_, _>>();
+        for input in &self.selected_inputs {
+            if let Some(chain_id) = input
+                .output
+                .chain_id()
+                .map(|id| id.or_from_output_id(input.output_id()))
+            {
+                res.entry(chain_id).or_default().0 += input.output.amount();
+            }
+        }
+        Ok(res)
     }
 }
 

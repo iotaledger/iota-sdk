@@ -881,7 +881,7 @@ fn burn_foundry_present() {
     assert_eq!(selected.inputs_data.len(), 2);
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert!(selected.inputs_data.contains(&inputs[1]));
-    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
@@ -893,7 +893,7 @@ fn burn_foundry_present() {
                     None,
                 );
             } else if output.is_account() {
-                assert_eq!(output.amount(), 1_000_000);
+                assert_eq!(output.amount(), 1_500_000);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
                 assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
@@ -1636,7 +1636,7 @@ fn burn_generated_mana_account() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 1);
     assert_eq!(
         selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
         1200

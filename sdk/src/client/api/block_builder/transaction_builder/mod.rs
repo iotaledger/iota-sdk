@@ -216,6 +216,7 @@ pub(crate) struct Remainders {
     address: Option<Address>,
     data: Vec<RemainderData>,
     storage_deposit_returns: Vec<Output>,
+    added_amount: HashMap<Option<ChainId>, u64>,
     added_mana: HashMap<Option<ChainId>, u64>,
 }
 
@@ -383,30 +384,43 @@ impl TransactionBuilder {
             .get_remainder_address()?
             .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
             .0;
-        for (chain_id, added_mana) in core::mem::take(&mut self.remainders.added_mana) {
-            if let Some(output) = self.get_output_for_added_mana(chain_id, &remainder_address) {
+
+        let mut added_amount_mana = HashMap::<Option<ChainId>, (u64, u64)>::new();
+        for (chain_id, added_amount) in self.remainders.added_amount.drain() {
+            added_amount_mana.entry(chain_id).or_default().0 = added_amount;
+        }
+        for (chain_id, added_mana) in self.remainders.added_mana.drain() {
+            added_amount_mana.entry(chain_id).or_default().1 = added_mana;
+        }
+
+        for (chain_id, (added_amount, added_mana)) in added_amount_mana {
+            let mut output = self.get_output_for_added_remainder(chain_id, &remainder_address);
+            if output.is_none() {
+                output = self.get_output_for_added_remainder(None, &remainder_address);
+            }
+            if let Some(output) = output {
                 log::debug!(
-                    "Adding {added_mana} excess input mana to output with address {remainder_address} and {chain_id:?}"
+                    "Adding {added_amount} excess amount and {added_mana} excess mana to output with address {remainder_address} and {chain_id:?}"
                 );
+                let new_amount = output.amount() + added_amount;
                 let new_mana = output.mana() + added_mana;
                 *output = match output {
-                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
-                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
-                    _ => unreachable!(),
-                };
-            } else if let Some(output) = self.get_output_for_added_mana(None, &remainder_address) {
-                log::debug!("Adding {added_mana} excess input mana to output with address {remainder_address}");
-                let new_mana = output.mana() + added_mana;
-                *output = match output {
-                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
-                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
+                    Output::Basic(b) => BasicOutputBuilder::from(&*b)
+                        .with_amount(new_amount)
+                        .with_mana(new_mana)
+                        .finish_output()?,
+                    Output::Account(a) => AccountOutputBuilder::from(&*a)
+                        .with_amount(new_amount)
+                        .with_mana(new_mana)
+                        .finish_output()?,
+                    Output::Nft(n) => NftOutputBuilder::from(&*n)
+                        .with_amount(new_amount)
+                        .with_mana(new_mana)
+                        .finish_output()?,
                     _ => unreachable!(),
                 };
             }
         }
-
         // If we're burning generated mana, set the capability flag.
         if self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
             // Get the mana sums with generated mana to see whether there's a difference.

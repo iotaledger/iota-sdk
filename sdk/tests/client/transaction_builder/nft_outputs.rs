@@ -1541,12 +1541,7 @@ fn auto_transition_nft_less_than_min_additional() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 2);
-    let min_amount = NftOutputBuilder::from(inputs[0].output.as_nft())
-        .with_minimum_amount(protocol_parameters.storage_score_parameters())
-        .finish_output()
-        .unwrap()
-        .amount();
+    assert_eq!(selected.transaction.outputs().len(), 1);
     let nft_output = selected
         .transaction
         .outputs()
@@ -1554,5 +1549,5 @@ fn auto_transition_nft_less_than_min_additional() {
         .filter_map(Output::as_nft_opt)
         .find(|o| o.nft_id() == &nft_id_1)
         .unwrap();
-    assert_eq!(nft_output.amount(), min_amount);
+    assert_eq!(nft_output.amount(), 1_000_000 + small_amount);
 }

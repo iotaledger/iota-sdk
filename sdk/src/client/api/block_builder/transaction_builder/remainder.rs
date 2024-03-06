@@ -96,7 +96,7 @@ impl TransactionBuilder {
 
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
-        let amount_diff = input_amount.checked_sub(output_amount).expect("amount underflow");
+        let mut amount_diff = input_amount.checked_sub(output_amount).expect("amount underflow");
         let mut mana_diff = input_mana.checked_sub(output_mana).expect("mana underflow");
 
         // If we are burning mana, then we can subtract out the burned amount.
@@ -108,12 +108,62 @@ impl TransactionBuilder {
             .get_remainder_address()?
             .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?;
 
+        let remainder_builder =
+            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
+                    [0; 32],
+                ))));
+
+        let nt_min_amount = if !native_tokens_diff.is_empty() {
+            let nt_remainder_amount = remainder_builder
+                .with_native_token(
+                    native_tokens_diff
+                        .first_key_value()
+                        .map(|(token_id, amount)| NativeToken::new(*token_id, amount))
+                        .unwrap()?,
+                )
+                .finish_output()?
+                .amount();
+            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
+            // cost.
+            nt_remainder_amount * native_tokens_diff.len() as u64
+        } else {
+            0
+        };
+
+        // If there is an amount remainder (above any nt min amount), try to fit it in an existing output
+        if amount_diff > nt_min_amount {
+            for (chain_id, (input_amount, output_amount)) in self.amount_chains()? {
+                if input_amount > output_amount
+                    && (self.output_for_added_remainder(Some(chain_id), &remainder_address)
+                        || self.output_for_added_remainder(None, &remainder_address))
+                {
+                    // Get the lowest of the total diff or the diff for this chain
+                    let amount_to_add = (amount_diff - nt_min_amount).min(input_amount - output_amount);
+                    log::debug!(
+                        "Allocating {amount_to_add} excess input amount for output with address {remainder_address} and chain id {chain_id}"
+                    );
+                    amount_diff -= amount_to_add;
+                    self.remainders.added_amount.insert(Some(chain_id), amount_to_add);
+                }
+            }
+            // Any leftover amount diff can go in any output with the right address
+            if amount_diff > nt_min_amount && self.output_for_added_remainder(None, &remainder_address) {
+                let amount_to_add = amount_diff - nt_min_amount;
+                log::debug!(
+                    "Allocating {amount_to_add} excess input amount for output with address {remainder_address}"
+                );
+                amount_diff = nt_min_amount;
+                self.remainders.added_amount.insert(None, amount_to_add);
+            }
+        }
+
         // If there is a mana remainder, try to fit it in an existing output
         if mana_diff > 0 {
             for (chain_id, (input_mana, output_mana)) in self.mana_chains()? {
                 if input_mana > output_mana
-                    && (self.output_for_added_mana_exists(Some(chain_id), &remainder_address)
-                        || self.output_for_added_mana_exists(None, &remainder_address))
+                    && (self.output_for_added_remainder(Some(chain_id), &remainder_address)
+                        || self.output_for_added_remainder(None, &remainder_address))
                 {
                     // Get the lowest of the total diff or the diff for this chain
                     let mana_to_add = mana_diff.min(input_mana - output_mana);
@@ -124,14 +174,14 @@ impl TransactionBuilder {
                     self.remainders.added_mana.insert(Some(chain_id), mana_to_add);
                 }
             }
-            // Any leftover mana diff can go in any basic output with the right address
-            if mana_diff > 0 && self.output_for_added_mana_exists(None, &remainder_address) {
+            // Any leftover mana diff can go in any output with the right address
+            if mana_diff > 0 && self.output_for_added_remainder(None, &remainder_address) {
                 log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
                 self.remainders.added_mana.insert(None, std::mem::take(&mut mana_diff));
             }
         }
 
-        if input_amount == output_amount && mana_diff == 0 && native_tokens_diff.is_empty() {
+        if amount_diff == 0 && mana_diff == 0 && native_tokens_diff.is_empty() {
             log::debug!("No remainder required");
             return Ok((storage_deposit_returns, Vec::new()));
         }
@@ -148,7 +198,7 @@ impl TransactionBuilder {
         Ok((storage_deposit_returns, remainder_outputs))
     }
 
-    fn output_for_added_mana_exists(&self, chain_id: Option<ChainId>, remainder_address: &Address) -> bool {
+    fn output_for_added_remainder(&self, chain_id: Option<ChainId>, remainder_address: &Address) -> bool {
         // Find the first value that matches the remainder address
         self.added_outputs.iter().any(|o| {
             (o.chain_id() == chain_id || chain_id.is_none() && (o.is_basic() || o.is_account() || o.is_nft()))
@@ -161,7 +211,7 @@ impl TransactionBuilder {
         })
     }
 
-    pub(crate) fn get_output_for_added_mana(
+    pub(crate) fn get_output_for_added_remainder(
         &mut self,
         chain_id: Option<ChainId>,
         remainder_address: &Address,
@@ -219,14 +269,14 @@ impl TransactionBuilder {
             && remainder_address.map_or(true, |remainder_address| {
                 let mut mana_diff = selected_mana - required_mana;
                 for (chain_id, (mana_in, mana_out)) in mana_chains {
-                    if mana_in > mana_out && self.output_for_added_mana_exists(Some(chain_id), &remainder_address) {
+                    if mana_in > mana_out && self.output_for_added_remainder(Some(chain_id), &remainder_address) {
                         mana_diff -= mana_diff.min(mana_in - mana_out);
                         if mana_diff == 0 {
                             return false;
                         }
                     }
                 }
-                mana_diff > 0 && !self.output_for_added_mana_exists(None, &remainder_address)
+                mana_diff > 0 && !self.output_for_added_remainder(None, &remainder_address)
             });
         // If we are burning mana, we may not need a mana remainder
         if self.burn.as_ref().map_or(false, |b| b.mana()) {
