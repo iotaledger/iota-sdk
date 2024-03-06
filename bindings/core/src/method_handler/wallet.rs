@@ -138,10 +138,6 @@ pub(crate) async fn call_wallet_method_internal(
             let output_ids = wallet.claimable_outputs(outputs_to_claim).await?;
             Response::OutputIds(output_ids)
         }
-        WalletMethod::ClaimOutputs { output_ids_to_claim } => {
-            let transaction = wallet.claim_outputs(output_ids_to_claim.to_vec()).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
-        }
         // #[cfg(feature = "participation")]
         // WalletMethod::DeregisterParticipationEvent { event_id } => {
         //     wallet.deregister_participation_event(&event_id).await?;
@@ -389,22 +385,6 @@ pub(crate) async fn call_wallet_method_internal(
                 .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
             Response::Ok
-        }
-        WalletMethod::Send {
-            amount,
-            address,
-            options,
-        } => {
-            let transaction = wallet.send(amount, address, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
-        }
-        WalletMethod::SendWithParams { params, options } => {
-            let transaction = wallet.send_with_params(params, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
-        }
-        WalletMethod::SendOutputs { outputs, options } => {
-            let transaction = wallet.send_outputs(outputs, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SetAlias { alias } => {
             wallet.set_alias(&alias).await?;

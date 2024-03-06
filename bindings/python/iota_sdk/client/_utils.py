@@ -81,16 +81,6 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
-    # pylint: disable=redefined-builtin
-    def hex_public_key_to_bech32_address(
-            self, hex_str: HexStr, bech32_hrp: Optional[str] = None) -> str:
-        """Transforms a hex encoded public key to a bech32 encoded address.
-        """
-        return self._call_method('hexPublicKeyToBech32Address', {
-            'hex': hex_str,
-            'bech32Hrp': bech32_hrp
-        })
-
     def computer_minimum_output_amount(self, output: Output) -> int:
         """Minimum required output amount.
         """

@@ -25,9 +25,9 @@ describe('Utils methods', () => {
         const hexPublicKey =
             '0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a';
 
-        const address = Utils.hexPublicKeyToBech32Address(hexPublicKey, 'rms');
+        const address = Utils.publicKeyHash(hexPublicKey);
 
-        expect(address).toBeValidAddress();
+        expect(address.pubKeyHash).toBe('0x96f9de0989e77d0e150e850a5a600e83045fa57419eaf3b20225b763d4e23813');
     });
 
     it('validates address', () => {
