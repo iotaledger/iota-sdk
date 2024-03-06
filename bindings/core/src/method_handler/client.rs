@@ -184,6 +184,7 @@ pub(crate) async fn call_client_method_internal(
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetInfo { url, auth } => Response::Info(Client::get_info(&url, auth).await?),
         ClientMethod::GetNodeInfo => Response::NodeInfo(client.get_node_info().await?),
+        ClientMethod::GetNetworkMetrics => Response::NetworkMetrics(client.get_network_metrics().await?),
         ClientMethod::GetRoutes => Response::Routes(client.get_routes().await?),
         ClientMethod::GetAccountCongestion { account_id, work_score } => {
             Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)

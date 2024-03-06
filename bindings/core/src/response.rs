@@ -17,9 +17,9 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-                IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
-                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-                ValidatorResponse, ValidatorsResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, NetworkMetricsResponse, OutputResponse,
+                OutputWithMetadataResponse, RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse,
+                UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -101,6 +101,9 @@ pub enum Response {
     /// Response for:
     /// - [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfo(NodeInfoResponse),
+    /// Response for:
+    /// - [`GetNetworkMetrics`](crate::method::ClientMethod::GetNetworkMetrics)
+    NetworkMetrics(NetworkMetricsResponse),
     /// Response for:
     /// - [`GetRoutes`](crate::method::ClientMethod::GetRoutes)
     Routes(RoutesResponse),
