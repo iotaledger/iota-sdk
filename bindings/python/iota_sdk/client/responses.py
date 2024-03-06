@@ -56,14 +56,12 @@ class InfoResponse:
         name: The name of the node (e.g. Hornet).
         version: The semantic version of the node.
         status: The status of the node.
-        metrics: Node metrics.
         protocol_parameters: Supported protocol versions by the node.
         base_token: Gives info about the base token the network uses.
     """
     name: str
     version: str
     status: StatusResponse
-    metrics: MetricsResponse
     protocol_parameters: List[ProtocolParametersResponse]
     base_token: BaseTokenResponse
 

@@ -40,7 +40,6 @@ pub struct InfoResponse {
     pub name: String,
     pub version: String,
     pub status: StatusResponse,
-    pub metrics: MetricsResponse,
     pub protocol_parameters: ProtocolParametersMap,
     pub base_token: BaseTokenResponse,
 }
