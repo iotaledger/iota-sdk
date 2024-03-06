@@ -32,6 +32,7 @@ fn no_inputs() {
     let inputs = Vec::new();
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -64,6 +65,7 @@ fn no_outputs() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -98,6 +100,7 @@ fn no_outputs_but_required_input() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -143,6 +146,7 @@ fn no_outputs_but_burn() {
         [(
             Account {
                 amount: 2_000_000,
+                mana: 0,
                 account_id: account_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -188,6 +192,7 @@ fn no_address_provided() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -201,6 +206,7 @@ fn no_address_provided() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -233,6 +239,7 @@ fn no_matching_address_provided() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -246,6 +253,7 @@ fn no_matching_address_provided() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -279,6 +287,7 @@ fn two_addresses_one_missing() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -291,6 +300,7 @@ fn two_addresses_one_missing() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -305,6 +315,7 @@ fn two_addresses_one_missing() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -342,6 +353,7 @@ fn two_addresses() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -354,6 +366,7 @@ fn two_addresses() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -368,6 +381,7 @@ fn two_addresses() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -469,6 +483,7 @@ fn transition_no_more_than_needed_for_account_amount() {
             (
                 Account {
                     amount: 500_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -479,6 +494,7 @@ fn transition_no_more_than_needed_for_account_amount() {
             (
                 Nft {
                     amount: 500_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -493,6 +509,7 @@ fn transition_no_more_than_needed_for_account_amount() {
     );
     let outputs = build_outputs([Account {
         amount: 500_000,
+        mana: 0,
         account_id: account_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -525,6 +542,7 @@ fn transition_no_more_than_needed_for_nft_amount() {
             (
                 Account {
                     amount: 500_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -535,6 +553,7 @@ fn transition_no_more_than_needed_for_nft_amount() {
             (
                 Nft {
                     amount: 500_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -549,6 +568,7 @@ fn transition_no_more_than_needed_for_nft_amount() {
     );
     let outputs = build_outputs([Nft {
         amount: 500_000,
+        mana: 0,
         nft_id: nft_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,

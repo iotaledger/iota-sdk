@@ -23,6 +23,7 @@ fn one_output_timelock_not_expired() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -36,6 +37,7 @@ fn one_output_timelock_not_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -68,6 +70,7 @@ fn timelock_equal_timestamp() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -81,6 +84,7 @@ fn timelock_equal_timestamp() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -113,6 +117,7 @@ fn two_outputs_one_timelock_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -125,6 +130,7 @@ fn two_outputs_one_timelock_expired() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -139,6 +145,7 @@ fn two_outputs_one_timelock_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -172,6 +179,7 @@ fn two_outputs_one_timelocked_one_missing() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -184,6 +192,7 @@ fn two_outputs_one_timelocked_one_missing() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -198,6 +207,7 @@ fn two_outputs_one_timelocked_one_missing() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
@@ -230,6 +240,7 @@ fn one_output_timelock_expired() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -243,6 +254,7 @@ fn one_output_timelock_expired() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         native_token: None,
         sender: None,
