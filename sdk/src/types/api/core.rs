@@ -413,8 +413,13 @@ pub struct TransactionMetadataResponse {
     pub transaction_state: TransactionState,
     /// The slot of the earliest included valid block that contains an attachment of the transaction.
     pub earliest_attachment_slot: SlotIndex,
+    /// If applicable, indicates the error that occurred during the transaction processing.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transaction_failure_reason: Option<TransactionFailureReason>,
+    /// Contains the detailed error message that occurred during the transaction processing if the debug mode was
+    /// activated in the retainer.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transaction_failure_details: Option<String>,
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.

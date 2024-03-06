@@ -18,11 +18,15 @@ export interface TransactionMetadataResponse {
      */
     transactionState: TransactionState;
     /**
-    * The slot of the earliest included valid block that contains an attachment of the transaction.
-    */
+     * The slot of the earliest included valid block that contains an attachment of the transaction.
+     */
     earliestAttachmentSlot: SlotIndex;
     /**
-     * The transaction failure reason.
+     * If applicable, indicates the error that occurred during the transaction processing.
      */
     transactionFailureReason?: TransactionFailureReason;
+    /**
+     * Contains the detailed error message that occurred during the transaction processing if the debug mode was activated in the retainer.
+     */
+    transactionFailureDetails?: String;
 }

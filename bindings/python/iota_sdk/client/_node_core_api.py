@@ -84,7 +84,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Accounts routes.
 
-    def get_account_congestion(self, account_id: HexStr, work_score: Optional[int] = None) -> CongestionResponse:
+    def get_account_congestion(
+            self, account_id: HexStr, work_score: Optional[int] = None) -> CongestionResponse:
         """Checks if the account is ready to issue a block.
         GET /api/core/v3/accounts/{bech32Address}/congestion
         """
@@ -112,7 +113,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Validators routes.
 
-    def get_validators(self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ValidatorsResponse:
+    def get_validators(
+            self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ValidatorsResponse:
         """Returns information of all stakers (registered validators) and if they are active, ordered by their holding stake.
         GET /api/core/v3/validators
         """
@@ -131,7 +133,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Committee routes.
 
-    def get_committee(self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
+    def get_committee(
+            self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
         current committee members are returned.
         GET /api/core/v3/committee/?epochIndex
