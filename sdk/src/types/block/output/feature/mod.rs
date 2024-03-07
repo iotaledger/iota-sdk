@@ -187,6 +187,7 @@ pub(crate) type FeatureCount = BoundedU8<0, { FeatureFlags::ALL_FLAGS.len() as u
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
 #[packable(unpack_error = FeatureError, with = |e| e.unwrap_item_err_or_else(|p| FeatureError::Count(p.into())))]
+#[packable(verify_with = verify_features)]
 pub struct Features(#[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<Feature, FeatureCount>);
 
 impl TryFrom<Vec<Feature>> for Features {
@@ -297,7 +298,14 @@ impl StorageScore for Features {
     }
 }
 
-#[inline]
+fn verify_features(features: &Features) -> Result<(), FeatureError> {
+    if features.staking().is_some() && features.block_issuer().is_none() {
+        Err(FeatureError::StakingBlockIssuerMissing)
+    } else {
+        Ok(())
+    }
+}
+
 fn verify_unique_sorted(features: &[Feature]) -> Result<(), FeatureError> {
     if !is_unique_sorted(features.iter().map(Feature::kind)) {
         Err(FeatureError::NotUniqueSorted)
