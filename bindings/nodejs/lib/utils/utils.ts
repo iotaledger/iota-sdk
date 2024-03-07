@@ -21,6 +21,7 @@ import {
     Unlock,
     DecayedMana,
     NumericString,
+    Ed25519Address,
 } from '../types';
 import {
     AccountId,
@@ -70,9 +71,9 @@ export class Utils {
      */
     static computeAccountId(outputId: OutputId): AccountId {
         return callUtilsMethod({
-            name: 'computeAccountId',
+            name: 'blake2b256Hash',
             data: {
-                outputId,
+                bytes: outputId,
             },
         });
     }
@@ -108,9 +109,9 @@ export class Utils {
      */
     static computeNftId(outputId: OutputId): NftId {
         return callUtilsMethod({
-            name: 'computeNftId',
+            name: 'blake2b256Hash',
             data: {
-                outputId,
+                bytes: outputId,
             },
         });
     }
@@ -369,23 +370,20 @@ export class Utils {
     }
 
     /**
-     * Convert a hex-encoded public key to a Bech32-encoded address string.
+     * Hashes a hex encoded public key with Blake2b256.
      *
-     * @param hex A hex-encoded public key.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
-     * @returns The Bech32-encoded address string.
+     * @param hex The hexadecimal string representation of a public key.
+     * @returns The Ed25519 address with the hashed public key.
      */
-    static hexPublicKeyToBech32Address(
-        hex: HexEncodedString,
-        bech32Hrp: string,
-    ): Bech32Address {
-        return callUtilsMethod({
-            name: 'hexPublicKeyToBech32Address',
-            data: {
-                hex,
-                bech32Hrp,
-            },
-        });
+    static publicKeyHash(hex: HexEncodedString): Ed25519Address {
+        return new Ed25519Address(
+            callUtilsMethod({
+                name: 'blake2b256Hash',
+                data: {
+                    bytes: hex,
+                },
+            }),
+        );
     }
 
     /**

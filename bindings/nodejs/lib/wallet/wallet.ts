@@ -1463,11 +1463,11 @@ export class Wallet {
     }
 
     /**
-     * Send outputs.
+     * Send outputs in a transaction.
      *
-     * @param outputs Outputs to use in the transaction.
-     * @param options Additional transaction options.
-     * @returns The transaction data.
+     * @param outputs The outputs to send.
+     * @param transactionOptions Additional transaction options.
+     * @returns The sent transaction.
      */
     async sendOutputs(
         outputs: Output[],
@@ -1555,18 +1555,9 @@ export class Wallet {
         if (typeof amount === 'bigint') {
             amount = amount.toString(10);
         }
-        const response = await this.methodHandler.callMethod({
-            name: 'send',
-            data: {
-                amount,
-                address,
-                options: transactionOptions,
-            },
-        });
-        const parsed = JSON.parse(
-            response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        return (
+            await this.prepareSend([{ address, amount }], transactionOptions)
+        ).send();
     }
 
     /**
@@ -1580,22 +1571,7 @@ export class Wallet {
         params: SendParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        for (let i = 0; i < params.length; i++) {
-            if (typeof params[i].amount === 'bigint') {
-                params[i].amount = params[i].amount.toString(10);
-            }
-        }
-        const response = await this.methodHandler.callMethod({
-            name: 'sendWithParams',
-            data: {
-                params,
-                options: transactionOptions,
-            },
-        });
-        const parsed = JSON.parse(
-            response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        return (await this.prepareSend(params, transactionOptions)).send();
     }
 
     /**
