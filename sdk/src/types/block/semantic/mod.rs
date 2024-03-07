@@ -404,6 +404,19 @@ impl<'a> SemanticValidationContext<'a> {
         Ok(())
     }
 
+    fn validate_storage_deposit_returns(&mut self) -> Result<(), TransactionFailureReason> {
+        for (return_address, return_amount) in self.storage_deposit_returns.iter() {
+            if let Some(deposit_amount) = self.simple_deposits.get(return_address) {
+                if deposit_amount < return_amount {
+                    return Err(TransactionFailureReason::ReturnAmountNotFulFilled);
+                }
+            } else {
+                return Err(TransactionFailureReason::ReturnAmountNotFulFilled);
+            }
+        }
+        Ok(())
+    }
+
     fn validate_balances(&mut self) -> Result<(), TransactionFailureReason> {
         // Validation of amounts
         if self.input_amount != self.output_amount {
@@ -454,19 +467,6 @@ impl<'a> SemanticValidationContext<'a> {
         for (chain_id, next_state) in self.output_chains.iter() {
             if self.input_chains.get(chain_id).is_none() {
                 self.verify_state_transition(None, Some((&next_state.0, next_state.1)))?;
-            }
-        }
-        Ok(())
-    }
-
-    fn validate_storage_deposit_returns(&mut self) -> Result<(), TransactionFailureReason> {
-        for (return_address, return_amount) in self.storage_deposit_returns.iter() {
-            if let Some(deposit_amount) = self.simple_deposits.get(return_address) {
-                if deposit_amount < return_amount {
-                    return Err(TransactionFailureReason::ReturnAmountNotFulFilled);
-                }
-            } else {
-                return Err(TransactionFailureReason::ReturnAmountNotFulFilled);
             }
         }
         Ok(())
