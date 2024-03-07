@@ -19,6 +19,7 @@ class Burn:
         accounts: The accounts to burn.
         nfts: The NFTs to burn.
         foundries: The foundries to burn.
+        delegations: The delegations to burn.
         native_tokens: The native tokens to burn.
     """
 
