@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{Requirement, TransactionBuilder, TransactionBuilderError};
-use crate::{
-    client::secret::types::InputSigningData,
-    types::block::output::{DelegationId, Output, OutputId},
-};
+use crate::types::block::output::{DelegationId, Output, OutputId};
 
 /// Checks if an output is an delegation with a given delegation ID.
 /// Assumes that the output delegation ID can be null and hashes the output ID.
@@ -34,7 +31,7 @@ impl TransactionBuilder {
     pub(crate) fn fulfill_delegation_requirement(
         &mut self,
         delegation_id: DelegationId,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    ) -> Result<(), TransactionBuilderError> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -45,7 +42,13 @@ impl TransactionBuilder {
                 "{delegation_id:?} requirement already fulfilled by {:?}",
                 input.output_id()
             );
-            return Ok(Vec::new());
+            return Ok(());
+        }
+
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(
+                Requirement::Delegation(delegation_id),
+            ));
         }
 
         // Check if the requirement can be fulfilled.
@@ -61,6 +64,8 @@ impl TransactionBuilder {
 
         log::debug!("{delegation_id:?} requirement fulfilled by {:?}", input.output_id());
 
-        Ok(vec![input])
+        self.select_input(input)?;
+
+        Ok(())
     }
 }
