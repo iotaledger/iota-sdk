@@ -35,6 +35,7 @@ fn input_nft_eq_output_nft() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -48,6 +49,7 @@ fn input_nft_eq_output_nft() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -80,6 +82,7 @@ fn transition_nft_id_zero() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -94,6 +97,7 @@ fn transition_nft_id_zero() {
     let nft_id = NftId::from(inputs[0].output_id());
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -214,6 +218,7 @@ fn mint_nft() {
         [(
             Basic {
                 amount: 2_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -227,6 +232,7 @@ fn mint_nft() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -268,6 +274,7 @@ fn burn_nft() {
         [(
             Nft {
                 amount: 2_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -281,6 +288,7 @@ fn burn_nft() {
     );
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -363,6 +371,7 @@ fn missing_input_for_nft_output() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -376,6 +385,7 @@ fn missing_input_for_nft_output() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -409,6 +419,7 @@ fn missing_input_for_nft_output_but_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -422,6 +433,7 @@ fn missing_input_for_nft_output_but_created() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -453,6 +465,7 @@ fn nft_in_output_and_sender() {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -465,6 +478,7 @@ fn nft_in_output_and_sender() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -480,6 +494,7 @@ fn nft_in_output_and_sender() {
     let outputs = build_outputs([
         Nft {
             amount: 1_000_000,
+            mana: 0,
             nft_id: nft_id_1,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             sender: None,
@@ -489,6 +504,7 @@ fn nft_in_output_and_sender() {
         },
         Basic {
             amount: 1_000_000,
+            mana: 0,
             address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             native_token: None,
             sender: Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
@@ -530,6 +546,7 @@ fn missing_ed25519_sender() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -543,6 +560,7 @@ fn missing_ed25519_sender() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
@@ -576,6 +594,7 @@ fn missing_ed25519_issuer_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -589,6 +608,7 @@ fn missing_ed25519_issuer_created() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -622,6 +642,7 @@ fn missing_ed25519_issuer_transition() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -635,6 +656,7 @@ fn missing_ed25519_issuer_transition() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -665,6 +687,7 @@ fn missing_account_sender() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -678,6 +701,7 @@ fn missing_account_sender() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
@@ -711,6 +735,7 @@ fn missing_account_issuer_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -724,6 +749,7 @@ fn missing_account_issuer_created() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -757,6 +783,7 @@ fn missing_account_issuer_transition() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -770,6 +797,7 @@ fn missing_account_issuer_transition() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -800,6 +828,7 @@ fn missing_nft_sender() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -813,6 +842,7 @@ fn missing_nft_sender() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
@@ -846,6 +876,7 @@ fn missing_nft_issuer_created() {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 native_token: None,
                 sender: None,
@@ -859,6 +890,7 @@ fn missing_nft_issuer_created() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -892,6 +924,7 @@ fn missing_nft_issuer_transition() {
         [(
             Nft {
                 amount: 1_000_000,
+                mana: 0,
                 nft_id: nft_id_2,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -905,6 +938,7 @@ fn missing_nft_issuer_transition() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_2,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -936,6 +970,7 @@ fn increase_nft_amount() {
             (
                 Nft {
                     amount: 2_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -948,6 +983,7 @@ fn increase_nft_amount() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -962,6 +998,7 @@ fn increase_nft_amount() {
     );
     let outputs = build_outputs([Nft {
         amount: 3_000_000,
+        mana: 0,
         nft_id: nft_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -995,6 +1032,7 @@ fn decrease_nft_amount() {
             (
                 Nft {
                     amount: 2_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1007,6 +1045,7 @@ fn decrease_nft_amount() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1021,6 +1060,7 @@ fn decrease_nft_amount() {
     );
     let outputs = build_outputs([Nft {
         amount: 1_000_000,
+        mana: 0,
         nft_id: nft_id_1,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         sender: None,
@@ -1066,6 +1106,7 @@ fn prefer_basic_to_nft() {
             (
                 Nft {
                     amount: 2_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1078,6 +1119,7 @@ fn prefer_basic_to_nft() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1092,6 +1134,7 @@ fn prefer_basic_to_nft() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1126,6 +1169,7 @@ fn take_amount_from_nft_to_fund_basic() {
             (
                 Nft {
                     amount: 2_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1138,6 +1182,7 @@ fn take_amount_from_nft_to_fund_basic() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1152,6 +1197,7 @@ fn take_amount_from_nft_to_fund_basic() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_200_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1198,6 +1244,7 @@ fn nft_burn_should_validate_nft_sender() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1210,6 +1257,7 @@ fn nft_burn_should_validate_nft_sender() {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1224,6 +1272,7 @@ fn nft_burn_should_validate_nft_sender() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
@@ -1262,6 +1311,7 @@ fn nft_burn_should_validate_nft_address() {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap(),
                     native_token: None,
                     sender: None,
@@ -1274,6 +1324,7 @@ fn nft_burn_should_validate_nft_address() {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1288,6 +1339,7 @@ fn nft_burn_should_validate_nft_address() {
     );
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1325,6 +1377,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
         [(
             Nft {
                 amount: 2_000_000,
+                mana: 0,
                 nft_id: nft_id_0,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1338,6 +1391,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
     );
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         native_token: None,
         sender: None,
@@ -1452,6 +1506,7 @@ fn auto_transition_nft_less_than_min() {
         [(
             Nft {
                 amount: small_amount,
+                mana: 0,
                 nft_id: nft_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -1503,6 +1558,7 @@ fn auto_transition_nft_less_than_min_additional() {
             (
                 Nft {
                     amount: small_amount,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
@@ -1515,6 +1571,7 @@ fn auto_transition_nft_less_than_min_additional() {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     sender: None,
                     native_token: None,

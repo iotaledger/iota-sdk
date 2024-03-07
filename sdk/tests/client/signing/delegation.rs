@@ -55,6 +55,7 @@ async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address.clone(),
                 native_token: None,
                 sender: None,
@@ -135,6 +136,7 @@ async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::E
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address.clone(),
                 native_token: None,
                 sender: None,
@@ -197,6 +199,7 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address.clone(),
                 native_token: None,
                 sender: None,
@@ -281,6 +284,7 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address.clone(),
                 native_token: None,
                 sender: None,
@@ -365,6 +369,7 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address.clone(),
                 native_token: None,
                 sender: None,
@@ -449,6 +454,7 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address.clone(),
                 native_token: None,
                 sender: None,
@@ -1019,6 +1025,7 @@ async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address,
         native_token: None,
         sender: None,
@@ -1111,6 +1118,7 @@ async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address,
         native_token: None,
         sender: None,

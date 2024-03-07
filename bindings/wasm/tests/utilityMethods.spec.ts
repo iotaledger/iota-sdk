@@ -32,7 +32,7 @@ describe('Utils methods', () => {
         const hexPublicKey =
             '0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a';
 
-        const address = Utils.hexPublicKeyToBech32Address(hexPublicKey, 'rms');
+        const address = Utils.addressToBech32(Utils.publicKeyHash(hexPublicKey), 'rms');
 
         expect(address).toBe(
             'rms1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx4aaacx',

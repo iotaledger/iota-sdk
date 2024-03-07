@@ -45,6 +45,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address_0.clone(),
                 native_token: None,
                 sender: None,
@@ -59,6 +60,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: address_0,
         native_token: None,
         sender: None,
@@ -124,6 +126,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -136,6 +139,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -148,6 +152,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -163,6 +168,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: address_0,
         native_token: None,
         sender: None,
@@ -249,6 +255,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -261,6 +268,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_1,
                     native_token: None,
                     sender: None,
@@ -276,6 +284,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: address_0,
         native_token: None,
         sender: None,

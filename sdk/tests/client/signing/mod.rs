@@ -75,6 +75,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_1,
                     address: nft_1.clone(),
                     sender: None,
@@ -85,6 +86,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Account {
                     amount: 1_000_000,
+                    mana: 0,
                     account_id: account_id_2,
                     address: ed25519_0.clone(),
                     sender: None,
@@ -95,6 +97,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_1.clone(),
                     native_token: None,
                     sender: None,
@@ -107,6 +110,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_2.clone(),
                     native_token: None,
                     sender: None,
@@ -119,6 +123,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_2,
                     native_token: None,
                     sender: None,
@@ -131,6 +136,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: nft_2.clone(),
                     native_token: None,
                     sender: None,
@@ -143,6 +149,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: nft_2,
                     native_token: None,
                     sender: None,
@@ -155,6 +162,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: nft_4.clone(),
                     native_token: None,
                     sender: None,
@@ -167,6 +175,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: ed25519_0.clone(),
                     native_token: None,
                     sender: None,
@@ -179,6 +188,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: ed25519_1.clone(),
                     native_token: None,
                     sender: None,
@@ -191,6 +201,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: ed25519_2.clone(),
                     native_token: None,
                     sender: None,
@@ -203,6 +214,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: ed25519_2.clone(),
                     native_token: None,
                     sender: None,
@@ -215,6 +227,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_1,
                     address: ed25519_0.clone(),
                     sender: None,
@@ -227,6 +240,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_2,
                     address: account_1.clone(),
                     sender: None,
@@ -240,6 +254,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: ed25519_0.clone(),
                     native_token: None,
                     sender: None,
@@ -252,6 +267,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: ed25519_0.clone(),
                     native_token: None,
                     sender: None,
@@ -264,6 +280,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 2_000_000,
+                    mana: 0,
                     address: ed25519_0.clone(),
                     native_token: None,
                     sender: None,
@@ -276,6 +293,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_3,
                     address: account_1.clone(),
                     sender: None,
@@ -288,6 +306,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Nft {
                     amount: 1_000_000,
+                    mana: 0,
                     nft_id: nft_id_4,
                     address: account_1,
                     sender: None,
@@ -304,6 +323,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
     let outputs = build_outputs([
         Account {
             amount: 1_000_000,
+            mana: 0,
             account_id: account_id_1,
             address: nft_1,
             sender: None,
@@ -311,6 +331,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
         Account {
             amount: 1_000_000,
+            mana: 0,
             account_id: account_id_2,
             address: ed25519_0.clone(),
             sender: None,
@@ -318,6 +339,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
         Basic {
             amount: 10_000_000,
+            mana: 0,
             address: ed25519_0.clone(),
             native_token: None,
             sender: None,
@@ -327,6 +349,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
         Nft {
             amount: 1_000_000,
+            mana: 0,
             nft_id: nft_id_1,
             address: ed25519_0.clone(),
             sender: None,
@@ -336,6 +359,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
         Nft {
             amount: 1_000_000,
+            mana: 0,
             nft_id: nft_id_2,
             address: ed25519_0.clone(),
             sender: None,
@@ -345,6 +369,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
         Nft {
             amount: 1_000_000,
+            mana: 0,
             nft_id: nft_id_3,
             address: ed25519_0.clone(),
             sender: None,
@@ -354,6 +379,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         },
         Nft {
             amount: 1_000_000,
+            mana: 0,
             nft_id: nft_id_4,
             address: ed25519_0.clone(),
             sender: None,
