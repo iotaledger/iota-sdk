@@ -57,7 +57,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
                 Nft {
                     amount: 1_000_000,
                     mana: 0,
-                    nft_id: nft_id,
+                    nft_id,
                     address: address_0.clone(),
                     sender: None,
                     issuer: None,
@@ -100,7 +100,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         Nft {
             amount: 1_000_000,
             mana: 0,
-            nft_id: nft_id,
+            nft_id,
             address: address_0,
             sender: None,
             issuer: None,
@@ -139,7 +139,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);

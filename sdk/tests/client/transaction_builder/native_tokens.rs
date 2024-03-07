@@ -640,7 +640,7 @@ fn multiple_native_tokens() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert!(selected.inputs_data.contains(&inputs[0]));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -838,7 +838,7 @@ fn single_output_native_token_no_remainder() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
