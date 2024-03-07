@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{Requirement, TransactionBuilder, TransactionBuilderError};
-use crate::{
-    client::secret::types::InputSigningData,
-    types::block::output::{NftId, Output, OutputId},
-};
+use crate::types::block::output::{NftId, Output, OutputId};
 
 /// Checks if an output is an nft with a given nft ID.
 /// Assumes that the output nft ID can be null and hashes the output ID.
@@ -31,10 +28,7 @@ pub(crate) fn is_nft_with_id_non_null(output: &Output, nft_id: &NftId) -> bool {
 
 impl TransactionBuilder {
     /// Fulfills an nft requirement by selecting the appropriate nft from the available inputs.
-    pub(crate) fn fulfill_nft_requirement(
-        &mut self,
-        nft_id: NftId,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_nft_requirement(&mut self, nft_id: NftId) -> Result<(), TransactionBuilderError> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -42,7 +36,13 @@ impl TransactionBuilder {
             .find(|input| is_nft_with_id(&input.output, &nft_id, input.output_id()))
         {
             log::debug!("{nft_id:?} requirement already fulfilled by {:?}", input.output_id());
-            return Ok(Vec::new());
+            return Ok(());
+        }
+
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Nft(
+                nft_id,
+            )));
         }
 
         // Check if the requirement can be fulfilled.
@@ -58,6 +58,8 @@ impl TransactionBuilder {
 
         log::debug!("{nft_id:?} requirement fulfilled by {:?}", input.output_id());
 
-        Ok(vec![input])
+        self.select_input(input)?;
+
+        Ok(())
     }
 }

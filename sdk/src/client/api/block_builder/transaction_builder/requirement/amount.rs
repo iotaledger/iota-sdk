@@ -35,11 +35,11 @@ pub(crate) fn sdruc_not_expired(
 }
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<(), TransactionBuilderError> {
         let (mut input_amount, mut output_amount) = self.amount_balance()?;
         if input_amount >= output_amount {
             log::debug!("Amount requirement already fulfilled");
-            return Ok(Vec::new());
+            return Ok(());
         }
 
         log::debug!("Fulfilling amount requirement with input amount {input_amount}, output amount {output_amount}");
@@ -81,7 +81,7 @@ impl TransactionBuilder {
             });
         }
 
-        Ok(Vec::new())
+        Ok(())
     }
 
     pub(crate) fn amount_sums(&self) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
