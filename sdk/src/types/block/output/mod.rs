@@ -207,6 +207,18 @@ impl Output {
         }
     }
 
+    /// Returns the generation amount of the output.
+    pub fn generation_amount(&self, protocol_parameters: &ProtocolParameters) -> u64 {
+        match self {
+            Self::Basic(output) => output.generation_amount(protocol_parameters),
+            Self::Account(output) => output.generation_amount(protocol_parameters),
+            Self::Anchor(output) => output.generation_amount(protocol_parameters),
+            Self::Foundry(output) => output.generation_amount(protocol_parameters),
+            Self::Nft(output) => output.generation_amount(protocol_parameters),
+            Self::Delegation(output) => output.generation_amount(protocol_parameters),
+        }
+    }
+
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {

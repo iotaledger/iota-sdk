@@ -353,9 +353,21 @@ impl TransactionBuilder {
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
         if input_mana < output_mana {
+            let total_generation_amount = self
+                .selected_inputs
+                .iter()
+                .map(|o| o.output.generation_amount(&self.protocol_parameters))
+                .sum::<u64>();
+            let total_stored_mana = self.selected_inputs.iter().map(|o| o.output.mana()).sum::<u64>();
+            let slots_remaining = self.protocol_parameters.slots_until_generated(
+                total_generation_amount,
+                total_stored_mana,
+                output_mana,
+            )?;
             return Err(TransactionBuilderError::InsufficientMana {
                 found: input_mana,
                 required: output_mana,
+                slots_remaining,
             });
         }
 
