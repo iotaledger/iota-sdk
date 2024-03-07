@@ -44,6 +44,8 @@ pub enum FeatureError {
     InvalidBlockIssuerKeyCount(<BlockIssuerKeyCount as TryFrom<usize>>::Error),
     #[display(fmt = "block issuer keys are not unique and/or sorted")]
     BlockIssuerKeysNotUniqueSorted,
+    #[display(fmt = "block issuer feature missing for account with staking feature")]
+    StakingBlockIssuerMissing,
     #[from]
     NativeToken(NativeTokenError),
     #[from]
