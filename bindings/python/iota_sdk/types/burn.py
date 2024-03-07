@@ -17,8 +17,8 @@ class Burn:
         mana: Whether initial excess mana should be burned (only from inputs/outputs that have been specified manually).
         generated_mana: Whether generated mana should be burned.
         accounts: The accounts to burn.
-        nfts: The NFTs to burn.
         foundries: The foundries to burn.
+        nfts: The NFTs to burn.
         delegations: The delegations to burn.
         native_tokens: The native tokens to burn.
     """
