@@ -19,7 +19,6 @@ use iota_sdk::{
     client::{
         api::{transaction_builder::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::NodeAuth,
-        secret::GenerateAddressOptions,
     },
     types::block::{
         address::Hrp,
@@ -456,27 +455,11 @@ pub enum WalletMethod {
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
     UnspentOutputs { filter_options: Option<FilterOptions> },
-
     /// Emits an event for testing if the event system is working
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     EmitTestEvent { event: WalletEvent },
-
-    // TODO: reconsider whether to have the following methods on the wallet
-    /// Generate an address without storing it
-    /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
-    #[serde(rename_all = "camelCase")]
-    GenerateEd25519Address {
-        /// Account index
-        account_index: u32,
-        /// Account index
-        address_index: u32,
-        /// Options
-        options: Option<GenerateAddressOptions>,
-        /// Bech32 HRP
-        bech32_hrp: Option<Hrp>,
-    },
     /// Get the ledger nano status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]

@@ -10,7 +10,7 @@ mod constants;
 // };
 use iota_sdk::client::Client;
 
-pub use self::constants::{FAUCET_URL, NODE_LOCAL};
+pub use self::constants::{DEFAULT_MNEMONIC, FAUCET_URL, NODE_LOCAL};
 
 /// Sets up a Client with node health ignored.
 pub async fn setup_client_with_node_health_ignored() -> Client {
@@ -62,3 +62,15 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 //     }
 //     panic!("Faucet no longer wants to hand over coins");
 // }
+
+#[allow(dead_code)]
+pub(crate) fn setup(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // Ignore error in case the path didn't exist yet.
+    std::fs::remove_dir_all(path).ok();
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub(crate) fn tear_down(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(std::fs::remove_dir_all(path)?)
+}

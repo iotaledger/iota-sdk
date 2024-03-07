@@ -169,7 +169,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
         if storage_path.is_dir() {
             match Wallet::builder().with_storage_path(storage_path).finish().await {
                 Ok(wallet) => {
-                    let linked_secret_manager = match &mut *wallet.get_secret_manager().write().await {
+                    let linked_secret_manager = match &mut *wallet.secret_manager().write().await {
                         SecretManager::Stronghold(stronghold) => {
                             let snapshot_path = stronghold.snapshot_path().to_path_buf();
                             let snapshot_exists = snapshot_path.exists();
