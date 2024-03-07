@@ -297,6 +297,7 @@ impl StorageScore for Features {
     }
 }
 
+#[inline]
 fn verify_unique_sorted(features: &[Feature]) -> Result<(), FeatureError> {
     if !is_unique_sorted(features.iter().map(Feature::kind)) {
         Err(FeatureError::NotUniqueSorted)
