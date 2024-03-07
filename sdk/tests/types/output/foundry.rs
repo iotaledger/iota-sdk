@@ -68,7 +68,7 @@ fn pack_unpack() {
     let protocol_parameters = iota_mainnet_protocol_parameters();
     let output = rand_foundry_output(protocol_parameters.token_supply());
     let bytes = output.pack_to_vec();
-    let output_unpacked = FoundryOutput::unpack_bytes_verified(bytes, &protocol_parameters).unwrap();
+    let output_unpacked = FoundryOutput::unpack_bytes_verified(bytes, protocol_parameters).unwrap();
 
     assert_eq!(output, output_unpacked);
 }

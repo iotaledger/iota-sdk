@@ -185,7 +185,7 @@ pub enum ClientError {
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     #[error("{0}")]
-    Ledger(#[from] crate::client::secret::ledger_nano::Error),
+    Ledger(Box<crate::client::secret::ledger_nano::Error>),
 
     /// MQTT error
     #[cfg(feature = "mqtt")]
@@ -236,3 +236,10 @@ crate::impl_from_error_via!(ClientError via BlockError:
     UnlockError,
     SignatureError,
 );
+
+#[cfg(feature = "ledger_nano")]
+impl From<crate::client::secret::ledger_nano::Error> for ClientError {
+    fn from(value: crate::client::secret::ledger_nano::Error) -> Self {
+        Self::Ledger(value.into())
+    }
+}

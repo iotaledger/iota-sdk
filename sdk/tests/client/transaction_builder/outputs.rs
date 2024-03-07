@@ -405,7 +405,7 @@ fn two_addresses() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -528,7 +528,7 @@ fn transition_no_more_than_needed_for_account_amount() {
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -589,5 +589,5 @@ fn transition_no_more_than_needed_for_nft_amount() {
     .unwrap();
 
     assert_eq!(selected.inputs_data.len(), 1);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
