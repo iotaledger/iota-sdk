@@ -198,9 +198,6 @@ pub enum Response {
     /// [`OutputIdToUtxoInput`](crate::method::UtilsMethod::OutputIdToUtxoInput)
     Input(UtxoInput),
     /// Response for:
-    /// - [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
-    Bech32ToHex(String),
-    /// Response for:
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
     ParsedBech32Address(Address),
     /// Response for:
@@ -219,8 +216,6 @@ pub enum Response {
     /// - [`Blake2b256Hash`](crate::method::UtilsMethod::Blake2b256Hash)
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
     Hash(String),
-    /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
-    HexAddress(String),
     /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)
     HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
@@ -240,13 +235,6 @@ pub enum Response {
     /// Response for:
     /// - [`AddressToBech32`](crate::method::ClientMethod::AddressToBech32)
     /// - [`AddressToBech32`](crate::method::UtilsMethod::AddressToBech32)
-    /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
-    /// - [`AccountIdToBech32`](crate::method::UtilsMethod::AccountIdToBech32)
-    /// - [`AnchorIdToBech32`](crate::method::ClientMethod::AnchorIdToBech32)
-    /// - [`AnchorIdToBech32`](crate::method::UtilsMethod::AnchorIdToBech32)
-    /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
-    /// - [`NftIdToBech32`](crate::method::UtilsMethod::NftIdToBech32)
-    /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`ImplicitAccountCreationAddress`](crate::method::WalletMethod::ImplicitAccountCreationAddress)
     Bech32Address(Bech32Address),
     /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)

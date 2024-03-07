@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from iota_sdk import Wallet, WalletOptions, Utils, NodeIndexerAPI, SyncOptions, WalletSyncOptions, SendParams
+from iota_sdk import AccountAddress, Wallet, WalletOptions, Utils, NodeIndexerAPI, SyncOptions, WalletSyncOptions, SendParams
 
 # In this example we send funds from an account output.
 
@@ -26,8 +26,8 @@ account_id = balance.accounts[0]
 print(f'Account Id: {account_id}')
 
 # Get account address
-account_address = Utils.account_id_to_bech32(
-    account_id, wallet.get_client().get_bech32_hrp())
+account_address = Utils.address_to_bech32(
+    AccountAddress(account_id), wallet.get_client().get_bech32_hrp())
 
 # Find first output unlockable by the account address
 query_parameters = NodeIndexerAPI.BasicOutputQueryParameters(
