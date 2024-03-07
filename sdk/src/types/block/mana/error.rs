@@ -18,6 +18,8 @@ pub enum ManaError {
     AllotmentsNotUniqueSorted,
     #[display(fmt = "invalid epoch diff: created {created}, target {target}")]
     EpochDiff { created: EpochIndex, target: EpochIndex },
+    #[display(fmt = "insufficient amount to generate positive mana")]
+    InsufficientGenerationAmount,
 }
 
 #[cfg(feature = "std")]
