@@ -37,8 +37,8 @@ pub struct GetAddressesOptions {
 
 impl GetAddressesOptions {
     // TODO: can we remove this function? It's not clear from the outside that it's just the default
-    // with a requested HRP. I think the caller can just do what this function does. Also ... this
-    // we do several API requests unnecessarily because oftentimes we could just re-use the HRP.
+    // with a requested HRP. I think the caller can just do what this function does. Also ... with this
+    // we do several API requests unnecessarily since oftentimes we could just re-use the HRP.
     pub async fn from_client(client: &Client) -> Result<Self, ClientError> {
         Ok(Self::default().with_bech32_hrp(client.get_bech32_hrp().await?))
     }
