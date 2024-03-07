@@ -19,9 +19,10 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum SecretManagerMethod {
-    /// Generate a Bech32 formatted Ed25519 address.
+    // TODO: Should we refactor `GetAddressesOptions` so we can use it for this method as well?
+    /// Generate a single Ed25519 address.
     #[serde(rename_all = "camelCase")]
-    GenerateEd25519AddressAsBech32 {
+    GenerateEd25519Address {
         coin_type: u32,
         #[serde(default)]
         account_index: u32,
@@ -33,7 +34,7 @@ pub enum SecretManagerMethod {
         ledger_nano_prompt: bool,
         bech32_hrp: Hrp,
     },
-    /// Generate Ed25519 addresses.
+    /// Generate multiple Ed25519 addresses at once.
     GenerateEd25519Addresses {
         /// Addresses generation options
         options: GetAddressesOptions,

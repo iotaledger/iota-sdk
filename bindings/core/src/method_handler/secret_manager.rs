@@ -28,7 +28,7 @@ where
     ClientError: From<S::Error>,
 {
     let response = match method {
-        SecretManagerMethod::GenerateEd25519AddressAsBech32 {
+        SecretManagerMethod::GenerateEd25519Address {
             coin_type,
             account_index,
             address_index,
