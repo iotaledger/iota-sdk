@@ -125,17 +125,18 @@ class SecretManager:
             return json_response['payload']
         return response
 
-    def generate_ed25519_address_as_bech32(self,
-                                           coin_type: int,
-                                           bech32_hrp: str,
-                                           account_index: Optional[int] = None,
-                                           address_index: Optional[int] = None,
-                                           internal: Optional[bool] = None,
-                                           legder_nano_prompt: Optional[bool] = None):
-        """Generate a Bech32 formatted Ed25519 address.
+    # TODO: Should we include `bech32` in the method name?
+    def generate_ed25519_address(self,
+                                 coin_type: int,
+                                 bech32_hrp: str,
+                                 account_index: Optional[int] = None,
+                                 address_index: Optional[int] = None,
+                                 internal: Optional[bool] = None,
+                                 legder_nano_prompt: Optional[bool] = None):
+        """Generate a single Ed25519 address.
 
         Args:
-            coin_type: The coin type to generate addresses for.
+            coin_type: The coin type to generate the address for.
             bech32_hrp: The bech32 HRP (human readable part) to use.
             account_index: An account index.
             address_index: An address index.
@@ -143,7 +144,7 @@ class SecretManager:
             ledger_nano_prompt: Whether to display the address on Ledger Nano devices.
 
         Returns:
-            The generated Bech32 address.
+            The generated Ed25519 address.
         """
 
         args = {}
@@ -158,29 +159,29 @@ class SecretManager:
         if legder_nano_prompt is not None:
             args['ledgerNanoPrompot'] = legder_nano_prompt
 
-        return self._call_method('generateEd25519AddressAsBech32', args)
+        return self._call_method('generateEd25519Address', args)
 
     # pylint: disable=unused-argument
 
-    # TODO: `coin_type` should probably not be optional;
-    # TODO: arg list should probably be re-ordered to match the expected order as close as possible;
+    # TODO: Should `coin_type` and `bech32_hrp` be mandatory to provide?
+    # TODO: Should we include `bech32` in the method name?
     def generate_ed25519_addresses(self,
+                                   coin_type: Optional[int] = None,
+                                   bech32_hrp: Optional[str] = None,
                                    account_index: Optional[int] = None,
                                    start: Optional[int] = None,
                                    end: Optional[int] = None,
                                    internal: Optional[bool] = None,
-                                   coin_type: Optional[int] = None,
-                                   bech32_hrp: Optional[str] = None,
                                    ledger_nano_prompt: Optional[bool] = None):
-        """Generate Ed25519 addresses.
+        """Generate multiple Ed25519 addresses at once.
 
         Args:
+            coin_type: The coin type to generate addresses for.
+            bech32_hrp: The bech32 HRP (human readable part) to use.
             account_index: An account index.
             start: The start index of the addresses to generate.
             end: The end index of the addresses to generate.
             internal: Whether the generated addresses should be internal.
-            coin_type: The coin type to generate addresses for.
-            bech32_hrp: The bech32 HRP (human readable part) to use.
             ledger_nano_prompt: Whether to display the address on Ledger Nano devices.
 
         Returns:
