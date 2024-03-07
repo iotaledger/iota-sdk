@@ -286,7 +286,7 @@ fn melt_native_tokens() {
         ],
         Some(SLOT_INDEX),
     );
-    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
+    let account_output = AccountOutputBuilder::new_with_amount(10_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -1222,7 +1222,7 @@ fn melt_and_burn_native_tokens() {
         ],
         Some(SLOT_INDEX),
     );
-    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+    let account_output = AccountOutputBuilder::new_with_amount(10_000, account_id)
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -1377,7 +1377,7 @@ fn auto_transition_foundry_less_than_min_additional() {
         ],
         Some(SLOT_INDEX),
     );
-    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+    let account_output = AccountOutputBuilder::new_with_amount(10_000, account_id)
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
@@ -1424,5 +1424,5 @@ fn auto_transition_foundry_less_than_min_additional() {
         .find(|o| o.account_id() == &account_id)
         .unwrap();
     assert_eq!(foundry_output.amount(), min_amount_foundry);
-    assert_eq!(account_output.amount(), 2_000_000 - min_amount_foundry + small_amount);
+    assert_eq!(account_output.amount(), 1_010_000 - min_amount_foundry + small_amount);
 }

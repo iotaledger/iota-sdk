@@ -13,7 +13,7 @@ use crate::{
         address::Address,
         input::{Input, UtxoInput},
         mana::ManaAllotment,
-        output::{AccountOutput, AccountOutputBuilder, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
+        output::{AccountOutput, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -107,8 +107,6 @@ impl TransactionBuilder {
                     return Ok(Vec::new());
                 }
             }
-
-            should_recalculate |= self.reduce_account_output()?;
         } else {
             should_recalculate = true;
         }
@@ -126,37 +124,6 @@ impl TransactionBuilder {
         }
 
         Ok(Vec::new())
-    }
-
-    fn reduce_account_output(&mut self) -> Result<bool, TransactionBuilderError> {
-        let MinManaAllotment {
-            issuer_id,
-            allotment_debt,
-            ..
-        } = self
-            .min_mana_allotment
-            .as_mut()
-            .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
-        if let Some(output) = self
-            .added_outputs
-            .iter_mut()
-            .filter(|o| o.is_account() && o.mana() != 0)
-            .find(|o| o.as_account().account_id() == issuer_id)
-        {
-            log::debug!(
-                "Reducing account mana of {} by {} for allotment",
-                output.as_account().account_id(),
-                allotment_debt
-            );
-            let output_mana = output.mana();
-            *output = AccountOutputBuilder::from(output.as_account())
-                .with_mana(output_mana.saturating_sub(*allotment_debt))
-                .finish_output()?;
-            *allotment_debt = allotment_debt.saturating_sub(output_mana);
-            log::debug!("Allotment debt after reduction: {}", allotment_debt);
-            return Ok(true);
-        }
-        Ok(false)
     }
 
     pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, TransactionBuilderError> {

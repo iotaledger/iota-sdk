@@ -9,8 +9,8 @@ use crate::{
     types::block::{
         address::Address,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutput, AccountOutputBuilder, BasicOutput,
-            ChainId, FoundryOutput, FoundryOutputBuilder, MinimumOutputAmount, NftOutput, NftOutputBuilder, Output,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutput, BasicOutput, ChainId, FoundryOutput,
+            NftOutput, Output,
         },
         slot::{SlotCommitmentId, SlotIndex},
     },
@@ -47,39 +47,38 @@ impl TransactionBuilder {
         if !self.allow_additional_input_selection {
             return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Amount));
         }
-        // If we have no inputs to balance with, try reducing outputs instead
         if self.available_inputs.is_empty() {
-            if !self.reduce_funds_of_chains(input_amount, &mut output_amount)? {
-                return Err(TransactionBuilderError::InsufficientAmount {
-                    found: input_amount,
-                    required: output_amount,
-                });
+            return Err(TransactionBuilderError::InsufficientAmount {
+                found: input_amount,
+                required: output_amount,
+            });
+        }
+
+        let mut priority_map = PriorityMap::<AmountPriority>::generate(&mut self.available_inputs);
+        loop {
+            let Some(input) = priority_map.next(output_amount - input_amount, self.latest_slot_commitment_id) else {
+                break;
+            };
+            log::debug!(
+                "selecting {} input with amount {}",
+                input.output.kind_str(),
+                input.output.amount()
+            );
+            self.select_input(input)?;
+            (input_amount, output_amount) = self.amount_balance()?;
+            if input_amount >= output_amount {
+                break;
             }
-        } else {
-            let mut priority_map = PriorityMap::<AmountPriority>::generate(&mut self.available_inputs);
-            loop {
-                let Some(input) = priority_map.next(output_amount - input_amount, self.latest_slot_commitment_id)
-                else {
-                    break;
-                };
-                log::debug!("selecting input with amount {}", input.output.amount());
-                self.select_input(input)?;
-                (input_amount, output_amount) = self.amount_balance()?;
-                // Try to reduce output funds
-                if self.reduce_funds_of_chains(input_amount, &mut output_amount)? {
-                    break;
-                }
-            }
-            // Return unselected inputs to the available list
-            for input in priority_map.into_inputs() {
-                self.available_inputs.push(input);
-            }
-            if output_amount > input_amount {
-                return Err(TransactionBuilderError::InsufficientAmount {
-                    found: input_amount,
-                    required: output_amount,
-                });
-            }
+        }
+        // Return unselected inputs to the available list
+        for input in priority_map.into_inputs() {
+            self.available_inputs.push(input);
+        }
+        if output_amount > input_amount {
+            return Err(TransactionBuilderError::InsufficientAmount {
+                found: input_amount,
+                required: output_amount,
+            });
         }
 
         Ok(Vec::new())
@@ -135,55 +134,6 @@ impl TransactionBuilder {
             outputs_sum += remainder_amount
         }
         Ok((inputs_sum, outputs_sum))
-    }
-
-    fn reduce_funds_of_chains(
-        &mut self,
-        input_amount: u64,
-        output_amount: &mut u64,
-    ) -> Result<bool, TransactionBuilderError> {
-        if *output_amount > input_amount {
-            // Only consider automatically transitioned outputs.
-            for output in self.added_outputs.iter_mut() {
-                let missing_amount = *output_amount - input_amount;
-                let amount = output.amount();
-                let minimum_amount = output.minimum_amount(self.protocol_parameters.storage_score_parameters());
-
-                let new_amount = if amount >= missing_amount + minimum_amount {
-                    *output_amount = input_amount;
-                    amount - missing_amount
-                } else {
-                    *output_amount -= amount - minimum_amount;
-                    minimum_amount
-                };
-
-                // PANIC: unwrap is fine as non-chain outputs have been filtered out already.
-                log::debug!(
-                    "Reducing amount of {} to {} to fulfill amount requirement",
-                    output.chain_id().unwrap(),
-                    new_amount
-                );
-
-                *output = match output {
-                    Output::Account(output) => AccountOutputBuilder::from(&*output)
-                        .with_amount(new_amount)
-                        .finish_output()?,
-                    Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
-                        .with_amount(new_amount)
-                        .finish_output()?,
-                    Output::Nft(output) => NftOutputBuilder::from(&*output)
-                        .with_amount(new_amount)
-                        .finish_output()?,
-                    _ => continue,
-                };
-
-                if *output_amount == input_amount {
-                    break;
-                }
-            }
-        }
-
-        Ok(input_amount >= *output_amount)
     }
 
     pub(crate) fn amount_chains(&self) -> Result<HashMap<ChainId, (u64, u64)>, TransactionBuilderError> {

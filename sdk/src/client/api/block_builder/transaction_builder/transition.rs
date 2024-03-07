@@ -18,7 +18,6 @@ use crate::{
             AccountId, AccountOutput, AccountOutputBuilder, AddressUnlockCondition, BasicOutput, FoundryOutput,
             FoundryOutputBuilder, NftOutput, NftOutputBuilder, Output, OutputId,
         },
-        payload::signed_transaction::TransactionCapabilityFlag,
         slot::EpochIndex,
     },
     utils::serde::string,
@@ -144,26 +143,13 @@ impl TransactionBuilder {
             }
         }
 
-        let mut builder = AccountOutputBuilder::from(input)
-            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
+        let output = AccountOutputBuilder::from(input)
+            .with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+            .with_mana(0)
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
-            .with_features(features);
-
-        if input.is_block_issuer() {
-            if !self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
-                builder = builder.with_mana(input.available_mana(
-                    &self.protocol_parameters,
-                    output_id.transaction_id().slot_index(),
-                    self.creation_slot,
-                )?)
-            } else {
-                self.transaction_capabilities
-                    .add_capability(TransactionCapabilityFlag::BurnMana);
-            }
-        }
-
-        let output = builder.finish_output()?;
+            .with_features(features)
+            .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
@@ -230,7 +216,8 @@ impl TransactionBuilder {
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
         let output = NftOutputBuilder::from(input)
-            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
+            .with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+            .with_mana(0)
             .with_nft_id(nft_id)
             .with_features(features)
             .finish_output()?;
@@ -269,7 +256,7 @@ impl TransactionBuilder {
         }
 
         let output = FoundryOutputBuilder::from(input)
-            .with_amount_or_minimum(input.amount(), self.protocol_parameters.storage_score_parameters())
+            .with_minimum_amount(self.protocol_parameters.storage_score_parameters())
             .finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
