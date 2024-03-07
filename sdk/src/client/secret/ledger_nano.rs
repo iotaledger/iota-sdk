@@ -626,7 +626,7 @@ mod tests {
         secret_manager.non_interactive = true;
 
         let addresses = SecretManager::LedgerNano(secret_manager)
-            .generate_ed25519_addresses_as_bech32(
+            .generate_ed25519_addresses(
                 GetAddressesOptions::default()
                     .with_coin_type(IOTA_COIN_TYPE)
                     .with_account_index(0)

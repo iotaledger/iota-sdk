@@ -38,7 +38,7 @@ async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -119,7 +119,7 @@ async fn creation_missing_commitment_input() -> Result<(), Box<dyn std::error::E
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -182,7 +182,7 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -267,7 +267,7 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -352,7 +352,7 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -437,7 +437,7 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -520,7 +520,7 @@ async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -616,7 +616,7 @@ async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -709,7 +709,7 @@ async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -802,7 +802,7 @@ async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> 
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -895,7 +895,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::erro
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -988,7 +988,7 @@ async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -1081,7 +1081,7 @@ async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),

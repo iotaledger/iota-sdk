@@ -15,7 +15,7 @@ async fn private_key_secret_manager_hex() -> Result<(), ClientError> {
     let secret_manager: SecretManager = dto.parse()?;
 
     let address_0 = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(0)
@@ -26,7 +26,7 @@ async fn private_key_secret_manager_hex() -> Result<(), ClientError> {
         .clone();
     // Changing range generates the same address.
     let address_1 = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(0)
@@ -37,7 +37,7 @@ async fn private_key_secret_manager_hex() -> Result<(), ClientError> {
         .clone();
     // Changing account generates the same address.
     let address_2 = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(1)
@@ -70,7 +70,7 @@ async fn private_key_secret_manager_bs58() -> Result<(), ClientError> {
     )?);
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
                 .with_account_index(0)

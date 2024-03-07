@@ -15,7 +15,7 @@ async fn mnemonic_secret_manager() -> Result<(), ClientError> {
     let secret_manager: SecretManager = dto.parse()?;
 
     let address = secret_manager
-        .generate_ed25519_address_as_bech32(SHIMMER_COIN_TYPE, 0, 0, SHIMMER_TESTNET_BECH32_HRP, None)
+        .generate_ed25519_address(SHIMMER_COIN_TYPE, 0, 0, SHIMMER_TESTNET_BECH32_HRP, None)
         .await
         .unwrap();
 

@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         addr
     } else {
         secret_manager
-            .generate_ed25519_addresses_as_bech32(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
+            .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?.with_range(0..1))
             .await?[0]
             .clone()
     };

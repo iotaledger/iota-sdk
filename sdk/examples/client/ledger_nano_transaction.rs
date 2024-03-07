@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)

@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Generate the first address
     let first_address = secret_manager
-        .generate_ed25519_address_as_bech32(SHIMMER_COIN_TYPE, 0, 0, client.get_bech32_hrp().await?, None)
+        .generate_ed25519_address(SHIMMER_COIN_TYPE, 0, 0, client.get_bech32_hrp().await?, None)
         .await?;
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints

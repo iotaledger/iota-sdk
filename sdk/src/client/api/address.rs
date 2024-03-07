@@ -103,8 +103,11 @@ impl Default for GetAddressesOptions {
 }
 
 impl SecretManager {
+    // TODO: while `SecretManage::generate...` returns `Ed25519Address`, `SecretManager`
+    // converts those to `Bech32Address`es, hence, should we add `bech32` to its method name
+    // to make that the difference clear?
     /// Generates a Bech32 formatted Ed25519 address.
-    pub async fn generate_ed25519_address_as_bech32(
+    pub async fn generate_ed25519_address(
         &self,
         coin_type: u32,
         account_index: u32,
@@ -125,8 +128,9 @@ impl SecretManager {
             .to_bech32(hrp))
     }
 
+    // TODO: Same as for `generate_ed25519_address`.
     /// Generates a vector of Bech32 formatted Ed25519 addresses.
-    pub async fn generate_ed25519_addresses_as_bech32(
+    pub async fn generate_ed25519_addresses(
         &self,
         GetAddressesOptions {
             coin_type,
@@ -201,12 +205,8 @@ pub async fn search_address(
         .with_coin_type(coin_type)
         .with_account_index(account_index)
         .with_range(range.clone());
-    let public = secret_manager
-        .generate_ed25519_addresses_as_bech32(opts.clone())
-        .await?;
-    let internal = secret_manager
-        .generate_ed25519_addresses_as_bech32(opts.internal())
-        .await?;
+    let public = secret_manager.generate_ed25519_addresses(opts.clone()).await?;
+    let internal = secret_manager.generate_ed25519_addresses(opts.internal()).await?;
     for index in 0..public.len() {
         if public[index].inner == *address {
             return Ok((range.start + index as u32, false));

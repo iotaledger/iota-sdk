@@ -37,7 +37,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
@@ -114,7 +114,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
     let address = secret_manager
-        .generate_ed25519_addresses_as_bech32(
+        .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
