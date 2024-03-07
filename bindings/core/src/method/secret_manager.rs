@@ -24,6 +24,7 @@ pub enum SecretManagerMethod {
     #[serde(rename_all = "camelCase")]
     GenerateEd25519Address {
         coin_type: u32,
+        bech32_hrp: Hrp,
         #[serde(default)]
         account_index: u32,
         #[serde(default)]
@@ -32,7 +33,6 @@ pub enum SecretManagerMethod {
         internal: bool,
         #[serde(default)]
         ledger_nano_prompt: bool,
-        bech32_hrp: Hrp,
     },
     /// Generate multiple Ed25519 addresses at once.
     GenerateEd25519Addresses {
