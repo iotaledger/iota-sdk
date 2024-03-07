@@ -47,7 +47,7 @@ fn builder_too_few_unlocks() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters)
         .unwrap();
 
@@ -83,7 +83,7 @@ fn builder_too_many_unlocks() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input1)
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters)
         .unwrap();
 
@@ -122,7 +122,7 @@ fn pack_unpack_valid() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters)
         .unwrap();
 
@@ -163,7 +163,7 @@ fn getters() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters)
         .unwrap();
 

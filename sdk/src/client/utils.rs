@@ -19,32 +19,11 @@ use crate::{
     client::ClientError,
     types::block::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-        output::{AccountId, AnchorId, NftId},
         payload::TaggedDataPayload,
         Block, BlockId,
     },
     utils::ConvertTo,
 };
-
-/// Transforms bech32 to hex
-pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String, ClientError> {
-    Ok(match bech32.convert()?.inner() {
-        Address::Ed25519(ed) => ed.to_string(),
-        Address::Account(account) => account.to_string(),
-        Address::Nft(nft) => nft.to_string(),
-        Address::Anchor(anchor) => anchor.to_string(),
-        Address::ImplicitAccountCreation(implicit) => implicit.to_string(),
-        Address::Multi(multi) => multi.to_string(),
-        Address::Restricted(restricted) => restricted.to_string(),
-    })
-}
-
-/// Transforms a hex encoded address to a bech32 encoded address
-pub fn hex_to_bech32(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, ClientError> {
-    let address = hex.parse::<Ed25519Address>()?;
-
-    Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
-}
 
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
 pub fn hex_public_key_to_bech32_address(
@@ -108,18 +87,6 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address
 }
 
 impl Client {
-    /// Transforms a hex encoded address to a bech32 encoded address
-    pub async fn hex_to_bech32(
-        &self,
-        hex: &str,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> Result<Bech32Address, ClientError> {
-        match bech32_hrp {
-            Some(hrp) => Ok(hex_to_bech32(hex, hrp)?),
-            None => Ok(hex_to_bech32(hex, self.get_bech32_hrp().await?)?),
-        }
-    }
-
     /// Converts an address to its bech32 representation
     pub async fn address_to_bech32(
         &self,
@@ -129,42 +96,6 @@ impl Client {
         match bech32_hrp {
             Some(hrp) => Ok(address.to_bech32(hrp.convert()?)),
             None => Ok(address.to_bech32(self.get_bech32_hrp().await?)),
-        }
-    }
-
-    /// Transforms an account id to a bech32 encoded address
-    pub async fn account_id_to_bech32(
-        &self,
-        account_id: AccountId,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> Result<Bech32Address, ClientError> {
-        match bech32_hrp {
-            Some(hrp) => Ok(account_id.to_bech32(hrp.convert()?)),
-            None => Ok(account_id.to_bech32(self.get_bech32_hrp().await?)),
-        }
-    }
-
-    /// Transforms an anchor id to a bech32 encoded address
-    pub async fn anchor_id_to_bech32(
-        &self,
-        anchor_id: AnchorId,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> Result<Bech32Address, ClientError> {
-        match bech32_hrp {
-            Some(hrp) => Ok(anchor_id.to_bech32(hrp.convert()?)),
-            None => Ok(anchor_id.to_bech32(self.get_bech32_hrp().await?)),
-        }
-    }
-
-    /// Transforms an nft id to a bech32 encoded address
-    pub async fn nft_id_to_bech32(
-        &self,
-        nft_id: NftId,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> Result<Bech32Address, ClientError> {
-        match bech32_hrp {
-            Some(hrp) => Ok(nft_id.to_bech32(hrp.convert()?)),
-            None => Ok(nft_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 
@@ -178,11 +109,6 @@ impl Client {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
             None => Ok(hex_public_key_to_bech32_address(hex, self.get_bech32_hrp().await?)?),
         }
-    }
-
-    /// Transforms bech32 to hex
-    pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String, ClientError> {
-        bech32_to_hex(bech32)
     }
 
     /// Generates a new mnemonic.

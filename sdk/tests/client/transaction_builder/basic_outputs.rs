@@ -65,7 +65,7 @@ fn input_amount_equal_output_amount() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -433,7 +433,7 @@ fn two_inputs_one_needed() {
     .unwrap();
 
     assert_eq!(selected.inputs_data, [inputs[0].clone()]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -494,7 +494,7 @@ fn two_inputs_one_needed_reversed() {
     .unwrap();
 
     assert_eq!(selected.inputs_data, [inputs[1].clone()]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -555,7 +555,7 @@ fn two_inputs_both_needed() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1463,7 +1463,7 @@ fn one_provided_one_needed() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1748,7 +1748,7 @@ fn sender_already_selected() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1798,7 +1798,7 @@ fn single_mandatory_input() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1918,7 +1918,7 @@ fn more_than_max_inputs_only_one_needed() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &needed_input));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -2123,7 +2123,7 @@ fn restricted_ed25519() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data, [inputs[2].clone()]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -2457,7 +2457,7 @@ fn multi_address_sender_already_fulfilled() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]

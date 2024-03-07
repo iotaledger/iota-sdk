@@ -276,7 +276,7 @@ impl TransactionBuilder {
         let mut selected_mana = 0;
         let include_generated = include_generated
             .into()
-            .unwrap_or(self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
+            .unwrap_or_else(|| self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
 
         for input in &self.selected_inputs {
             selected_mana += self.total_mana(input, include_generated)?;

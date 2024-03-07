@@ -55,7 +55,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
             Account {
                 amount: 1_000_000,
                 mana: 0,
-                account_id: account_id,
+                account_id,
                 address: address.clone(),
                 sender: None,
                 issuer: None,
@@ -68,7 +68,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
     let outputs = build_outputs([Account {
         amount: 1_000_000,
         mana: 0,
-        account_id: account_id,
+        account_id,
         address: address.clone(),
         sender: None,
         issuer: None,
@@ -94,7 +94,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -134,7 +134,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
                 Account {
                     amount: 1_000_000,
                     mana: 0,
-                    account_id: account_id,
+                    account_id,
                     address: address.clone(),
                     sender: None,
                     issuer: None,
@@ -175,8 +175,8 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         Account {
             amount: 1_000_000,
             mana: 0,
-            account_id: account_id,
-            address: address,
+            account_id,
+            address,
             sender: None,
             issuer: None,
         },
@@ -212,7 +212,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);

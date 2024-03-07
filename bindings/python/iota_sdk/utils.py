@@ -29,58 +29,12 @@ if TYPE_CHECKING:
 class Utils:
     """Utility functions.
     """
-
-    @staticmethod
-    def bech32_to_hex(bech32: str) -> HexStr:
-        """Convert a Bech32 string to a hex string.
-        """
-        return _call_method('bech32ToHex', {
-            'bech32': bech32
-        })
-
-    # pylint: disable=redefined-builtin
-    @staticmethod
-    def hex_to_bech32(hex_str: HexStr, bech32_hrp: str) -> str:
-        """Convert a hex encoded address to a Bech32 encoded address.
-        """
-        return _call_method('hexToBech32', {
-            'hex': hex_str,
-            'bech32Hrp': bech32_hrp
-        })
-
     @staticmethod
     def address_to_bech32(address: Address, bech32_hrp: str) -> str:
         """Convert an address to its bech32 representation.
         """
         return _call_method('addressToBech32', {
             'address': address,
-            'bech32Hrp': bech32_hrp
-        })
-
-    @staticmethod
-    def account_id_to_bech32(account_id: HexStr, bech32_hrp: str) -> str:
-        """Convert an account id to a Bech32 encoded address.
-        """
-        return _call_method('accountIdToBech32', {
-            'accountId': account_id,
-            'bech32Hrp': bech32_hrp
-        })
-
-    @staticmethod
-    def anchor_id_to_bech32(anchor_id: HexStr, bech32_hrp: str) -> str:
-        """Convert an anchor id to a Bech32 encoded address.
-        """
-        return _call_method('anchorIdToBech32', {
-            'anchorId': anchor_id,
-            'bech32Hrp': bech32_hrp
-        })
-
-    @staticmethod
-    def nft_id_to_bech32(nft_id: HexStr, bech32_hrp: str) -> str:
-        """Convert an NFT ID to a Bech32 encoded address.
-        """
-        return _call_method('nftIdToBech32', {
-            'nftId': nft_id,
             'bech32Hrp': bech32_hrp
         })
 
