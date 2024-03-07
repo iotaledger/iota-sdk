@@ -114,7 +114,7 @@ fn remainder_needed_for_mana() {
                 .map(|i| i
                     .output
                     .available_mana(
-                        &protocol_parameters,
+                        protocol_parameters,
                         i.output_id().transaction_id().slot_index(),
                         SLOT_INDEX
                     )

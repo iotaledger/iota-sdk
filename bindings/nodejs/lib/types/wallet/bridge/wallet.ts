@@ -343,14 +343,6 @@ export type __PrepareOutputMethod__ = {
     };
 };
 
-export type __PrepareSendMethod__ = {
-    name: 'prepareSend';
-    data: {
-        params: SendParams[];
-        options?: TransactionOptions;
-    };
-};
-
 export type __PrepareSendOutputsMethod__ = {
     name: 'prepareSendOutputs';
     data: {
@@ -375,17 +367,8 @@ export type __WaitForTransactionAcceptanceMethod__ = {
     };
 };
 
-export type __SendMethod__ = {
-    name: 'send';
-    data: {
-        amount: NumericString;
-        address: string;
-        options?: TransactionOptions;
-    };
-};
-
-export type __SendWithParamsMethod__ = {
-    name: 'sendWithParams';
+export type __PrepareSendMethod__ = {
+    name: 'prepareSend';
     data: {
         params: SendParams[];
         options?: TransactionOptions;

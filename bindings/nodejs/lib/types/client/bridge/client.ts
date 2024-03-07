@@ -317,50 +317,10 @@ export interface __GetProtocolParametersMethod__ {
     name: 'getProtocolParameters';
 }
 
-export interface __HexToBech32Method__ {
-    name: 'hexToBech32';
-    data: {
-        hex: HexEncodedString;
-        bech32Hrp?: string;
-    };
-}
-
 export interface __AddressToBech32Method__ {
     name: 'addressToBech32';
     data: {
         address: Address;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __AccountIdToBech32Method__ {
-    name: 'accountIdToBech32';
-    data: {
-        accountId: AccountId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __AnchorIdToBech32Method__ {
-    name: 'anchorIdToBech32';
-    data: {
-        anchorId: AnchorId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __NftIdToBech32Method__ {
-    name: 'nftIdToBech32';
-    data: {
-        nftId: NftId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __HexPublicKeyToBech32AddressMethod__ {
-    name: 'hexPublicKeyToBech32Address';
-    data: {
-        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }

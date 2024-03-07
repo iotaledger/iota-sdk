@@ -44,12 +44,7 @@ import type {
     __GetCommitmentBySlotRawMethod__,
     __GetUtxoChangesBySlotMethod__,
     __GetUtxoChangesFullBySlotMethod__,
-    __HexToBech32Method__,
     __AddressToBech32Method__,
-    __AccountIdToBech32Method__,
-    __AnchorIdToBech32Method__,
-    __NftIdToBech32Method__,
-    __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
     __AnchorOutputIdsMethod__,
@@ -116,12 +111,7 @@ export type __ClientMethods__ =
     | __GetCommitmentBySlotRawMethod__
     | __GetUtxoChangesBySlotMethod__
     | __GetUtxoChangesFullBySlotMethod__
-    | __HexToBech32Method__
     | __AddressToBech32Method__
-    | __AccountIdToBech32Method__
-    | __AnchorIdToBech32Method__
-    | __NftIdToBech32Method__
-    | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
     | __AnchorOutputIdsMethod__

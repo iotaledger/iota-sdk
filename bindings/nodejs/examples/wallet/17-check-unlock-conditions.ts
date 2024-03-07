@@ -1,7 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AddressUnlockCondition, BasicOutput, Output, Utils } from '@iota/sdk';
+import {
+    AddressUnlockCondition,
+    BasicOutput,
+    Ed25519Address,
+    Output,
+    Utils,
+} from '@iota/sdk';
 
 import { getUnlockedWallet } from './common';
 
@@ -27,7 +33,9 @@ async function run() {
             amount: AMOUNT,
         });
 
-        const hexEncodedwalletAddress = Utils.bech32ToHex(walletAddress);
+        const hexEncodedwalletAddress = Utils.parseBech32Address(
+            walletAddress,
+        ) as Ed25519Address;
 
         if (output instanceof BasicOutput) {
             const basicOutput = output as BasicOutput;
@@ -36,7 +44,7 @@ async function run() {
                 basicOutput.unlockConditions.length === 1 &&
                 basicOutput.unlockConditions[0] instanceof
                     AddressUnlockCondition &&
-                hexEncodedwalletAddress.includes(
+                hexEncodedwalletAddress.pubKeyHash.includes(
                     (
                         basicOutput
                             .unlockConditions[0] as AddressUnlockCondition

@@ -423,7 +423,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 13);

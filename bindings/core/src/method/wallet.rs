@@ -6,9 +6,9 @@ use std::path::PathBuf;
 
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
+use iota_sdk::client::api::options::TransactionOptions;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
-use iota_sdk::{client::api::options::TransactionOptions, utils::serde::string};
 // #[cfg(feature = "participation")]
 // use iota_sdk::{
 //     client::node_manager::node::Node,
@@ -22,7 +22,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::Hrp,
         output::{AccountId, DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
@@ -119,10 +119,6 @@ pub enum WalletMethod {
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
     ClaimableOutputs { outputs_to_claim: OutputsToClaim },
-    /// Claim outputs.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    ClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     // /// Removes a previously registered participation event from local storage.
     // /// Expected response: [`Ok`](crate::Response::Ok)
     // #[cfg(feature = "participation")]
@@ -308,7 +304,7 @@ pub enum WalletMethod {
         #[serde(default)]
         transaction_options: Option<TransactionOptions>,
     },
-    /// Prepare to send base coins.
+    /// Prepare to send base coins to multiple addresses, or with additional parameters.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSend {
         params: Vec<SendParams>,
@@ -420,29 +416,6 @@ pub enum WalletMethod {
         interval: Option<u64>,
         /// Maximum attempts
         max_attempts: Option<u64>,
-    },
-    /// Send base coins.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    Send {
-        #[serde(with = "string")]
-        amount: u64,
-        address: Bech32Address,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Send base coins to multiple addresses, or with additional parameters.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendWithParams {
-        params: Vec<SendParams>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Send outputs in a transaction.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendOutputs {
-        outputs: Vec<Output>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
     },
     /// Set the alias of the wallet.
     /// Expected response: [`Ok`](crate::Response::Ok)

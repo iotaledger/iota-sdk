@@ -2,7 +2,7 @@ import os
 import time
 
 from dotenv import load_dotenv
-from iota_sdk import Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOptions
+from iota_sdk import AccountAddress, Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOptions
 
 # In this example we request funds to the wallet's first account output
 # address.
@@ -27,8 +27,8 @@ account_id = balance.accounts[0]
 print(f'Account Id: {account_id}')
 
 # Get Account address
-account_address = Utils.account_id_to_bech32(
-    account_id, wallet.get_client().get_bech32_hrp())
+account_address = Utils.address_to_bech32(
+    AccountAddress(account_id), wallet.get_client().get_bech32_hrp())
 faucet_response = wallet.get_client().request_funds_from_faucet(
     FAUCET_URL, account_address)
 print(faucet_response)

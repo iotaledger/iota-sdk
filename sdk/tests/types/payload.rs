@@ -40,7 +40,7 @@ fn transaction() {
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .add_mana_allotment(rand_mana_allotment(protocol_parameters))
         .finish_with_params(protocol_parameters)
         .unwrap();
 

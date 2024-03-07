@@ -50,7 +50,7 @@ async function run() {
             console.log(`OUTPUT #${i}`);
             console.log(
                 '- address: %s\n- amount: %d\n- native token: %s',
-                Utils.hexToBech32(address.toString(), 'rms'),
+                Utils.addressToBech32(address, 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
                     ? (output as CommonOutput).getNativeToken() ?? []
@@ -84,7 +84,7 @@ async function run() {
             console.log(`OUTPUT #${i}`);
             console.log(
                 '- address: %s\n- amount: %d\n- native tokens: %s',
-                Utils.hexToBech32(address.toString(), 'rms'),
+                Utils.addressToBech32(address, 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
                     ? (output as CommonOutput).getNativeToken()
