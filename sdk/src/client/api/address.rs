@@ -106,6 +106,7 @@ impl SecretManager {
     // TODO: while `SecretManage::generate...` returns `Ed25519Address`, `SecretManager`
     // converts those to `Bech32Address`es, hence, should we add `bech32` to its method name
     // to make that the difference clear?
+    // TODO: make `account_index` and `address_index` impl Into<Option<u32>>?
     /// Generates a Bech32 formatted Ed25519 address.
     pub async fn generate_ed25519_address(
         &self,
@@ -115,7 +116,7 @@ impl SecretManager {
         bech32_hrp: impl ConvertTo<Hrp>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Bech32Address, ClientError> {
-        let hrp = bech32_hrp.convert()?;
+        let hrp: Hrp = bech32_hrp.convert()?;
         Ok(SecretManage::generate_ed25519_addresses(
             self,
             coin_type,

@@ -65,7 +65,9 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 
 #[allow(dead_code)]
 pub(crate) fn setup(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    Ok(std::fs::remove_dir_all(path)?)
+    // Ignore error in case the path didn't exist yet.
+    std::fs::remove_dir_all(path).ok();
+    Ok(())
 }
 
 #[allow(dead_code)]
