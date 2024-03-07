@@ -350,16 +350,7 @@ impl TransactionBuilder {
         // Process all the requirements until there are no more.
         while let Some(requirement) = self.requirements.pop() {
             // Fulfill the requirement.
-            let inputs = self.fulfill_requirement(&requirement)?;
-
-            if !self.allow_additional_input_selection && !inputs.is_empty() {
-                return Err(TransactionBuilderError::AdditionalInputsRequired(requirement));
-            }
-
-            // Select suggested inputs.
-            for input in inputs {
-                self.select_input(input)?;
-            }
+            self.fulfill_requirement(&requirement)?;
         }
 
         let (input_mana, output_mana) = self.mana_sums(false)?;
