@@ -223,7 +223,7 @@ impl From<crate::client::stronghold::Error> for WalletError {
 #[cfg(feature = "ledger_nano")]
 impl From<crate::client::secret::ledger_nano::Error> for WalletError {
     fn from(error: crate::client::secret::ledger_nano::Error) -> Self {
-        Self::Client(ClientError::Ledger(error))
+        Self::Client(ClientError::from(error))
     }
 }
 

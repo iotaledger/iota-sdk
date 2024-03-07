@@ -70,7 +70,7 @@ fn input_nft_eq_output_nft() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -118,7 +118,7 @@ fn transition_nft_id_zero() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 // #[test]
@@ -314,7 +314,7 @@ fn burn_nft() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 // #[test]
@@ -1019,7 +1019,7 @@ fn increase_nft_amount() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1298,7 +1298,7 @@ fn nft_burn_should_validate_nft_sender() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1365,7 +1365,7 @@ fn nft_burn_should_validate_nft_address() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]

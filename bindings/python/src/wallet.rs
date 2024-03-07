@@ -116,7 +116,7 @@ pub fn get_secret_manager_from_wallet(wallet: &Wallet) -> Result<SecretManager, 
             .read()
             .await
             .as_ref()
-            .map(|w| w.get_secret_manager().clone())
+            .map(|w| w.secret_manager().clone())
             .ok_or_else(|| {
                 Error::from(
                     serde_json::to_string(&Response::Panic("wallet was destroyed".into()))

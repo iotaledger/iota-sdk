@@ -48,8 +48,8 @@ impl Client {
     /// Builds a transaction using the given inputs, outputs, addresses, and options.
     pub async fn build_transaction(
         &self,
-        addresses: impl IntoIterator<Item = (Address, Bip44)>,
-        outputs: impl IntoIterator<Item = Output>,
+        addresses: impl IntoIterator<Item = (Address, Bip44)> + Send,
+        outputs: impl IntoIterator<Item = Output> + Send,
         options: TransactionOptions,
     ) -> Result<PreparedTransactionData, ClientError> {
         let addresses = addresses.into_iter().collect::<HashMap<_, _>>();
@@ -93,9 +93,9 @@ impl Client {
     /// Builds a transaction using the given inputs, outputs, addresses, and options.
     pub(crate) async fn build_transaction_inner(
         &self,
-        addresses: impl IntoIterator<Item = Address>,
-        available_inputs: impl IntoIterator<Item = InputSigningData>,
-        outputs: impl IntoIterator<Item = Output>,
+        addresses: impl IntoIterator<Item = Address> + Send,
+        available_inputs: impl IntoIterator<Item = InputSigningData> + Send,
+        outputs: impl IntoIterator<Item = Output> + Send,
         options: TransactionOptions,
         slot_commitment_id: SlotCommitmentId,
         protocol_parameters: ProtocolParameters,
@@ -347,16 +347,7 @@ impl TransactionBuilder {
         // Process all the requirements until there are no more.
         while let Some(requirement) = self.requirements.pop() {
             // Fulfill the requirement.
-            let inputs = self.fulfill_requirement(&requirement)?;
-
-            if !self.allow_additional_input_selection && !inputs.is_empty() {
-                return Err(TransactionBuilderError::AdditionalInputsRequired(requirement));
-            }
-
-            // Select suggested inputs.
-            for input in inputs {
-                self.select_input(input)?;
-            }
+            self.fulfill_requirement(&requirement)?;
         }
 
         let (input_mana, output_mana) = self.mana_sums(false)?;

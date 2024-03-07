@@ -25,7 +25,6 @@ import {
 } from '../types';
 import {
     AccountId,
-    AnchorId,
     BlockId,
     FoundryId,
     NftId,
@@ -261,41 +260,6 @@ export class Utils {
     }
 
     /**
-     * Convert a Bech32 address to a hex-encoded string.
-     *
-     * @param bech32 A Bech32 address.
-     * @returns The hex-encoded string.
-     */
-    static bech32ToHex(bech32: Bech32Address): HexEncodedString {
-        return callUtilsMethod({
-            name: 'bech32ToHex',
-            data: {
-                bech32,
-            },
-        });
-    }
-
-    /**
-     * Convert a hex-encoded address string to a Bech32-encoded address string.
-     *
-     * @param hex A hex-encoded address string.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
-     * @returns The Bech32-encoded address string.
-     */
-    static hexToBech32(
-        hex: HexEncodedString,
-        bech32Hrp: string,
-    ): Bech32Address {
-        return callUtilsMethod({
-            name: 'hexToBech32',
-            data: {
-                hex,
-                bech32Hrp,
-            },
-        });
-    }
-
-    /**
      * Converts an address to its bech32 representation.
      *
      * @param address An address.
@@ -307,63 +271,6 @@ export class Utils {
             name: 'addressToBech32',
             data: {
                 address,
-                bech32Hrp,
-            },
-        });
-    }
-
-    /**
-     * Transforms an account id to a bech32 encoded address.
-     *
-     * @param accountId An account ID.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
-     * @returns The Bech32-encoded address string.
-     */
-    static accountIdToBech32(
-        accountId: AccountId,
-        bech32Hrp: string,
-    ): Bech32Address {
-        return callUtilsMethod({
-            name: 'accountIdToBech32',
-            data: {
-                accountId,
-                bech32Hrp,
-            },
-        });
-    }
-
-    /**
-     * Transforms an anchor id to a bech32 encoded address.
-     *
-     * @param anchorId An anchor ID.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
-     * @returns The Bech32-encoded address string.
-     */
-    static anchorIdToBech32(
-        anchorId: AnchorId,
-        bech32Hrp: string,
-    ): Bech32Address {
-        return callUtilsMethod({
-            name: 'anchorIdToBech32',
-            data: {
-                anchorId,
-                bech32Hrp,
-            },
-        });
-    }
-
-    /**
-     * Convert an NFT ID to a Bech32-encoded address string.
-     *
-     * @param nftId An NFT ID.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to use.
-     * @returns The Bech32-encoded address string.
-     */
-    static nftIdToBech32(nftId: NftId, bech32Hrp: string): Bech32Address {
-        return callUtilsMethod({
-            name: 'nftIdToBech32',
-            data: {
-                nftId,
                 bech32Hrp,
             },
         });

@@ -837,28 +837,6 @@ export class Client {
     }
 
     /**
-     * Convert a hex encoded address to a Bech32 encoded address.
-     *
-     * @param hex The hexadecimal string representation of an address.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
-     * @returns The corresponding Bech32 address.
-     */
-    async hexToBech32(
-        hex: HexEncodedString,
-        bech32Hrp?: string,
-    ): Promise<Bech32Address> {
-        const response = await this.methodHandler.callMethod({
-            name: 'hexToBech32',
-            data: {
-                hex,
-                bech32Hrp,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Converts an address to its bech32 representation
      *
      * @param address An address.
@@ -873,72 +851,6 @@ export class Client {
             name: 'addressToBech32',
             data: {
                 address,
-                bech32Hrp,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Transforms an account id to a bech32 encoded address.
-     *
-     * @param accountId An account ID.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
-     * @returns The corresponding Bech32 address.
-     */
-    async accountIdToBech32(
-        accountId: AccountId,
-        bech32Hrp?: string,
-    ): Promise<Bech32Address> {
-        const response = await this.methodHandler.callMethod({
-            name: 'accountIdToBech32',
-            data: {
-                accountId,
-                bech32Hrp,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Transforms an anchor id to a bech32 encoded address.
-     *
-     * @param anchorId An anchor ID.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
-     * @returns The corresponding Bech32 address.
-     */
-    async anchorIdToBech32(
-        anchorId: AnchorId,
-        bech32Hrp?: string,
-    ): Promise<Bech32Address> {
-        const response = await this.methodHandler.callMethod({
-            name: 'anchorIdToBech32',
-            data: {
-                anchorId,
-                bech32Hrp,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Convert an NFT ID to a Bech32 encoded address.
-     *
-     * @param nftId An NFT ID.
-     * @param bech32Hrp The Bech32 HRP (human readable part) to be used.
-     * @returns The corresponding Bech32 address.
-     */
-    async nftIdToBech32(
-        nftId: NftId,
-        bech32Hrp?: string,
-    ): Promise<Bech32Address> {
-        const response = await this.methodHandler.callMethod({
-            name: 'nftIdToBech32',
-            data: {
-                nftId,
                 bech32Hrp,
             },
         });

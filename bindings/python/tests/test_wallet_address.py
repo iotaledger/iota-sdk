@@ -5,8 +5,8 @@ import shutil
 from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletOptions, Bip44, Utils
 
 
-def test_address_generation_iota():
-    db_path = './test_address_generation_iota'
+def test_wallet_address_iota():
+    db_path = './test_wallet_address_iota'
     shutil.rmtree(db_path, ignore_errors=True)
 
     client_options = ClientOptions(
@@ -33,8 +33,8 @@ def test_address_generation_iota():
     shutil.rmtree(db_path, ignore_errors=True)
 
 
-def test_address_generation_shimmer():
-    db_path = './test_address_generation_shimmer'
+def test_wallet_address_shimmer():
+    db_path = './test_wallet_address_shimmer'
     shutil.rmtree(db_path, ignore_errors=True)
 
     client_options = ClientOptions(

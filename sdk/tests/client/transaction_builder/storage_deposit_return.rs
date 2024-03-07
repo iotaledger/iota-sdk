@@ -128,7 +128,7 @@ fn sdruc_output_provided_no_remainder() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]

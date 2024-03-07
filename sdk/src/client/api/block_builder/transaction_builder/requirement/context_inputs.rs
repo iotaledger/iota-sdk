@@ -2,18 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{TransactionBuilder, TransactionBuilderError};
-use crate::{
-    client::secret::types::InputSigningData,
-    types::block::{
-        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
-        output::{AccountId, DelegationOutputBuilder, Output},
-    },
+use crate::types::block::{
+    context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
+    output::{AccountId, DelegationOutputBuilder, Output},
 };
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_context_inputs_requirement(
-        &mut self,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_context_inputs_requirement(&mut self) -> Result<(), TransactionBuilderError> {
         let mut needs_commitment_context = false;
 
         for input in &self.selected_inputs {
@@ -95,6 +90,6 @@ impl TransactionBuilder {
             self.commitment_context_input
                 .replace(CommitmentContextInput::new(self.latest_slot_commitment_id));
         }
-        Ok(Vec::new())
+        Ok(())
     }
 }

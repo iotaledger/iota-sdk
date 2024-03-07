@@ -42,6 +42,6 @@ impl Client {
             tokio::time::sleep(duration).await;
         }
 
-        Err(ClientError::TransactionAcceptance(transaction_id.to_string()).into())
+        Err(ClientError::TransactionAcceptance(transaction_id.to_string()))
     }
 }

@@ -8,7 +8,7 @@ use primitive_types::U256;
 
 use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
-    client::secret::types::InputSigningData,
+    client::api::transaction_builder::Requirement,
     types::block::{
         output::{Output, TokenId, TokenScheme},
         payload::signed_transaction::TransactionCapabilityFlag,
@@ -16,9 +16,7 @@ use crate::{
 };
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_native_tokens_requirement(
-        &mut self,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_native_tokens_requirement(&mut self) -> Result<(), TransactionBuilderError> {
         let (input_nts, output_nts) = self.get_input_output_native_tokens();
         let diffs = get_native_tokens_diff(output_nts, input_nts);
         if self.burn.as_ref().map_or(false, |burn| !burn.native_tokens.is_empty()) {
@@ -28,7 +26,13 @@ impl TransactionBuilder {
         if diffs.is_empty() {
             log::debug!("Native tokens requirement already fulfilled");
 
-            return Ok(Vec::new());
+            return Ok(());
+        }
+
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(
+                Requirement::NativeTokens,
+            ));
         }
 
         log::debug!("Fulfilling native tokens requirement");
@@ -77,7 +81,11 @@ impl TransactionBuilder {
         self.available_inputs
             .retain(|input| !newly_selected_ids.contains(input.output_id()));
 
-        Ok(newly_selected_inputs)
+        for input in newly_selected_inputs {
+            self.select_input(input)?;
+        }
+
+        Ok(())
     }
 
     pub(crate) fn get_input_output_native_tokens(&self) -> (BTreeMap<TokenId, U256>, BTreeMap<TokenId, U256>) {

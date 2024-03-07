@@ -125,24 +125,69 @@ class SecretManager:
             return json_response['payload']
         return response
 
+    # TODO: Should we include `bech32` in the method name?
+    def generate_ed25519_address(self,
+                                 coin_type: int,
+                                 bech32_hrp: str,
+                                 account_index: Optional[int] = None,
+                                 address_index: Optional[int] = None,
+                                 internal: Optional[bool] = None,
+                                 legder_nano_prompt: Optional[bool] = None):
+        """Generate a single Ed25519 address.
+
+        Args:
+            coin_type: The coin type to generate the address for.
+            bech32_hrp: The bech32 HRP (human readable part) to use.
+            account_index: An account index.
+            address_index: An address index.
+            internal: Whether the generated address should be internal.
+            ledger_nano_prompt: Whether to display the address on Ledger Nano devices.
+
+        Returns:
+            The generated Ed25519 address.
+        """
+
+        options = {}
+        options['coinType'] = coin_type
+        options['bech32Hrp'] = bech32_hrp
+        if address_index is not None:
+            options['range'] = {}
+            options['range']['start'] = address_index
+            options['range']['end'] = address_index + 1
+        if account_index is not None:
+            options['accountIndex'] = account_index
+        if internal is not None or legder_nano_prompt is not None:
+            options['options'] = {}
+            if internal is not None:
+                options['options']['internal'] = internal
+            if legder_nano_prompt is not None:
+                options['options']['ledgerNanoPrompot'] = legder_nano_prompt
+
+        return self._call_method('generateEd25519Addresses', {
+            'options': options
+        })[0]
+
     # pylint: disable=unused-argument
+
+    # TODO: Should `coin_type` and `bech32_hrp` be mandatory to provide?
+    # TODO: Should we include `bech32` in the method name?
     def generate_ed25519_addresses(self,
+                                   coin_type: Optional[int] = None,
+                                   bech32_hrp: Optional[str] = None,
                                    account_index: Optional[int] = None,
                                    start: Optional[int] = None,
                                    end: Optional[int] = None,
                                    internal: Optional[bool] = None,
-                                   coin_type: Optional[int] = None,
-                                   bech32_hrp: Optional[str] = None,
                                    ledger_nano_prompt: Optional[bool] = None):
-        """Generate Ed25519 addresses.
+        """Generate multiple Ed25519 addresses at once.
 
         Args:
+            coin_type: The coin type to generate addresses for.
+            bech32_hrp: The bech32 HRP (human readable part) to use.
             account_index: An account index.
             start: The start index of the addresses to generate.
             end: The end index of the addresses to generate.
             internal: Whether the generated addresses should be internal.
-            coin_type: The coin type to generate addresses for.
-            bech32_hrp: The bech32 HRP (human readable part) to use.
             ledger_nano_prompt: Whether to display the address on Ledger Nano devices.
 
         Returns:

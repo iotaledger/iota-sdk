@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from iota_sdk import (
     AddressUnlockCondition,
     Client,
-    Ed25519Address,
     Wallet,
     WalletOptions,
     Utils,
@@ -39,8 +38,8 @@ in_an_hour = int(
 basic_output = Client().build_basic_output(
     unlock_conditions=[
         AddressUnlockCondition(
-            Ed25519Address(
-                Utils.bech32_to_hex('rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'))
+            Utils.parse_bech32_address(
+                'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
         ),
         TimelockUnlockCondition(in_an_hour),
     ],
