@@ -73,11 +73,12 @@ fn responses() {
     json_response::<BlockDto>("transaction-block-example.json").unwrap();
     json_response::<BlockDto>("get-block-by-id-validation-response-example.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/metadata
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new-transaction.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed-transaction.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
+    // TODO reenable when TIP is updated
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/full
     json_response::<BlockWithMetadataResponse>("get-full-block-by-id-tagged-data-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}
