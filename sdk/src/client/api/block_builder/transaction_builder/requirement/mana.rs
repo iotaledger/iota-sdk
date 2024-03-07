@@ -22,7 +22,7 @@ use crate::{
 };
 
 impl TransactionBuilder {
-    pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<(), TransactionBuilderError> {
         let Some(MinManaAllotment {
             issuer_id,
             reference_mana_cost,
@@ -31,7 +31,7 @@ impl TransactionBuilder {
         else {
             // If there is no min allotment calculation needed, just check mana
             self.get_inputs_for_mana_balance()?;
-            return Ok(Vec::new());
+            return Ok(());
         };
 
         let mut should_recalculate = false;
@@ -104,7 +104,7 @@ impl TransactionBuilder {
                 let (input_mana, output_mana) = self.mana_sums(true)?;
                 if input_mana == output_mana {
                     log::debug!("allotments and mana are both correct, no further action needed");
-                    return Ok(Vec::new());
+                    return Ok(());
                 }
             }
 
@@ -125,7 +125,7 @@ impl TransactionBuilder {
             self.requirements.push(Requirement::Mana);
         }
 
-        Ok(Vec::new())
+        Ok(())
     }
 
     fn reduce_account_output(&mut self) -> Result<bool, TransactionBuilderError> {
