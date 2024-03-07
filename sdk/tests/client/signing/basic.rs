@@ -89,7 +89,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -197,7 +197,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -313,7 +313,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 2);

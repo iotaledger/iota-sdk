@@ -563,7 +563,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 fn verify_staking(amount: u64, features: &Features) -> Result<(), OutputError> {
     if let Some(staking) = features.staking() {
         if features.block_issuer().is_none() {
-            return Err(FeatureError::StakingBlockIssuerMissing)?;
+            return Err(FeatureError::StakingBlockIssuerMissing.into());
         }
         if amount < staking.staked_amount() {
             return Err(OutputError::InvalidStakedAmount);

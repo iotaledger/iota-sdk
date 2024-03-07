@@ -59,7 +59,7 @@ impl SignedTransactionData {
             .collect::<Vec<(&OutputId, &Output)>>();
 
         let context = SemanticValidationContext::new(
-            &self.payload.transaction(),
+            self.payload.transaction(),
             &inputs,
             Some(self.payload.unlocks()),
             Some(&self.mana_rewards),

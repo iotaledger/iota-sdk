@@ -88,7 +88,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let native_token_return =
                 BasicOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters())
                     .add_unlock_condition(AddressUnlockCondition::new(from_address.clone()))
-                    .with_native_token(native_token.clone())
+                    .with_native_token(*native_token)
                     .finish_output()?;
             total_amount -= native_token_return.amount();
             outputs.push(native_token_return);

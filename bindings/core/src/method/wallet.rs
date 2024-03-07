@@ -6,9 +6,9 @@ use std::path::PathBuf;
 
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
+use iota_sdk::client::api::options::TransactionOptions;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
-use iota_sdk::{client::api::options::TransactionOptions, utils::serde::string};
 // #[cfg(feature = "participation")]
 // use iota_sdk::{
 //     client::node_manager::node::Node,
@@ -22,7 +22,7 @@ use iota_sdk::{
         secret::GenerateAddressOptions,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::Hrp,
         output::{AccountId, DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },

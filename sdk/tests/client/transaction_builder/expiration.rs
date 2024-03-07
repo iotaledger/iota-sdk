@@ -111,7 +111,7 @@ fn expiration_equal_timestamp() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -157,7 +157,7 @@ fn one_output_expiration_expired() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -219,7 +219,7 @@ fn two_outputs_one_expiration_expired() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[1]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -281,7 +281,7 @@ fn two_outputs_one_unexpired_one_missing() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[1]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -356,7 +356,7 @@ fn two_outputs_two_expired() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[1]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -420,7 +420,7 @@ fn two_outputs_two_expired_2() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -466,7 +466,7 @@ fn expiration_expired_with_sdr() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -512,7 +512,7 @@ fn expiration_expired_with_sdr_2() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -558,7 +558,7 @@ fn expiration_expired_with_sdr_and_timelock() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -604,7 +604,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -708,7 +708,7 @@ fn sender_in_expiration() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert!(selected.inputs_data.contains(&inputs[2]));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -758,7 +758,7 @@ fn sender_in_expiration_already_selected() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -864,7 +864,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -972,7 +972,7 @@ fn one_nft_output_expiration_unexpired() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1019,5 +1019,5 @@ fn one_nft_output_expiration_expired() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }

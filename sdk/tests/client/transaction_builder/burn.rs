@@ -360,7 +360,7 @@ fn burn_accounts_present() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -768,7 +768,7 @@ fn burn_nfts_present() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1584,7 +1584,7 @@ fn burn_generated_mana() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]

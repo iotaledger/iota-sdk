@@ -99,7 +99,7 @@ async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -216,7 +216,7 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id: rand_delegation_id(),
-        address: address,
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id),
         end_epoch: 0,
@@ -245,7 +245,7 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -301,7 +301,7 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
         amount: 1_000_000,
         delegation_amount: 1_500_000,
         delegation_id: DelegationId::null(),
-        address: address,
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id),
         end_epoch: 0,
@@ -330,7 +330,7 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -386,7 +386,7 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id: DelegationId::null(),
-        address: address,
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id),
         end_epoch: 100,
@@ -415,7 +415,7 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -471,7 +471,7 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id: DelegationId::null(),
-        address: address,
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id) + 5,
         end_epoch: 0,
@@ -498,7 +498,7 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -561,7 +561,7 @@ async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id,
-        address: address,
+        address,
         validator_address,
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
         end_epoch: *protocol_parameters.delegation_end_epoch(slot_commitment_id_2),
@@ -591,7 +591,7 @@ async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -657,7 +657,7 @@ async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
         amount: 1_000_000,
         delegation_amount: 900_000,
         delegation_id,
-        address: address,
+        address,
         validator_address,
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
         end_epoch: *protocol_parameters.delegation_end_epoch(slot_commitment_id_2),
@@ -687,7 +687,7 @@ async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -750,7 +750,7 @@ async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id,
-        address: address,
+        address,
         validator_address: rand_account_address(),
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
         end_epoch: *protocol_parameters.delegation_end_epoch(slot_commitment_id_2),
@@ -780,7 +780,7 @@ async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -843,7 +843,7 @@ async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> 
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id,
-        address: address,
+        address,
         validator_address,
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1) + 1,
         end_epoch: *protocol_parameters.delegation_end_epoch(slot_commitment_id_2),
@@ -873,7 +873,7 @@ async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> 
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -936,7 +936,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::erro
         amount: 1_000_000,
         delegation_amount: 1_000_000,
         delegation_id,
-        address: address,
+        address,
         validator_address,
         start_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1),
         end_epoch: *protocol_parameters.delegation_start_epoch(slot_commitment_id_1) + 1,
@@ -966,7 +966,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::erro
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -1061,7 +1061,7 @@ async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -1148,7 +1148,7 @@ async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
