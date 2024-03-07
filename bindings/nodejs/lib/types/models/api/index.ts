@@ -3,7 +3,6 @@
 
 export * from './info';
 export * from './plugins';
-export * from './block-failure-reason';
 export * from './block-response';
 export * from './committee-response';
 export * from './congestion-response';
