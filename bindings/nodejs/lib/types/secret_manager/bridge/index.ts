@@ -1,5 +1,5 @@
 import type {
-    __GenerateEd25519Address__,
+    __GenerateEd25519AddressMethod__,
     __GenerateEd25519AddressesMethod__,
     __GenerateEvmAddressesMethod__,
     __GetLedgerNanoStatusMethod__,
@@ -15,7 +15,7 @@ import type {
 } from './secret-manager';
 
 export type __SecretManagerMethods__ =
-    | __GenerateEd25519Address__
+    | __GenerateEd25519AddressMethod__
     | __GenerateEd25519AddressesMethod__
     | __GenerateEvmAddressesMethod__
     | __GetLedgerNanoStatusMethod__

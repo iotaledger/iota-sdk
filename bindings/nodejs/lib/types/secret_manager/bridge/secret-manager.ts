@@ -8,7 +8,7 @@ import type { PreparedTransactionData } from '../../client/prepared-transaction-
 import { HexEncodedString } from '../../utils';
 import { Bip44 } from '../secret-manager';
 
-export interface __GenerateEd25519Address__ {
+export interface __GenerateEd25519AddressMethod__ {
     name: 'generateEd25519Address';
     data: {
         coinType: CoinType;
