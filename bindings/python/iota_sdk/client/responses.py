@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from typing import Dict, List, Optional
-from enum import Enum, IntEnum
+from enum import Enum
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.block.block import Block
