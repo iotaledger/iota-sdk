@@ -74,8 +74,9 @@ def test_api_responses():
     test_api_response(OutputWithMetadataResponse,
                       "get-full-output-metadata-example.json")
     # GET /api/core/v3/transactions/{transactionId}/metadata
-    test_api_response(TransactionMetadataResponse,
-                      "get-transaction-metadata-by-id-response-example.json")
+    # TODO reenable when TIP is updated
+    # test_api_response(TransactionMetadataResponse,
+    #                   "get-transaction-metadata-by-id-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}
     test_api_response(SlotCommitment, "get-commitment-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes
