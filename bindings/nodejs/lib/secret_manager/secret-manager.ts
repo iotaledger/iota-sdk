@@ -6,6 +6,8 @@ import type {
     GenerateAddressesOptions,
     PreparedTransactionData,
     LedgerNanoStatus,
+    CoinType,
+    GenerateAddressOptions,
 } from '../types/client';
 import {
     Bip44,
@@ -21,6 +23,7 @@ import {
     UnsignedBlock,
     Block,
     parseBlock,
+    Bech32Address,
 } from '../types';
 
 import { plainToInstance } from 'class-transformer';
@@ -44,14 +47,41 @@ export class SecretManager {
     }
 
     /**
-     * Generate Ed25519 addresses.
+     * Generate a single Ed25519 address.
+     *
+     * @returns The generated Bech32 address.
+     */
+    async generateEd25519Address(
+        coinType: CoinType,
+        bech32Hrp: string,
+        accountIndex?: number,
+        addressIndex?: number,
+        options?: GenerateAddressOptions,
+    ): Promise<Bech32Address> {
+        const response = await this.methodHandler.callMethod({
+            name: 'generateEd25519Address',
+            data: {
+                coinType,
+                bech32Hrp,
+                accountIndex,
+                addressIndex,
+                internal: options?.internal,
+                ledgerNanoPrompt: options?.ledgerNanoPrompt,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Generate multiple Ed25519 addresses at once.
      *
      * @param generateAddressesOptions Options to generate addresses.
      * @returns An array of generated addresses.
      */
     async generateEd25519Addresses(
         generateAddressesOptions: GenerateAddressesOptions,
-    ): Promise<string[]> {
+    ): Promise<Bech32Address[]> {
         const response = await this.methodHandler.callMethod({
             name: 'generateEd25519Addresses',
             data: {
