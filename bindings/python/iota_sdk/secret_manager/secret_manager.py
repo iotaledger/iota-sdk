@@ -156,11 +156,12 @@ class SecretManager:
             options['range']['end'] = address_index + 1
         if account_index is not None:
             options['accountIndex'] = account_index
-        options['options'] = {}
-        if internal is not None:
-            options['options']['internal'] = internal
-        if legder_nano_prompt is not None:
-            options['options']['ledgerNanoPrompot'] = legder_nano_prompt
+        if internal is not None or legder_nano_prompt is not None:
+            options['options'] = {}
+            if internal is not None:
+                options['options']['internal'] = internal
+            if legder_nano_prompt is not None:
+                options['options']['ledgerNanoPrompot'] = legder_nano_prompt
 
         return self._call_method('generateEd25519Addresses', {
             'options': options
