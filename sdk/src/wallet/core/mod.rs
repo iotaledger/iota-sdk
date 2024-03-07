@@ -427,12 +427,12 @@ impl<S: 'static + SecretManage> Wallet<S> {
 }
 
 impl<S: SecretManage> WalletInner<S> {
-    /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
+    /// Get the [`SecretManager`] of the wallet.
+    pub fn secret_manager(&self) -> &Arc<RwLock<S>> {
         &self.secret_manager
     }
 
-    /// Listen to wallet events, empty vec will listen to all events
+    /// Listen to wallet events, empty vec will listen to all events.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
@@ -444,7 +444,7 @@ impl<S: SecretManage> WalletInner<S> {
         emitter.on(events, handler);
     }
 
-    /// Remove wallet event listeners, empty vec will remove all listeners
+    /// Remove wallet event listeners, empty vec will remove all listeners.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn clear_listeners<I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I)
