@@ -3,7 +3,6 @@
 
 import {
     AddressUnlockCondition,
-    Ed25519Address,
     IssuerFeature,
     MintNftParams,
     SenderFeature,
@@ -83,19 +82,17 @@ async function run() {
         // Build an NFT manually by using the `NftOutputBuilder`
         const client = await wallet.getClient();
 
-        const hexAddress = Utils.bech32ToHex(senderAddress);
+        const ed25519Address = Utils.parseBech32Address(senderAddress);
         const output = await client.buildNftOutput({
             amount: NFT2_AMOUNT,
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
                 new AddressUnlockCondition(
-                    new Ed25519Address(Utils.bech32ToHex(NFT1_OWNER_ADDRESS)),
+                    Utils.parseBech32Address(NFT1_OWNER_ADDRESS),
                 ),
             ],
-            immutableFeatures: [
-                new IssuerFeature(new Ed25519Address(hexAddress)),
-            ],
-            features: [new SenderFeature(new Ed25519Address(hexAddress))],
+            immutableFeatures: [new IssuerFeature(ed25519Address)],
+            features: [new SenderFeature(ed25519Address)],
         });
 
         transaction = await wallet.sendOutputs([output]);

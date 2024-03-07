@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Wallet, initLogger, Utils } from '@iota/sdk';
+import { Wallet, initLogger, Utils, AccountAddress } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 //
@@ -52,8 +52,8 @@ async function run() {
         const client = await wallet.getClient();
 
         // Get Account address
-        const accountAddress = Utils.accountIdToBech32(
-            accountId,
+        const accountAddress = Utils.addressToBech32(
+            new AccountAddress(accountId),
             await client.getBech32Hrp(),
         );
 

@@ -11,7 +11,6 @@ import {
     SenderFeature,
     TagFeature,
     StorageDepositReturnUnlockCondition,
-    Ed25519Address,
     ExpirationUnlockCondition,
     TimelockUnlockCondition,
     utf8ToHex,
@@ -36,12 +35,12 @@ async function run() {
     });
 
     try {
-        const hexAddress = Utils.bech32ToHex(
+        const ed25519Address = Utils.parseBech32Address(
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
         const addressUnlockCondition: UnlockCondition =
-            new AddressUnlockCondition(new Ed25519Address(hexAddress));
+            new AddressUnlockCondition(ed25519Address);
 
         // Build most basic output with amount and a single address unlock condition
         const basicOutput = await client.buildBasicOutput({
@@ -68,7 +67,7 @@ async function run() {
             unlockConditions: [
                 addressUnlockCondition,
                 new StorageDepositReturnUnlockCondition(
-                    new Ed25519Address(hexAddress),
+                    ed25519Address,
                     '1000000',
                 ),
             ],
@@ -81,10 +80,7 @@ async function run() {
             amount: BigInt(1000000),
             unlockConditions: [
                 addressUnlockCondition,
-                new ExpirationUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                    1,
-                ),
+                new ExpirationUnlockCondition(ed25519Address, 1),
             ],
         });
 
@@ -114,7 +110,7 @@ async function run() {
         const basicOutputWithSender = await client.buildBasicOutput({
             amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
-            features: [new SenderFeature(new Ed25519Address(hexAddress))],
+            features: [new SenderFeature(ed25519Address)],
         });
 
         console.log(JSON.stringify(basicOutputWithSender, null, 2));

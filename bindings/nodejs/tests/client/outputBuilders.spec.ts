@@ -33,7 +33,7 @@ describe.skip('Output builder methods', () => {
             },
         });
 
-        const hexAddress = Utils.bech32ToHex(addresses[0]);
+        const address = Utils.parseBech32Address(addresses[0]);
         const client = await makeClient();
 
         // most simple basic output
@@ -41,7 +41,7 @@ describe.skip('Output builder methods', () => {
             amount: BigInt(1000000),
             unlockConditions: [
                 new AddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
+                    address,
                 ),
             ],
         });
@@ -57,7 +57,7 @@ describe.skip('Output builder methods', () => {
             },
         });
 
-        const hexAddress = Utils.bech32ToHex(addresses[0]);
+        const address = Utils.parseBech32Address(addresses[0]);
         const client = await makeClient();
 
         const accountId =
@@ -67,7 +67,7 @@ describe.skip('Output builder methods', () => {
             accountId,
             unlockConditions: [
                 new AddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
+                    address,
                 ),
             ],
         });
@@ -110,14 +110,14 @@ describe.skip('Output builder methods', () => {
             },
         });
 
-        const hexAddress = Utils.bech32ToHex(addresses[0]);
+        const address = Utils.parseBech32Address(addresses[0]);
 
         // most simple nft output
         const nftOutput = await client.buildNftOutput({
             nftId: '0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3',
             unlockConditions: [
                 new AddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
+                    address
                 ),
             ],
         });
