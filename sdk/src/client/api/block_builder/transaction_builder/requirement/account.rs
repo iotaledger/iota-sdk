@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{Requirement, TransactionBuilder, TransactionBuilderError};
-use crate::{
-    client::secret::types::InputSigningData,
-    types::block::output::{AccountId, Output, OutputId},
-};
+use crate::types::block::output::{AccountId, Output, OutputId};
 
 /// Checks if an output is an account with output ID that matches the given account ID.
 pub(crate) fn is_account_with_id(output: &Output, account_id: &AccountId, output_id: &OutputId) -> bool {
@@ -28,10 +25,7 @@ pub(crate) fn is_account_with_id_non_null(output: &Output, account_id: &AccountI
 
 impl TransactionBuilder {
     /// Fulfills an account requirement by selecting the appropriate account from the available inputs.
-    pub(crate) fn fulfill_account_requirement(
-        &mut self,
-        account_id: AccountId,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_account_requirement(&mut self, account_id: AccountId) -> Result<(), TransactionBuilderError> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -42,7 +36,13 @@ impl TransactionBuilder {
                 "{account_id:?} requirement already fulfilled by {:?}",
                 input.output_id()
             );
-            return Ok(Vec::new());
+            return Ok(());
+        }
+
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Account(
+                account_id,
+            )));
         }
 
         // Check if the requirement can be fulfilled.
@@ -58,6 +58,8 @@ impl TransactionBuilder {
 
         log::debug!("{account_id:?} requirement fulfilled by {:?}", input.output_id());
 
-        Ok(vec![input])
+        self.select_input(input)?;
+
+        Ok(())
     }
 }
