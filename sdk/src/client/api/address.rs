@@ -16,6 +16,9 @@ use crate::{
     utils::ConvertTo,
 };
 
+// TODO: Should we rename ths struct to `GetAddressOptions`, thereby moving out the `range` field, so
+// it can be used by `GenerateEd25519Address` and `GenerateEd25519Addresses`? Do we even still need
+// the latter?
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
