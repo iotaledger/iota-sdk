@@ -28,5 +28,5 @@ export interface TransactionMetadataResponse {
     /**
      * Contains the detailed error message that occurred during the transaction processing if the debug mode was activated in the retainer.
      */
-    transactionFailureDetails?: String;
+    transactionFailureDetails?: string;
 }
