@@ -314,11 +314,6 @@ impl<'a> SemanticValidationContext<'a> {
                                 .ok_or(TransactionFailureReason::ManaOverflow)?;
                         }
                     }
-                    if output.features().staking().is_some() {
-                        if output.features().block_issuer().is_none() {
-                            return Err(TransactionFailureReason::StakingBlockIssuerFeatureMissing);
-                        }
-                    }
 
                     (output.amount(), output.mana(), None, Some(output.features()))
                 }
