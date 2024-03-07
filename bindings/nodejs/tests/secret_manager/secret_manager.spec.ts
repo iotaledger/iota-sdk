@@ -19,9 +19,12 @@ describe('SecretManager', () => {
         let bech32_hrp = Utils.iotaMainnetProtocolParameters().bech32Hrp;
 
         const secretManager = SecretManager.create(mnemonicSecretManager);
-        const address = await secretManager.generateEd25519Address(CoinType.IOTA, bech32_hrp);
+        const addresses = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.IOTA,
+            bech32Hrp: bech32_hrp,
+        });
 
-        expect(address).toEqual('iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg');
+        expect(addresses[0]).toEqual('iota1qpg2xkj66wwgn8p2ggnp7p582gj8g6p79us5hve2tsudzpsr2ap4skprwjg');
 
     }, 20000);
 
@@ -33,9 +36,13 @@ describe('SecretManager', () => {
         let bech32_hrp = Utils.shimmerMainnetProtocolParameters().bech32Hrp;
 
         const secretManager = SecretManager.create(mnemonicSecretManager);
-        const address = await secretManager.generateEd25519Address(CoinType.Shimmer, bech32_hrp);
+        const addresses = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.Shimmer,
+            bech32Hrp: bech32_hrp,
+            range: { start: 0, end: 1 },
+        });
 
-        expect(address).toEqual('smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y');
+        expect(addresses[0]).toEqual('smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y');
 
     }, 20000);
 });

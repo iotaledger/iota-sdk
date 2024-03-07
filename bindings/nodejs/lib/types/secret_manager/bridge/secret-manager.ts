@@ -2,23 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { UnsignedBlock } from '../../block';
-import { CoinType } from '../../client';
 import type { GenerateAddressesOptions } from '../../client/generate-addresses-options';
 import type { PreparedTransactionData } from '../../client/prepared-transaction-data';
 import { HexEncodedString } from '../../utils';
 import { Bip44 } from '../secret-manager';
-
-export interface __GenerateEd25519AddressMethod__ {
-    name: 'generateEd25519Address';
-    data: {
-        coinType: CoinType;
-        bech32Hrp: string;
-        accountIndex?: number;
-        addressIndex?: number;
-        internal?: boolean;
-        ledgerNanoPrompt?: boolean;
-    };
-}
 
 export interface __GenerateEd25519AddressesMethod__ {
     name: 'generateEd25519Addresses';

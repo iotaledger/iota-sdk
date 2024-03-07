@@ -147,19 +147,24 @@ class SecretManager:
             The generated Ed25519 address.
         """
 
-        args = {}
-        args['coinType'] = coin_type
-        args['bech32Hrp'] = bech32_hrp
-        if account_index is not None:
-            args['accountIndex'] = account_index
+        options = {}
+        options['coinType'] = coin_type
+        options['bech32Hrp'] = bech32_hrp
         if address_index is not None:
-            args['addressIndex'] = address_index
+            options['range'] = {}
+            options['range']['start'] = address_index
+            options['range']['end'] = address_index + 1
+        if account_index is not None:
+            options['accountIndex'] = account_index
+        options['options'] = {}
         if internal is not None:
-            args['internal'] = internal
+            options['options']['internal'] = internal
         if legder_nano_prompt is not None:
-            args['ledgerNanoPrompot'] = legder_nano_prompt
+            options['options']['ledgerNanoPrompot'] = legder_nano_prompt
 
-        return self._call_method('generateEd25519Address', args)
+        return self._call_method('generateEd25519Addresses', {
+            'options': options
+        })[0]
 
     # pylint: disable=unused-argument
 
