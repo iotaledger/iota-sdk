@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, OutputWithMetadataResponse, ManaRewardsResponse, ValidatorsResponse, ValidatorResponse, InfoResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockWithMetadataResponse, OutputMetadata, OutputResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk import RoutesResponse, CongestionResponse, OutputWithMetadataResponse, ManaRewardsResponse, ValidatorsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockWithMetadataResponse, OutputMetadata, OutputResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -27,7 +27,8 @@ def test_api_responses():
     # GET /api/routes
     test_api_response(RoutesResponse, "get-routes-response-example.json")
     # GET /api/core/v3/info
-    test_api_response(InfoResponse, "get-info-response-example.json")
+    # TODO reenable when Metrics are split out of Info
+    # test_api_response(InfoResponse, "get-info-response-example.json")
     # GET /api/core/v3/accounts/{bech32Address}/congestion
     test_api_response(CongestionResponse,
                       "get-congestion-estimate-response-example.json")

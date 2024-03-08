@@ -52,7 +52,8 @@ fn responses() {
     // GET /api/routes
     json_response::<RoutesResponse>("get-routes-response-example.json").unwrap();
     // GET /api/core/v3/info
-    json_response::<InfoResponse>("get-info-response-example.json").unwrap();
+    // TODO reenable when Metrics are split out of Info
+    // json_response::<InfoResponse>("get-info-response-example.json").unwrap();
     // GET /api/core/v3/accounts/{bech32Address}/congestion
     json_response::<CongestionResponse>("get-congestion-estimate-response-example.json").unwrap();
     // GET /api/core/v3/rewards/{outputId}

@@ -149,6 +149,8 @@ pub enum ClientMethod {
     },
     /// Returns general information about the node together with its URL.
     GetNodeInfo,
+    /// Returns network metrics.
+    GetNetworkMetrics,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
     #[serde(rename_all = "camelCase")]

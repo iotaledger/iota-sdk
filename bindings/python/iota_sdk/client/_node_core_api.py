@@ -3,7 +3,7 @@
 
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
-from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, NetworkMetricsResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
@@ -81,6 +81,16 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'url': url,
             'auth': auth
         }))
+
+    def get_network_metrics(self) -> NetworkMetricsResponse:
+        """Returns network metrics.
+        GET /api/core/v3/network/metrics
+
+        Returns:
+            Network metrics.
+        """
+        return NetworkMetricsResponse.from_dict(
+            self._call_method('getNetworkMetrics'))
 
     # Accounts routes.
 

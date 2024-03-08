@@ -8,6 +8,7 @@ export * from './committee-response';
 export * from './congestion-response';
 export * from './issuance-response';
 export * from './mana-rewards-response';
+export * from './network-metrics';
 export * from './output-id-proof';
 export * from './output-metadata-response';
 export * from './output-response';
