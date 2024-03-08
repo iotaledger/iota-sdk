@@ -385,9 +385,9 @@ impl TransactionBuilder {
         }
 
         for (chain_id, (added_amount, added_mana)) in added_amount_mana {
-            let mut output = self.get_output_for_added_remainder(chain_id, &remainder_address);
+            let mut output = self.get_output_for_remainder(chain_id, &remainder_address);
             if output.is_none() {
-                output = self.get_output_for_added_remainder(None, &remainder_address);
+                output = self.get_output_for_remainder(None, &remainder_address);
             }
             if let Some(output) = output {
                 log::debug!(

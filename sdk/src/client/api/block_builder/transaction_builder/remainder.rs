@@ -8,69 +8,24 @@ use primitive_types::U256;
 
 use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
-    client::api::{transaction_builder::requirement::native_tokens::get_native_tokens_diff, RemainderData},
+    client::api::{
+        transaction_builder::{requirement::native_tokens::get_native_tokens_diff, Remainders},
+        RemainderData,
+    },
     types::block::{
         address::{Address, Ed25519Address},
-        output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, ChainId, NativeToken, Output,
-            StorageScoreParameters, TokenId,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, ChainId, NativeToken, Output, TokenId},
     },
 };
 
 impl TransactionBuilder {
     /// Updates the remainders, overwriting old values.
     pub(crate) fn update_remainders(&mut self) -> Result<(), TransactionBuilderError> {
-        let (storage_deposit_returns, remainders) = self.storage_deposit_returns_and_remainders()?;
-
-        self.remainders.storage_deposit_returns = storage_deposit_returns;
-        self.remainders.data = remainders;
-
-        Ok(())
-    }
-
-    /// Gets the remainder address from configuration of finds one from the inputs.
-    pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, TransactionBuilderError> {
-        if let Some(remainder_address) = &self.remainders.address {
-            // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
-            for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
-                let required_address = input
-                    .output
-                    .required_address(
-                        self.latest_slot_commitment_id.slot_index(),
-                        self.protocol_parameters.committable_age_range(),
-                    )?
-                    .expect("expiration unlockable outputs already filtered out");
-
-                if &required_address == remainder_address {
-                    return Ok(Some((remainder_address.clone(), input.chain)));
-                }
-            }
-            return Ok(Some((remainder_address.clone(), None)));
-        }
-
-        for input in &self.selected_inputs {
-            let required_address = input
-                .output
-                .required_address(
-                    self.latest_slot_commitment_id.slot_index(),
-                    self.protocol_parameters.committable_age_range(),
-                )?
-                .expect("expiration unlockable outputs already filtered out");
-
-            if let Some(&required_address) = required_address.backing_ed25519() {
-                return Ok(Some((required_address.into(), input.chain)));
-            }
-        }
-
-        Ok(None)
-    }
-
-    pub(crate) fn storage_deposit_returns_and_remainders(
-        &mut self,
-    ) -> Result<(Vec<Output>, Vec<RemainderData>), TransactionBuilderError> {
+        self.remainders = Remainders {
+            address: self.remainders.address.take(),
+            ..Default::default()
+        };
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) = self.amount_sums();
-        let mut storage_deposit_returns = Vec::new();
 
         for (address, amount) in inputs_sdr {
             let output_sdr_amount = *outputs_sdr.get(&address).unwrap_or(&0);
@@ -85,7 +40,7 @@ impl TransactionBuilder {
 
                 log::debug!("Created storage deposit return output of {diff} for {address:?}");
 
-                storage_deposit_returns.push(srd_output);
+                self.remainders.storage_deposit_returns.push(srd_output);
             }
         }
 
@@ -133,8 +88,8 @@ impl TransactionBuilder {
         if amount_diff > nt_min_amount {
             for (chain_id, (input_amount, output_amount)) in self.amount_chains()? {
                 if input_amount > output_amount
-                    && (self.output_for_added_remainder(Some(chain_id), &remainder_address)
-                        || self.output_for_added_remainder(None, &remainder_address))
+                    && (self.output_for_remainder_exists(Some(chain_id), &remainder_address)
+                        || self.output_for_remainder_exists(None, &remainder_address))
                 {
                     // Get the lowest of the total diff or the diff for this chain
                     let amount_to_add = (amount_diff - nt_min_amount).min(input_amount - output_amount);
@@ -146,7 +101,7 @@ impl TransactionBuilder {
                 }
             }
             // Any leftover amount diff can go in any output with the right address
-            if amount_diff > nt_min_amount && self.output_for_added_remainder(None, &remainder_address) {
+            if amount_diff > nt_min_amount && self.output_for_remainder_exists(None, &remainder_address) {
                 let amount_to_add = amount_diff - nt_min_amount;
                 log::debug!(
                     "Allocating {amount_to_add} excess input amount for output with address {remainder_address}"
@@ -160,8 +115,8 @@ impl TransactionBuilder {
         if mana_diff > 0 {
             for (chain_id, (input_mana, output_mana)) in self.mana_chains()? {
                 if input_mana > output_mana
-                    && (self.output_for_added_remainder(Some(chain_id), &remainder_address)
-                        || self.output_for_added_remainder(None, &remainder_address))
+                    && (self.output_for_remainder_exists(Some(chain_id), &remainder_address)
+                        || self.output_for_remainder_exists(None, &remainder_address))
                 {
                     // Get the lowest of the total diff or the diff for this chain
                     let mana_to_add = mana_diff.min(input_mana - output_mana);
@@ -173,7 +128,7 @@ impl TransactionBuilder {
                 }
             }
             // Any leftover mana diff can go in any output with the right address
-            if mana_diff > 0 && self.output_for_added_remainder(None, &remainder_address) {
+            if mana_diff > 0 && self.output_for_remainder_exists(None, &remainder_address) {
                 log::debug!("Allocating {mana_diff} excess input mana for output with address {remainder_address}");
                 self.remainders.added_mana.insert(None, std::mem::take(&mut mana_diff));
             }
@@ -181,22 +136,52 @@ impl TransactionBuilder {
 
         if amount_diff == 0 && mana_diff == 0 && native_tokens_diff.is_empty() {
             log::debug!("No remainder required");
-            return Ok((storage_deposit_returns, Vec::new()));
+            return Ok(());
         }
 
-        let remainder_outputs = create_remainder_outputs(
-            amount_diff,
-            mana_diff,
-            native_tokens_diff,
-            remainder_address,
-            chain,
-            self.protocol_parameters.storage_score_parameters(),
-        )?;
+        self.create_remainder_outputs(amount_diff, mana_diff, native_tokens_diff, remainder_address, chain)?;
 
-        Ok((storage_deposit_returns, remainder_outputs))
+        Ok(())
     }
 
-    fn output_for_added_remainder(&self, chain_id: Option<ChainId>, remainder_address: &Address) -> bool {
+    /// Gets the remainder address from configuration of finds one from the inputs.
+    pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, TransactionBuilderError> {
+        if let Some(remainder_address) = &self.remainders.address {
+            // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
+            for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
+                let required_address = input
+                    .output
+                    .required_address(
+                        self.latest_slot_commitment_id.slot_index(),
+                        self.protocol_parameters.committable_age_range(),
+                    )?
+                    .expect("expiration unlockable outputs already filtered out");
+
+                if &required_address == remainder_address {
+                    return Ok(Some((remainder_address.clone(), input.chain)));
+                }
+            }
+            return Ok(Some((remainder_address.clone(), None)));
+        }
+
+        for input in &self.selected_inputs {
+            let required_address = input
+                .output
+                .required_address(
+                    self.latest_slot_commitment_id.slot_index(),
+                    self.protocol_parameters.committable_age_range(),
+                )?
+                .expect("expiration unlockable outputs already filtered out");
+
+            if let Some(&required_address) = required_address.backing_ed25519() {
+                return Ok(Some((required_address.into(), input.chain)));
+            }
+        }
+
+        Ok(None)
+    }
+
+    fn output_for_remainder_exists(&self, chain_id: Option<ChainId>, remainder_address: &Address) -> bool {
         // Find the first value that matches the remainder address
         self.added_outputs.iter().any(|o| {
             (o.chain_id() == chain_id || chain_id.is_none() && (o.is_basic() || o.is_account() || o.is_nft()))
@@ -209,7 +194,7 @@ impl TransactionBuilder {
         })
     }
 
-    pub(crate) fn get_output_for_added_remainder(
+    pub(crate) fn get_output_for_remainder(
         &mut self,
         chain_id: Option<ChainId>,
         remainder_address: &Address,
@@ -265,14 +250,14 @@ impl TransactionBuilder {
             && remainder_address.map_or(true, |remainder_address| {
                 let mut mana_diff = selected_mana - required_mana;
                 for (chain_id, (mana_in, mana_out)) in mana_chains {
-                    if mana_in > mana_out && self.output_for_added_remainder(Some(chain_id), &remainder_address) {
+                    if mana_in > mana_out && self.output_for_remainder_exists(Some(chain_id), &remainder_address) {
                         mana_diff -= mana_diff.min(mana_in - mana_out);
                         if mana_diff == 0 {
                             return false;
                         }
                     }
                 }
-                mana_diff > 0 && !self.output_for_added_remainder(None, &remainder_address)
+                mana_diff > 0 && !self.output_for_remainder_exists(None, &remainder_address)
             });
         // If we are burning mana, we may not need a mana remainder
         if self.burn.as_ref().map_or(false, |b| b.mana()) {
@@ -283,61 +268,62 @@ impl TransactionBuilder {
 
         Ok((remainder_amount, !remainder_native_tokens.is_empty(), mana_remainder))
     }
-}
 
-fn create_remainder_outputs(
-    amount_diff: u64,
-    mana_diff: u64,
-    mut native_tokens: BTreeMap<TokenId, U256>,
-    remainder_address: Address,
-    remainder_address_chain: Option<Bip44>,
-    storage_score_parameters: StorageScoreParameters,
-) -> Result<Vec<RemainderData>, TransactionBuilderError> {
-    let mut remainder_outputs = Vec::new();
-    let mut remaining_amount = amount_diff;
-    let mut catchall_native_token = None;
+    fn create_remainder_outputs(
+        &mut self,
+        amount_diff: u64,
+        mana_diff: u64,
+        mut native_tokens: BTreeMap<TokenId, U256>,
+        remainder_address: Address,
+        remainder_address_chain: Option<Bip44>,
+    ) -> Result<(), TransactionBuilderError> {
+        let mut remaining_amount = amount_diff;
+        let mut catchall_native_token = None;
 
-    // Start with the native tokens
-    if let Some((token_id, amount)) = native_tokens.pop_last() {
-        // Save this one for the catchall
-        catchall_native_token.replace(NativeToken::new(token_id, amount)?);
-        // Create remainder outputs with min amount
-        for (token_id, amount) in native_tokens {
-            let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_parameters)
-                .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
-                .with_native_token(NativeToken::new(token_id, amount)?)
-                .finish_output()?;
-            log::debug!(
-                "Created remainder output of amount {}, mana {} and native token ({token_id}: {amount}) for {remainder_address:?}",
-                output.amount(),
-                output.mana()
-            );
-            remaining_amount = remaining_amount.saturating_sub(output.amount());
-            remainder_outputs.push(output);
+        // Start with the native tokens
+        if let Some((token_id, amount)) = native_tokens.pop_last() {
+            // Save this one for the catchall
+            catchall_native_token.replace(NativeToken::new(token_id, amount)?);
+            // Create remainder outputs with min amount
+            for (token_id, amount) in native_tokens {
+                let output =
+                    BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+                        .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()))
+                        .with_native_token(NativeToken::new(token_id, amount)?)
+                        .finish_output()?;
+                log::debug!(
+                    "Created remainder output of amount {}, mana {} and native token ({token_id}: {amount}) for {remainder_address:?}",
+                    output.amount(),
+                    output.mana()
+                );
+                remaining_amount = remaining_amount.saturating_sub(output.amount());
+                self.remainders.data.push(RemainderData {
+                    output,
+                    chain: remainder_address_chain,
+                    address: remainder_address.clone(),
+                });
+            }
         }
-    }
-    let mut catchall = BasicOutputBuilder::new_with_amount(remaining_amount)
-        .with_mana(mana_diff)
-        .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
-    if let Some(native_token) = catchall_native_token {
-        catchall = catchall.with_native_token(native_token);
-    }
-    let catchall = catchall.finish_output()?;
-    catchall.verify_storage_deposit(storage_score_parameters)?;
-    log::debug!(
-        "Created remainder output of amount {}, mana {} and native token {:?} for {remainder_address:?}",
-        catchall.amount(),
-        catchall.mana(),
-        catchall.native_token(),
-    );
-    remainder_outputs.push(catchall);
-
-    Ok(remainder_outputs
-        .into_iter()
-        .map(|o| RemainderData {
-            output: o,
+        let mut catchall = BasicOutputBuilder::new_with_amount(remaining_amount)
+            .with_mana(mana_diff)
+            .add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
+        if let Some(native_token) = catchall_native_token {
+            catchall = catchall.with_native_token(native_token);
+        }
+        let catchall = catchall.finish_output()?;
+        catchall.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
+        log::debug!(
+            "Created remainder output of amount {}, mana {} and native token {:?} for {remainder_address:?}",
+            catchall.amount(),
+            catchall.mana(),
+            catchall.native_token(),
+        );
+        self.remainders.data.push(RemainderData {
+            output: catchall,
             chain: remainder_address_chain,
             address: remainder_address.clone(),
-        })
-        .collect())
+        });
+
+        Ok(())
+    }
 }
