@@ -9,7 +9,7 @@ from dataclasses_json import config
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
-from iota_sdk.types.node_info import BaseTokenResponse, MetricsResponse, StatusResponse, ProtocolParameters
+from iota_sdk.types.node_info import BaseTokenResponse, StatusResponse, ProtocolParameters
 from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId, OutputWithId
 from iota_sdk.types.output_id_proof import OutputIdProof
@@ -56,14 +56,12 @@ class InfoResponse:
         name: The name of the node (e.g. Hornet).
         version: The semantic version of the node.
         status: The status of the node.
-        metrics: Node metrics.
         protocol_parameters: Supported protocol versions by the node.
         base_token: Gives info about the base token the network uses.
     """
     name: str
     version: str
     status: StatusResponse
-    metrics: MetricsResponse
     protocol_parameters: List[ProtocolParametersResponse]
     base_token: BaseTokenResponse
 
@@ -82,7 +80,28 @@ class NodeInfoResponse:
     url: str
 
 
+@json
+@dataclass
+class NetworkMetricsResponse:
+    """Network metrics.
+
+    Attributes:
+        blocks_per_second: The current rate of new blocks per second.
+        confirmed_blocks_per_second: The current rate of confirmed blocks per second.
+        confirmation_rate: The ratio of confirmed blocks to new blocks of the last confirmed slot.
+    """
+    blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmed_blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmation_rate: float = field(metadata=config(
+        encoder=str
+    ))
+
 # Accounts routes responses
+
 
 @json
 @dataclass

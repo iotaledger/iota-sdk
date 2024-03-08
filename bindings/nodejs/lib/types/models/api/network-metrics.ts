@@ -1,10 +1,10 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Response from the /info endpoint.
+ * Metrics information about the network.
  */
-export interface MetricsResponse {
+export interface NetworkMetricsResponse {
     /**
      * The current rate of new blocks per second.
      */
