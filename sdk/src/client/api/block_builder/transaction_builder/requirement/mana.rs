@@ -218,10 +218,7 @@ impl TransactionBuilder {
             }
             let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
             let mut priority_map = PriorityMap::<ManaPriority>::generate(&mut self.available_inputs);
-            loop {
-                let Some(input) = priority_map.next(required_mana - selected_mana) else {
-                    break;
-                };
+            while let Some(input) = priority_map.next(required_mana - selected_mana) {
                 selected_mana += self.total_mana(&input, include_generated)?;
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();

@@ -55,10 +55,7 @@ impl TransactionBuilder {
         }
 
         let mut priority_map = PriorityMap::<AmountPriority>::generate(&mut self.available_inputs);
-        loop {
-            let Some(input) = priority_map.next(output_amount - input_amount, self.latest_slot_commitment_id) else {
-                break;
-            };
+        while let Some(input) = priority_map.next(output_amount - input_amount, self.latest_slot_commitment_id) {
             log::debug!(
                 "selecting {} input with amount {}",
                 input.output.kind_str(),
