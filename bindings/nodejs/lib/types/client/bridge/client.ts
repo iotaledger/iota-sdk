@@ -31,7 +31,6 @@ import type { BasicOutputBuilderParams } from '../output_builder_params/basic-ou
 import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
-import { HexEncodedString } from '../../utils';
 import { TransactionId } from '../..';
 
 // Node routes.
@@ -57,6 +56,10 @@ export interface __GetInfoMethod__ {
         url: string;
         auth?: Auth;
     };
+}
+
+export interface __GetNetworkMetricsMethod__ {
+    name: 'getNetworkMetrics';
 }
 
 // Accounts routes.

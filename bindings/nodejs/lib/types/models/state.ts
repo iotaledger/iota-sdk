@@ -3,32 +3,40 @@
 
 /**
  * The different states of a block.
- * 'pending': stored but not accepted/confirmed.
- * 'accepted': valid block referenced by some validators.
- * 'confirmed': valid block referenced by more than 2/3 of the validators.
- * 'finalized': accepted/confirmed block and the slot was finalized, can no longer be reverted.
- * 'rejected': rejected by the node, and user should reissue payload if it contains one.
- * 'failed': not successfully issued due to failure reason.
+ * 'pending':   The block has been booked by the node but not yet accepted.
+ * 'accepted':  The block has been referenced by the super majority of the online committee.
+ * 'confirmed': The block has been referenced by the super majority of the total committee.
+ * 'finalized': The commitment containing the block has been finalized.
+ *              This state is computed based on the accepted/confirmed block's slot being smaller or equal than the latest finalized slot.
+ * 'dropped':   The block has been dropped due to congestion control.
+ * 'orphaned':  The block's slot has been committed by the node without the block being included.
+ *              In this case, the block will never be finalized unless there is a chain switch.
+ *              This state is computed based on the pending block's slot being smaller or equal than the latest committed slot.
  */
 export declare type BlockState =
     | 'pending'
     | 'accepted'
     | 'confirmed'
     | 'finalized'
-    | 'rejected'
-    | 'failed';
+    | 'dropped'
+    | 'orphaned';
 
 /**
  * The different states of a transaction.
- * 'pending': the transaction is not included yet.
- * 'accepted': the transaction is included.
- * 'confirmed': the transaction is included and its included block is confirmed.
- * 'finalized': the transaction is included, its included block is finalized and cannot be reverted anymore.
- * 'failed': the transaction is not successfully issued due to failure reason.
+ * 'pending':   The transaction has been booked by the node but not yet accepted.
+ * 'accepted':  The transaction meets the following 4 conditions:
+ *	                - Signatures of the transaction are valid.
+ *                  - The transaction has been approved by the super majority of the online committee (potential conflicts are resolved by this time).
+ *	                - The transactions that created the inputs were accepted (monotonicity).
+ *                  - At least one valid attachment was accepted.
+ * 'committed': The slot of the earliest accepted attachment of the transaction was committed.
+ * 'finalized': The transaction is accepted and the slot containing the transaction has been finalized by the node.
+ *              This state is computed based on the accepted transaction's earliest included attachment slot being smaller or equal than the latest finalized slot.
+ * 'failed':    The transaction has not been executed by the node due to a failure during processing.
  */
 export declare type TransactionState =
     | 'pending'
     | 'accepted'
-    | 'confirmed'
+    | 'committed'
     | 'finalized'
     | 'failed';

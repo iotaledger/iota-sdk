@@ -258,7 +258,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def get_protocol_parameters(self) -> ProtocolParameters:
         """Gets the protocol parameters.
         """
-        return ProtocolParameters.from_dict(self._call_method('getProtocolParameters'))
+        return ProtocolParameters.from_dict(
+            self._call_method('getProtocolParameters'))
 
     def get_network_id(self) -> int:
         """Gets the network id of the node we're connecting to.
