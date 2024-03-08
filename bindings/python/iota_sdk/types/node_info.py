@@ -48,27 +48,6 @@ class StatusResponse:
 
 @json
 @dataclass
-class MetricsResponse:
-    """Node metrics.
-
-    Attributes:
-        blocks_per_second: The current rate of new blocks per second.
-        confirmed_blocks_per_second: The current rate of confirmed blocks per second.
-        confirmation_rate: The ratio of confirmed blocks to new blocks of the last confirmed slot.
-    """
-    blocks_per_second: float = field(metadata=config(
-        encoder=str
-    ))
-    confirmed_blocks_per_second: float = field(metadata=config(
-        encoder=str
-    ))
-    confirmation_rate: float = field(metadata=config(
-        encoder=str
-    ))
-
-
-@json
-@dataclass
 class StorageScoreParameters:
     """Defines the parameters of storage score calculations on objects which take node resources.
 

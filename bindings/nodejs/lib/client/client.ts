@@ -42,7 +42,6 @@ import {
     EpochIndex,
     Address,
 } from '../types/block';
-import { HexEncodedString } from '../utils';
 import {
     BlockMetadataResponse,
     InfoResponse,
@@ -66,6 +65,7 @@ import {
     IssuanceBlockHeaderResponse,
     OutputMetadataResponse,
     OutputWithMetadataResponse,
+    NetworkMetricsResponse,
 } from '../types/models/api';
 import { RoutesResponse } from '../types/models/api/routes-response';
 
@@ -151,6 +151,17 @@ export class Client {
                 url,
                 auth,
             },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the network metrics.
+     */
+    async getNetworkMetrics(): Promise<NetworkMetricsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getNetworkMetrics',
         });
 
         return JSON.parse(response).payload;

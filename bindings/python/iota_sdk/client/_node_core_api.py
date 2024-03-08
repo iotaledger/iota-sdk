@@ -3,7 +3,7 @@
 
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
-from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk.client.responses import InfoResponse, NodeInfoResponse, NetworkMetricsResponse, RoutesResponse, CongestionResponse, ManaRewardsResponse, CommitteeResponse, ValidatorResponse, ValidatorsResponse, IssuanceBlockHeaderResponse, BlockMetadataResponse, BlockWithMetadataResponse, OutputResponse, OutputWithMetadataResponse, TransactionMetadataResponse, UtxoChangesResponse, UtxoChangesFullResponse
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
@@ -82,9 +82,20 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'auth': auth
         }))
 
+    def get_network_metrics(self) -> NetworkMetricsResponse:
+        """Returns network metrics.
+        GET /api/core/v3/network/metrics
+
+        Returns:
+            Network metrics.
+        """
+        return NetworkMetricsResponse.from_dict(
+            self._call_method('getNetworkMetrics'))
+
     # Accounts routes.
 
-    def get_account_congestion(self, account_id: HexStr, work_score: Optional[int] = None) -> CongestionResponse:
+    def get_account_congestion(
+            self, account_id: HexStr, work_score: Optional[int] = None) -> CongestionResponse:
         """Checks if the account is ready to issue a block.
         GET /api/core/v3/accounts/{bech32Address}/congestion
         """
@@ -112,7 +123,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Validators routes.
 
-    def get_validators(self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ValidatorsResponse:
+    def get_validators(
+            self, page_size: Optional[int] = None, cursor: Optional[str] = None) -> ValidatorsResponse:
         """Returns information of all stakers (registered validators) and if they are active, ordered by their holding stake.
         GET /api/core/v3/validators
         """
@@ -131,7 +143,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     # Committee routes.
 
-    def get_committee(self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
+    def get_committee(
+            self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
         current committee members are returned.
         GET /api/core/v3/committee/?epochIndex

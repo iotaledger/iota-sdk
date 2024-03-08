@@ -40,7 +40,6 @@ pub struct InfoResponse {
     pub name: String,
     pub version: String,
     pub status: StatusResponse,
-    pub metrics: MetricsResponse,
     pub protocol_parameters: ProtocolParametersMap,
     pub base_token: BaseTokenResponse,
 }
@@ -105,11 +104,10 @@ pub struct StatusResponse {
     pub pruning_epoch: EpochIndex,
 }
 
-/// Returned in [`InfoResponse`].
-/// Metric information about the node.
+/// Metrics information about the network.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct MetricsResponse {
+pub struct NetworkMetricsResponse {
     #[serde(with = "string")]
     pub blocks_per_second: f64,
     #[serde(with = "string")]
@@ -362,109 +360,64 @@ pub struct SubmitBlockResponse {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BlockState {
-    /// Stored but not accepted/confirmed.
+    /// The block has been booked by the node but not yet accepted.
     Pending,
-    /// Valid block referenced by some validators.
+    /// The block has been referenced by the super majority of the online committee.
     Accepted,
-    /// Valid block referenced by more than 2/3 of the validators.
+    /// The block has been referenced by the super majority of the total committee.
     Confirmed,
-    /// Accepted/confirmed block and the slot was finalized, can no longer be reverted.
+    /// The commitment containing the block has been finalized.
+    /// This state is computed based on the accepted/confirmed block's slot being smaller or equal than the latest
+    /// finalized slot.
     Finalized,
-    /// Rejected by the node, and user should reissue payload if it contains one.
-    Rejected,
-    /// Not successfully issued due to failure reason.
-    Failed,
+    /// The block has been dropped due to congestion control.
+    Dropped,
+    /// The block's slot has been committed by the node without the block being included.
+    /// In this case, the block will never be finalized unless there is a chain switch.
+    /// This state is computed based on the pending block's slot being smaller or equal than the latest committed slot.
+    Orphaned,
 }
 
 /// Describes the state of a transaction.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionState {
-    /// Not included yet.
+    /// The transaction has been booked by the node but not yet accepted.
     Pending,
-    /// Included.
+    /// The transaction meets the following 4 conditions:
+    /// - Signatures of the transaction are valid.
+    /// - The transaction has been approved by the super majority of the online committee (potential conflicts are
+    ///   resolved by this time).
+    /// - The transactions that created the inputs were accepted (monotonicity).
+    /// - At least one valid attachment was accepted.
     Accepted,
-    /// Included and its included block is confirmed.
-    Confirmed,
-    /// Included, its included block is finalized and cannot be reverted anymore.
+    /// The slot of the earliest accepted attachment of the transaction was committed.
+    Committed,
+    /// The transaction is accepted and the slot containing the transaction has been finalized by the node.
+    /// This state is computed based on the accepted transaction's earliest included attachment slot being smaller or
+    /// equal than the latest finalized slot.
     Finalized,
-    /// The block is not successfully issued due to failure reason.
+    /// The transaction has not been executed by the node due to a failure during processing.
     Failed,
-}
-
-/// Describes the reason of a block failure.
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    PartialEq,
-    serde_repr::Serialize_repr,
-    serde_repr::Deserialize_repr,
-    strum::FromRepr,
-    strum::EnumString,
-    strum::AsRefStr,
-)]
-#[serde(rename_all = "camelCase")]
-#[strum(serialize_all = "camelCase")]
-#[non_exhaustive]
-#[repr(u8)]
-pub enum BlockFailureReason {
-    /// The block is too old to issue.
-    TooOldToIssue = 1,
-    /// One of the block's parents is too old.
-    ParentTooOld = 2,
-    /// One of the block's parents does not exist.
-    ParentDoesNotExist = 3,
-    /// The block's issuer account could not be found.
-    IssuerAccountNotFound = 4,
-    /// The mana cost could not be calculated.
-    ManaCostCalculationFailed = 5,
-    // The block's issuer account burned insufficient Mana for a block.
-    BurnedInsufficientMana = 6,
-    /// The account is locked.
-    AccountLocked = 7,
-    /// The account is locked.
-    AccountExpired = 8,
-    /// The block's signature is invalid.
-    SignatureInvalid = 9,
-    /// The block is dropped due to congestion.
-    DroppedDueToCongestion = 10,
-    /// The block payload is invalid.
-    PayloadInvalid = 11,
-    /// The block is invalid.
-    Invalid = 255,
-}
-
-impl core::fmt::Display for BlockFailureReason {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::TooOldToIssue => write!(f, "The block is too old to issue."),
-            Self::ParentTooOld => write!(f, "One of the block's parents is too old."),
-            Self::ParentDoesNotExist => write!(f, "One of the block's parents does not exist."),
-            Self::IssuerAccountNotFound => write!(f, "The block's issuer account could not be found."),
-            Self::ManaCostCalculationFailed => write!(f, "The mana cost could not be calculated."),
-            Self::BurnedInsufficientMana => {
-                write!(f, "The block's issuer account burned insufficient Mana for a block.")
-            }
-            Self::AccountLocked => write!(f, "The account is locked."),
-            Self::AccountExpired => write!(f, "The account is expired."),
-            Self::SignatureInvalid => write!(f, "The block's signature is invalid."),
-            Self::DroppedDueToCongestion => write!(f, "The block is dropped due to congestion."),
-            Self::PayloadInvalid => write!(f, "The block payload is invalid."),
-            Self::Invalid => write!(f, "The block is invalid."),
-        }
-    }
 }
 
 // Response of a GET transaction metadata REST API call.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TransactionMetadataResponse {
+    /// The transaction ID.
     pub transaction_id: TransactionId,
+    /// The transaction state.
     pub transaction_state: TransactionState,
+    /// The slot of the earliest included valid block that contains an attachment of the transaction.
+    pub earliest_attachment_slot: SlotIndex,
+    /// If applicable, indicates the error that occurred during the transaction processing.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transaction_failure_reason: Option<TransactionFailureReason>,
+    /// Contains the detailed error message that occurred during the transaction processing if the debug mode was
+    /// activated in the retainer.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transaction_failure_details: Option<String>,
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
@@ -474,10 +427,6 @@ pub struct TransactionMetadataResponse {
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     pub block_state: BlockState,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub block_failure_reason: Option<BlockFailureReason>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transaction_metadata: Option<TransactionMetadataResponse>,
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/full.
