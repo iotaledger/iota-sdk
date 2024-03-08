@@ -42,7 +42,6 @@ import {
     EpochIndex,
     Address,
 } from '../types/block';
-import { HexEncodedString } from '../utils';
 import {
     BlockMetadataResponse,
     InfoResponse,
