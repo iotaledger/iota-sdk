@@ -31,7 +31,7 @@ pub enum TransactionBuilderError {
     /// Can't burn and transition an output at the same time.
     #[error("can't burn and transition an output at the same time, chain ID: {0}")]
     BurnAndTransition(ChainId),
-    #[error("account id {account_id} cannot end staking until {end_epoch}")]
+    #[error("account {account_id} cannot end staking until {end_epoch}")]
     CannotEndStaking {
         account_id: AccountId,
         end_epoch: EpochIndex,
