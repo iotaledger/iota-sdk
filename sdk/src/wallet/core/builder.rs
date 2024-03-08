@@ -245,9 +245,20 @@ where
             }
         };
 
+        let loaded_alias = loaded_wallet_builder.as_ref().and_then(|builder| builder.alias.clone());
+
         // May use a previously stored wallet alias if it wasn't provided
-        if self.alias.is_none() {
-            self.alias = loaded_wallet_builder.as_ref().and_then(|builder| builder.alias.clone());
+        if let Some(alias) = &self.alias {
+            if let Some(loaded_alias) = &loaded_alias {
+                if alias != loaded_alias {
+                    return Err(WalletError::AliasMismatch {
+                        provided: alias.clone(),
+                        expected: loaded_alias.clone(),
+                    });
+                }
+            }
+        } else {
+            self.alias = loaded_alias;
         }
 
         #[cfg(feature = "storage")]

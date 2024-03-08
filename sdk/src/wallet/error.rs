@@ -30,6 +30,9 @@ use crate::{
 #[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
 pub enum WalletError {
+    /// Wallet alias mismatch.
+    #[error("wallet alias mismatch: {provided}, existing alias is: {expected}")]
+    AliasMismatch { provided: String, expected: String },
     /// Errors during backup creation or restoring
     #[error("backup failed {0}")]
     Backup(&'static str),
