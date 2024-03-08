@@ -357,8 +357,9 @@ pub struct SubmitBlockResponse {
 }
 
 /// Describes the state of a block.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, strum::AsRefStr, strum::EnumString)]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 pub enum BlockState {
     /// The block has been booked by the node but not yet accepted.
     Pending,
@@ -379,8 +380,9 @@ pub enum BlockState {
 }
 
 /// Describes the state of a transaction.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, strum::AsRefStr, strum::EnumString)]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 pub enum TransactionState {
     /// The transaction has been booked by the node but not yet accepted.
     Pending,
