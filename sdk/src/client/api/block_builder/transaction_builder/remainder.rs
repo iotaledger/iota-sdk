@@ -110,9 +110,7 @@ impl TransactionBuilder {
 
         let remainder_builder =
             BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
-                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
-                    [0; 32],
-                ))));
+                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()));
 
         let nt_min_amount = if !native_tokens_diff.is_empty() {
             let nt_remainder_amount = remainder_builder
@@ -235,9 +233,7 @@ impl TransactionBuilder {
 
         let remainder_builder =
             BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
-                .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
-                    [0; 32],
-                ))));
+                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()));
 
         let remainder_amount = if !remainder_native_tokens.is_empty() {
             let nt_remainder_amount = remainder_builder
