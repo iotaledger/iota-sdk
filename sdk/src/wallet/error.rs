@@ -77,7 +77,7 @@ pub enum WalletError {
     /// Invalid parameter.
     #[error("invalid parameter: {0}")]
     InvalidParameter(&'static str),
-    /// Invalid Voting Power.
+    /// Invalid voting power.
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("invalid voting power")]
@@ -116,7 +116,7 @@ pub enum WalletError {
     /// Errors not covered by other variants.
     #[error(transparent)]
     Other(#[from] Box<dyn std::error::Error + Send + Sync>),
-    /// Participation error
+    /// Participation error.
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("participation error {0}")]
@@ -145,7 +145,7 @@ pub enum WalletError {
         provided: Bech32Address,
         expected: Bech32Address,
     },
-    /// Action requires the wallet to be Ed25519 address based
+    /// Action requires the wallet to be Ed25519 address based.
     #[error("tried to perform an action that requires the wallet to be Ed25519 address based")]
     NonEd25519Address,
     /// Implicit account not found.
