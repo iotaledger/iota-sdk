@@ -48,7 +48,7 @@ fn custom_error_serialization() {
             "type": "wallet",
             "error": {
                 "type": "bipPathMismatch",
-                "error": "BIP44 mismatch: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 }), existing bip path is: None"
+                "error": "bip path mismatch: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 }), existing bip path is: None"
             }
         })
     );
