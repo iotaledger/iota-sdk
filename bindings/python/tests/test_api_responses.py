@@ -3,7 +3,7 @@
 
 from typing import Generic, TypeVar
 from json import load, loads, dumps
-from iota_sdk import RoutesResponse, CongestionResponse, OutputWithMetadataResponse, ManaRewardsResponse, ValidatorsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockMetadataResponse, BlockWithMetadataResponse, OutputMetadata, OutputResponse, TransactionMetadataResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
+from iota_sdk import RoutesResponse, CongestionResponse, OutputWithMetadataResponse, ManaRewardsResponse, ValidatorsResponse, ValidatorResponse, CommitteeResponse, IssuanceBlockHeaderResponse, Block, BlockWithMetadataResponse, OutputMetadata, OutputResponse, SlotCommitment, UtxoChangesResponse, UtxoChangesFullResponse
 
 
 base_path = '../../sdk/tests/types/api/fixtures/'
@@ -50,16 +50,17 @@ def test_api_responses():
     test_api_response(
         Block, "get-block-by-id-validation-response-example.json")
     # GET /api/core/v3/blocks/{blockId}/metadata
-    test_api_response(BlockMetadataResponse,
-                      "get-block-by-id-response-example-new-transaction.json")
-    test_api_response(BlockMetadataResponse,
-                      "get-block-by-id-response-example-new.json")
-    test_api_response(BlockMetadataResponse,
-                      "get-block-by-id-response-example-confirmed-transaction.json")
-    test_api_response(BlockMetadataResponse,
-                      "get-block-by-id-response-example-confirmed.json")
-    test_api_response(BlockMetadataResponse,
-                      "get-block-by-id-response-example-conflicting-transaction.json")
+    # TODO reenable when TIP is updated
+    # test_api_response(BlockMetadataResponse,
+    #                   "get-block-by-id-response-example-new-transaction.json")
+    # test_api_response(BlockMetadataResponse,
+    #                   "get-block-by-id-response-example-new.json")
+    # test_api_response(BlockMetadataResponse,
+    #                   "get-block-by-id-response-example-confirmed-transaction.json")
+    # test_api_response(BlockMetadataResponse,
+    #                   "get-block-by-id-response-example-confirmed.json")
+    # test_api_response(BlockMetadataResponse,
+    #                   "get-block-by-id-response-example-conflicting-transaction.json")
     # GET /api/core/v3/blocks/{blockId}/full
     test_api_response(BlockWithMetadataResponse,
                       "get-full-block-by-id-tagged-data-response-example.json")
@@ -75,8 +76,9 @@ def test_api_responses():
     test_api_response(OutputWithMetadataResponse,
                       "get-full-output-metadata-example.json")
     # GET /api/core/v3/transactions/{transactionId}/metadata
-    test_api_response(TransactionMetadataResponse,
-                      "get-transaction-metadata-by-id-response-example.json")
+    # TODO reenable when TIP is updated
+    # test_api_response(TransactionMetadataResponse,
+    #                   "get-transaction-metadata-by-id-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}
     test_api_response(SlotCommitment, "get-commitment-response-example.json")
     # GET /api/core/v3/commitments/{commitmentId}/utxo-changes
