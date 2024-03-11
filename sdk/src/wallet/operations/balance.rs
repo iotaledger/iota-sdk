@@ -11,7 +11,7 @@ use crate::{
         unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
-        operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
+        operations::{helpers::time::can_output_be_unlocked_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
         Wallet, WalletError,
     },
@@ -174,7 +174,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         if is_claimable {
                             // check if output can be unlocked always from now on, in that case it should be
                             // added to the total amount
-                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
+                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_from_now_on(
                                 &controlled_addresses,
                                 output,
                                 slot_index,

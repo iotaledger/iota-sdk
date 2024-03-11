@@ -34,7 +34,7 @@ pub(crate) fn can_output_be_unlocked_now(
 
 // Check if an output can be unlocked by the wallet address at the current time and at any
 // point in the future
-pub(crate) fn can_output_be_unlocked_forever_from_now_on(
+pub(crate) fn can_output_be_unlocked_from_now_on(
     controlled_addresses: &HashSet<Address>,
     output: &Output,
     slot_index: impl Into<SlotIndex> + Copy,

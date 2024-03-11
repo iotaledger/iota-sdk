@@ -19,9 +19,7 @@ use crate::{
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
-    wallet::{
-        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputData, Wallet, WalletError,
-    },
+    wallet::{operations::helpers::time::can_output_be_unlocked_from_now_on, types::OutputData, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
@@ -118,7 +116,7 @@ fn filter_inputs<'a>(
 
     for output_data in available_outputs {
         if !required_inputs.contains(&output_data.output_id) {
-            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
+            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_from_now_on(
                 controlled_addresses,
                 &output_data.output,
                 slot_index,
