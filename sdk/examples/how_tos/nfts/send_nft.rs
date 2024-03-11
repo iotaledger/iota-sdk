@@ -48,15 +48,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let transaction = wallet.send_nft(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        // Wait for transaction to get accepted
-        let block_id = wallet
+        wallet
             .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
 
         println!(
-            "Tx accepted in block: {}/block/{}",
+            "Tx accepted: {}/transactions/{}",
             std::env::var("EXPLORER_URL").unwrap(),
-            block_id
+            transaction.transaction_id
         );
     } else {
         println!("No available NFTs");

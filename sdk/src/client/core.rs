@@ -20,9 +20,8 @@ use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
     client::{
         builder::{ClientBuilder, NetworkInfo},
-        error::Result,
         node_manager::NodeManager,
-        Error,
+        ClientError,
     },
     types::block::{address::Hrp, output::StorageScoreParameters, protocol::ProtocolParameters},
 };
@@ -101,7 +100,7 @@ impl Client {
 
     /// Gets the network related information such as network_id and if it's the default one, sync it first and set the
     /// NetworkInfo.
-    pub async fn get_network_info(&self) -> Result<NetworkInfo> {
+    pub async fn get_network_info(&self) -> Result<NetworkInfo, ClientError> {
         // For WASM we don't have the node syncing process, which updates the network_info every 60 seconds, so we
         // request the node info every time, so we don't create invalid transactions/blocks.
         #[cfg(target_family = "wasm")]
@@ -125,32 +124,32 @@ impl Client {
     }
 
     /// Gets the protocol parameters of the node we're connecting to.
-    pub async fn get_protocol_parameters(&self) -> Result<ProtocolParameters> {
+    pub async fn get_protocol_parameters(&self) -> Result<ProtocolParameters, ClientError> {
         Ok(self.get_network_info().await?.protocol_parameters)
     }
 
     /// Gets the protocol version of the node we're connecting to.
-    pub async fn get_protocol_version(&self) -> Result<u8> {
+    pub async fn get_protocol_version(&self) -> Result<u8, ClientError> {
         Ok(self.get_network_info().await?.protocol_parameters.version())
     }
 
     /// Gets the network name of the node we're connecting to.
-    pub async fn get_network_name(&self) -> Result<String> {
+    pub async fn get_network_name(&self) -> Result<String, ClientError> {
         Ok(self.get_network_info().await?.protocol_parameters.network_name().into())
     }
 
     /// Gets the network id of the node we're connecting to.
-    pub async fn get_network_id(&self) -> Result<u64> {
+    pub async fn get_network_id(&self) -> Result<u64, ClientError> {
         Ok(self.get_network_info().await?.protocol_parameters.network_id())
     }
 
     /// Gets the bech32 HRP of the node we're connecting to.
-    pub async fn get_bech32_hrp(&self) -> Result<Hrp> {
+    pub async fn get_bech32_hrp(&self) -> Result<Hrp, ClientError> {
         Ok(self.get_network_info().await?.protocol_parameters.bech32_hrp())
     }
 
     /// Gets the storage score parameters of the node we're connecting to.
-    pub async fn get_storage_score_parameters(&self) -> Result<StorageScoreParameters> {
+    pub async fn get_storage_score_parameters(&self) -> Result<StorageScoreParameters, ClientError> {
         Ok(self
             .get_network_info()
             .await?
@@ -159,15 +158,15 @@ impl Client {
     }
 
     /// Gets the token supply of the node we're connecting to.
-    pub async fn get_token_supply(&self) -> Result<u64> {
+    pub async fn get_token_supply(&self) -> Result<u64, ClientError> {
         Ok(self.get_network_info().await?.protocol_parameters.token_supply())
     }
 
     /// Validates if a bech32 HRP matches the one from the connected network.
-    pub async fn bech32_hrp_matches(&self, bech32_hrp: &Hrp) -> Result<()> {
+    pub async fn bech32_hrp_matches(&self, bech32_hrp: &Hrp) -> Result<(), ClientError> {
         let expected = self.get_bech32_hrp().await?;
         if bech32_hrp != &expected {
-            return Err(Error::Bech32HrpMismatch {
+            return Err(ClientError::Bech32HrpMismatch {
                 provided: bech32_hrp.to_string(),
                 expected: expected.to_string(),
             });
@@ -177,7 +176,7 @@ impl Client {
 }
 
 impl ClientInner {
-    pub(crate) async fn fetch_network_info(&self) -> Result<NetworkInfo> {
+    pub(crate) async fn fetch_network_info(&self) -> Result<NetworkInfo, ClientError> {
         let info = self.get_node_info().await?.info;
         let protocol_parameters = info
             .protocol_parameters_by_version(crate::types::block::PROTOCOL_VERSION)

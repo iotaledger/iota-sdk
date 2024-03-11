@@ -409,8 +409,8 @@ required-features = ["client"]
 # High Level examples
 
 [[example]]
-name = "inputs_from_transaction_id"
-path = "examples/client/high_level/inputs_from_transaction_id.rs"
+name = "get_transaction_inputs"
+path = "examples/client/high_level/get_transaction_inputs.rs"
 required-features = ["client"]
 
 [[example]]
@@ -483,6 +483,11 @@ required-features = ["client"]
 [[example]]
 name = "node_api_core_get_included_block_raw"
 path = "examples/client/node_api_core/16_get_included_block_raw.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_validators"
+path = "examples/client/node_api_core/get_validators.rs"
 required-features = ["client"]
 
 # Node API indexer examples

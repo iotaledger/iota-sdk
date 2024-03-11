@@ -6,7 +6,6 @@ mod client_builder;
 mod common;
 mod error;
 mod high_level;
-mod input_selection;
 mod input_signing_data;
 mod mnemonic;
 #[cfg(feature = "mqtt")]
@@ -14,6 +13,7 @@ mod mqtt;
 mod node_api;
 mod secret_manager;
 mod signing;
+mod transaction_builder;
 
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 
@@ -65,6 +65,7 @@ const SLOT_COMMITMENT_ID: SlotCommitmentId = SlotCommitmentHash::null().const_in
 enum Build<'a> {
     Basic {
         amount: u64,
+        mana: u64,
         address: Address,
         native_token: Option<(&'a str, u64)>,
         sender: Option<Address>,
@@ -74,6 +75,7 @@ enum Build<'a> {
     },
     Nft {
         amount: u64,
+        mana: u64,
         nft_id: NftId,
         address: Address,
         sender: Option<Address>,
@@ -83,6 +85,7 @@ enum Build<'a> {
     },
     Account {
         amount: u64,
+        mana: u64,
         account_id: AccountId,
         address: Address,
         sender: Option<Address>,
@@ -111,6 +114,7 @@ impl<'a> Build<'a> {
         match self {
             Build::Basic {
                 amount,
+                mana,
                 address,
                 native_token,
                 sender,
@@ -119,6 +123,7 @@ impl<'a> Build<'a> {
                 expiration,
             } => {
                 let mut builder = BasicOutputBuilder::new_with_amount(amount)
+                    .with_mana(mana)
                     .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
                 if let Some((id, amount)) = native_token {
@@ -149,6 +154,7 @@ impl<'a> Build<'a> {
             }
             Build::Nft {
                 amount,
+                mana,
                 nft_id,
                 address,
                 sender,
@@ -157,6 +163,7 @@ impl<'a> Build<'a> {
                 expiration,
             } => {
                 let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
+                    .with_mana(mana)
                     .add_unlock_condition(AddressUnlockCondition::new(address));
 
                 if let Some(sender) = sender {
@@ -180,12 +187,14 @@ impl<'a> Build<'a> {
             }
             Build::Account {
                 amount,
+                mana,
                 account_id,
                 address,
                 sender,
                 issuer,
             } => {
                 let mut builder = AccountOutputBuilder::new_with_amount(amount, account_id)
+                    .with_mana(mana)
                     .add_unlock_condition(AddressUnlockCondition::new(address));
 
                 if let Some(sender) = sender {

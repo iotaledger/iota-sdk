@@ -31,7 +31,6 @@ import type { BasicOutputBuilderParams } from '../output_builder_params/basic-ou
 import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
-import { HexEncodedString } from '../../utils';
 import { TransactionId } from '../..';
 
 // Node routes.
@@ -43,6 +42,14 @@ export interface __GetHealthMethod__ {
     };
 }
 
+export interface __GetRoutesMethod__ {
+    name: 'getRoutes';
+}
+
+export interface __GetNodeInfoMethod__ {
+    name: 'getNodeInfo';
+}
+
 export interface __GetInfoMethod__ {
     name: 'getInfo';
     data: {
@@ -51,12 +58,8 @@ export interface __GetInfoMethod__ {
     };
 }
 
-export interface __GetNodeInfoMethod__ {
-    name: 'getNodeInfo';
-}
-
-export interface __GetRoutesMethod__ {
-    name: 'getRoutes';
+export interface __GetNetworkMetricsMethod__ {
+    name: 'getNetworkMetrics';
 }
 
 // Accounts routes.
@@ -71,8 +74,8 @@ export interface __GetAccountCongestionMethod__ {
 
 // Rewards routes.
 
-export interface __GetRewardsMethod__ {
-    name: 'getRewards';
+export interface __GetOutputManaRewardsMethod__ {
+    name: 'getOutputManaRewards';
     data: {
         outputId: OutputId;
         slotIndex?: SlotIndex;
@@ -135,7 +138,7 @@ export interface __PostBlockMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: Block;
+        blockBytes: Uint8Array;
     };
 }
 
@@ -157,6 +160,13 @@ export interface __GetBlockWithMetadataMethod__ {
 
 export interface __GetOutputMethod__ {
     name: 'getOutput';
+    data: {
+        outputId: OutputId;
+    };
+}
+
+export interface __GetOutputRawMethod__ {
+    name: 'getOutputRaw';
     data: {
         outputId: OutputId;
     };
@@ -197,6 +207,13 @@ export interface __GetIncludedBlockMethod__ {
     };
 }
 
+export interface __GetIncludedBlockRawMethod__ {
+    name: 'getIncludedBlockRaw';
+    data: {
+        transactionId: TransactionId;
+    };
+}
+
 export interface __GetIncludedBlockMetadataMethod__ {
     name: 'getIncludedBlockMetadata';
     data: {
@@ -215,6 +232,13 @@ export interface __GetTransactionMetadataMethod__ {
 
 export interface __GetCommitmentMethod__ {
     name: 'getCommitment';
+    data: {
+        commitmentId: SlotCommitmentId;
+    };
+}
+
+export interface __GetCommitmentRawMethod__ {
+    name: 'getCommitmentRaw';
     data: {
         commitmentId: SlotCommitmentId;
     };
@@ -241,6 +265,13 @@ export interface __GetCommitmentBySlotMethod__ {
     };
 }
 
+export interface __GetCommitmentBySlotRawMethod__ {
+    name: 'getCommitmentBySlotRaw';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
 export interface __GetUtxoChangesBySlotMethod__ {
     name: 'getUtxoChangesBySlot';
     data: {
@@ -256,10 +287,6 @@ export interface __GetUtxoChangesFullBySlotMethod__ {
 }
 
 // Other routes.
-
-export interface __GetNetworkInfoMethod__ {
-    name: 'getNetworkInfo';
-}
 
 export interface __FindInputsMethod__ {
     name: 'findInputs';
@@ -293,50 +320,10 @@ export interface __GetProtocolParametersMethod__ {
     name: 'getProtocolParameters';
 }
 
-export interface __HexToBech32Method__ {
-    name: 'hexToBech32';
-    data: {
-        hex: HexEncodedString;
-        bech32Hrp?: string;
-    };
-}
-
 export interface __AddressToBech32Method__ {
     name: 'addressToBech32';
     data: {
         address: Address;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __AccountIdToBech32Method__ {
-    name: 'accountIdToBech32';
-    data: {
-        accountId: AccountId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __AnchorIdToBech32Method__ {
-    name: 'anchorIdToBech32';
-    data: {
-        anchorId: AnchorId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __NftIdToBech32Method__ {
-    name: 'nftIdToBech32';
-    data: {
-        nftId: NftId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __HexPublicKeyToBech32AddressMethod__ {
-    name: 'hexPublicKeyToBech32Address';
-    data: {
-        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }

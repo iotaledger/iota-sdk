@@ -28,7 +28,7 @@ use crate::types::block::{
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
 #[packable(unpack_error = BlockError)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = BlockError::InvalidBlockBodyKind)]
+#[packable(tag_type = u8, with_error = BlockError::Kind)]
 pub enum BlockBody {
     #[packable(tag = BasicBlockBody::KIND)]
     Basic(Box<BasicBlockBody>),
@@ -55,7 +55,7 @@ impl TryFrom<BlockBody> for BasicBlockBodyBuilder {
         if let BlockBody::Basic(block) = value {
             Ok((*block).into())
         } else {
-            Err(BlockError::InvalidBlockBodyKind(value.kind()))
+            Err(BlockError::Kind(value.kind()))
         }
     }
 }
@@ -67,7 +67,7 @@ impl TryFrom<BlockBody> for ValidationBlockBodyBuilder {
         if let BlockBody::Validation(block) = value {
             Ok((*block).into())
         } else {
-            Err(BlockError::InvalidBlockBodyKind(value.kind()))
+            Err(BlockError::Kind(value.kind()))
         }
     }
 }

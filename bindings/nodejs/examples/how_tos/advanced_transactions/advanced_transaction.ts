@@ -3,7 +3,6 @@
 
 import {
     AddressUnlockCondition,
-    Ed25519Address,
     TimelockUnlockCondition,
     Utils,
     Wallet,
@@ -49,10 +48,8 @@ async function run() {
         const basicOutput = await client.buildBasicOutput({
             unlockConditions: [
                 new AddressUnlockCondition(
-                    new Ed25519Address(
-                        Utils.bech32ToHex(
-                            'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
-                        ),
+                    Utils.parseBech32Address(
+                        'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
                     ),
                 ),
                 new TimelockUnlockCondition(slotIndex),
@@ -63,10 +60,10 @@ async function run() {
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         console.log('Waiting until transaction is accepted...');
-        const blockId = await wallet.waitForTransactionAcceptance(
-            transaction.transactionId,
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
+        console.log(
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
-        console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
     } catch (error) {
         console.error('Error: ', error);
     }

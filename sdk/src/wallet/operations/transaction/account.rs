@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::Address,
         output::{
@@ -16,21 +16,21 @@ use crate::{
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Error, Result, Wallet,
+        Wallet, WalletError,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(
         &self,
         output_id: &OutputId,
         key_source: impl Into<BlockIssuerKeySource> + Send,
-    ) -> Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let issuer_id = AccountId::from(output_id);
 
         self.sign_and_submit_transaction(
@@ -48,19 +48,19 @@ where
         &self,
         output_id: &OutputId,
         key_source: impl Into<BlockIssuerKeySource> + Send,
-    ) -> Result<PreparedTransactionData>
+    ) -> Result<PreparedTransactionData, WalletError>
     where
-        crate::wallet::Error: From<S::Error>,
+        WalletError: From<S::Error>,
     {
         let wallet_ledger = self.ledger().await;
         let implicit_account_data = wallet_ledger
             .unspent_outputs
             .get(output_id)
-            .ok_or(Error::ImplicitAccountNotFound)?;
+            .ok_or(WalletError::ImplicitAccountNotFound)?;
         let implicit_account = if implicit_account_data.output.is_implicit_account() {
             implicit_account_data.output.as_basic()
         } else {
-            return Err(Error::ImplicitAccountNotFound);
+            return Err(WalletError::ImplicitAccountNotFound);
         };
         let ed25519_address = *implicit_account
             .address()
@@ -103,7 +103,7 @@ where
             ..Default::default()
         };
 
-        self.prepare_transaction(vec![account], transaction_options.clone())
+        self.prepare_send_outputs(vec![account], transaction_options.clone())
             .await
     }
 }

@@ -115,18 +115,20 @@ class TransactionInclusionWalletEvent extends WalletEvent {
  * All of the transaction progress types.
  */
 enum TransactionProgressType {
-    /** Performing input selection. */
-    SelectingInputs = 0,
+    /** Building a transaction. */
+    BuildingTransaction = 0,
     /** Generating remainder value deposit address. */
     GeneratingRemainderDepositAddress = 1,
     /** Prepared transaction. */
     PreparedTransaction = 2,
-    /** Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano. */
-    PreparedTransactionSigningHash = 3,
     /** Signing the transaction. */
-    SigningTransaction = 4,
+    SigningTransaction = 3,
+    /** Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano. */
+    PreparedTransactionSigningHash = 4,
+    /** Prepared block signing input, required for blindsigning with a Ledger Nano. */
+    PreparedBlockSigningInput = 5,
     /** Broadcasting. */
-    Broadcasting = 5,
+    Broadcasting = 6,
 }
 
 /**
@@ -159,11 +161,11 @@ abstract class TransactionProgress {
 }
 
 /**
- * A 'selecting inputs' progress.
+ * A 'building transaction' progress.
  */
-class SelectingInputsProgress extends TransactionProgress {
+class BuildingTransactionProgress extends TransactionProgress {
     constructor() {
-        super(TransactionProgressType.SelectingInputs);
+        super(TransactionProgressType.BuildingTransaction);
     }
 }
 
@@ -208,6 +210,15 @@ class PreparedTransactionProgress extends TransactionProgress {
 }
 
 /**
+ * A 'signing transaction' progress.
+ */
+class SigningTransactionProgress extends TransactionProgress {
+    constructor() {
+        super(TransactionProgressType.SigningTransaction);
+    }
+}
+
+/**
  * A 'prepared transaction hash' progress.
  */
 class PreparedTransactionSigningHashProgress extends TransactionProgress {
@@ -223,11 +234,17 @@ class PreparedTransactionSigningHashProgress extends TransactionProgress {
 }
 
 /**
- * A 'signing transaction' progress.
+ * A 'prepared block input' progress.
  */
-class SigningTransactionProgress extends TransactionProgress {
-    constructor() {
-        super(TransactionProgressType.SigningTransaction);
+class PreparedBlockSigningInputProgress extends TransactionProgress {
+    blockSigningInput: HexEncodedString;
+
+    /**
+     * @param signingHash The signing hash of the block.
+     */
+    constructor(signingInput: HexEncodedString) {
+        super(TransactionProgressType.PreparedBlockSigningInput);
+        this.blockSigningInput = signingInput;
     }
 }
 
@@ -249,11 +266,12 @@ export {
     TransactionInclusionWalletEvent,
     TransactionProgressWalletEvent,
     TransactionProgress,
-    SelectingInputsProgress,
+    BuildingTransactionProgress,
     GeneratingRemainderDepositAddressProgress,
     PreparedTransactionProgress,
-    PreparedTransactionSigningHashProgress,
     SigningTransactionProgress,
+    PreparedTransactionSigningHashProgress,
+    PreparedBlockSigningInputProgress,
     BroadcastingProgress,
     TransactionProgressType,
 };

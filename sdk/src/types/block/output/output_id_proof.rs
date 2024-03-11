@@ -17,7 +17,7 @@ use crate::{
 #[derive(Debug, derive_more::Display)]
 pub enum ProofError {
     #[display(fmt = "invalid output ID proof kind: {_0}")]
-    InvalidProofKind(u8),
+    Kind(u8),
     #[display(fmt = "index {index} is out of range, outputs length {len}")]
     IndexOutOfRange { index: u16, len: u16 },
     #[display(fmt = "no outputs provided")]
@@ -117,14 +117,14 @@ impl OutputCommitmentProof {
 
 fn verify_output_commitment_type(proof: &OutputCommitmentProof) -> Result<(), ProofError> {
     match proof {
-        OutputCommitmentProof::Leaf(_) => Err(ProofError::InvalidProofKind(LeafHash::KIND)),
+        OutputCommitmentProof::Leaf(_) => Err(ProofError::Kind(LeafHash::KIND)),
         _ => Ok(()),
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, derive_more::From, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
-#[packable(tag_type = u8, with_error = ProofError::InvalidProofKind)]
+#[packable(tag_type = u8, with_error = ProofError::Kind)]
 #[packable(unpack_error = ProofError)]
 pub enum OutputCommitmentProof {
     #[packable(tag = HashableNode::KIND)]

@@ -6,10 +6,7 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
-        },
+        api::{GetAddressesOptions, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Client,
@@ -49,7 +46,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let slot_index = SlotIndex::from(10);
 
@@ -57,7 +54,8 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
         [(
             Account {
                 amount: 1_000_000,
-                account_id: account_id,
+                mana: 0,
+                account_id,
                 address: address.clone(),
                 sender: None,
                 issuer: None,
@@ -69,7 +67,8 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
 
     let outputs = build_outputs([Account {
         amount: 1_000_000,
-        account_id: account_id,
+        mana: 0,
+        account_id,
         address: address.clone(),
         sender: None,
         issuer: None,
@@ -85,7 +84,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -95,7 +94,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -103,14 +102,9 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }
@@ -129,7 +123,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_address = Address::Account(AccountAddress::new(account_id));
     let slot_index = SlotIndex::from(10);
@@ -139,7 +133,8 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Account {
                     amount: 1_000_000,
-                    account_id: account_id,
+                    mana: 0,
+                    account_id,
                     address: address.clone(),
                     sender: None,
                     issuer: None,
@@ -149,6 +144,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_address.clone(),
                     native_token: None,
                     sender: None,
@@ -161,6 +157,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: account_address.clone(),
                     native_token: None,
                     sender: None,
@@ -177,13 +174,15 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     let outputs = build_outputs([
         Account {
             amount: 1_000_000,
-            account_id: account_id,
-            address: address,
+            mana: 0,
+            account_id,
+            address,
             sender: None,
             issuer: None,
         },
         Basic {
             amount: 2_000_000,
+            mana: 0,
             address: account_address,
             native_token: None,
             sender: None,
@@ -203,7 +202,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -213,7 +212,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -233,14 +232,9 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }

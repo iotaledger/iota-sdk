@@ -5,18 +5,27 @@ use iota_sdk::{
     client::api::PreparedTransactionDataDto,
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
+        core::{
+            basic::{MaxBurnedManaAmount, StrongParents},
+            BlockHeader,
+        },
         input::{Input, UtxoInput},
         output::{
-            unlock_condition::AddressUnlockCondition, BasicOutput, LeafHash, Output, OutputCommitmentProof,
+            unlock_condition::AddressUnlockCondition, AccountId, BasicOutput, LeafHash, Output, OutputCommitmentProof,
             OutputIdProof,
         },
-        payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
+        payload::{
+            signed_transaction::{Transaction, TransactionHash, TransactionId},
+            Payload, SignedTransactionPayload,
+        },
         protocol::iota_mainnet_protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
             output::{rand_basic_output, rand_output_metadata},
         },
-        slot::SlotIndex,
+        slot::{SlotCommitmentId, SlotIndex},
+        unlock::{EmptyUnlock, Unlock, Unlocks},
+        BlockBody, BlockId, UnsignedBlock,
     },
     wallet::{
         events::types::{
@@ -76,7 +85,7 @@ fn wallet_events_serde() {
     }));
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::SelectingInputs,
+        TransactionProgressEvent::BuildingTransaction,
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(
@@ -115,14 +124,42 @@ fn wallet_events_serde() {
                 mana_rewards: Default::default(),
             })),
         ));
+
+        let block_payload = SignedTransactionPayload::new(
+            transaction,
+            Unlocks::new([Unlock::Empty(EmptyUnlock), Unlock::Empty(EmptyUnlock)]).unwrap(),
+        )
+        .unwrap();
+        let payload = Payload::from(block_payload);
+        let block = UnsignedBlock::new(
+            BlockHeader::new(
+                protocol_parameters.version(),
+                protocol_parameters.network_id(),
+                0u64,
+                SlotCommitmentId::new([0; 36]),
+                SlotIndex(0),
+                AccountId::new([0; 32]),
+            ),
+            BlockBody::build_basic(
+                StrongParents::from_vec(vec![BlockId::new([0; 36])]).unwrap(),
+                MaxBurnedManaAmount::Amount(0),
+            )
+            .with_payload(payload)
+            .finish_block_body()
+            .unwrap(),
+        );
+
+        assert_serde_eq(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::PreparedBlockSigningInput(prefix_hex::encode(block.signing_input())),
+        ));
     }
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::PreparedTransactionSigningHash(ED25519_ADDRESS.to_string()),
+        TransactionProgressEvent::SigningTransaction,
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::SigningTransaction,
+        TransactionProgressEvent::PreparedTransactionSigningHash(ED25519_ADDRESS.to_string()),
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting));

@@ -15,7 +15,6 @@ from iota_sdk.types.block.block import UnsignedBlock
 from iota_sdk.types.client_options import MqttBrokerOptions
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
-from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload
@@ -61,7 +60,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         api_timeout :
             Timeout for API requests.
         node_sync_interval :
-            Interval in which nodes will be checked for their sync status and the [NetworkInfo](crate::NetworkInfo) gets updated.
+            Interval in which nodes will be checked for their sync status and the network info gets updated.
         quorum :
             If node quorum is enabled. Will compare the responses from multiple nodes and only returns the response if 'quorum_threshold'% of the nodes return the same one.
         min_quorum_size :
@@ -256,10 +255,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('getNode')
 
-    def get_network_info(self) -> NetworkInfo:
-        """Gets the network related information such as network_id.
+    def get_protocol_parameters(self) -> ProtocolParameters:
+        """Gets the protocol parameters.
         """
-        return NetworkInfo.from_dict(self._call_method('getNetworkInfo'))
+        return ProtocolParameters.from_dict(
+            self._call_method('getProtocolParameters'))
 
     def get_network_id(self) -> int:
         """Gets the network id of the node we're connecting to.

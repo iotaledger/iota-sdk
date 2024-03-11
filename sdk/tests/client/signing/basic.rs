@@ -4,10 +4,7 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
-        },
+        api::{GetAddressesOptions, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Client,
@@ -41,13 +38,14 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
         [(
             Basic {
                 amount: 1_000_000,
+                mana: 0,
                 address: address_0.clone(),
                 native_token: None,
                 sender: None,
@@ -62,6 +60,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 1_000_000,
+        mana: 0,
         address: address_0,
         native_token: None,
         sender: None,
@@ -80,7 +79,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -90,7 +89,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -98,14 +97,9 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }
@@ -124,7 +118,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -132,6 +126,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -144,6 +139,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -156,6 +152,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -171,6 +168,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 3_000_000,
+        mana: 0,
         address: address_0,
         native_token: None,
         sender: None,
@@ -189,7 +187,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -199,7 +197,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -219,14 +217,9 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }
@@ -254,7 +247,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .clone()
         .into_inner();
 
-    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let protocol_parameters = iota_mainnet_protocol_parameters();
     let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
@@ -262,6 +255,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_0.clone(),
                     native_token: None,
                     sender: None,
@@ -274,6 +268,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
             (
                 Basic {
                     amount: 1_000_000,
+                    mana: 0,
                     address: address_1,
                     native_token: None,
                     sender: None,
@@ -289,6 +284,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let outputs = build_outputs([Basic {
         amount: 2_000_000,
+        mana: 0,
         address: address_0,
         native_token: None,
         sender: None,
@@ -307,7 +303,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index + 1)
         .with_capabilities([TransactionCapabilityFlag::BurnMana])
-        .finish_with_params(&protocol_parameters)?;
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -317,7 +313,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
         .await?;
 
     assert_eq!(unlocks.len(), 2);
@@ -326,14 +322,9 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_signed_transaction_payload_length(&tx_payload)?;
+    tx_payload.validate_length()?;
 
-    verify_semantic(
-        &prepared_transaction_data.inputs_data,
-        &tx_payload,
-        prepared_transaction_data.mana_rewards,
-        protocol_parameters,
-    )?;
+    prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
     Ok(())
 }

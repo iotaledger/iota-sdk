@@ -50,7 +50,7 @@ async function run() {
             console.log(`OUTPUT #${i}`);
             console.log(
                 '- address: %s\n- amount: %d\n- native token: %s',
-                Utils.hexToBech32(address.toString(), 'rms'),
+                Utils.addressToBech32(address, 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
                     ? (output as CommonOutput).getNativeToken() ?? []
@@ -68,14 +68,10 @@ async function run() {
         console.log('Transaction sent: %s', transaction.transactionId);
 
         // Wait for the consolidation transaction to get accepted
-        const blockId = wallet.waitForTransactionAcceptance(
-            transaction.transactionId,
-        );
+        await wallet.waitForTransactionAcceptance(transaction.transactionId);
 
         console.log(
-            'Transaction accepted: %s/block/$s',
-            process.env.EXPLORER_URL,
-            blockId,
+            `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
         );
 
         // Sync wallet
@@ -88,7 +84,7 @@ async function run() {
             console.log(`OUTPUT #${i}`);
             console.log(
                 '- address: %s\n- amount: %d\n- native tokens: %s',
-                Utils.hexToBech32(address.toString(), 'rms'),
+                Utils.addressToBech32(address, 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
                     ? (output as CommonOutput).getNativeToken()

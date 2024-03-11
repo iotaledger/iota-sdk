@@ -2,7 +2,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
-from iota_sdk import MintNftParams, Utils, Wallet, WalletOptions, Irc27Metadata
+from iota_sdk import HexStr, MintNftParams, NFTAddress, Utils, Wallet, WalletOptions, Irc27Metadata
 
 load_dotenv()
 
@@ -16,7 +16,7 @@ NUM_NFTS_MINTED_PER_TRANSACTION = 50
 if len(sys.argv) < 2:
     raise Exception("missing example argument: ISSUER_NFT_ID")
 
-issuer_nft_id = sys.argv[1]
+issuer_nft_id = HexStr(sys.argv[1])
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
@@ -29,12 +29,12 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 wallet.sync()
 
 bech32_hrp = wallet.get_client().get_bech32_hrp()
-issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
+issuer = Utils.address_to_bech32(NFTAddress(issuer_nft_id), bech32_hrp)
 
 
 def get_immutable_metadata(index: int) -> str:
     """Returns the immutable metadata for the NFT with the given index"""
-    Irc27Metadata(
+    return Irc27Metadata(
         "video/mp4",
         "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
         "Shimmer OG NFT #" + str(index),
@@ -64,11 +64,11 @@ while nft_mint_params:
     )
     transaction = wallet.mint_nfts(chunk)
 
-    # Wait for transaction to get accepted
-    block_id = wallet.wait_for_transaction_acceptance(
+    wallet.wait_for_transaction_acceptance(
         transaction.transaction_id)
 
-    print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    print(
+        f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
 
     # Sync so the new outputs are available again for new transactions
     wallet.sync()

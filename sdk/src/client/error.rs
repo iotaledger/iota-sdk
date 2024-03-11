@@ -9,7 +9,7 @@ use packable::error::UnexpectedEOF;
 use serde::{ser::Serializer, Serialize};
 
 use crate::{
-    client::api::input_selection::Error as InputSelectionError,
+    client::api::transaction_builder::TransactionBuilderError,
     types::block::{
         address::AddressError,
         context_input::ContextInputError,
@@ -28,14 +28,11 @@ use crate::{
     utils::ConversionError,
 };
 
-/// Type alias of `Result` in iota-client
-pub type Result<T> = std::result::Result<T, Error>;
-
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error, strum::AsRefStr)]
 #[strum(serialize_all = "camelCase")]
 #[non_exhaustive]
-pub enum Error {
+pub enum ClientError {
     /// Invalid bech32 HRP, should match the one from the used network
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
     Bech32HrpMismatch {
@@ -162,9 +159,9 @@ pub enum Error {
     /// URL validation error
     #[error("{0}")]
     UrlValidation(String),
-    /// Input selection error.
+    /// Transaction builder error.
     #[error("{0}")]
-    InputSelection(#[from] InputSelectionError),
+    TransactionBuilder(#[from] TransactionBuilderError),
     /// Missing BIP32 chain to sign with.
     #[error("missing BIP32 chain to sign with")]
     MissingBip32Chain,
@@ -188,7 +185,7 @@ pub enum Error {
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     #[error("{0}")]
-    Ledger(#[from] crate::client::secret::ledger_nano::Error),
+    Ledger(Box<crate::client::secret::ledger_nano::Error>),
 
     /// MQTT error
     #[cfg(feature = "mqtt")]
@@ -206,7 +203,7 @@ pub enum Error {
 }
 
 // Serialize type with Display error
-impl Serialize for Error {
+impl Serialize for ClientError {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -226,7 +223,7 @@ impl Serialize for Error {
     }
 }
 
-crate::impl_from_error_via!(Error via BlockError:
+crate::impl_from_error_via!(ClientError via BlockError:
     PayloadError,
     OutputError,
     InputError,
@@ -239,3 +236,10 @@ crate::impl_from_error_via!(Error via BlockError:
     UnlockError,
     SignatureError,
 );
+
+#[cfg(feature = "ledger_nano")]
+impl From<crate::client::secret::ledger_nano::Error> for ClientError {
+    fn from(value: crate::client::secret::ledger_nano::Error) -> Self {
+        Self::Ledger(value.into())
+    }
+}

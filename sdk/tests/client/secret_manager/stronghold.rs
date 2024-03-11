@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{
-    api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
+    api::GetAddressesOptions,
+    constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+    secret::SecretManager,
+    ClientError,
 };
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-async fn stronghold_secret_manager() -> Result<()> {
+async fn stronghold_secret_manager() -> Result<(), ClientError> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     let dto = r#"{"stronghold": {"password": "some_hopefully_secure_password", "snapshotPath": "snapshot_test_dir/test.stronghold"}}"#;
@@ -24,18 +27,13 @@ async fn stronghold_secret_manager() -> Result<()> {
         panic!("expect a Stronghold secret manager, but it's not the case!");
     }
 
-    let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-                .with_account_index(0)
-                .with_range(0..1),
-        )
+    let address = secret_manager
+        .generate_ed25519_address(SHIMMER_COIN_TYPE, 0, 0, SHIMMER_TESTNET_BECH32_HRP, None)
         .await
         .unwrap();
 
     assert_eq!(
-        addresses[0],
+        address,
         "rms1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6v3ea5a"
     );
 
@@ -52,7 +50,7 @@ async fn stronghold_secret_manager() -> Result<()> {
 }
 
 #[tokio::test]
-async fn stronghold_mnemonic_missing() -> Result<()> {
+async fn stronghold_mnemonic_missing() -> Result<(), ClientError> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
     // Cleanup of a possibly failed run
@@ -64,16 +62,12 @@ async fn stronghold_mnemonic_missing() -> Result<()> {
 
     // Generating addresses will fail because no mnemonic has been stored
     let error = SecretManager::Stronghold(stronghold_secret_manager)
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default(),
-            // .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-            // .with_coin_type(iota_sdk::client::constants::SHIMMER_COIN_TYPE)
-        )
+        .generate_ed25519_address(SHIMMER_COIN_TYPE, 0, 0, SHIMMER_TESTNET_BECH32_HRP, None)
         .await
         .unwrap_err();
 
     match error {
-        iota_sdk::client::Error::Stronghold(iota_sdk::client::stronghold::Error::MnemonicMissing) => {}
+        iota_sdk::client::ClientError::Stronghold(iota_sdk::client::stronghold::Error::MnemonicMissing) => {}
         _ => panic!("expected StrongholdMnemonicMissing error"),
     }
 

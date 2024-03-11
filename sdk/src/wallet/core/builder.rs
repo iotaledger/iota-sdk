@@ -16,11 +16,14 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    client::{
+        secret::{GenerateAddressOptions, SecretManage, SecretManager},
+        ClientError,
+    },
     types::block::address::{Bech32Address, Ed25519Address},
     wallet::{
         core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletInner, WalletLedger},
-        ClientOptions, Wallet,
+        ClientOptions, Wallet, WalletError,
     },
 };
 
@@ -54,7 +57,7 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
 
 impl<S: 'static + SecretManage> WalletBuilder<S>
 where
-    crate::wallet::Error: From<S::Error>,
+    WalletError: From<S::Error>,
 {
     /// Initialises a new instance of the wallet builder with the default storage adapter.
     pub fn new() -> Self {
@@ -120,12 +123,12 @@ where
 
 impl<S: 'static + SecretManage> WalletBuilder<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
     Self: SaveLoadWallet,
 {
     /// Builds the wallet.
-    pub async fn finish(mut self) -> crate::wallet::Result<Wallet<S>> {
+    pub async fn finish(mut self) -> Result<Wallet<S>, WalletError> {
         log::debug!("[WalletBuilder]");
 
         #[cfg(feature = "storage")]
@@ -134,7 +137,7 @@ where
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
         if !storage_options.path.is_dir() && self.client_options.is_none() {
-            return Err(crate::wallet::Error::MissingParameter("client_options"));
+            return Err(WalletError::MissingParameter("client_options"));
         }
 
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
@@ -156,7 +159,7 @@ where
             let loaded_client_options = loaded_wallet_builder
                 .as_ref()
                 .and_then(|data| data.client_options.clone())
-                .ok_or(crate::wallet::Error::MissingParameter("client_options"))?;
+                .ok_or(WalletError::MissingParameter("client_options"))?;
 
             // Update self so it gets used and stored again
             self.client_options = Some(loaded_client_options);
@@ -167,11 +170,12 @@ where
 
         // May use a previously stored secret manager if it wasn't provided
         if self.secret_manager.is_none() {
-            let secret_manager = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.secret_manager.clone());
-
-            self.secret_manager = secret_manager;
+            self.secret_manager.replace(
+                loaded_wallet_builder
+                    .as_ref()
+                    .and_then(|builder| builder.secret_manager.clone())
+                    .ok_or(WalletError::MissingParameter("secret_manager"))?,
+            );
         }
 
         let mut verify_address = false;
@@ -183,7 +187,10 @@ where
         if let Some(address) = &self.address {
             if let Some(loaded_address) = &loaded_address {
                 if address != loaded_address {
-                    return Err(crate::wallet::Error::WalletAddressMismatch(address.clone()));
+                    return Err(WalletError::WalletAddressMismatch {
+                        provided: address.clone(),
+                        expected: loaded_address.clone(),
+                    });
                 }
             } else {
                 verify_address = true;
@@ -198,7 +205,7 @@ where
         if let Some(bip_path) = self.bip_path {
             if let Some(loaded_bip_path) = loaded_bip_path {
                 if bip_path != loaded_bip_path {
-                    return Err(crate::wallet::Error::BipPathMismatch {
+                    return Err(WalletError::BipPathMismatch {
                         new_bip_path: Some(bip_path),
                         old_bip_path: Some(loaded_bip_path),
                     });
@@ -214,7 +221,7 @@ where
         let client = self
             .client_options
             .clone()
-            .ok_or(crate::wallet::Error::MissingParameter("client_options"))?
+            .ok_or(WalletError::MissingParameter("client_options"))?
             .finish()
             .await?;
 
@@ -225,7 +232,7 @@ where
                     if let Some(backing_ed25519_address) = address.inner.backing_ed25519() {
                         self.verify_ed25519_address(backing_ed25519_address, bip_path).await?;
                     } else {
-                        return Err(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"));
+                        return Err(WalletError::InvalidParameter("address/bip_path mismatch"));
                     }
                 }
             }
@@ -237,7 +244,7 @@ where
                 ));
             }
             (None, None) => {
-                return Err(crate::wallet::Error::MissingParameter("address or bip_path"));
+                return Err(WalletError::MissingParameter("address or bip_path"));
             }
         };
 
@@ -274,6 +281,7 @@ where
             last_synced: Mutex::new(0),
             background_syncing_status,
             client,
+            // TODO: make secret manager optional
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]
             event_emitter: tokio::sync::RwLock::new(EventEmitter::new()),
@@ -322,13 +330,13 @@ where
         &self,
         ed25519_address: &Ed25519Address,
         bip_path: &Bip44,
-    ) -> crate::wallet::Result<()> {
+    ) -> Result<(), WalletError> {
         (ed25519_address == &self.generate_ed25519_address(bip_path).await?)
             .then_some(())
-            .ok_or(crate::wallet::Error::InvalidParameter("address/bip_path mismatch"))
+            .ok_or(WalletError::InvalidParameter("address/bip_path mismatch"))
     }
 
-    async fn generate_ed25519_address(&self, bip_path: &Bip44) -> crate::wallet::Result<Ed25519Address> {
+    async fn generate_ed25519_address(&self, bip_path: &Bip44) -> Result<Ed25519Address, WalletError> {
         if let Some(secret_manager) = &self.secret_manager {
             let secret_manager = &*secret_manager.read().await;
             Ok(secret_manager
@@ -344,7 +352,7 @@ where
                 // Panic: if it didn't return an Err, then there must be at least one address
                 .await?[0])
         } else {
-            Err(crate::wallet::Error::MissingParameter("secret_manager"))
+            Err(WalletError::MissingParameter("secret_manager"))
         }
     }
 }
@@ -352,7 +360,7 @@ where
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
 // transactions
 #[cfg(feature = "storage")]
-fn unlock_unused_inputs(wallet_ledger: &mut WalletLedger) -> crate::wallet::Result<()> {
+fn unlock_unused_inputs(wallet_ledger: &mut WalletLedger) -> Result<(), WalletError> {
     log::debug!("[unlock_unused_inputs]");
     let mut used_inputs = HashSet::new();
     for transaction_id in &wallet_ledger.pending_transactions {

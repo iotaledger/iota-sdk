@@ -11,11 +11,7 @@ use iota_sdk_bindings_core::{
 use pyo3::{prelude::*, types::PyTuple};
 use tokio::sync::RwLock;
 
-use crate::{
-    client::Client,
-    error::{Error, Result},
-    SecretManager,
-};
+use crate::{client::Client, error::Error, SecretManager};
 
 #[pyclass]
 pub struct Wallet {
@@ -33,7 +29,7 @@ pub fn destroy_wallet(wallet: &Wallet) -> PyResult<()> {
 
 /// Create wallet handler for python-side usage.
 #[pyfunction]
-pub fn create_wallet(options: String) -> Result<Wallet> {
+pub fn create_wallet(options: String) -> Result<Wallet, Error> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
     let wallet = crate::block_on(async { wallet_options.build().await })?;
 
@@ -44,7 +40,7 @@ pub fn create_wallet(options: String) -> Result<Wallet> {
 
 /// Call a wallet method.
 #[pyfunction]
-pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String> {
+pub fn call_wallet_method(wallet: &Wallet, method: String) -> Result<String, Error> {
     let method = serde_json::from_str::<WalletMethod>(&method)?;
     let response = crate::block_on(async {
         match wallet.wallet.read().await.as_ref() {
@@ -91,7 +87,7 @@ pub fn listen_wallet(wallet: &Wallet, events: Vec<u8>, handler: PyObject) {
 
 /// Get the client from the wallet.
 #[pyfunction]
-pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
+pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client, Error> {
     let client = crate::block_on(async {
         wallet
             .wallet
@@ -113,14 +109,14 @@ pub fn get_client_from_wallet(wallet: &Wallet) -> Result<Client> {
 
 /// Get the secret manager from the wallet.
 #[pyfunction]
-pub fn get_secret_manager_from_wallet(wallet: &Wallet) -> Result<SecretManager> {
+pub fn get_secret_manager_from_wallet(wallet: &Wallet) -> Result<SecretManager, Error> {
     let secret_manager = crate::block_on(async {
         wallet
             .wallet
             .read()
             .await
             .as_ref()
-            .map(|w| w.get_secret_manager().clone())
+            .map(|w| w.secret_manager().clone())
             .ok_or_else(|| {
                 Error::from(
                     serde_json::to_string(&Response::Panic("wallet was destroyed".into()))

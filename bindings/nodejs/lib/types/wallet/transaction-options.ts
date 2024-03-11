@@ -6,7 +6,6 @@ import {
     AccountId,
     Address,
     Bech32Address,
-    ContextInput,
     OutputId,
 } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
@@ -19,11 +18,9 @@ export interface TransactionOptions {
     remainderValueStrategy?: RemainderValueStrategy;
     /** An optional tagged data payload. */
     taggedDataPayload?: TaggedDataPayload;
-    /** Transaction context inputs to include. */
-    contextInputs?: ContextInput[];
     /** Inputs that must be used for the transaction. */
     requiredInputs?: OutputId[];
-    /** Specifies what needs to be burned during input selection. */
+    /** Specifies what needs to be burned in the transaction. */
     burn?: Burn;
     /** Optional note, that is only stored locally. */
     note?: string;
@@ -31,8 +28,6 @@ export interface TransactionOptions {
     allowMicroAmount?: boolean;
     /** Whether to allow the selection of additional inputs for this transaction. */
     allowAdditionalInputSelection?: boolean;
-    /** Transaction capabilities. */
-    capabilities?: HexEncodedString;
     /** Mana allotments for the transaction. */
     manaAllotments?: { [account_id: AccountId]: u64 };
     /** Optional block issuer to which the transaction will have required mana allotted. */

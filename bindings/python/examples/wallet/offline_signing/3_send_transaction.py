@@ -28,7 +28,8 @@ signed_transaction_data = from_dict(
 # Sends offline signed transaction online.
 transaction = wallet.submit_and_store_transaction(signed_transaction_data)
 print(
-    f'Transaction sent: {os.environ["EXPLORER_URL"]}/transaction/{transaction.transaction_id}')
-block_id = wallet.wait_for_transaction_acceptance(
+    f'Transaction sent: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')
+wallet.wait_for_transaction_acceptance(
     transaction.transaction_id)
-print(f'Tx accepted in block: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+print(
+    f'Tx accepted: {os.environ["EXPLORER_URL"]}/transactions/{transaction.transaction_id}')

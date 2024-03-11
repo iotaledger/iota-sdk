@@ -7,9 +7,9 @@
 //! `cargo run --release --all-features --example account_output_send_amount`
 
 use iota_sdk::{
-    client::node_api::indexer::query_parameters::BasicOutputQueryParameters,
+    client::{api::options::TransactionOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters},
     types::block::address::{AccountAddress, ToBech32Ext},
-    wallet::{AccountSyncOptions, SyncOptions, TransactionOptions},
+    wallet::{AccountSyncOptions, SyncOptions},
     Wallet,
 };
 

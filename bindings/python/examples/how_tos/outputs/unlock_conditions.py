@@ -3,9 +3,7 @@ import json
 from dotenv import load_dotenv
 from iota_sdk import (
     AddressUnlockCondition,
-    AccountAddress,
     Client,
-    Ed25519Address,
     Utils,
     ExpirationUnlockCondition,
     SimpleTokenScheme,
@@ -18,15 +16,13 @@ load_dotenv()
 
 client = Client()
 
-hex_address = Utils.bech32_to_hex(
+ed25519_address = Utils.parse_bech32_address(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
-account_hex_address = Utils.bech32_to_hex(
+account_address = Utils.parse_bech32_address(
     'rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux')
 
-address_unlock_condition = AddressUnlockCondition(
-    Ed25519Address(hex_address)
-)
+address_unlock_condition = AddressUnlockCondition(ed25519_address)
 
 token_scheme = SimpleTokenScheme(50, 0, 100)
 
@@ -42,7 +38,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
         StorageDepositReturnUnlockCondition(
             1000000,
-            Ed25519Address(hex_address),
+            ed25519_address,
         ),
     ],
 )
@@ -63,7 +59,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
         ExpirationUnlockCondition(
             1,
-            Ed25519Address(hex_address),
+            ed25519_address,
         ),
     ],
 )
@@ -75,7 +71,7 @@ foundry_output = client.build_foundry_output(
     token_scheme=token_scheme,
     unlock_conditions=[
         ImmutableAccountAddressUnlockCondition(
-            AccountAddress(account_hex_address),
+            account_address,
         ),
     ],
 )

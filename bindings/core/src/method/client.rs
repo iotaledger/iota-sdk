@@ -104,8 +104,6 @@ pub enum ClientMethod {
     },
     /// Get a node candidate from the healthy node pool.
     GetNode,
-    /// Gets the network related information such as network_id.
-    GetNetworkInfo,
     /// Gets the network id of the node we're connecting to.
     GetNetworkId,
     /// Returns the bech32_hrp
@@ -151,6 +149,8 @@ pub enum ClientMethod {
     },
     /// Returns general information about the node together with its URL.
     GetNodeInfo,
+    /// Returns network metrics.
+    GetNetworkMetrics,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
     #[serde(rename_all = "camelCase")]
@@ -162,7 +162,7 @@ pub enum ClientMethod {
     },
     /// Returns all the available Mana rewards of an account or delegation output in the returned range of epochs.
     #[serde(rename_all = "camelCase")]
-    GetRewards {
+    GetOutputManaRewards {
         /// Output ID of an account or delegation output.
         output_id: OutputId,
         /// A client can specify a slot index explicitly, which should be equal to the slot it uses as the commitment
@@ -205,7 +205,7 @@ pub enum ClientMethod {
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
     PostBlockRaw {
-        /// Block
+        /// Block as raw bytes
         block_bytes: Vec<u8>,
     },
     /// Get block
@@ -434,49 +434,9 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Utils
     //////////////////////////////////////////////////////////////////////
-    /// Transforms a hex encoded address to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexToBech32 {
-        /// Hex encoded bech32 address
-        hex: String,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
     /// Converts an address to its bech32 representation
     #[serde(rename_all = "camelCase")]
     AddressToBech32 { address: Address, bech32_hrp: Option<Hrp> },
-    /// Transforms an account id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AccountIdToBech32 {
-        /// Account ID
-        account_id: AccountId,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
-    /// Transforms an anchor id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AnchorIdToBech32 {
-        /// Anchor ID
-        anchor_id: AnchorId,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
-    /// Transforms an nft id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    NftIdToBech32 {
-        /// Nft ID
-        nft_id: NftId,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
-    /// Transforms a hex encoded public key to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexPublicKeyToBech32Address {
-        /// Hex encoded public key
-        hex: String,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
     /// Calculate the minimum required amount for an output.
     /// Expected response:
     /// [`Amount`](crate::Response::Amount)

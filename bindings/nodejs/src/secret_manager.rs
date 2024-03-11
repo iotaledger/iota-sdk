@@ -65,7 +65,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
         new_path.as_ref(),
         new_password,
     )
-    .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::from)
+    .map_err(iota_sdk_bindings_core::iota_sdk::client::ClientError::from)
     .map_err(NodejsError::new)?;
 
     Ok(())

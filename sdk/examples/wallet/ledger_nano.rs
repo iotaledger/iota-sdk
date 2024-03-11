@@ -23,8 +23,6 @@ use iota_sdk::{
     wallet::{ClientOptions, Wallet},
 };
 
-// The address to send coins to
-const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount of base coins we'll send
 const SEND_AMOUNT: u64 = 1_000_000;
 
@@ -38,23 +36,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager = LedgerSecretManager::new(true);
+    let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
+
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
+    let recv_address = wallet.address().await;
+    println!("recipient address: {recv_address}");
     println!("{:?}", wallet.get_ledger_nano_status().await?);
-
-    println!("Generating address...");
-    let now = tokio::time::Instant::now();
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
-    println!("took: {:.2?}", now.elapsed());
-
-    println!("ADDRESS:\n{address:#?}");
 
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
@@ -63,16 +57,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
     println!("Sending the coin-transfer transaction...");
-    let transaction = wallet.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
+    let transaction = wallet.send(SEND_AMOUNT, recv_address, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = wallet
+    wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
+
     println!(
-        "Tx accepted in block: {}/block/{}",
+        "Tx accepted: {}/transactions/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block_id
+        transaction.transaction_id
     );
 
     let now = tokio::time::Instant::now();

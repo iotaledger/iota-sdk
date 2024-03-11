@@ -1,8 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashMap;
+
 use crate::{
-    client::secret::SecretManage,
+    client::{secret::SecretManage, ClientError},
     types::{
         api::core::{BlockState, TransactionState},
         block::{input::Input, output::OutputId, BlockId},
@@ -10,7 +12,7 @@ use crate::{
     wallet::{
         core::WalletLedger,
         types::{InclusionState, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -21,15 +23,16 @@ use crate::{
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Sync transactions. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
     /// be synced again
-    pub(crate) async fn sync_pending_transactions(&self) -> crate::wallet::Result<bool> {
+    pub(crate) async fn sync_pending_transactions(&self) -> Result<bool, WalletError> {
         log::debug!("[SYNC] sync pending transactions");
+        let network_id = self.client().get_network_id().await?;
         let wallet_ledger = self.ledger().await;
 
         // only set to true if a transaction got confirmed for which we don't have an output
@@ -40,22 +43,34 @@ where
             return Ok(confirmed_unknown_output);
         }
 
-        let network_id = self.client().get_network_id().await?;
-
         let mut updated_transactions = Vec::new();
         let mut spent_output_ids = Vec::new();
         // Inputs from conflicting transactions that are unspent, but should be removed from the locked outputs so they
         // are available again
         let mut output_ids_to_unlock = Vec::new();
 
-        for transaction_id in &wallet_ledger.pending_transactions {
+        let pending_transactions = wallet_ledger
+            .pending_transactions
+            .iter()
+            .copied()
+            .map(|id| {
+                (
+                    id,
+                    wallet_ledger
+                        .transactions
+                        .get(&id)
+                        // panic during development to easier detect if something is wrong, should be handled different
+                        // later
+                        .expect("transaction id stored, but transaction is missing")
+                        .clone(),
+                )
+            })
+            .collect::<HashMap<_, _>>();
+
+        drop(wallet_ledger);
+
+        for (transaction_id, transaction) in pending_transactions {
             log::debug!("[SYNC] sync pending transaction {transaction_id}");
-            let mut transaction = wallet_ledger
-                .transactions
-                .get(transaction_id)
-                // panic during development to easier detect if something is wrong, should be handled different later
-                .expect("transaction id stored, but transaction is missing")
-                .clone();
 
             // only check transaction from the network we're connected to
             if transaction.network_id != network_id {
@@ -64,25 +79,31 @@ where
 
             // check if we have an output (remainder, if not sending to an own address) that got created by this
             // transaction, if that's the case, then the transaction got confirmed
-            let transaction_output = wallet_ledger
+            let transaction_output = self
+                .ledger()
+                .await
                 .outputs
                 .keys()
-                .find(|o| o.transaction_id() == transaction_id);
+                .find(|o| o.transaction_id() == &transaction_id)
+                .copied();
 
             if let Some(transaction_output) = transaction_output {
-                // Save to unwrap, we just got the output
-                let confirmed_output_data = wallet_ledger.outputs.get(transaction_output).expect("output exists");
-                log::debug!(
-                    "[SYNC] confirmed transaction {transaction_id} in block {}",
-                    confirmed_output_data.metadata.block_id()
-                );
-                updated_transaction_and_outputs(
-                    transaction,
-                    Some(*confirmed_output_data.metadata.block_id()),
-                    InclusionState::Confirmed,
-                    &mut updated_transactions,
-                    &mut spent_output_ids,
-                );
+                {
+                    let wallet_ledger = self.ledger().await;
+                    // Safe to unwrap, we just got the output
+                    let confirmed_output_data = wallet_ledger.outputs.get(&transaction_output).expect("output exists");
+                    log::debug!(
+                        "[SYNC] confirmed transaction {transaction_id} in block {}",
+                        confirmed_output_data.metadata.block_id()
+                    );
+                    updated_transaction_and_outputs(
+                        transaction,
+                        Some(*confirmed_output_data.metadata.block_id()),
+                        InclusionState::Confirmed,
+                        &mut updated_transactions,
+                        &mut spent_output_ids,
+                    );
+                }
                 continue;
             }
 
@@ -90,18 +111,33 @@ where
             let mut input_got_spent = false;
             for input in transaction.payload.transaction().inputs() {
                 let Input::Utxo(input) = input;
-                if let Some(input) = wallet_ledger.outputs.get(input.output_id()) {
+                if let Some(input) = self.ledger().await.outputs.get(input.output_id()) {
                     if input.metadata.is_spent() {
                         input_got_spent = true;
                     }
                 }
             }
 
-            if let Some(block_id) = &transaction.block_id {
-                match self.client().get_block_metadata(block_id).await {
-                    Ok(metadata) => {
-                        // TODO: refactor, this is the same code as in `TransactionState::Failed` https://github.com/iotaledger/iota-sdk/issues/2111
-                        if metadata.block_state == BlockState::Failed {
+            match self.client().get_transaction_metadata(&transaction_id).await {
+                Ok(metadata) => {
+                    match metadata.transaction_state {
+                        // TODO: Separate TransactionState::Finalized, TransactionState::Accepted? https://github.com/iotaledger/iota-sdk/issues/1814
+                        TransactionState::Accepted | TransactionState::Committed | TransactionState::Finalized => {
+                            log::debug!(
+                                "[SYNC] confirmed transaction {transaction_id} in slot {}",
+                                metadata.earliest_attachment_slot
+                            );
+                            confirmed_unknown_output = true;
+                            updated_transaction_and_outputs(
+                                transaction,
+                                // Some(metadata.block_id),
+                                None,
+                                InclusionState::Confirmed,
+                                &mut updated_transactions,
+                                &mut spent_output_ids,
+                            );
+                        }
+                        TransactionState::Failed => {
                             // try to get the included block, because maybe only this attachment is
                             // conflicting because it got confirmed in another block
                             if let Ok(included_block) = self
@@ -128,96 +164,50 @@ where
                                     &mut spent_output_ids,
                                 );
                             }
-                        } else if let Some(tx_state) = metadata.transaction_metadata.map(|m| m.transaction_state) {
-                            println!("tx_state: {tx_state:?}");
-                            match tx_state {
-                                // TODO: Separate TransactionState::Finalized, TransactionState::Accepted? https://github.com/iotaledger/iota-sdk/issues/1814
-                                TransactionState::Accepted
-                                | TransactionState::Confirmed
-                                | TransactionState::Finalized => {
-                                    log::debug!(
-                                        "[SYNC] confirmed transaction {transaction_id} in block {}",
-                                        metadata.block_id
-                                    );
-                                    confirmed_unknown_output = true;
-                                    updated_transaction_and_outputs(
-                                        transaction,
-                                        Some(metadata.block_id),
-                                        InclusionState::Confirmed,
-                                        &mut updated_transactions,
-                                        &mut spent_output_ids,
-                                    );
-                                }
-                                TransactionState::Failed => {
-                                    // try to get the included block, because maybe only this attachment is
-                                    // conflicting because it got confirmed in another block
-                                    if let Ok(included_block) = self
-                                        .client()
-                                        .get_included_block(&transaction.payload.transaction().id())
-                                        .await
-                                    {
-                                        confirmed_unknown_output = true;
-                                        updated_transaction_and_outputs(
-                                            transaction,
-                                            Some(self.client().block_id(&included_block).await?),
-                                            // block metadata was Conflicting, but it's confirmed in another attachment
-                                            InclusionState::Confirmed,
-                                            &mut updated_transactions,
-                                            &mut spent_output_ids,
-                                        );
-                                    } else {
-                                        log::debug!("[SYNC] conflicting transaction {transaction_id}");
-                                        updated_transaction_and_outputs(
-                                            transaction,
-                                            None,
-                                            InclusionState::Conflicting,
-                                            &mut updated_transactions,
-                                            &mut spent_output_ids,
-                                        );
-                                    }
-                                }
-                                // Do nothing, just need to wait a bit more
-                                TransactionState::Pending => {}
-                            }
-                        } else if input_got_spent {
-                            process_transaction_with_unknown_state(
-                                &wallet_ledger,
-                                transaction,
-                                &mut updated_transactions,
-                                &mut output_ids_to_unlock,
-                            )?;
                         }
+                        // Do nothing, just need to wait a bit more
+                        TransactionState::Pending => {}
                     }
-                    Err(crate::client::Error::Node(crate::client::node_api::error::Error::NotFound(_))) => {
-                        if input_got_spent {
-                            process_transaction_with_unknown_state(
-                                &wallet_ledger,
-                                transaction,
-                                &mut updated_transactions,
-                                &mut output_ids_to_unlock,
-                            )?;
-                        }
-                    }
-                    Err(e) => return Err(e.into()),
+                    // else if input_got_spent {
+                    //     process_transaction_with_unknown_state(
+                    //         &*self.ledger().await,
+                    //         transaction,
+                    //         &mut updated_transactions,
+                    //         &mut output_ids_to_unlock,
+                    //     )?;
+                    // }
                 }
-            } else if input_got_spent {
-                process_transaction_with_unknown_state(
-                    &wallet_ledger,
-                    transaction,
-                    &mut updated_transactions,
-                    &mut output_ids_to_unlock,
-                )?;
-            } else {
-                // Reissue if there was no block id yet, because then we also didn't burn any mana
-                log::debug!("[SYNC] reissue transaction {}", transaction.transaction_id);
-                let reissued_block = self
-                    .submit_signed_transaction(transaction.payload.clone(), None)
-                    .await?;
-                transaction.block_id.replace(reissued_block);
-                updated_transactions.push(transaction);
+                Err(ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) => {
+                    if input_got_spent {
+                        process_transaction_with_unknown_state(
+                            &*self.ledger().await,
+                            transaction,
+                            &mut updated_transactions,
+                            &mut output_ids_to_unlock,
+                        )?;
+                    }
+                }
+                Err(e) => return Err(e.into()),
             }
+
+            //  else if input_got_spent {
+            //     process_transaction_with_unknown_state(
+            //         &*self.ledger().await,
+            //         transaction,
+            //         &mut updated_transactions,
+            //         &mut output_ids_to_unlock,
+            //     )?;
+            // }
+            // else {
+            //     // Reissue if there was no block id yet, because then we also didn't burn any mana
+            //     log::debug!("[SYNC] reissue transaction {}", transaction.transaction_id);
+            //     let reissued_block = self
+            //         .submit_signed_transaction(transaction.payload.clone(), None)
+            //         .await?;
+            //     transaction.block_id.replace(reissued_block);
+            //     updated_transactions.push(transaction);
+            // }
         }
-        drop(wallet_ledger);
 
         // updates account with balances, output ids, outputs
         self.update_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)
@@ -252,7 +242,7 @@ fn process_transaction_with_unknown_state(
     mut transaction: TransactionWithMetadata,
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,
-) -> crate::wallet::Result<()> {
+) -> Result<(), WalletError> {
     let mut all_inputs_spent = true;
     for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;

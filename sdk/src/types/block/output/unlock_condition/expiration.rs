@@ -100,7 +100,7 @@ impl StorageScore for ExpirationUnlockCondition {
 #[inline]
 fn verify_return_address(return_address: &Address) -> Result<(), UnlockConditionError> {
     if return_address.is_implicit_account_creation() {
-        Err(AddressError::InvalidAddressKind(return_address.kind()).into())
+        Err(AddressError::Kind(return_address.kind()).into())
     } else {
         Ok(())
     }
@@ -109,7 +109,7 @@ fn verify_return_address(return_address: &Address) -> Result<(), UnlockCondition
 #[inline]
 fn verify_slot_index(slot_index: &SlotIndex) -> Result<(), UnlockConditionError> {
     if *slot_index == 0 {
-        Err(UnlockConditionError::ExpirationUnlockConditionZero)
+        Err(UnlockConditionError::ExpirationZero)
     } else {
         Ok(())
     }

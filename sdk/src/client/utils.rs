@@ -16,38 +16,20 @@ use zeroize::{Zeroize, ZeroizeOnDrop};
 
 use super::Client;
 use crate::{
-    client::{Error, Result},
+    client::ClientError,
     types::block::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
-        output::{AccountId, AnchorId, NftId},
         payload::TaggedDataPayload,
         Block, BlockId,
     },
     utils::ConvertTo,
 };
 
-/// Transforms bech32 to hex
-pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
-    Ok(match bech32.convert()?.inner() {
-        Address::Ed25519(ed) => ed.to_string(),
-        Address::Account(account) => account.to_string(),
-        Address::Nft(nft) => nft.to_string(),
-        Address::Anchor(anchor) => anchor.to_string(),
-        Address::ImplicitAccountCreation(implicit) => implicit.to_string(),
-        Address::Multi(multi) => multi.to_string(),
-        Address::Restricted(restricted) => restricted.to_string(),
-    })
-}
-
-/// Transforms a hex encoded address to a bech32 encoded address
-pub fn hex_to_bech32(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
-    let address = hex.parse::<Ed25519Address>()?;
-
-    Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
-}
-
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
-pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
+pub fn hex_public_key_to_bech32_address(
+    hex: &str,
+    bech32_hrp: impl ConvertTo<Hrp>,
+) -> Result<Bech32Address, ClientError> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
     let address = Ed25519Address::new(Blake2b256::digest(public_key).into());
 
@@ -55,22 +37,22 @@ pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hr
 }
 
 /// Generates a new mnemonic.
-pub fn generate_mnemonic() -> Result<Mnemonic> {
+pub fn generate_mnemonic() -> Result<Mnemonic, ClientError> {
     let mut entropy = [0u8; 32];
     utils::rand::fill(&mut entropy)?;
     let mnemonic = wordlist::encode(&entropy, &crypto::keys::bip39::wordlist::ENGLISH)
-        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+        .map_err(|e| ClientError::InvalidMnemonic(format!("{e:?}")))?;
     entropy.zeroize();
     Ok(mnemonic)
 }
 
 /// Returns a hex encoded seed for a mnemonic.
-pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String> {
+pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String, ClientError> {
     Ok(prefix_hex::encode(mnemonic_to_seed(mnemonic)?.as_ref()))
 }
 
 /// Returns a seed for a mnemonic.
-pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
+pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed, ClientError> {
     // first we check if the mnemonic is valid to give meaningful errors
     verify_mnemonic(mnemonic.borrow())?;
     Ok(crypto::keys::bip39::mnemonic_to_seed(
@@ -80,14 +62,14 @@ pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
 }
 
 /// Verifies that a &str is a valid mnemonic.
-pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<()> {
+pub fn verify_mnemonic(mnemonic: impl Borrow<MnemonicRef>) -> Result<(), ClientError> {
     crypto::keys::bip39::wordlist::verify(mnemonic.borrow(), &crypto::keys::bip39::wordlist::ENGLISH)
-        .map_err(|e| crate::client::Error::InvalidMnemonic(format!("{e:?}")))?;
+        .map_err(|e| ClientError::InvalidMnemonic(format!("{e:?}")))?;
     Ok(())
 }
 
 /// Requests funds from a faucet
-pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address) -> Result<String> {
+pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address) -> Result<String, ClientError> {
     let mut map = HashMap::new();
     map.insert("address", bech32_address.to_string());
 
@@ -97,71 +79,23 @@ pub async fn request_funds_from_faucet(url: &str, bech32_address: &Bech32Address
         .json(&map)
         .send()
         .await
-        .map_err(|err| Error::Node(err.into()))?
+        .map_err(|err| ClientError::Node(err.into()))?
         .text()
         .await
-        .map_err(|err| Error::Node(err.into()))?;
+        .map_err(|err| ClientError::Node(err.into()))?;
     Ok(faucet_response)
 }
 
 impl Client {
-    /// Transforms a hex encoded address to a bech32 encoded address
-    pub async fn hex_to_bech32(
-        &self,
-        hex: &str,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> crate::client::Result<Bech32Address> {
-        match bech32_hrp {
-            Some(hrp) => Ok(hex_to_bech32(hex, hrp)?),
-            None => Ok(hex_to_bech32(hex, self.get_bech32_hrp().await?)?),
-        }
-    }
-
     /// Converts an address to its bech32 representation
     pub async fn address_to_bech32(
         &self,
         address: Address,
         bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> crate::client::Result<Bech32Address> {
+    ) -> Result<Bech32Address, ClientError> {
         match bech32_hrp {
             Some(hrp) => Ok(address.to_bech32(hrp.convert()?)),
             None => Ok(address.to_bech32(self.get_bech32_hrp().await?)),
-        }
-    }
-
-    /// Transforms an account id to a bech32 encoded address
-    pub async fn account_id_to_bech32(
-        &self,
-        account_id: AccountId,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> crate::client::Result<Bech32Address> {
-        match bech32_hrp {
-            Some(hrp) => Ok(account_id.to_bech32(hrp.convert()?)),
-            None => Ok(account_id.to_bech32(self.get_bech32_hrp().await?)),
-        }
-    }
-
-    /// Transforms an anchor id to a bech32 encoded address
-    pub async fn anchor_id_to_bech32(
-        &self,
-        anchor_id: AnchorId,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> crate::client::Result<Bech32Address> {
-        match bech32_hrp {
-            Some(hrp) => Ok(anchor_id.to_bech32(hrp.convert()?)),
-            None => Ok(anchor_id.to_bech32(self.get_bech32_hrp().await?)),
-        }
-    }
-
-    /// Transforms an nft id to a bech32 encoded address
-    pub async fn nft_id_to_bech32(
-        &self,
-        nft_id: NftId,
-        bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> crate::client::Result<Bech32Address> {
-        match bech32_hrp {
-            Some(hrp) => Ok(nft_id.to_bech32(hrp.convert()?)),
-            None => Ok(nft_id.to_bech32(self.get_bech32_hrp().await?)),
         }
     }
 
@@ -170,49 +104,46 @@ impl Client {
         &self,
         hex: &str,
         bech32_hrp: Option<impl ConvertTo<Hrp>>,
-    ) -> crate::client::Result<Bech32Address> {
+    ) -> Result<Bech32Address, ClientError> {
         match bech32_hrp {
             Some(hrp) => Ok(hex_public_key_to_bech32_address(hex, hrp)?),
             None => Ok(hex_public_key_to_bech32_address(hex, self.get_bech32_hrp().await?)?),
         }
     }
 
-    /// Transforms bech32 to hex
-    pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> crate::client::Result<String> {
-        bech32_to_hex(bech32)
-    }
-
     /// Generates a new mnemonic.
-    pub fn generate_mnemonic() -> Result<Mnemonic> {
+    pub fn generate_mnemonic() -> Result<Mnemonic, ClientError> {
         generate_mnemonic()
     }
 
     /// Returns a seed for a mnemonic.
-    pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed> {
+    pub fn mnemonic_to_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<Seed, ClientError> {
         mnemonic_to_seed(mnemonic)
     }
 
     /// Returns a hex encoded seed for a mnemonic.
-    pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String> {
+    pub fn mnemonic_to_hex_seed(mnemonic: impl Borrow<MnemonicRef>) -> Result<String, ClientError> {
         mnemonic_to_hex_seed(mnemonic)
     }
 
     /// UTF-8 encodes the `tag` of a given TaggedDataPayload.
-    pub fn tag_to_utf8(payload: &TaggedDataPayload) -> Result<String> {
-        String::from_utf8(payload.tag().to_vec()).map_err(|_| Error::TaggedData("found invalid UTF-8".to_string()))
+    pub fn tag_to_utf8(payload: &TaggedDataPayload) -> Result<String, ClientError> {
+        String::from_utf8(payload.tag().to_vec())
+            .map_err(|_| ClientError::TaggedData("found invalid UTF-8".to_string()))
     }
 
     /// UTF-8 encodes the `data` of a given TaggedDataPayload.
-    pub fn data_to_utf8(payload: &TaggedDataPayload) -> Result<String> {
-        String::from_utf8(payload.data().to_vec()).map_err(|_| Error::TaggedData("found invalid UTF-8".to_string()))
+    pub fn data_to_utf8(payload: &TaggedDataPayload) -> Result<String, ClientError> {
+        String::from_utf8(payload.data().to_vec())
+            .map_err(|_| ClientError::TaggedData("found invalid UTF-8".to_string()))
     }
 
     /// UTF-8 encodes both the `tag` and `data` of a given TaggedDataPayload.
-    pub fn tagged_data_to_utf8(payload: &TaggedDataPayload) -> Result<(String, String)> {
+    pub fn tagged_data_to_utf8(payload: &TaggedDataPayload) -> Result<(String, String), ClientError> {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
     }
 
-    pub async fn block_id(&self, block: &Block) -> Result<BlockId> {
+    pub async fn block_id(&self, block: &Block) -> Result<BlockId, ClientError> {
         Ok(block.id(&self.get_protocol_parameters().await?))
     }
 }

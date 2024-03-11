@@ -7,11 +7,15 @@ import type {
     __GetOutputIdsMethod__,
     __GetBasicOutputIdsMethod__,
     __GetOutputMethod__,
+    __GetOutputRawMethod__,
     __GetOutputsMethod__,
+    __GetOutputsIgnoreNotFoundMethod__,
+    __GetOutputMetadataMethod__,
+    __GetOutputWithMetadataMethod__,
     __PostBlockMethod__,
-    __GetNetworkInfoMethod__,
+    __PostBlockRawMethod__,
     __GetAccountCongestionMethod__,
-    __GetRewardsMethod__,
+    __GetOutputManaRewardsMethod__,
     __GetCommitteeMethod__,
     __GetValidatorsMethod__,
     __GetValidatorMethod__,
@@ -27,23 +31,21 @@ import type {
     __GetProtocolParametersMethod__,
     __GetHealthMethod__,
     __GetNodeInfoMethod__,
-    __PostBlockRawMethod__,
+    __GetNetworkMetricsMethod__,
     __GetBlockRawMethod__,
     __GetIncludedBlockMethod__,
+    __GetIncludedBlockRawMethod__,
     __GetIncludedBlockMetadataMethod__,
     __GetTransactionMetadataMethod__,
     __GetCommitmentMethod__,
+    __GetCommitmentRawMethod__,
     __GetUtxoChangesMethod__,
     __GetUtxoChangesFullMethod__,
     __GetCommitmentBySlotMethod__,
+    __GetCommitmentBySlotRawMethod__,
     __GetUtxoChangesBySlotMethod__,
     __GetUtxoChangesFullBySlotMethod__,
-    __HexToBech32Method__,
     __AddressToBech32Method__,
-    __AccountIdToBech32Method__,
-    __AnchorIdToBech32Method__,
-    __NftIdToBech32Method__,
-    __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
     __AnchorOutputIdsMethod__,
@@ -54,7 +56,6 @@ import type {
     __FoundryOutputIdMethod__,
     __NftOutputIdsMethod__,
     __NftOutputIdMethod__,
-    __GetOutputsIgnoreNotFoundMethod__,
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
     __BuildBasicOutputMethod__,
@@ -71,14 +72,18 @@ import type {
 export type __ClientMethods__ =
     | __GetInfoMethod__
     | __GetRoutesMethod__
-    | __GetOutputMethod__
     | __GetOutputIdsMethod__
     | __GetBasicOutputIdsMethod__
+    | __GetOutputMethod__
+    | __GetOutputRawMethod__
     | __GetOutputsMethod__
+    | __GetOutputsIgnoreNotFoundMethod__
+    | __GetOutputMetadataMethod__
+    | __GetOutputWithMetadataMethod__
     | __PostBlockMethod__
-    | __GetNetworkInfoMethod__
+    | __PostBlockRawMethod__
     | __GetAccountCongestionMethod__
-    | __GetRewardsMethod__
+    | __GetOutputManaRewardsMethod__
     | __GetCommitteeMethod__
     | __GetValidatorsMethod__
     | __GetValidatorMethod__
@@ -94,23 +99,21 @@ export type __ClientMethods__ =
     | __GetProtocolParametersMethod__
     | __GetHealthMethod__
     | __GetNodeInfoMethod__
-    | __PostBlockRawMethod__
+    | __GetNetworkMetricsMethod__
     | __GetBlockRawMethod__
     | __GetIncludedBlockMethod__
+    | __GetIncludedBlockRawMethod__
     | __GetIncludedBlockMetadataMethod__
     | __GetTransactionMetadataMethod__
     | __GetCommitmentMethod__
+    | __GetCommitmentRawMethod__
     | __GetUtxoChangesMethod__
     | __GetUtxoChangesFullMethod__
     | __GetCommitmentBySlotMethod__
+    | __GetCommitmentBySlotRawMethod__
     | __GetUtxoChangesBySlotMethod__
     | __GetUtxoChangesFullBySlotMethod__
-    | __HexToBech32Method__
     | __AddressToBech32Method__
-    | __AccountIdToBech32Method__
-    | __AnchorIdToBech32Method__
-    | __NftIdToBech32Method__
-    | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
     | __AnchorOutputIdsMethod__
@@ -121,7 +124,6 @@ export type __ClientMethods__ =
     | __FoundryOutputIdMethod__
     | __NftOutputIdsMethod__
     | __NftOutputIdMethod__
-    | __GetOutputsIgnoreNotFoundMethod__
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__
     | __BuildBasicOutputMethod__
