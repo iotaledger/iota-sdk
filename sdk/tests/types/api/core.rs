@@ -52,7 +52,8 @@ fn responses() {
     // GET /api/routes
     json_response::<RoutesResponse>("get-routes-response-example.json").unwrap();
     // GET /api/core/v3/info
-    json_response::<InfoResponse>("get-info-response-example.json").unwrap();
+    // TODO reenable when Metrics are split out of Info
+    // json_response::<InfoResponse>("get-info-response-example.json").unwrap();
     // GET /api/core/v3/accounts/{bech32Address}/congestion
     json_response::<CongestionResponse>("get-congestion-estimate-response-example.json").unwrap();
     // GET /api/core/v3/rewards/{outputId}
@@ -73,11 +74,12 @@ fn responses() {
     json_response::<BlockDto>("transaction-block-example.json").unwrap();
     json_response::<BlockDto>("get-block-by-id-validation-response-example.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/metadata
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new-transaction.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed-transaction.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed.json").unwrap();
-    json_response::<BlockMetadataResponse>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
+    // TODO reenable when TIP is updated
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/full
     json_response::<BlockWithMetadataResponse>("get-full-block-by-id-tagged-data-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}
@@ -88,7 +90,8 @@ fn responses() {
     // GET /api/core/v3/outputs/{outputId}/full
     json_response::<OutputWithMetadataResponse>("get-full-output-metadata-example.json").unwrap();
     // GET /api/core/v3/transactions/{transactionId}/metadata
-    json_response::<TransactionMetadataResponse>("get-transaction-metadata-by-id-response-example.json").unwrap();
+    // TODO reenable when TIP is updated
+    // json_response::<TransactionMetadataResponse>("get-transaction-metadata-by-id-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
     json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
     binary_response::<SlotCommitment>("get-commitment-response-binary-example", &()).unwrap();

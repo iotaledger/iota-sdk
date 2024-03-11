@@ -170,11 +170,12 @@ where
 
         // May use a previously stored secret manager if it wasn't provided
         if self.secret_manager.is_none() {
-            let secret_manager = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.secret_manager.clone());
-
-            self.secret_manager = secret_manager;
+            self.secret_manager.replace(
+                loaded_wallet_builder
+                    .as_ref()
+                    .and_then(|builder| builder.secret_manager.clone())
+                    .ok_or(WalletError::MissingParameter("secret_manager"))?,
+            );
         }
 
         let mut verify_address = false;
@@ -186,7 +187,10 @@ where
         if let Some(address) = &self.address {
             if let Some(loaded_address) = &loaded_address {
                 if address != loaded_address {
-                    return Err(WalletError::WalletAddressMismatch(address.clone()));
+                    return Err(WalletError::WalletAddressMismatch {
+                        provided: address.clone(),
+                        expected: loaded_address.clone(),
+                    });
                 }
             } else {
                 verify_address = true;
@@ -277,6 +281,7 @@ where
             last_synced: Mutex::new(0),
             background_syncing_status,
             client,
+            // TODO: make secret manager optional
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]
             event_emitter: tokio::sync::RwLock::new(EventEmitter::new()),

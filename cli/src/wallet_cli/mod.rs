@@ -1393,7 +1393,7 @@ pub enum PromptResponse {
 }
 
 async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
-    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+    if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
         let password = get_password("Stronghold password", false)?;

@@ -52,7 +52,7 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
 #[wasm_bindgen(js_name = getSecretManager)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsError> {
     if let Some(wallet) = &*method_handler.0.read().await {
-        Ok(SecretManagerMethodHandler::new(wallet.get_secret_manager().clone()))
+        Ok(SecretManagerMethodHandler::new(wallet.secret_manager().clone()))
     } else {
         // Notify that the wallet was destroyed
         Err(destroyed_err("Wallet"))

@@ -121,7 +121,7 @@ pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<Externa
 #[napi(js_name = "getSecretManager")]
 pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result<External<SecretManagerMethodHandler>> {
     if let Some(wallet) = &**wallet.as_ref().read().await {
-        Ok(External::new(wallet.get_secret_manager().clone()))
+        Ok(External::new(wallet.secret_manager().clone()))
     } else {
         Err(destroyed_err("Wallet"))
     }
