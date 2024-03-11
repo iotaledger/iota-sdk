@@ -8,6 +8,8 @@
 //! cargo run --release --example block_confirmation_time
 //! ```
 
+use std::time::Instant;
+
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
@@ -45,20 +47,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{block:#?}");
 
+    let mut block_state = BlockState::Pending;
+    let start = Instant::now();
+
     // Wait for the block to get included
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let metadata = client.get_block_metadata(&block_id).await?;
-        if let BlockState::Confirmed | BlockState::Finalized = metadata.block_state {
+        block_state = metadata.block_state;
+
+        if let BlockState::Confirmed | BlockState::Finalized = block_state {
             break;
         }
     }
 
-    println!(
-        "Block with no payload included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    if let BlockState::Confirmed | BlockState::Finalized = block_state {
+        let duration = start.elapsed();
+
+        println!(
+            "Block with no payload included after {} seconds: {}/block/{}",
+            duration.as_secs(),
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
+    } else {
+        println!("Block with no payload was not included");
+    }
 
     Ok(())
 }
