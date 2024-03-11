@@ -168,11 +168,7 @@ impl Client {
             transaction_builder = transaction_builder.disable_additional_input_selection();
         }
 
-        let prepared_transaction_data = transaction_builder.finish()?;
-
-        prepared_transaction_data.transaction.validate_length()?;
-
-        Ok(prepared_transaction_data)
+        Ok(transaction_builder.finish()?)
     }
 }
 

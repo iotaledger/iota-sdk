@@ -44,6 +44,8 @@ pub enum PayloadError {
     OutputCount(<OutputCount as TryFrom<usize>>::Error),
     #[display(fmt = "invalid transaction amount sum: {_0}")]
     TransactionAmountSum(u128),
+    #[display(fmt = "the transaction is too large. Its length is {length}, max length is {max_length}")]
+    TransactionLength { length: usize, max_length: usize },
     #[display(fmt = "duplicate output chain: {_0}")]
     DuplicateOutputChain(ChainId),
     #[display(fmt = "duplicate UTXO {_0} in inputs")]

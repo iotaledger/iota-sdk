@@ -12,6 +12,9 @@ use packable::{
 };
 
 use crate::{
+    client::api::transaction::{
+        MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS, REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH, SINGLE_UNLOCK_LENGTH,
+    },
     types::block::{
         capabilities::{Capabilities, CapabilityFlag},
         context_input::{ContextInput, ContextInputs},
@@ -448,7 +451,36 @@ fn verify_transaction_packable(transaction: &Transaction, _: &ProtocolParameters
     verify_transaction(transaction)
 }
 
+impl Transaction {
+    /// Verifies that the transaction doesn't exceed the block size limit with 8 parents.
+    /// Assuming one signature unlock and otherwise reference/account/nft unlocks.
+    /// `validate_transaction_payload_length()` should later be used to check the length again with the correct
+    /// unlocks.
+    pub(crate) fn validate_length(&self) -> Result<(), PayloadError> {
+        let transaction_bytes = self.pack_to_vec();
+
+        // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
+        let reference_account_nft_unlocks_amount = self.inputs().len() - 1;
+
+        // Max tx payload length - length for one signature unlock (there might be more unlocks, we check with them
+        // later again, when we built the transaction payload)
+        let max_length = MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS
+            - SINGLE_UNLOCK_LENGTH
+            - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
+
+        if transaction_bytes.len() > max_length {
+            return Err(PayloadError::TransactionLength {
+                length: transaction_bytes.len(),
+                max_length,
+            });
+        }
+        Ok(())
+    }
+}
+
 fn verify_transaction(transaction: &Transaction) -> Result<(), PayloadError> {
+    transaction.validate_length()?;
+
     if transaction.context_inputs().commitment().is_none() {
         for output in transaction.outputs.iter() {
             if output.features().is_some_and(|f| f.staking().is_some()) {
