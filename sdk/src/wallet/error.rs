@@ -33,30 +33,31 @@ pub enum WalletError {
     /// Wallet alias mismatch.
     #[error("wallet alias mismatch: {provided}, existing alias is: {expected}")]
     AliasMismatch { provided: String, expected: String },
-    /// Errors during backup creation or restoring
+    /// Errors during backup creation or restoring.
     #[error("backup failed {0}")]
     Backup(&'static str),
     /// Error from block crate.
     #[error("{0}")]
     Block(#[from] BlockError),
-    /// Burning or melting failed
+    /// Burning or melting failed.
     #[error("burning or melting failed: {0}")]
     BurningOrMeltingFailed(String),
     /// Client error.
     #[error("`{0}`")]
     Client(#[from] ClientError),
-    /// BIP44 coin type mismatch
-    #[error("BIP44 mismatch: {new_bip_path:?}, existing bip path is: {old_bip_path:?}")]
+    /// BIP path mismatch.
+    #[error("bip path mismatch: {new_bip_path:?}, existing bip path is: {old_bip_path:?}")]
     BipPathMismatch {
         new_bip_path: Option<Bip44>,
         old_bip_path: Option<Bip44>,
     },
-    /// Crypto.rs error
+    /// Crypto.rs error.
     #[error("{0}")]
     Crypto(#[from] crypto::Error),
-    /// Custom input error
+    /// Custom input error.
     #[error("custom input error {0}")]
     CustomInput(String),
+    /// Missing delegation.
     #[error("no delegation output found with id {0}")]
     MissingDelegation(DelegationId),
     /// Insufficient funds to send transaction.
@@ -70,7 +71,7 @@ pub enum WalletError {
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     #[error("invalid event type: {0}")]
     InvalidEventType(u8),
-    /// Invalid mnemonic error
+    /// Invalid mnemonic error.
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),
     /// Invalid output kind.
@@ -79,21 +80,21 @@ pub enum WalletError {
     /// Invalid parameter.
     #[error("invalid parameter: {0}")]
     InvalidParameter(&'static str),
-    /// Invalid Voting Power
+    /// Invalid voting power.
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("invalid voting power")]
     InvalidVotingPower,
-    /// IO error. (storage, backup, restore)
+    /// IO error (storage, backup, restore).
     #[error("`{0}`")]
     Io(#[from] std::io::Error),
     /// serde_json error.
     #[error("`{0}`")]
     Json(#[from] serde_json::error::Error),
-    /// Error migrating storage or backup
+    /// Error migrating storage or backup.
     #[error("migration failed {0}")]
     Migration(String),
-    /// Minting failed
+    /// Minting failed.
     #[error("minting failed {0}")]
     MintingFailed(String),
     /// Missing BIP path.
@@ -102,10 +103,10 @@ pub enum WalletError {
     /// Missing parameter.
     #[error("missing parameter: {0}")]
     MissingParameter(&'static str),
-    /// Nft not found in unspent outputs
+    /// Nft not found in unspent outputs.
     #[error("nft not found in unspent outputs")]
     NftNotFoundInUnspentOutputs,
-    /// No outputs available for consolidating
+    /// No outputs available for consolidating.
     #[error(
         "nothing to consolidate: available outputs: {available_outputs}, consolidation threshold: {consolidation_threshold}"
     )]
@@ -118,7 +119,7 @@ pub enum WalletError {
     /// Errors not covered by other variants.
     #[error(transparent)]
     Other(#[from] Box<dyn std::error::Error + Send + Sync>),
-    /// Participation error
+    /// Participation error.
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("participation error {0}")]
@@ -126,25 +127,28 @@ pub enum WalletError {
     /// Storage access error.
     #[error("error accessing storage: {0}")]
     Storage(String),
-    /// Can't use Wallet API because the storage is encrypted
+    /// Can't use Wallet API because the storage is encrypted.
     #[error("can't perform operation while storage is encrypted; use Wallet::set_storage_password to decrypt storage")]
     StorageIsEncrypted,
-    /// Tokio task join error
+    /// Tokio task join error.
     #[error("{0}")]
     TaskJoin(#[from] tokio::task::JoinError),
-    /// Transaction not found
+    /// Transaction not found.
     #[error("transaction {0} not found")]
     TransactionNotFound(TransactionId),
     // TODO more precise error
-    /// Voting error
+    /// Voting error.
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("voting error {0}")]
     Voting(String),
-    /// Address not the wallet address
-    #[error("address {0} is not the wallet address")]
-    WalletAddressMismatch(Bech32Address),
-    /// Action requires the wallet to be Ed25519 address based
+    /// Wallet address mismatch.
+    #[error("wallet address mismatch: {provided}, existing address is: {expected}")]
+    WalletAddressMismatch {
+        provided: Bech32Address,
+        expected: Bech32Address,
+    },
+    /// Action requires the wallet to be Ed25519 address based.
     #[error("tried to perform an action that requires the wallet to be Ed25519 address based")]
     NonEd25519Address,
     /// Implicit account not found.
@@ -153,8 +157,10 @@ pub enum WalletError {
     /// Account not found.
     #[error("account not found")]
     AccountNotFound,
+    /// Staking failed.
     #[error("staking failed: {0}")]
     StakingFailed(String),
+    /// Conversion error.
     #[error("{0}")]
     Convert(#[from] ConversionError),
 }

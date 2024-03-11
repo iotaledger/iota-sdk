@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { BaseTokenResponse } from './node-info-base-token';
-import type { MetricsResponse } from './node-info-metrics';
 import type { ProtocolParametersResponse } from './node-info-protocol';
 import type { StatusResponse } from './node-info-status';
 /**
@@ -21,10 +20,6 @@ export interface InfoResponse {
      * The status of the node.
      */
     status: StatusResponse;
-    /**
-     * The metrics for the node.
-     */
-    metrics: MetricsResponse;
     /**
      * The protocol parameters.
      */
