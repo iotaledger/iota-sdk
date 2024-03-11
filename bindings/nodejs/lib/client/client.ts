@@ -67,14 +67,14 @@ import {
     OutputWithMetadataResponse,
     NetworkMetricsResponse,
 } from '../types/models/api';
-import { RoutesResponse } from '../types/models/api/routes-response';
+import { RoutesResponse } from '../types/models/api/node/routes-response';
 
 import { plainToInstance } from 'class-transformer';
-import { ManaRewardsResponse } from '../types/models/api/mana-rewards-response';
+import { ManaRewardsResponse } from '../types/models/api/rewards';
 import {
     ValidatorResponse,
     ValidatorsResponse,
-} from '../types/models/api/validators-response';
+} from '../types/models/api/validators';
 
 /** The Client to interact with nodes. */
 export class Client {

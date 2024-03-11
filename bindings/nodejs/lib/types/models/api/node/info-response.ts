@@ -2,13 +2,59 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { StorageScoreParameters } from '../../storage-score';
-import { EpochIndex } from '../../../block/slot';
+import { SlotIndex, EpochIndex } from '../../../block/slot';
 import { NumericString } from '../../../utils';
+
+/**
+ * Response from the /info endpoint.
+ */
+export interface StatusResponse {
+    /**
+     * Tells whether the node is healthy or not.
+     */
+    isHealthy: boolean;
+    /**
+     * A notion of time that is anchored to the latest accepted block.
+     */
+    acceptedTangleTime?: string;
+    /**
+     * The Accepted Tangle Time after it has advanced with the system clock.
+     */
+    relativeAcceptedTangleTime?: string;
+    /**
+     * A notion of time that is anchored to the latest confirmed block.
+     */
+    confirmedTangleTime?: string;
+    /**
+     * The Confirmed Tangle Time after it has advanced with the system clock.
+     */
+    relativeConfirmedTangleTime?: string;
+    /**
+     * The latest slot that the node has committed to.
+     */
+    latestCommitmentId: string;
+    /**
+     * The index of latest finalized slot.
+     */
+    latestFinalizedSlot: SlotIndex;
+    /**
+     * The slot index of the latest accepted block.
+     */
+    latestAcceptedBlockSlot?: SlotIndex;
+    /**
+     * The slot index of the latest confirmed block.
+     */
+    latestConfirmedBlockSlot?: SlotIndex;
+    /**
+     * The index of the epoch before which the tangle history is pruned.
+     */
+    pruningEpoch: EpochIndex;
+}
 
 /**
  * The Protocol Parameters response.
  */
-interface ProtocolParametersResponse {
+export interface ProtocolParametersResponse {
     /**
      * The protocol parameters.
      */
@@ -22,7 +68,7 @@ interface ProtocolParametersResponse {
 /**
  * The Protocol Parameters.
  */
-interface ProtocolParameters {
+export interface ProtocolParameters {
     /**
      * Set to value 0 to denote a IOTA 2.0 protocol parameter.
      */
@@ -129,7 +175,7 @@ interface ProtocolParameters {
 /**
  * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
  */
-interface RewardsParameters {
+export interface RewardsParameters {
     /**
      * Profit Margin Exponent is used for shift operation for calculation of profit margin.
      */
@@ -164,7 +210,7 @@ interface RewardsParameters {
 /**
  * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
  */
-interface WorkScoreParameters {
+export interface WorkScoreParameters {
     /**
      * DataByte accounts for the network traffic per kibibyte.
      */
@@ -210,7 +256,7 @@ interface WorkScoreParameters {
 /**
  * ManaParameters defines the parameters used by mana calculation.
  */
-interface ManaParameters {
+export interface ManaParameters {
     /**
      * The number of bits used to represent Mana.
      */
@@ -248,7 +294,7 @@ interface ManaParameters {
 /**
  * Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
  */
-interface CongestionControlParameters {
+export interface CongestionControlParameters {
     /**
      * The minimum value of the reference Mana cost.
      */
@@ -286,7 +332,7 @@ interface CongestionControlParameters {
 /**
  * The version signaling parameters.
  */
-interface VersionSignalingParameters {
+export interface VersionSignalingParameters {
     /**
      * The size of the window in epochs to find which version of protocol parameters was most signaled, from currentEpoch - windowSize to currentEpoch.
      */
@@ -301,13 +347,58 @@ interface VersionSignalingParameters {
     activationOffset: number;
 }
 
-export {
-    ProtocolParametersResponse,
-    ProtocolParameters,
-    RewardsParameters,
-    WorkScoreParameters,
-    StorageScoreParameters,
-    ManaParameters,
-    VersionSignalingParameters,
-    CongestionControlParameters,
-};
+/**
+ * The base token info of the node.
+ */
+export interface BaseTokenResponse {
+    /**
+     * The base token name.
+     */
+    name: string;
+    /**
+     * The base token ticker symbol.
+     */
+    tickerSymbol: string;
+    /**
+     * The base token unit.
+     */
+    unit: string;
+    /**
+     * The base token decimals.
+     */
+    decimals: number;
+    /**
+     * The base token sub-unit.
+     */
+    subunit?: string;
+    /**
+     * The use metric prefix flag.
+     */
+    useMetricPrefix: boolean;
+}
+
+/**
+ * Response from the /info endpoint.
+ */
+export interface InfoResponse {
+    /**
+     * The name of the node.
+     */
+    name: string;
+    /**
+     * The semantic version of the node.
+     */
+    version: string;
+    /**
+     * The status of the node.
+     */
+    status: StatusResponse;
+    /**
+     * The protocol parameters.
+     */
+    protocolParameters: ProtocolParametersResponse[];
+    /**
+     * The base token info of the node.
+     */
+    baseToken: BaseTokenResponse;
+}

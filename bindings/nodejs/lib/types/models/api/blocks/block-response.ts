@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { BlockState } from '../state';
-import { Block, BlockId } from '../../block';
+import { BlockState } from '../../state';
+import { Block, BlockId } from '../../../block';
 
 /**
  * Response from the metadata endpoint.

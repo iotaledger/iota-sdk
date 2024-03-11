@@ -1,10 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { OutputIdProof, TransactionId } from '../..';
-import { BlockId } from '../../block/id';
-import { Output, OutputId } from '../../block/output';
-import { SlotCommitmentId, SlotIndex } from '../../block/slot';
+import { OutputIdProof, TransactionId } from '../../..';
+import { BlockId } from '../../../block/id';
+import { Output, OutputId } from '../../../block/output';
+import { SlotCommitmentId, SlotIndex } from '../../../block/slot';
 
 /**
  * Metadata of the output if it is included in the ledger.

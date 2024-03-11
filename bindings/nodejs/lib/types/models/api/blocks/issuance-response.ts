@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { BlockId, SlotCommitment, SlotIndex } from '../../block';
-import { NumericString } from '../../utils';
+import { BlockId, SlotCommitment, SlotIndex } from '../../../block';
+import { NumericString } from '../../../utils';
 
 /**
  * Information that is used to attach a block in the network.

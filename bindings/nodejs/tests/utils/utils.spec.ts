@@ -9,7 +9,7 @@ import { BasicOutput, BlockId, OutputId, TransactionId, Utils } from '../../out'
 import '../customMatchers';
 import { SlotCommitment } from '../../out/types/block/slot';
 import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
-import { ProtocolParameters } from '../../lib/types/models/api/info/node-info-protocol';
+import { ProtocolParameters } from '../../lib/types/models/api/node/info-response';
 
 describe('Utils methods', () => {
     it('invalid mnemonic error', () => {

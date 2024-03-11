@@ -1,7 +1,7 @@
 // Copyright 2021-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProtocolParameters } from '../models/api/info/node-info-protocol';
+import { ProtocolParameters } from '../models/api/node/info-response';
 import type { MqttBrokerOptions, Node } from './network';
 
 /** Options for the client builder */

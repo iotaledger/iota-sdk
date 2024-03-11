@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionState } from '../state';
-import { SlotIndex, TransactionId } from '../../block';
+import { TransactionState } from '../../state';
+import { SlotIndex, TransactionId } from '../../../block';
 import { TransactionFailureReason } from './transaction-failure-reason';
 
 /**

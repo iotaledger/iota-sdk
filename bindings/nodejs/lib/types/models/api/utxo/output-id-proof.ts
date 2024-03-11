@@ -3,8 +3,8 @@
 
 // Temp solution for not double parsing JSON
 import { plainToInstance } from 'class-transformer';
-import { SlotIndex } from '../../block';
-import { HexEncodedString } from '../../utils';
+import { SlotIndex } from '../../../block';
+import { HexEncodedString } from '../../../utils';
 
 /**
  * OutputCommitmentProof types.
