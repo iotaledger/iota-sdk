@@ -320,7 +320,6 @@ where
                     // add additional inputs
                     .chain(possible_additional_inputs.iter().map(|o| o.output_id))
                     .collect(),
-                allow_additional_input_selection: false,
                 ..Default::default()
             },
         )
