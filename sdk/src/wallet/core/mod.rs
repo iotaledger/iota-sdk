@@ -188,13 +188,13 @@ impl WalletLedger {
             }
 
             if let Some(included_below_slot) = filter.included_below_slot {
-                if output.metadata.included().slot() < included_below_slot {
+                if output.metadata.included().slot() > included_below_slot {
                     return false;
                 }
             }
 
             if let Some(included_above_slot) = filter.included_above_slot {
-                if output.metadata.included().slot() > included_above_slot {
+                if output.metadata.included().slot() < included_above_slot {
                     return false;
                 }
             }
