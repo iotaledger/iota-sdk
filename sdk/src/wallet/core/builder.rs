@@ -187,7 +187,10 @@ where
         if let Some(address) = &self.address {
             if let Some(loaded_address) = &loaded_address {
                 if address != loaded_address {
-                    return Err(WalletError::WalletAddressMismatch(address.clone()));
+                    return Err(WalletError::WalletAddressMismatch {
+                        provided: address.clone(),
+                        expected: loaded_address.clone(),
+                    });
                 }
             } else {
                 verify_address = true;
