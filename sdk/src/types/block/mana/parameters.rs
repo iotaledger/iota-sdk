@@ -203,6 +203,12 @@ impl ProtocolParameters {
         stored_mana: u64,
         required_mana: u64,
     ) -> Result<u32, ManaError> {
+        if generation_amount == 0 {
+            return Err(ManaError::InsufficientGenerationAmount);
+        }
+        if required_mana == 0 {
+            return Ok(0);
+        }
         let mut num_slots = 0;
         let mana_generated_per_epoch = self
             .mana_parameters()
