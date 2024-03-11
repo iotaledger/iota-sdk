@@ -1,7 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNftParams, NftId, Utils, Wallet, Irc27Metadata } from '@iota/sdk';
+import {
+    MintNftParams,
+    NftId,
+    Utils,
+    Wallet,
+    Irc27Metadata,
+    NftAddress,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // The NFT collection size
@@ -49,7 +56,10 @@ async function run() {
 
         const client = await wallet.getClient();
         const bech32Hrp = await client.getBech32Hrp();
-        const issuer = Utils.nftIdToBech32(issuerNftId, bech32Hrp);
+        const issuer = Utils.addressToBech32(
+            new NftAddress(issuerNftId),
+            bech32Hrp,
+        );
 
         const nftMintParams = [];
         // Create the metadata with another index for each

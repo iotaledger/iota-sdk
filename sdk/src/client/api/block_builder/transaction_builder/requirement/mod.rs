@@ -56,10 +56,7 @@ pub enum Requirement {
 impl TransactionBuilder {
     /// Fulfills a requirement by selecting the appropriate available inputs.
     /// Returns the selected inputs and an optional new requirement.
-    pub(crate) fn fulfill_requirement(
-        &mut self,
-        requirement: &Requirement,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_requirement(&mut self, requirement: &Requirement) -> Result<(), TransactionBuilderError> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {

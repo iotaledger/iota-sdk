@@ -70,9 +70,7 @@ impl TransactionBuilder {
         }
     }
 
-    pub(crate) fn fulfill_output_context_inputs_requirements(
-        &mut self,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
+    pub(crate) fn fulfill_output_context_inputs_requirements(&mut self) -> Result<(), TransactionBuilderError> {
         let mut needs_commitment_context = false;
 
         for output in self
@@ -108,6 +106,6 @@ impl TransactionBuilder {
             self.commitment_context_input
                 .replace(CommitmentContextInput::new(self.latest_slot_commitment_id));
         }
-        Ok(Vec::new())
+        Ok(())
     }
 }

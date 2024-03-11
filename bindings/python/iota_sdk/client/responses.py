@@ -3,13 +3,13 @@
 
 from __future__ import annotations
 from typing import Dict, List, Optional
-from enum import Enum, IntEnum
+from enum import Enum
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.id import BlockId
 from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
-from iota_sdk.types.node_info import BaseTokenResponse, MetricsResponse, StatusResponse, ProtocolParameters
+from iota_sdk.types.node_info import BaseTokenResponse, StatusResponse, ProtocolParameters
 from iota_sdk.types.output import Output, deserialize_output
 from iota_sdk.types.output_id import OutputId, OutputWithId
 from iota_sdk.types.output_id_proof import OutputIdProof
@@ -56,14 +56,12 @@ class InfoResponse:
         name: The name of the node (e.g. Hornet).
         version: The semantic version of the node.
         status: The status of the node.
-        metrics: Node metrics.
         protocol_parameters: Supported protocol versions by the node.
         base_token: Gives info about the base token the network uses.
     """
     name: str
     version: str
     status: StatusResponse
-    metrics: MetricsResponse
     protocol_parameters: List[ProtocolParametersResponse]
     base_token: BaseTokenResponse
 
@@ -82,7 +80,28 @@ class NodeInfoResponse:
     url: str
 
 
+@json
+@dataclass
+class NetworkMetricsResponse:
+    """Network metrics.
+
+    Attributes:
+        blocks_per_second: The current rate of new blocks per second.
+        confirmed_blocks_per_second: The current rate of confirmed blocks per second.
+        confirmation_rate: The ratio of confirmed blocks to new blocks of the last confirmed slot.
+    """
+    blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmed_blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmation_rate: float = field(metadata=config(
+        encoder=str
+    ))
+
 # Accounts routes responses
+
 
 @json
 @dataclass
@@ -258,66 +277,22 @@ class BlockState(str, Enum):
     """Describes the state of a block.
 
     Attributes:
-        Pending: Stored but not accepted/confirmed.
-        Accepted: Valid block referenced by some validators.
-        Confirmed: Valid block referenced by more than 2/3 of the validators.
-        Finalized: Accepted/confirmed block and the slot was finalized, can no longer be reverted.
-        Rejected: Rejected by the node, and user should reissue payload if it contains one.
-        Failed: Not successfully issued due to failure reason.
+        Pending:    The block has been booked by the node but not yet accepted.
+        Accepted:   The block has been referenced by the super majority of the online committee.
+        Confirmed:  The block has been referenced by the super majority of the total committee.
+        Finalized:  The commitment containing the block has been finalized.
+                    This state is computed based on the accepted/confirmed block's slot being smaller or equal than the latest finalized slot.
+        Dropped:    The block has been dropped due to congestion control.
+        Orphaned:   The block's slot has been committed by the node without the block being included.
+                    In this case, the block will never be finalized unless there is a chain switch.
+                    This state is computed based on the pending block's slot being smaller or equal than the latest committed slot.
     """
     Pending = 'pending'
     Accepted = 'accepted'
     Confirmed = 'confirmed'
     Finalized = 'finalized'
-    Rejected = 'rejected'
-    Failed = 'failed'
-
-
-class BlockFailureReason(IntEnum):
-    """Describes the reason of a block failure.
-
-    Attributes:
-        TooOldToIssue (1): The block is too old to issue.
-        ParentTooOld (2): One of the block's parents is too old.
-        ParentDoesNotExist (3): One of the block's parents does not exist.
-        IssuerAccountNotFound (4): The block's issuer account could not be found.
-        ManaCostCalculationFailed (5): The mana cost could not be calculated.
-        BurnedInsufficientMana (6): The block's issuer account burned insufficient Mana for a block.
-        AccountLocked (7): The account is locked.
-        AccountExpired (8): The account is expired.
-        SignatureInvalid (9): The block's signature is invalid.
-        DroppedDueToCongestion (10): The block is dropped due to congestion.
-        PayloadInvalid (11): The block payload is invalid.
-        Invalid (255): The block is invalid.
-    """
-    TooOldToIssue = 1
-    ParentTooOld = 2
-    ParentDoesNotExist = 3
-    IssuerAccountNotFound = 4
-    ManaCostCalculationFailed = 5
-    BurnedInsufficientMana = 6
-    AccountLocked = 7
-    AccountExpired = 8
-    SignatureInvalid = 9
-    DroppedDueToCongestion = 10
-    PayloadInvalid = 11
-    Invalid = 255
-
-    def __str__(self):
-        return {
-            1: "The block is too old to issue.",
-            2: "One of the block's parents is too old.",
-            3: "One of the block's parents does not exist.",
-            4: "The block's issuer account could not be found.",
-            5: "The mana cost could not be calculated.",
-            6: "The block's issuer account burned insufficient Mana for a block.",
-            7: "The account is locked.",
-            8: "The account is expired.",
-            9: "The block's signature is invalid.",
-            10: "The block is dropped due to congestion.",
-            11: "The block payload is invalid.",
-            255: "The block is invalid."
-        }[self.value]
+    Dropped = 'dropped'
+    Orphaned = 'orphaned'
 
 
 @json
@@ -329,13 +304,9 @@ class BlockMetadataResponse:
     Attributes:
         block_id: The identifier of the block. Hex-encoded with 0x prefix.
         block_state: If pending, the block is stored but not confirmed. If confirmed, the block is confirmed with the first level of knowledge. If finalized, the block is included and cannot be reverted anymore. If rejected, the block is rejected by the node, and user should reissue payload if it contains one. If failed, the block is not successfully issued due to failure reason.
-        block_failure_reason: The optional block failure reason.
-        transaction_metadata: The optional metadata of a given transaction.
     """
     block_id: BlockId
     block_state: BlockState
-    block_failure_reason: Optional[BlockFailureReason] = None
-    transaction_metadata: Optional[TransactionMetadataResponse] = None
 
 
 @json
@@ -416,11 +387,15 @@ class TransactionMetadataResponse:
     Attributes:
         transaction_id: The identifier of the transaction. Hex-encoded with 0x prefix.
         transaction_state: If 'pending', the transaction is not included yet. If 'accepted', the transaction is included. If 'confirmed' means transaction is included and its included block is confirmed. If 'finalized' means transaction is included, its included block is finalized and cannot be reverted anymore. If 'failed' means transaction is issued but failed due to the transaction failure reason.
-        transaction_failure_reason: The optional transaction failure reason.
+        earliest_attachment_slot: The slot of the earliest included valid block that contains an attachment of the transaction.
+        transaction_failure_reason: If applicable, indicates the error that occurred during the transaction processing.
+        transaction_failure_details: Contains the detailed error message that occurred during the transaction processing if the debug mode was activated in the retainer.
     """
     transaction_id: TransactionId
     transaction_state: TransactionState
+    earliest_attachment_slot: SlotIndex
     transaction_failure_reason: Optional[TransactionFailureReason] = None
+    transaction_failure_details: Optional[str] = None
 
 
 # Commitment routes responses

@@ -3,6 +3,8 @@
 import type { CoinType } from './constants';
 import type { Range } from './range';
 
+// TODO: Rename (to GetAddressOptions) and refactor (move out range field),
+// so we can use it for the single address generation method as well?
 /**
  * Input options for GenerateAddresses
  */

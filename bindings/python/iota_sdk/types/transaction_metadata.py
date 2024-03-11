@@ -8,15 +8,20 @@ class TransactionState(str, Enum):
     """Describes the state of a transaction.
 
     Attributes:
-        Pending: Not included yet.
-        Accepted: Included.
-        Confirmed: Included and its included block is confirmed.
-        Finalized: Included, its included block is finalized and cannot be reverted anymore.
-        Failed: Not successfully issued due to failure reason.
+        Pending:    The transaction has been booked by the node but not yet accepted.
+        Accepted:   The transaction meets the following 4 conditions:
+                        - Signatures of the transaction are valid.
+                        - The transaction has been approved by the super majority of the online committee (potential conflicts are resolved by this time).
+                        - The transactions that created the inputs were accepted (monotonicity).
+                        - At least one valid attachment was accepted.
+        Committed:  The slot of the earliest accepted attachment of the transaction was committed.
+        Finalized:  The transaction is accepted and the slot containing the transaction has been finalized by the node.
+                    This state is computed based on the accepted transaction's earliest included attachment slot being smaller or equal than the latest finalized slot.
+        Failed:     The transaction has not been executed by the node due to a failure during processing.
     """
     Pending = 'pending'
     Accepted = 'accepted'
-    Confirmed = 'confirmed'
+    Committed = 'committed'
     Finalized = 'finalized'
     Failed = 'failed'
 
@@ -26,33 +31,33 @@ class TransactionFailureReason(Enum):
     """
     Null = 0
     ConflictRejected = 1
-    InputAlreadySpent = 2
-    InputCreationAfterTxCreation = 3
-    UnlockSignatureInvalid = 4
-    ChainAddressUnlockInvalid = 5
-    DirectUnlockableAddressUnlockInvalid = 6
-    MultiAddressUnlockInvalid = 7
-    CommitmentInputReferenceInvalid = 8
-    BicInputReferenceInvalid = 9
-    RewardInputReferenceInvalid = 10
-    StakingRewardCalculationFailure = 11
-    DelegationRewardCalculationFailure = 12
-    InputOutputBaseTokenMismatch = 13
-    ManaOverflow = 14
-    InputOutputManaMismatch = 15
-    ManaDecayCreationIndexExceedsTargetIndex = 16
-    NativeTokenSumUnbalanced = 17
-    SimpleTokenSchemeMintedMeltedTokenDecrease = 18
-    SimpleTokenSchemeMintingInvalid = 19
-    SimpleTokenSchemeMeltingInvalid = 20
-    SimpleTokenSchemeMaximumSupplyChanged = 21
-    SimpleTokenSchemeGenesisInvalid = 22
-    MultiAddressLengthUnlockLengthMismatch = 23
-    MultiAddressUnlockThresholdNotReached = 24
-    SenderFeatureNotUnlocked = 25
-    IssuerFeatureNotUnlocked = 26
-    StakingRewardInputMissing = 27
-    StakingBlockIssuerFeatureMissing = 28
+    Orphaned = 2
+    InputAlreadySpent = 3
+    InputCreationAfterTxCreation = 4
+    UnlockSignatureInvalid = 5
+    ChainAddressUnlockInvalid = 6
+    DirectUnlockableAddressUnlockInvalid = 7
+    MultiAddressUnlockInvalid = 8
+    CommitmentInputReferenceInvalid = 9
+    BicInputReferenceInvalid = 10
+    RewardInputReferenceInvalid = 11
+    StakingRewardCalculationFailure = 12
+    DelegationRewardCalculationFailure = 13
+    InputOutputBaseTokenMismatch = 14
+    ManaOverflow = 15
+    InputOutputManaMismatch = 16
+    ManaDecayCreationIndexExceedsTargetIndex = 17
+    NativeTokenSumUnbalanced = 18
+    SimpleTokenSchemeMintedMeltedTokenDecrease = 19
+    SimpleTokenSchemeMintingInvalid = 20
+    SimpleTokenSchemeMeltingInvalid = 21
+    SimpleTokenSchemeMaximumSupplyChanged = 22
+    SimpleTokenSchemeGenesisInvalid = 23
+    MultiAddressLengthUnlockLengthMismatch = 24
+    MultiAddressUnlockThresholdNotReached = 25
+    SenderFeatureNotUnlocked = 26
+    IssuerFeatureNotUnlocked = 27
+    StakingRewardInputMissing = 28
     StakingCommitmentInputMissing = 29
     StakingRewardClaimingInvalid = 30
     StakingFeatureRemovedBeforeUnbonding = 31
@@ -74,7 +79,7 @@ class TransactionFailureReason(Enum):
     ChainOutputImmutableFeaturesChanged = 47
     ImplicitAccountDestructionDisallowed = 48
     MultipleImplicitAccountCreationAddresses = 49
-    AccountInvalidFoundryCounter = 50
+    AccountInvalidFoundryCounter = 40
     AnchorInvalidStateTransition = 51
     AnchorInvalidGovernanceTransition = 52
     FoundryTransitionWithoutAccount = 53
@@ -100,33 +105,33 @@ class TransactionFailureReason(Enum):
         return {
             0: "Null.",
             1: "Transaction was conflicting and was rejected.",
-            2: "Input already spent.",
-            3: "Input creation slot after tx creation slot.",
-            4: "Signature in unlock is invalid.",
-            5: "Invalid unlock for chain address.",
-            6: "Invalid unlock for direct unlockable address.",
-            7: "Invalid unlock for multi address.",
-            8: "Commitment input required with reward or BIC input.",
-            9: "BIC input reference cannot be loaded.",
-            10: "Reward input does not reference a staking account or a delegation output.",
-            11: "Staking rewards could not be calculated due to storage issues or overflow.",
-            12: "Delegation rewards could not be calculated due to storage issues or overflow.",
-            13: "Inputs and outputs do not spend/deposit the same amount of base tokens.",
-            14: "Under- or overflow in Mana calculations.",
-            15: "Inputs and outputs do not contain the same amount of Mana.",
-            16: "Mana decay creation slot/epoch index exceeds target slot/epoch index.",
-            17: "Native token sums are unbalanced.",
-            18: "Simple token scheme minted/melted value decreased.",
-            19: "Simple token scheme minting invalid.",
-            20: "Simple token scheme melting invalid.",
-            21: "Simple token scheme maximum supply changed.",
-            22: "Simple token scheme genesis invalid.",
-            23: "Multi address length and multi unlock length do not match.",
-            24: "Multi address unlock threshold not reached.",
-            25: "Sender feature is not unlocked.",
-            26: "Issuer feature is not unlocked.",
-            27: "Staking feature removal or resetting requires a reward input.",
-            28: "Block issuer feature missing for account with staking feature.",
+            2: "Transaction was orphaned.",
+            3: "Input already spent.",
+            4: "Input creation slot after tx creation slot.",
+            5: "Signature in unlock is invalid.",
+            6: "Invalid unlock for chain address.",
+            7: "Invalid unlock for direct unlockable address.",
+            8: "Invalid unlock for multi address.",
+            9: "Commitment input references an invalid or non-existent commitment.",
+            10: "BIC input reference cannot be loaded.",
+            11: "Reward input does not reference a staking account or a delegation output.",
+            12: "Staking rewards could not be calculated due to storage issues or overflow.",
+            13: "Delegation rewards could not be calculated due to storage issues or overflow.",
+            14: "Inputs and outputs do not spend/deposit the same amount of base tokens.",
+            15: "Under- or overflow in Mana calculations.",
+            16: "Inputs and outputs do not contain the same amount of Mana.",
+            17: "Mana decay creation slot/epoch index exceeds target slot/epoch index.",
+            18: "Native token sums are unbalanced.",
+            19: "Simple token scheme minted/melted value decreased.",
+            20: "Simple token scheme's minted tokens did not increase by the minted amount or melted tokens changed.",
+            21: "Simple token scheme's melted tokens did not increase by the melted amount or minted tokens changed.",
+            22: "Simple token scheme's maximum supply cannot change during transition.",
+            23: "Newly created simple token scheme's melted tokens are not zero or minted tokens do not equal native token amount in transaction.",
+            24: "Multi address length and multi unlock length do not match.",
+            25: "Multi address unlock threshold not reached.",
+            26: "Sender feature is not unlocked.",
+            27: "Issuer feature is not unlocked.",
+            28: "Staking feature removal or resetting requires a reward input.",
             29: "Staking feature validation requires a commitment input.",
             30: "Staking feature must be removed or reset in order to claim rewards.",
             31: "Staking feature can only be removed after the unbonding period.",

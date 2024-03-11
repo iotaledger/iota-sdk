@@ -149,6 +149,8 @@ pub enum ClientMethod {
     },
     /// Returns general information about the node together with its URL.
     GetNodeInfo,
+    /// Returns network metrics.
+    GetNetworkMetrics,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
     #[serde(rename_all = "camelCase")]
@@ -432,41 +434,9 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Utils
     //////////////////////////////////////////////////////////////////////
-    /// Transforms a hex encoded address to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexToBech32 {
-        /// Hex encoded bech32 address
-        hex: String,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
     /// Converts an address to its bech32 representation
     #[serde(rename_all = "camelCase")]
     AddressToBech32 { address: Address, bech32_hrp: Option<Hrp> },
-    /// Transforms an account id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AccountIdToBech32 {
-        /// Account ID
-        account_id: AccountId,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
-    /// Transforms an anchor id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AnchorIdToBech32 {
-        /// Anchor ID
-        anchor_id: AnchorId,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
-    /// Transforms an nft id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    NftIdToBech32 {
-        /// Nft ID
-        nft_id: NftId,
-        /// Human readable part
-        bech32_hrp: Option<Hrp>,
-    },
     /// Calculate the minimum required amount for an output.
     /// Expected response:
     /// [`Amount`](crate::Response::Amount)

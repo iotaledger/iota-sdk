@@ -10,7 +10,6 @@ import {
     MetadataFeature,
     SenderFeature,
     TagFeature,
-    Ed25519Address,
     IssuerFeature,
     utf8ToHex,
 } from '@iota/sdk';
@@ -26,27 +25,25 @@ async function run() {
     const client = await Client.create({});
 
     try {
-        const hexAddress = Utils.bech32ToHex(
+        const ed25519Address = Utils.parseBech32Address(
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
         );
 
         const addressUnlockCondition: UnlockCondition =
-            new AddressUnlockCondition(new Ed25519Address(hexAddress));
+            new AddressUnlockCondition(ed25519Address);
 
         // Output with sender feature
         const nftOutputWithSender = await client.buildNftOutput({
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
-            features: [new SenderFeature(new Ed25519Address(hexAddress))],
+            features: [new SenderFeature(ed25519Address)],
         });
 
         // Output with issuer feature
         const nftOutputWithIssuer = await client.buildNftOutput({
             nftId: '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [addressUnlockCondition],
-            immutableFeatures: [
-                new IssuerFeature(new Ed25519Address(hexAddress)),
-            ],
+            immutableFeatures: [new IssuerFeature(ed25519Address)],
         });
 
         // Output with metadata feature

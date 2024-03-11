@@ -10,6 +10,7 @@
 
 use iota_sdk::{
     client::{
+        api::GetAddressesOptions,
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
@@ -38,17 +39,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Restore a wallet
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
+    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
+        std::env::var("MNEMONIC").unwrap(),
+    )?);
+
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
-    let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+
+    let wallet = Wallet::<MnemonicSecretManager>::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
+        .with_secret_manager(secret_manager)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
-
-    println!("Generating address...");
-    let _ = wallet.generate_ed25519_address(0, 0, None).await?;
 
     println!("Syncing wallet");
     wallet.sync(None).await?;

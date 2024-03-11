@@ -70,7 +70,7 @@ fn input_account_eq_output_account() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -114,7 +114,7 @@ fn transition_account_id_zero() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 // #[test]
@@ -352,7 +352,7 @@ fn burn_account() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyAccountOutputs])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 // #[test]
@@ -610,7 +610,7 @@ fn account_in_output_and_sender() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1061,7 +1061,7 @@ fn increase_account_amount() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1665,7 +1665,7 @@ fn state_controller_sender_required_already_selected() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -1709,7 +1709,7 @@ fn state_transition_and_required() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]

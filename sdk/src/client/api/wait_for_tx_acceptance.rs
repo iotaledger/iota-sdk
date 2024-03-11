@@ -29,7 +29,7 @@ impl Client {
             let transaction_metadata = self.get_transaction_metadata(transaction_id).await?;
 
             match transaction_metadata.transaction_state {
-                TransactionState::Accepted | TransactionState::Confirmed | TransactionState::Finalized => {
+                TransactionState::Accepted | TransactionState::Committed | TransactionState::Finalized => {
                     return Ok(());
                 }
                 TransactionState::Failed => return Err(ClientError::TransactionAcceptance(transaction_id.to_string())),
@@ -42,6 +42,6 @@ impl Client {
             tokio::time::sleep(duration).await;
         }
 
-        Err(ClientError::TransactionAcceptance(transaction_id.to_string()).into())
+        Err(ClientError::TransactionAcceptance(transaction_id.to_string()))
     }
 }

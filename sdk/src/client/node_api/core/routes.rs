@@ -17,9 +17,10 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
-            PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse, TransactionMetadataResponse,
-            UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, NetworkMetricsResponse, OutputResponse,
+            OutputWithMetadataResponse, PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse,
+            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+            ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -86,6 +87,14 @@ impl ClientInner {
     /// GET /api/core/v3/info
     pub async fn get_node_info(&self) -> Result<NodeInfoResponse, ClientError> {
         self.get_request(INFO_PATH, None, false).await
+    }
+
+    /// Returns network metrics.
+    /// GET /api/core/v3/network/metrics
+    pub async fn get_network_metrics(&self) -> Result<NetworkMetricsResponse, ClientError> {
+        const PATH: &str = "api/core/v3/network/metrics";
+
+        self.get_request(PATH, None, false).await
     }
 }
 

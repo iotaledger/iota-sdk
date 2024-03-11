@@ -31,7 +31,6 @@ import type { BasicOutputBuilderParams } from '../output_builder_params/basic-ou
 import type { AccountOutputBuilderParams } from '../output_builder_params/account-output-params';
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
-import { HexEncodedString } from '../../utils';
 import { TransactionId } from '../..';
 
 // Node routes.
@@ -57,6 +56,10 @@ export interface __GetInfoMethod__ {
         url: string;
         auth?: Auth;
     };
+}
+
+export interface __GetNetworkMetricsMethod__ {
+    name: 'getNetworkMetrics';
 }
 
 // Accounts routes.
@@ -317,42 +320,10 @@ export interface __GetProtocolParametersMethod__ {
     name: 'getProtocolParameters';
 }
 
-export interface __HexToBech32Method__ {
-    name: 'hexToBech32';
-    data: {
-        hex: HexEncodedString;
-        bech32Hrp?: string;
-    };
-}
-
 export interface __AddressToBech32Method__ {
     name: 'addressToBech32';
     data: {
         address: Address;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __AccountIdToBech32Method__ {
-    name: 'accountIdToBech32';
-    data: {
-        accountId: AccountId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __AnchorIdToBech32Method__ {
-    name: 'anchorIdToBech32';
-    data: {
-        anchorId: AnchorId;
-        bech32Hrp?: string;
-    };
-}
-
-export interface __NftIdToBech32Method__ {
-    name: 'nftIdToBech32';
-    data: {
-        nftId: NftId;
         bech32Hrp?: string;
     };
 }

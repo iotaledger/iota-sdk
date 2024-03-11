@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BlockState } from '../state';
-import { BlockFailureReason } from './block-failure-reason';
 import { Block, BlockId } from '../../block';
-import { TransactionMetadataResponse } from './transaction-response';
 
 /**
  * Response from the metadata endpoint.
@@ -18,14 +16,6 @@ export interface BlockMetadataResponse {
      * The block state.
      */
     blockState: BlockState;
-    /**
-     * The block failure reason.
-     */
-    blockFailureReason?: BlockFailureReason;
-    /**
-     * The metadata of the transaction in the block.
-     */
-    transactionMetadata?: TransactionMetadataResponse;
 }
 
 /**

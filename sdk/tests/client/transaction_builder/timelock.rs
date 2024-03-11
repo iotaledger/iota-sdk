@@ -105,7 +105,7 @@ fn timelock_equal_timestamp() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -167,7 +167,7 @@ fn two_outputs_one_timelock_expired() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[1]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -229,7 +229,7 @@ fn two_outputs_one_timelocked_one_missing() {
 
     assert_eq!(selected.inputs_data.len(), 1);
     assert_eq!(selected.inputs_data[0], inputs[1]);
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
 #[test]
@@ -275,5 +275,5 @@ fn one_output_timelock_expired() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert!(unsorted_eq(&selected.transaction.outputs(), &outputs));
+    assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
