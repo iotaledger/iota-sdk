@@ -179,8 +179,7 @@ pub enum WalletCommand {
     },
     /// Request funds from the faucet.
     Faucet {
-        /// Address the faucet sends the funds to, defaults to the wallet address.
-        #[arg(short, long)]
+        /// Address the faucet sends the funds to. If not provided, the command defaults to the wallet address.
         address: Option<Bech32Address>,
         /// URL of the faucet.
         #[arg(short, long, value_name = "URL", env = "FAUCET_URL", default_value = DEFAULT_FAUCET_URL)]
