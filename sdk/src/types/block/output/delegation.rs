@@ -17,7 +17,6 @@ use crate::types::block::{
         StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::TransactionFailureReason,
     slot::{EpochIndex, SlotIndex},
 };
 
@@ -382,22 +381,6 @@ impl DelegationOutput {
             stored: 0,
             potential: potential_mana,
         })
-    }
-
-    // Transition, just without full SemanticValidationContext.
-    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), TransactionFailureReason> {
-        if !current_state.delegation_id.is_null() || next_state.delegation_id.is_null() {
-            return Err(TransactionFailureReason::DelegationOutputTransitionedTwice);
-        }
-
-        if current_state.delegated_amount != next_state.delegated_amount
-            || current_state.start_epoch != next_state.start_epoch
-            || current_state.validator_address != next_state.validator_address
-        {
-            return Err(TransactionFailureReason::DelegationModified);
-        }
-
-        Ok(())
     }
 }
 

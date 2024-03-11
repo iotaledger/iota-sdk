@@ -1,14 +1,17 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip39::Mnemonic;
+use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
+    keys::bip39::Mnemonic,
+};
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
+    client::{verify_mnemonic, Client},
     types::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
+            output::{FoundryId, MinimumOutputAmount, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
             semantic::SemanticValidationContext,
             signature::SignatureError,
@@ -24,19 +27,7 @@ use crate::{method::UtilsMethod, response::Response};
 /// Call a utils method.
 pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response, crate::Error> {
     let response = match method {
-        UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(bech32)?),
-        UtilsMethod::HexToBech32 { hex, bech32_hrp } => Response::Bech32Address(hex_to_bech32(&hex, bech32_hrp)?),
         UtilsMethod::AddressToBech32 { address, bech32_hrp } => Response::Bech32Address(address.to_bech32(bech32_hrp)),
-        UtilsMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
-            Response::Bech32Address(account_id.to_bech32(bech32_hrp))
-        }
-        UtilsMethod::AnchorIdToBech32 { anchor_id, bech32_hrp } => {
-            Response::Bech32Address(anchor_id.to_bech32(bech32_hrp))
-        }
-        UtilsMethod::NftIdToBech32 { nft_id, bech32_hrp } => Response::Bech32Address(nft_id.to_bech32(bech32_hrp)),
-        UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
-            Response::Bech32Address(hex_public_key_to_bech32_address(&hex, bech32_hrp)?)
-        }
         UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(address.into_inner()),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.to_string()),
@@ -55,7 +46,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let payload = SignedTransactionPayload::try_from_dto(payload)?;
             Response::TransactionId(payload.transaction().id())
         }
-        UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
+        UtilsMethod::Blake2b256Hash { bytes } => Response::Hash(prefix_hex::encode(Blake2b256::digest(bytes).to_vec())),
         UtilsMethod::ComputeFoundryId {
             account_id,
             serial_number,
@@ -65,7 +56,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             serial_number,
             token_scheme_type,
         )),
-        UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
         UtilsMethod::ComputeOutputId { id, index } => Response::OutputId(OutputId::new(id, index)),
         UtilsMethod::ComputeTokenId {
             account_id,
@@ -133,8 +123,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 &transaction,
                 &inputs,
                 unlocks.as_deref(),
-                mana_rewards,
-                protocol_parameters,
+                mana_rewards.as_ref(),
+                &protocol_parameters,
             );
             context.validate()?;
 

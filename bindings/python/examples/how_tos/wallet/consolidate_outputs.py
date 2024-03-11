@@ -32,7 +32,7 @@ print('Outputs BEFORE consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
-        f'- address: #{Utils.hex_to_bech32(output_data.address.pub_key_hash, "rms")}')
+        f'- address: #{Utils.address_to_bech32(output_data.address, "rms")}')
     print(f'- amount: #{output_data.output.amount}')
 
     native_tokens = [
@@ -65,7 +65,7 @@ print('Outputs AFTER consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
-        f'- address: #{Utils.hex_to_bech32(output_data.address.pub_key_hash, "rms")}')
+        f'- address: #{Utils.address_to_bech32(output_data.address, "rms")}')
     print(f'- amount: #{output_data.output.amount}')
 
     native_tokens = [

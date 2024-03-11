@@ -9,7 +9,7 @@ use packable::error::UnexpectedEOF;
 use serde::{ser::Serializer, Serialize};
 
 use crate::{
-    client::api::input_selection::Error as InputSelectionError,
+    client::api::transaction_builder::TransactionBuilderError,
     types::block::{
         address::AddressError,
         context_input::ContextInputError,
@@ -159,9 +159,9 @@ pub enum ClientError {
     /// URL validation error
     #[error("{0}")]
     UrlValidation(String),
-    /// Input selection error.
+    /// Transaction builder error.
     #[error("{0}")]
-    InputSelection(#[from] InputSelectionError),
+    TransactionBuilder(#[from] TransactionBuilderError),
     /// Missing BIP32 chain to sign with.
     #[error("missing BIP32 chain to sign with")]
     MissingBip32Chain,
@@ -185,7 +185,7 @@ pub enum ClientError {
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     #[error("{0}")]
-    Ledger(#[from] crate::client::secret::ledger_nano::Error),
+    Ledger(Box<crate::client::secret::ledger_nano::Error>),
 
     /// MQTT error
     #[cfg(feature = "mqtt")]
@@ -236,3 +236,10 @@ crate::impl_from_error_via!(ClientError via BlockError:
     UnlockError,
     SignatureError,
 );
+
+#[cfg(feature = "ledger_nano")]
+impl From<crate::client::secret::ledger_nano::Error> for ClientError {
+    fn from(value: crate::client::secret::ledger_nano::Error) -> Self {
+        Self::Ledger(value.into())
+    }
+}

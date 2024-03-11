@@ -6,10 +6,7 @@ use std::time::Duration;
 use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
     client::api::{PreparedTransactionData, SignedTransactionData, SignedTransactionDataDto},
-    types::{
-        block::{address::ToBech32Ext, output::feature::BlockIssuerKeySource},
-        TryFromDto,
-    },
+    types::{block::output::feature::BlockIssuerKeySource, TryFromDto},
     wallet::{types::TransactionWithMetadataDto, Wallet},
 };
 
@@ -73,23 +70,6 @@ pub(crate) async fn call_wallet_method_internal(
             let ledger_nano_status = wallet.get_ledger_nano_status().await?;
             Response::LedgerNanoStatus(ledger_nano_status)
         }
-        WalletMethod::GenerateEd25519Address {
-            account_index,
-            address_index,
-            options,
-            bech32_hrp,
-        } => {
-            let address = wallet
-                .generate_ed25519_address(account_index, address_index, options)
-                .await?;
-
-            let bech32_hrp = match bech32_hrp {
-                Some(bech32_hrp) => bech32_hrp,
-                None => *wallet.address().await.hrp(),
-            };
-
-            Response::Bech32Address(address.to_bech32(bech32_hrp))
-        }
         #[cfg(feature = "stronghold")]
         WalletMethod::SetStrongholdPassword { password } => {
             wallet.set_stronghold_password(password).await?;
@@ -137,10 +117,6 @@ pub(crate) async fn call_wallet_method_internal(
         WalletMethod::ClaimableOutputs { outputs_to_claim } => {
             let output_ids = wallet.claimable_outputs(outputs_to_claim).await?;
             Response::OutputIds(output_ids)
-        }
-        WalletMethod::ClaimOutputs { output_ids_to_claim } => {
-            let transaction = wallet.claim_outputs(output_ids_to_claim.to_vec()).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::DeregisterParticipationEvent { event_id } => {
@@ -366,8 +342,8 @@ pub(crate) async fn call_wallet_method_internal(
         //     let data = wallet.prepare_stop_participating(event_id).await?;
         //     Response::PreparedTransaction(data)
         // }
-        WalletMethod::PrepareTransaction { outputs, options } => {
-            let data = wallet.prepare_transaction(outputs, options).await?;
+        WalletMethod::PrepareSendOutputs { outputs, options } => {
+            let data = wallet.prepare_send_outputs(outputs, options).await?;
             Response::PreparedTransaction(data)
         }
         // #[cfg(feature = "participation")]
@@ -389,22 +365,6 @@ pub(crate) async fn call_wallet_method_internal(
                 .wait_for_transaction_acceptance(&transaction_id, interval, max_attempts)
                 .await?;
             Response::Ok
-        }
-        WalletMethod::Send {
-            amount,
-            address,
-            options,
-        } => {
-            let transaction = wallet.send(amount, address, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
-        }
-        WalletMethod::SendWithParams { params, options } => {
-            let transaction = wallet.send_with_params(params, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
-        }
-        WalletMethod::SendOutputs { outputs, options } => {
-            let transaction = wallet.send_outputs(outputs, options).await?;
-            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SetAlias { alias } => {
             wallet.set_alias(&alias).await?;

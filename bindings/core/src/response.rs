@@ -17,16 +17,16 @@ use iota_sdk::{
         api::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-                IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, OutputWithMetadataResponse,
-                RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse,
-                ValidatorResponse, ValidatorsResponse,
+                IssuanceBlockHeaderResponse, ManaRewardsResponse, NetworkMetricsResponse, OutputResponse,
+                OutputWithMetadataResponse, RoutesResponse, TransactionMetadataResponse, UtxoChangesFullResponse,
+                UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, DecayedMana, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
+            output::{DecayedMana, FoundryId, Output, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
@@ -101,6 +101,9 @@ pub enum Response {
     /// Response for:
     /// - [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfo(NodeInfoResponse),
+    /// Response for:
+    /// - [`GetNetworkMetrics`](crate::method::ClientMethod::GetNetworkMetrics)
+    NetworkMetrics(NetworkMetricsResponse),
     /// Response for:
     /// - [`GetRoutes`](crate::method::ClientMethod::GetRoutes)
     Routes(RoutesResponse),
@@ -198,9 +201,6 @@ pub enum Response {
     /// [`OutputIdToUtxoInput`](crate::method::UtilsMethod::OutputIdToUtxoInput)
     Input(UtxoInput),
     /// Response for:
-    /// - [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
-    Bech32ToHex(String),
-    /// Response for:
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
     ParsedBech32Address(Address),
     /// Response for:
@@ -213,19 +213,12 @@ pub enum Response {
     /// - [`TransactionId`](crate::method::UtilsMethod::TransactionId)
     TransactionId(TransactionId),
     /// Response for:
-    /// - [`ComputeAccountId`](crate::method::UtilsMethod::ComputeAccountId)
-    AccountId(AccountId),
-    /// Response for:
-    /// - [`ComputeNftId`](crate::method::UtilsMethod::ComputeNftId)
-    NftId(NftId),
-    /// Response for:
     /// - [`ComputeFoundryId`](crate::method::UtilsMethod::ComputeFoundryId)
     FoundryId(FoundryId),
     /// Response for:
+    /// - [`Blake2b256Hash`](crate::method::UtilsMethod::Blake2b256Hash)
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
     Hash(String),
-    /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
-    HexAddress(String),
     /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)
     HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
@@ -245,14 +238,6 @@ pub enum Response {
     /// Response for:
     /// - [`AddressToBech32`](crate::method::ClientMethod::AddressToBech32)
     /// - [`AddressToBech32`](crate::method::UtilsMethod::AddressToBech32)
-    /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
-    /// - [`AccountIdToBech32`](crate::method::UtilsMethod::AccountIdToBech32)
-    /// - [`AnchorIdToBech32`](crate::method::ClientMethod::AnchorIdToBech32)
-    /// - [`AnchorIdToBech32`](crate::method::UtilsMethod::AnchorIdToBech32)
-    /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
-    /// - [`NftIdToBech32`](crate::method::UtilsMethod::NftIdToBech32)
-    /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
-    /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`ImplicitAccountCreationAddress`](crate::method::WalletMethod::ImplicitAccountCreationAddress)
     Bech32Address(Bech32Address),
     /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)
@@ -277,12 +262,12 @@ pub enum Response {
     /// - [`VerifySecp256k1EcdsaSignature`](crate::method::UtilsMethod::VerifySecp256k1EcdsaSignature)
     Bool(bool),
     /// Response for:
-    /// - [`Backup`](crate::method::WalletMethod::Backup),
+    /// - [`BackupToStrongholdSnapshot`](crate::method::WalletMethod::BackupToStrongholdSnapshot),
     /// - [`ClearListeners`](crate::method::WalletMethod::ClearListeners)
     /// - [`ClearStrongholdPassword`](crate::method::WalletMethod::ClearStrongholdPassword),
     /// - [`DeregisterParticipationEvent`](crate::method::WalletMethod::DeregisterParticipationEvent),
     /// - [`EmitTestEvent`](crate::method::WalletMethod::EmitTestEvent),
-    /// - [`RestoreBackup`](crate::method::WalletMethod::RestoreBackup),
+    /// - [`RestoreFromStrongholdSnapshot`](crate::method::WalletMethod::RestoreFromStrongholdSnapshot),
     /// - [`SetAlias`](crate::method::WalletMethod::SetAlias),
     /// - [`SetClientOptions`](crate::method::WalletMethod::SetClientOptions),
     /// - [`SetDefaultSyncOptions`](crate::method::WalletMethod::SetDefaultSyncOptions),
@@ -332,12 +317,12 @@ pub enum Response {
     /// - [`PrepareMeltNativeToken`](crate::method::WalletMethod::PrepareMeltNativeToken)
     /// - [`PrepareMintNativeToken`](crate::method::WalletMethod::PrepareMintNativeToken),
     /// - [`PrepareMintNfts`](crate::method::WalletMethod::PrepareMintNfts),
-    /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
     /// - [`PrepareSendMana`](crate::method::WalletMethod::PrepareSendMana),
     /// - [`PrepareSendNativeTokens`](crate::method::WalletMethod::PrepareSendNativeTokens),
     /// - [`PrepareSendNft`](crate::method::WalletMethod::PrepareSendNft),
+    /// - [`PrepareSend`](crate::method::WalletMethod::PrepareSend),
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)
-    /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
+    /// - [`PrepareSendOutputs`](crate::method::WalletMethod::PrepareSendOutputs)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
     /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
     PreparedTransaction(PreparedTransactionData),
@@ -364,9 +349,6 @@ pub enum Response {
     /// - [`Sync`](crate::method::WalletMethod::Sync)
     Balance(Balance),
     /// Response for:
-    /// - [`ClaimOutputs`](crate::method::WalletMethod::ClaimOutputs)
-    /// - [`Send`](crate::method::WalletMethod::Send)
-    /// - [`SendOutputs`](crate::method::WalletMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::WalletMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::WalletMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionWithMetadataDto),

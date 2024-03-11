@@ -9,7 +9,7 @@ use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use eyre::Error;
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager},
+    client::{api::options::TransactionOptions, request_funds_from_faucet, secret::SecretManager},
     types::block::{
         address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
@@ -27,7 +27,7 @@ use iota_sdk::{
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
         MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams, SendNftParams,
-        SendParams, SyncOptions, TransactionOptions, Wallet, WalletError,
+        SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };
@@ -1377,7 +1377,7 @@ pub enum PromptResponse {
 }
 
 async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
-    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+    if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
         let password = get_password("Stronghold password", false)?;

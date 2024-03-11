@@ -38,6 +38,7 @@ runs:
     - name: Wait for tangle to start
       shell: bash
       run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8050/health -- echo "Tangle is up"
-    - name: Wait for faucet to start
-      shell: bash
-      run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8088/health -- echo "Faucet is up"
+    # TODO https://github.com/iotaledger/iota-sdk/issues/2154
+    # - name: Wait for faucet to start
+    #   shell: bash
+    #   run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8088/health -- echo "Faucet is up"

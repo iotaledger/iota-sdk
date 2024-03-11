@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
-use iota_sdk::utils::serde::string;
+use iota_sdk::client::api::options::TransactionOptions;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 // #[cfg(feature = "participation")]
@@ -17,19 +17,18 @@ use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 // };
 use iota_sdk::{
     client::{
-        api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{transaction_builder::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::NodeAuth,
-        secret::GenerateAddressOptions,
     },
     types::block::{
-        address::{Bech32Address, Hrp},
+        address::Hrp,
         output::{AccountId, DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
     wallet::{
         BeginStakingParams, ClientOptions, ConsolidationParams, CreateAccountParams, CreateDelegationParams,
         CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams, OutputsToClaim, SendManaParams,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
     },
     U256,
 };
@@ -119,10 +118,6 @@ pub enum WalletMethod {
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
     ClaimableOutputs { outputs_to_claim: OutputsToClaim },
-    /// Claim outputs.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    #[serde(rename_all = "camelCase")]
-    ClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     // /// Removes a previously registered participation event from local storage.
     // /// Expected response: [`Ok`](crate::Response::Ok)
     // #[cfg(feature = "participation")]
@@ -308,7 +303,7 @@ pub enum WalletMethod {
         #[serde(default)]
         transaction_options: Option<TransactionOptions>,
     },
-    /// Prepare to send base coins.
+    /// Prepare to send base coins to multiple addresses, or with additional parameters.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSend {
         params: Vec<SendParams>,
@@ -385,9 +380,9 @@ pub enum WalletMethod {
     // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     // #[serde(rename_all = "camelCase")]
     // PrepareStopParticipating { event_id: ParticipationEventId },
-    /// Prepare transaction.
+    /// Prepare to send outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareTransaction {
+    PrepareSendOutputs {
         outputs: Vec<Output>,
         #[serde(default)]
         options: Option<TransactionOptions>,
@@ -420,29 +415,6 @@ pub enum WalletMethod {
         interval: Option<u64>,
         /// Maximum attempts
         max_attempts: Option<u64>,
-    },
-    /// Send base coins.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    Send {
-        #[serde(with = "string")]
-        amount: u64,
-        address: Bech32Address,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Send base coins to multiple addresses, or with additional parameters.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendWithParams {
-        params: Vec<SendParams>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
-    },
-    /// Send outputs in a transaction.
-    /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
-    SendOutputs {
-        outputs: Vec<Output>,
-        #[serde(default)]
-        options: Option<TransactionOptions>,
     },
     /// Set the alias of the wallet.
     /// Expected response: [`Ok`](crate::Response::Ok)
@@ -483,27 +455,11 @@ pub enum WalletMethod {
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
     UnspentOutputs { filter_options: Option<FilterOptions> },
-
     /// Emits an event for testing if the event system is working
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     EmitTestEvent { event: WalletEvent },
-
-    // TODO: reconsider whether to have the following methods on the wallet
-    /// Generate an address without storing it
-    /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
-    #[serde(rename_all = "camelCase")]
-    GenerateEd25519Address {
-        /// Account index
-        account_index: u32,
-        /// Account index
-        address_index: u32,
-        /// Options
-        options: Option<GenerateAddressOptions>,
-        /// Bech32 HRP
-        bech32_hrp: Option<Hrp>,
-    },
     /// Get the ledger nano status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]

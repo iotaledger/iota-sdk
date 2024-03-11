@@ -14,6 +14,7 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
+    types::block::address::Bech32Address,
     wallet::{ClientOptions, Wallet},
 };
 
@@ -50,17 +51,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
-
     println!("Generated a new wallet");
 
-    write_wallet_address_to_file(&wallet).await
+    write_wallet_address_to_file(&wallet.address().await).await?;
+
+    Ok(())
 }
 
-async fn write_wallet_address_to_file(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
+async fn write_wallet_address_to_file(address: &Bech32Address) -> Result<(), Box<dyn std::error::Error>> {
     use tokio::io::AsyncWriteExt;
 
-    let wallet_address = wallet.address().await;
-    let json = serde_json::to_string_pretty(&wallet_address)?;
+    let json = serde_json::to_string_pretty(address)?;
     let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(ADDRESS_FILE_PATH).await?);
     println!("example.address.json:\n{json}");
     file.write_all(json.as_bytes()).await?;

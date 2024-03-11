@@ -591,18 +591,6 @@ class Wallet:
             })
         )
 
-    def prepare_send(self, params: List[SendParams],
-                     options: Optional[TransactionOptions] = None) -> PreparedTransaction:
-        """Prepare to send base coins.
-        """
-        prepared = PreparedTransactionData.from_dict(self._call_method(
-            'prepareSend', {
-                'params': params,
-                'options': options
-            }
-        ))
-        return PreparedTransaction(self, prepared)
-
     def create_delegation(self, params: CreateDelegationParams,
                           options: Optional[TransactionOptions] = None) -> CreateDelegationTransaction:
         """Create a delegation.
@@ -701,18 +689,18 @@ class Wallet:
             }
         ))
 
-    def send_transaction(
+    def send_outputs(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
-        """Send a transaction.
+        """Send outputs.
         """
-        return self.prepare_transaction(outputs, options).send()
+        return self.prepare_send_outputs(outputs, options).send()
 
-    def prepare_transaction(
+    def prepare_send_outputs(
             self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
-        """Prepare transaction.
+        """Prepare to send outputs.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
-            'prepareTransaction', {
+            'prepareSendOutputs', {
                 'outputs': outputs,
                 'options': options
             }
@@ -735,24 +723,25 @@ class Wallet:
              options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send base coins.
         """
-        return TransactionWithMetadata.from_dict(self._call_method(
-            'send', {
-                'amount': str(amount),
-                'address': address,
-                'options': options
-            }
-        ))
+        return self.prepare_send([SendParams(address, amount)], options).send()
 
     def send_with_params(
             self, params: List[SendParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send base coins to multiple addresses or with additional parameters.
         """
-        return TransactionWithMetadata.from_dict(self._call_method(
-            'sendWithParams', {
-                'params': [param.to_dict() for param in params],
+        return self.prepare_send(params, options).send()
+
+    def prepare_send(self, params: List[SendParams],
+                     options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Prepare to send with params.
+        """
+        prepared = PreparedTransactionData.from_dict(self._call_method(
+            'prepareSend', {
+                'params': params,
                 'options': options
             }
         ))
+        return PreparedTransaction(self, prepared)
 
     def send_native_tokens(
             self, params: List[SendNativeTokenParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
@@ -791,17 +780,6 @@ class Wallet:
             }
         ))
         return PreparedTransaction(self, prepared)
-
-    def send_outputs(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
-        """Send outputs in a transaction.
-        """
-        return TransactionWithMetadata.from_dict(self._call_method(
-            'sendOutputs', {
-                'outputs': outputs,
-                'options': options,
-            }
-        ))
 
     def send_mana(
             self, params: SendManaParams, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:

@@ -7,8 +7,8 @@ use futures::{StreamExt, TryStreamExt};
 
 use crate::{
     client::{
-        api::input_selection::Error as InputSelectionError, constants::FIVE_MINUTES_IN_NANOSECONDS, error::ClientError,
-        node_api::indexer::query_parameters::BasicOutputQueryParameters, unix_timestamp_now, Client,
+        api::transaction_builder::TransactionBuilderError, constants::FIVE_MINUTES_IN_NANOSECONDS,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters, unix_timestamp_now, Client, ClientError,
     },
     types::{
         api::core::OutputWithMetadataResponse,
@@ -25,7 +25,7 @@ use crate::{
 
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
-    pub async fn inputs_from_transaction_id(
+    pub async fn get_transaction_inputs(
         &self,
         transaction_id: &TransactionId,
     ) -> Result<Vec<OutputWithMetadataResponse>, ClientError> {
@@ -102,7 +102,7 @@ impl Client {
         }
 
         if total_already_spent < amount {
-            return Err(InputSelectionError::InsufficientAmount {
+            return Err(TransactionBuilderError::InsufficientAmount {
                 found: total_already_spent,
                 required: amount,
             })?;

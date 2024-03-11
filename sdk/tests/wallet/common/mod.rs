@@ -15,7 +15,7 @@ use iota_sdk::{
     wallet::{ClientOptions, Wallet},
 };
 
-pub use self::constants::*;
+pub use self::constants::{DEFAULT_MNEMONIC, FAUCET_URL, NODE_LOCAL, NODE_OTHER};
 
 /// It creates a new wallet with a mnemonic secret manager, a client options object,
 /// SHIMMER_COIN_TYPE, and a storage path

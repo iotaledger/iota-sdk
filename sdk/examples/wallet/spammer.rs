@@ -48,19 +48,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let bip_path = Bip44::new(SHIMMER_COIN_TYPE);
-    let address = Bech32Address::new(
-        Hrp::from_str_unchecked("smr"),
-        Address::from(
-            secret_manager
-                .generate_ed25519_addresses(bip_path.coin_type, bip_path.account, 0..1, None)
-                .await?[0],
-        ),
-    );
-
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_address(address)
         .with_bip_path(bip_path)
         .finish()
         .await?;
