@@ -105,9 +105,7 @@ async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
@@ -251,9 +249,7 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -336,9 +332,7 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -421,9 +415,7 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -504,9 +496,7 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -597,9 +587,7 @@ async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -693,9 +681,7 @@ async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -786,9 +772,7 @@ async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -879,9 +863,7 @@ async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> 
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -972,9 +954,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::erro
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 
@@ -1067,9 +1047,7 @@ async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
@@ -1154,9 +1132,7 @@ async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     let conflict = prepared_transaction_data.verify_semantic(protocol_parameters);
 

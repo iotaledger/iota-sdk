@@ -13,10 +13,13 @@ pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
     transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
-use crate::types::block::{
-    payload::PayloadError,
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    unlock::Unlocks,
+use crate::{
+    client::api::transaction::MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT,
+    types::block::{
+        payload::PayloadError,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        unlock::Unlocks,
+    },
 };
 
 /// A signed transaction to move funds.
@@ -66,6 +69,20 @@ fn verify_signed_transaction_payload(payload: &SignedTransactionPayload) -> Resu
         return Err(PayloadError::InputUnlockCountMismatch {
             input_count: payload.transaction.inputs().len(),
             unlock_count: payload.unlocks.len(),
+        });
+    }
+
+    verify_signed_transaction_payload_length(payload)?;
+
+    Ok(())
+}
+
+fn verify_signed_transaction_payload_length(payload: &SignedTransactionPayload) -> Result<(), PayloadError> {
+    let signed_transaction_payload_bytes = payload.pack_to_vec();
+    if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT {
+        return Err(PayloadError::SignedTransactionPayloadLength {
+            length: signed_transaction_payload_bytes.len(),
+            max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT,
         });
     }
 

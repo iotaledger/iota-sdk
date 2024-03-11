@@ -42,6 +42,8 @@ pub enum PayloadError {
     InputCount(<InputCount as TryFrom<usize>>::Error),
     #[display(fmt = "invalid output count: {_0}")]
     OutputCount(<OutputCount as TryFrom<usize>>::Error),
+    #[display(fmt = "the signed transaction payload is too large. Its length is {length}, max length is {max_length}")]
+    SignedTransactionPayloadLength { length: usize, max_length: usize },
     #[display(fmt = "invalid transaction amount sum: {_0}")]
     TransactionAmountSum(u128),
     #[display(fmt = "the transaction is too large. Its length is {length}, max length is {max_length}")]

@@ -34,7 +34,7 @@ pub struct RoutesResponse {
 
 /// Response of GET /api/core/v3/info.
 /// General information about the node.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InfoResponse {
     pub name: String,

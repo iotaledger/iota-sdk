@@ -3,16 +3,10 @@
 
 //! Transaction preparation and signing
 
-use packable::PackableExt;
-
 use crate::{
-    client::{
-        api::{PreparedTransactionData, SignedTransactionData},
-        ClientError,
-    },
+    client::api::{PreparedTransactionData, SignedTransactionData},
     types::block::{
         output::{Output, OutputId},
-        payload::signed_transaction::SignedTransactionPayload,
         protocol::ProtocolParameters,
         semantic::{SemanticValidationContext, TransactionFailureReason},
         signature::Ed25519Signature,
@@ -23,6 +17,8 @@ use crate::{
 // TODO this is wrong because of https://github.com/iotaledger/iota-sdk/issues/1208
 pub(crate) const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize =
     Block::LENGTH_MAX - Block::LENGTH_MIN - (7 * BlockId::LENGTH);
+pub(crate) const MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT: usize =
+    Block::LENGTH_MAX - Block::LENGTH_MIN - BlockId::LENGTH;
 // Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
 // signature)
 pub(crate) const SINGLE_UNLOCK_LENGTH: usize =
@@ -69,19 +65,5 @@ impl SignedTransactionData {
         );
 
         context.validate()
-    }
-}
-
-impl SignedTransactionPayload {
-    /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
-    pub fn validate_length(&self) -> Result<(), ClientError> {
-        let signed_transaction_payload_bytes = self.pack_to_vec();
-        if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
-            return Err(ClientError::InvalidSignedTransactionPayloadLength {
-                length: signed_transaction_payload_bytes.len(),
-                max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS,
-            });
-        }
-        Ok(())
     }
 }

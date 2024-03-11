@@ -30,8 +30,6 @@ export type ClientErrorName =
     | 'inputAddressNotFound'
     | 'invalidAmount'
     | 'invalidMnemonic'
-    | 'invalidTransactionLength'
-    | 'invalidSignedTransactionPayloadLength'
     | 'json'
     | 'missingParameter'
     | 'node'
@@ -62,7 +60,7 @@ export type ClientErrorName =
     | 'mqtt'
     | 'stronghold';
 
-export class ClientError extends ErrorBase<ClientErrorName> {}
+export class ClientError extends ErrorBase<ClientErrorName> { }
 
 export type WalletErrorName =
     | 'backup'
@@ -97,7 +95,7 @@ export type WalletErrorName =
     | 'implicitAccountNotFound'
     | 'accountNotFound';
 
-export class WalletError extends ErrorBase<WalletErrorName> {}
+export class WalletError extends ErrorBase<WalletErrorName> { }
 export class BlockError extends ErrorBase<'block'> {
     constructor(message: string) {
         super({ name: 'block', message });
