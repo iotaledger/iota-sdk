@@ -1,7 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::collections::{BTreeSet, HashSet};
+use alloc::collections::BTreeSet;
+use std::collections::HashSet;
 
 use crypto::keys::bip44::Bip44;
 
