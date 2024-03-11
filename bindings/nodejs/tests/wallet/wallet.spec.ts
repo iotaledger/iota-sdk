@@ -10,7 +10,6 @@ import {
     WalletOptions,
     SecretManager,
     Utils,
-    Bip44,
 } from '../../lib/';
 
 describe('Wallet', () => {
@@ -86,7 +85,6 @@ describe('Wallet', () => {
 
         const walletOptions = await createDefaultWalletOptions(storagePath);
         const wallet = await Wallet.create(walletOptions);
-        console.log(await wallet.address());
         await wallet.destroy();
 
         walletOptions.address = "tst1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fyg6k2w3";
@@ -95,7 +93,8 @@ describe('Wallet', () => {
             const _restoredWallet = await Wallet.create(walletOptions);
             throw 'Should return an error because the provided address conflicts with the stored one';
         } catch (err: any) {
-            expect(err.message).toEqual('address tst1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fyg6k2w3 is not the wallet address');
+            expect(err.message).toEqual(
+                'wallet address mismatch: tst1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fyg6k2w3, existing address is: smr1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fyq4ten7');
         }
 
         removeDir(storagePath);
@@ -107,7 +106,6 @@ describe('Wallet', () => {
 
         const walletOptions = await createDefaultWalletOptions(storagePath);
         const wallet = await Wallet.create(walletOptions);
-        console.log(await wallet.address());
         await wallet.destroy();
 
         walletOptions.bipPath = { coinType: CoinType.IOTA };
@@ -116,7 +114,7 @@ describe('Wallet', () => {
             const _restoredWallet = await Wallet.create(walletOptions);
             throw 'Should return an error because the provided bip path conflicts with the stored one';
         } catch (err: any) {
-            expect(err.message).toEqual('BIP44 mismatch: Some(Bip44 { coin_type: 4218, account: 0, change: 0, address_index: 0 }), existing bip path is: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 })');
+            expect(err.message).toEqual('bip path mismatch: Some(Bip44 { coin_type: 4218, account: 0, change: 0, address_index: 0 }), existing bip path is: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 })');
         }
 
         removeDir(storagePath);
@@ -125,7 +123,6 @@ describe('Wallet', () => {
     it('error on alias conflict', async () => {
         let storagePath = 'test-error-on-alias-conflict';
         removeDir(storagePath);
-
 
         const walletOptions = await createDefaultWalletOptions(storagePath);
         const wallet = await Wallet.create(walletOptions);
