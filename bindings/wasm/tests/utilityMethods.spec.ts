@@ -48,13 +48,24 @@ describe('Utils methods', () => {
         expect(isAddressValid).toBeTruthy();
     });
 
-    it('hash output id', async () => {
+    it('compute account id', () => {
         const outputId =
             '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
 
         const accountId = Utils.computeAccountId(outputId);
 
         expect(accountId).toBe(
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
+        );
+    });
+
+    it('compute delegation id', () => {
+        const outputId =
+            '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
+
+        const delegationId = Utils.computeDelegationId(outputId);
+
+        expect(delegationId).toBe(
             '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
         );
     });
