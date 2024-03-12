@@ -20,6 +20,8 @@ pub enum ManaError {
     EpochDiff { created: EpochIndex, target: EpochIndex },
     #[display(fmt = "insufficient amount to generate positive mana")]
     InsufficientGenerationAmount,
+    #[display(fmt = "mana value {value} above maximum {max}")]
+    AboveMax { value: u64, max: u64 },
 }
 
 #[cfg(feature = "std")]

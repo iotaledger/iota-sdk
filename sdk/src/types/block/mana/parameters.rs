@@ -208,7 +208,10 @@ impl ProtocolParameters {
             return Ok(0);
         }
         if required_mana > self.mana_parameters().max_mana() {
-            return Err(ManaError::Value(required_mana));
+            return Err(ManaError::AboveMax {
+                value: required_mana,
+                max: self.mana_parameters().max_mana(),
+            });
         }
         let current_slot = current_slot.into();
         let mut num_slots = 0;
@@ -218,11 +221,12 @@ impl ProtocolParameters {
         let mut required_mana_remaining = required_mana;
         loop {
             // Get the minimum number of slots required to achieve the needed mana (i.e. not including decay)
-            num_slots += u32::try_from(
-                1 + (required_mana_remaining as u128 * self.slots_per_epoch() as u128)
+            let additional_slots = u32::try_from(
+                (required_mana_remaining as u128 * self.slots_per_epoch() as u128)
                     / mana_generated_per_epoch.max(1) as u128,
             )
             .map_err(|_| ManaError::InsufficientGenerationAmount)?;
+            num_slots += additional_slots.max(1);
             // Get the actual values after than many slots
             let decayed_mana =
                 stored_mana - self.mana_with_decay(stored_mana, current_slot, current_slot + num_slots)?;
@@ -230,6 +234,7 @@ impl ProtocolParameters {
                 self.generate_mana_with_decay(generation_amount, current_slot, current_slot + num_slots)?;
             // If we generated less than how much we lost, this is not going to work out
             if generated_mana <= decayed_mana {
+                println!("{generated_mana} less than {decayed_mana}");
                 return Err(ManaError::InsufficientGenerationAmount);
             }
             if generated_mana - decayed_mana >= required_mana {
@@ -588,64 +593,117 @@ mod test {
             )
     }
 
+    #[derive(Debug)]
+    struct ManaTest {
+        current_slot: u32,
+        generation_amount: u64,
+        stored_mana: u64,
+        required_mana: u64,
+    }
+
+    impl ManaTest {
+        fn mana_after(&self, slots: u32) -> u64 {
+            params()
+                .generate_mana_with_decay(self.generation_amount, self.current_slot, self.current_slot + slots)
+                .unwrap()
+                + params()
+                    .mana_with_decay(self.stored_mana, self.current_slot, self.current_slot + slots)
+                    .unwrap()
+        }
+
+        fn slots_until_generated(&self) -> Result<u32, ManaError> {
+            params().slots_until_generated(
+                self.current_slot,
+                self.generation_amount,
+                self.stored_mana,
+                self.required_mana,
+            )
+        }
+    }
+
     #[test]
     fn slots_until_generated() {
-        let current_slot = 100;
-        let generation_amount = 100000;
-        let stored_mana = 1000000;
-        let required_mana = 50000;
-
-        let slots_left = params()
-            .slots_until_generated(current_slot, generation_amount, stored_mana, required_mana)
-            .unwrap();
-        assert_eq!(
-            params()
-                .generate_mana_with_decay(generation_amount, 0, slots_left)
-                .unwrap()
-                + params().mana_with_decay(stored_mana, 0, slots_left).unwrap(),
-            stored_mana + required_mana
-        );
-
-        let current_slot = 1000000;
-        let generation_amount = 500000;
-        let stored_mana = 12345;
-        let required_mana = 999999;
-
-        let slots_left = params()
-            .slots_until_generated(current_slot, generation_amount, stored_mana, required_mana)
-            .unwrap();
-        assert_eq!(
-            params()
-                .generate_mana_with_decay(generation_amount, 0, slots_left)
-                .unwrap()
-                + params().mana_with_decay(stored_mana, 0, slots_left).unwrap(),
-            stored_mana + required_mana
-        );
+        for test in [
+            ManaTest {
+                current_slot: 100,
+                generation_amount: 100000,
+                stored_mana: 1000000,
+                required_mana: 50000,
+            },
+            ManaTest {
+                current_slot: 1000000,
+                generation_amount: 500000,
+                stored_mana: 12345,
+                required_mana: 999999,
+            },
+            ManaTest {
+                current_slot: 1294732685,
+                generation_amount: 300000,
+                stored_mana: 50,
+                required_mana: 1,
+            },
+            ManaTest {
+                current_slot: 1294732685,
+                generation_amount: 500000,
+                stored_mana: 0,
+                required_mana: 600,
+            },
+        ] {
+            let slots_left = test.slots_until_generated().expect(&format!("{test:?}"));
+            let mana_after_n_minus_1 = test.mana_after(slots_left - 1);
+            let mana_after_n = test.mana_after(slots_left);
+            let expected_mana = test.stored_mana + test.required_mana;
+            assert!(
+                mana_after_n_minus_1 < expected_mana,
+                "{test:?}: mana after {} slots should be lower than {expected_mana}, but found {mana_after_n_minus_1}",
+                slots_left - 1,
+            );
+            assert!(
+                mana_after_n >= expected_mana,
+                "{test:?}: mana after {slots_left} slots should be greater than or equal to {expected_mana}, but found {mana_after_n}",
+            );
+        }
     }
 
     #[test]
     fn slots_until_generated_insufficient_amount() {
-        let current_slot = 10000;
-        let generation_amount = 1000;
-        let stored_mana = 1000000;
-        let required_mana = 50000;
+        let test = ManaTest {
+            current_slot: 10000,
+            generation_amount: 1000,
+            stored_mana: 1000000,
+            required_mana: 50000,
+        };
 
-        let slots_left = params()
-            .slots_until_generated(current_slot, generation_amount, stored_mana, required_mana)
-            .unwrap_err();
+        let slots_left = test.slots_until_generated().unwrap_err();
         assert_eq!(slots_left, ManaError::InsufficientGenerationAmount);
     }
 
     #[test]
     fn slots_until_generated_absurd_requirement() {
-        let current_slot = 10000;
-        let generation_amount = 100000;
-        let stored_mana = 1000000;
-        let required_mana = 500000000000;
+        let test = ManaTest {
+            current_slot: 10000,
+            generation_amount: 100000,
+            stored_mana: 1000000,
+            required_mana: 500000000000,
+        };
 
-        let slots_left = params()
-            .slots_until_generated(current_slot, generation_amount, stored_mana, required_mana)
-            .unwrap_err();
+        let slots_left = test.slots_until_generated().unwrap_err();
         assert_eq!(slots_left, ManaError::InsufficientGenerationAmount);
+
+        let test = ManaTest {
+            current_slot: 10000,
+            generation_amount: 100000,
+            stored_mana: 1000000,
+            required_mana: 9999999999999999999,
+        };
+
+        let slots_left = test.slots_until_generated().unwrap_err();
+        assert_eq!(
+            slots_left,
+            ManaError::AboveMax {
+                value: test.required_mana,
+                max: params().mana_parameters().max_mana()
+            }
+        );
     }
 }
