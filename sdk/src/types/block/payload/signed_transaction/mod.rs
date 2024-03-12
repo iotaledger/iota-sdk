@@ -70,21 +70,24 @@ fn verify_signed_transaction_payload(payload: &SignedTransactionPayload) -> Resu
         });
     }
 
-    verify_signed_transaction_payload_length(payload)?;
+    payload.validate_length()?;
 
     Ok(())
 }
 
-fn verify_signed_transaction_payload_length(payload: &SignedTransactionPayload) -> Result<(), PayloadError> {
-    let signed_transaction_payload_bytes = payload.pack_to_vec();
-    if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT {
-        return Err(PayloadError::SignedTransactionPayloadLength {
-            length: signed_transaction_payload_bytes.len(),
-            max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT,
-        });
-    }
+impl SignedTransactionPayload {
+    /// Verifies that the transaction doesn't exceed the block size limit with 1 parent.
+    fn validate_length(&self) -> Result<(), PayloadError> {
+        let signed_transaction_payload_bytes = self.pack_to_vec();
+        if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT {
+            return Err(PayloadError::SignedTransactionPayloadLength {
+                length: signed_transaction_payload_bytes.len(),
+                max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT,
+            });
+        }
 
-    Ok(())
+        Ok(())
+    }
 }
 
 #[cfg(feature = "serde")]

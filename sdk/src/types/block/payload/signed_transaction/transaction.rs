@@ -460,11 +460,11 @@ fn verify_transaction_packable(transaction: &Transaction, _: &ProtocolParameters
 }
 
 impl Transaction {
-    /// Verifies that the transaction doesn't exceed the block size limit with 8 parents.
+    /// Verifies that the transaction doesn't exceed the block size limit with 1 parent.
     /// Assuming one signature unlock and otherwise reference/account/nft unlocks.
     /// `validate_transaction_payload_length()` should later be used to check the length again with the correct
     /// unlocks.
-    pub(crate) fn validate_length(&self) -> Result<(), PayloadError> {
+    fn validate_length(&self) -> Result<(), PayloadError> {
         let transaction_bytes = self.pack_to_vec();
 
         // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
