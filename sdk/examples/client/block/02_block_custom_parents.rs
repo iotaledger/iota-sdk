@@ -72,6 +72,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{block:#?}");
 
+    client.post_block(&block).await?;
+
     println!(
         "Block with custom parents sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
