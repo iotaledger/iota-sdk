@@ -12,9 +12,6 @@ use packable::{
 };
 
 use crate::{
-    client::api::transaction::{
-        MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS, REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH, SINGLE_UNLOCK_LENGTH,
-    },
     types::block::{
         capabilities::{Capabilities, CapabilityFlag},
         context_input::{ContextInput, ContextInputs},
@@ -26,10 +23,21 @@ use crate::{
             OptionalPayload, Payload, PayloadError,
         },
         protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        signature::Ed25519Signature,
         slot::SlotIndex,
+        Block,
     },
     utils::merkle_hasher,
 };
+
+pub(crate) const BASIC_BLOCK_LENGTH_MIN: usize = 238;
+pub(crate) const MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT: usize = Block::LENGTH_MAX - BASIC_BLOCK_LENGTH_MIN;
+// Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
+// signature)
+pub(crate) const SINGLE_UNLOCK_LENGTH: usize =
+    1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
+// Type + reference index
+pub(crate) const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 
 /// A builder to build a [`Transaction`].
 #[derive(Debug, Clone)]
@@ -464,7 +472,7 @@ impl Transaction {
 
         // Max tx payload length - length for one signature unlock (there might be more unlocks, we check with them
         // later again, when we built the transaction payload)
-        let max_length = MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS
+        let max_length = MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT
             - SINGLE_UNLOCK_LENGTH
             - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
 

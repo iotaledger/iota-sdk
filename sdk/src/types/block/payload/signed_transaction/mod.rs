@@ -8,18 +8,16 @@ mod transaction_id;
 
 use packable::{Packable, PackableExt};
 
+use self::transaction::MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT;
 pub(crate) use self::transaction::{InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
     transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
-use crate::{
-    client::api::transaction::MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT,
-    types::block::{
-        payload::PayloadError,
-        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-        unlock::Unlocks,
-    },
+use crate::types::block::{
+    payload::PayloadError,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    unlock::Unlocks,
 };
 
 /// A signed transaction to move funds.
