@@ -49,7 +49,7 @@ describe.skip('Block methods', () => {
         );
         const block = await secretManager.signBlock(unsignedBlock, chain);
 
-        const blockId = await client.postBlockRaw(block);
+        const blockId = await client.postBlock(block);
 
         expect(blockId).toBeValidBlockId();
     });

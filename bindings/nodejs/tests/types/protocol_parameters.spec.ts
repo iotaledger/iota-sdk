@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { expect, describe, it } from '@jest/globals';
 import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
-import { ProtocolParameters } from '../../lib/types/models/api/info/node-info-protocol';
+import { ProtocolParameters } from '../../lib/types/models/api';
 import { Utils } from '../../';
 
 describe('ProtocolParameters tests', () => {
