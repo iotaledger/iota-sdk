@@ -26,6 +26,7 @@ import {
 import {
     AccountId,
     BlockId,
+    DelegationId,
     FoundryId,
     NftId,
     TokenId,
@@ -69,6 +70,21 @@ export class Utils {
      * @returns The account ID.
      */
     static computeAccountId(outputId: OutputId): AccountId {
+        return callUtilsMethod({
+            name: 'blake2b256Hash',
+            data: {
+                bytes: outputId,
+            },
+        });
+    }
+
+    /**
+     * Compute the delegation ID from a given delegation output ID.
+     *
+     * @param outputId The output ID as hex-encoded string.
+     * @returns The delegation ID.
+     */
+    static computeDelegationId(outputId: OutputId): DelegationId {
         return callUtilsMethod({
             name: 'blake2b256Hash',
             data: {
