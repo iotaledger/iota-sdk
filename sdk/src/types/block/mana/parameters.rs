@@ -228,7 +228,7 @@ impl ProtocolParameters {
             .map_err(|_| ManaError::InsufficientGenerationAmount)?;
 
             num_slots += additional_slots.max(1);
-            // Get the actual values after than many slots
+            // Get the actual values after that many slots
             let decayed_mana =
                 stored_mana - self.mana_with_decay(stored_mana, current_slot, current_slot + num_slots)?;
             let generated_mana =
