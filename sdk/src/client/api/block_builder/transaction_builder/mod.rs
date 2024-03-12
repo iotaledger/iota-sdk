@@ -360,6 +360,7 @@ impl TransactionBuilder {
                 .sum::<u64>();
             let total_stored_mana = self.selected_inputs.iter().map(|o| o.output.mana()).sum::<u64>();
             let slots_remaining = self.protocol_parameters.slots_until_generated(
+                self.creation_slot,
                 total_generation_amount,
                 total_stored_mana,
                 output_mana,
