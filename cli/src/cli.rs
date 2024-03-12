@@ -339,10 +339,10 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
             // init new wallet with default init parameters
             let mut init_params = InitParameters::default();
 
-            if let Some(stronghold_snapshot_path) = std::env::var("STRONGHOLD_SNAPSHOT_PATH").ok() {
+            if let Ok(stronghold_snapshot_path) = std::env::var("STRONGHOLD_SNAPSHOT_PATH") {
                 init_params.stronghold_snapshot_path = stronghold_snapshot_path;
             }
-            if let Some(node_url) = std::env::var("NODE_URL").ok() {
+            if let Ok(node_url) = std::env::var("NODE_URL") {
                 init_params.node_url = node_url;
             }
 
