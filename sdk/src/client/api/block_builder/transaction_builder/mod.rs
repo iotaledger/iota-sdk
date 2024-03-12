@@ -13,7 +13,6 @@ use alloc::collections::BTreeMap;
 use std::collections::{HashMap, HashSet};
 
 use crypto::keys::bip44::Bip44;
-use packable::PackableExt;
 
 pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement};
 use crate::{
@@ -39,7 +38,7 @@ use crate::{
             signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
             TaggedDataPayload,
         },
-        protocol::{CommittableAgeRange, ProtocolParameters},
+        protocol::ProtocolParameters,
         slot::{SlotCommitmentId, SlotIndex},
     },
 };
@@ -313,7 +312,6 @@ impl TransactionBuilder {
         }
 
         // Gets requirements from outputs.
-        // TODO this may re-evaluate outputs added by inputs
         self.outputs_requirements();
 
         // Gets requirements from burn.
@@ -419,12 +417,6 @@ impl TransactionBuilder {
             }
         }
 
-        let inputs_data = Self::sort_input_signing_data(
-            self.selected_inputs,
-            self.latest_slot_commitment_id.slot_index(),
-            self.protocol_parameters.committable_age_range(),
-        )?;
-
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = self
             .bic_context_inputs
@@ -433,7 +425,7 @@ impl TransactionBuilder {
             .chain(self.commitment_context_input.map(ContextInput::from))
             .collect::<Vec<_>>();
 
-        for (idx, input) in inputs_data.iter().enumerate() {
+        for (idx, input) in self.selected_inputs.iter().enumerate() {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
             if self.reward_context_inputs.contains(input.output_id()) {
                 context_inputs.push(RewardContextInput::new(idx as u16).unwrap().into());
@@ -464,7 +456,7 @@ impl TransactionBuilder {
 
         let data = PreparedTransactionData {
             transaction,
-            inputs_data,
+            inputs_data: self.selected_inputs,
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
         };
@@ -477,7 +469,7 @@ impl TransactionBuilder {
     fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, TransactionBuilderError> {
         log::debug!("Selecting input {:?}", input.output_id());
 
-        let mut added_output = None;
+        let mut added_output = false;
         if let Some(output) = self.transition_input(&input)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
@@ -485,7 +477,7 @@ impl TransactionBuilder {
             // - input doesn't need to be checked for as we just transitioned it
             // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
             self.added_outputs.push(output);
-            added_output = self.added_outputs.last();
+            added_output = true;
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
@@ -493,14 +485,14 @@ impl TransactionBuilder {
             self.requirements.push(requirement);
         }
 
-        self.selected_inputs.push(input);
+        self.insert_input_sorted(input);
 
         // New inputs/outputs may need context inputs
         if !self.requirements.contains(&Requirement::ContextInputs) {
             self.requirements.push(Requirement::ContextInputs);
         }
 
-        Ok(added_output)
+        Ok(added_output.then(|| self.added_outputs.last().unwrap()))
     }
 
     /// Sets the required inputs of an [`TransactionBuilder`].
@@ -680,38 +672,38 @@ impl TransactionBuilder {
         })
     }
 
-    // Inputs need to be sorted before signing, because the reference unlock conditions can only reference a lower index
-    pub(crate) fn sort_input_signing_data(
-        mut inputs: Vec<InputSigningData>,
-        commitment_slot_index: SlotIndex,
-        committable_age_range: CommittableAgeRange,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
-        // initially sort by output to make it deterministic
-        // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
-        // might be a more efficient way to do this
-        inputs.sort_by_key(|i| i.output.pack_to_vec());
-        // filter for ed25519 address first
-        let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
-            inputs.into_iter().partition(|input_signing_data| {
+    fn insert_input_sorted(&mut self, input: InputSigningData) {
+        let input_required_address = input
+            .output
+            .required_address(
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.committable_age_range(),
+            )
+            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
+            .unwrap()
+            .expect("expiration unlockable outputs already filtered out");
+        if input_required_address.is_ed25519() {
+            if let Some(position) = self
+                .selected_inputs
+                .iter()
+                .position(|i| i.output_id() > input.output_id())
+            {
+                self.selected_inputs.insert(position, input);
+            } else {
+                self.selected_inputs.push(input);
+            }
+        } else {
+            match self.selected_inputs.iter().position(|input_signing_data| {
                 let required_address = input_signing_data
                     .output
-                    .required_address(commitment_slot_index, committable_age_range)
+                    .required_address(
+                        self.latest_slot_commitment_id.slot_index(),
+                        self.protocol_parameters.committable_age_range(),
+                    )
                     // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                     .unwrap()
                     .expect("expiration unlockable outputs already filtered out");
-
-                required_address.is_ed25519()
-            });
-
-        for input in account_nft_address_inputs {
-            let required_address = input
-                .output
-                .required_address(commitment_slot_index, committable_age_range)?
-                .expect("expiration unlockable outputs already filtered out");
-
-            match sorted_inputs
-                .iter()
-                .position(|input_signing_data| match required_address {
+                match required_address {
                     Address::Account(unlock_address) => {
                         if let Output::Account(account_output) = &input_signing_data.output {
                             *unlock_address.account_id()
@@ -728,10 +720,11 @@ impl TransactionBuilder {
                         }
                     }
                     _ => false,
-                }) {
+                }
+            }) {
                 Some(position) => {
                     // Insert after the output we need
-                    sorted_inputs.insert(position + 1, input);
+                    self.selected_inputs.insert(position + 1, input);
                 }
                 None => {
                     // insert before address
@@ -747,31 +740,32 @@ impl TransactionBuilder {
 
                     if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
-                        match sorted_inputs.iter().position(|input_signing_data| {
+                        match self.selected_inputs.iter().position(|input_signing_data| {
                             let required_address = input_signing_data
                                 .output
-                                .required_address(commitment_slot_index, committable_age_range)
-                                // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
+                                .required_address(
+                                    self.latest_slot_commitment_id.slot_index(),
+                                    self.protocol_parameters.committable_age_range(),
+                                )
+                                // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered
+                                // out.
                                 .unwrap()
                                 .expect("expiration unlockable outputs already filtered out");
-
                             required_address == account_or_nft_address
                         }) {
                             Some(position) => {
                                 // Insert before the output with this address required for unlocking
-                                sorted_inputs.insert(position, input);
+                                self.selected_inputs.insert(position, input);
                             }
                             // just push output
-                            None => sorted_inputs.push(input),
+                            None => self.selected_inputs.push(input),
                         }
                     } else {
                         // just push basic or foundry output
-                        sorted_inputs.push(input);
+                        self.selected_inputs.push(input);
                     }
                 }
             }
         }
-
-        Ok(sorted_inputs)
     }
 }
