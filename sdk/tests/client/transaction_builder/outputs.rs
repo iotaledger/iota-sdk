@@ -655,7 +655,7 @@ fn insufficient_mana() {
         slots_remaining,
     } = selected
     else {
-        panic!("expected insufficient mana error")
+        panic!("expected insufficient mana error, found {selected:?}")
     };
     assert_eq!(found, 0);
     assert_eq!(required, 10000);
