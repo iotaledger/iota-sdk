@@ -679,7 +679,7 @@ impl TransactionBuilder {
                 self.latest_slot_commitment_id.slot_index(),
                 self.protocol_parameters.committable_age_range(),
             )
-            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
+            // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered out.
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");
         if input_required_address.is_ed25519() {
@@ -700,7 +700,8 @@ impl TransactionBuilder {
                         self.latest_slot_commitment_id.slot_index(),
                         self.protocol_parameters.committable_age_range(),
                     )
-                    // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
+                    // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered
+                    // out.
                     .unwrap()
                     .expect("expiration unlockable outputs already filtered out");
                 match required_address {
@@ -747,8 +748,8 @@ impl TransactionBuilder {
                                     self.latest_slot_commitment_id.slot_index(),
                                     self.protocol_parameters.committable_age_range(),
                                 )
-                                // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered
-                                // out.
+                                // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already
+                                // filtered out.
                                 .unwrap()
                                 .expect("expiration unlockable outputs already filtered out");
                             required_address == account_or_nft_address
