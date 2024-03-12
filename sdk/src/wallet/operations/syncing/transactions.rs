@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use crate::{
     client::{secret::SecretManage, ClientError},
     types::{
-        api::core::{BlockState, TransactionState},
+        api::core::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::{
@@ -128,10 +128,20 @@ where
                                 metadata.earliest_attachment_slot
                             );
                             confirmed_unknown_output = true;
+
+                            let mut block_id = transaction.block_id;
+                            if transaction.block_id.is_none() {
+                                if let Ok(metadata) = self
+                                    .client()
+                                    .get_included_block_metadata(&transaction.payload.transaction().id())
+                                    .await
+                                {
+                                    block_id.replace(metadata.block_id);
+                                }
+                            }
                             updated_transaction_and_outputs(
                                 transaction,
-                                // Some(metadata.block_id),
-                                None,
+                                block_id,
                                 InclusionState::Confirmed,
                                 &mut updated_transactions,
                                 &mut spent_output_ids,
@@ -156,9 +166,20 @@ where
                                 );
                             } else {
                                 log::debug!("[SYNC] conflicting transaction {transaction_id}");
+
+                                let mut block_id = transaction.block_id;
+                                if transaction.block_id.is_none() {
+                                    if let Ok(metadata) = self
+                                        .client()
+                                        .get_included_block_metadata(&transaction.payload.transaction().id())
+                                        .await
+                                    {
+                                        block_id.replace(metadata.block_id);
+                                    }
+                                }
                                 updated_transaction_and_outputs(
                                     transaction,
-                                    None,
+                                    block_id,
                                     InclusionState::Conflicting,
                                     &mut updated_transactions,
                                     &mut spent_output_ids,
@@ -168,14 +189,6 @@ where
                         // Do nothing, just need to wait a bit more
                         TransactionState::Pending => {}
                     }
-                    // else if input_got_spent {
-                    //     process_transaction_with_unknown_state(
-                    //         &*self.ledger().await,
-                    //         transaction,
-                    //         &mut updated_transactions,
-                    //         &mut output_ids_to_unlock,
-                    //     )?;
-                    // }
                 }
                 Err(ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) => {
                     if input_got_spent {
@@ -185,28 +198,26 @@ where
                             &mut updated_transactions,
                             &mut output_ids_to_unlock,
                         )?;
+                    } else {
+                        log::debug!(
+                            "[SYNC] setting transaction {transaction_id} without block as conflicting so inputs get available again"
+                        );
+                        for input in transaction.payload.transaction().inputs() {
+                            let Input::Utxo(input) = input;
+                            output_ids_to_unlock.push(*input.output_id());
+                        }
+                        updated_transaction_and_outputs(
+                            transaction,
+                            None,
+                            // No block with this transaction, set it as conflicting so the inputs get available again
+                            InclusionState::Conflicting,
+                            &mut updated_transactions,
+                            &mut spent_output_ids,
+                        );
                     }
                 }
                 Err(e) => return Err(e.into()),
             }
-
-            //  else if input_got_spent {
-            //     process_transaction_with_unknown_state(
-            //         &*self.ledger().await,
-            //         transaction,
-            //         &mut updated_transactions,
-            //         &mut output_ids_to_unlock,
-            //     )?;
-            // }
-            // else {
-            //     // Reissue if there was no block id yet, because then we also didn't burn any mana
-            //     log::debug!("[SYNC] reissue transaction {}", transaction.transaction_id);
-            //     let reissued_block = self
-            //         .submit_signed_transaction(transaction.payload.clone(), None)
-            //         .await?;
-            //     transaction.block_id.replace(reissued_block);
-            //     updated_transactions.push(transaction);
-            // }
         }
 
         // updates account with balances, output ids, outputs
@@ -225,7 +236,9 @@ fn updated_transaction_and_outputs(
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     spent_output_ids: &mut Vec<OutputId>,
 ) {
-    transaction.block_id = block_id;
+    if block_id.is_some() {
+        transaction.block_id = block_id;
+    }
     transaction.inclusion_state = inclusion_state;
     // get spent inputs
     for input in transaction.payload.transaction().inputs() {

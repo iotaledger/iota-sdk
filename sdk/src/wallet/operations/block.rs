@@ -12,6 +12,8 @@ use crate::{
     wallet::{Wallet, WalletError},
 };
 
+const MAX_POST_BLOCK_ATTEMPTS: u64 = 3;
+
 impl<S: 'static + SecretManage> Wallet<S>
 where
     WalletError: From<S::Error>,
@@ -64,6 +66,14 @@ where
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
             .await;
+
+        for attempt in 1..MAX_POST_BLOCK_ATTEMPTS {
+            if let Ok(block_id) = self.client().post_block(&block).await {
+                log::debug!("submitted block {}", block_id);
+                return Ok(block_id);
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(attempt)).await;
+        }
 
         let block_id = self.client().post_block(&block).await?;
 
