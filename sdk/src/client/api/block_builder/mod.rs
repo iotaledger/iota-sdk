@@ -25,7 +25,7 @@ impl Client {
 
         let issuing_time = {
             let issuing_time = instant::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
+                .duration_since(instant::SystemTime::UNIX_EPOCH)
                 .expect("Time went backwards")
                 .as_nanos() as u64;
 
