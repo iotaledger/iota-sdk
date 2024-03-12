@@ -78,6 +78,21 @@ export class Utils {
     }
 
     /**
+     * Compute the delegation ID from a given delegation output ID.
+     *
+     * @param outputId The output ID as hex-encoded string.
+     * @returns The delegation ID.
+     */
+    static computeDelegationId(outputId: OutputId): AccountId {
+        return callUtilsMethod({
+            name: 'blake2b256Hash',
+            data: {
+                bytes: outputId,
+            },
+        });
+    }
+
+    /**
      * Compute the Foundry ID.
      *
      * @param accountId The account ID associated with the Foundry.
