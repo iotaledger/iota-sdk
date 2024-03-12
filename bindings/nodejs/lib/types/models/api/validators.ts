@@ -1,9 +1,9 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Bech32Address, EpochIndex } from '../../../block';
-import { u64 } from '../../../utils';
-import type { HexEncodedString } from '../../../utils/hex-encoding';
+import { Bech32Address, EpochIndex } from '../../block';
+import { u64 } from '../../utils';
+import type { HexEncodedString } from '../../utils/hex-encoding';
 
 /**
  * Information of a validator.

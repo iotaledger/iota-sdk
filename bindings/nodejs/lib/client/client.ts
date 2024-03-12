@@ -1,7 +1,9 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { plainToInstance } from 'class-transformer';
 import { ClientMethodHandler } from './client-method-handler';
+import { Response } from '../types';
 import {
     ClientOptions,
     Node,
@@ -18,7 +20,6 @@ import {
     NftOutputQueryParameters,
     OutputQueryParameters,
 } from '../types/client';
-import type { NodeInfoResponse } from '../types/client/nodeInfo';
 import {
     AccountOutput,
     BasicOutput,
@@ -42,39 +43,35 @@ import {
     EpochIndex,
     Address,
 } from '../types/block';
+import type { NodeInfoResponse } from '../types/client/nodeInfo';
 import {
-    BlockMetadataResponse,
-    InfoResponse,
     UTXOInput,
-    Response,
     OutputId,
     ProtocolParameters,
     u64,
     TransactionId,
     Bech32Address,
-    BlockWithMetadataResponse,
-    TransactionMetadataResponse,
 } from '../types';
 import {
+    BlockMetadataResponse,
+    BlockWithMetadataResponse,
+    InfoResponse,
+    IssuanceBlockHeaderResponse,
+    CommitteeResponse,
+    CongestionResponse,
+    ManaRewardsResponse,
+    NetworkMetricsResponse,
+    OutputMetadataResponse,
     OutputResponse,
     OutputsResponse,
-    CongestionResponse,
-    UtxoChangesResponse,
-    UtxoChangesFullResponse,
-    CommitteeResponse,
-    IssuanceBlockHeaderResponse,
-    OutputMetadataResponse,
     OutputWithMetadataResponse,
-    NetworkMetricsResponse,
-} from '../types/models/api';
-import { RoutesResponse } from '../types/models/api/node/routes-response';
-
-import { plainToInstance } from 'class-transformer';
-import { ManaRewardsResponse } from '../types/models/api/rewards';
-import {
+    RoutesResponse,
+    TransactionMetadataResponse,
+    UtxoChangesFullResponse,
+    UtxoChangesResponse,
     ValidatorResponse,
     ValidatorsResponse,
-} from '../types/models/api/validators';
+} from '../types/models/api';
 
 /** The Client to interact with nodes. */
 export class Client {

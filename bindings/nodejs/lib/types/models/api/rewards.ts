@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { EpochIndex } from '../../../block/slot';
-import { u64 } from '../../../utils';
+import { EpochIndex } from '../../block/slot';
+import { u64 } from '../../utils';
 
 /**
  * The mana rewards of an account or delegation output.

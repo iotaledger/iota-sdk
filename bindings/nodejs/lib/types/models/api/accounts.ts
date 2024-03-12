@@ -1,8 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SlotIndex } from '../../../block/slot';
-import { u64 } from '../../../utils';
+import { SlotIndex } from '../../block/slot';
+import { u64 } from '../../utils';
 
 /**
  * Provides the cost and readiness to issue estimates.

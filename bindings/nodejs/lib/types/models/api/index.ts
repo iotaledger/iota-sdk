@@ -9,5 +9,4 @@ export * from './node';
 export * from './plugins';
 export * from './rewards';
 export * from './utxo';
-export * from './response';
 export * from './validators';

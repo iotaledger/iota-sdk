@@ -1,10 +1,9 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { OutputId } from '../../../block/output';
-import { SlotCommitmentId } from '../../../block';
-import { Output, OutputDiscriminator } from '../../../block/output';
 import { Type } from 'class-transformer';
+import { SlotCommitmentId } from '../../block';
+import { Output, OutputId, OutputDiscriminator } from '../../block/output';
 
 /**
  * All UTXO changes that happened at a specific slot.

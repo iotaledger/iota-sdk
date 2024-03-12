@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { StorageScoreParameters } from '../../storage-score';
-import { SlotIndex, EpochIndex } from '../../../block/slot';
-import { NumericString } from '../../../utils';
+import type { StorageScoreParameters } from '../storage-score';
+import { SlotIndex, EpochIndex } from '../../block/slot';
+import { NumericString } from '../../utils';
 
 /**
  * Response from the /info endpoint.
@@ -401,4 +401,32 @@ export interface InfoResponse {
      * The base token info of the node.
      */
     baseToken: BaseTokenResponse;
+}
+
+/**
+ * Metrics information about the network.
+ */
+export interface NetworkMetricsResponse {
+    /**
+     * The current rate of new blocks per second.
+     */
+    blocksPerSecond: string;
+    /**
+     * The current rate of confirmed blocks per second.
+     */
+    confirmedBlocksPerSecond: string;
+    /**
+     * The ratio of confirmed blocks to new blocks of the last confirmed slot.
+     */
+    confirmationRate: string;
+}
+
+/**
+ * Response from the /routes endpoint.
+ */
+export interface RoutesResponse {
+    /**
+     * The routes the node exposes.
+     */
+    routes: string[];
 }
