@@ -234,7 +234,6 @@ impl ProtocolParameters {
                 self.generate_mana_with_decay(generation_amount, current_slot, current_slot + num_slots)?;
             // If we generated less than how much we lost, this is not going to work out
             if generated_mana <= decayed_mana {
-                println!("{generated_mana} less than {decayed_mana}");
                 return Err(ManaError::InsufficientGenerationAmount);
             }
             if generated_mana - decayed_mana >= required_mana {
