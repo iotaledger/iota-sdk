@@ -358,12 +358,11 @@ impl TransactionBuilder {
                 .iter()
                 .map(|o| o.output.mana_generation_amount(&self.protocol_parameters))
                 .sum::<u64>();
-            let total_stored_mana = self.selected_inputs.iter().map(|o| o.output.mana()).sum::<u64>();
             let slots_remaining = self.protocol_parameters.slots_until_generated(
                 self.creation_slot,
                 total_generation_amount,
-                total_stored_mana,
-                output_mana,
+                self.total_selected_mana(false)?,
+                output_mana - input_mana,
             )?;
             return Err(TransactionBuilderError::InsufficientMana {
                 found: input_mana,
