@@ -15,7 +15,11 @@ use iota_sdk::{
         secret::{SecretManager, SignBlock},
         Client,
     },
-    types::block::output::AccountId,
+    types::block::{
+        core::{basic::MaxBurnedManaAmount, BasicBlockBodyBuilder, BlockHeader},
+        output::AccountId,
+        UnsignedBlock,
+    },
 };
 
 #[tokio::main]
@@ -39,13 +43,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let issuance = client.get_issuance().await?;
     println!("Issuance:\n{issuance:#?}");
 
+    let protocol_params = client.get_protocol_parameters().await?;
+
     // Create and send the block with custom parents.
-    // TODO build block with custom parents, but without `build_basic_block()`
-    let block = client
-        .build_basic_block(issuer_id, None)
-        .await?
-        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
-        .await?;
+    let block = UnsignedBlock::new(
+        BlockHeader::new(
+            protocol_params.version(),
+            protocol_params.network_id(),
+            time::OffsetDateTime::now_utc().unix_timestamp_nanos() as _,
+            issuance.latest_commitment.id(),
+            issuance.latest_finalized_slot,
+            issuer_id,
+        ),
+        BasicBlockBodyBuilder::new(
+            issuance.strong_parents()?,
+            MaxBurnedManaAmount::MinimumAmount {
+                params: protocol_params.work_score_parameters(),
+                reference_mana_cost: client
+                    .get_account_congestion(&issuer_id, None)
+                    .await?
+                    .reference_mana_cost,
+            },
+        )
+        .finish_block_body()?,
+    )
+    .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
+    .await?;
 
     println!("{block:#?}");
 

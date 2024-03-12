@@ -76,8 +76,7 @@ pub enum TransactionBuilderError {
     UnfulfillableRequirement(Requirement),
     /// Unsupported address type.
     #[error("unsupported address type {0}")]
-    // TODO replace with string when 2.0 has Address::kind_str
-    UnsupportedAddressType(u8),
+    UnsupportedAddressType(String),
     /// Block error.
     #[error("{0}")]
     Block(#[from] BlockError),

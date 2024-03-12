@@ -41,7 +41,6 @@ pub enum ClientMethod {
         // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         account_id: AccountId,
@@ -58,7 +57,6 @@ pub enum ClientMethod {
         // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         unlock_conditions: Vec<UnlockCondition>,
@@ -86,7 +84,6 @@ pub enum ClientMethod {
         // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
         nft_id: NftId,
