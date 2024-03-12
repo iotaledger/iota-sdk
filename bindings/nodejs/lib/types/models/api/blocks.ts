@@ -1,7 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { BlockId, SlotCommitment, SlotIndex } from '../../block';
+import { BlockState } from '../state';
+import { Block, BlockId, SlotCommitment, SlotIndex } from '../../block';
 import { NumericString } from '../../utils';
 
 /**
@@ -33,4 +34,32 @@ export interface IssuanceBlockHeaderResponse {
      * Blocks that are directly referenced to adjust opinion.
      */
     shallowLikeParents?: BlockId[];
+}
+
+/**
+ * Response from the metadata endpoint.
+ */
+export interface BlockMetadataResponse {
+    /**
+     * The block id.
+     */
+    blockId: BlockId;
+    /**
+     * The block state.
+     */
+    blockState: BlockState;
+}
+
+/**
+ * Response from the full endpoint.
+ */
+export interface BlockWithMetadataResponse {
+    /**
+     * The block.
+     */
+    block: Block;
+    /**
+     * The block metadata.
+     */
+    metadata: BlockMetadataResponse;
 }
