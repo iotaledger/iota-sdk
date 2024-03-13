@@ -30,7 +30,7 @@ impl TransactionBuilder {
         Ok(())
     }
 
-    /// Gets the remainder address from configuration of finds one from the inputs.
+    /// Gets the remainder address from configuration or finds one from the inputs.
     pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, TransactionBuilderError> {
         if let Some(remainder_address) = &self.remainders.address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it

@@ -9,7 +9,7 @@ pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, VecDeque};
 use std::collections::{HashMap, HashSet};
 
 use crypto::keys::bip44::Bip44;
@@ -180,7 +180,7 @@ impl Client {
 pub struct TransactionBuilder {
     available_inputs: Vec<InputSigningData>,
     required_inputs: HashSet<OutputId>,
-    selected_inputs: Vec<InputSigningData>,
+    selected_inputs: OrderedInputs,
     bic_context_inputs: HashSet<BlockIssuanceCreditContextInput>,
     commitment_context_input: Option<CommitmentContextInput>,
     reward_context_inputs: HashSet<OutputId>,
@@ -252,7 +252,7 @@ impl TransactionBuilder {
         Self {
             available_inputs,
             required_inputs: HashSet::new(),
-            selected_inputs: Vec::new(),
+            selected_inputs: Default::default(),
             bic_context_inputs: HashSet::new(),
             commitment_context_input: None,
             reward_context_inputs: HashSet::new(),
@@ -456,7 +456,7 @@ impl TransactionBuilder {
 
         let data = PreparedTransactionData {
             transaction,
-            inputs_data: self.selected_inputs,
+            inputs_data: self.selected_inputs.into_iter().collect(),
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
         };
@@ -485,7 +485,16 @@ impl TransactionBuilder {
             self.requirements.push(requirement);
         }
 
-        self.insert_input_sorted(input);
+        let required_address = input
+            .output
+            .required_address(
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.committable_age_range(),
+            )
+            // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered out.
+            .unwrap()
+            .expect("expiration unlockable outputs already filtered out");
+        self.selected_inputs.insert(input, required_address);
 
         // New inputs/outputs may need context inputs
         if !self.requirements.contains(&Requirement::ContextInputs) {
@@ -671,102 +680,119 @@ impl TransactionBuilder {
             }
         })
     }
+}
 
-    fn insert_input_sorted(&mut self, input: InputSigningData) {
-        let input_required_address = input
-            .output
-            .required_address(
-                self.latest_slot_commitment_id.slot_index(),
-                self.protocol_parameters.committable_age_range(),
-            )
-            // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered out.
-            .unwrap()
-            .expect("expiration unlockable outputs already filtered out");
-        if input_required_address.is_ed25519() {
-            if let Some(position) = self
-                .selected_inputs
-                .iter()
-                .position(|i| i.output_id() > input.output_id())
-            {
-                self.selected_inputs.insert(position, input);
-            } else {
-                self.selected_inputs.push(input);
-            }
+#[derive(Clone, Debug, Default)]
+pub(crate) struct OrderedInputs {
+    ed25519: VecDeque<InputSigningData>,
+    other: BTreeMap<Address, Vec<InputSigningData>>,
+    len: usize,
+}
+
+impl OrderedInputs {
+    pub(crate) fn iter(&self) -> <&Self as IntoIterator>::IntoIter {
+        self.into_iter()
+    }
+
+    pub(crate) fn insert(&mut self, input: InputSigningData, required_address: Address) {
+        if required_address.is_ed25519() {
+            self.ed25519.push_back(input);
         } else {
-            match self.selected_inputs.iter().position(|input_signing_data| {
-                let required_address = input_signing_data
-                    .output
-                    .required_address(
-                        self.latest_slot_commitment_id.slot_index(),
-                        self.protocol_parameters.committable_age_range(),
-                    )
-                    // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered
-                    // out.
-                    .unwrap()
-                    .expect("expiration unlockable outputs already filtered out");
-                match required_address {
-                    Address::Account(unlock_address) => {
-                        if let Output::Account(account_output) = &input_signing_data.output {
-                            *unlock_address.account_id()
-                                == account_output.account_id_non_null(input_signing_data.output_id())
-                        } else {
-                            false
-                        }
-                    }
-                    Address::Nft(unlock_address) => {
-                        if let Output::Nft(nft_output) = &input_signing_data.output {
-                            *unlock_address.nft_id() == nft_output.nft_id_non_null(input_signing_data.output_id())
-                        } else {
-                            false
-                        }
-                    }
-                    _ => false,
-                }
-            }) {
-                Some(position) => {
-                    // Insert after the output we need
-                    self.selected_inputs.insert(position + 1, input);
-                }
-                None => {
-                    // insert before address
-                    let account_or_nft_address = match &input.output {
-                        Output::Account(account_output) => Some(Address::Account(AccountAddress::new(
-                            account_output.account_id_non_null(input.output_id()),
-                        ))),
-                        Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
-                            nft_output.nft_id_non_null(input.output_id()),
-                        ))),
-                        _ => None,
-                    };
-
-                    if let Some(account_or_nft_address) = account_or_nft_address {
-                        // Check for existing outputs for this address, and insert before
-                        match self.selected_inputs.iter().position(|input_signing_data| {
-                            let required_address = input_signing_data
-                                .output
-                                .required_address(
-                                    self.latest_slot_commitment_id.slot_index(),
-                                    self.protocol_parameters.committable_age_range(),
-                                )
-                                // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already
-                                // filtered out.
-                                .unwrap()
-                                .expect("expiration unlockable outputs already filtered out");
-                            required_address == account_or_nft_address
-                        }) {
-                            Some(position) => {
-                                // Insert before the output with this address required for unlocking
-                                self.selected_inputs.insert(position, input);
-                            }
-                            // just push output
-                            None => self.selected_inputs.push(input),
-                        }
-                    } else {
-                        // just push basic or foundry output
-                        self.selected_inputs.push(input);
-                    }
-                }
-            }
+            self.other.entry(required_address).or_default().push(input);
         }
+        self.len += 1;
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.len
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
+impl<'a> IntoIterator for &'a OrderedInputs {
+    type Item = &'a InputSigningData;
+    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut other = self
+            .other
+            .iter()
+            .map(|(k, v)| (k, v.iter().collect::<VecDeque<_>>()))
+            .collect::<BTreeMap<_, _>>();
+        let mut inputs = Vec::new();
+        let mut queue = self.ed25519.iter().collect::<VecDeque<_>>();
+        while let Some(input) = queue.pop_front() {
+            // Add associated inputs to the front of the queue
+            match &input.output {
+                Output::Account(account_output) => {
+                    queue = other
+                        .remove(&Address::Account(AccountAddress::new(
+                            account_output.account_id_non_null(input.output_id()),
+                        )))
+                        .into_iter()
+                        .flatten()
+                        .chain(queue)
+                        .collect()
+                }
+                Output::Nft(nft_output) => {
+                    queue = other
+                        .remove(&Address::Nft(NftAddress::new(
+                            nft_output.nft_id_non_null(input.output_id()),
+                        )))
+                        .into_iter()
+                        .flatten()
+                        .chain(queue)
+                        .collect()
+                }
+                _ => (),
+            };
+            inputs.push(input);
+        }
+        inputs.extend(other.into_values().flatten());
+        inputs.into_iter()
+    }
+}
+
+impl IntoIterator for OrderedInputs {
+    type Item = InputSigningData;
+    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+
+    fn into_iter(mut self) -> Self::IntoIter {
+        let mut inputs = Vec::new();
+        let mut queue = self.ed25519;
+        while let Some(input) = queue.pop_front() {
+            // Add associated inputs to the front of the queue
+            match &input.output {
+                Output::Account(account_output) => {
+                    queue = self
+                        .other
+                        .remove(&Address::Account(AccountAddress::new(
+                            account_output.account_id_non_null(input.output_id()),
+                        )))
+                        .into_iter()
+                        .flatten()
+                        .chain(queue)
+                        .collect()
+                }
+                Output::Nft(nft_output) => {
+                    queue = self
+                        .other
+                        .remove(&Address::Nft(NftAddress::new(
+                            nft_output.nft_id_non_null(input.output_id()),
+                        )))
+                        .into_iter()
+                        .flatten()
+                        .chain(queue)
+                        .collect()
+                }
+                _ => (),
+            };
+            inputs.push(input);
+        }
+        inputs.extend(self.other.into_values().flatten());
+        inputs.into_iter()
     }
 }
