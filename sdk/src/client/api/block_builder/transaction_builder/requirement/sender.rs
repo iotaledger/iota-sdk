@@ -79,7 +79,9 @@ impl TransactionBuilder {
 
                 self.fulfill_sender_requirement(restricted_address.address())
             }
-            _ => Err(TransactionBuilderError::UnsupportedAddressType(address.kind())),
+            _ => Err(TransactionBuilderError::UnsupportedAddressType(
+                address.kind_str().to_owned(),
+            )),
         }
     }
 }

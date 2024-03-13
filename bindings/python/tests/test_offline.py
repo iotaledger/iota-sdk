@@ -150,3 +150,14 @@ def test_irc_30():
     }
     metadata_deser = Irc30Metadata.from_dict(metadata_dict)
     assert metadata == metadata_deser
+
+
+def test_output_id_hashing():
+    output_id = OutputId(
+        '0x0000000000000000000000000000000000000000000000000000000000000000000000000000')
+    assert Utils.compute_account_id(
+        output_id) == '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345'
+    assert Utils.compute_delegation_id(
+        output_id) == '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345'
+    assert Utils.compute_nft_id(
+        output_id) == '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345'

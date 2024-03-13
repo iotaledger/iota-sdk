@@ -168,10 +168,9 @@ fn minted_native_tokens_in_new_remainder() {
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.transaction.outputs().len(), 3);
     selected.transaction.outputs().iter().for_each(|output| {
-        if let Output::Basic(_basic_output) = &output {
+        if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the minted native tokens
-            // TODO reenable when ISA supports NTs again
-            // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 10);
+            assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 10);
         }
     });
 }
@@ -321,10 +320,9 @@ fn melt_native_tokens() {
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.transaction.outputs().len(), 3);
     selected.transaction.outputs().iter().for_each(|output| {
-        if let Output::Basic(_basic_output) = &output {
+        if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            // TODO reenable when ISA supports NTs again
-            // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 5);
+            assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 5);
         }
     });
 }
@@ -1264,10 +1262,9 @@ fn melt_and_burn_native_tokens() {
     assert_eq!(selected.transaction.outputs().len(), 3);
     // Account state index is increased
     selected.transaction.outputs().iter().for_each(|output| {
-        if let Output::Basic(_basic_output) = &output {
+        if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            // TODO reenable when ISA supports NTs again
-            // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 421);
+            assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 421);
         }
     });
 }
