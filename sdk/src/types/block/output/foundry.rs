@@ -441,8 +441,7 @@ impl FoundryOutput {
         creation_index: SlotIndex,
         target_index: SlotIndex,
     ) -> Result<DecayedMana, OutputError> {
-        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
-        let generation_amount = self.amount().saturating_sub(min_deposit);
+        let generation_amount = self.mana_generation_amount(protocol_parameters);
         let potential_mana =
             protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
 
@@ -450,6 +449,12 @@ impl FoundryOutput {
             stored: 0,
             potential: potential_mana,
         })
+    }
+
+    /// Returns the mana generation amount of the output.
+    pub fn mana_generation_amount(&self, protocol_parameters: &ProtocolParameters) -> u64 {
+        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
+        self.amount().saturating_sub(min_deposit)
     }
 }
 
