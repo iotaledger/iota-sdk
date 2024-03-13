@@ -10,6 +10,7 @@ pub(crate) mod requirement;
 pub(crate) mod transition;
 
 use alloc::collections::{BTreeMap, VecDeque};
+use core::borrow::Borrow;
 use std::collections::{HashMap, HashSet};
 
 use crypto::keys::bip44::Bip44;
@@ -690,7 +691,7 @@ pub(crate) struct OrderedInputs {
 }
 
 impl OrderedInputs {
-    pub(crate) fn iter(&self) -> <&Self as IntoIterator>::IntoIter {
+    pub(crate) fn iter(&self) -> OrderedInputsIter<&InputSigningData> {
         self.into_iter()
     }
 
@@ -712,87 +713,77 @@ impl OrderedInputs {
     }
 }
 
-impl<'a> IntoIterator for &'a OrderedInputs {
-    type Item = &'a InputSigningData;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+#[derive(Clone, Debug)]
+pub(crate) struct OrderedInputsIter<I: Borrow<InputSigningData>> {
+    queue: VecDeque<I>,
+    other: BTreeMap<Address, Vec<I>>,
+}
 
-    fn into_iter(self) -> Self::IntoIter {
-        let mut other = self
-            .other
-            .iter()
-            .map(|(k, v)| (k, v.iter().collect::<VecDeque<_>>()))
-            .collect::<BTreeMap<_, _>>();
-        let mut inputs = Vec::new();
-        let mut queue = self.ed25519.iter().collect::<VecDeque<_>>();
-        while let Some(input) = queue.pop_front() {
+impl<I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<I> {
+    type Item = I;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(input) = self.queue.pop_front() {
             // Add associated inputs to the front of the queue
-            match &input.output {
+            match &input.borrow().output {
                 Output::Account(account_output) => {
-                    queue = other
+                    for input in self
+                        .other
                         .remove(&Address::Account(AccountAddress::new(
-                            account_output.account_id_non_null(input.output_id()),
+                            account_output.account_id_non_null(input.borrow().output_id()),
                         )))
                         .into_iter()
                         .flatten()
-                        .chain(queue)
-                        .collect()
+                        .rev()
+                    {
+                        self.queue.push_front(input);
+                    }
                 }
                 Output::Nft(nft_output) => {
-                    queue = other
+                    for input in self
+                        .other
                         .remove(&Address::Nft(NftAddress::new(
-                            nft_output.nft_id_non_null(input.output_id()),
+                            nft_output.nft_id_non_null(input.borrow().output_id()),
                         )))
                         .into_iter()
                         .flatten()
-                        .chain(queue)
-                        .collect()
+                        .rev()
+                    {
+                        self.queue.push_front(input);
+                    }
                 }
                 _ => (),
             };
-            inputs.push(input);
+            return Some(input);
         }
-        inputs.extend(other.into_values().flatten());
-        inputs.into_iter()
+        None
+    }
+}
+
+impl<'a> IntoIterator for &'a OrderedInputs {
+    type Item = &'a InputSigningData;
+    type IntoIter = OrderedInputsIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        OrderedInputsIter {
+            queue: self.ed25519.iter().collect(),
+            other: self
+                .other
+                .iter()
+                .map(|(k, v)| (k.clone(), v.iter().collect()))
+                .collect(),
+        }
     }
 }
 
 impl IntoIterator for OrderedInputs {
     type Item = InputSigningData;
-    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+    type IntoIter = OrderedInputsIter<Self::Item>;
 
-    fn into_iter(mut self) -> Self::IntoIter {
-        let mut inputs = Vec::new();
-        let mut queue = self.ed25519;
-        while let Some(input) = queue.pop_front() {
-            // Add associated inputs to the front of the queue
-            match &input.output {
-                Output::Account(account_output) => {
-                    queue = self
-                        .other
-                        .remove(&Address::Account(AccountAddress::new(
-                            account_output.account_id_non_null(input.output_id()),
-                        )))
-                        .into_iter()
-                        .flatten()
-                        .chain(queue)
-                        .collect()
-                }
-                Output::Nft(nft_output) => {
-                    queue = self
-                        .other
-                        .remove(&Address::Nft(NftAddress::new(
-                            nft_output.nft_id_non_null(input.output_id()),
-                        )))
-                        .into_iter()
-                        .flatten()
-                        .chain(queue)
-                        .collect()
-                }
-                _ => (),
-            };
-            inputs.push(input);
+    fn into_iter(self) -> Self::IntoIter {
+        OrderedInputsIter {
+            queue: self.ed25519,
+            other: self.other,
         }
-        inputs.extend(self.other.into_values().flatten());
-        inputs.into_iter()
     }
 }
