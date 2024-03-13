@@ -700,7 +700,7 @@ pub(crate) struct OrderedInputs {
 }
 
 impl OrderedInputs {
-    pub(crate) fn iter(&self) -> OrderedInputsIter<&InputSigningData> {
+    pub(crate) fn iter(&self) -> OrderedInputsIter<&Address, &InputSigningData> {
         self.into_iter()
     }
 
@@ -723,12 +723,12 @@ impl OrderedInputs {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct OrderedInputsIter<I: Borrow<InputSigningData>> {
+pub(crate) struct OrderedInputsIter<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> {
     queue: VecDeque<I>,
-    other: BTreeMap<Address, VecDeque<I>>,
+    other: BTreeMap<A, VecDeque<I>>,
 }
 
-impl<I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<I> {
+impl<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<A, I> {
     type Item = I;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -779,23 +779,19 @@ impl<I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<I> {
 
 impl<'a> IntoIterator for &'a OrderedInputs {
     type Item = &'a InputSigningData;
-    type IntoIter = OrderedInputsIter<Self::Item>;
+    type IntoIter = OrderedInputsIter<&'a Address, Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         OrderedInputsIter {
             queue: self.ed25519.iter().collect(),
-            other: self
-                .other
-                .iter()
-                .map(|(k, v)| (k.clone(), v.iter().collect()))
-                .collect(),
+            other: self.other.iter().map(|(k, v)| (k, v.iter().collect())).collect(),
         }
     }
 }
 
 impl IntoIterator for OrderedInputs {
     type Item = InputSigningData;
-    type IntoIter = OrderedInputsIter<Self::Item>;
+    type IntoIter = OrderedInputsIter<Address, Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         OrderedInputsIter {
