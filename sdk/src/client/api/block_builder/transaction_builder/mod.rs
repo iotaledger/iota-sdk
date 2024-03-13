@@ -700,8 +700,15 @@ pub(crate) struct OrderedInputs {
 }
 
 impl OrderedInputs {
-    pub(crate) fn iter(&self) -> OrderedInputsIter<&Address, &InputSigningData> {
-        self.into_iter()
+    pub(crate) fn iter_sorted(&self) -> OrderedInputsIter<&Address, &InputSigningData> {
+        OrderedInputsIter {
+            queue: self.ed25519.iter().collect(),
+            other: self.other.iter().map(|(k, v)| (k, v.iter().collect())).collect(),
+        }
+    }
+
+    pub(crate) fn iter(&self) -> impl Iterator<Item = &InputSigningData> + Clone {
+        self.ed25519.iter().chain(self.other.values().flatten())
     }
 
     pub(crate) fn insert(&mut self, required_address: Address, input: InputSigningData) {
@@ -774,18 +781,6 @@ impl<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> I
             }
         }
         None
-    }
-}
-
-impl<'a> IntoIterator for &'a OrderedInputs {
-    type Item = &'a InputSigningData;
-    type IntoIter = OrderedInputsIter<&'a Address, Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        OrderedInputsIter {
-            queue: self.ed25519.iter().collect(),
-            other: self.other.iter().map(|(k, v)| (k, v.iter().collect())).collect(),
-        }
     }
 }
 

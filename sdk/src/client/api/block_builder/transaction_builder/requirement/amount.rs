@@ -91,7 +91,7 @@ impl TransactionBuilder {
         let mut inputs_sdr = HashMap::new();
         let mut outputs_sdr = HashMap::new();
 
-        for selected_input in &self.selected_inputs {
+        for selected_input in self.selected_inputs.iter() {
             inputs_sum += selected_input.output.amount();
 
             if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.latest_slot_commitment_id.slot_index())

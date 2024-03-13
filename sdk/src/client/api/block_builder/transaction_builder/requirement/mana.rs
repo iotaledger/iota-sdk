@@ -39,7 +39,7 @@ impl TransactionBuilder {
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
             let inputs = self
                 .selected_inputs
-                .iter()
+                .iter_sorted()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
 
             let outputs = self.all_outputs().cloned();
@@ -305,7 +305,7 @@ impl TransactionBuilder {
             .into()
             .unwrap_or_else(|| self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
 
-        for input in &self.selected_inputs {
+        for input in self.selected_inputs.iter() {
             selected_mana += self.total_mana(input, include_generated)?;
         }
 

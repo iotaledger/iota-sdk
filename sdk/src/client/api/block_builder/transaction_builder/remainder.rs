@@ -50,7 +50,7 @@ impl TransactionBuilder {
             return Ok(Some((remainder_address.clone(), None)));
         }
 
-        for input in &self.selected_inputs {
+        for input in self.selected_inputs.iter() {
             let required_address = input
                 .output
                 .required_address(
