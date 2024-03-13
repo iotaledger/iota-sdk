@@ -686,7 +686,7 @@ impl TransactionBuilder {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct OrderedInputs {
     ed25519: VecDeque<InputSigningData>,
-    other: BTreeMap<Address, Vec<InputSigningData>>,
+    other: BTreeMap<Address, VecDeque<InputSigningData>>,
     len: usize,
 }
 
@@ -699,7 +699,7 @@ impl OrderedInputs {
         if required_address.is_ed25519() {
             self.ed25519.push_back(input);
         } else {
-            self.other.entry(required_address).or_default().push(input);
+            self.other.entry(required_address).or_default().push_back(input);
         }
         self.len += 1;
     }
@@ -716,7 +716,7 @@ impl OrderedInputs {
 #[derive(Clone, Debug)]
 pub(crate) struct OrderedInputsIter<I: Borrow<InputSigningData>> {
     queue: VecDeque<I>,
-    other: BTreeMap<Address, Vec<I>>,
+    other: BTreeMap<Address, VecDeque<I>>,
 }
 
 impl<I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<I> {
@@ -755,6 +755,14 @@ impl<I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<I> {
                 _ => (),
             };
             return Some(input);
+        }
+        if let Some(mut entry) = self.other.first_entry() {
+            if let Some(input) = entry.get_mut().pop_front() {
+                if entry.get().is_empty() {
+                    self.other.pop_first();
+                }
+                return Some(input);
+            }
         }
         None
     }
