@@ -24,15 +24,10 @@ impl Client {
         let issuance = self.get_issuance().await?;
 
         let issuing_time = {
-            #[cfg(feature = "std")]
-            let issuing_time = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
+            let issuing_time = instant::SystemTime::now()
+                .duration_since(instant::SystemTime::UNIX_EPOCH)
                 .expect("Time went backwards")
                 .as_nanos() as u64;
-            // TODO no_std way to have a nanosecond timestamp
-            // https://github.com/iotaledger/iota-sdk/issues/647
-            #[cfg(not(feature = "std"))]
-            let issuing_time = 0;
 
             // Check that the issuing_time is in the range of +-5 minutes of the node to prevent potential issues
             if !(issuance.latest_parent_block_issuing_time - FIVE_MINUTES_IN_NANOSECONDS
