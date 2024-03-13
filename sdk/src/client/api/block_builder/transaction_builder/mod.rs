@@ -705,7 +705,7 @@ impl OrderedInputs {
     }
 
     pub(crate) fn insert(&mut self, required_address: Address, input: InputSigningData) {
-        if required_address.is_ed25519() {
+        if required_address.is_ed25519_backed() {
             self.ed25519.push_back(input);
         } else {
             self.other.entry(required_address).or_default().push_back(input);
