@@ -509,7 +509,7 @@ impl TransactionBuilder {
             // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered out.
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");
-        self.selected_inputs.insert(input, required_address);
+        self.selected_inputs.insert(required_address, input);
 
         Ok(added_output.then(|| self.added_outputs.last().unwrap()))
     }
@@ -704,7 +704,7 @@ impl OrderedInputs {
         self.into_iter()
     }
 
-    pub(crate) fn insert(&mut self, input: InputSigningData, required_address: Address) {
+    pub(crate) fn insert(&mut self, required_address: Address, input: InputSigningData) {
         if required_address.is_ed25519() {
             self.ed25519.push_back(input);
         } else {
