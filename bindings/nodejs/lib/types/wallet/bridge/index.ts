@@ -24,18 +24,16 @@ import type {
     __PrepareMintNativeTokenMethod__,
     __PrepareMintNftsMethod__,
     __PrepareOutputMethod__,
-    __PrepareSendMethod__,
     __PrepareSendManaMethod__,
+    __PrepareSendMethod__,
     __PrepareCreateDelegationMethod__,
     __PrepareDelayDelegationClaimingMethod__,
     __PrepareBeginStakingMethod__,
     __PrepareExtendStakingMethod__,
     __PrepareEndStakingMethod__,
-    __PrepareTransactionMethod__,
+    __PrepareSendOutputsMethod__,
     __RegisterParticipationEventsMethod__,
     __WaitForTransactionAcceptanceMethod__,
-    __SendMethod__,
-    __SendWithParamsMethod__,
     __PrepareSendNativeTokensMethod__,
     __PrepareSendNftMethod__,
     __SendOutputsMethod__,
@@ -105,18 +103,16 @@ export type __WalletMethod__ =
     | __PrepareMintNativeTokenMethod__
     | __PrepareMintNftsMethod__
     | __PrepareOutputMethod__
-    | __PrepareSendMethod__
     | __PrepareSendManaMethod__
+    | __PrepareSendMethod__
     | __PrepareCreateDelegationMethod__
     | __PrepareDelayDelegationClaimingMethod__
     | __PrepareBeginStakingMethod__
     | __PrepareExtendStakingMethod__
     | __PrepareEndStakingMethod__
-    | __PrepareTransactionMethod__
+    | __PrepareSendOutputsMethod__
     | __RegisterParticipationEventsMethod__
     | __WaitForTransactionAcceptanceMethod__
-    | __SendMethod__
-    | __SendWithParamsMethod__
     | __PrepareSendNativeTokensMethod__
     | __PrepareSendNftMethod__
     | __SendOutputsMethod__

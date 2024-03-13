@@ -9,7 +9,7 @@ use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use eyre::Error;
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager},
+    client::{api::options::TransactionOptions, request_funds_from_faucet, secret::SecretManager},
     types::block::{
         address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
@@ -26,8 +26,8 @@ use iota_sdk::{
     utils::ConvertTo,
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        Error as WalletError, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
-        SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams, SendNftParams,
+        SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };
@@ -38,6 +38,8 @@ use crate::{
     helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
+
+const DEFAULT_FAUCET_URL: &str = "http://localhost:8088/api/enqueue";
 
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
@@ -177,10 +179,11 @@ pub enum WalletCommand {
     },
     /// Request funds from the faucet.
     Faucet {
-        /// Address the faucet sends the funds to, defaults to the wallet address.
+        /// Address the faucet sends the funds to. If not provided, the command defaults to the wallet address.
         address: Option<Bech32Address>,
-        /// URL of the faucet, default to <http://localhost:8088/api/enqueue>.
-        url: Option<String>,
+        /// URL of the faucet.
+        #[arg(short, long, value_name = "URL", env = "FAUCET_URL", default_value = DEFAULT_FAUCET_URL)]
+        url: String,
     },
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     ImplicitAccountCreationAddress,
@@ -838,15 +841,14 @@ pub async fn extend_staking_command(
 }
 
 // `faucet` command
-pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url: Option<String>) -> Result<(), Error> {
+pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url: &str) -> Result<(), Error> {
     let address = if let Some(address) = address {
         address
     } else {
         wallet.address().await
     };
 
-    let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
-    let response = request_funds_from_faucet(faucet_url, &address).await?;
+    let response = request_funds_from_faucet(url, &address).await?;
 
     println_log_info!("{response}");
 
@@ -1377,7 +1379,7 @@ pub enum PromptResponse {
 }
 
 async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
-    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+    if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
         let password = get_password("Stronghold password", false)?;
@@ -1526,7 +1528,7 @@ pub async fn prompt_internal(
                             ensure_password(wallet).await?;
                             extend_staking_command(wallet, account_id, additional_epochs).await
                         }
-                        WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
+                        WalletCommand::Faucet { address, url } => faucet_command(wallet, address, &url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
                             implicit_account_creation_address_command(wallet).await
                         }

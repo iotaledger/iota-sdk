@@ -17,14 +17,14 @@ use iota_sdk::{
     },
 };
 use iota_sdk_bindings_core::{
-    call_client_method, call_secret_manager_method, CallMethod, ClientMethod, Response, Result, SecretManagerMethod,
+    call_client_method, call_secret_manager_method, CallMethod, ClientMethod, Error, Response, SecretManagerMethod,
     WalletMethod, WalletOptions,
 };
 use pretty_assertions::assert_eq;
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn create_wallet() -> Result<()> {
+async fn create_wallet() -> Result<(), Error> {
     let storage_path = "test-storage/create_wallet";
     std::fs::remove_dir_all(storage_path).ok();
 
@@ -67,7 +67,7 @@ async fn create_wallet() -> Result<()> {
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn client_from_wallet() -> Result<()> {
+async fn client_from_wallet() -> Result<(), Error> {
     let storage_path = "test-storage/client_from_wallet";
     std::fs::remove_dir_all(storage_path).ok();
 

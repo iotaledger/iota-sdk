@@ -3,8 +3,8 @@
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, Error as ClientError},
-    wallet::Error as WalletError,
+    client::{constants::SHIMMER_COIN_TYPE, ClientError},
+    wallet::WalletError,
 };
 use iota_sdk_bindings_core::Error;
 use pretty_assertions::assert_eq;
@@ -48,7 +48,7 @@ fn custom_error_serialization() {
             "type": "wallet",
             "error": {
                 "type": "bipPathMismatch",
-                "error": "BIP44 mismatch: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 }), existing bip path is: None"
+                "error": "bip path mismatch: Some(Bip44 { coin_type: 4219, account: 0, change: 0, address_index: 0 }), existing bip path is: None"
             }
         })
     );

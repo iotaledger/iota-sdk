@@ -3,7 +3,6 @@
 
 use alloc::collections::BTreeSet;
 
-use hashbrown::HashMap;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -14,7 +13,7 @@ use packable::{
 use crate::types::block::{
     address::{AccountAddress, Address},
     output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        feature::{verify_allowed_features, Feature, FeatureError, FeatureFlags, Features},
         unlock_condition::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
             UnlockConditions,
@@ -23,7 +22,6 @@ use crate::types::block::{
         StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::TransactionFailureReason,
     slot::SlotIndex,
 };
 
@@ -261,7 +259,7 @@ impl AccountOutputBuilder {
             OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
-        verify_staked_amount(output.amount, &output.features)?;
+        verify_staking(output.amount, &output.features)?;
 
         Ok(output)
     }
@@ -442,61 +440,6 @@ impl AccountOutput {
             potential: potential_mana,
         })
     }
-
-    // Transition, just without full SemanticValidationContext
-    pub(crate) fn transition_inner(
-        current_state: &Self,
-        next_state: &Self,
-        input_chains: &HashMap<ChainId, (&OutputId, &Output)>,
-        outputs: &[Output],
-    ) -> Result<(), TransactionFailureReason> {
-        if current_state.immutable_features != next_state.immutable_features {
-            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
-        }
-
-        // TODO update when TIP is updated
-        // // Governance transition.
-        // if current_state.amount != next_state.amount
-        //     || current_state.foundry_counter != next_state.foundry_counter
-        // {
-        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
-        // }
-
-        // // State transition.
-        // if current_state.features.metadata() != next_state.features.metadata() {
-        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
-        // }
-
-        let created_foundries = outputs.iter().filter_map(|output| {
-            if let Output::Foundry(foundry) = output {
-                if foundry.account_address().account_id() == &next_state.account_id
-                    && !input_chains.contains_key(&foundry.chain_id())
-                {
-                    Some(foundry)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        });
-
-        let mut created_foundries_count = 0;
-
-        for foundry in created_foundries {
-            created_foundries_count += 1;
-
-            if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                return Err(TransactionFailureReason::FoundrySerialInvalid);
-            }
-        }
-
-        if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-            return Err(TransactionFailureReason::AccountInvalidFoundryCounter);
-        }
-
-        Ok(())
-    }
 }
 
 impl StorageScore for AccountOutput {
@@ -568,7 +511,7 @@ impl Packable for AccountOutput {
             verify_allowed_features(&features, Self::ALLOWED_FEATURES)
                 .map_err(UnpackError::Packable)
                 .coerce()?;
-            verify_staked_amount(amount, &features).map_err(UnpackError::Packable)?;
+            verify_staking(amount, &features).map_err(UnpackError::Packable)?;
         }
 
         let immutable_features = Features::unpack_inner(unpacker, visitor).coerce()?;
@@ -617,8 +560,11 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     )?)
 }
 
-fn verify_staked_amount(amount: u64, features: &Features) -> Result<(), OutputError> {
+fn verify_staking(amount: u64, features: &Features) -> Result<(), OutputError> {
     if let Some(staking) = features.staking() {
+        if features.block_issuer().is_none() {
+            return Err(FeatureError::StakingBlockIssuerMissing.into());
+        }
         if amount < staking.staked_amount() {
             return Err(OutputError::InvalidStakedAmount);
         }

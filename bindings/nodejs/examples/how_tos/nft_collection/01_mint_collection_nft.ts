@@ -1,7 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MintNftParams, NftId, Utils, Wallet, Irc27Metadata } from '@iota/sdk';
+import {
+    MintNftParams,
+    NftId,
+    Utils,
+    Wallet,
+    Irc27Metadata,
+    NftAddress,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // The NFT collection size
@@ -49,7 +56,10 @@ async function run() {
 
         const client = await wallet.getClient();
         const bech32Hrp = await client.getBech32Hrp();
-        const issuer = Utils.nftIdToBech32(issuerNftId, bech32Hrp);
+        const issuer = Utils.addressToBech32(
+            new NftAddress(issuerNftId),
+            bech32Hrp,
+        );
 
         const nftMintParams = [];
         // Create the metadata with another index for each
@@ -79,12 +89,11 @@ async function run() {
             );
             const transaction = await wallet.mintNfts(chunk);
 
-            // Wait for transaction to get accepted
-            const blockId = await wallet.waitForTransactionAcceptance(
+            await wallet.waitForTransactionAcceptance(
                 transaction.transactionId,
             );
             console.log(
-                `Tx accepted in block: ${process.env.EXPLORER_URL}/block/${blockId}`,
+                `Tx accepted: ${process.env.EXPLORER_URL}/transactions/${transaction.transactionId}`,
             );
 
             // Sync so the new outputs are available again for new transactions

@@ -1,22 +1,15 @@
 import type {
     __GenerateMnemonicMethod__,
     __MnemonicToHexSeedMethod__,
-    __ComputeAccountIdMethod__,
     __ComputeOutputIdMethod__,
     __ComputeTokenIdMethod__,
-    __ComputeNftIdMethod__,
     __ComputeFoundryIdMethod__,
     __ComputeMinimumOutputAmountMethod__,
-    __ParseBech32AddressMethod__,
+    __Blake2b256HashMethod__,
     __BlockIdMethod__,
     __TransactionIdMethod__,
-    __Bech32ToHexMethod__,
-    __HexToBech32Method__,
     __AddressToBech32Method__,
-    __AccountIdToBech32Method__,
-    __AnchorIdToBech32Method__,
-    __NftIdToBech32Method__,
-    __HexPublicKeyToBech32AddressMethod__,
+    __ParseBech32AddressMethod__,
     __IsAddressValidMethod__,
     __ProtocolParametersHashMethod__,
     __TransactionSigningHashMethod__,
@@ -40,22 +33,15 @@ import type {
 export type __UtilsMethods__ =
     | __GenerateMnemonicMethod__
     | __MnemonicToHexSeedMethod__
-    | __ComputeAccountIdMethod__
-    | __ComputeNftIdMethod__
     | __ComputeFoundryIdMethod__
     | __ComputeOutputIdMethod__
     | __ComputeTokenIdMethod__
     | __ComputeMinimumOutputAmountMethod__
     | __ParseBech32AddressMethod__
+    | __Blake2b256HashMethod__
     | __BlockIdMethod__
     | __TransactionIdMethod__
-    | __Bech32ToHexMethod__
-    | __HexToBech32Method__
     | __AddressToBech32Method__
-    | __AccountIdToBech32Method__
-    | __AnchorIdToBech32Method__
-    | __NftIdToBech32Method__
-    | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__
     | __ProtocolParametersHashMethod__
     | __TransactionSigningHashMethod__

@@ -4,13 +4,13 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::{AccountAddress, Bech32Address},
         output::{unlock_condition::AddressUnlockCondition, DelegationId, DelegationOutputBuilder},
     },
     utils::serde::string,
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet, WalletError},
 };
 
 /// Params for `create_delegation_output()`
@@ -46,8 +46,8 @@ pub struct PreparedCreateDelegationTransaction {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Creates a delegation output.
     /// ```ignore
@@ -68,7 +68,7 @@ where
         &self,
         params: CreateDelegationParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<CreateDelegationTransaction> {
+    ) -> Result<CreateDelegationTransaction, WalletError> {
         let options = options.into();
         let prepared = self.prepare_create_delegation_output(params, options.clone()).await?;
 
@@ -85,7 +85,7 @@ where
         &self,
         params: CreateDelegationParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedCreateDelegationTransaction> {
+    ) -> Result<PreparedCreateDelegationTransaction, WalletError> {
         log::debug!("[TRANSACTION] prepare_create_delegation_output");
 
         let address = match params.address.as_ref() {
@@ -104,7 +104,7 @@ where
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()?;
 
-        let transaction = self.prepare_transaction([output], options).await?;
+        let transaction = self.prepare_send_outputs([output], options).await?;
 
         Ok(PreparedCreateDelegationTransaction {
             delegation_id: DelegationId::from(&transaction.transaction.id().into_output_id(0)),

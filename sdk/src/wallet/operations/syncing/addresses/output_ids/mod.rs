@@ -21,15 +21,11 @@ use crate::{
     types::block::{address::Bech32Address, output::OutputId},
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
-        types::address::AddressWithUnspentOutputs, Wallet,
+        types::address::AddressWithUnspentOutputs, Wallet, WalletError,
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
     /// (account/nft address in AddressUnlockCondition and the account/nft output is controlled with the Ed25519
     /// address) connected to
@@ -37,7 +33,7 @@ where
         &self,
         address: &Bech32Address,
         sync_options: &SyncOptions,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> Result<Vec<OutputId>, WalletError> {
         if sync_options.sync_only_most_basic_outputs {
             let output_ids = self
                 .get_basic_output_ids_with_address_unlock_condition_only(address.clone())
@@ -67,6 +63,7 @@ where
         if (address.is_ed25519() && sync_options.wallet.basic_outputs)
             || (address.is_nft() && sync_options.nft.basic_outputs)
             || (address.is_account() && sync_options.account.basic_outputs)
+            || (address.is_implicit_account_creation() && sync_options.sync_implicit_accounts)
         {
             // basic outputs
             #[cfg(target_family = "wasm")]
@@ -235,7 +232,7 @@ where
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
+    ) -> Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>), WalletError> {
         log::debug!("[SYNC] start get_output_ids_for_addresses");
         let address_output_ids_start_time = Instant::now();
 
@@ -248,13 +245,13 @@ where
             .chunks(PARALLEL_REQUESTS_AMOUNT)
             .map(|x: &[AddressWithUnspentOutputs]| x.to_vec())
         {
-            let results;
+            let results: Vec<Result<_, WalletError>>;
             #[cfg(target_family = "wasm")]
             {
                 let mut tasks = Vec::new();
                 for address in addresses_chunk {
                     let output_ids = self.get_output_ids_for_address(&address.address, options).await?;
-                    tasks.push(crate::wallet::Result::Ok((address, output_ids)));
+                    tasks.push(Ok((address, output_ids)));
                 }
                 results = tasks;
             }
@@ -270,7 +267,7 @@ where
                             let output_ids = wallet
                                 .get_output_ids_for_address(&address.address, &sync_options)
                                 .await?;
-                            crate::wallet::Result::Ok((address, output_ids))
+                            Ok((address, output_ids))
                         })
                         .await
                     });

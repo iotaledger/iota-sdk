@@ -17,7 +17,7 @@ use iota_sdk::{
     },
 };
 
-use crate::{method::ClientMethod, response::Response, Result};
+use crate::{method::ClientMethod, response::Response};
 
 /// Listen to MQTT events
 #[cfg(feature = "mqtt")]
@@ -52,7 +52,10 @@ where
 }
 
 /// Call a client method.
-pub(crate) async fn call_client_method_internal(client: &Client, method: ClientMethod) -> Result<Response> {
+pub(crate) async fn call_client_method_internal(
+    client: &Client,
+    method: ClientMethod,
+) -> Result<Response, crate::Error> {
     let response = match method {
         ClientMethod::BuildAccountOutput {
             amount,
@@ -173,7 +176,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Ok
         }
         ClientMethod::GetNode => Response::Node(client.get_node().await?),
-        ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
@@ -182,11 +184,12 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetInfo { url, auth } => Response::Info(Client::get_info(&url, auth).await?),
         ClientMethod::GetNodeInfo => Response::NodeInfo(client.get_node_info().await?),
+        ClientMethod::GetNetworkMetrics => Response::NetworkMetrics(client.get_network_metrics().await?),
         ClientMethod::GetRoutes => Response::Routes(client.get_routes().await?),
         ClientMethod::GetAccountCongestion { account_id, work_score } => {
             Response::Congestion(client.get_account_congestion(&account_id, work_score).await?)
         }
-        ClientMethod::GetRewards { output_id, slot_index } => {
+        ClientMethod::GetOutputManaRewards { output_id, slot_index } => {
             Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
         }
         ClientMethod::GetValidators { page_size, cursor } => {
@@ -304,23 +307,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::FindInputs { addresses, amount } => {
             Response::Inputs(client.find_inputs(addresses, amount).await?)
         }
-        ClientMethod::HexToBech32 { hex, bech32_hrp } => {
-            Response::Bech32Address(client.hex_to_bech32(&hex, bech32_hrp).await?)
-        }
         ClientMethod::AddressToBech32 { address, bech32_hrp } => {
             Response::Bech32Address(client.address_to_bech32(address, bech32_hrp).await?)
-        }
-        ClientMethod::AccountIdToBech32 { account_id, bech32_hrp } => {
-            Response::Bech32Address(client.account_id_to_bech32(account_id, bech32_hrp).await?)
-        }
-        ClientMethod::AnchorIdToBech32 { anchor_id, bech32_hrp } => {
-            Response::Bech32Address(client.anchor_id_to_bech32(anchor_id, bech32_hrp).await?)
-        }
-        ClientMethod::NftIdToBech32 { nft_id, bech32_hrp } => {
-            Response::Bech32Address(client.nft_id_to_bech32(nft_id, bech32_hrp).await?)
-        }
-        ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
-            Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
         ClientMethod::ComputeMinimumOutputAmount { output } => {
             let storage_score_params = client.get_storage_score_parameters().await?;

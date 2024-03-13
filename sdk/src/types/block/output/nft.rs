@@ -22,7 +22,6 @@ use crate::types::block::{
         OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::TransactionFailureReason,
     slot::SlotIndex,
 };
 
@@ -452,15 +451,6 @@ impl NftOutput {
             stored: stored_mana,
             potential: potential_mana,
         })
-    }
-
-    // Transition, just without full SemanticValidationContext
-    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), TransactionFailureReason> {
-        if current_state.immutable_features != next_state.immutable_features {
-            return Err(TransactionFailureReason::ChainOutputImmutableFeaturesChanged);
-        }
-
-        Ok(())
     }
 }
 

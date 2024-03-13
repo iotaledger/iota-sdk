@@ -40,7 +40,7 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::{operations::syncing::SyncOptions, types::OutputData, Error, FilterOptions, Result},
+    wallet::{operations::syncing::SyncOptions, types::OutputData, FilterOptions, WalletError},
 };
 
 /// The stateful wallet used to interact with an IOTA network.
@@ -75,7 +75,7 @@ impl<S: SecretManage> core::ops::Deref for Wallet<S> {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
+    WalletError: From<S::Error>,
 {
     /// Initialises the wallet builder.
     pub fn builder() -> WalletBuilder<S> {
@@ -339,14 +339,10 @@ impl WalletLedger {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
     /// from the wallet, if it isn't in the wallet try to get it from the node
-    pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output> {
+    pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output, WalletError> {
         let foundry_id = FoundryId::from(native_token_id);
 
         for output_data in self.ledger.read().await.outputs.values() {
@@ -410,18 +406,13 @@ where
         self.ledger.write().await
     }
 
-    /// Get the wallet's ledger RwLock.
-    pub(crate) fn ledger_rw(&self) -> &Arc<tokio::sync::RwLock<WalletLedger>> {
-        &self.ledger
-    }
-
     #[cfg(feature = "storage")]
     pub(crate) fn storage_manager(&self) -> &StorageManager {
         &self.storage_manager
     }
 
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
-    pub async fn implicit_account_creation_address(&self) -> Result<Bech32Address> {
+    pub async fn implicit_account_creation_address(&self) -> Result<Bech32Address, WalletError> {
         let bech32_address = &self.address().await;
 
         if let Address::Ed25519(address) = bech32_address.inner() {
@@ -430,18 +421,18 @@ where
                 ImplicitAccountCreationAddress::from(*address),
             ))
         } else {
-            Err(Error::NonEd25519Address)
+            Err(WalletError::NonEd25519Address)
         }
     }
 }
 
 impl<S: SecretManage> WalletInner<S> {
-    /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
+    /// Get the [`SecretManager`] of the wallet.
+    pub fn secret_manager(&self) -> &Arc<RwLock<S>> {
         &self.secret_manager
     }
 
-    /// Listen to wallet events, empty vec will listen to all events
+    /// Listen to wallet events, empty vec will listen to all events.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
@@ -453,7 +444,7 @@ impl<S: SecretManage> WalletInner<S> {
         emitter.on(events, handler);
     }
 
-    /// Remove wallet event listeners, empty vec will remove all listeners
+    /// Remove wallet event listeners, empty vec will remove all listeners.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn clear_listeners<I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I)
@@ -465,12 +456,12 @@ impl<S: SecretManage> WalletInner<S> {
     }
 
     /// Generates a new random mnemonic.
-    pub fn generate_mnemonic(&self) -> crate::wallet::Result<Mnemonic> {
+    pub fn generate_mnemonic(&self) -> Result<Mnemonic, WalletError> {
         Ok(Client::generate_mnemonic()?)
     }
 
     /// Verify that a &str is a valid mnemonic.
-    pub fn verify_mnemonic(&self, mnemonic: &MnemonicRef) -> crate::wallet::Result<()> {
+    pub fn verify_mnemonic(&self, mnemonic: &MnemonicRef) -> Result<(), WalletError> {
         verify_mnemonic(mnemonic)?;
         Ok(())
     }
@@ -515,7 +506,7 @@ pub struct WalletLedgerDto {
 }
 
 impl TryFromDto<WalletLedgerDto> for WalletLedger {
-    type Error = crate::wallet::Error;
+    type Error = WalletError;
 
     fn try_from_dto_with_params_inner(
         dto: WalletLedgerDto,
@@ -529,13 +520,13 @@ impl TryFromDto<WalletLedgerDto> for WalletLedger {
                 .transactions
                 .into_iter()
                 .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
-                .collect::<crate::wallet::Result<_>>()?,
+                .collect::<Result<_, WalletError>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
                 .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
-                .collect::<crate::wallet::Result<_>>()?,
+                .collect::<Result<_, WalletError>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto.native_token_foundries,
         })

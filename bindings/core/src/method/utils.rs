@@ -8,7 +8,7 @@ use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
         address::{Address, Bech32Address, Hrp},
-        output::{AccountId, AnchorId, NftId, Output, OutputId, StorageScoreParameters},
+        output::{AccountId, Output, OutputId, StorageScoreParameters},
         payload::signed_transaction::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
             TransactionId,
@@ -19,7 +19,7 @@ use iota_sdk::{
         unlock::Unlock,
         BlockDto,
     },
-    utils::serde::{option_mana_rewards, string},
+    utils::serde::{option_mana_rewards, prefix_hex_bytes, string},
 };
 use serde::{Deserialize, Serialize};
 
@@ -31,44 +31,10 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum UtilsMethod {
-    /// Transforms bech32 to hex
-    Bech32ToHex {
-        bech32: Bech32Address,
-    },
-    /// Transforms a hex encoded address to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexToBech32 {
-        hex: String,
-        bech32_hrp: Hrp,
-    },
     /// Converts an address to its bech32 representation
     #[serde(rename_all = "camelCase")]
     AddressToBech32 {
         address: Address,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms an account id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AccountIdToBech32 {
-        account_id: AccountId,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms an anchor id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    AnchorIdToBech32 {
-        anchor_id: AnchorId,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms an nft id to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    NftIdToBech32 {
-        nft_id: NftId,
-        bech32_hrp: Hrp,
-    },
-    /// Transforms a hex encoded public key to a bech32 encoded address
-    #[serde(rename_all = "camelCase")]
-    HexPublicKeyToBech32Address {
-        hex: String,
         bech32_hrp: Hrp,
     },
     /// Returns a valid Address parsed from a String.
@@ -96,10 +62,11 @@ pub enum UtilsMethod {
     TransactionId {
         payload: SignedTransactionPayloadDto,
     },
-    /// Computes the account ID
+    /// Computes the Blake2b256 hash of the provided hex encoded bytes.
     #[serde(rename_all = "camelCase")]
-    ComputeAccountId {
-        output_id: OutputId,
+    Blake2b256Hash {
+        #[serde(with = "prefix_hex_bytes")]
+        bytes: Vec<u8>,
     },
     /// Computes the Foundry ID
     #[serde(rename_all = "camelCase")]
@@ -107,11 +74,6 @@ pub enum UtilsMethod {
         account_id: AccountId,
         serial_number: u32,
         token_scheme_type: u8,
-    },
-    /// Computes the NFT ID
-    #[serde(rename_all = "camelCase")]
-    ComputeNftId {
-        output_id: OutputId,
     },
     /// Computes the output ID from transaction id and output index
     ComputeOutputId {

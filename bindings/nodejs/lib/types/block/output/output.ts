@@ -14,6 +14,7 @@ import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { AccountId, NftId, AnchorId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
 import { NativeToken } from '../../models/native-token';
+import { Address, AddressDiscriminator, AccountAddress } from '../address';
 
 export type OutputId = HexEncodedString;
 
@@ -344,7 +345,10 @@ class DelegationOutput extends Output {
     /**
      * The Account ID of the validator to which this output is delegating.
      */
-    readonly validatorId: AccountId;
+    @Type(() => Address, {
+        discriminator: AddressDiscriminator,
+    })
+    readonly validatorAddress: Address;
     /**
      * The index of the first epoch for which this output delegates.
      */
@@ -365,7 +369,7 @@ class DelegationOutput extends Output {
      * @param amount The amount of the output.
      * @param delegatedAmount The amount of delegated coins.
      * @param delegationId Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.
-     * @param validatorId The Account ID of the validator to which this output is delegating.
+     * @param validatorAddress The Account address of the validator to which this output is delegating.
      * @param startEpoch The index of the first epoch for which this output delegates.
      * @param endEpoch The index of the last epoch for which this output delegates.
      * @param unlockConditions The unlock conditions of the output.
@@ -374,7 +378,7 @@ class DelegationOutput extends Output {
         amount: u64,
         delegatedAmount: u64,
         delegationId: DelegationId,
-        validatorId: AccountId,
+        validatorAddress: AccountAddress,
         startEpoch: EpochIndex,
         endEpoch: EpochIndex,
         unlockConditions: UnlockCondition[],
@@ -382,7 +386,7 @@ class DelegationOutput extends Output {
         super(OutputType.Delegation, amount);
         this.delegatedAmount = delegatedAmount;
         this.delegationId = delegationId;
-        this.validatorId = validatorId;
+        this.validatorAddress = validatorAddress;
         this.startEpoch = startEpoch;
         this.endEpoch = endEpoch;
         this.unlockConditions = unlockConditions;

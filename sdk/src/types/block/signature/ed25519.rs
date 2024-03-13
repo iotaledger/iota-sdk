@@ -97,16 +97,13 @@ impl Ed25519Signature {
         let signature_address: [u8; Self::PUBLIC_KEY_LENGTH] = Blake2b256::digest(self.public_key).into();
 
         if address.deref() != &signature_address {
-            return Err(SignatureError::SignaturePublicKeyMismatch {
+            return Err(SignatureError::PublicKeyMismatch {
                 expected: prefix_hex::encode(address.as_ref()),
                 actual: prefix_hex::encode(signature_address),
             });
         }
 
-        if !self
-            .try_verify(message)
-            .map_err(SignatureError::InvalidSignatureBytes)?
-        {
+        if !self.try_verify(message).map_err(SignatureError::SignatureBytes)? {
             return Err(SignatureError::SignatureMismatch(prefix_hex::encode(message)));
         }
 
@@ -199,8 +196,8 @@ pub(crate) mod dto {
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
             Ok(Self::from_bytes(
-                prefix_hex::decode(&value.public_key).map_err(SignatureError::InvalidPublicKeyHex)?,
-                prefix_hex::decode(&value.signature).map_err(SignatureError::InvalidSignatureHex)?,
+                prefix_hex::decode(&value.public_key).map_err(SignatureError::PublicKeyHex)?,
+                prefix_hex::decode(&value.signature).map_err(SignatureError::SignatureHex)?,
             ))
         }
     }

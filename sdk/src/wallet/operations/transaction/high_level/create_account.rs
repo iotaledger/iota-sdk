@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
     types::block::{
         address::Bech32Address,
         output::{
@@ -14,7 +14,7 @@ use crate::{
     wallet::{
         operations::transaction::TransactionOptions,
         types::{OutputData, TransactionWithMetadata},
-        Wallet,
+        Wallet, WalletError,
     },
 };
 
@@ -33,8 +33,8 @@ pub struct CreateAccountParams {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
+    WalletError: From<S::Error>,
+    ClientError: From<S::Error>,
 {
     /// Creates an account output.
     /// ```ignore
@@ -55,7 +55,7 @@ where
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<TransactionWithMetadata> {
+    ) -> Result<TransactionWithMetadata, WalletError> {
         let options = options.into();
         let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 
@@ -67,7 +67,7 @@ where
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
@@ -100,7 +100,7 @@ where
 
         let outputs = [account_output_builder.finish_output()?];
 
-        self.prepare_transaction(outputs, options).await
+        self.prepare_send_outputs(outputs, options).await
     }
 
     /// Gets an existing account output.

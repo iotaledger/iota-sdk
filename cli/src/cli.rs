@@ -169,7 +169,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
         if storage_path.is_dir() {
             match Wallet::builder().with_storage_path(storage_path).finish().await {
                 Ok(wallet) => {
-                    let linked_secret_manager = match &mut *wallet.get_secret_manager().write().await {
+                    let linked_secret_manager = match &mut *wallet.secret_manager().write().await {
                         SecretManager::Stronghold(stronghold) => {
                             let snapshot_path = stronghold.snapshot_path().to_path_buf();
                             let snapshot_exists = snapshot_path.exists();
@@ -337,7 +337,15 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
             Some(wallet)
         } else {
             // init new wallet with default init parameters
-            let init_params = InitParameters::default();
+            let mut init_params = InitParameters::default();
+
+            if let Ok(stronghold_snapshot_path) = std::env::var("STRONGHOLD_SNAPSHOT_PATH") {
+                init_params.stronghold_snapshot_path = stronghold_snapshot_path;
+            }
+            if let Ok(node_url) = std::env::var("NODE_URL") {
+                init_params.node_url = node_url;
+            }
+
             let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
             if !snapshot_path.exists() {
                 if get_decision("Create a new wallet with default parameters?")? {

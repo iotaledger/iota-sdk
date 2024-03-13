@@ -9,7 +9,7 @@ import { BasicOutput, BlockId, OutputId, TransactionId, Utils } from '../../out'
 import '../customMatchers';
 import { SlotCommitment } from '../../out/types/block/slot';
 import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
-import { ProtocolParameters } from '../../lib/types/models/api/info/node-info-protocol';
+import { ProtocolParameters } from '../../lib/types/models/api';
 
 describe('Utils methods', () => {
     it('invalid mnemonic error', () => {
@@ -25,9 +25,9 @@ describe('Utils methods', () => {
         const hexPublicKey =
             '0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a';
 
-        const address = Utils.hexPublicKeyToBech32Address(hexPublicKey, 'rms');
+        const address = Utils.publicKeyHash(hexPublicKey);
 
-        expect(address).toBeValidAddress();
+        expect(address.pubKeyHash).toBe('0x96f9de0989e77d0e150e850a5a600e83045fa57419eaf3b20225b763d4e23813');
     });
 
     it('validates address', () => {
@@ -39,13 +39,24 @@ describe('Utils methods', () => {
         expect(isAddressValid).toBeTruthy();
     });
 
-    it('hash output id', () => {
+    it('compute account id', () => {
         const outputId =
             '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
 
         const accountId = Utils.computeAccountId(outputId);
 
         expect(accountId).toBe(
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
+        );
+    });
+
+    it('compute delegation id', () => {
+        const outputId =
+            '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
+
+        const delegationId = Utils.computeDelegationId(outputId);
+
+        expect(delegationId).toBe(
             '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
         );
     });

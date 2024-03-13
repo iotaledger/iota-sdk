@@ -10,12 +10,15 @@ use crate::{
     client::{
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
-        Client, Result,
+        Client, ClientError,
     },
     types::block::address::{Address, Bech32Address, Hrp, ToBech32Ext},
     utils::ConvertTo,
 };
 
+// TODO: Should we rename ths struct to `GetAddressOptions`, thereby moving out the `range` field, so
+// it can be used by `GenerateEd25519Address` and `GenerateEd25519Addresses`? Do we even still need
+// the latter?
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
@@ -33,7 +36,10 @@ pub struct GetAddressesOptions {
 }
 
 impl GetAddressesOptions {
-    pub async fn from_client(client: &Client) -> Result<Self> {
+    // TODO: can we remove this function? It's not clear from the outside that it's just the default
+    // with a requested HRP. I think the caller can just do what this function does. Also ... with this
+    // we do several API requests unnecessarily since oftentimes we could just re-use the HRP.
+    pub async fn from_client(client: &Client) -> Result<Self, ClientError> {
         Ok(Self::default().with_bech32_hrp(client.get_bech32_hrp().await?))
     }
 
@@ -62,7 +68,7 @@ impl GetAddressesOptions {
     }
 
     /// Set bech32 human readable part (hrp) from something that might be valid
-    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Self> {
+    pub fn try_with_bech32_hrp(mut self, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Self, ClientError> {
         self.bech32_hrp = bech32_hrp.convert()?;
         Ok(self)
     }
@@ -97,7 +103,34 @@ impl Default for GetAddressesOptions {
 }
 
 impl SecretManager {
-    /// Get a vector of public bech32 addresses
+    // TODO: while `SecretManage::generate...` returns `Ed25519Address`, `SecretManager`
+    // converts those to `Bech32Address`es, hence, should we add `bech32` to its method name
+    // to make that the difference clear?
+    // TODO: make `account_index` and `address_index` impl Into<Option<u32>>?
+    /// Generates a Bech32 formatted Ed25519 address.
+    pub async fn generate_ed25519_address(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_index: u32,
+        bech32_hrp: impl ConvertTo<Hrp>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Bech32Address, ClientError> {
+        let hrp: Hrp = bech32_hrp.convert()?;
+        Ok(SecretManage::generate_ed25519_addresses(
+            self,
+            coin_type,
+            account_index,
+            address_index..address_index + 1,
+            options,
+        )
+        // Panic: if the secret manager hasn't failed then there must be an address.
+        .await?[0]
+            .to_bech32(hrp))
+    }
+
+    // TODO: Same as for `generate_ed25519_address`.
+    /// Generates a vector of Bech32 formatted Ed25519 addresses.
     pub async fn generate_ed25519_addresses(
         &self,
         GetAddressesOptions {
@@ -107,7 +140,7 @@ impl SecretManager {
             bech32_hrp,
             options,
         }: GetAddressesOptions,
-    ) -> Result<Vec<Bech32Address>> {
+    ) -> Result<Vec<Bech32Address>, ClientError> {
         Ok(
             SecretManage::generate_ed25519_addresses(self, coin_type, account_index, range, options)
                 .await?
@@ -117,7 +150,29 @@ impl SecretManager {
         )
     }
 
-    /// Get a vector of EVM address strings
+    /// Generates a single EVM address hex string.
+    pub async fn generate_evm_address(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_index: u32,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<String, ClientError> {
+        Ok(prefix_hex::encode(
+            SecretManage::generate_evm_addresses(
+                self,
+                coin_type,
+                account_index,
+                address_index..address_index + 1,
+                options,
+            )
+            // Panic: if the secret manager hasn't failed then there must be an address.
+            .await?[0]
+                .as_ref(),
+        ))
+    }
+
+    /// Generates a vector of EVM address hex strings.
     pub async fn generate_evm_addresses(
         &self,
         GetAddressesOptions {
@@ -127,7 +182,7 @@ impl SecretManager {
             options,
             ..
         }: GetAddressesOptions,
-    ) -> Result<Vec<String>> {
+    ) -> Result<Vec<String>, ClientError> {
         Ok(
             SecretManage::generate_evm_addresses(self, coin_type, account_index, range, options)
                 .await?
@@ -146,7 +201,7 @@ pub async fn search_address(
     account_index: u32,
     range: Range<u32>,
     address: &Address,
-) -> Result<(u32, bool)> {
+) -> Result<(u32, bool), ClientError> {
     let opts = GetAddressesOptions::default()
         .with_coin_type(coin_type)
         .with_account_index(account_index)
@@ -161,7 +216,7 @@ pub async fn search_address(
             return Ok((range.start + index as u32, true));
         }
     }
-    Err(crate::client::Error::InputAddressNotFound {
+    Err(ClientError::InputAddressNotFound {
         address: address.clone().to_bech32(bech32_hrp).to_string(),
         range: format!("{range:?}"),
     })

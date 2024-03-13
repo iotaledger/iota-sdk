@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::bip39::Mnemonic;
-use iota_sdk::client::{Client, Result};
+use iota_sdk::client::{Client, ClientError};
 
 #[tokio::test]
-async fn mnemonic() -> Result<()> {
+async fn mnemonic() -> Result<(), ClientError> {
     let mnemonic = Client::generate_mnemonic()?;
     assert!(Client::mnemonic_to_hex_seed(mnemonic).is_ok());
     assert!(Client::mnemonic_to_hex_seed(Mnemonic::from("until fire hat mountain zoo grocery real deny advance change marble taste goat ivory wheat bubble panic banner tattoo client ticket action race rocket".to_owned())).is_ok());

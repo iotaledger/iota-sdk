@@ -1,4 +1,4 @@
-import { Utils } from '../node/lib';
+import { AccountAddress, Ed25519Address, Utils } from '../node/lib';
 
 describe('Utils methods', () => {
     it('generates and validates mnemonic', async () => {
@@ -17,22 +17,22 @@ describe('Utils methods', () => {
     });
 
     it('converts address to hex and bech32', async () => {
-        const address =
+        const bech32Address =
             'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy';
-        const hexAddress = Utils.bech32ToHex(address);
+        const address = Utils.parseBech32Address(bech32Address) as Ed25519Address;
 
-        expect(hexAddress.slice(0, 2)).toBe('0x');
+        expect(address.pubKeyHash.slice(0, 2)).toBe('0x');
 
-        const bech32Address = Utils.hexToBech32(hexAddress, 'rms');
+        const convertedBech32Address = Utils.addressToBech32(address, 'rms');
 
-        expect(bech32Address).toBe(address);
+        expect(convertedBech32Address).toBe(bech32Address);
     });
 
     it('converts hex public key to bech32 address', async () => {
         const hexPublicKey =
             '0x2baaf3bca8ace9f862e60184bd3e79df25ff230f7eaaa4c7f03daa9833ba854a';
 
-        const address = Utils.hexPublicKeyToBech32Address(hexPublicKey, 'rms');
+        const address = Utils.addressToBech32(Utils.publicKeyHash(hexPublicKey), 'rms');
 
         expect(address).toBe(
             'rms1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx4aaacx',
@@ -48,7 +48,7 @@ describe('Utils methods', () => {
         expect(isAddressValid).toBeTruthy();
     });
 
-    it('hash output id', async () => {
+    it('compute account id', () => {
         const outputId =
             '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
 
@@ -59,11 +59,22 @@ describe('Utils methods', () => {
         );
     });
 
+    it('compute delegation id', () => {
+        const outputId =
+            '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
+
+        const delegationId = Utils.computeDelegationId(outputId);
+
+        expect(delegationId).toBe(
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
+        );
+    });
+
     it('account id to address', async () => {
         const accountId =
             '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345';
 
-        const accountAddress = Utils.accountIdToBech32(accountId, 'rms');
+        const accountAddress = Utils.addressToBech32(new AccountAddress(accountId), 'rms');
 
         expect(accountAddress).toBe(
             'rms1pq8tc2r85fq8rxnsl2kdlsuyp6zhlfzskd7e22t6cnckdshhpse52a27mlc',
