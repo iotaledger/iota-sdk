@@ -4,7 +4,6 @@
 use iota_sdk::types::block::{
     payload::{tagged_data::TaggedDataPayload, PayloadError},
     rand::bytes::{rand_bytes, rand_bytes_array},
-    Block,
 };
 use packable::{
     bounded::{TryIntoBoundedU32Error, TryIntoBoundedU8Error},
@@ -57,19 +56,28 @@ fn new_valid_tag_length_min() {
 
 #[test]
 fn new_invalid_tag_length_more_than_max() {
-    assert!(matches!(
-        TaggedDataPayload::new(rand_bytes(65), [0x42, 0xff, 0x84, 0xa2, 0x42, 0xff, 0x84, 0xa2]),
-        Err(PayloadError::TagLength(TryIntoBoundedU8Error::Invalid(65)))
-    ));
+    assert_eq!(
+        TaggedDataPayload::new(
+            [0u8; *TaggedDataPayload::TAG_LENGTH_RANGE.end() as usize + 1],
+            [0x42, 0xff, 0x84, 0xa2, 0x42, 0xff, 0x84, 0xa2],
+        ),
+        Err(PayloadError::TagLength(TryIntoBoundedU8Error::Invalid(
+            TaggedDataPayload::TAG_LENGTH_RANGE.end() + 1
+        )))
+    );
 }
 
 #[test]
 fn new_invalid_data_length_more_than_max() {
-    assert!(matches!(
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1226
-        TaggedDataPayload::new(rand_bytes(32), [0u8; Block::LENGTH_MAX + 42]),
-        Err(PayloadError::TaggedDataLength(TryIntoBoundedU32Error::Invalid(l))) if l == Block::LENGTH_MAX as u32 + 42
-    ));
+    assert_eq!(
+        TaggedDataPayload::new(
+            rand_bytes(32),
+            [0u8; *TaggedDataPayload::DATA_LENGTH_RANGE.end() as usize + 1]
+        ),
+        Err(PayloadError::TaggedDataLength(TryIntoBoundedU32Error::Invalid(
+            TaggedDataPayload::DATA_LENGTH_RANGE.end() + 1
+        )))
+    );
 }
 
 #[test]

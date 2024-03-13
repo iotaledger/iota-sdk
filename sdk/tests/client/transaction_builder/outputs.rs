@@ -591,3 +591,97 @@ fn transition_no_more_than_needed_for_nft_amount() {
     assert_eq!(selected.inputs_data.len(), 1);
     assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
+
+#[test]
+fn insufficient_mana() {
+    let protocol_parameters = iota_mainnet_protocol_parameters();
+
+    let inputs = build_inputs(
+        [
+            (
+                Basic {
+                    amount: 1_000_000,
+                    mana: 0,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+            (
+                Basic {
+                    amount: 1_000_000,
+                    mana: 0,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            ),
+        ],
+        Some(SLOT_INDEX),
+    );
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        mana: 10000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .finish()
+    .unwrap_err();
+
+    let TransactionBuilderError::InsufficientMana {
+        found,
+        required,
+        slots_remaining,
+    } = selected
+    else {
+        panic!("expected insufficient mana error, found {selected:?}")
+    };
+    assert_eq!(found, 0);
+    assert_eq!(required, 10000);
+
+    // Re-running with any slot index less than the original plus the slots remaining will still error
+    let err = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + slots_remaining - 1,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .finish()
+    .unwrap_err();
+
+    assert!(matches!(err, TransactionBuilderError::InsufficientMana { .. }));
+
+    TransactionBuilder::new(
+        inputs.clone(),
+        outputs,
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + slots_remaining,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .finish()
+    .unwrap();
+}
