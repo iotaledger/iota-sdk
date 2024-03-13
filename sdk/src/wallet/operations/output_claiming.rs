@@ -12,7 +12,7 @@ use crate::{
         ClientError,
     },
     types::block::{
-        address::{Address, Bech32Address, Ed25519Address},
+        address::{Address, Ed25519Address},
         output::{
             unlock_condition::AddressUnlockCondition, BasicOutput, NftOutputBuilder, Output, OutputId, UnlockCondition,
         },
@@ -47,12 +47,14 @@ impl WalletLedger {
     /// additional inputs
     pub(crate) fn claimable_outputs(
         &self,
-        wallet_address: &Bech32Address,
+        wallet_address: Address,
         outputs_to_claim: OutputsToClaim,
         slot_index: SlotIndex,
         protocol_parameters: &ProtocolParameters,
     ) -> Result<Vec<OutputId>, WalletError> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
+
+        let controlled_addresses = self.controlled_addresses(wallet_address);
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
@@ -71,7 +73,7 @@ impl WalletLedger {
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            wallet_address.inner(),
+                            &controlled_addresses,
                             output_data,
                             slot_index,
                             protocol_parameters.committable_age_range(),
@@ -133,6 +135,26 @@ impl WalletLedger {
         );
         Ok(output_ids_to_claim.into_iter().collect())
     }
+
+    // Returns the wallet address together with account and nft addresses that only have the address unlock condition
+    pub(crate) fn controlled_addresses(&self, wallet_address: Address) -> HashSet<Address> {
+        let mut controlled_addresses = HashSet::from([wallet_address]);
+        for o in self.unspent_outputs().values() {
+            match &o.output {
+                Output::Account(account) => {
+                    controlled_addresses.insert(Address::Account(account.account_address(&o.output_id)));
+                }
+                Output::Nft(nft) => {
+                    // Only consider addresses of NFTs with a single (address) unlock condition
+                    if nft.unlock_conditions().len() == 1 {
+                        controlled_addresses.insert(Address::Nft(nft.nft_address(&o.output_id)));
+                    }
+                }
+                _ => {} // not interested in other outputs here
+            }
+        }
+        controlled_addresses
+    }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -153,7 +175,7 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         wallet_ledger.claimable_outputs(
-            &self.address().await,
+            self.address().await.into_inner(),
             outputs_to_claim,
             slot_index,
             &protocol_parameters,
@@ -298,7 +320,6 @@ where
                     // add additional inputs
                     .chain(possible_additional_inputs.iter().map(|o| o.output_id))
                     .collect(),
-                allow_additional_input_selection: false,
                 ..Default::default()
             },
         )
