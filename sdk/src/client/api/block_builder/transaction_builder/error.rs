@@ -45,6 +45,8 @@ pub enum TransactionBuilderError {
         found: u64,
         /// The required amount.
         required: u64,
+        /// The number of slots remaining before this transaction will have generated enough mana.
+        slots_remaining: u32,
     },
     /// Insufficient native token amount provided.
     #[error("insufficient native token amount: found {found}, required {required}")]
