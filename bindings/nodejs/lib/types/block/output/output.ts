@@ -153,6 +153,7 @@ class BasicOutput extends CommonOutput {
 
     /**
      * @param amount The amount of the output.
+     * @param mana The mana of the output.
      * @param unlockConditions The unlock conditions for the output.
      */
     constructor(amount: u64, mana: u64, unlockConditions: UnlockCondition[]) {
