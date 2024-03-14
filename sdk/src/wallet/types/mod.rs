@@ -36,12 +36,8 @@ use crate::{
 // it's a cleanup PR afterall. You may not like this name, but I think it's still better than `OutputData` tbh.
 // Some alternatives I had in mind were: `OutputWithMetadataExt` or `OutputWithExtMetadata`, but I think that
 // doesn't matter a lot. What's important is that just by reading the name it's pretty clear that this type
-// contains a bit of extra information on top of a `OutputWithMetadata`.
-//
-// prevents adding more and more nouns to the name of the struct, and still expresses that it's similar to
-// `OutputWithMetadata` but a bit more than that without being explicit and probably inaccurate in the future. I am open
-// to suggestions though!!
-/// An output with metadata
+// contains a bit of extra information on top of a regular `OutputWithMetadata`.
+/// An output with extended metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithExtendedMetadata {
