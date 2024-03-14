@@ -27,7 +27,9 @@ use crate::{
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
-    /// Set the fallback SyncOptions for account syncing.
+    // TODO: can we rename this to `set_fallback_sync_options`? It's no biggie, but if I read `default` in Rust
+    // if feels like it would use `SyncOptions::default()`, but that's not what we mean here, right?
+    /// Set the default SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> Result<(), WalletError> {
         #[cfg(feature = "storage")]
@@ -66,8 +68,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let (addresses_with_unspent_output_ids, mut spent_or_not_synced_output_ids) =
             self.get_output_ids_for_addresses(addresses, options).await?;
 
-        // Get the corresponding unspent outputs with extra metadata
-        let mut new_addresses_with_unspent_outputs = self
+        // Get the corresponding unspent outputs
+        let mut addresses_with_unspent_outputs = self
             .get_outputs_from_address_output_ids(&addresses_with_unspent_output_ids)
             .await?;
 
@@ -85,7 +87,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 address,
                 unspent_output_ids,
                 unspent_outputs,
-            } in new_addresses_with_unspent_outputs.drain(..)
+            } in addresses_with_unspent_outputs.drain(..)
             {
                 for unspent_output in &unspent_outputs {
                     match &unspent_output.output {
@@ -145,7 +147,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     address,
                     unspent_output_ids,
                 } = address_with_unspent_output_ids.clone();
-                new_addresses_with_unspent_outputs.push(AddressWithUnspentOutputs {
+                addresses_with_unspent_outputs.push(AddressWithUnspentOutputs {
                     address,
                     unspent_output_ids,
                     unspent_outputs: account_or_nft_outputs_with_extra_metadata,

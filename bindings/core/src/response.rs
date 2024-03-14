@@ -300,11 +300,11 @@ pub enum Response {
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
-    // TODO: update bindings in a separete PR
+    // TODO: update bindings in a separate PR
     /// Response for:
     /// - [`GetOutput`](crate::method::WalletMethod::GetOutput)
     OutputData(Option<Box<OutputWithExtendedMetadata>>),
-    // TODO: update bindings in a separete PR
+    // TODO: update bindings in a separate PR
     /// Response for:
     /// - [`Outputs`](crate::method::WalletMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::WalletMethod::UnspentOutputs)
