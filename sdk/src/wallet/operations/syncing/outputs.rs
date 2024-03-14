@@ -30,23 +30,29 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         Ok(outputs_with_meta
             .into_iter()
-            .map(|output_with_meta| {
-                // check if we know the transaction that created this output and if we created it (if we store incoming
-                // transactions separated, then this check wouldn't be required)
-                let remainder = wallet_ledger
-                    .transactions
-                    .get(output_with_meta.metadata().output_id().transaction_id())
-                    .map_or(false, |tx| !tx.incoming);
+            .map(
+                |OutputWithMetadataResponse {
+                     output,
+                     output_id_proof,
+                     metadata,
+                 }| {
+                    // check if we know the transaction that created this output and if we created it (if we store
+                    // incoming transactions separated, then this check wouldn't be required)
+                    let remainder = wallet_ledger
+                        .transactions
+                        .get(metadata.output_id().transaction_id())
+                        .map_or(false, |tx| !tx.incoming);
 
-                OutputData {
-                    output_id: output_with_meta.metadata().output_id().to_owned(),
-                    metadata: *output_with_meta.metadata(),
-                    output: output_with_meta.output().clone(),
-                    output_id_proof: output_with_meta.output_id_proof().clone(),
-                    network_id,
-                    remainder,
-                }
-            })
+                    OutputData {
+                        output_id: metadata.output_id().to_owned(),
+                        metadata,
+                        output,
+                        output_id_proof,
+                        network_id,
+                        remainder,
+                    }
+                },
+            )
             .collect())
     }
 
