@@ -23,10 +23,21 @@ use crate::{
             OptionalPayload, Payload, PayloadError,
         },
         protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        signature::Ed25519Signature,
         slot::SlotIndex,
+        Block,
     },
     utils::merkle_hasher,
 };
+
+pub(crate) const BASIC_BLOCK_LENGTH_MIN: usize = 238;
+pub(crate) const MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT: usize = Block::LENGTH_MAX - BASIC_BLOCK_LENGTH_MIN;
+// Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
+// signature)
+pub(crate) const SINGLE_UNLOCK_LENGTH: usize =
+    1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
+// Type + reference index
+pub(crate) const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 
 /// A builder to build a [`Transaction`].
 #[derive(Debug, Clone)]
@@ -448,7 +459,36 @@ fn verify_transaction_packable(transaction: &Transaction, _: &ProtocolParameters
     verify_transaction(transaction)
 }
 
+impl Transaction {
+    /// Verifies that the transaction doesn't exceed the block size limit with 1 parent.
+    /// Assuming one signature unlock and otherwise reference/account/nft unlocks.
+    /// `validate_transaction_payload_length()` should later be used to check the length again with the correct
+    /// unlocks.
+    fn validate_length(&self) -> Result<(), PayloadError> {
+        let transaction_bytes = self.pack_to_vec();
+
+        // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
+        let reference_account_nft_unlocks_amount = self.inputs().len() - 1;
+
+        // Max tx payload length - length for one signature unlock (there might be more unlocks, we check with them
+        // later again, when we built the transaction payload)
+        let max_length = MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT
+            - SINGLE_UNLOCK_LENGTH
+            - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
+
+        if transaction_bytes.len() > max_length {
+            return Err(PayloadError::TransactionLength {
+                length: transaction_bytes.len(),
+                max_length,
+            });
+        }
+        Ok(())
+    }
+}
+
 fn verify_transaction(transaction: &Transaction) -> Result<(), PayloadError> {
+    transaction.validate_length()?;
+
     if transaction.context_inputs().commitment().is_none() {
         for output in transaction.outputs.iter() {
             if output.features().is_some_and(|f| f.staking().is_some()) {

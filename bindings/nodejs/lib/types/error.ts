@@ -30,8 +30,6 @@ export type ClientErrorName =
     | 'inputAddressNotFound'
     | 'invalidAmount'
     | 'invalidMnemonic'
-    | 'invalidTransactionLength'
-    | 'invalidSignedTransactionPayloadLength'
     | 'json'
     | 'missingParameter'
     | 'node'
