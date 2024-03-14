@@ -739,6 +739,13 @@ impl<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> I
     type Item = I;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // Inputs that are unlocked by Ed25519 addresses go in the queue first
+        // because they do not need to reference other inputs for their unlocks.
+        // Each one may have additional dependents which are added to the front of
+        // the queue to be sorted immediately after the input they depend upon.
+        // Those can also have dependents which will go after them.
+        // This creates a tree structure with many to one relationship, which is
+        // flattened by this loop in insertion order.
         if let Some(input) = self.queue.pop_front() {
             // Add associated inputs to the front of the queue
             match &input.borrow().output {
@@ -772,8 +779,11 @@ impl<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> I
             };
             return Some(input);
         }
+        // When the queue is empty, just add anything that is left over to the end of the list.
         if let Some(mut entry) = self.other.first_entry() {
             if let Some(input) = entry.get_mut().pop_front() {
+                // Since the structure is a list-of-lists, we need to pop
+                // the inner list if it's empty.
                 if entry.get().is_empty() {
                     self.other.pop_first();
                 }
