@@ -144,13 +144,13 @@ class NodeCoreAPI(metaclass=ABCMeta):
     # Committee routes.
 
     def get_committee(
-            self, epoch_index: Optional[EpochIndex] = None) -> CommitteeResponse:
+            self, epoch: Optional[EpochIndex] = None) -> CommitteeResponse:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
         current committee members are returned.
-        GET /api/core/v3/committee/?epochIndex
+        GET /api/core/v3/committee/?epoch
         """
         return CommitteeResponse.from_dict(self._call_method('getCommittee', {
-            'epochIndex': epoch_index
+            'epoch': epoch
         }))
 
     # Block routes.
