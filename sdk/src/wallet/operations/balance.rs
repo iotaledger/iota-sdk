@@ -7,8 +7,11 @@ use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{
-        unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
+    types::block::{
+        address::ImplicitAccountCreationAddress,
+        output::{
+            unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
+        },
     },
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_from_now_on, output_claiming::OutputsToClaim},
@@ -32,6 +35,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
+        let mut delegation_implicit_accounts_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
@@ -110,6 +114,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 Output::Delegation(delegation) => {
                     // Add amount
                     balance.base_coin.total += delegation.amount();
+                    delegation_implicit_accounts_amount += delegation.amount();
                     // Add mana rewards
                     reward_outputs.insert(*output_id);
                     // Add storage deposit
@@ -124,7 +129,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
                     // without restrictions
-                    if let [UnlockCondition::Address(_)] = output
+                    if let [UnlockCondition::Address(address_unlock_cond)] = output
                         .unlock_conditions()
                         .expect("output needs to have unlock conditions")
                         .as_ref()
@@ -137,6 +142,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
                         // Add amount
                         balance.base_coin.total += output.amount();
+                        if address_unlock_cond.address().kind() == ImplicitAccountCreationAddress::KIND {
+                            delegation_implicit_accounts_amount += output.amount();
+                        }
                         // Add decayed mana
                         balance.mana.total += output.decayed_mana(
                             &protocol_parameters,
@@ -338,13 +346,18 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         #[cfg(not(feature = "participation"))]
         {
-            balance.base_coin.available = balance.base_coin.total.saturating_sub(locked_amount);
+            balance.base_coin.available = balance
+                .base_coin
+                .total
+                .saturating_sub(delegation_implicit_accounts_amount)
+                .saturating_sub(locked_amount);
         }
         #[cfg(feature = "participation")]
         {
             balance.base_coin.available = balance
                 .base_coin
                 .total
+                .saturating_sub(delegation_implicit_accounts_amount)
                 .saturating_sub(locked_amount)
                 .saturating_sub(balance.base_coin.voting_power);
         }
