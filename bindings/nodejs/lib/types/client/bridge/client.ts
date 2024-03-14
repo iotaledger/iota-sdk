@@ -104,7 +104,7 @@ export interface __GetValidatorMethod__ {
 export interface __GetCommitteeMethod__ {
     name: 'getCommittee';
     data: {
-        epochIndex?: EpochIndex;
+        epoch?: EpochIndex;
     };
 }
 

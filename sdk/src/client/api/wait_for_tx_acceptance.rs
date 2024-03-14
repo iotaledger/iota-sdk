@@ -26,14 +26,20 @@ impl Client {
             .unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_INTERVAL);
 
         for _ in 0..max_attempts.unwrap_or(DEFAULT_WAIT_FOR_TX_ACCEPTANCE_MAX_ATTEMPTS) {
-            let transaction_metadata = self.get_transaction_metadata(transaction_id).await?;
-
-            match transaction_metadata.transaction_state {
-                TransactionState::Accepted | TransactionState::Committed | TransactionState::Finalized => {
-                    return Ok(());
+            match self.get_transaction_metadata(transaction_id).await {
+                Ok(transaction_metadata) => {
+                    match transaction_metadata.transaction_state {
+                        TransactionState::Accepted | TransactionState::Committed | TransactionState::Finalized => {
+                            return Ok(());
+                        }
+                        TransactionState::Failed => {
+                            return Err(ClientError::TransactionAcceptance(transaction_id.to_string()));
+                        }
+                        TransactionState::Pending => {} // Just need to wait longer
+                    };
                 }
-                TransactionState::Failed => return Err(ClientError::TransactionAcceptance(transaction_id.to_string())),
-                TransactionState::Pending => {} // Just need to wait longer
+                Err(ClientError::Node(crate::client::node_api::error::Error::NotFound(_))) => {}
+                Err(e) => return Err(e),
             };
 
             #[cfg(target_family = "wasm")]
