@@ -26,7 +26,7 @@ use crate::{
 impl TransactionBuilder {
     /// Transitions an account input by creating a new account output if required.
     fn transition_account_input(
-        &mut self,
+        &self,
         input: &AccountOutput,
         output_id: &OutputId,
     ) -> Result<Option<Output>, TransactionBuilderError> {
@@ -143,13 +143,18 @@ impl TransactionBuilder {
             }
         }
 
-        let output = AccountOutputBuilder::from(input)
+        let mut builder = AccountOutputBuilder::from(input)
             .with_minimum_amount(self.protocol_parameters.storage_score_parameters())
             .with_mana(0)
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
-            .with_features(features)
-            .finish_output()?;
+            .with_features(features);
+
+        if input.is_block_issuer() {
+            builder = builder.with_mana(input.mana());
+        }
+
+        let output = builder.finish_output()?;
 
         log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
@@ -157,7 +162,7 @@ impl TransactionBuilder {
     }
 
     fn transition_implicit_account_input(
-        &mut self,
+        &self,
         input: &BasicOutput,
         output_id: &OutputId,
     ) -> Result<Option<Output>, TransactionBuilderError> {
@@ -186,7 +191,7 @@ impl TransactionBuilder {
 
     /// Transitions an nft input by creating a new nft output if required.
     fn transition_nft_input(
-        &mut self,
+        &self,
         input: &NftOutput,
         output_id: &OutputId,
     ) -> Result<Option<Output>, TransactionBuilderError> {
@@ -229,7 +234,7 @@ impl TransactionBuilder {
 
     /// Transitions a foundry input by creating a new foundry output if required.
     fn transition_foundry_input(
-        &mut self,
+        &self,
         input: &FoundryOutput,
         output_id: &OutputId,
     ) -> Result<Option<Output>, TransactionBuilderError> {
@@ -266,10 +271,7 @@ impl TransactionBuilder {
 
     /// Transitions an input by creating a new output if required.
     /// If no `account_transition` is provided, assumes a state transition.
-    pub(crate) fn transition_input(
-        &mut self,
-        input: &InputSigningData,
-    ) -> Result<Option<Output>, TransactionBuilderError> {
+    pub(crate) fn transition_input(&self, input: &InputSigningData) -> Result<Option<Output>, TransactionBuilderError> {
         match &input.output {
             Output::Account(account_input) => self.transition_account_input(account_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),

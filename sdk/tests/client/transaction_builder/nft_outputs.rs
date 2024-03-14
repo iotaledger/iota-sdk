@@ -1168,7 +1168,7 @@ fn take_amount_from_nft_to_fund_basic() {
         [
             (
                 Nft {
-                    amount: 2_000_000,
+                    amount: 1_000_000,
                     mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1223,7 +1223,7 @@ fn take_amount_from_nft_to_fund_basic() {
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_nft());
-            assert_eq!(output.amount(), 1_800_000);
+            assert_eq!(output.amount(), 800_000);
             assert_eq!(output.as_nft().unlock_conditions().len(), 1);
             assert_eq!(output.as_nft().features().len(), 0);
             assert_eq!(

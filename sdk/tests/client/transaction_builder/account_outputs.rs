@@ -1204,7 +1204,7 @@ fn take_amount_from_account_to_fund_basic() {
         [
             (
                 Account {
-                    amount: 2_000_000,
+                    amount: 1_000_000,
                     mana: 0,
                     account_id: account_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1257,7 +1257,7 @@ fn take_amount_from_account_to_fund_basic() {
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_account());
-            assert_eq!(output.amount(), 1_800_000);
+            assert_eq!(output.amount(), 800_000);
             assert_eq!(*output.as_account().account_id(), account_id_1);
             assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
@@ -1834,9 +1834,9 @@ fn min_allot_account_mana_additional() {
     let provided_allotment = 1000;
     let required_allotment = 7900;
     // The account does not have enough to cover the requirement
-    let account_mana = required_allotment - 100;
+    let account_mana = required_allotment - 500;
     // But there is additional available mana elsewhere
-    let additional_available_mana = 111;
+    let additional_available_mana = 511;
 
     let inputs = [
         AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
@@ -2346,6 +2346,7 @@ fn account_transition_with_required_context_inputs() {
 
     let inputs = [
         BasicOutputBuilder::new_with_amount(1_000_000)
+            .with_mana(11000)
             .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
             .finish_output()
             .unwrap(),

@@ -1,12 +1,12 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashMap, sync::OnceLock};
+use std::collections::HashMap;
 
 use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::{
-        api::transaction_builder::{requirement::PriorityMap, MinManaAllotment, Requirement},
+        api::transaction_builder::{MinManaAllotment, Requirement},
         secret::types::InputSigningData,
     },
     types::block::{
@@ -212,28 +212,24 @@ impl TransactionBuilder {
         let mut added_inputs = false;
         if selected_mana >= required_mana {
             log::debug!("Mana requirement already fulfilled");
-        } else {
-            if !self.allow_additional_input_selection {
-                return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Mana));
+            return Ok(false);
+        }
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Mana));
+        }
+        let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
+        while let Some(input) = self.next_input_for_mana(required_mana - selected_mana, include_generated) {
+            selected_mana += self.total_mana(&input, include_generated)?;
+            if let Some(output) = self.select_input(input)? {
+                required_mana += output.mana();
             }
-            let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
-            let mut priority_map = PriorityMap::<ManaPriority>::generate(&mut self.available_inputs);
-            while let Some(input) = priority_map.next(required_mana - selected_mana) {
-                selected_mana += self.total_mana(&input, include_generated)?;
-                if let Some(output) = self.select_input(input)? {
-                    required_mana += output.mana();
-                }
-                added_inputs = true;
+            added_inputs = true;
 
-                if selected_mana >= required_mana {
-                    break;
-                }
-            }
-            // Return unselected inputs to the available list
-            for input in priority_map.into_inputs() {
-                self.available_inputs.push(input);
+            if selected_mana >= required_mana {
+                break;
             }
         }
+
         Ok(added_inputs)
     }
 
@@ -282,7 +278,11 @@ impl TransactionBuilder {
         Ok(selected_mana)
     }
 
-    fn total_mana(&self, input: &InputSigningData, include_generated: bool) -> Result<u64, TransactionBuilderError> {
+    pub(crate) fn total_mana(
+        &self,
+        input: &InputSigningData,
+        include_generated: bool,
+    ) -> Result<u64, TransactionBuilderError> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
             + if include_generated {
                 input.output.available_mana(
@@ -312,72 +312,51 @@ impl TransactionBuilder {
         }
         Ok(res)
     }
-}
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-struct ManaPriority {
-    kind_priority: usize,
-    has_native_token: bool,
-}
-
-impl PartialOrd for ManaPriority {
-    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl Ord for ManaPriority {
-    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        (self.kind_priority, self.has_native_token).cmp(&(other.kind_priority, other.has_native_token))
-    }
-}
-
-impl From<&InputSigningData> for Option<ManaPriority> {
-    fn from(value: &InputSigningData) -> Self {
-        sort_order_type()
-            .get(&value.output.kind())
-            .map(|&kind_priority| ManaPriority {
-                kind_priority,
-                has_native_token: value.output.native_token().is_some(),
+    fn next_input_for_mana(&mut self, missing_mana: u64, include_generated: bool) -> Option<InputSigningData> {
+        self.available_inputs
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, input)| {
+                self.score_for_mana(input, missing_mana, include_generated)
+                    .map(|score| (score, idx))
             })
+            .max_by_key(|(score, _)| *score)
+            .map(|(_, idx)| self.available_inputs.swap_remove(idx))
     }
-}
 
-/// Establish the order in which we want to pick an input
-pub fn sort_order_type() -> &'static HashMap<u8, usize> {
-    static MAP: OnceLock<HashMap<u8, usize>> = OnceLock::new();
-    MAP.get_or_init(|| {
-        [
+    // Score an input based on how desirable it is.
+    fn score_for_mana(&self, input: &InputSigningData, missing_mana: u64, include_generated: bool) -> Option<usize> {
+        ([
             BasicOutput::KIND,
             NftOutput::KIND,
             AccountOutput::KIND,
             FoundryOutput::KIND,
         ]
-        .into_iter()
-        .zip(0_usize..)
-        .collect::<HashMap<_, _>>()
-    })
-}
-
-impl PriorityMap<ManaPriority> {
-    fn next(&mut self, missing_mana: u64) -> Option<InputSigningData> {
-        let mana_sort = |mana: u64| {
-            // If the mana is greater than the missing mana, we want the smallest ones first
-            if mana >= missing_mana {
-                (false, mana)
-            // Otherwise, we want the biggest first
-            } else {
-                (true, u64::MAX - mana)
+        .contains(&input.output.kind()))
+        .then(|| {
+            let mut work_score = self
+                .protocol_parameters
+                .work_score(&UtxoInput::from(*input.output_id()));
+            let has_native_token = input.output.native_token().is_some();
+            let mut mana = self.total_mana(input, include_generated).unwrap_or_default();
+            if let Ok(Some(output)) = self.transition_input(input) {
+                mana = mana.saturating_sub(output.mana());
+                work_score += self.protocol_parameters.work_score(&output);
             }
-        };
-        if let Some((priority, mut inputs)) = self.0.pop_first() {
-            // Sort in reverse so we can pop from the back
-            inputs.sort_unstable_by(|i1, i2| mana_sort(i2.output.mana()).cmp(&mana_sort(i1.output.mana())));
-            let input = inputs.pop();
-            if !inputs.is_empty() {
-                self.0.insert(priority, inputs);
-            }
-            return input;
-        }
-        None
+            let mana_diff = missing_mana.abs_diff(mana) as f64;
+            // Normalize scores between 0..1 with 1 being desirable
+            let nt_score = if has_native_token { 0.5 } else { 1.0 };
+            // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
+            let mana_score = (-mana_diff
+                / if input.output.mana() >= missing_mana {
+                    u64::MAX as f64
+                } else {
+                    missing_mana as f64
+                })
+            .exp();
+            let allotment_score = (-(work_score as f64) / 1000.0).exp();
+            (allotment_score * nt_score * mana_score * usize::MAX as f64).round() as _
+        })
     }
 }
