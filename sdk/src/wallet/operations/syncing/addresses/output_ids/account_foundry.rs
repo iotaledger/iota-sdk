@@ -55,7 +55,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     ) -> Result<Vec<OutputId>, WalletError> {
         log::debug!("[SYNC] get_foundry_output_ids");
         // Get account outputs, so we can then get the foundry outputs with the account addresses
-        let account_outputs_with_meta = self.get_outputs(account_output_ids.to_vec()).await?;
+        let account_outputs_with_meta = self.get_outputs(account_output_ids).await?;
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 

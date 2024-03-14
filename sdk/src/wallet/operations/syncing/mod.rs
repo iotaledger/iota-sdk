@@ -117,7 +117,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     .output_ids
                     .extend(account_or_nft_output_ids.clone());
 
-                let account_or_nft_outputs_with_metadata = self.get_outputs(account_or_nft_output_ids).await?;
+                let account_or_nft_outputs_with_metadata = self.get_outputs(&account_or_nft_output_ids).await?;
                 let account_or_nft_outputs_data = self
                     .output_response_to_output_data(account_or_nft_outputs_with_metadata)
                     .await?;

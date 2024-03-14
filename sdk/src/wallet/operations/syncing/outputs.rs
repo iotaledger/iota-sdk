@@ -60,7 +60,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// unspent, because we wouldn't get them from the node if they were spent
     pub(crate) async fn get_outputs(
         &self,
-        output_ids: Vec<OutputId>,
+        output_ids: &[OutputId],
     ) -> Result<Vec<OutputWithMetadataResponse>, WalletError> {
         log::debug!("[SYNC] start get_outputs");
         let get_outputs_start_time = Instant::now();
@@ -78,14 +78,14 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         log::warn!("Removing spent output metadata for {output_id}, because it's still unspent");
                         output_data.metadata.spent = None;
                     }
-                    unspent_outputs.push((output_id, output_data.clone()));
+                    unspent_outputs.push((*output_id, output_data.clone()));
                     outputs.push(OutputWithMetadataResponse::new(
                         output_data.output.clone(),
                         output_data.output_id_proof.clone(),
                         output_data.metadata,
                     ));
                 }
-                None => unknown_outputs.push(output_id),
+                None => unknown_outputs.push(*output_id),
             }
         }
         // known output is unspent, so insert it to the unspent outputs again, because if it was an
