@@ -51,13 +51,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let mut reward_outputs = HashSet::new();
 
-        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
+        for (output_id, output_with_ext_metadata) in &wallet_ledger.unspent_outputs {
             // Check if output is from the network we're currently connected to
-            if output_data.network_id != network_id {
+            if output_with_ext_metadata.network_id != network_id {
                 continue;
             }
 
-            let output = &output_data.output;
+            let output = &output_with_ext_metadata.output;
             let storage_cost = output.minimum_amount(storage_score_params);
 
             // Add account, foundry, and delegation outputs here because they can't have a
@@ -270,17 +270,17 @@ impl<S: 'static + SecretManage> Wallet<S> {
             if balance.potentially_locked_outputs.contains_key(locked_output) {
                 continue;
             }
-            if let Some(output_data) = wallet_ledger.unspent_outputs.get(locked_output) {
+            if let Some(output_with_ext_metadata) = wallet_ledger.unspent_outputs.get(locked_output) {
                 // Only check outputs that are in this network
-                if output_data.network_id == network_id {
-                    locked_amount += output_data.output.amount();
-                    locked_mana += output_data.output.decayed_mana(
+                if output_with_ext_metadata.network_id == network_id {
+                    locked_amount += output_with_ext_metadata.output.amount();
+                    locked_mana += output_with_ext_metadata.output.decayed_mana(
                         &protocol_parameters,
-                        output_data.output_id.transaction_id().slot_index(),
+                        output_with_ext_metadata.output_id.transaction_id().slot_index(),
                         slot_index,
                     )?;
 
-                    if let Some(native_token) = output_data.output.native_token() {
+                    if let Some(native_token) = output_with_ext_metadata.output.native_token() {
                         locked_native_tokens.add_native_token(*native_token)?;
                     }
                 }

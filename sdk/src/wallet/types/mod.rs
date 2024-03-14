@@ -32,7 +32,12 @@ use crate::{
     wallet::WalletError,
 };
 
-// TODO: you may nott like this name, but I think it's still better than OutputData tbh. I wanted something that
+// TODO: This type is heavily used in the syncing logic so I found it appropriate to change its name in this PR,
+// it's a cleanup PR afterall. You may not like this name, but I think it's still better than `OutputData` tbh.
+// Some alternatives I had in mind were: `OutputWithMetadataExt` or `OutputWithExtMetadata`, but I think that
+// doesn't matter a lot. What's important is that just by reading the name it's pretty clear that this type
+// contains a bit of extra information on top of a `OutputWithMetadata`.
+//
 // prevents adding more and more nouns to the name of the struct, and still expresses that it's similar to
 // `OutputWithMetadata` but a bit more than that without being explicit and probably inaccurate in the future. I am open
 // to suggestions though!!

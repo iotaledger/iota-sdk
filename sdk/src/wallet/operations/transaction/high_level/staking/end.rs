@@ -35,14 +35,14 @@ where
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_end_staking");
 
-        let account_output_data = self
+        let account_output_with_ext_metadata = self
             .ledger()
             .await
             .unspent_account_output(&account_id)
             .cloned()
             .ok_or_else(|| WalletError::AccountNotFound)?;
 
-        let staking_feature = account_output_data
+        let staking_feature = account_output_with_ext_metadata
             .output
             .features()
             .and_then(|f| f.staking())
@@ -61,7 +61,7 @@ where
             )));
         }
 
-        let features = account_output_data
+        let features = account_output_with_ext_metadata
             .output
             .features()
             .map(|f| f.iter().filter(|f| !f.is_staking()))
@@ -69,7 +69,7 @@ where
             .flatten()
             .cloned();
 
-        let output = AccountOutputBuilder::from(account_output_data.output.as_account())
+        let output = AccountOutputBuilder::from(account_output_with_ext_metadata.output.as_account())
             .with_account_id(account_id)
             .with_features(features)
             .finish_output()?;

@@ -51,12 +51,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unspent_outputs()
         .values()
         .enumerate()
-        .for_each(|(i, output_data)| {
+        .for_each(|(i, output_with_ext_metadata)| {
             println!("OUTPUT #{i}");
             println!(
                 "- amount: {:?}\n- native tokens: {:?}",
-                output_data.output.amount(),
-                output_data.output.native_token()
+                output_with_ext_metadata.output.amount(),
+                output_with_ext_metadata.output.native_token()
             )
         });
 
@@ -91,12 +91,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unspent_outputs()
         .values()
         .enumerate()
-        .for_each(|(i, output_data)| {
+        .for_each(|(i, output_with_ext_metadata)| {
             println!("OUTPUT #{i}");
             println!(
                 "- amount: {:?}\n- native tokens: {:?}",
-                output_data.output.amount(),
-                output_data.output.native_token()
+                output_with_ext_metadata.output.amount(),
+                output_with_ext_metadata.output.native_token()
             )
         });
 

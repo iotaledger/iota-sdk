@@ -112,13 +112,13 @@ fn filter_inputs<'a>(
 ) -> Result<Vec<InputSigningData>, WalletError> {
     let mut available_outputs_signing_data = Vec::new();
 
-    for output_data in available_outputs {
-        if !required_inputs.contains(&output_data.output_id) {
+    for output_with_ext_metadata in available_outputs {
+        if !required_inputs.contains(&output_with_ext_metadata.output_id) {
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
                 // We use the addresses with unspent outputs, because other addresses of the
                 // account without unspent outputs can't be related to this output
                 wallet_address.inner(),
-                &output_data.output,
+                &output_with_ext_metadata.output,
                 slot_index,
                 committable_age_range,
             );
@@ -129,9 +129,12 @@ fn filter_inputs<'a>(
             }
         }
 
-        if let Some(available_input) =
-            output_data.input_signing_data(wallet_address, wallet_bip_path, slot_index, committable_age_range)?
-        {
+        if let Some(available_input) = output_with_ext_metadata.input_signing_data(
+            wallet_address,
+            wallet_bip_path,
+            slot_index,
+            committable_age_range,
+        )? {
             available_outputs_signing_data.push(available_input);
         }
     }

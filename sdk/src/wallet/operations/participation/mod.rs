@@ -63,19 +63,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
     //     restored_spent_cached_outputs_len
     // );
     // let wallet_ledger = self.data().await;
-    // let participation_outputs = wallet_ledger.outputs().values().filter(|output_data| {
-    //     is_valid_participation_output(&output_data.output)
+    // let participation_outputs = wallet_ledger.outputs().values().filter(|output_with_ext_metadata| {
+    //     is_valid_participation_output(&output_with_ext_metadata.output)
     //         // Check that the metadata exists, because otherwise we aren't participating for anything
-    //             && output_data.output.features().and_then(|f| f.metadata()).is_some()
+    //             && output_with_ext_metadata.output.features().and_then(|f| f.metadata()).is_some()
     //             // Don't add spent cached outputs, we have their data already and it can't change anymore
-    //             && !spent_cached_outputs.contains_key(&output_data.output_id)
+    //             && !spent_cached_outputs.contains_key(&output_with_ext_metadata.output_id)
     // });
 
     //     let mut events = HashMap::new();
     //     let mut spent_outputs = HashSet::new();
-    //     for output_data in participation_outputs {
+    //     for output_with_ext_metadata in participation_outputs {
     //         // PANIC: the filter already checks that the metadata exists.
-    //         let metadata = output_data.output.features().and_then(|f| f.metadata()).unwrap();
+    //         let metadata = output_with_ext_metadata.output.features().and_then(|f| f.metadata()).unwrap();
     //         if let Ok(participations) = Participations::from_bytes(&mut metadata.data()) {
     //             for participation in participations.participations {
     //                 // Skip events that aren't in `event_ids` if not None
@@ -86,14 +86,14 @@ impl<S: 'static + SecretManage> Wallet<S> {
     //                 }
     //                 match events.entry(participation.event_id) {
     //                     Entry::Vacant(entry) => {
-    //                         entry.insert(vec![output_data.output_id]);
+    //                         entry.insert(vec![output_with_ext_metadata.output_id]);
     //                     }
     //                     Entry::Occupied(mut entry) => {
-    //                         entry.get_mut().push(output_data.output_id);
+    //                         entry.get_mut().push(output_with_ext_metadata.output_id);
     //                     }
     //                 }
-    //                 if output_data.is_spent() {
-    //                     spent_outputs.insert(output_data.output_id);
+    //                 if output_with_ext_metadata.is_spent() {
+    //                     spent_outputs.insert(output_with_ext_metadata.output_id);
     //                 }
     //             }
     //         };
@@ -275,8 +275,8 @@ impl WalletLedger {
         log::debug!("[get_voting_output]");
         self.unspent_outputs
             .values()
-            .filter(|output_data| is_valid_participation_output(&output_data.output))
-            .max_by_key(|output_data| output_data.output.amount())
+            .filter(|output_with_ext_metadata| is_valid_participation_output(&output_with_ext_metadata.output))
+            .max_by_key(|output_with_ext_metadata| output_with_ext_metadata.output.amount())
             .cloned()
     }
 }

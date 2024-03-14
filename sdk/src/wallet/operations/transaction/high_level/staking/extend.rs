@@ -39,7 +39,7 @@ where
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_extend_staking");
 
-        let account_output_data = self
+        let account_output_with_ext_metadata = self
             .ledger()
             .await
             .unspent_account_output(&account_id)
@@ -52,14 +52,14 @@ where
 
         let future_bounded_epoch = protocol_parameters.future_bounded_epoch(slot_commitment_id);
 
-        let staking_feature = account_output_data
+        let staking_feature = account_output_with_ext_metadata
             .output
             .features()
             .and_then(|f| f.staking())
             .ok_or_else(|| WalletError::StakingFailed(format!("account id {account_id} is not staking")))?;
 
-        let mut output_builder =
-            AccountOutputBuilder::from(account_output_data.output.as_account()).with_account_id(account_id);
+        let mut output_builder = AccountOutputBuilder::from(account_output_with_ext_metadata.output.as_account())
+            .with_account_id(account_id);
 
         // Just extend the end epoch if it's still possible
         if future_bounded_epoch <= staking_feature.end_epoch() {

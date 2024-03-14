@@ -44,7 +44,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
-        let (mut first_output_builder, existing_nft_output_data) = self
+        let (mut first_output_builder, existing_nft_output_with_ext_metadata) = self
             .create_initial_output_builder(params.recipient_address, nft_id, storage_score_params)
             .await?;
 
@@ -164,8 +164,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let mut available_base_coin = self.balance().await?.base_coin.available;
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
-        if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.minimum_amount(storage_score_params);
+        if let Some(existing_nft_output_with_ext_metadata) = existing_nft_output_with_ext_metadata {
+            available_base_coin += existing_nft_output_with_ext_metadata
+                .output
+                .minimum_amount(storage_score_params);
         }
 
         if final_amount > available_base_coin {
@@ -226,7 +228,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         nft_id: Option<NftId>,
         params: StorageScoreParameters,
     ) -> Result<(OutputBuilder, Option<OutputWithExtendedMetadata>), WalletError> {
-        let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
+        let (mut first_output_builder, existing_nft_output_with_ext_metadata) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
                 (
@@ -238,8 +240,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 let unspent_nft_output = self.ledger().await.unspent_nft_output(nft_id).cloned();
 
                 // Find nft output from the inputs
-                let mut first_output_builder = if let Some(nft_output_data) = &unspent_nft_output {
-                    let nft_output = nft_output_data.output.as_nft();
+                let mut first_output_builder = if let Some(nft_output_with_ext_metadata) = &unspent_nft_output {
+                    let nft_output = nft_output_with_ext_metadata.output.as_nft();
                     NftOutputBuilder::from(nft_output).with_nft_id(*nft_id)
                 } else {
                     return Err(WalletError::NftNotFoundInUnspentOutputs);
@@ -259,7 +261,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // Set new address unlock condition
         first_output_builder =
             first_output_builder.add_unlock_condition(AddressUnlockCondition::new(recipient_address));
-        Ok((first_output_builder, existing_nft_output_data))
+        Ok((first_output_builder, existing_nft_output_with_ext_metadata))
     }
 
     // Get a remainder address based on transaction_options or use the first account address

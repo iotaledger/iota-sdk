@@ -9,17 +9,17 @@ use crate::{
 // Check if an output can be unlocked by the wallet address at the current time
 pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
-    output_data: &OutputWithExtendedMetadata,
+    output_with_ext_metadata: &OutputWithExtendedMetadata,
     commitment_slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
 ) -> Result<bool, WalletError> {
-    if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
+    if let Some(unlock_conditions) = output_with_ext_metadata.output.unlock_conditions() {
         if unlock_conditions.is_timelocked(commitment_slot_index, committable_age_range.min) {
             return Ok(false);
         }
     }
 
-    let required_address = output_data
+    let required_address = output_with_ext_metadata
         .output
         .required_address(commitment_slot_index.into(), committable_age_range)?;
 

@@ -287,14 +287,14 @@ impl WalletLedger {
     pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputWithExtendedMetadata> {
         self.unspent_outputs
             .values()
-            .filter(|output_data| output_data.output.is_implicit_account())
+            .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_implicit_account())
     }
 
     /// Returns accounts of the wallet.
     pub fn accounts(&self) -> impl Iterator<Item = &OutputWithExtendedMetadata> {
         self.unspent_outputs
             .values()
-            .filter(|output_data| output_data.output.is_account())
+            .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_account())
     }
 
     // Returns the first possible Account id, which can be an implicit account.
@@ -305,7 +305,7 @@ impl WalletLedger {
             .or_else(|| self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
     }
 
-    /// Get the [`OutputData`] of an output stored in the wallet.
+    /// Get the [`OutputWithExtendedMetadata`] of an output stored in the wallet.
     pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputWithExtendedMetadata> {
         self.outputs.get(output_id)
     }
@@ -345,10 +345,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output, WalletError> {
         let foundry_id = FoundryId::from(native_token_id);
 
-        for output_data in self.ledger.read().await.outputs.values() {
-            if let Output::Foundry(foundry_output) = &output_data.output {
+        for output_with_ext_metadata in self.ledger.read().await.outputs.values() {
+            if let Output::Foundry(foundry_output) = &output_with_ext_metadata.output {
                 if foundry_output.id() == foundry_id {
-                    return Ok(output_data.output.clone());
+                    return Ok(output_with_ext_metadata.output.clone());
                 }
             }
         }

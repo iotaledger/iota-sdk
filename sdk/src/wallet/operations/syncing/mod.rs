@@ -237,9 +237,11 @@ where
                         .ledger()
                         .await
                         .implicit_accounts()
-                        .filter_map(|output_data| {
-                            if output_data.output.as_basic().address() == implicit_account_creation_address.inner() {
-                                Some(output_data.output_id)
+                        .filter_map(|output_with_ext_metadata| {
+                            if output_with_ext_metadata.output.as_basic().address()
+                                == implicit_account_creation_address.inner()
+                            {
+                                Some(output_with_ext_metadata.output_id)
                             } else {
                                 None
                             }

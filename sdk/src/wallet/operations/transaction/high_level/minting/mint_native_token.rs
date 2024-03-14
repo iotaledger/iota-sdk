@@ -55,8 +55,8 @@ where
 
         let mint_amount = mint_amount.into();
         let wallet_ledger = self.ledger().await;
-        let existing_foundry_output = wallet_ledger.unspent_outputs.values().find(|output_data| {
-            if let Output::Foundry(output) = &output_data.output {
+        let existing_foundry_output = wallet_ledger.unspent_outputs.values().find(|output_with_ext_metadata| {
+            if let Output::Foundry(output) = &output_with_ext_metadata.output {
                 TokenId::new(*output.id()) == token_id
             } else {
                 false
@@ -78,9 +78,10 @@ where
             }
 
             // Get the account output that controls the foundry output
-            let existing_account_output = wallet_ledger.unspent_outputs.values().find(|output_data| {
-                if let Output::Account(output) = &output_data.output {
-                    output.account_id_non_null(&output_data.output_id) == **foundry_output.account_address()
+            let existing_account_output = wallet_ledger.unspent_outputs.values().find(|output_with_ext_metadata| {
+                if let Output::Account(output) = &output_with_ext_metadata.output {
+                    output.account_id_non_null(&output_with_ext_metadata.output_id)
+                        == **foundry_output.account_address()
                 } else {
                     false
                 }

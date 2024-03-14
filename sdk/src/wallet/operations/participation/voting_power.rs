@@ -50,8 +50,8 @@ where
     /// Prepares the transaction for [Wallet::increase_voting_power()].
     pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData, WalletError> {
         let (new_output, tx_options) = match self.get_voting_output().await? {
-            Some(current_output_data) => {
-                let output = current_output_data.output.as_basic();
+            Some(current_output_with_ext_metadata) => {
+                let output = current_output_with_ext_metadata.output.as_basic();
 
                 let new_amount = output.amount().checked_add(amount).ok_or(Error::InvalidVotingPower)?;
 
@@ -62,7 +62,7 @@ where
                     new_output,
                     Some(TransactionOptions {
                         // Use the previous voting output and additionally other for the additional amount.
-                        required_inputs: Some(vec![current_output_data.output_id]),
+                        required_inputs: Some(vec![current_output_with_ext_metadata.output_id]),
                         tagged_data_payload: Some(tagged_data_payload),
                         ..Default::default()
                     }),
@@ -97,11 +97,11 @@ where
 
     /// Prepares the transaction for [Wallet::decrease_voting_power()].
     pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData, WalletError> {
-        let current_output_data = self
+        let current_output_with_ext_metadata = self
             .get_voting_output()
             .await?
             .ok_or_else(|| crate::wallet::Error::Voting("No unspent voting output found".to_string()))?;
-        let output = current_output_data.output.as_basic();
+        let output = current_output_with_ext_metadata.output.as_basic();
 
         // If the amount to decrease is the amount of the output, then we just remove the features.
         let (new_output, tagged_data_payload) = if amount == output.amount() {
@@ -119,7 +119,7 @@ where
             Some(TransactionOptions {
                 // Use the previous voting output and additionally others for possible additional required amount for
                 // the remainder to reach the minimum required storage deposit.
-                required_inputs: Some(vec![current_output_data.output_id]),
+                required_inputs: Some(vec![current_output_with_ext_metadata.output_id]),
                 tagged_data_payload,
                 ..Default::default()
             }),

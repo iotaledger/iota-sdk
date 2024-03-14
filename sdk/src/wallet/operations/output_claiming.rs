@@ -56,14 +56,14 @@ impl WalletLedger {
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in self
+        for (output_id, output_with_ext_metadata) in self
             .unspent_outputs
             .iter()
             .filter(|(_, o)| o.output.is_basic() || o.output.is_nft())
         {
             // Don't use outputs that are locked for other transactions
             if !self.locked_outputs.contains(output_id) && self.outputs.contains_key(output_id) {
-                if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
+                if let Some(unlock_conditions) = output_with_ext_metadata.output.unlock_conditions() {
                     // If there is a single [UnlockCondition], then it's an
                     // [AddressUnlockCondition] and we own it already without
                     // further restrictions
@@ -72,7 +72,7 @@ impl WalletLedger {
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
                             wallet_address.inner(),
-                            output_data,
+                            output_with_ext_metadata,
                             slot_index,
                             protocol_parameters.committable_age_range(),
                         )?
@@ -87,8 +87,8 @@ impl WalletLedger {
                                         Some(false) => {
                                             // Only micro transaction if not the same amount needs to be returned
                                             // (resulting in 0 amount to claim)
-                                            if sdr.amount() != output_data.output.amount() {
-                                                output_ids_to_claim.insert(output_data.output_id);
+                                            if sdr.amount() != output_with_ext_metadata.output.amount() {
+                                                output_ids_to_claim.insert(output_with_ext_metadata.output_id);
                                             }
                                         }
                                         _ => continue,
@@ -96,17 +96,17 @@ impl WalletLedger {
                                 }
                             }
                             OutputsToClaim::NativeTokens => {
-                                if output_data.output.native_token().is_some() {
-                                    output_ids_to_claim.insert(output_data.output_id);
+                                if output_with_ext_metadata.output.native_token().is_some() {
+                                    output_ids_to_claim.insert(output_with_ext_metadata.output_id);
                                 }
                             }
                             OutputsToClaim::Nfts => {
-                                if output_data.output.is_nft() {
-                                    output_ids_to_claim.insert(output_data.output_id);
+                                if output_with_ext_metadata.output.is_nft() {
+                                    output_ids_to_claim.insert(output_with_ext_metadata.output_id);
                                 }
                             }
                             OutputsToClaim::Amount => {
-                                let mut claimable_amount = output_data.output.amount();
+                                let mut claimable_amount = output_with_ext_metadata.output.amount();
                                 if unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age_range())
                                     == Some(false)
                                 {
@@ -116,11 +116,11 @@ impl WalletLedger {
                                         .unwrap_or_default()
                                 };
                                 if claimable_amount > 0 {
-                                    output_ids_to_claim.insert(output_data.output_id);
+                                    output_ids_to_claim.insert(output_with_ext_metadata.output_id);
                                 }
                             }
                             OutputsToClaim::All => {
-                                output_ids_to_claim.insert(output_data.output_id);
+                                output_ids_to_claim.insert(output_with_ext_metadata.output_id);
                             }
                         }
                     }
@@ -172,11 +172,11 @@ where
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
         let mut basic_outputs: Vec<OutputWithExtendedMetadata> = Vec::new();
-        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
+        for (output_id, output_with_ext_metadata) in &wallet_ledger.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
                 // Remove voting output from inputs, because we don't want to spent it to claim something else.
-                if output_data.output_id == voting_output.output_id {
+                if output_with_ext_metadata.output_id == voting_output.output_id {
                     continue;
                 }
             }
@@ -189,7 +189,7 @@ where
                             if !a.address().is_implicit_account_creation() {
                                 // Store outputs with [`AddressUnlockCondition`] alone, because they could be used as
                                 // additional input, if required
-                                basic_outputs.push(output_data.clone());
+                                basic_outputs.push(output_with_ext_metadata.clone());
                             }
                         }
                     }
@@ -240,9 +240,9 @@ where
 
         let mut outputs_to_claim = Vec::new();
         for output_id in output_ids_to_claim {
-            if let Some(output_data) = wallet_ledger.unspent_outputs.get(&output_id) {
+            if let Some(output_with_extended_metadata) = wallet_ledger.unspent_outputs.get(&output_id) {
                 if !wallet_ledger.locked_outputs.contains(&output_id) {
-                    outputs_to_claim.push(output_data.clone());
+                    outputs_to_claim.push(output_with_extended_metadata.clone());
                 }
             }
         }
@@ -266,8 +266,8 @@ where
             .sum::<u64>()
             >= BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
-        for output_data in &outputs_to_claim {
-            if let Output::Nft(nft_output) = &output_data.output {
+        for output_with_ext_metadata in &outputs_to_claim {
+            if let Output::Nft(nft_output) = &output_with_ext_metadata.output {
                 // build new output with same amount, nft_id, immutable/feature blocks and native tokens, just
                 // updated address unlock conditions
 
@@ -275,13 +275,13 @@ where
                     // Only update address and nft id if we have no additional inputs which can provide the storage
                     // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
-                        .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
+                        .with_nft_id(nft_output.nft_id_non_null(&output_with_ext_metadata.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
-                        .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
+                        .with_nft_id(nft_output.nft_id_non_null(&output_with_ext_metadata.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
                         .finish_output()?
                 };

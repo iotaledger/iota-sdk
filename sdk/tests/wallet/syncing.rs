@@ -125,11 +125,11 @@
 //     assert_eq!(balance.accounts().len(), 0);
 //     let unspent_outputs = wallet_1.unspent_outputs(None).await?;
 //     assert_eq!(unspent_outputs.len(), 1);
-//     unspent_outputs.into_iter().for_each(|output_data| {
-//         assert!(output_data.output.is_basic());
-//         assert_eq!(output_data.output.unlock_conditions().unwrap().len(), 1);
+//     unspent_outputs.into_iter().for_each(|output_with_ext_metadata| {
+//         assert!(output_with_ext_metadata.output.is_basic());
+//         assert_eq!(output_with_ext_metadata.output.unlock_conditions().unwrap().len(), 1);
 //         assert_eq!(
-//             output_data
+//             output_with_ext_metadata
 //                 .output
 //                 .unlock_conditions()
 //                 .unwrap()
