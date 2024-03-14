@@ -181,8 +181,15 @@ async fn balance_expiration() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(balance.base_coin().available(), 0);
 
     // Wait until expired
-    // TODO wait for slots, not seconds
-    tokio::time::sleep(std::time::Duration::from_secs(slots_until_expired as u64)).await;
+    let seconds_per_slot = wallet_0
+        .client()
+        .get_protocol_parameters()
+        .await?
+        .slot_duration_in_seconds();
+    tokio::time::sleep(std::time::Duration::from_secs(
+        seconds_per_slot as u64 * slots_until_expired as u64,
+    ))
+    .await;
 
     // Wallet 1 balance after expiration
     let balance = wallet_1.sync(None).await?;

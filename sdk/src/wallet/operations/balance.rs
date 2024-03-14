@@ -11,7 +11,7 @@ use crate::{
         unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
-        operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
+        operations::{helpers::time::can_output_be_unlocked_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
         Wallet, WalletError,
     },
@@ -37,8 +37,12 @@ impl<S: 'static + SecretManage> Wallet<S> {
         #[cfg(feature = "participation")]
         let voting_output = wallet_ledger.get_voting_output();
 
-        let claimable_outputs =
-            wallet_ledger.claimable_outputs(&wallet_address, OutputsToClaim::All, slot_index, &protocol_parameters)?;
+        let claimable_outputs = wallet_ledger.claimable_outputs(
+            wallet_address.inner().clone(),
+            OutputsToClaim::All,
+            slot_index,
+            &protocol_parameters,
+        )?;
 
         #[cfg(feature = "participation")]
         {
@@ -48,6 +52,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 }
             }
         }
+
+        let controlled_addresses = wallet_ledger.controlled_addresses(wallet_address.inner().clone());
 
         let mut reward_outputs = HashSet::new();
 
@@ -168,11 +174,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         if is_claimable {
                             // check if output can be unlocked always from now on, in that case it should be
                             // added to the total amount
-                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
-                                // We use the addresses with unspent outputs, because other addresses of
-                                // the account without unspent
-                                // outputs can't be related to this output
-                                wallet_address.inner(),
+                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_from_now_on(
+                                &controlled_addresses,
                                 output,
                                 slot_index,
                                 protocol_parameters.committable_age_range(),

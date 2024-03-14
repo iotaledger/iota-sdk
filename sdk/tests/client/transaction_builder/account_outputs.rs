@@ -2364,3 +2364,71 @@ fn auto_transition_account_less_than_min_additional() {
         .unwrap();
     assert_eq!(account_output.amount(), min_amount);
 }
+
+#[test]
+fn account_transition_with_required_context_inputs() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let ed25519_address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
+
+    let inputs = [
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+            .finish_output()
+            .unwrap(),
+        AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
+            .with_mana(12000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_features([BlockIssuerFeature::new(
+                u32::MAX,
+                BlockIssuerKeys::from_vec(vec![
+                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
+                ])
+                .unwrap(),
+            )
+            .unwrap()])
+            .finish_output()
+            .unwrap(),
+    ];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+            .finish_output()
+            .unwrap(),
+    ];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
+    .finish()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert!(selected.transaction.outputs()[1].is_account());
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    // Required context inputs are added when the account is transitioned
+    assert_eq!(selected.transaction.context_inputs().len(), 2);
+    assert!(selected.transaction.context_inputs().commitment().is_some());
+    assert_eq!(
+        selected.transaction.context_inputs().block_issuance_credits().count(),
+        1
+    );
+}

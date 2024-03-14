@@ -39,12 +39,16 @@ pub enum TransactionBuilderError {
         required: u64,
     },
     /// Insufficient mana provided.
-    #[error("insufficient mana: found {found}, required {required}")]
+    #[error(
+        "insufficient mana: found {found}, required {required}, slots remaining until enough mana {slots_remaining}"
+    )]
     InsufficientMana {
         /// The amount found.
         found: u64,
         /// The required amount.
         required: u64,
+        /// The number of slots remaining before this transaction will have generated enough mana.
+        slots_remaining: u32,
     },
     /// Insufficient native token amount provided.
     #[error("insufficient native token amount: found {found}, required {required}")]
@@ -76,8 +80,7 @@ pub enum TransactionBuilderError {
     UnfulfillableRequirement(Requirement),
     /// Unsupported address type.
     #[error("unsupported address type {0}")]
-    // TODO replace with string when 2.0 has Address::kind_str
-    UnsupportedAddressType(u8),
+    UnsupportedAddressType(String),
     /// Block error.
     #[error("{0}")]
     Block(#[from] BlockError),

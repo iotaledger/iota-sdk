@@ -252,13 +252,13 @@ export class Client {
     /**
      * Returns the information of committee members at the given epoch index. If epoch index is not provided, the
      * current committee members are returned.
-     * GET /api/core/v3/committee/?epochIndex
+     * GET /api/core/v3/committee/?epoch
      */
-    async getCommittee(epochIndex?: EpochIndex): Promise<CommitteeResponse> {
+    async getCommittee(epoch?: EpochIndex): Promise<CommitteeResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getCommittee',
             data: {
-                epochIndex,
+                epoch,
             },
         });
 

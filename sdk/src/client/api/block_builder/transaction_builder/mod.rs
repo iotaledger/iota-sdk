@@ -4,6 +4,7 @@
 //! Builder for transactions
 
 pub(crate) mod burn;
+pub(crate) mod context_inputs;
 pub(crate) mod error;
 pub(crate) mod remainder;
 pub(crate) mod requirement;
@@ -168,11 +169,7 @@ impl Client {
             transaction_builder = transaction_builder.disable_additional_input_selection();
         }
 
-        let prepared_transaction_data = transaction_builder.finish()?;
-
-        prepared_transaction_data.transaction.validate_length()?;
-
-        Ok(prepared_transaction_data)
+        Ok(transaction_builder.finish()?)
     }
 }
 
@@ -287,12 +284,10 @@ impl TransactionBuilder {
             *allotment_debt = self.mana_allotments.get(issuer_id).copied().unwrap_or_default();
         }
         // Add initial requirements
-        self.requirements.extend([
-            Requirement::Mana,
-            Requirement::ContextInputs,
-            Requirement::Amount,
-            Requirement::NativeTokens,
-        ]);
+        self.requirements
+            .extend([Requirement::Mana, Requirement::Amount, Requirement::NativeTokens]);
+
+        self.fulfill_output_context_inputs_requirements()?;
 
         for required_input in self.required_inputs.clone() {
             // Checks that required input is available.
@@ -353,9 +348,21 @@ impl TransactionBuilder {
         let (input_mana, output_mana) = self.mana_sums(false)?;
 
         if input_mana < output_mana {
+            let total_generation_amount = self
+                .selected_inputs
+                .iter()
+                .map(|o| o.output.mana_generation_amount(&self.protocol_parameters))
+                .sum::<u64>();
+            let slots_remaining = self.protocol_parameters.slots_until_generated(
+                self.creation_slot,
+                total_generation_amount,
+                self.total_selected_mana(false)?,
+                output_mana - input_mana,
+            )?;
             return Err(TransactionBuilderError::InsufficientMana {
                 found: input_mana,
                 required: output_mana,
+                slots_remaining,
             });
         }
 
@@ -477,7 +484,7 @@ impl TransactionBuilder {
     fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, TransactionBuilderError> {
         log::debug!("Selecting input {:?}", input.output_id());
 
-        let mut added_output = None;
+        let mut added_output = false;
         if let Some(output) = self.transition_input(&input)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
@@ -485,7 +492,7 @@ impl TransactionBuilder {
             // - input doesn't need to be checked for as we just transitioned it
             // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
             self.added_outputs.push(output);
-            added_output = self.added_outputs.last();
+            added_output = true;
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
@@ -493,14 +500,12 @@ impl TransactionBuilder {
             self.requirements.push(requirement);
         }
 
+        // New input may need context inputs
+        self.fulfill_context_inputs_requirements(&input);
+
         self.selected_inputs.push(input);
 
-        // New inputs/outputs may need context inputs
-        if !self.requirements.contains(&Requirement::ContextInputs) {
-            self.requirements.push(Requirement::ContextInputs);
-        }
-
-        Ok(added_output)
+        Ok(if added_output { self.added_outputs.last() } else { None })
     }
 
     /// Sets the required inputs of an [`TransactionBuilder`].

@@ -207,6 +207,18 @@ impl Output {
         }
     }
 
+    /// Returns the mana generation amount of the output.
+    pub fn mana_generation_amount(&self, protocol_parameters: &ProtocolParameters) -> u64 {
+        match self {
+            Self::Basic(output) => output.mana_generation_amount(protocol_parameters),
+            Self::Account(output) => output.mana_generation_amount(protocol_parameters),
+            Self::Anchor(output) => output.mana_generation_amount(protocol_parameters),
+            Self::Foundry(output) => output.mana_generation_amount(protocol_parameters),
+            Self::Nft(output) => output.mana_generation_amount(protocol_parameters),
+            Self::Delegation(output) => output.mana_generation_amount(protocol_parameters),
+        }
+    }
+
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {

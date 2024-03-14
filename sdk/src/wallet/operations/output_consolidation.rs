@@ -128,7 +128,7 @@ where
         &self,
         output_with_ext_metadata: &OutputWithExtendedMetadata,
         slot_index: SlotIndex,
-        wallet_address: &Address,
+        controlled_addresses: &HashSet<Address>,
     ) -> Result<bool, WalletError> {
         Ok(if let Output::Basic(basic_output) = &output_with_ext_metadata.output {
             let protocol_parameters = self.client().get_protocol_parameters().await?;
@@ -157,7 +157,7 @@ where
             }
 
             can_output_be_unlocked_now(
-                wallet_address,
+                controlled_addresses,
                 output_with_ext_metadata,
                 slot_index,
                 protocol_parameters.committable_age_range(),
@@ -182,6 +182,8 @@ where
         let mut outputs_to_consolidate = Vec::new();
         let mut native_token_inputs = HashMap::new();
 
+        let controlled_addresses = wallet_ledger.controlled_addresses(wallet_address.inner().clone());
+
         for (output_id, output_with_ext_metadata) in &wallet_ledger.unspent_outputs {
             // #[cfg(feature = "participation")]
             // if let Some(ref voting_output) = voting_output {
@@ -193,7 +195,7 @@ where
 
             let is_locked_output = wallet_ledger.locked_outputs.contains(output_id);
             let should_consolidate_output = self
-                .should_consolidate_output(output_with_ext_metadata, slot_index, wallet_address.as_ref())
+                .should_consolidate_output(output_with_ext_metadata, slot_index, &controlled_addresses)
                 .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_with_ext_metadata.clone());

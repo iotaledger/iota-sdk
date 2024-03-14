@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
+use std::collections::HashSet;
 
 use crypto::keys::bip44::Bip44;
 
@@ -13,14 +14,14 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
-        address::Bech32Address,
+        address::{Address, Bech32Address},
         output::{Output, OutputId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
     wallet::{
-        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, types::OutputWithExtendedMetadata,
-        Wallet, WalletError,
+        operations::helpers::time::can_output_be_unlocked_from_now_on, types::OutputWithExtendedMetadata, Wallet,
+        WalletError,
     },
 };
 
@@ -61,10 +62,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
             }
         }
 
+        let wallet_address = self.address().await;
+        let controlled_addresses = wallet_ledger.controlled_addresses(wallet_address.inner().clone());
         // Filter inputs to not include inputs that require additional outputs for storage deposit return or could be
         // still locked.
         let available_inputs = filter_inputs(
-            &self.address().await,
+            &wallet_address,
+            &controlled_addresses,
             self.bip_path().await,
             wallet_ledger
                 .unspent_outputs
@@ -104,6 +108,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs<'a>(
     wallet_address: &Bech32Address,
+    controlled_addresses: &HashSet<Address>,
     wallet_bip_path: Option<Bip44>,
     available_outputs: impl IntoIterator<Item = &'a OutputWithExtendedMetadata>,
     slot_index: impl Into<SlotIndex> + Copy,
@@ -114,10 +119,8 @@ fn filter_inputs<'a>(
 
     for output_with_ext_metadata in available_outputs {
         if !required_inputs.contains(&output_with_ext_metadata.output_id) {
-            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
-                // We use the addresses with unspent outputs, because other addresses of the
-                // account without unspent outputs can't be related to this output
-                wallet_address.inner(),
+            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_from_now_on(
+                controlled_addresses,
                 &output_with_ext_metadata.output,
                 slot_index,
                 committable_age_range,

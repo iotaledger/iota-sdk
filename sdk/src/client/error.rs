@@ -67,22 +67,6 @@ pub enum ClientError {
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
-    /// The transaction is too large
-    #[error("the transaction is too large. Its length is {length}, max length is {max_length}")]
-    InvalidTransactionLength {
-        /// The found length.
-        length: usize,
-        /// The max supported length.
-        max_length: usize,
-    },
-    /// The signed transaction payload is too large
-    #[error("the signed transaction payload is too large. Its length is {length}, max length is {max_length}")]
-    InvalidSignedTransactionPayloadLength {
-        /// The found length.
-        length: usize,
-        /// The max length.
-        max_length: usize,
-    },
     /// JSON error
     #[error("{0}")]
     Json(#[from] serde_json::Error),

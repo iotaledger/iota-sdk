@@ -1,14 +1,16 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashSet;
+
 use crate::{
     types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex},
     wallet::{types::OutputWithExtendedMetadata, WalletError},
 };
 
-// Check if an output can be unlocked by the wallet address at the current time
+// Check if an output can be unlocked by one of the provided addresses at the current time
 pub(crate) fn can_output_be_unlocked_now(
-    wallet_address: &Address,
+    controlled_addresses: &HashSet<Address>,
     output_with_ext_metadata: &OutputWithExtendedMetadata,
     commitment_slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
@@ -24,13 +26,16 @@ pub(crate) fn can_output_be_unlocked_now(
         .required_address(commitment_slot_index.into(), committable_age_range)?;
 
     // In case of `None` the output can currently not be unlocked because of expiration unlock condition
-    Ok(required_address.map_or_else(|| false, |required_address| wallet_address == &required_address))
+    Ok(required_address.map_or_else(
+        || false,
+        |required_address| controlled_addresses.contains(&required_address),
+    ))
 }
 
 // Check if an output can be unlocked by the wallet address at the current time and at any
 // point in the future
-pub(crate) fn can_output_be_unlocked_forever_from_now_on(
-    wallet_address: &Address,
+pub(crate) fn can_output_be_unlocked_from_now_on(
+    controlled_addresses: &HashSet<Address>,
     output: &Output,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
@@ -49,7 +54,7 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
                 slot_index,
                 committable_age_range,
             ) {
-                if address != expiration.return_address() || address != wallet_address {
+                if address != expiration.return_address() || !controlled_addresses.contains(address) {
                     return false;
                 }
             } else {
