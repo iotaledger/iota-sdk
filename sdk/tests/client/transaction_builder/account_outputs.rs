@@ -12,8 +12,9 @@ use iota_sdk::{
         address::{Address, ImplicitAccountCreationAddress},
         mana::ManaAllotment,
         output::{
-            feature::Ed25519PublicKeyHashBlockIssuerKey, unlock_condition::AddressUnlockCondition, AccountId,
-            AccountOutputBuilder, BasicOutputBuilder, Output,
+            feature::{BlockIssuerFeature, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
+            unlock_condition::AddressUnlockCondition,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
         },
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
