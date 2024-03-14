@@ -28,7 +28,7 @@ where
     /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
         &self,
-        options: impl Into<Option<SyncOptions>>,
+        options: impl Into<Option<SyncOptions>> + Send,
         interval: Option<Duration>,
     ) -> Result<(), WalletError> {
         log::debug!("[start_background_syncing]");

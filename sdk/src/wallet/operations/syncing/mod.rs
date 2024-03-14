@@ -178,7 +178,7 @@ where
 {
     /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: impl Into<Option<SyncOptions>>) -> Result<Balance, WalletError> {
+    pub async fn sync(&self, options: impl Into<Option<SyncOptions>> + Send) -> Result<Balance, WalletError> {
         let options = match options.into() {
             Some(opt) => opt,
             None => self.default_sync_options().await,
