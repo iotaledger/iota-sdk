@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 /// The synchronization options
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncOptions {
     /// Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
@@ -57,7 +57,7 @@ impl Default for SyncOptions {
 }
 
 /// Sync options for Ed25519 addresses from the wallet
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct WalletSyncOptions {
     #[serde(default = "yes")]
@@ -88,7 +88,7 @@ impl WalletSyncOptions {
 }
 
 /// Sync options for addresses from account outputs
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct AccountSyncOptions {
     #[serde(default = "no")]
@@ -127,7 +127,7 @@ impl AccountSyncOptions {
 }
 
 /// Sync options for addresses from NFT outputs
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct NftSyncOptions {
     #[serde(default = "no")]

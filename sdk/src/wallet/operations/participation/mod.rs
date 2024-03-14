@@ -25,7 +25,7 @@ use crate::{
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
-    wallet::{core::WalletLedger, types::OutputData, Wallet},
+    wallet::{core::WalletLedger, types::OutputWithExtendedMetadata, Wallet},
 };
 
 /// An object containing an account's entire participation overview.
@@ -213,7 +213,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
-    pub async fn get_voting_output(&self) -> Option<OutputData> {
+    pub async fn get_voting_output(&self) -> Option<OutputWithExtendedMetadata> {
         self.ledger().await.get_voting_output()
     }
 
@@ -271,7 +271,7 @@ impl WalletLedger {
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
-    pub(crate) fn get_voting_output(&self) -> Option<OutputData> {
+    pub(crate) fn get_voting_output(&self) -> Option<OutputWithExtendedMetadata> {
         log::debug!("[get_voting_output]");
         self.unspent_outputs
             .values()

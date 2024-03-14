@@ -12,7 +12,7 @@ use crate::{
         payload::signed_transaction::TransactionId,
     },
     wallet::{
-        types::{InclusionState, OutputData, TransactionWithMetadata},
+        types::{InclusionState, OutputWithExtendedMetadata, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -58,7 +58,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Update wallet with newly synced data and emit events for outputs.
     pub(crate) async fn update_after_sync(
         &self,
-        unspent_outputs: Vec<OutputData>,
+        unspent_outputs: Vec<OutputWithExtendedMetadata>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
     ) -> Result<(), WalletError> {
         log::debug!("[SYNC] Update wallet ledger with new synced transactions");

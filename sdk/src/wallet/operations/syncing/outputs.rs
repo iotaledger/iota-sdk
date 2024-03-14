@@ -14,21 +14,21 @@ use crate::{
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
         },
     },
-    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet, WalletError},
+    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputWithExtendedMetadata, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
-    /// Convert OutputWithMetadataResponse to OutputData with the network_id added
-    pub(crate) async fn output_response_to_output_data(
+    /// Convert `OutputWithMetadataResponse` to `OutputWithExtendedMetadata` with the network_id added.
+    pub(crate) async fn output_response_to_output_with_extended_metadata(
         &self,
-        outputs_with_meta: Vec<OutputWithMetadataResponse>,
-    ) -> Result<Vec<OutputData>, WalletError> {
+        outputs_with_metadata: Vec<OutputWithMetadataResponse>,
+        network_id: u64,
+    ) -> Result<Vec<OutputWithExtendedMetadata>, WalletError> {
         log::debug!("[SYNC] convert output_responses");
-        // store outputs with network_id
-        let network_id = self.client().get_network_id().await?;
+
         let wallet_ledger = self.ledger().await;
 
-        Ok(outputs_with_meta
+        Ok(outputs_with_metadata
             .into_iter()
             .map(
                 |OutputWithMetadataResponse {
@@ -43,7 +43,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         .get(metadata.output_id().transaction_id())
                         .map_or(false, |tx| !tx.incoming);
 
-                    OutputData {
+                    OutputWithExtendedMetadata {
                         output_id: metadata.output_id().to_owned(),
                         metadata,
                         output,
@@ -58,7 +58,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
     /// Gets outputs by their id, already known outputs are not requested again, but loaded from the account set as
     /// unspent, because we wouldn't get them from the node if they were spent
-    pub(crate) async fn get_outputs(
+    pub(crate) async fn get_outputs_request_unknown(
         &self,
         output_ids: &[OutputId],
     ) -> Result<Vec<OutputWithMetadataResponse>, WalletError> {

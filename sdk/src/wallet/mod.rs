@@ -70,7 +70,7 @@ pub use self::{
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
         },
     },
-    types::OutputData,
+    types::OutputWithExtendedMetadata,
 };
 use crate::{
     types::{

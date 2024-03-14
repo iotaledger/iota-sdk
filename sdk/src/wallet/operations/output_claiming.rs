@@ -22,7 +22,7 @@ use crate::{
     wallet::{
         core::WalletLedger,
         operations::helpers::time::can_output_be_unlocked_now,
-        types::{OutputData, TransactionWithMetadata},
+        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -162,14 +162,16 @@ where
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
     /// additional inputs
-    pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> Result<Vec<OutputData>, WalletError> {
+    pub(crate) async fn get_basic_outputs_for_additional_inputs(
+        &self,
+    ) -> Result<Vec<OutputWithExtendedMetadata>, WalletError> {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await;
         let wallet_ledger = self.ledger().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
-        let mut basic_outputs: Vec<OutputData> = Vec::new();
+        let mut basic_outputs: Vec<OutputWithExtendedMetadata> = Vec::new();
         for (output_id, output_data) in &wallet_ledger.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {

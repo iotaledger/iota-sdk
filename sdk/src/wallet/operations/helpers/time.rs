@@ -3,13 +3,13 @@
 
 use crate::{
     types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex},
-    wallet::{types::OutputData, WalletError},
+    wallet::{types::OutputWithExtendedMetadata, WalletError},
 };
 
 // Check if an output can be unlocked by the wallet address at the current time
 pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
-    output_data: &OutputData,
+    output_data: &OutputWithExtendedMetadata,
     commitment_slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
 ) -> Result<bool, WalletError> {

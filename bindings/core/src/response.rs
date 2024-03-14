@@ -37,7 +37,7 @@ use iota_sdk::{
     },
     utils::serde::string,
     wallet::{
-        types::{Balance, OutputData, TransactionWithMetadataDto},
+        types::{Balance, OutputWithExtendedMetadata, TransactionWithMetadataDto},
         PreparedCreateDelegationTransaction, PreparedCreateNativeTokenTransaction,
     },
 };
@@ -300,13 +300,15 @@ pub enum Response {
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
+    // TODO: update bindings in a separete PR
     /// Response for:
     /// - [`GetOutput`](crate::method::WalletMethod::GetOutput)
-    OutputData(Option<Box<OutputData>>),
+    OutputData(Option<Box<OutputWithExtendedMetadata>>),
+    // TODO: update bindings in a separete PR
     /// Response for:
     /// - [`Outputs`](crate::method::WalletMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::WalletMethod::UnspentOutputs)
-    OutputsData(Vec<OutputData>),
+    OutputsData(Vec<OutputWithExtendedMetadata>),
     /// Response for:
     /// - [`PrepareBurn`](crate::method::WalletMethod::PrepareBurn),
     /// - [`PrepareClaimOutputs`](crate::method::WalletMethod::PrepareClaimOutputs)

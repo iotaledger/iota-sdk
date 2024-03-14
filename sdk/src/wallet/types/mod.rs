@@ -32,10 +32,14 @@ use crate::{
     wallet::WalletError,
 };
 
+// TODO: you may nott like this name, but I think it's still better than OutputData tbh. I wanted something that
+// prevents adding more and more nouns to the name of the struct, and still expresses that it's similar to
+// `OutputWithMetadata` but a bit more than that without being explicit and probably inaccurate in the future. I am open
+// to suggestions though!!
 /// An output with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputData {
+pub struct OutputWithExtendedMetadata {
     /// The output id
     pub output_id: OutputId,
     /// The output metadata
@@ -50,7 +54,7 @@ pub struct OutputData {
     pub remainder: bool,
 }
 
-impl OutputData {
+impl OutputWithExtendedMetadata {
     /// Returns whether the [`OutputMetadata`] is spent or not.
     pub fn is_spent(&self) -> bool {
         self.metadata.is_spent()

@@ -25,7 +25,7 @@ use crate::{
     wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::helpers::time::can_output_be_unlocked_now,
-        types::{OutputData, TransactionWithMetadata},
+        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -126,7 +126,7 @@ where
     /// Determines whether an output should be consolidated or not.
     async fn should_consolidate_output(
         &self,
-        output_data: &OutputData,
+        output_data: &OutputWithExtendedMetadata,
         slot_index: SlotIndex,
         wallet_address: &Address,
     ) -> Result<bool, WalletError> {
@@ -168,7 +168,10 @@ where
     }
 
     /// Returns all outputs that should be consolidated.
-    async fn get_outputs_to_consolidate(&self, params: &ConsolidationParams) -> Result<Vec<OutputData>, WalletError> {
+    async fn get_outputs_to_consolidate(
+        &self,
+        params: &ConsolidationParams,
+    ) -> Result<Vec<OutputWithExtendedMetadata>, WalletError> {
         // #[cfg(feature = "participation")]
         // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;

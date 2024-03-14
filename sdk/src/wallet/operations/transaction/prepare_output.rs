@@ -20,7 +20,7 @@ use crate::{
         BlockError,
     },
     utils::serde::string,
-    wallet::{operations::transaction::TransactionOptions, types::OutputData, Wallet, WalletError},
+    wallet::{operations::transaction::TransactionOptions, types::OutputWithExtendedMetadata, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
@@ -225,7 +225,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
         params: StorageScoreParameters,
-    ) -> Result<(OutputBuilder, Option<OutputData>), WalletError> {
+    ) -> Result<(OutputBuilder, Option<OutputWithExtendedMetadata>), WalletError> {
         let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
