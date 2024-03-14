@@ -63,7 +63,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         // Get the corresponding unspent output data
         let mut new_unspent_outputs_data = self
-            .get_outputs_from_address_output_ids(addresses_to_sync_with_unspent_output_ids)
+            .get_outputs_from_address_output_ids(&addresses_to_sync_with_unspent_output_ids)
             .await?;
 
         loop {
@@ -148,8 +148,8 @@ where
 {
     /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: Option<SyncOptions>) -> Result<Balance, WalletError> {
-        let options = match options {
+    pub async fn sync(&self, options: impl Into<Option<SyncOptions>>) -> Result<Balance, WalletError> {
+        let options = match options.into() {
             Some(opt) => opt,
             None => self.default_sync_options().await,
         };
