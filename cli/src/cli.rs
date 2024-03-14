@@ -73,6 +73,9 @@ pub struct InitParameters {
     /// Set the Bech32-encoded wallet address.
     #[arg(short, long)]
     pub address: Option<String>,
+    /// Set the wallet alias name.
+    #[arg(short = 'l', long)]
+    pub alias: Option<String>,
 }
 
 impl Default for InitParameters {
@@ -84,6 +87,7 @@ impl Default for InitParameters {
             node_url: DEFAULT_NODE_URL.to_string(),
             bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
             address: None,
+            alias: None,
         }
     }
 }
@@ -400,11 +404,12 @@ pub async fn init_command(
     secret_manager: SecretManager,
     init_params: InitParameters,
 ) -> Result<Wallet, Error> {
-    let alias = if get_decision("Do you want to assign an alias to your wallet?")? {
-        Some(get_alias("New wallet alias").await?)
-    } else {
-        None
-    };
+    let mut alias = init_params.alias;
+    if alias.is_none() {
+        if get_decision("Do you want to assign an alias to your wallet?")? {
+            alias.replace(get_alias("New wallet alias").await?);
+        }
+    }
 
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
