@@ -167,13 +167,13 @@ impl Client {
 
     /// Returns the information of committee members at the given epoch index. If epoch index is not provided, the
     /// current committee members are returned.
-    /// GET /api/core/v3/committee/?epochIndex
+    /// GET /api/core/v3/committee/?epoch
     pub async fn get_committee(
         &self,
-        epoch_index: impl Into<Option<EpochIndex>> + Send,
+        epoch: impl Into<Option<EpochIndex>> + Send,
     ) -> Result<CommitteeResponse, ClientError> {
         const PATH: &str = "api/core/v3/committee";
-        let query = query_tuples_to_query_string([epoch_index.into().map(|i| ("epochIndex", i.to_string()))]);
+        let query = query_tuples_to_query_string([epoch.into().map(|i| ("epoch", i.to_string()))]);
 
         self.get_request(PATH, query.as_deref(), false).await
     }

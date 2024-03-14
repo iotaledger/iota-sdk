@@ -187,10 +187,9 @@ pub enum ClientMethod {
     },
     /// Return the information of committee members at the given epoch index. If epoch index is not provided, the
     /// current committee members are returned.
-    #[serde(rename_all = "camelCase")]
     GetCommittee {
         /// The epoch index to query.
-        epoch_index: Option<EpochIndex>,
+        epoch: Option<EpochIndex>,
     },
     /// Get issuance
     GetIssuance,
