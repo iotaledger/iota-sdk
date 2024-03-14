@@ -217,11 +217,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let results = futures::future::try_join_all(tasks).await?;
 
         // Get all results
-        let mut output_ids = HashSet::new();
-        for res in results {
-            let found_output_ids = res?;
-            output_ids.extend(found_output_ids);
-        }
+        let output_ids = results.into_iter().collect::<Result<Vec<_>, _>>()?;
+        let output_ids: HashSet<OutputId> = HashSet::from_iter(output_ids.into_iter().flat_map(|v| v.into_iter()));
 
         Ok(output_ids.into_iter().collect())
     }

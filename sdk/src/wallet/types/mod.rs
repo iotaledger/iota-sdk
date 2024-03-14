@@ -38,6 +38,7 @@ use crate::{
 pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
+    /// The output metadata
     pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
@@ -45,6 +46,7 @@ pub struct OutputData {
     pub output_id_proof: OutputIdProof,
     /// Network ID
     pub network_id: u64,
+    /// Whether the output is a remainder
     pub remainder: bool,
 }
 

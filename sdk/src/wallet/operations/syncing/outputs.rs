@@ -64,6 +64,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     ) -> Result<Vec<OutputWithMetadataResponse>, WalletError> {
         log::debug!("[SYNC] start get_outputs");
         let get_outputs_start_time = Instant::now();
+
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
