@@ -46,7 +46,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     // are found.
     async fn request_outputs_recursively(
         &self,
-        addresses_to_sync: Vec<AddressWithUnspentOutputs>,
+        addresses_to_sync: &[AddressWithUnspentOutputs],
         options: &SyncOptions,
     ) -> Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>), WalletError> {
         // Cache account and nft addresses with the related Ed25519 address, so we can update the account
@@ -58,9 +58,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 
         // Get the unspent and spent/not-synced output ids per address to sync
-        let (addresses_to_sync_with_unspent_output_ids, mut spent_or_not_synced_output_ids) = self
-            .get_output_ids_for_addresses(addresses_to_sync.clone(), options)
-            .await?;
+        let (addresses_to_sync_with_unspent_output_ids, mut spent_or_not_synced_output_ids) =
+            self.get_output_ids_for_addresses(addresses_to_sync, options).await?;
 
         // Get the corresponding unspent output data
         let mut new_unspent_outputs_data = self
@@ -224,7 +223,7 @@ where
         }
 
         let (_addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data) =
-            self.request_outputs_recursively(addresses_to_sync, options).await?;
+            self.request_outputs_recursively(&addresses_to_sync, options).await?;
 
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");

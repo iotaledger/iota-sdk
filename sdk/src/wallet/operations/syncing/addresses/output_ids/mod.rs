@@ -227,7 +227,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// return spent outputs separated
     pub(crate) async fn get_output_ids_for_addresses(
         &self,
-        addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
+        addresses_with_unspent_outputs: &[AddressWithUnspentOutputs],
         options: &SyncOptions,
     ) -> Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>), WalletError> {
         log::debug!("[SYNC] start get_output_ids_for_addresses");
@@ -238,7 +238,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let mut spent_or_not_anymore_synced_outputs = Vec::new();
 
         // We split the addresses into chunks so we don't get timeouts if we have thousands
-        for addresses_chunk in &mut addresses_with_unspent_outputs
+        for addresses_chunk in addresses_with_unspent_outputs
             .chunks(PARALLEL_REQUESTS_AMOUNT)
             .map(|x: &[AddressWithUnspentOutputs]| x.to_vec())
         {
