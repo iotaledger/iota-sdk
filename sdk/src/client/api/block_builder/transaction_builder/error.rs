@@ -47,7 +47,9 @@ pub enum TransactionBuilderError {
         required: u64,
     },
     /// Insufficient mana provided.
-    #[error("insufficient mana: found {found}, required {required}")]
+    #[error(
+        "insufficient mana: found {found}, required {required}, slots remaining until enough mana {slots_remaining}"
+    )]
     InsufficientMana {
         /// The amount found.
         found: u64,
