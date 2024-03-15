@@ -237,8 +237,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let mut addresses_with_unspent_outputs = Vec::new();
         // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
-        // TODO: can we rename this to `spent_or_ignored_outputs`? (they are ignored because ^)
-        let mut spent_or_not_anymore_synced_outputs = Vec::new();
+        let mut spent_or_ignored_outputs = Vec::new();
 
         // We split the addresses into chunks so we don't get timeouts if we have thousands
         for addresses_chunk in addresses
@@ -285,7 +284,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     // get synced anymore because of other sync options
                     for output_id in address.unspent_output_ids {
                         if !new_unspent_output_ids.contains(&output_id) {
-                            spent_or_not_anymore_synced_outputs.push(output_id.into());
+                            spent_or_ignored_outputs.push(output_id);
                         }
                     }
                     address.unspent_output_ids = new_unspent_output_ids;
@@ -293,19 +292,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 } else {
                     // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't
                     // get synced anymore because of other sync options
-                    spent_or_not_anymore_synced_outputs.extend(address.unspent_output_ids);
+                    spent_or_ignored_outputs.extend(address.unspent_output_ids);
                 }
             }
         }
 
         log::debug!(
-            "[SYNC] spent or not anymore synced account/nft/foundries outputs: {:?}",
-            spent_or_not_anymore_synced_outputs
+            "[SYNC] spent or ignored account/nft/foundries outputs: {:?}",
+            spent_or_ignored_outputs
         );
         log::debug!(
             "[SYNC] finished get_output_ids_for_addresses in {:.2?}",
             address_output_ids_start_time.elapsed()
         );
-        Ok((addresses_with_unspent_outputs, spent_or_not_anymore_synced_outputs))
+        Ok((addresses_with_unspent_outputs, spent_or_ignored_outputs))
     }
 }
