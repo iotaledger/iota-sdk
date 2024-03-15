@@ -51,7 +51,7 @@ pub struct OutputWithExtendedMetadata {
     pub output_id_proof: OutputIdProof,
     /// Network ID
     pub network_id: u64,
-    /// Whether the output is a remainder
+    /// Whether the output represents a remainder amount.
     pub remainder: bool,
 }
 
