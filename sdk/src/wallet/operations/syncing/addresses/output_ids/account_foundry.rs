@@ -79,8 +79,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let results: Vec<Result<OutputIdsResponse, WalletError>> = futures::future::try_join_all(tasks).await?;
         let responses: Vec<OutputIdsResponse> = results.into_iter().collect::<Result<Vec<_>, _>>()?;
-        let output_ids: HashSet<OutputId> = HashSet::from_iter(responses.into_iter().flat_map(|res| res.items));
 
-        Ok(output_ids.into_iter().collect())
+        Ok(responses.into_iter().flat_map(|res| res.items).collect())
     }
 }
