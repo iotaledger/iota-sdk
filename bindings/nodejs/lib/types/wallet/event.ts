@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { OutputData } from './output';
+import type { OutputWithExtendedMetadata } from './output';
 import { InclusionState } from './transaction';
 import { InputSigningData, Remainder } from '../client';
 import { Transaction, SignedTransactionPayload, TransactionId } from '../block';
@@ -57,7 +57,7 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
  * A 'new output' wallet event.
  */
 class NewOutputWalletEvent extends WalletEvent {
-    output: OutputData;
+    output: OutputWithExtendedMetadata;
     transaction?: SignedTransactionPayload;
     transactionInputs?: OutputResponse[];
 
@@ -67,7 +67,7 @@ class NewOutputWalletEvent extends WalletEvent {
      * @param transactionInputs The inputs for the transaction that created the output. Might be pruned and not available.
      */
     constructor(
-        output: OutputData,
+        output: OutputWithExtendedMetadata,
         transaction?: SignedTransactionPayload,
         transactionInputs?: OutputResponse[],
     ) {
@@ -82,12 +82,12 @@ class NewOutputWalletEvent extends WalletEvent {
  * A 'spent output' wallet event.
  */
 class SpentOutputWalletEvent extends WalletEvent {
-    output: OutputData;
+    output: OutputWithExtendedMetadata;
 
     /**
      * @param output The spent output.
      */
-    constructor(output: OutputData) {
+    constructor(output: OutputWithExtendedMetadata) {
         super(WalletEventType.SpentOutput);
         this.output = output;
     }

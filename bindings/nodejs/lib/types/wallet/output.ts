@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Address, AddressDiscriminator } from '../block/address';
 import { Output, OutputDiscriminator, OutputId } from '../block/output';
-import { OutputMetadataResponse } from '../models/api';
+import { OutputIdProof, OutputMetadataResponse } from '../models/api';
 
 /** Output to claim */
 export enum OutputsToClaim {
@@ -15,28 +14,23 @@ export enum OutputsToClaim {
     All = 'All',
 }
 
-/** An output with metadata */
-export class OutputData {
-    /** The identifier of an Output */
-    outputId!: OutputId;
-    /** The metadata of the output */
-    metadata!: OutputMetadataResponse;
-    /** The actual Output */
+/** An output with extended metadata */
+export class OutputWithExtendedMetadata {
+    /** The output object itself */
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
     output!: Output;
-    /** Associated account address */
-    @Type(() => Address, {
-        discriminator: AddressDiscriminator,
-    })
-    address!: Address;
+    /** The metadata of the output */
+    metadata!: OutputMetadataResponse;
+    /** The identifier of an Output */
+    outputId!: OutputId;
+    /** The output ID proof */
+    OutputIdProof!: OutputIdProof;
     /** Network ID */
     networkId!: string;
     /** Remainder */
     remainder!: boolean;
-    /** BIP32 path */
-    chain?: Segment[];
 }
 
 /** A Segment of the BIP32 path*/
