@@ -408,6 +408,7 @@ pub trait MinimumOutputAmount: StorageScore {
 /// Decayed stored and potential Mana of an output.
 #[derive(Debug, Default, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, derive_more::AddAssign)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[getset(get = "pub")]
 pub struct DecayedMana {
     /// Decayed stored mana.
     #[cfg_attr(feature = "serde", serde(with = "string"))]
