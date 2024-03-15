@@ -8,10 +8,7 @@ use crate::{
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT,
         task,
-        types::{
-            address::{AddressWithUnspentOutputIds, AddressWithUnspentOutputs},
-            OutputWithExtendedMetadata,
-        },
+        types::address::{AddressWithUnspentOutputIds, AddressWithUnspentOutputs},
         Wallet, WalletError,
     },
 };
@@ -35,23 +32,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
             .map(|x: &[AddressWithUnspentOutputIds]| x.to_vec())
         {
             let mut tasks = Vec::new();
-            for AddressWithUnspentOutputIds {
-                address,
-                unspent_output_ids,
-            } in addresses_chunk
-            {
+            for address_with_unspent_output_ids in addresses_chunk {
                 let wallet = self.clone();
                 tasks.push(async move {
                     task::spawn(async move {
-                        let unspent_outputs_with_metadata =
-                            wallet.get_outputs_request_unknown(&unspent_output_ids).await?;
+                        let unspent_outputs_with_metadata = wallet
+                            .get_outputs_request_unknown(address_with_unspent_output_ids.unspent_output_ids())
+                            .await?;
                         let unspent_outputs = wallet
                             .output_response_to_output_with_extended_metadata(unspent_outputs_with_metadata, network_id)
                             .await?;
 
                         Ok(AddressWithUnspentOutputs {
-                            address,
-                            unspent_output_ids,
+                            address_with_unspent_output_ids,
                             unspent_outputs,
                         })
                     })
@@ -59,7 +52,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 });
             }
             let results: Vec<Result<_, WalletError>> = futures::future::try_join_all(tasks).await?;
-            let addresses_with_outputs = results.into_iter().collect::<Result<Vec<_>, _>>()?;
+            let result = results.into_iter().collect::<Result<Vec<_>, _>>()?;
+            addresses_with_outputs.extend(result.into_iter());
         }
         log::debug!(
             "[SYNC] finished get_outputs_from_address_output_ids in {:.2?}",

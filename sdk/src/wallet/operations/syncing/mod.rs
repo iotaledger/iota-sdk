@@ -84,8 +84,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
             // See https://github.com/rust-lang/rust-clippy/issues/8539 regarding this lint.
             #[allow(clippy::iter_with_drain)]
             for AddressWithUnspentOutputs {
-                address,
-                unspent_output_ids,
+                address_with_unspent_output_ids: address,
                 unspent_outputs,
             } in addresses_with_unspent_outputs.drain(..)
             {
@@ -94,22 +93,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         Output::Account(account) => {
                             addresses_to_scan.insert(
                                 AccountAddress::from(account.account_id_non_null(&unspent_output.output_id)).into(),
-                                address.inner().clone(),
+                                (*address).inner().clone(),
                             );
                         }
                         Output::Nft(nft) => {
                             addresses_to_scan.insert(
                                 NftAddress::from(nft.nft_id_non_null(&unspent_output.output_id)).into(),
-                                address.inner().clone(),
+                                (*address).inner().clone(),
                             );
                         }
                         _ => {}
                     }
                 }
-                new_addresses_with_unspent_output_ids.push(AddressWithUnspentOutputIds {
-                    address,
-                    unspent_output_ids,
-                });
+                new_addresses_with_unspent_output_ids.push(address);
                 unspent_outputs_with_extra_metadata.extend(unspent_outputs);
             }
 
@@ -143,13 +139,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     .output_response_to_output_with_extended_metadata(account_or_nft_outputs_with_metadata, network_id)
                     .await?;
 
-                let AddressWithUnspentOutputIds {
-                    address,
-                    unspent_output_ids,
-                } = address_with_unspent_output_ids.clone();
                 addresses_with_unspent_outputs.push(AddressWithUnspentOutputs {
-                    address,
-                    unspent_output_ids,
+                    address_with_unspent_output_ids: address_with_unspent_output_ids.clone(),
                     unspent_outputs: account_or_nft_outputs_with_extra_metadata,
                 });
             }

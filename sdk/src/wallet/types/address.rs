@@ -1,9 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::ops;
-
-use derive_more::{AsRef, From};
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
@@ -21,13 +18,12 @@ pub(crate) struct AddressWithUnspentOutputIds {
     pub(crate) unspent_output_ids: Vec<OutputId>,
 }
 
-#[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, derive_more::Deref)]
+#[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
 pub(crate) struct AddressWithUnspentOutputs {
-    #[deref]
-    pub(crate) address: Bech32Address,
-    pub(crate) unspent_output_ids: Vec<OutputId>,
+    #[serde(flatten)]
+    pub(crate) address_with_unspent_output_ids: AddressWithUnspentOutputIds,
     pub(crate) unspent_outputs: Vec<OutputWithExtendedMetadata>,
 }
 
