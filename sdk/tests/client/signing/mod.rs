@@ -432,9 +432,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.iter().filter(|u| u.is_account()).count(), 3);
     assert_eq!(unlocks.iter().filter(|u| u.is_nft()).count(), 5);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
