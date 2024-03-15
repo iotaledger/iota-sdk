@@ -37,7 +37,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
         if options.issuer_id.is_none() {
-            options.issuer_id = self.ledger().await.first_account_id();
+            options.issuer_id = self.first_block_issuer_account_id().await?;
         }
 
         #[cfg(feature = "events")]
