@@ -140,7 +140,7 @@ pub enum WalletMethod {
     #[serde(rename_all = "camelCase")]
     GetIncomingTransaction { transaction_id: TransactionId },
     /// Get the [`OutputWithExtendedMetadata`](iota_sdk::wallet::types::OutputWithExtendedMetadata) of an output stored
-    /// in the wallet. Expected response: [`OutputData`](crate::Response::OutputData)
+    /// in the wallet. Expected response: [`OutputWithExtendedMetadata`](crate::Response::OutputWithExtendedMetadata)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
     // /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)
