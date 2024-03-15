@@ -45,7 +45,7 @@ use crate::OmittedDebug;
 #[non_exhaustive]
 pub enum WalletMethod {
     /// Returns the accounts of the wallet.
-    /// Expected response: [`OutputsData`](crate::Response::OutputsData)
+    /// Expected response: [`OutputsWithExtendedMetadata`](crate::Response::OutputsWithExtendedMetadata)
     Accounts,
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
     /// Expected response: [`Ok`](crate::Response::Ok)
@@ -199,13 +199,13 @@ pub enum WalletMethod {
         bip_path: Option<Bip44>,
     },
     /// Returns the implicit accounts of the wallet.
-    /// Expected response: [`OutputsData`](crate::Response::OutputsData)
+    /// Expected response: [`OutputsWithExtendedMetadata`](crate::Response::OutputsWithExtendedMetadata)
     ImplicitAccounts,
     /// Returns all incoming transactions of the wallet.
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
     /// Returns all outputs of the wallet.
-    /// Expected response: [`OutputsData`](crate::Response::OutputsData)
+    /// Expected response: [`OutputsWithExtendedMetadata`](crate::Response::OutputsWithExtendedMetadata)
     #[serde(rename_all = "camelCase")]
     Outputs { filter_options: Option<FilterOptions> },
     /// Returns all pending transactions of the wallet.
@@ -452,7 +452,7 @@ pub enum WalletMethod {
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     Transactions,
     /// Returns all unspent outputs of the wallet
-    /// Expected response: [`OutputsData`](crate::Response::OutputsData)
+    /// Expected response: [`OutputsWithExtendedMetadata`](crate::Response::OutputsWithExtendedMetadata)
     #[serde(rename_all = "camelCase")]
     UnspentOutputs { filter_options: Option<FilterOptions> },
     /// Emits an event for testing if the event system is working
