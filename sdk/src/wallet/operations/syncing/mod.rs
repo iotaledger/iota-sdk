@@ -19,7 +19,7 @@ use crate::{
     wallet::{
         constants::MIN_SYNC_INTERVAL,
         types::{
-            address::{AddressWithUnspentOutputIds, AddressWithUnspentOutputs, SpentOutput},
+            address::{AddressWithUnspentOutputIds, AddressWithUnspentOutputs, SpentOutputId},
             Balance, OutputWithExtendedMetadata,
         },
         Wallet, WalletError,
@@ -56,7 +56,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     ) -> Result<
         (
             Vec<AddressWithUnspentOutputIds>,
-            Vec<SpentOutput>,
+            Vec<SpentOutputId>,
             Vec<OutputWithExtendedMetadata>,
         ),
         WalletError,

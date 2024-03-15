@@ -22,7 +22,7 @@ use crate::{
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT,
         operations::syncing::SyncOptions,
-        types::address::{AddressWithUnspentOutputIds, SpentOutput},
+        types::address::{AddressWithUnspentOutputIds, SpentOutputId},
         Wallet, WalletError,
     },
 };
@@ -231,7 +231,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         addresses: &[AddressWithUnspentOutputIds],
         options: &SyncOptions,
-    ) -> Result<(Vec<AddressWithUnspentOutputIds>, Vec<SpentOutput>), WalletError> {
+    ) -> Result<(Vec<AddressWithUnspentOutputIds>, Vec<SpentOutputId>), WalletError> {
         log::debug!("[SYNC] start get_output_ids_for_addresses");
         let address_output_ids_start_time = Instant::now();
 
