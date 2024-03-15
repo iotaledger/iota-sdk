@@ -32,12 +32,7 @@ use crate::{
     wallet::WalletError,
 };
 
-// TODO: This type is heavily used in the syncing logic so I found it appropriate to change its name in this PR,
-// it's a cleanup PR afterall. You may not like this name, but I think it's still better than `OutputData` tbh.
-// Some alternatives I had in mind were: `OutputWithMetadataExt` or `OutputWithExtMetadata`, but I think that
-// doesn't matter a lot. What's important is that just by reading the name it's pretty clear that this type
-// contains a bit of extra information on top of a regular `OutputWithMetadata`.
-/// An output with extended metadata
+/// An output with extended metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithExtendedMetadata {
