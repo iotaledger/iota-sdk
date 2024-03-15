@@ -84,7 +84,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
             // See https://github.com/rust-lang/rust-clippy/issues/8539 regarding this lint.
             #[allow(clippy::iter_with_drain)]
             for AddressWithUnspentOutputs {
-                address_with_unspent_output_ids: address,
+                address_with_unspent_output_ids,
                 unspent_outputs,
             } in addresses_with_unspent_outputs.drain(..)
             {
@@ -93,19 +93,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         Output::Account(account) => {
                             addresses_to_scan.insert(
                                 AccountAddress::from(account.account_id_non_null(&unspent_output.output_id)).into(),
-                                (*address).inner().clone(),
+                                (*address_with_unspent_output_ids).inner().clone(),
                             );
                         }
                         Output::Nft(nft) => {
                             addresses_to_scan.insert(
                                 NftAddress::from(nft.nft_id_non_null(&unspent_output.output_id)).into(),
-                                (*address).inner().clone(),
+                                (*address_with_unspent_output_ids).inner().clone(),
                             );
                         }
                         _ => {}
                     }
                 }
-                new_addresses_with_unspent_output_ids.push(address);
+                new_addresses_with_unspent_output_ids.push(address_with_unspent_output_ids);
                 unspent_outputs_with_extra_metadata.extend(unspent_outputs);
             }
 
