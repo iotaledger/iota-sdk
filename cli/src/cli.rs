@@ -20,8 +20,8 @@ use log::LevelFilter;
 
 use crate::{
     helper::{
-        check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_alias, get_decision, get_password,
-        import_mnemonic, select_secret_manager, SecretManagerChoice,
+        check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_address, get_alias, get_bip_path,
+        get_decision, get_password, import_mnemonic, parse_bip_path, select_secret_manager, SecretManagerChoice,
     },
     println_log_error, println_log_info,
 };
@@ -67,8 +67,10 @@ pub struct InitParameters {
     /// Set the node to connect to with this wallet.
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
-    /// Set the BIP path, `4219/0/0/0` if not provided.
-    #[arg(short, long, value_parser = parse_bip_path, default_value = "4219/0/0/0")]
+    /// Set the BIP path. If not provided a bip path has to be provided interactively on first launch.
+    /// The expected format is: `a/b/c/d` where `a` = coin type, `b` = account index, `c` = address index, `d` =
+    /// internal.
+    #[arg(short, long, value_parser = parse_bip_path)]
     pub bip_path: Option<Bip44>,
     /// Set the Bech32-encoded wallet address.
     #[arg(short, long)]
@@ -85,36 +87,11 @@ impl Default for InitParameters {
             stronghold_snapshot_path: DEFAULT_STRONGHOLD_SNAPSHOT_PATH.to_string(),
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),
-            bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            bip_path: None,
             address: None,
             alias: None,
         }
     }
-}
-
-fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
-    let mut bip_path_enc = Vec::with_capacity(4);
-    for p in arg.split_terminator('/').map(|p| p.trim()) {
-        match p.parse::<u32>() {
-            Ok(value) => bip_path_enc.push(value),
-            Err(_) => {
-                return Err(format!("cannot parse BIP path: {p}"));
-            }
-        }
-    }
-
-    if bip_path_enc.len() != 4 {
-        return Err(
-            "invalid BIP path format. Expected: `coin_type/account_index/change_address/address_index`".to_string(),
-        );
-    }
-
-    let bip_path = Bip44::new(bip_path_enc[0])
-        .with_account(bip_path_enc[1])
-        .with_change(bip_path_enc[2])
-        .with_address_index(bip_path_enc[3]);
-
-    Ok(bip_path)
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -254,6 +231,18 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                 let secret_manager_variant = secret_manager.to_string();
                 let wallet = init_command(storage_path, secret_manager, init_parameters).await?;
                 println_log_info!("Created new wallet with '{}' secret manager.", secret_manager_variant);
+                println_log_info!(
+                    "Wallet parameters:\naddress={}\nbip_path={:?}\nalias={:?}",
+                    wallet.address().await,
+                    wallet.bip_path().await,
+                    wallet.alias().await,
+                );
+                println_log_info!(
+                    "Network parameters:\nname={}\nid={}\nbech32_hrp={}",
+                    wallet.client().get_network_name().await?,
+                    wallet.client().get_network_id().await?,
+                    wallet.client().get_bech32_hrp().await?,
+                );
 
                 Some(wallet)
             }
@@ -357,6 +346,18 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                     let secret_manager_variant = secret_manager.to_string();
                     let wallet = init_command(storage_path, secret_manager, init_params).await?;
                     println_log_info!("Created new wallet with '{}' secret manager.", secret_manager_variant);
+                    println_log_info!(
+                        "Wallet parameters:\naddress={}\nbip_path={:?}\nalias={:?}",
+                        wallet.address().await,
+                        wallet.bip_path().await,
+                        wallet.alias().await,
+                    );
+                    println_log_info!(
+                        "Network parameters:\nname={}\nid={}\nbech32_hrp={}",
+                        wallet.client().get_network_name().await?,
+                        wallet.client().get_network_id().await?,
+                        wallet.client().get_bech32_hrp().await?,
+                    );
                     Some(wallet)
                 } else {
                     Cli::print_help()?;
@@ -404,10 +405,28 @@ pub async fn init_command(
     secret_manager: SecretManager,
     init_params: InitParameters,
 ) -> Result<Wallet, Error> {
+    let mut address = init_params.address.map(|s| Bech32Address::from_str(&s)).transpose()?;
+    if address.is_none() {
+        if get_decision("Do you want to assign an existing address to your new wallet?")? {
+            address.replace(get_address("Set wallet address").await?);
+        }
+    }
+
+    let mut bip_path = init_params.bip_path;
+    if bip_path.is_none() {
+        if get_decision("Do you want to assign a valid address bip path to your new wallet?")? {
+            bip_path.replace(
+                get_bip_path("Set address bip path (format: a/b/c/d)")
+                    .await
+                    .expect("todo"),
+            );
+        }
+    }
+
     let mut alias = init_params.alias;
     if alias.is_none() {
-        if get_decision("Do you want to assign an alias to your wallet?")? {
-            alias.replace(get_alias("New wallet alias").await?);
+        if get_decision("Do you want to assign an alias name to your new wallet?")? {
+            alias.replace(get_alias("Set wallet alias").await?);
         }
     }
 
@@ -415,13 +434,8 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_address(
-            init_params
-                .address
-                .map(|addr| Bech32Address::from_str(&addr))
-                .transpose()?,
-        )
-        .with_bip_path(init_params.bip_path)
+        .with_address(address)
+        .with_bip_path(bip_path)
         .with_alias(alias)
         .finish()
         .await?)

@@ -9,7 +9,8 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use eyre::{bail, eyre, Error};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
-    crypto::keys::bip39::Mnemonic,
+    crypto::keys::{bip39::Mnemonic, bip44::Bip44},
+    types::block::address::Bech32Address,
 };
 use tokio::{
     fs::{self, OpenOptions},
@@ -59,6 +60,53 @@ pub async fn get_alias(prompt: &str) -> Result<String, Error> {
             return Ok(input);
         }
     }
+}
+
+pub async fn get_address(prompt: &str) -> Result<Bech32Address, Error> {
+    loop {
+        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
+        if input.is_empty() || !input.is_ascii() {
+            println_log_error!("Invalid input, please choose a non-empty address consisting of ASCII characters.");
+        } else {
+            return Ok(Bech32Address::from_str(&input)?);
+        }
+    }
+}
+
+pub async fn get_bip_path(prompt: &str) -> Result<Bip44, Error> {
+    loop {
+        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
+        if input.is_empty() || !input.is_ascii() {
+            println_log_error!("Invalid input, please choose a non-empty address consisting of ASCII characters.");
+        } else {
+            return Ok(parse_bip_path(&input).expect("todo"));
+        }
+    }
+}
+
+pub fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
+    let mut bip_path_enc = Vec::with_capacity(4);
+    for p in arg.split_terminator('/').map(|p| p.trim()) {
+        match p.parse::<u32>() {
+            Ok(value) => bip_path_enc.push(value),
+            Err(_) => {
+                return Err(format!("cannot parse BIP path: {p}"));
+            }
+        }
+    }
+
+    if bip_path_enc.len() != 4 {
+        return Err(
+            "invalid BIP path format. Expected: `coin_type/account_index/change_address/address_index`".to_string(),
+        );
+    }
+
+    let bip_path = Bip44::new(bip_path_enc[0])
+        .with_account(bip_path_enc[1])
+        .with_change(bip_path_enc[2])
+        .with_address_index(bip_path_enc[3]);
+
+    Ok(bip_path)
 }
 
 pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -> Result<Option<Vec<u8>>, Error> {
