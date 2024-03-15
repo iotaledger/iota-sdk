@@ -157,9 +157,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
