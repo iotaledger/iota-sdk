@@ -11,7 +11,7 @@ use crate::{
     },
     types::block::{
         address::Address,
-        input::{Input, UtxoInput},
+        input::{Input, UtxoInput, INPUT_COUNT_MAX},
         mana::ManaAllotment,
         output::{AccountOutput, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -348,13 +348,13 @@ impl TransactionBuilder {
             // Normalize scores between 0..1 with 1 being desirable
             let nt_score = if has_native_token { 0.5 } else { 1.0 };
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
-            let mana_score = (-mana_diff
-                / if input.output.mana() >= missing_mana {
-                    u64::MAX as f64
-                } else {
-                    missing_mana as f64
-                })
-            .exp();
+            // If the mana is insufficient, the score will decrease the more inputs are selected
+            let mana_score = if mana >= missing_mana {
+                (-mana_diff / u64::MAX as f64).exp()
+            } else {
+                (-mana_diff / missing_mana as f64).exp()
+                    * ((INPUT_COUNT_MAX as f64 - self.selected_inputs.len() as f64) / INPUT_COUNT_MAX as f64)
+            };
             let allotment_score = (-(work_score as f64) / 1000.0).exp();
             (allotment_score * nt_score * mana_score * usize::MAX as f64).round() as _
         })

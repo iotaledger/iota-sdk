@@ -8,7 +8,7 @@ use crate::{
     client::secret::types::InputSigningData,
     types::block::{
         address::Address,
-        input::UtxoInput,
+        input::{UtxoInput, INPUT_COUNT_MAX},
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutput, BasicOutput, ChainId, FoundryOutput,
             NftOutput, Output,
@@ -55,19 +55,14 @@ impl TransactionBuilder {
             });
         }
 
-        let (mut selected_mana, mut required_mana) = self.mana_sums(true)?;
         let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
 
         while let Some(input) = self.next_input_for_amount(
             output_amount - input_amount,
-            required_mana.saturating_sub(selected_mana),
             include_generated,
             self.latest_slot_commitment_id,
         ) {
-            selected_mana += self.total_mana(&input, include_generated)?;
-            if let Some(output) = self.select_input(input)? {
-                required_mana += output.mana();
-            }
+            self.select_input(input)?;
             (input_amount, output_amount) = self.amount_balance()?;
             if input_amount >= output_amount {
                 break;
@@ -155,7 +150,6 @@ impl TransactionBuilder {
     fn next_input_for_amount(
         &mut self,
         missing_amount: u64,
-        missing_mana: u64,
         include_generated: bool,
         slot_commitment_id: SlotCommitmentId,
     ) -> Option<InputSigningData> {
@@ -166,7 +160,6 @@ impl TransactionBuilder {
                 self.score_for_amount(
                     input,
                     missing_amount,
-                    missing_mana,
                     include_generated,
                     slot_commitment_id.slot_index(),
                 )
@@ -181,7 +174,6 @@ impl TransactionBuilder {
         &self,
         input: &InputSigningData,
         missing_amount: u64,
-        missing_mana: u64,
         include_generated: bool,
         slot_index: SlotIndex,
     ) -> Option<usize> {
@@ -208,24 +200,18 @@ impl TransactionBuilder {
                 work_score += self.protocol_parameters.work_score(&output);
             }
             let amount_diff = amount.abs_diff(missing_amount) as f64;
-            let mana_diff = mana.abs_diff(missing_mana) as f64;
             // Normalize scores between 0..1 with 1 being desirable
             let nt_score = if has_native_token { 0.5 } else { 1.0 };
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
-            let amount_score = (-amount_diff
-                / if amount >= missing_amount {
-                    u64::MAX as f64
-                } else {
-                    missing_amount as f64
-                })
-            .exp();
-            let mana_score = (-mana_diff
-                / if input.output.mana() >= missing_mana {
-                    u64::MAX as f64
-                } else {
-                    missing_mana as f64
-                })
-            .exp();
+            // If the amount is insufficient, the score will decrease the more inputs are selected
+            let amount_score = if amount >= missing_amount {
+                (-amount_diff / u64::MAX as f64).exp()
+            } else {
+                (-amount_diff / missing_amount as f64).exp()
+                    * ((INPUT_COUNT_MAX as f64 - self.selected_inputs.len() as f64) / INPUT_COUNT_MAX as f64)
+            };
+            // For the purpose of amount selection, higher mana is better
+            let mana_score = mana as f64 / u64::MAX as f64;
             let allotment_score = (-(work_score as f64) / 1000.0).exp();
             (allotment_score * nt_score * amount_score * mana_score * usize::MAX as f64).round() as _
         })
