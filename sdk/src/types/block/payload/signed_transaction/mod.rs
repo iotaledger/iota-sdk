@@ -8,6 +8,7 @@ mod transaction_id;
 
 use packable::{Packable, PackableExt};
 
+use self::transaction::MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT;
 pub(crate) use self::transaction::{InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
@@ -69,7 +70,24 @@ fn verify_signed_transaction_payload(payload: &SignedTransactionPayload) -> Resu
         });
     }
 
+    payload.validate_length()?;
+
     Ok(())
+}
+
+impl SignedTransactionPayload {
+    /// Verifies that the transaction doesn't exceed the block size limit with 1 parent.
+    fn validate_length(&self) -> Result<(), PayloadError> {
+        let signed_transaction_payload_bytes = self.pack_to_vec();
+        if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT {
+            return Err(PayloadError::SignedTransactionPayloadLength {
+                length: signed_transaction_payload_bytes.len(),
+                max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_SINGLE_PARENT,
+            });
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(feature = "serde")]

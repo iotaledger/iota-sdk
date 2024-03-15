@@ -666,8 +666,6 @@ where
     } = prepared_transaction_data;
     let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
-    tx_payload.validate_length()?;
-
     let data = SignedTransactionData {
         payload: tx_payload,
         inputs_data,

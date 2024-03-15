@@ -37,7 +37,7 @@ use crate::{
 pub(crate) static INFO_PATH: &str = "api/core/v3/info";
 
 /// Contains the info and the url from the node (useful when multiple nodes are used)
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NodeInfoResponse {
     /// The returned info

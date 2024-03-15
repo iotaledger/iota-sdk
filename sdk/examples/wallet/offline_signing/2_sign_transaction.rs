@@ -48,8 +48,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    signed_transaction.validate_length()?;
-
     let signed_transaction_data = SignedTransactionData {
         payload: signed_transaction,
         inputs_data: prepared_transaction_data.inputs_data,
