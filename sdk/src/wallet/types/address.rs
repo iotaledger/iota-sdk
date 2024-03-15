@@ -27,4 +27,4 @@ pub(crate) struct AddressWithUnspentOutputs {
     pub(crate) unspent_outputs: Vec<OutputWithExtendedMetadata>,
 }
 
-pub(crate) type SpentOutput = OutputId;
+pub(crate) type SpentOutputId = OutputId;
