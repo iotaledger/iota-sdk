@@ -189,29 +189,33 @@ impl TransactionBuilder {
                 .protocol_parameters
                 .work_score(&UtxoInput::from(*input.output_id()));
             let has_native_token = input.output.native_token().is_some();
-            let mut amount = input.output.amount();
+            let mut amount_gained = input.output.amount();
             if let Some(sdruc) = sdruc_not_expired(&input.output, slot_index) {
-                amount -= sdruc.amount();
+                amount_gained -= sdruc.amount();
             }
-            let mut mana = self.total_mana(input, include_generated).unwrap_or_default();
+            let mut mana_gained = self.total_mana(input, include_generated).unwrap_or_default();
             if let Ok(Some(output)) = self.transition_input(input) {
-                amount = amount.saturating_sub(output.amount());
-                mana = mana.saturating_sub(output.mana());
+                amount_gained = amount_gained.saturating_sub(output.amount());
+                mana_gained = mana_gained.saturating_sub(output.mana());
                 work_score += self.protocol_parameters.work_score(&output);
             }
-            let amount_diff = amount.abs_diff(missing_amount) as f64;
+            // The gained mana is reduced by the amount we'll need to allot later.
+            if let Some(allotment) = self.min_mana_allotment {
+                mana_gained = mana_gained.saturating_sub(work_score as u64 * allotment.reference_mana_cost);
+            }
+            let amount_diff = amount_gained.abs_diff(missing_amount) as f64;
             // Normalize scores between 0..1 with 1 being desirable
             let nt_score = if has_native_token { 0.5 } else { 1.0 };
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
             // If the amount is insufficient, the score will decrease the more inputs are selected
-            let amount_score = if amount >= missing_amount {
+            let amount_score = if amount_gained >= missing_amount {
                 (-amount_diff / u64::MAX as f64).exp()
             } else {
                 (-amount_diff / missing_amount as f64).exp()
                     * ((INPUT_COUNT_MAX as f64 - self.selected_inputs.len() as f64) / INPUT_COUNT_MAX as f64)
             };
             // For the purpose of amount selection, higher mana is better
-            let mana_score = mana as f64 / u64::MAX as f64;
+            let mana_score = mana_gained as f64 / u64::MAX as f64;
             let allotment_score = (-(work_score as f64) / 1000.0).exp();
             (allotment_score * nt_score * amount_score * mana_score * usize::MAX as f64).round() as _
         })

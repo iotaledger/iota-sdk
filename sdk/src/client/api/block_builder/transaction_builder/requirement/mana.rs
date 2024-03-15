@@ -13,7 +13,7 @@ use crate::{
         address::Address,
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         mana::ManaAllotment,
-        output::{AccountOutput, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
+        output::{AccountOutput, AccountOutputBuilder, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
@@ -75,24 +75,25 @@ impl TransactionBuilder {
             let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
                 + self.protocol_parameters.work_score_parameters().block();
 
-            let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
-
             let MinManaAllotment {
                 issuer_id,
                 allotment_debt,
+                required_allotment,
                 ..
             } = self
                 .min_mana_allotment
                 .as_mut()
                 .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
 
+            *required_allotment = block_work_score as u64 * reference_mana_cost;
+
             // Add the required allotment to the issuing allotment
-            if required_allotment_mana > self.mana_allotments[issuer_id] {
-                log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
-                let additional_allotment = required_allotment_mana - self.mana_allotments[issuer_id];
+            if *required_allotment > self.mana_allotments[issuer_id] {
+                log::debug!("Allotting at least {required_allotment} mana to account ID {issuer_id}");
+                let additional_allotment = *required_allotment - self.mana_allotments[issuer_id];
                 log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
                 // Unwrap: safe because we always add the record above
-                *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
+                *self.mana_allotments.get_mut(issuer_id).unwrap() = *required_allotment;
                 log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
                 *allotment_debt += additional_allotment;
                 should_recalculate = true;
@@ -107,6 +108,8 @@ impl TransactionBuilder {
                     return Ok(());
                 }
             }
+
+            should_recalculate |= self.reduce_account_output()?;
         } else {
             should_recalculate = true;
         }
@@ -124,6 +127,39 @@ impl TransactionBuilder {
         }
 
         Ok(())
+    }
+
+    /// Reduce an account output by an allotment value, if one exists.
+    /// This will only affect automatically transitioned accounts.
+    fn reduce_account_output(&mut self) -> Result<bool, TransactionBuilderError> {
+        let MinManaAllotment {
+            issuer_id,
+            allotment_debt,
+            ..
+        } = self
+            .min_mana_allotment
+            .as_mut()
+            .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
+        if let Some(output) = self
+            .added_outputs
+            .iter_mut()
+            .filter(|o| o.is_account() && o.mana() != 0)
+            .find(|o| o.as_account().account_id() == issuer_id)
+        {
+            log::debug!(
+                "Reducing account mana of {} by {} for allotment",
+                output.as_account().account_id(),
+                allotment_debt
+            );
+            let output_mana = output.mana();
+            *output = AccountOutputBuilder::from(output.as_account())
+                .with_mana(output_mana.saturating_sub(*allotment_debt))
+                .finish_output()?;
+            *allotment_debt = allotment_debt.saturating_sub(output_mana);
+            log::debug!("Allotment debt after reduction: {}", allotment_debt);
+            return Ok(true);
+        }
+        Ok(false)
     }
 
     pub(crate) fn null_transaction_unlocks(&self) -> Result<Unlocks, TransactionBuilderError> {
@@ -220,7 +256,18 @@ impl TransactionBuilder {
         let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
         while let Some(input) = self.next_input_for_mana(required_mana - selected_mana, include_generated) {
             selected_mana += self.total_mana(&input, include_generated)?;
-            if let Some(output) = self.select_input(input)? {
+            if self.select_input(input)? {
+                let output = self.added_outputs.last().unwrap();
+                // If we're allotting, it's possible the added output should be reduced, so just exit early and
+                // We will re-calculate the allotment.
+                if let Some(MinManaAllotment { issuer_id, .. }) = &self.min_mana_allotment {
+                    if output
+                        .as_account_opt()
+                        .is_some_and(|account| account.account_id() == issuer_id)
+                    {
+                        return Ok(true);
+                    }
+                }
                 required_mana += output.mana();
             }
             added_inputs = true;
@@ -339,17 +386,34 @@ impl TransactionBuilder {
                 .protocol_parameters
                 .work_score(&UtxoInput::from(*input.output_id()));
             let has_native_token = input.output.native_token().is_some();
-            let mut mana = self.total_mana(input, include_generated).unwrap_or_default();
+            let mut mana_gained = self.total_mana(input, include_generated).unwrap_or_default();
             if let Ok(Some(output)) = self.transition_input(input) {
-                mana = mana.saturating_sub(output.mana());
                 work_score += self.protocol_parameters.work_score(&output);
+                if let Some(allotment) = self.min_mana_allotment {
+                    // If we're allotting to this output account, we will have more mana from the reduction.
+                    if output
+                        .as_account_opt()
+                        .is_some_and(|account| account.account_id() == &allotment.issuer_id)
+                    {
+                        // We can regain as much as the full account mana value
+                        // by reducing the mana on the account.
+                        let new_required_allotment =
+                            allotment.required_allotment + (work_score as u64 * allotment.reference_mana_cost);
+                        mana_gained += new_required_allotment.min(output.mana());
+                    }
+                }
+                mana_gained = mana_gained.saturating_sub(output.mana());
             }
-            let mana_diff = missing_mana.abs_diff(mana) as f64;
+            // The gained mana is reduced by the amount we'll need to allot later.
+            if let Some(allotment) = self.min_mana_allotment {
+                mana_gained = mana_gained.saturating_sub(work_score as u64 * allotment.reference_mana_cost);
+            }
+            let mana_diff = missing_mana.abs_diff(mana_gained) as f64;
             // Normalize scores between 0..1 with 1 being desirable
             let nt_score = if has_native_token { 0.5 } else { 1.0 };
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
             // If the mana is insufficient, the score will decrease the more inputs are selected
-            let mana_score = if mana >= missing_mana {
+            let mana_score = if mana_gained >= missing_mana {
                 (-mana_diff / u64::MAX as f64).exp()
             } else {
                 (-mana_diff / missing_mana as f64).exp()

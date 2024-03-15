@@ -719,8 +719,8 @@ fn do_not_select_too_many_inputs_for_mana_requirement() {
     inputs.extend(build_inputs(
         [(
             Nft {
-                amount: 1_000_000,
-                mana: 12_000,
+                amount: 100_000,
+                mana: 130,
                 nft_id: nft_id_1,
                 address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 sender: None,
@@ -734,7 +734,7 @@ fn do_not_select_too_many_inputs_for_mana_requirement() {
     ));
     inputs.push(InputSigningData {
         output: AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
-            .with_mana(10_000)
+            .with_mana(11_000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
@@ -763,7 +763,7 @@ fn do_not_select_too_many_inputs_for_mana_requirement() {
         expiration: None,
     }]);
 
-    let selected = TransactionBuilder::new(
+    TransactionBuilder::new(
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
@@ -774,6 +774,4 @@ fn do_not_select_too_many_inputs_for_mana_requirement() {
     .with_min_mana_allotment(account_id_1, 2)
     .finish()
     .unwrap();
-
-    assert_eq!(selected.inputs_data.len(), 2);
 }

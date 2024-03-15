@@ -30,7 +30,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput, RewardContextInput},
-        input::{Input, UtxoInput, INPUT_COUNT_RANGE},
+        input::{Input, UtxoInput, INPUT_COUNT_MAX, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
             AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId, NftOutputBuilder, Output, OutputId,
@@ -206,6 +206,7 @@ pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
     reference_mana_cost: u64,
     allotment_debt: u64,
+    required_allotment: u64,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -506,8 +507,15 @@ impl TransactionBuilder {
         Ok(data)
     }
 
-    fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, TransactionBuilderError> {
+    /// Select an input and return whether an output was created.
+    fn select_input(&mut self, input: InputSigningData) -> Result<bool, TransactionBuilderError> {
         log::debug!("Selecting input {:?}", input.output_id());
+
+        if self.selected_inputs.len() >= INPUT_COUNT_MAX as usize {
+            return Err(TransactionBuilderError::InvalidInputCount(
+                self.selected_inputs.len() + 1,
+            ));
+        }
 
         let mut added_output = false;
         if let Some(output) = self.transition_input(&input)? {
@@ -530,7 +538,7 @@ impl TransactionBuilder {
 
         self.selected_inputs.push(input);
 
-        Ok(if added_output { self.added_outputs.last() } else { None })
+        Ok(added_output)
     }
 
     /// Sets the required inputs of a [`TransactionBuilder`].
@@ -587,6 +595,7 @@ impl TransactionBuilder {
             issuer_id: account_id,
             reference_mana_cost,
             allotment_debt: 0,
+            required_allotment: 0,
         });
         self
     }
