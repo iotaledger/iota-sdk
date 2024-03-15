@@ -62,7 +62,7 @@ impl<Flag> std::fmt::Debug for Capabilities<Flag> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Capabilities")
             .field("bytes", &self.bytes)
-            .field("type", &std::any::type_name::<Flag>())
+            .field("type", &std::any::type_name::<Flag>().rsplit_once("::").unwrap().1)
             .finish()
     }
 }
