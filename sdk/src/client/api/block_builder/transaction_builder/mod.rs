@@ -464,7 +464,7 @@ impl TransactionBuilder {
 
         let data = PreparedTransactionData {
             transaction,
-            inputs_data: self.selected_inputs.into_iter().collect(),
+            inputs_data: self.selected_inputs.into_sorted_iter().collect(),
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
         };
@@ -696,10 +696,17 @@ pub(crate) struct OrderedInputs {
 }
 
 impl OrderedInputs {
-    pub(crate) fn iter_sorted(&self) -> OrderedInputsIter<&Address, &InputSigningData> {
+    pub(crate) fn sorted_iter(&self) -> OrderedInputsIter<&Address, &InputSigningData> {
         OrderedInputsIter {
             queue: self.ed25519.iter().collect(),
             other: self.other.iter().map(|(k, v)| (k, v.iter().collect())).collect(),
+        }
+    }
+
+    pub(crate) fn into_sorted_iter(self) -> OrderedInputsIter<Address, InputSigningData> {
+        OrderedInputsIter {
+            queue: self.ed25519,
+            other: self.other,
         }
     }
 
@@ -787,17 +794,5 @@ impl<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> I
             }
         }
         None
-    }
-}
-
-impl IntoIterator for OrderedInputs {
-    type Item = InputSigningData;
-    type IntoIter = OrderedInputsIter<Address, Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        OrderedInputsIter {
-            queue: self.ed25519,
-            other: self.other,
-        }
     }
 }

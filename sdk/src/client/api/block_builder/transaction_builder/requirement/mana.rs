@@ -39,7 +39,7 @@ impl TransactionBuilder {
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
             let inputs = self
                 .selected_inputs
-                .iter_sorted()
+                .sorted_iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
 
             let outputs = self.all_outputs().cloned();
