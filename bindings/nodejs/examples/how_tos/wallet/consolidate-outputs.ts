@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { CommonOutput, Utils, Wallet, initLogger } from '@iota/sdk';
+import { CommonOutput, Wallet, initLogger } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
@@ -46,11 +46,10 @@ async function run() {
         const outputs = await wallet.unspentOutputs();
         console.log('Outputs BEFORE consolidation:');
 
-        outputs.forEach(({ output, address }, i) => {
+        outputs.forEach(({ output }, i) => {
             console.log(`OUTPUT #${i}`);
             console.log(
-                '- address: %s\n- amount: %d\n- native token: %s',
-                Utils.addressToBech32(address, 'rms'),
+                '- amount: %d\n- native token: %s',
                 output.getAmount(),
                 output instanceof CommonOutput
                     ? (output as CommonOutput).getNativeToken() ?? []
@@ -80,11 +79,10 @@ async function run() {
 
         // Outputs after consolidation
         console.log('Outputs AFTER consolidation:');
-        outputs.forEach(({ output, address }, i) => {
+        outputs.forEach(({ output }, i) => {
             console.log(`OUTPUT #${i}`);
             console.log(
-                '- address: %s\n- amount: %d\n- native tokens: %s',
-                Utils.addressToBech32(address, 'rms'),
+                '- amount: %d\n- native tokens: %s',
                 output.getAmount(),
                 output instanceof CommonOutput
                     ? (output as CommonOutput).getNativeToken()
