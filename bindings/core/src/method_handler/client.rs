@@ -196,7 +196,7 @@ pub(crate) async fn call_client_method_internal(
             Response::Validators(client.get_validators(page_size, cursor).await?)
         }
         ClientMethod::GetValidator { account_id } => Response::Validator(client.get_validator(&account_id).await?),
-        ClientMethod::GetCommittee { epoch_index } => Response::Committee(client.get_committee(epoch_index).await?),
+        ClientMethod::GetCommittee { epoch } => Response::Committee(client.get_committee(epoch).await?),
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../slot';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../address';
 import {
     BlockIssuerKey,
@@ -11,7 +11,7 @@ import {
 import { u256, u64 } from '../../utils/type-aliases';
 import { EpochIndex } from '../../block/slot';
 import { NativeToken } from '../../models/native-token';
-import { HexEncodedString } from '../../utils/hex-encoding';
+import { HexEncodedString, hexToBigInt } from '../../utils/hex-encoding';
 
 /**
  * Printable ASCII characters.
@@ -147,16 +147,18 @@ class NativeTokenFeature extends Feature {
     /**
      * Amount of native tokens of the given Token ID.
      */
+    @Transform((value) => hexToBigInt(value.value))
     readonly amount: u256;
 
     /**
      * Creates a new `NativeTokenFeature`.
-     * @param nativeToken The native token stored with the feature.
+     * @param id The identifier of the native token.
+     * @param amount The native token amount.
      */
-    constructor(nativeToken: NativeToken) {
+    constructor(id: HexEncodedString, amount: u256) {
         super(FeatureType.NativeToken);
-        this.id = nativeToken.id;
-        this.amount = nativeToken.amount;
+        this.id = id;
+        this.amount = amount;
     }
 
     /**
