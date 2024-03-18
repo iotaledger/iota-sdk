@@ -330,10 +330,7 @@ pub enum WalletCommand {
     /// Get information of a validator.
     Validator { account_id: AccountId },
     /// List all validators known to the node.
-    Validators {
-        page_size: Option<u32>,
-        cursor: Option<String>,
-    },
+    Validators,
     // /// Cast votes for an event.
     // Vote {
     //     /// Event ID for which to cast votes, e.g.
@@ -1215,8 +1212,8 @@ pub async fn validator_command(wallet: &Wallet, account_id: &AccountId) -> Resul
 }
 
 /// `validators` command
-pub async fn validators_command(wallet: &Wallet, page_size: Option<u32>, cursor: Option<String>) -> Result<(), Error> {
-    let validators = wallet.client().get_validators(page_size, cursor).await?;
+pub async fn validators_command(wallet: &Wallet) -> Result<(), Error> {
+    let validators = wallet.client().get_validators(None, None).await?;
     println_log_info!("{validators:#?}");
     Ok(())
 }
@@ -1664,9 +1661,7 @@ pub async fn prompt_internal(
                         // }
                         // WalletCommand::VotingOutput => voting_output_command(wallet).await,
                         WalletCommand::Validator { account_id } => validator_command(wallet, &account_id).await,
-                        WalletCommand::Validators { page_size, cursor } => {
-                            validators_command(wallet, page_size, cursor).await
-                        }
+                        WalletCommand::Validators => validators_command(wallet).await,
                     }
                     .unwrap_or_else(|err| {
                         println_log_error!("{err}");
