@@ -58,12 +58,9 @@ impl<Flag> Capabilities<Flag> {
     }
 }
 
-impl<Flag> core::fmt::Debug for Capabilities<Flag> {
+impl<Flag: CapabilityFlag> core::fmt::Debug for Capabilities<Flag> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Capabilities")
-            .field("bytes", &self.bytes)
-            .field("flag", &core::any::type_name::<Flag>().rsplit_once("::").unwrap().1)
-            .finish()
+        f.debug_list().entries(self.capabilities_iter()).finish()
     }
 }
 
@@ -243,7 +240,7 @@ impl<Flag: 'static + CapabilityFlag> Packable for Capabilities<Flag> {
     }
 }
 
-pub trait CapabilityFlag {
+pub trait CapabilityFlag: core::fmt::Debug {
     type Iterator: Iterator<Item = Self>;
 
     /// Converts the flag into the byte representation.
