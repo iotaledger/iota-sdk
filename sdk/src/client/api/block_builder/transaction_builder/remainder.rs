@@ -136,8 +136,8 @@ impl TransactionBuilder {
         // Find the first value that matches the remainder address
         self.non_remainder_outputs().any(|o| {
             (o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
-                && o.unlock_conditions()
-                    .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
+                && o.unlock_conditions().expiration().is_none()
+                && o.unlock_conditions().timelock().is_none()
                 && matches!(o.required_address(
                     self.latest_slot_commitment_id.slot_index(),
                     self.protocol_parameters.committable_age_range(),
@@ -156,10 +156,7 @@ impl TransactionBuilder {
             .provided_outputs
             .iter_mut()
             .chain(&mut self.added_outputs)
-            .filter(|o| {
-                o.unlock_conditions()
-                    .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
-            })
+            .filter(|o| o.unlock_conditions().expiration().is_none() && o.unlock_conditions().timelock().is_none())
             .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
             .collect::<BTreeMap<_, _>>();
 
