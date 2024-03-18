@@ -230,20 +230,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                 let secret_manager = create_secret_manager(&init_parameters).await?;
                 let secret_manager_variant = secret_manager.to_string();
                 let wallet = init_command(storage_path, secret_manager, init_parameters).await?;
-                println_log_info!("Created new wallet with '{}' secret manager.", secret_manager_variant);
-                println_log_info!(
-                    "Wallet parameters:\naddress={}\nbip_path={:?}\nalias={:?}",
-                    wallet.address().await,
-                    wallet.bip_path().await,
-                    wallet.alias().await,
-                );
-                println_log_info!(
-                    "Network parameters:\nname={}\nid={}\nbech32_hrp={}",
-                    wallet.client().get_network_name().await?,
-                    wallet.client().get_network_id().await?,
-                    wallet.client().get_bech32_hrp().await?,
-                );
-
+                print_create_wallet_summary(&wallet, &secret_manager_variant).await?;
                 Some(wallet)
             }
             CliCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
@@ -345,19 +332,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                     let secret_manager = create_secret_manager(&init_params).await?;
                     let secret_manager_variant = secret_manager.to_string();
                     let wallet = init_command(storage_path, secret_manager, init_params).await?;
-                    println_log_info!("Created new wallet with '{}' secret manager.", secret_manager_variant);
-                    println_log_info!(
-                        "Wallet parameters:\naddress={}\nbip_path={:?}\nalias={:?}",
-                        wallet.address().await,
-                        wallet.bip_path().await,
-                        wallet.alias().await,
-                    );
-                    println_log_info!(
-                        "Network parameters:\nname={}\nid={}\nbech32_hrp={}",
-                        wallet.client().get_network_name().await?,
-                        wallet.client().get_network_id().await?,
-                        wallet.client().get_bech32_hrp().await?,
-                    );
+                    print_create_wallet_summary(&wallet, &secret_manager_variant).await?;
                     Some(wallet)
                 } else {
                     Cli::print_help()?;
@@ -373,6 +348,16 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
             }
         }
     })
+}
+
+async fn print_create_wallet_summary(wallet: &Wallet, secret_manager_variant: &str) -> Result<(), Error> {
+    println_log_info!("Created new wallet with the following parameters:",);
+    println_log_info!("Secret manager: {secret_manager_variant}");
+    println_log_info!("Wallet address: {}", wallet.address().await);
+    println_log_info!("Wallet bip path: {:?}", wallet.bip_path().await);
+    println_log_info!("Wallet alias: {:?}", wallet.alias().await);
+    println_log_info!("Network name: {}", wallet.client().get_network_name().await?);
+    Ok(())
 }
 
 pub async fn backup_to_stronghold_snapshot_command(
