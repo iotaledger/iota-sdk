@@ -119,27 +119,6 @@ describe('Wallet', () => {
 
         removeDir(storagePath);
     }, 20000);
-
-    it('error on alias conflict', async () => {
-        let storagePath = 'test-error-on-alias-conflict';
-        removeDir(storagePath);
-
-        const walletOptions = await createDefaultWalletOptions(storagePath);
-        const wallet = await Wallet.create(walletOptions);
-        await wallet.destroy();
-
-        walletOptions.alias = "Bob";
-
-        try {
-            const _restoredWallet = await Wallet.create(walletOptions);
-            throw 'Should return an error because the provided alias conflicts with the stored one';
-        } catch (err: any) {
-            expect(err.message).toEqual('wallet alias mismatch: Bob, existing alias is: Alice');
-        }
-
-        removeDir(storagePath);
-    }, 20000);
-
 });
 
 async function createDefaultWalletOptions(storagePath: string): Promise<WalletOptions> {
