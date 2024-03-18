@@ -1,42 +1,42 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// use iota_sdk::wallet::{MintNftParams, Result, SendNftParams, SendParams, TransactionOptions};
-// use pretty_assertions::assert_eq;
+use iota_sdk::{client::generate_mnemonic, wallet::SendParams};
+use pretty_assertions::assert_eq;
 
-// use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
+use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
+
+#[tokio::test]
+async fn send_amount() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/send_amount_0";
+    setup(storage_path_0)?;
+    let storage_path_1 = "test-storage/send_amount_1";
+    setup(storage_path_1)?;
+
+    let wallet_0 = make_wallet(storage_path_0, Some(generate_mnemonic()?), None).await?;
+    request_funds(&wallet_0).await?;
+
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
+
+    let amount = 1_000_000;
+    let tx = wallet_0
+        .send_with_params([SendParams::new(amount, wallet_1.address().await)?], None)
+        .await?;
+
+    wallet_0
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
+
+    let balance = wallet_1.sync(None).await.unwrap();
+    assert_eq!(balance.base_coin().available(), amount);
+
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)
+}
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_amount() -> Result<(), WalletError> {
-//     let storage_path_0 = "test-storage/send_amount_0";
-//     setup(storage_path_0)?;
-//     let storage_path_1 = "test-storage/send_amount_1";
-//     setup(storage_path_1)?;
-
-//     let wallet_0 = make_wallet(storage_path_0, None, None).await?;
-//     request_funds(&wallet_0, 1).await?;
-
-//     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
-
-//     let amount = 1_000_000;
-//     let tx = wallet_0
-//         .send_with_params([SendParams::new(amount, wallet_1.address().clone())?], None)
-//         .await?;
-
-//     wallet_0
-//         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
-//         .await?;
-
-//     let balance = wallet_1.sync(None).await.unwrap();
-//     assert_eq!(balance.base_coin().available(), amount);
-
-//     tear_down(storage_path)
-// }
-
-// #[ignore]
-// #[tokio::test]
-// async fn send_amount_127_outputs() -> Result<(), WalletError> {
+// async fn send_amount_127_outputs() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path_0 = "test-storage/send_amount_127_outputs_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_amount_127_outputs_1";
@@ -74,7 +74,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_amount_custom_input() -> Result<(), WalletError> {
+// async fn send_amount_custom_input() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path_0 = "test-storage/send_amount_custom_input_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_amount_custom_input_1";
@@ -121,7 +121,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_nft() -> Result<(), WalletError> {
+// async fn send_nft() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path_0 = "test-storage/send_nft_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_nft_1";
@@ -164,7 +164,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn send_with_note() -> Result<(), WalletError> {
+// async fn send_with_note() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path_0 = "test-storage/send_with_note_0";
 //     setup(storage_path_0)?;
 //     let storage_path_1 = "test-storage/send_with_note_1";
@@ -193,7 +193,7 @@
 
 // #[ignore]
 // #[tokio::test]
-// async fn conflicting_transaction() -> Result<(), WalletError> {
+// async fn conflicting_transaction() -> Result<(), Box<dyn std::error::Error>> {
 //     let storage_path_0 = "test-storage/conflicting_transaction_0";
 //     let storage_path_1 = "test-storage/conflicting_transaction_1";
 //     setup(storage_path_0)?;
@@ -265,7 +265,7 @@
 // #[tokio::test]
 // #[cfg(all(feature = "ledger_nano", feature = "events"))]
 // #[ignore = "requires ledger nano instance"]
-// async fn prepare_transaction_ledger() -> Result<(), WalletError> {
+// async fn prepare_transaction_ledger() -> Result<(), Box<dyn std::error::Error>> {
 //     use iota_sdk::wallet::events::{types::TransactionProgressEvent, WalletEvent, WalletEventType};
 
 //     let storage_path_0 = "test-storage/wallet_address_generation_ledger_0";

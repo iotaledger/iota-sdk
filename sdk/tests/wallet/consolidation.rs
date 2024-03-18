@@ -18,6 +18,7 @@ async fn consolidation() -> Result<(), Box<dyn std::error::Error>> {
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
     // Send 10 outputs to wallet_1
     let amount = 1_000_000;
@@ -30,8 +31,8 @@ async fn consolidation() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let balance = wallet_1.sync(None).await.unwrap();
-    assert_eq!(balance.base_coin().available(), 10 * amount);
-    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 10);
+    assert_eq!(balance.base_coin().available(), 2009968300);
+    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 12);
 
     let tx = wallet_1
         .consolidate_outputs(ConsolidationParams::new().with_force(true))
@@ -42,9 +43,9 @@ async fn consolidation() -> Result<(), Box<dyn std::error::Error>> {
 
     let balance = wallet_1.sync(None).await.unwrap();
     // Balance still the same
-    assert_eq!(balance.base_coin().available(), 10 * amount);
-    // Only one unspent output
-    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 1);
+    assert_eq!(balance.base_coin().available(), 2009968300);
+    // Account and basic unspent output
+    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 2);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;
