@@ -4,7 +4,7 @@
 use core::str::FromStr;
 use std::path::Path;
 
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
@@ -323,11 +323,11 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     let nanos = u32::try_from(millis * 1000000)
         .map_err(|e| Error::Miscellaneous(format!("Failed to convert timestamp to u32: {e}")))?;
 
-    let naive_time = NaiveDateTime::from_timestamp_opt(secs_int, nanos).ok_or(Error::Miscellaneous(
+    let date_time = DateTime::from_timestamp(secs_int, nanos).ok_or(Error::Miscellaneous(
         "Failed to convert timestamp to NaiveDateTime".to_string(),
     ))?;
 
-    Ok(naive_time.and_utc())
+    Ok(date_time)
 }
 
 pub async fn check_file_exists(path: &Path) -> Result<(), Error> {

@@ -20,7 +20,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 # Mandatory dependencies
 bech32 = { version = "0.9.1", default-features = false }
 bitflags = { version = "2.4.2", default-features = false }
-bytemuck = { version = "1.14.3", default-features = false }
+bytemuck = { version = "1.15.0", default-features = false }
 derive_more = { version = "0.99.17", default-features = false, features = [
     "from",
     "as_ref",
@@ -51,24 +51,24 @@ prefix-hex = { version = "0.7.1", default-features = false, features = [
     "primitive-types",
 ] }
 primitive-types = { version = "0.12.2", default-features = false }
-serde = { version = "1.0.196", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.113", default-features = false, features = [
+serde = { version = "1.0.197", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.114", default-features = false, features = [
     "alloc",
 ] }
 
 # Optional dependencies
 anymap = { version = "0.12.1", default-features = false, optional = true }
-async-trait = { version = "0.1.77", default-features = false, optional = true }
+async-trait = { version = "0.1.78", default-features = false, optional = true }
 bs58 = { version = "0.5.0", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.30", default-features = false, features = [
     "thread-pool",
 ], optional = true }
-heck = { version = "0.4.1", default-features = false, optional = true }
+heck = { version = "0.5.0", default-features = false, optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.1", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
-log = { version = "0.4.20", default-features = false, optional = true }
+log = { version = "0.4.21", default-features = false, optional = true }
 num_cpus = { version = "1.16.0", default-features = false, optional = true }
 once_cell = { version = "1.19.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [
@@ -77,17 +77,17 @@ rand = { version = "0.8.5", default-features = false, features = [
 regex = { version = "1.10.3", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
-reqwest = { version = "0.11.24", default-features = false, features = [
+reqwest = { version = "0.11.26", default-features = false, features = [
     "json",
 ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [
     "lz4",
 ], optional = true }
-rumqttc = { version = "0.23.0", default-features = false, features = [
+rumqttc = { version = "0.24.0", default-features = false, features = [
     "websocket",
 ], optional = true }
 serde_repr = { version = "0.1.18", default-features = false, optional = true }
-thiserror = { version = "1.0.57", default-features = false, optional = true }
+thiserror = { version = "1.0.58", default-features = false, optional = true }
 time = { version = "0.3.34", default-features = false, features = [
     "serde",
     "macros",
@@ -122,7 +122,7 @@ tokio = { version = "1.36.0", default-features = false, features = [
     "time",
     "sync",
 ], optional = true }
-wasm-bindgen-futures = { version = "0.4.41", default-features = false, optional = true }
+wasm-bindgen-futures = { version = "0.4.42", default-features = false, optional = true }
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = ["rand"] }
