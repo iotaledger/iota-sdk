@@ -22,13 +22,13 @@ iota-crypto = { version = "0.23.1", default-features = false, features = [
     "slip10",
     "bip44",
 ] }
-log = { version = "0.4.20", default-features = false }
+log = { version = "0.4.21", default-features = false }
 packable = { version = "0.8.3", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false }
 primitive-types = { version = "0.12.2", default-features = false }
-serde = { version = "1.0.196", default-features = false }
-serde_json = { version = "1.0.113", default-features = false }
-thiserror = { version = "1.0.57", default-features = false }
+serde = { version = "1.0.197", default-features = false }
+serde_json = { version = "1.0.114", default-features = false }
+thiserror = { version = "1.0.58", default-features = false }
 tokio = { version = "1.36.0", default-features = false }
 zeroize = { version = "1.7.0", default-features = false }
 
