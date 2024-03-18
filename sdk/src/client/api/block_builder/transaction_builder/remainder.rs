@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeMap;
+use std::sync::OnceLock;
 
 use crypto::keys::bip44::Bip44;
 use primitive_types::U256;
@@ -63,26 +64,9 @@ impl TransactionBuilder {
             .get_remainder_address()?
             .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?;
 
-        let remainder_builder =
-            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
-                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()));
-
-        let nt_min_amount = if !native_tokens_diff.is_empty() {
-            let nt_remainder_amount = remainder_builder
-                .with_native_token(
-                    native_tokens_diff
-                        .first_key_value()
-                        .map(|(token_id, amount)| NativeToken::new(*token_id, amount))
-                        .unwrap()?,
-                )
-                .finish_output()?
-                .amount();
-            // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
-            // cost.
-            nt_remainder_amount * native_tokens_diff.len() as u64
-        } else {
-            0
-        };
+        // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
+        // cost.
+        let nt_min_amount = self.native_token_remainder().amount() * native_tokens_diff.len() as u64;
 
         // If there is an amount remainder (above any nt min amount), try to fit it in an existing output
         if amount_diff > nt_min_amount {
@@ -216,25 +200,12 @@ impl TransactionBuilder {
         let (input_nts, output_nts) = self.get_input_output_native_tokens();
         let remainder_native_tokens = get_native_tokens_diff(input_nts, output_nts);
 
-        let remainder_builder =
-            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
-                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()));
-
         let remainder_amount = if !remainder_native_tokens.is_empty() {
-            let nt_remainder_amount = remainder_builder
-                .with_native_token(
-                    remainder_native_tokens
-                        .first_key_value()
-                        .map(|(token_id, amount)| NativeToken::new(*token_id, amount))
-                        .unwrap()?,
-                )
-                .finish_output()?
-                .amount();
             // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
             // cost.
-            nt_remainder_amount * remainder_native_tokens.len() as u64
+            self.native_token_remainder().amount() * remainder_native_tokens.len() as u64
         } else {
-            remainder_builder.finish_output()?.amount()
+            self.basic_remainder().amount()
         };
 
         let (selected_mana, required_mana) = self.mana_sums(false)?;
@@ -325,5 +296,26 @@ impl TransactionBuilder {
         });
 
         Ok(())
+    }
+
+    pub(crate) fn basic_remainder(&self) -> &'static Output {
+        static OUTPUT_LOCK: OnceLock<Output> = OnceLock::new();
+        OUTPUT_LOCK.get_or_init(|| {
+            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                .finish_output()
+                .unwrap()
+        })
+    }
+
+    pub(crate) fn native_token_remainder(&self) -> &'static Output {
+        static OUTPUT_LOCK: OnceLock<Output> = OnceLock::new();
+        OUTPUT_LOCK.get_or_init(|| {
+            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
+                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                .with_native_token(NativeToken::new(TokenId::null(), 1).unwrap())
+                .finish_output()
+                .unwrap()
+        })
     }
 }

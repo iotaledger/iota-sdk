@@ -16,6 +16,7 @@ use crate::{
         output::{AccountOutput, AccountOutputBuilder, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
+        slot::{SlotCommitmentId, SlotIndex},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         BlockError,
     },
@@ -254,7 +255,11 @@ impl TransactionBuilder {
             return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Mana));
         }
         let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
-        while let Some(input) = self.next_input_for_mana(required_mana - selected_mana, include_generated) {
+        while let Some(input) = self.next_input_for_mana(
+            required_mana - selected_mana,
+            include_generated,
+            self.latest_slot_commitment_id,
+        ) {
             selected_mana += self.total_mana(&input, include_generated)?;
             if self.select_input(input)? {
                 let output = self.added_outputs.last().unwrap();
@@ -360,12 +365,17 @@ impl TransactionBuilder {
         Ok(res)
     }
 
-    fn next_input_for_mana(&mut self, missing_mana: u64, include_generated: bool) -> Option<InputSigningData> {
+    fn next_input_for_mana(
+        &mut self,
+        missing_mana: u64,
+        include_generated: bool,
+        slot_commitment_id: SlotCommitmentId,
+    ) -> Option<InputSigningData> {
         self.available_inputs
             .iter()
             .enumerate()
             .filter_map(|(idx, input)| {
-                self.score_for_mana(input, missing_mana, include_generated)
+                self.score_for_mana(input, missing_mana, include_generated, slot_commitment_id.slot_index())
                     .map(|score| (score, idx))
             })
             .max_by_key(|(score, _)| *score)
@@ -373,7 +383,13 @@ impl TransactionBuilder {
     }
 
     // Score an input based on how desirable it is.
-    fn score_for_mana(&self, input: &InputSigningData, missing_mana: u64, include_generated: bool) -> Option<usize> {
+    fn score_for_mana(
+        &self,
+        input: &InputSigningData,
+        missing_mana: u64,
+        include_generated: bool,
+        slot_index: SlotIndex,
+    ) -> Option<usize> {
         ([
             BasicOutput::KIND,
             NftOutput::KIND,
@@ -385,8 +401,12 @@ impl TransactionBuilder {
             let mut work_score = self
                 .protocol_parameters
                 .work_score(&UtxoInput::from(*input.output_id()));
-            let has_native_token = input.output.native_token().is_some();
             let mut mana_gained = self.total_mana(input, include_generated).unwrap_or_default();
+            let mut remainder_work_score = 0;
+            if super::amount::sdruc_not_expired(&input.output, slot_index).is_some() {
+                remainder_work_score = self.protocol_parameters.work_score(self.basic_remainder())
+            }
+
             if let Ok(Some(output)) = self.transition_input(input) {
                 work_score += self.protocol_parameters.work_score(&output);
                 if let Some(allotment) = self.min_mana_allotment {
@@ -403,14 +423,19 @@ impl TransactionBuilder {
                     }
                 }
                 mana_gained = mana_gained.saturating_sub(output.mana());
+            } else if input.output.native_token().is_some() {
+                remainder_work_score += self.protocol_parameters.work_score(self.native_token_remainder())
+            } else if mana_gained > missing_mana {
+                remainder_work_score = self.protocol_parameters.work_score(self.basic_remainder())
             }
+            work_score += remainder_work_score;
+
             // The gained mana is reduced by the amount we'll need to allot later.
             if let Some(allotment) = self.min_mana_allotment {
                 mana_gained = mana_gained.saturating_sub(work_score as u64 * allotment.reference_mana_cost);
             }
+
             let mana_diff = missing_mana.abs_diff(mana_gained) as f64;
-            // Normalize scores between 0..1 with 1 being desirable
-            let nt_score = if has_native_token { 0.5 } else { 1.0 };
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
             // If the mana is insufficient, the score will decrease the more inputs are selected
             let mana_score = if mana_gained >= missing_mana {
@@ -419,8 +444,9 @@ impl TransactionBuilder {
                 (-mana_diff / missing_mana as f64).exp()
                     * ((INPUT_COUNT_MAX as f64 - self.selected_inputs.len() as f64) / INPUT_COUNT_MAX as f64)
             };
-            let allotment_score = (-(work_score as f64) / 1000.0).exp();
-            (allotment_score * nt_score * mana_score * usize::MAX as f64).round() as _
+            let work_score = (-(work_score as f64) / u32::MAX as f64).exp();
+            // Normalize scores between 0..1 with 1 being desirable
+            (mana_score * work_score * usize::MAX as f64).round() as _
         })
     }
 }
