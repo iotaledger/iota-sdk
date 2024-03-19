@@ -265,7 +265,7 @@ export type __GetTransactionMethod__ = {
     };
 };
 
-export type __AddressMethod__ = {
+export type __GetAddressMethod__ = {
     name: 'getAddress';
 };
 
