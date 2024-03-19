@@ -55,7 +55,7 @@ pub async fn get_alias(prompt: &str) -> Result<String, Error> {
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
+            println_log_error!("Invalid input, please enter a valid alias (non-empty, ASCII).");
         } else {
             return Ok(input);
         }
@@ -66,7 +66,7 @@ pub async fn get_address(prompt: &str) -> Result<Bech32Address, Error> {
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please choose a non-empty address consisting of ASCII characters.");
+            println_log_error!("Invalid input, please enter a valid Bech32 address.");
         } else {
             return Ok(Bech32Address::from_str(&input)?);
         }
@@ -77,9 +77,11 @@ pub async fn get_bip_path(prompt: &str) -> Result<Bip44, Error> {
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please choose a non-empty address consisting of ASCII characters.");
+            println_log_error!(
+                "Invalid input, please enter a valid bip path (<coin_type>/<account_index>/<change_address>/<address_index>."
+            );
         } else {
-            return Ok(parse_bip_path(&input).expect("todo"));
+            return Ok(parse_bip_path(&input).map_err(|err| eyre!(err))?);
         }
     }
 }

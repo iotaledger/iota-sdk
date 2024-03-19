@@ -68,7 +68,7 @@ pub struct InitParameters {
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
     /// Set the BIP path. If not provided a bip path has to be provided interactively on first launch.
-    /// The expected format is: `<coin_type>/<account_index>/<address_index>/<change>`.
+    /// The expected format is: `<coin_type>/<account_index>/<change_address>/<address_index>`.
     #[arg(short, long, value_parser = parse_bip_path)]
     pub bip_path: Option<Bip44>,
     /// Set the Bech32-encoded wallet address.
@@ -412,7 +412,7 @@ pub async fn init_command(
 
     let mut alias = init_params.alias;
     if alias.is_none() {
-        if get_decision("Do you want to set an alias of the new wallet?")? {
+        if get_decision("Do you want to set an alias for the new wallet?")? {
             alias.replace(get_alias("Set wallet alias").await?);
         }
     }
