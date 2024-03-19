@@ -68,8 +68,7 @@ pub struct InitParameters {
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
     /// Set the BIP path. If not provided a bip path has to be provided interactively on first launch.
-    /// The expected format is: `a/b/c/d` where `a` = coin type, `b` = account index, `c` = address index, `d` =
-    /// internal.
+    /// The expected format is: `<coin_type>/<account_index>/<address_index>/<change>`.
     #[arg(short, long, value_parser = parse_bip_path)]
     pub bip_path: Option<Bip44>,
     /// Set the Bech32-encoded wallet address.
