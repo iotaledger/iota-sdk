@@ -5,6 +5,7 @@ import type {
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAccountOutputMethod__,
     __DeregisterParticipationEventMethod__,
+    __GetAddressMethod__,
     __GetBalanceMethod__,
     __GetOutputMethod__,
     __GetFoundryOutputMethod__,
@@ -69,7 +70,6 @@ import type {
     __StopBackgroundSyncMethod__,
     __StoreMnemonicMethod__,
     __UpdateNodeAuthMethod__,
-    __AddressMethod__,
 } from './wallet';
 
 export type __WalletMethod__ =
@@ -79,6 +79,7 @@ export type __WalletMethod__ =
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAccountOutputMethod__
     | __DeregisterParticipationEventMethod__
+    | __GetAddressMethod__
     | __GetBalanceMethod__
     | __GetOutputMethod__
     | __GetIncomingTransactionMethod__
@@ -142,5 +143,4 @@ export type __WalletMethod__ =
     | __StartBackgroundSyncMethod__
     | __StopBackgroundSyncMethod__
     | __StoreMnemonicMethod__
-    | __UpdateNodeAuthMethod__
-    | __AddressMethod__;
+    | __UpdateNodeAuthMethod__;
