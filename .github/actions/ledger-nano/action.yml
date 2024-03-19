@@ -7,7 +7,7 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: iotaledger/ledger-iota-app
-        ref: develop
+        ref: feat/nova
         path: ledger-iota-app
 
     - name: Update submodules
