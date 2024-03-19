@@ -351,11 +351,12 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
 
 async fn print_create_wallet_summary(wallet: &Wallet, secret_manager_variant: &str) -> Result<(), Error> {
     println_log_info!("Created new wallet with the following parameters:",);
-    println_log_info!("Secret manager: {secret_manager_variant}");
-    println_log_info!("Wallet address: {}", wallet.address().await);
-    println_log_info!("Wallet bip path: {:?}", wallet.bip_path().await);
-    println_log_info!("Wallet alias: {:?}", wallet.alias().await);
-    println_log_info!("Network name: {}", wallet.client().get_network_name().await?);
+    println_log_info!(" Secret manager: {secret_manager_variant}");
+    println_log_info!(" Wallet address: {}", wallet.address().await);
+    println_log_info!(" Wallet bip path: {:?}", wallet.bip_path().await);
+    println_log_info!(" Wallet alias: {:?}", wallet.alias().await);
+    println_log_info!(" Network name: {}", wallet.client().get_network_name().await?);
+    println_log_info!(" Node url: {}", wallet.client().get_node_info().await?.url);
     Ok(())
 }
 
@@ -390,26 +391,28 @@ pub async fn init_command(
     init_params: InitParameters,
 ) -> Result<Wallet, Error> {
     let mut address = init_params.address.map(|s| Bech32Address::from_str(&s)).transpose()?;
+    let mut forced = false;
     if address.is_none() {
-        if get_decision("Do you want to assign an existing address to your new wallet?")? {
+        if get_decision("Do you want to set the address of the new wallet?")? {
             address.replace(get_address("Set wallet address").await?);
+        } else {
+            forced = true;
         }
     }
 
     let mut bip_path = init_params.bip_path;
     if bip_path.is_none() {
-        if get_decision("Do you want to assign a valid address bip path to your new wallet?")? {
+        if forced || get_decision("Do you want to set the bip path of the new wallet?")? {
             bip_path.replace(
-                get_bip_path("Set address bip path (format: a/b/c/d)")
-                    .await
-                    .expect("todo"),
+                get_bip_path("Set bip path (format=<coin_type>/<account_index>/<change_address>/<address_index>)")
+                    .await?,
             );
         }
     }
 
     let mut alias = init_params.alias;
     if alias.is_none() {
-        if get_decision("Do you want to assign an alias name to your new wallet?")? {
+        if get_decision("Do you want to set an alias of the new wallet?")? {
             alias.replace(get_alias("Set wallet alias").await?);
         }
     }
