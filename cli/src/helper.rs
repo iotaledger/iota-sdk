@@ -78,7 +78,7 @@ pub async fn get_bip_path(prompt: &str) -> Result<Bip44, Error> {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
             println_log_error!(
-                "Invalid input, please enter a valid bip path (<coin_type>/<account_index>/<change_address>/<address_index>."
+                "Invalid input, please enter a valid bip path (<coin_type>/<account_index>/<change_address>/<address_index>)."
             );
         } else {
             return Ok(parse_bip_path(&input).map_err(|err| eyre!(err))?);
@@ -99,7 +99,7 @@ pub fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
 
     if bip_path_enc.len() != 4 {
         return Err(
-            "invalid BIP path format. Expected: `coin_type/account_index/change_address/address_index`".to_string(),
+            "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`".to_string(),
         );
     }
 

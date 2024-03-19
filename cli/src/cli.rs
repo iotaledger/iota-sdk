@@ -404,7 +404,7 @@ pub async fn init_command(
     if bip_path.is_none() {
         if forced || get_decision("Do you want to set the bip path of the new wallet?")? {
             bip_path.replace(
-                get_bip_path("Set bip path (format=<coin_type>/<account_index>/<change_address>/<address_index>)")
+                get_bip_path("Set bip path (<coin_type>/<account_index>/<change_address>/<address_index>)")
                     .await?,
             );
         }
