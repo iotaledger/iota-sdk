@@ -96,10 +96,10 @@ async fn client_from_wallet() -> Result<(), Error> {
         .await?;
 
     // Send ClientMethod via the client from the wallet
-    let response = wallet.client().call_method(ClientMethod::GetNodeInfo).await;
+    let response = wallet.client().call_method(ClientMethod::GetProtocolParameters).await;
 
     match response {
-        Response::NodeInfo(_) => {}
+        Response::ProtocolParameters(_) => {}
         _ => panic!("unexpected response {response:?}"),
     }
 

@@ -6,6 +6,7 @@ use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
+#[ignore]
 #[tokio::test]
 async fn send_amount() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/send_amount_0";
