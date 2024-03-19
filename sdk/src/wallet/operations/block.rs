@@ -27,11 +27,13 @@ where
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = match issuer_id.into() {
             Some(id) => id,
-            None => self
-                .ledger()
-                .await
-                .first_account_id()
-                .ok_or(WalletError::AccountNotFound)?,
+            None => {
+                let current_slot = self.client().get_slot_index().await?;
+                self.ledger()
+                    .await
+                    .first_block_issuer_account_id(current_slot)
+                    .ok_or(WalletError::AccountNotFound)?
+            }
         };
 
         let unsigned_block = self.client().build_basic_block(issuer_id, payload).await?;

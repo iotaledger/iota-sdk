@@ -449,11 +449,12 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
@@ -639,11 +640,12 @@ pub async fn congestion_command(
     account_id: Option<AccountId>,
     work_score: Option<u32>,
 ) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let congestion = wallet.client().get_account_congestion(&account_id, work_score).await?;
