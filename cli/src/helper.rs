@@ -99,7 +99,8 @@ pub fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
 
     if bip_path_enc.len() != 4 {
         return Err(
-            "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`".to_string(),
+            "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`"
+                .to_string(),
         );
     }
 
