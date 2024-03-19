@@ -196,7 +196,7 @@ impl TransactionBuilder {
 
     /// Calculates the required amount for required remainder outputs (multiple outputs are required if multiple native
     /// tokens are remaining) and returns if there are native tokens as remainder.
-    pub(crate) fn required_remainder_amount(&self) -> Result<(u64, bool, bool), TransactionBuilderError> {
+    pub(crate) fn required_remainder_amount(&mut self) -> Result<(u64, bool, bool), TransactionBuilderError> {
         let (input_nts, output_nts) = self.get_input_output_native_tokens();
         let remainder_native_tokens = get_native_tokens_diff(input_nts, output_nts);
 
@@ -209,8 +209,6 @@ impl TransactionBuilder {
         };
 
         let (selected_mana, required_mana) = self.mana_sums(false)?;
-
-        log::debug!("selected mana: {selected_mana}, required: {required_mana}");
 
         let remainder_address = self.get_remainder_address()?.map(|v| v.0);
 
@@ -233,7 +231,6 @@ impl TransactionBuilder {
         // If we are burning mana, we may not need a mana remainder
         if self.burn.as_ref().map_or(false, |b| b.mana()) {
             let initial_excess = self.initial_mana_excess()?;
-            log::debug!("initial_mana_excess: {initial_excess}");
             mana_remainder &= selected_mana > required_mana + initial_excess;
         }
 

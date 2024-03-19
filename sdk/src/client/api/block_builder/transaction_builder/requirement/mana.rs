@@ -24,77 +24,27 @@ use crate::{
 
 impl TransactionBuilder {
     pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<(), TransactionBuilderError> {
-        let Some(MinManaAllotment {
-            issuer_id,
-            reference_mana_cost,
-            ..
-        }) = self.min_mana_allotment
-        else {
+        if self.min_mana_allotment.is_none() {
             // If there is no min allotment calculation needed, just check mana
             self.get_inputs_for_mana_balance()?;
             return Ok(());
-        };
+        }
 
         let mut should_recalculate = false;
 
-        if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
-            self.selected_inputs = Self::sort_input_signing_data(
-                std::mem::take(&mut self.selected_inputs),
-                self.latest_slot_commitment_id.slot_index(),
-                self.protocol_parameters.committable_age_range(),
-            )?;
-
-            let inputs = self
-                .selected_inputs
-                .iter()
-                .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
-
-            let outputs = self.all_outputs().cloned();
-
-            let mut builder = Transaction::builder(self.protocol_parameters.network_id())
-                .with_inputs(inputs)
-                .with_outputs(outputs);
-
-            if let Some(payload) = &self.payload {
-                builder = builder.with_payload(payload.clone());
-            }
-
-            // Add the empty allotment so the work score includes it
-            self.mana_allotments.entry(issuer_id).or_default();
-
-            let transaction = builder
-                .with_context_inputs(self.context_inputs())
-                .with_mana_allotments(
-                    self.mana_allotments
-                        .iter()
-                        .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
-                )
-                .finish_with_params(&self.protocol_parameters)?;
-
-            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
-
-            let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
-                + self.protocol_parameters.work_score_parameters().block();
-
+        if let Some(required_allotment) = self.required_allotment()? {
             let MinManaAllotment {
                 issuer_id,
                 allotment_debt,
-                required_allotment,
                 ..
-            } = self
-                .min_mana_allotment
-                .as_mut()
-                .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
-
-            *required_allotment = block_work_score as u64 * reference_mana_cost;
-
+            } = self.min_mana_allotment.as_mut().unwrap();
             // Add the required allotment to the issuing allotment
-            if *required_allotment > self.mana_allotments[issuer_id] {
+            if required_allotment > self.mana_allotments[issuer_id] {
                 log::debug!("Allotting at least {required_allotment} mana to account ID {issuer_id}");
-                let additional_allotment = *required_allotment - self.mana_allotments[issuer_id];
+                let additional_allotment = required_allotment - self.mana_allotments[issuer_id];
                 log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
                 // Unwrap: safe because we always add the record above
-                *self.mana_allotments.get_mut(issuer_id).unwrap() = *required_allotment;
+                *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment;
                 log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
                 *allotment_debt += additional_allotment;
                 should_recalculate = true;
@@ -128,6 +78,62 @@ impl TransactionBuilder {
         }
 
         Ok(())
+    }
+
+    pub(crate) fn required_allotment(&mut self) -> Result<Option<u64>, TransactionBuilderError> {
+        let Some(MinManaAllotment {
+            issuer_id,
+            reference_mana_cost,
+            required_allotment,
+            ..
+        }) = self.min_mana_allotment
+        else {
+            return Ok(None);
+        };
+
+        if required_allotment.is_none() && !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
+            self.selected_inputs = Self::sort_input_signing_data(
+                std::mem::take(&mut self.selected_inputs),
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.committable_age_range(),
+            )?;
+
+            let inputs = self
+                .selected_inputs
+                .iter()
+                .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
+
+            let mut builder = Transaction::builder(self.protocol_parameters.network_id())
+                .with_inputs(inputs)
+                .with_outputs(self.all_outputs().cloned());
+
+            if let Some(payload) = &self.payload {
+                builder = builder.with_payload(payload.clone());
+            }
+
+            // Add the empty allotment so the work score includes it
+            self.mana_allotments.entry(issuer_id).or_default();
+
+            let transaction = builder
+                .with_context_inputs(self.context_inputs())
+                .with_mana_allotments(
+                    self.mana_allotments
+                        .iter()
+                        .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
+                )
+                .finish_with_params(&self.protocol_parameters)?;
+
+            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
+
+            let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
+                + self.protocol_parameters.work_score_parameters().block();
+
+            let MinManaAllotment { required_allotment, .. } = self.min_mana_allotment.as_mut().unwrap();
+            required_allotment.replace(block_work_score as u64 * reference_mana_cost);
+
+            return Ok(*required_allotment);
+        }
+        Ok(required_allotment)
     }
 
     /// Reduce an account output by an allotment value, if one exists.
@@ -301,9 +307,23 @@ impl TransactionBuilder {
         Ok(input_mana.saturating_sub(output_mana))
     }
 
-    pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), TransactionBuilderError> {
-        let mut required_mana =
-            self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
+    pub(crate) fn mana_sums(&mut self, include_remainders: bool) -> Result<(u64, u64), TransactionBuilderError> {
+        let allotments_sum = if let Some(MinManaAllotment { issuer_id, .. }) = self.min_mana_allotment {
+            let required_allotment = self.required_allotment()?.unwrap_or_default();
+            self.mana_allotments
+                .iter()
+                .filter_map(|(id, value)| (id != &issuer_id).then_some(value))
+                .sum::<u64>()
+                + self
+                    .mana_allotments
+                    .get(&issuer_id)
+                    .copied()
+                    .unwrap_or_default()
+                    .max(required_allotment)
+        } else {
+            self.mana_allotments.values().sum::<u64>()
+        };
+        let mut required_mana = self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + allotments_sum;
         if include_remainders {
             // Add the remainder outputs mana as well as the excess mana we've allocated to add to existing outputs
             // later.
@@ -417,8 +437,8 @@ impl TransactionBuilder {
                     {
                         // We can regain as much as the full account mana value
                         // by reducing the mana on the account.
-                        let new_required_allotment =
-                            allotment.required_allotment + (work_score as u64 * allotment.reference_mana_cost);
+                        let new_required_allotment = allotment.required_allotment.unwrap_or_default()
+                            + (work_score as u64 * allotment.reference_mana_cost);
                         mana_gained += new_required_allotment.min(output.mana());
                     }
                 }

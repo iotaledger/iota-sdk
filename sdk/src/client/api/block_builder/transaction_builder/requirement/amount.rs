@@ -110,7 +110,7 @@ impl TransactionBuilder {
         (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr)
     }
 
-    pub(crate) fn amount_balance(&self) -> Result<(u64, u64), TransactionBuilderError> {
+    pub(crate) fn amount_balance(&mut self) -> Result<(u64, u64), TransactionBuilderError> {
         let (inputs_sum, mut outputs_sum, _, _) = self.amount_sums();
         let (remainder_amount, native_tokens_remainder, mana_remainder) = self.required_remainder_amount()?;
         if inputs_sum > outputs_sum {

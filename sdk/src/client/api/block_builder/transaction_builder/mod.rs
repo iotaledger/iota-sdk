@@ -206,7 +206,7 @@ pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
     reference_mana_cost: u64,
     allotment_debt: u64,
-    required_allotment: u64,
+    required_allotment: Option<u64>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -538,6 +538,11 @@ impl TransactionBuilder {
 
         self.selected_inputs.push(input);
 
+        // Remove the cached allotment value because it's no longer valid
+        if let Some(MinManaAllotment { required_allotment, .. }) = self.min_mana_allotment.as_mut() {
+            *required_allotment = None;
+        }
+
         Ok(added_output)
     }
 
@@ -595,7 +600,7 @@ impl TransactionBuilder {
             issuer_id: account_id,
             reference_mana_cost,
             allotment_debt: 0,
-            required_allotment: 0,
+            required_allotment: None,
         });
         self
     }
