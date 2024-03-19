@@ -612,146 +612,146 @@ async fn prepare_nft_output_features_update() -> Result<(), Box<dyn std::error::
     tear_down(storage_path)
 }
 
-// TODO: adjust amounts
-// #[ignore]
-// #[tokio::test]
-// async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error>> {
-//     let storage_path_0 = "test-storage/prepare_output_remainder_dust_0";
-//     let storage_path_1 = "test-storage/prepare_output_remainder_dust_1";
-//     setup(storage_path_0)?;
-//     setup(storage_path_1)?;
+#[ignore]
+#[tokio::test]
+async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/prepare_output_remainder_dust_0";
+    let storage_path_1 = "test-storage/prepare_output_remainder_dust_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-//     let wallet_0 = make_wallet(storage_path_0, None, None).await?;
-//     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
-//     request_funds(&wallet_0).await?;
-//     request_funds(&wallet_1).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
+    request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
-//     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
+    let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
 
-//     let balance = wallet_0.sync(None).await?;
-//     let minimum_amount = BasicOutput::minimum_amount(&*wallet_1.address().await, storage_score_params);
+    let balance = wallet_0.sync(None).await?;
+    let minimum_amount = BasicOutput::minimum_amount(&*wallet_1.address().await, storage_score_params);
 
-//     // Send away most balance so we can test with leaving dust
-//     let output = wallet_0
-//         .prepare_output(
-//             OutputParams {
-//                 recipient_address: wallet_1.address().await,
-//                 amount: balance.base_coin().available() - 63900,
-//                 assets: None,
-//                 features: None,
-//                 unlocks: None,
-//                 storage_deposit: None,
-//             },
-//             None,
-//         )
-//         .await?;
-//     let transaction = wallet_0.send_outputs(vec![output], None).await?;
-//     wallet_0
-//         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
-//         .await?;
-//     let balance = wallet_0.sync(None).await?;
+    // Send away most balance so we can test with leaving dust
+    let output = wallet_0
+        .prepare_output(
+            OutputParams {
+                recipient_address: wallet_1.address().await,
+                amount: balance.base_coin().available() - 18300,
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: None,
+            },
+            None,
+        )
+        .await?;
+    let transaction = wallet_0.send_outputs(vec![output], None).await?;
+    wallet_0
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
+        .await?;
+    let balance = wallet_0.sync(None).await?;
 
-//     // 63900 left
-//     let output = wallet_0
-//         .prepare_output(
-//             OutputParams {
-//                 recipient_address: wallet_1.address().await,
-//                 amount: minimum_amount - 1, // Leave less than min. deposit
-//                 assets: None,
-//                 features: None,
-//                 unlocks: None,
-//                 storage_deposit: Some(StorageDeposit {
-//                     return_strategy: Some(ReturnStrategy::Gift),
-//                     use_excess_if_low: Some(true),
-//                 }),
-//             },
-//             None,
-//         )
-//         .await?;
+    // 18300 left
+    let output = wallet_0
+        .prepare_output(
+            OutputParams {
+                recipient_address: wallet_1.address().await,
+                amount: minimum_amount - 1, // Leave less than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Gift),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await?;
 
-//     // Check if the output has enough amount to cover the storage deposit
-//     output.verify_storage_deposit(storage_score_params)?;
-//     // The left over 21299 is too small to keep, so we donate it
-//     assert_eq!(output.amount(), balance.base_coin().available());
-//     // storage deposit gifted, only address unlock condition
-//     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
+    // Check if the output has enough amount to cover the storage deposit
+    output.verify_storage_deposit(storage_score_params)?;
+    // The left over 21299 is too small to keep, so we donate it
+    assert_eq!(output.amount(), balance.base_coin().available());
+    // storage deposit gifted, only address unlock condition
+    assert_eq!(output.unlock_conditions().unwrap().len(), 1);
 
-//     let result = wallet_0
-//         .prepare_output(
-//             OutputParams {
-//                 recipient_address: wallet_1.address().await,
-//                 amount: minimum_amount - 1, // Leave less than min. deposit
-//                 assets: None,
-//                 features: None,
-//                 unlocks: None,
-//                 storage_deposit: Some(StorageDeposit {
-//                     return_strategy: Some(ReturnStrategy::Return),
-//                     use_excess_if_low: Some(true),
-//                 }),
-//             },
-//             None,
-//         )
-//         .await;
-//     assert!(
-//         matches!(result, Err(iota_sdk::wallet::WalletError::InsufficientFunds{available, required}) if available ==
-// balance.base_coin().available() && required == 42599)     );
+    let result = wallet_0
+        .prepare_output(
+            OutputParams {
+                recipient_address: wallet_1.address().await,
+                amount: minimum_amount - 1, // Leave less than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Return),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await;
+    assert!(
+        matches!(result, Err(iota_sdk::wallet::WalletError::InsufficientFunds{available, required}) if available ==
+    balance.base_coin().available() && required == 28199)
+    );
 
-//     let output = wallet_0
-//         .prepare_output(
-//             OutputParams {
-//                 recipient_address: wallet_1.address().await,
-//                 amount: 100, // leave more behind than min. deposit
-//                 assets: None,
-//                 features: None,
-//                 unlocks: None,
-//                 storage_deposit: Some(StorageDeposit {
-//                     return_strategy: Some(ReturnStrategy::Gift),
-//                     use_excess_if_low: Some(true),
-//                 }),
-//             },
-//             None,
-//         )
-//         .await?;
+    let output = wallet_0
+        .prepare_output(
+            OutputParams {
+                recipient_address: wallet_1.address().await,
+                amount: 100, // leave more behind than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Gift),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await?;
 
-//     // Check if the output has enough amount to cover the storage deposit
-//     output.verify_storage_deposit(storage_score_params)?;
-//     // We use excess if leftover is too small, so amount == all available balance
-//     assert_eq!(output.amount(), 63900);
-//     // storage deposit gifted, only address unlock condition
-//     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
+    // Check if the output has enough amount to cover the storage deposit
+    output.verify_storage_deposit(storage_score_params)?;
+    // We use excess if leftover is too small, so amount == all available balance
+    assert_eq!(output.amount(), 18300);
+    // storage deposit gifted, only address unlock condition
+    assert_eq!(output.unlock_conditions().unwrap().len(), 1);
 
-//     let output = wallet_0
-//         .prepare_output(
-//             OutputParams {
-//                 recipient_address: wallet_1.address().await,
-//                 amount: 100, // leave more behind than min. deposit
-//                 assets: None,
-//                 features: None,
-//                 unlocks: None,
-//                 storage_deposit: Some(StorageDeposit {
-//                     return_strategy: Some(ReturnStrategy::Return),
-//                     use_excess_if_low: Some(true),
-//                 }),
-//             },
-//             None,
-//         )
-//         .await?;
+    let output = wallet_0
+        .prepare_output(
+            OutputParams {
+                recipient_address: wallet_1.address().await,
+                amount: 100, // leave more behind than min. deposit
+                assets: None,
+                features: None,
+                unlocks: None,
+                storage_deposit: Some(StorageDeposit {
+                    return_strategy: Some(ReturnStrategy::Return),
+                    use_excess_if_low: Some(true),
+                }),
+            },
+            None,
+        )
+        .await?;
 
-//     // Check if the output has enough amount to cover the storage deposit
-//     output.verify_storage_deposit(storage_score_params)?;
-//     // We use excess if leftover is too small, so amount == all available balance
-//     assert_eq!(output.amount(), 63900);
-//     // storage deposit returned, address and SDR unlock condition
-//     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-//     // We have ReturnStrategy::Return, so leftover amount gets returned
-//     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
-//     assert_eq!(sdr.amount(), 63900 - 100);
+    // Check if the output has enough amount to cover the storage deposit
+    output.verify_storage_deposit(storage_score_params)?;
+    // We use excess if leftover is too small, so amount == all available balance
+    assert_eq!(output.amount(), 18300);
+    // storage deposit returned, address and SDR unlock condition
+    assert_eq!(output.unlock_conditions().unwrap().len(), 2);
+    // We have ReturnStrategy::Return, so leftover amount gets returned
+    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    assert_eq!(sdr.amount(), 18300 - 100);
 
-//     tear_down(storage_path_0)?;
-//     tear_down(storage_path_1)?;
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
 
-//     Ok(())
-// }
+    Ok(())
+}
 
 #[ignore]
 #[tokio::test]
