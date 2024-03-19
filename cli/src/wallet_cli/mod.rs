@@ -20,7 +20,7 @@ use iota_sdk::{
             OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
-        slot::SlotIndex,
+        slot::{EpochIndex, SlotIndex},
         IdentifierError,
     },
     utils::ConvertTo,
@@ -103,6 +103,8 @@ pub enum WalletCommand {
     },
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
+    /// Get the committee for the given epoch.
+    Committee { epoch: Option<EpochIndex> },
     /// Checks if an account is ready to issue a block.
     Congestion {
         account_id: Option<AccountId>,
@@ -325,6 +327,10 @@ pub enum WalletCommand {
     },
     /// List the unspent outputs.
     UnspentOutputs,
+    /// Get information of a validator.
+    Validator { account_id: AccountId },
+    /// List all validators known to the node.
+    Validators,
     // /// Cast votes for an event.
     // Vote {
     //     /// Event ID for which to cast votes, e.g.
@@ -443,11 +449,12 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
@@ -620,17 +627,25 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
+/// `committee` command
+pub async fn committee_command(wallet: &Wallet, epoch: Option<EpochIndex>) -> Result<(), Error> {
+    let committee = wallet.client().get_committee(epoch).await?;
+    println_log_info!("{committee:#?}");
+    Ok(())
+}
+
 // `congestion` command
 pub async fn congestion_command(
     wallet: &Wallet,
     account_id: Option<AccountId>,
     work_score: Option<u32>,
 ) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let congestion = wallet.client().get_account_congestion(&account_id, work_score).await?;
@@ -1191,6 +1206,20 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     )
 }
 
+/// `validator` command
+pub async fn validator_command(wallet: &Wallet, account_id: &AccountId) -> Result<(), Error> {
+    let validator = wallet.client().get_validator(account_id).await?;
+    println_log_info!("{validator:#?}");
+    Ok(())
+}
+
+/// `validators` command
+pub async fn validators_command(wallet: &Wallet) -> Result<(), Error> {
+    let validators = wallet.client().get_validators(None, None).await?;
+    println_log_info!("{validators:#?}");
+    Ok(())
+}
+
 // pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
 //     let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
 
@@ -1457,6 +1486,7 @@ pub async fn prompt_internal(
                             claim_command(wallet, output_id).await
                         }
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        WalletCommand::Committee { epoch } => committee_command(wallet, epoch).await,
                         WalletCommand::Congestion { account_id, work_score } => {
                             congestion_command(wallet, account_id, work_score).await
                         }
@@ -1632,6 +1662,8 @@ pub async fn prompt_internal(
                         //     decrease_voting_power_command(wallet, amount).await
                         // }
                         // WalletCommand::VotingOutput => voting_output_command(wallet).await,
+                        WalletCommand::Validator { account_id } => validator_command(wallet, &account_id).await,
+                        WalletCommand::Validators => validators_command(wallet).await,
                     }
                     .unwrap_or_else(|err| {
                         println_log_error!("{err}");

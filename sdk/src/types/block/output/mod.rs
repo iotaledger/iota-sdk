@@ -28,7 +28,7 @@ pub mod unlock_condition;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
-use getset::Getters;
+use getset::CopyGetters;
 use packable::Packable;
 
 pub(crate) use self::unlock_condition::AddressUnlockCondition;
@@ -406,8 +406,9 @@ pub trait MinimumOutputAmount: StorageScore {
 }
 
 /// Decayed stored and potential Mana of an output.
-#[derive(Debug, Default, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, derive_more::AddAssign)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, CopyGetters, derive_more::AddAssign)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[getset(get = "pub")]
 pub struct DecayedMana {
     /// Decayed stored mana.
     #[cfg_attr(feature = "serde", serde(with = "string"))]

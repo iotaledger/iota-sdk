@@ -29,7 +29,7 @@ use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::{
         secret::{SecretManage, SecretManager},
-        verify_mnemonic, Client,
+        verify_mnemonic, Client, ClientError,
     },
     types::{
         block::{
@@ -37,6 +37,7 @@ use crate::{
             output::{AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::signed_transaction::TransactionId,
             protocol::ProtocolParameters,
+            slot::SlotIndex,
         },
         TryFromDto,
     },
@@ -297,11 +298,19 @@ impl WalletLedger {
             .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_account())
     }
 
-    // Returns the first possible Account id, which can be an implicit account.
-    pub fn first_account_id(&self) -> Option<AccountId> {
+    // Returns the first possible unexpired block issuer Account id, which can be an implicit account.
+    pub fn first_block_issuer_account_id(&self, current_slot: SlotIndex) -> Option<AccountId> {
         self.accounts()
-            .next()
-            .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
+            .find_map(|o| {
+                let account = o.output.as_account();
+                account.features().block_issuer().and_then(|block_issuer| {
+                    if block_issuer.expiry_slot() > current_slot {
+                        Some(account.account_id_non_null(&o.output_id))
+                    } else {
+                        None
+                    }
+                })
+            })
             .or_else(|| self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
     }
 
@@ -340,6 +349,31 @@ impl WalletLedger {
 }
 
 impl<S: 'static + SecretManage> Wallet<S> {
+    // Returns the first possible unexpired block issuer Account id, which can be an implicit account.
+    pub async fn first_block_issuer_account_id(&self) -> Result<Option<AccountId>, ClientError> {
+        let current_slot = self.client().get_slot_index().await?;
+        let wallet_ledger = self.ledger().await;
+        let account_id = wallet_ledger
+            .accounts()
+            .find_map(|o| {
+                let account = o.output.as_account();
+                account.features().block_issuer().and_then(|block_issuer| {
+                    if block_issuer.expiry_slot() > current_slot {
+                        Some(account.account_id_non_null(&o.output_id))
+                    } else {
+                        None
+                    }
+                })
+            })
+            .or_else(|| {
+                wallet_ledger
+                    .implicit_accounts()
+                    .next()
+                    .map(|o| AccountId::from(&o.output_id))
+            });
+        Ok(account_id)
+    }
+
     /// Get the [`Output`] that minted a native token by the token ID. First try to get it
     /// from the wallet, if it isn't in the wallet try to get it from the node
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output, WalletError> {
