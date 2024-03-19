@@ -133,9 +133,9 @@ async fn claim_1_of_2_basic_outputs() -> Result<(), Box<dyn std::error::Error>> 
 
 #[ignore]
 #[tokio::test]
-async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
-    let storage_path_0 = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account_0";
-    let storage_path_1 = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account_1";
+async fn claim_2_basic_outputs_no_available_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/claim_2_basic_outputs_no_available_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_basic_outputs_no_available_in_claim_account_1";
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
@@ -143,10 +143,31 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<(), Box<d
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
+
+    // Send all available from wallet 1 away
+    let balance = wallet_1.sync(None).await?;
+    let tx = wallet_1
+        .send_with_params(
+            [SendParams::new(
+                balance.base_coin().available(),
+                wallet_0.address().await,
+            )?],
+            None,
+        )
+        .await?;
+    wallet_1
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
 
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
-    // TODO more fitting value
-    let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
+    let slot_duration_in_seconds = wallet_0
+        .client()
+        .get_protocol_parameters()
+        .await?
+        .slot_duration_in_seconds();
+
+    let expiration_slot = wallet_0.client().get_slot_index().await? + (86400 / slot_duration_in_seconds as u32);
 
     let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
@@ -281,9 +302,9 @@ async fn claim_2_native_tokens() -> Result<(), Box<dyn std::error::Error>> {
 
 #[ignore]
 #[tokio::test]
-async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
-    let storage_path_0 = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account_0";
-    let storage_path_1 = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account_1";
+async fn claim_2_native_tokens_no_available_balance_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/claim_2_native_tokens_no_available_balance_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_native_tokens_no_available_balance_in_claim_account_1";
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
@@ -291,6 +312,22 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<(), Box<d
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
+
+    // Send all available from wallet 1 away
+    let balance = wallet_1.sync(None).await?;
+    let tx = wallet_1
+        .send_with_params(
+            [SendParams::new(
+                balance.base_coin().available(),
+                wallet_0.address().await,
+            )?],
+            None,
+        )
+        .await?;
+    wallet_1
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
 
     let native_token_amount = U256::from(100);
 

@@ -111,6 +111,7 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
     // First create an account output, this needs to be done only once, because an account can have many foundry outputs
     let transaction = wallet.create_account_output(None, None).await?;
 
+    let account_id = AccountId::from(&OutputId::new(transaction.transaction_id, 0));
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -118,7 +119,7 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
 
     let circulating_supply = U256::from(60i32);
     let params = CreateNativeTokenParams {
-        account_id: None,
+        account_id: Some(account_id),
         circulating_supply,
         maximum_supply: U256::from(100i32),
         foundry_metadata: None,
@@ -175,7 +176,7 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
 
     // Call to run tests in sequence
     destroy_foundry(&wallet).await?;
-    destroy_account(&wallet).await?;
+    destroy_account(&wallet, account_id).await?;
 
     tear_down(storage_path)
 }
@@ -203,12 +204,10 @@ async fn destroy_foundry(wallet: &Wallet) -> Result<(), Box<dyn std::error::Erro
     Ok(())
 }
 
-async fn destroy_account(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
+async fn destroy_account(wallet: &Wallet, account_id: AccountId) -> Result<(), Box<dyn std::error::Error>> {
     let balance = wallet.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    // Let's destroy the first account we can find
-    let account_id = *balance.accounts().first().unwrap();
     println!("account_id -> {account_id}");
     let transaction = wallet.burn(account_id, None).await.unwrap();
     wallet
@@ -228,6 +227,16 @@ async fn destroy_account(wallet: &Wallet) -> Result<(), Box<dyn std::error::Erro
 #[ignore]
 #[tokio::test]
 async fn create_and_burn_native_tokens() -> Result<(), Box<dyn std::error::Error>> {
+    let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
+        .name("client.log")
+        .target_exclusions(&["h2", "hyper", "rustls"])
+        .level_filter(log::LevelFilter::Debug);
+
+    let config = fern_logger::LoggerConfig::build()
+        .with_output(logger_output_config)
+        .finish();
+
+    fern_logger::logger_init(config).unwrap();
     let storage_path = "test-storage/create_and_burn_native_tokens";
     setup(storage_path)?;
 

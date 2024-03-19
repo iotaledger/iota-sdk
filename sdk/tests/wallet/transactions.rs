@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::{client::generate_mnemonic, wallet::SendParams};
+use iota_sdk::wallet::SendParams;
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
@@ -13,7 +13,7 @@ async fn send_amount() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_1 = "test-storage/send_amount_1";
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, Some(generate_mnemonic()?), None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
     request_funds(&wallet_0).await?;
 
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;

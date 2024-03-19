@@ -256,6 +256,15 @@ impl TransactionBuilder {
                 let Some(input) = priority_map.next(required_mana - selected_mana) else {
                     break;
                 };
+                // Don't select input with 0 available mana
+                if input.output.available_mana(
+                    &self.protocol_parameters,
+                    input.output_id().transaction_id().slot_index(),
+                    self.creation_slot,
+                )? == 0
+                {
+                    continue;
+                }
                 selected_mana += self.total_mana(&input, include_generated)?;
                 if let Some(output) = self.select_input(input)? {
                     required_mana += output.mana();

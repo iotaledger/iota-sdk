@@ -10,7 +10,6 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions,
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
