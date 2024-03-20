@@ -101,13 +101,13 @@ pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::er
             }))
             .await?;
         if let Some(account) = wallet.ledger().await.implicit_accounts().next() {
-            break account;
+            break account.clone();
         }
         attempts += 1;
         if attempts == 30 {
             panic!("Faucet no longer wants to hand over coins");
         }
-    }
+    };
 
     let mut tries = 0;
     while let Err(ClientError::Node(iota_sdk::client::node_api::error::Error::NotFound(_))) = wallet
