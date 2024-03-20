@@ -77,7 +77,6 @@ pub fn enter_bip_path() -> Result<Bip44, Error> {
                 println_log_error!("{s}");
             }
         }
-        // println_log_error!("Invalid input, please enter a valid bip path.");
     }
 }
 
@@ -446,7 +445,7 @@ impl FromStr for BipPathChoice {
 }
 
 pub fn select_or_enter_bip_path() -> Result<BipPathChoice, Error> {
-    let choices = ["4218/0/0/0", "4219/0/0/0", "Custom"];
+    let choices = ["IOTA (4218/0/0/0)", "Shimmer (4219/0/0/0)", "Custom"];
 
     Ok(Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select bip path")

@@ -7,7 +7,7 @@ use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand
 use eyre::{bail, Error};
 use iota_sdk::{
     client::{
-        constants::SHIMMER_COIN_TYPE,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         secret::{ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
@@ -227,12 +227,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                         storage_path.display()
                     );
                 }
-                // TODO: move this into `init_command`?
-                let secret_manager = create_secret_manager(&init_parameters).await?;
-                let secret_manager_variant = secret_manager.to_string();
-                let wallet = init_command(storage_path, secret_manager, init_parameters).await?;
-                print_create_wallet_summary(&wallet, &secret_manager_variant).await?;
-                Some(wallet)
+                Some(init_command(storage_path, init_parameters).await?)
             }
             CliCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
                 migrate_stronghold_snapshot_v2_to_v3_command(path).await?;
@@ -330,12 +325,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
             let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
             if !snapshot_path.exists() {
                 if enter_decision("Create a new wallet with default parameters?")? {
-                    // TODO: move this into `init_command`?
-                    let secret_manager = create_secret_manager(&init_params).await?;
-                    let secret_manager_variant = secret_manager.to_string();
-                    let wallet = init_command(storage_path, secret_manager, init_params).await?;
-                    print_create_wallet_summary(&wallet, &secret_manager_variant).await?;
-                    Some(wallet)
+                    Some(init_command(storage_path, init_params).await?)
                 } else {
                     Cli::print_help()?;
                     None
@@ -352,7 +342,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
     })
 }
 
-async fn print_create_wallet_summary(wallet: &Wallet, secret_manager_variant: &str) -> Result<(), Error> {
+async fn print_new_wallet_summary(wallet: &Wallet, secret_manager_variant: &str) -> Result<(), Error> {
     println_log_info!("Created new wallet with the following parameters:",);
     println_log_info!(" Secret manager: {secret_manager_variant}");
     println_log_info!(" Wallet address: {}", wallet.address().await);
@@ -388,11 +378,10 @@ pub async fn change_password_command(wallet: &Wallet, current_password: Password
     Ok(())
 }
 
-pub async fn init_command(
-    storage_path: &Path,
-    secret_manager: SecretManager,
-    init_params: InitParameters,
-) -> Result<Wallet, Error> {
+pub async fn init_command(storage_path: &Path, init_params: InitParameters) -> Result<Wallet, Error> {
+    let secret_manager = create_secret_manager(&init_params).await?;
+    let secret_manager_variant = secret_manager.to_string();
+
     let mut address = init_params.address.map(|s| Bech32Address::from_str(&s)).transpose()?;
     let mut forced = false;
     if address.is_none() {
@@ -407,8 +396,8 @@ pub async fn init_command(
     if bip_path.is_none() {
         if forced || enter_decision("Do you want to set the bip path of the new wallet?")? {
             bip_path.replace(match select_or_enter_bip_path()? {
-                BipPathChoice::Iota => parse_bip_path("4218/0/0/0").unwrap(),
-                BipPathChoice::Shimmer => parse_bip_path("4219/0/0/0").unwrap(),
+                BipPathChoice::Iota => Bip44::new(IOTA_COIN_TYPE),
+                BipPathChoice::Shimmer => Bip44::new(SHIMMER_COIN_TYPE),
                 BipPathChoice::Custom => enter_bip_path()?,
             });
         }
@@ -421,7 +410,7 @@ pub async fn init_command(
         }
     }
 
-    Ok(Wallet::builder()
+    let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
@@ -429,7 +418,11 @@ pub async fn init_command(
         .with_bip_path(bip_path)
         .with_alias(alias)
         .finish()
-        .await?)
+        .await?;
+
+    print_new_wallet_summary(&wallet, &secret_manager_variant).await?;
+
+    Ok(wallet)
 }
 
 pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) -> Result<(), Error> {
