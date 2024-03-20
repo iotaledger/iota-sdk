@@ -192,11 +192,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     final_amount += remaining_balance;
                     second_output_builder = second_output_builder.with_amount(final_amount);
 
-                    if let Some(sdr) = third_output
-                        .unlock_conditions()
-                        .expect("basic and nft outputs have unlock conditions")
-                        .storage_deposit_return()
-                    {
+                    if let Some(sdr) = third_output.unlock_conditions().storage_deposit_return() {
                         // create a new sdr unlock_condition with the updated amount and replace it
                         let new_sdr_amount = sdr.amount() + remaining_balance;
                         second_output_builder =

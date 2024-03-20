@@ -129,11 +129,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
                     // without restrictions
-                    if let [UnlockCondition::Address(address_unlock_cond)] = output
-                        .unlock_conditions()
-                        .expect("output needs to have unlock conditions")
-                        .as_ref()
-                    {
+                    if let [UnlockCondition::Address(address_unlock_cond)] = output.unlock_conditions().as_ref() {
                         // add nft_id for nft outputs
                         if let Output::Nft(nft) = &output {
                             let nft_id = nft.nft_id_non_null(output_id);
@@ -193,21 +189,18 @@ impl<S: 'static + SecretManage> Wallet<S> {
                                 // If output has a StorageDepositReturnUnlockCondition, the amount of it should
                                 // be subtracted, because this part
                                 // needs to be sent back
-                                let amount = output
-                                    .unlock_conditions()
-                                    .and_then(|u| u.storage_deposit_return())
-                                    .map_or_else(
-                                        || output.amount(),
-                                        |sdr| {
-                                            if wallet_address.inner() == sdr.return_address() {
-                                                // sending to ourself, we get the full amount
-                                                output.amount()
-                                            } else {
-                                                // Sending to someone else
-                                                output.amount() - sdr.amount()
-                                            }
-                                        },
-                                    );
+                                let amount = output.unlock_conditions().storage_deposit_return().map_or_else(
+                                    || output.amount(),
+                                    |sdr| {
+                                        if wallet_address.inner() == sdr.return_address() {
+                                            // sending to ourself, we get the full amount
+                                            output.amount()
+                                        } else {
+                                            // Sending to someone else
+                                            output.amount() - sdr.amount()
+                                        }
+                                    },
+                                );
 
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {
@@ -251,11 +244,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                             }
                         } else {
                             // Don't add expired outputs that can't ever be unlocked by us
-                            if let Some(expiration) = output
-                                .unlock_conditions()
-                                .expect("output needs to have unlock conditions")
-                                .expiration()
-                            {
+                            if let Some(expiration) = output.unlock_conditions().expiration() {
                                 // Not expired, could get unlockable when it's expired, so we insert it
                                 if slot_index < expiration.slot_index() {
                                     balance.potentially_locked_outputs.insert(*output_id, false);
