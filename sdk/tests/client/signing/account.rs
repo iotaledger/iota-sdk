@@ -100,9 +100,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
@@ -230,9 +228,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 

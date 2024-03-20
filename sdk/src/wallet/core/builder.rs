@@ -248,7 +248,8 @@ where
             }
         };
 
-        // May use a previously stored wallet alias if it wasn't provided
+        // May use a previously stored wallet alias if it wasn't provided.
+        // An already stored alias will be silently replaced.
         if self.alias.is_none() {
             self.alias = loaded_wallet_builder.as_ref().and_then(|builder| builder.alias.clone());
         }

@@ -95,9 +95,7 @@ async fn single_ed25519_unlock() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
@@ -215,9 +213,7 @@ async fn ed25519_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
@@ -320,9 +316,7 @@ async fn two_signature_unlocks() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     assert_eq!((*unlocks).get(1).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
-
-    tx_payload.validate_length()?;
+    SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     prepared_transaction_data.verify_semantic(protocol_parameters)?;
 
