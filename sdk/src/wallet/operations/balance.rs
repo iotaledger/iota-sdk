@@ -35,7 +35,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
-        let mut delegation_implicit_accounts_amount = 0;
+        let mut locked_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
@@ -272,7 +272,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_ledger.locked_outputs);
 
-        let mut locked_amount = 0;
         let mut locked_mana = DecayedMana::default();
         let mut locked_native_tokens = NativeTokensBuilder::default();
 
@@ -346,18 +345,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         #[cfg(not(feature = "participation"))]
         {
-            balance.base_coin.available = balance
-                .base_coin
-                .total
-                .saturating_sub(delegation_implicit_accounts_amount)
-                .saturating_sub(locked_amount);
+            balance.base_coin.available = balance.base_coin.total.saturating_sub(locked_amount);
         }
         #[cfg(feature = "participation")]
         {
             balance.base_coin.available = balance
                 .base_coin
                 .total
-                .saturating_sub(delegation_implicit_accounts_amount)
                 .saturating_sub(locked_amount)
                 .saturating_sub(balance.base_coin.voting_power);
         }
