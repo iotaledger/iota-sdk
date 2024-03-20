@@ -22,7 +22,7 @@ use crate::{println_log_error, println_log_info};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
-pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
+pub fn enter_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
     let mut password = dialoguer::Password::new().with_prompt(prompt);
 
     if confirmation {
@@ -34,7 +34,7 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error>
     Ok(password.interact()?.into())
 }
 
-pub fn get_decision(prompt: &str) -> Result<bool, Error> {
+pub fn enter_decision(prompt: &str) -> Result<bool, Error> {
     loop {
         let input = Input::<String>::new()
             .with_prompt(prompt)
@@ -51,65 +51,90 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn get_alias(prompt: &str) -> Result<String, Error> {
+pub fn enter_address() -> Result<Bech32Address, Error> {
     loop {
-        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
-        if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please enter a valid alias (non-empty, ASCII).");
-        } else {
-            return Ok(input);
+        let input = Input::<String>::new()
+            .with_prompt("Enter a Bech32 wallet address")
+            .interact_text()?;
+        match Bech32Address::from_str(&input) {
+            Ok(address) => {
+                return Ok(address);
+            }
+            Err(err) => {
+                println_log_error!("Invalid input, please enter a valid Bech32 address: {err}");
+            }
         }
     }
 }
 
-pub async fn get_address(prompt: &str) -> Result<Bech32Address, Error> {
+pub fn enter_bip_path() -> Result<Bip44, Error> {
     loop {
-        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
-        if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please enter a valid Bech32 address.");
-        } else {
-            return Ok(Bech32Address::from_str(&input)?);
+        let input = Input::<String>::new().with_prompt("Enter a bip path").interact_text()?;
+        match parse_bip_path(&input) {
+            Ok(bip_path) => return Ok(bip_path),
+            Err(err) => {
+                let s = err.to_string();
+                println_log_error!("{s}");
+            }
         }
+        // println_log_error!("Invalid input, please enter a valid bip path.");
     }
 }
 
-pub async fn get_bip_path(prompt: &str) -> Result<Bip44, Error> {
-    loop {
-        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
-        if input.is_empty() || !input.is_ascii() {
-            println_log_error!(
-                "Invalid input, please enter a valid bip path (<coin_type>/<account_index>/<change_address>/<address_index>)."
-            );
-        } else {
-            return Ok(parse_bip_path(&input).map_err(|err| eyre!(err))?);
-        }
+pub fn parse_bip_path(input: &str) -> Result<Bip44, Error> {
+    if input.is_empty() || !input.is_ascii() {
+        return Err(eyre!(
+            "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`"
+        ));
     }
-}
 
-pub fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
-    let mut bip_path_enc = Vec::with_capacity(4);
-    for p in arg.split_terminator('/').map(|p| p.trim()) {
-        match p.parse::<u32>() {
-            Ok(value) => bip_path_enc.push(value),
-            Err(_) => {
-                return Err(format!("cannot parse BIP path: {p}"));
+    let mut segments = Vec::with_capacity(4);
+    for (i, segment) in input.split_terminator('/').map(|p| p.trim()).enumerate() {
+        match segment.parse::<u32>() {
+            Ok(s) => segments.push(s),
+            Err(err) => {
+                return Err(eyre!("invalid BIP path segment. {i}/`{segment}`: {err}"));
             }
         }
     }
 
-    if bip_path_enc.len() != 4 {
-        return Err(
+    if segments.len() != 4 {
+        return Err(eyre!(
             "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`"
-                .to_string(),
-        );
+        ));
     }
 
-    let bip_path = Bip44::new(bip_path_enc[0])
-        .with_account(bip_path_enc[1])
-        .with_change(bip_path_enc[2])
-        .with_address_index(bip_path_enc[3]);
+    let bip_path = Bip44::new(segments[0])
+        .with_account(segments[1])
+        .with_change(segments[2])
+        .with_address_index(segments[3]);
 
     Ok(bip_path)
+}
+
+pub fn enter_alias() -> Result<String, Error> {
+    loop {
+        let input = Input::<String>::new()
+            .with_prompt("Enter a wallet alias")
+            .interact_text()?;
+        if !input.is_empty() && input.is_ascii() {
+            return Ok(input);
+        } else {
+            println_log_error!("Invalid input, please enter a valid alias (non-empty, ASCII).");
+        }
+    }
+}
+
+pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
+    loop {
+        let mnemonic = Mnemonic::from(Input::<String>::new().with_prompt("Enter a mnemonic").interact_text()?);
+        match verify_mnemonic(&*mnemonic) {
+            Ok(_) => return Ok(mnemonic),
+            Err(err) => {
+                println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic: {err}");
+            }
+        }
+    }
 }
 
 pub async fn bytes_from_hex_or_file(hex: Option<String>, file: Option<String>) -> Result<Option<Vec<u8>>, Error> {
@@ -187,21 +212,6 @@ pub async fn generate_mnemonic(
     );
 
     Ok(mnemonic)
-}
-
-pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
-    loop {
-        let input = Mnemonic::from(
-            Input::<String>::new()
-                .with_prompt("Enter your mnemonic")
-                .interact_text()?,
-        );
-        if verify_mnemonic(&*input).is_err() {
-            println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
-        } else {
-            return Ok(input);
-        }
-    }
 }
 
 pub async fn import_mnemonic(path: &str) -> Result<Mnemonic, Error> {
@@ -393,11 +403,53 @@ impl FromStr for SecretManagerChoice {
     }
 }
 
-pub async fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
+pub fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
     let choices = ["Stronghold", "Ledger Nano", "Ledger Nano Simulator"];
 
     Ok(Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select secret manager")
+        .items(&choices)
+        .default(0)
+        .interact_on(&Term::stderr())?
+        .into())
+}
+
+#[derive(Copy, Clone, Debug, clap::ValueEnum)]
+pub enum BipPathChoice {
+    Iota,
+    Shimmer,
+    Custom,
+}
+
+impl From<usize> for BipPathChoice {
+    fn from(value: usize) -> Self {
+        match value {
+            0 => Self::Iota,
+            1 => Self::Shimmer,
+            2 => Self::Custom,
+            _ => panic!("invalid bip path choice index"),
+        }
+    }
+}
+
+impl FromStr for BipPathChoice {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "iota" => Ok(Self::Iota),
+            "shimmer" => Ok(Self::Shimmer),
+            "custom" => Ok(Self::Custom),
+            _ => Err("invalid bip path specifier [iota|shimmer|custom]"),
+        }
+    }
+}
+
+pub fn select_or_enter_bip_path() -> Result<BipPathChoice, Error> {
+    let choices = ["4218/0/0/0", "4219/0/0/0", "Custom"];
+
+    Ok(Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select bip path")
         .items(&choices)
         .default(0)
         .interact_on(&Term::stderr())?

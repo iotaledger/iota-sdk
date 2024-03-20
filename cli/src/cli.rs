@@ -20,8 +20,9 @@ use log::LevelFilter;
 
 use crate::{
     helper::{
-        check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_address, get_alias, get_bip_path,
-        get_decision, get_password, import_mnemonic, parse_bip_path, select_secret_manager, SecretManagerChoice,
+        check_file_exists, enter_address, enter_alias, enter_bip_path, enter_decision, enter_or_generate_mnemonic,
+        enter_password, generate_mnemonic, import_mnemonic, parse_bip_path, select_or_enter_bip_path,
+        select_secret_manager, BipPathChoice, SecretManagerChoice,
     },
     println_log_error, println_log_info,
 };
@@ -181,7 +182,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                         LinkedSecretManager::Stronghold {
                             snapshot_exists: true, ..
                         } => {
-                            let password = get_password("Stronghold password", false)?;
+                            let password = enter_password("Stronghold password", false)?;
                             backup_to_stronghold_snapshot_command(&wallet, &password, Path::new(&backup_path)).await?;
                             return Ok(None);
                         }
@@ -203,7 +204,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                         LinkedSecretManager::Stronghold {
                             snapshot_exists: true, ..
                         } => {
-                            let current_password = get_password("Stronghold password", false)?;
+                            let current_password = enter_password("Stronghold password", false)?;
                             change_password_command(&wallet, current_password).await?;
                             Some(wallet)
                         }
@@ -226,6 +227,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
                         storage_path.display()
                     );
                 }
+                // TODO: move this into `init_command`?
                 let secret_manager = create_secret_manager(&init_parameters).await?;
                 let secret_manager_variant = secret_manager.to_string();
                 let wallet = init_command(storage_path, secret_manager, init_parameters).await?;
@@ -327,7 +329,8 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
 
             let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
             if !snapshot_path.exists() {
-                if get_decision("Create a new wallet with default parameters?")? {
+                if enter_decision("Create a new wallet with default parameters?")? {
+                    // TODO: move this into `init_command`?
                     let secret_manager = create_secret_manager(&init_params).await?;
                     let secret_manager_variant = secret_manager.to_string();
                     let wallet = init_command(storage_path, secret_manager, init_params).await?;
@@ -375,7 +378,7 @@ pub async fn backup_to_stronghold_snapshot_command(
 }
 
 pub async fn change_password_command(wallet: &Wallet, current_password: Password) -> Result<(), Error> {
-    let new_password = get_password("New Stronghold password", true)?;
+    let new_password = enter_password("New Stronghold password", true)?;
     wallet
         .change_stronghold_password(current_password, new_password)
         .await?;
@@ -393,8 +396,8 @@ pub async fn init_command(
     let mut address = init_params.address.map(|s| Bech32Address::from_str(&s)).transpose()?;
     let mut forced = false;
     if address.is_none() {
-        if get_decision("Do you want to set the address of the new wallet?")? {
-            address.replace(get_address("Set wallet address").await?);
+        if enter_decision("Do you want to set the address of the new wallet?")? {
+            address.replace(enter_address()?);
         } else {
             forced = true;
         }
@@ -402,17 +405,19 @@ pub async fn init_command(
 
     let mut bip_path = init_params.bip_path;
     if bip_path.is_none() {
-        if forced || get_decision("Do you want to set the bip path of the new wallet?")? {
-            bip_path.replace(
-                get_bip_path("Set bip path (<coin_type>/<account_index>/<change_address>/<address_index>)").await?,
-            );
+        if forced || enter_decision("Do you want to set the bip path of the new wallet?")? {
+            bip_path.replace(match select_or_enter_bip_path()? {
+                BipPathChoice::Iota => parse_bip_path("4218/0/0/0").unwrap(),
+                BipPathChoice::Shimmer => parse_bip_path("4219/0/0/0").unwrap(),
+                BipPathChoice::Custom => enter_bip_path()?,
+            });
         }
     }
 
     let mut alias = init_params.alias;
     if alias.is_none() {
-        if get_decision("Do you want to set an alias for the new wallet?")? {
-            alias.replace(get_alias("Set wallet alias").await?);
+        if enter_decision("Do you want to set an alias for the new wallet?")? {
+            alias.replace(enter_alias()?);
         }
     }
 
@@ -431,7 +436,7 @@ pub async fn migrate_stronghold_snapshot_v2_to_v3_command(path: Option<String>) 
     let snapshot_path = path.as_deref().unwrap_or(DEFAULT_STRONGHOLD_SNAPSHOT_PATH);
     check_file_exists(snapshot_path.as_ref()).await?;
 
-    let password = get_password("Stronghold password", false)?;
+    let password = enter_password("Stronghold password", false)?;
     StrongholdAdapter::migrate_snapshot_v2_to_v3(snapshot_path, password, "wallet.rs", 100, None, None)?;
 
     println_log_info!("Stronghold snapshot successfully migrated from v2 to v3.");
@@ -454,7 +459,7 @@ pub async fn restore_from_stronghold_snapshot_command(
     let mut builder = Wallet::builder();
 
     let password = if snapshot_path.exists() {
-        Some(get_password("Stronghold password", false)?)
+        Some(enter_password("Stronghold password", false)?)
     } else {
         None
     };
@@ -485,7 +490,7 @@ pub async fn restore_from_stronghold_snapshot_command(
         .finish()
         .await?;
 
-    let password = get_password("Stronghold backup password", false)?;
+    let password = enter_password("Stronghold backup password", false)?;
     if let Err(e) = wallet
         .restore_from_stronghold_snapshot(backup_path.into(), password, None, None)
         .await
@@ -524,7 +529,7 @@ async fn create_secret_manager(init_params: &InitParameters) -> Result<SecretMan
     let choice = if let Some(choice) = &init_params.secret_manager {
         *choice
     } else {
-        select_secret_manager().await?
+        select_secret_manager()?
     };
 
     Ok(match choice {
@@ -535,7 +540,7 @@ async fn create_secret_manager(init_params: &InitParameters) -> Result<SecretMan
                 bail!("cannot initialize: {} already exists", snapshot_path.display());
             }
 
-            let password = get_password("Stronghold password", true)?;
+            let password = enter_password("Stronghold password", true)?;
             let mnemonic = match &init_params.mnemonic_file_path {
                 Some(path) => import_mnemonic(path).await?,
                 None => enter_or_generate_mnemonic().await?,
