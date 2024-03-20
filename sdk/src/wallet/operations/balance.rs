@@ -7,11 +7,8 @@ use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::{
-        address::ImplicitAccountCreationAddress,
-        output::{
-            unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
-        },
+    types::block::output::{
+        unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
         operations::{helpers::time::can_output_be_unlocked_from_now_on, output_claiming::OutputsToClaim},
