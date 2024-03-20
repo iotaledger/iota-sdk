@@ -91,7 +91,8 @@ pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::er
     request_funds_from_faucet(FAUCET_URL, &wallet.address().await).await?;
 
     // Continue only after funds are received
-    for i in 0..30 {
+    let mut attempts = 0;
+    let implicit_account = loop {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         wallet
             .sync(Some(SyncOptions {
@@ -99,21 +100,14 @@ pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::er
                 ..Default::default()
             }))
             .await?;
-        if wallet.ledger().await.implicit_accounts().next().is_some() {
-            break;
+        if let Some(account) = wallet.ledger().await.implicit_accounts().next() {
+            break account;
         }
-        if i == 29 {
+        attempts += 1;
+        if attempts == 30 {
             panic!("Faucet no longer wants to hand over coins");
         }
     }
-
-    let wallet_ledger = wallet.ledger().await;
-    let implicit_account = wallet_ledger
-        .implicit_accounts()
-        .next()
-        .expect("No implicit account found")
-        .clone();
-    drop(wallet_ledger);
 
     let mut tries = 0;
     while let Err(ClientError::Node(iota_sdk::client::node_api::error::Error::NotFound(_))) = wallet
