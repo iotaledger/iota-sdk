@@ -355,25 +355,27 @@ impl<'a> SemanticValidationContext<'a> {
                 }
             }
 
-            if let Some(unlock_conditions) = created_output.unlock_conditions() {
-                if let (Some(address), Some(timelock)) = (unlock_conditions.address(), unlock_conditions.timelock()) {
-                    if let Address::Account(account_address) = address.address() {
-                        if let Some(entry) = self.block_issuer_mana.get_mut(account_address.account_id()) {
-                            if let Some(commitment_context_input) = self.commitment_context_input {
-                                let past_bounded_slot =
-                                    self.protocol_parameters.past_bounded_slot(commitment_context_input);
+            if let Some((address, timelock)) = created_output
+                .unlock_conditions()
+                .address()
+                .zip(created_output.unlock_conditions().timelock())
+            {
+                if let Address::Account(account_address) = address.address() {
+                    if let Some(entry) = self.block_issuer_mana.get_mut(account_address.account_id()) {
+                        if let Some(commitment_context_input) = self.commitment_context_input {
+                            let past_bounded_slot =
+                                self.protocol_parameters.past_bounded_slot(commitment_context_input);
 
-                                if timelock.slot_index()
-                                    >= past_bounded_slot + self.protocol_parameters.max_committable_age()
-                                {
-                                    entry.1 = entry
-                                        .1
-                                        .checked_add(created_output.mana())
-                                        .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
-                                }
-                            } else {
-                                return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing);
+                            if timelock.slot_index()
+                                >= past_bounded_slot + self.protocol_parameters.max_committable_age()
+                            {
+                                entry.1 = entry
+                                    .1
+                                    .checked_add(created_output.mana())
+                                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
                             }
+                        } else {
+                            return Err(TransactionFailureReason::BlockIssuerCommitmentInputMissing);
                         }
                     }
                 }
