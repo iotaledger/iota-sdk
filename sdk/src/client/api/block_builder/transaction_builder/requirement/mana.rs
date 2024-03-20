@@ -37,15 +37,9 @@ impl TransactionBuilder {
         let mut should_recalculate = false;
 
         if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
-            self.selected_inputs = Self::sort_input_signing_data(
-                std::mem::take(&mut self.selected_inputs),
-                self.latest_slot_commitment_id.slot_index(),
-                self.protocol_parameters.committable_age_range(),
-            )?;
-
             let inputs = self
                 .selected_inputs
-                .iter()
+                .sorted_iter()
                 .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
 
             let outputs = self.all_outputs().cloned();
@@ -311,7 +305,7 @@ impl TransactionBuilder {
             .into()
             .unwrap_or_else(|| self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
 
-        for input in &self.selected_inputs {
+        for input in self.selected_inputs.iter() {
             selected_mana += self.total_mana(input, include_generated)?;
         }
 
