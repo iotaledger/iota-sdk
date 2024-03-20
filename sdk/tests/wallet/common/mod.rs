@@ -118,7 +118,7 @@ pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::er
         tries += 1;
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         if tries > 100 {
-            panic!("Can't get_account_congestion for implicit account");
+            panic!("Can't get account for implicit account");
         }
     }
 

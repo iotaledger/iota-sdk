@@ -30,7 +30,7 @@ use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL};
 // THIS SEED SERVES FOR TESTING PURPOSES! DON'T USE THIS SEED IN PRODUCTION!
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
 
-// Sends a tagged data block to the node to test against it.*
+// Sends a tagged data block to the node to test against it.
 async fn setup_tagged_data_block() -> Result<BlockId, Box<dyn std::error::Error>> {
     let client = setup_client_with_node_health_ignored().await;
 
@@ -67,7 +67,7 @@ async fn setup_tagged_data_block() -> Result<BlockId, Box<dyn std::error::Error>
     }
     // Wait until account is read to issue blocks
     for _ in 0..60 {
-        if let Ok(_r) = client.get_account_congestion(&account_id, None).await {
+        if client.get_account_congestion(&account_id, None).await.is_ok() {
             break;
         }
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
