@@ -10,6 +10,7 @@ use core::borrow::Borrow;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
+use instant::Duration;
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 #[cfg(feature = "protocol_parameters_samples")]
 pub use samples::{iota_mainnet_protocol_parameters, shimmer_mainnet_protocol_parameters};
@@ -171,6 +172,11 @@ impl ProtocolParameters {
         } else {
             self.genesis_slot() + slot_index.0 - self.first_slot_of(self.epoch_index_of(slot_index)).0
         }
+    }
+
+    /// Calculates the number of slots in a duration.
+    pub fn slots_in_duration(&self, duration: Duration) -> u32 {
+        (duration.as_secs() / self.slot_duration_in_seconds() as u64) as u32
     }
 
     /// Gets the [`EpochIndex`] of a given [`SlotIndex`].

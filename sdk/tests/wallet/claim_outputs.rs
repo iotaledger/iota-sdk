@@ -1,6 +1,7 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use instant::Duration;
 use iota_sdk::{
     client::{
         api::{options::TransactionOptions, transaction_builder::TransactionBuilderError},
@@ -161,13 +162,13 @@ async fn claim_2_basic_outputs_no_available_in_claim_account() -> Result<(), Box
         .await?;
 
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
-    let slot_duration_in_seconds = wallet_0
+    let slots_in_one_day = wallet_0
         .client()
         .get_protocol_parameters()
         .await?
-        .slot_duration_in_seconds();
+        .slots_in_duration(Duration::from_secs(86400));
 
-    let expiration_slot = wallet_0.client().get_slot_index().await? + (86400 / slot_duration_in_seconds as u32);
+    let expiration_slot = wallet_0.client().get_slot_index().await? + slots_in_one_day;
 
     let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
