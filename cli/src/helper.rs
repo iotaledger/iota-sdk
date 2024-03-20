@@ -8,7 +8,11 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use eyre::{bail, eyre, Error};
 use iota_sdk::{
-    client::{utils::Password, verify_mnemonic},
+    client::{
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        utils::Password,
+        verify_mnemonic,
+    },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
     types::block::address::Bech32Address,
 };
@@ -62,19 +66,6 @@ pub fn enter_address() -> Result<Bech32Address, Error> {
             }
             Err(err) => {
                 println_log_error!("Invalid input, please enter a valid Bech32 address: {err}");
-            }
-        }
-    }
-}
-
-pub fn enter_bip_path() -> Result<Bip44, Error> {
-    loop {
-        let input = Input::<String>::new().with_prompt("Enter a bip path").interact_text()?;
-        match parse_bip_path(&input) {
-            Ok(bip_path) => return Ok(bip_path),
-            Err(err) => {
-                let s = err.to_string();
-                println_log_error!("{s}");
             }
         }
     }
@@ -157,7 +148,7 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
     let mnemonic = match selected_choice {
         0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
-        _ => panic!("invalid choice index"),
+        _ => panic!("invalid choice"),
     };
 
     Ok(mnemonic)
@@ -384,7 +375,7 @@ impl From<usize> for SecretManagerChoice {
             0 => Self::Stronghold,
             1 => Self::LedgerNano,
             2 => Self::LedgerNanoSimulator,
-            _ => panic!("invalid secret manager choice index"),
+            _ => panic!("invalid secret manager choice"),
         }
     }
 }
@@ -413,44 +404,34 @@ pub fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
         .into())
 }
 
-#[derive(Copy, Clone, Debug, clap::ValueEnum)]
-pub enum BipPathChoice {
-    Iota,
-    Shimmer,
-    Custom,
+pub fn select_or_enter_bip_path() -> Result<Bip44, Error> {
+    let choices = ["IOTA [4218/0/0/0]", "Shimmer [4219/0/0/0]", "Custom"];
+
+    Ok(
+        match Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Select bip path")
+            .items(&choices)
+            .default(0)
+            .interact_on(&Term::stderr())?
+            .into()
+        {
+            0 => Bip44::new(IOTA_COIN_TYPE),
+            1 => Bip44::new(SHIMMER_COIN_TYPE),
+            2 => enter_bip_path()?,
+            _ => panic!("invalid choice"),
+        },
+    )
 }
 
-impl From<usize> for BipPathChoice {
-    fn from(value: usize) -> Self {
-        match value {
-            0 => Self::Iota,
-            1 => Self::Shimmer,
-            2 => Self::Custom,
-            _ => panic!("invalid bip path choice index"),
+fn enter_bip_path() -> Result<Bip44, Error> {
+    loop {
+        let input = Input::<String>::new().with_prompt("Enter a bip path").interact_text()?;
+        match parse_bip_path(&input) {
+            Ok(bip_path) => return Ok(bip_path),
+            Err(err) => {
+                let s = err.to_string();
+                println_log_error!("{s}");
+            }
         }
     }
-}
-
-impl FromStr for BipPathChoice {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "iota" => Ok(Self::Iota),
-            "shimmer" => Ok(Self::Shimmer),
-            "custom" => Ok(Self::Custom),
-            _ => Err("invalid bip path specifier [iota|shimmer|custom]"),
-        }
-    }
-}
-
-pub fn select_or_enter_bip_path() -> Result<BipPathChoice, Error> {
-    let choices = ["IOTA (4218/0/0/0)", "Shimmer (4219/0/0/0)", "Custom"];
-
-    Ok(Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select bip path")
-        .items(&choices)
-        .default(0)
-        .interact_on(&Term::stderr())?
-        .into())
 }

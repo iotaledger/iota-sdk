@@ -7,7 +7,7 @@ use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand
 use eyre::{bail, Error};
 use iota_sdk::{
     client::{
-        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
@@ -20,9 +20,9 @@ use log::LevelFilter;
 
 use crate::{
     helper::{
-        check_file_exists, enter_address, enter_alias, enter_bip_path, enter_decision, enter_or_generate_mnemonic,
-        enter_password, generate_mnemonic, import_mnemonic, parse_bip_path, select_or_enter_bip_path,
-        select_secret_manager, BipPathChoice, SecretManagerChoice,
+        check_file_exists, enter_address, enter_alias, enter_decision, enter_or_generate_mnemonic, enter_password,
+        generate_mnemonic, import_mnemonic, parse_bip_path, select_or_enter_bip_path, select_secret_manager,
+        SecretManagerChoice,
     },
     println_log_error, println_log_info,
 };
@@ -395,11 +395,7 @@ pub async fn init_command(storage_path: &Path, init_params: InitParameters) -> R
     let mut bip_path = init_params.bip_path;
     if bip_path.is_none() {
         if forced || enter_decision("Do you want to set the bip path of the new wallet?")? {
-            bip_path.replace(match select_or_enter_bip_path()? {
-                BipPathChoice::Iota => Bip44::new(IOTA_COIN_TYPE),
-                BipPathChoice::Shimmer => Bip44::new(SHIMMER_COIN_TYPE),
-                BipPathChoice::Custom => enter_bip_path()?,
-            });
+            bip_path.replace(select_or_enter_bip_path()?);
         }
     }
 
