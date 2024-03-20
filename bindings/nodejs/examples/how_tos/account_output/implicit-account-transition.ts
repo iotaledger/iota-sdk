@@ -35,7 +35,7 @@ async function run() {
         // Need to sync the wallet with implicit accounts option enabled.
         let balance = await wallet.sync({ syncImplicitAccounts: true });
 
-        let implicitAccounts = await wallet.implicitAccounts();
+        const implicitAccounts = await wallet.implicitAccounts();
         if (implicitAccounts.length == 0) {
             throw new Error(`No implicit account available`);
         }
