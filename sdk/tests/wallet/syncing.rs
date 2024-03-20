@@ -127,7 +127,7 @@
 //     assert_eq!(unspent_outputs.len(), 1);
 //     unspent_outputs.into_iter().for_each(|output_data| {
 //         assert!(output_data.output.is_basic());
-//         assert_eq!(output_data.output.unlock_conditions().unwrap().len(), 1);
+//         assert_eq!(output_data.output.unlock_conditions().len(), 1);
 //         assert_eq!(
 //             output_data
 //                 .output

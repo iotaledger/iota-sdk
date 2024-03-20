@@ -640,10 +640,7 @@ impl TransactionBuilder {
                 return false;
             }
 
-            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-            let unlock_conditions = input.output.unlock_conditions().unwrap();
-
-            if unlock_conditions.is_timelocked(
+            if input.output.unlock_conditions().is_timelocked(
                 self.latest_slot_commitment_id.slot_index(),
                 self.protocol_parameters.min_committable_age(),
             ) {
