@@ -114,7 +114,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 Output::Delegation(delegation) => {
                     // Add amount
                     balance.base_coin.total += delegation.amount();
-                    delegation_implicit_accounts_amount += delegation.amount();
+                    locked_amount += delegation.amount();
                     // Add mana rewards
                     reward_outputs.insert(*output_id);
                     // Add storage deposit
@@ -139,7 +139,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         // Add amount
                         balance.base_coin.total += output.amount();
                         if address_unlock_cond.address().kind() == ImplicitAccountCreationAddress::KIND {
-                            delegation_implicit_accounts_amount += output.amount();
+                            locked_amount += output.amount();
                         }
                         // Add decayed mana
                         balance.mana.total += output.decayed_mana(
