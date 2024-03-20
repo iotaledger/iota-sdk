@@ -2,7 +2,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
-from iota_sdk import HexStr, MintNftParams, NFTAddress, Utils, Wallet, WalletOptions, Irc27Metadata
+from iota_sdk import HexStr, MintNftParams, NFTAddress, Utils, Wallet, WalletOptions, Irc27Metadata, MetadataFeature
 
 load_dotenv()
 
@@ -32,7 +32,7 @@ bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.address_to_bech32(NFTAddress(issuer_nft_id), bech32_hrp)
 
 
-def get_immutable_metadata(index: int) -> str:
+def get_immutable_metadata(index: int) -> MetadataFeature:
     """Returns the immutable metadata for the NFT with the given index"""
     return Irc27Metadata(
         "video/mp4",
@@ -41,7 +41,7 @@ def get_immutable_metadata(index: int) -> str:
         description="The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
         issuerName="IOTA Foundation",
         collectionName="Shimmer OG",
-    ).as_hex()
+    ).as_feature()
 
 
 # Create the metadata with another index for each

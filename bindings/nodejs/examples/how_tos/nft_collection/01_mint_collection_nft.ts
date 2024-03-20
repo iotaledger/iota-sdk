@@ -65,7 +65,7 @@ async function run() {
         // Create the metadata with another index for each
         for (let index = 0; index < NFT_COLLECTION_SIZE; index++) {
             const params: MintNftParams = {
-                immutableMetadata: getImmutableMetadata(index).asHex(),
+                immutableMetadata: getImmutableMetadata(index).asFeature(),
                 // The NFT address from the NFT we minted in mint_issuer_nft example
                 issuer,
             };

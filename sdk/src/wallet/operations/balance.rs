@@ -32,6 +32,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
+        let mut locked_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
@@ -110,6 +111,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 Output::Delegation(delegation) => {
                     // Add amount
                     balance.base_coin.total += delegation.amount();
+                    locked_amount += delegation.amount();
                     // Add mana rewards
                     reward_outputs.insert(*output_id);
                     // Add storage deposit
@@ -124,7 +126,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
                     // without restrictions
-                    if let [UnlockCondition::Address(_)] = output.unlock_conditions().as_ref() {
+                    if let [UnlockCondition::Address(address_unlock_cond)] = output.unlock_conditions().as_ref() {
                         // add nft_id for nft outputs
                         if let Output::Nft(nft) = &output {
                             let nft_id = nft.nft_id_non_null(output_id);
@@ -133,6 +135,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
                         // Add amount
                         balance.base_coin.total += output.amount();
+                        if address_unlock_cond.address().is_implicit_account_creation() {
+                            locked_amount += output.amount();
+                        }
                         // Add decayed mana
                         balance.mana.total += output.decayed_mana(
                             &protocol_parameters,
@@ -253,7 +258,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_ledger.locked_outputs);
 
-        let mut locked_amount = 0;
         let mut locked_mana = DecayedMana::default();
         let mut locked_native_tokens = NativeTokensBuilder::default();
 
