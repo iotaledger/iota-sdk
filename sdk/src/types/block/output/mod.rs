@@ -220,14 +220,14 @@ impl Output {
     }
 
     /// Returns the unlock conditions of an [`Output`], if any.
-    pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
+    pub fn unlock_conditions(&self) -> &UnlockConditions {
         match self {
-            Self::Basic(output) => Some(output.unlock_conditions()),
-            Self::Account(output) => Some(output.unlock_conditions()),
-            Self::Anchor(output) => Some(output.unlock_conditions()),
-            Self::Foundry(output) => Some(output.unlock_conditions()),
-            Self::Nft(output) => Some(output.unlock_conditions()),
-            Self::Delegation(output) => Some(output.unlock_conditions()),
+            Self::Basic(output) => output.unlock_conditions(),
+            Self::Account(output) => output.unlock_conditions(),
+            Self::Anchor(output) => output.unlock_conditions(),
+            Self::Foundry(output) => output.unlock_conditions(),
+            Self::Nft(output) => output.unlock_conditions(),
+            Self::Delegation(output) => output.unlock_conditions(),
         }
     }
 
@@ -340,10 +340,7 @@ impl Output {
             });
         }
 
-        if let Some(return_condition) = self
-            .unlock_conditions()
-            .and_then(UnlockConditions::storage_deposit_return)
-        {
+        if let Some(return_condition) = self.unlock_conditions().storage_deposit_return() {
             // We can't return more tokens than were originally contained in the output.
             // `Return Amount` ≤ `Amount`.
             if return_condition.amount() > self.amount() {

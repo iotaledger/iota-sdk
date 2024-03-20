@@ -22,16 +22,11 @@ pub(crate) fn sdruc_not_expired(
     output: &Output,
     slot_index: SlotIndex,
 ) -> Option<&StorageDepositReturnUnlockCondition> {
-    // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
-    let unlock_conditions = output.unlock_conditions().unwrap();
-
-    unlock_conditions.storage_deposit_return().and_then(|sdr| {
-        let expired = unlock_conditions
+    output.unlock_conditions().storage_deposit_return().filter(|_| {
+        output
+            .unlock_conditions()
             .expiration()
-            .map_or(false, |expiration| slot_index >= expiration.slot_index());
-
-        // We only have to send the storage deposit return back if the output is not expired
-        (!expired).then_some(sdr)
+            .map_or(true, |expiration| slot_index < expiration.slot_index())
     })
 }
 
@@ -79,7 +74,7 @@ impl TransactionBuilder {
         let mut inputs_sdr = HashMap::new();
         let mut outputs_sdr = HashMap::new();
 
-        for selected_input in &self.selected_inputs {
+        for selected_input in self.selected_inputs.iter() {
             inputs_sum += selected_input.output.amount();
 
             if let Some(sdruc) = sdruc_not_expired(&selected_input.output, self.latest_slot_commitment_id.slot_index())
@@ -130,7 +125,7 @@ impl TransactionBuilder {
             .non_remainder_outputs()
             .filter_map(|o| o.chain_id().map(|id| (id, (0, o.amount()))))
             .collect::<HashMap<_, _>>();
-        for input in &self.selected_inputs {
+        for input in self.selected_inputs.iter() {
             if let Some(chain_id) = input
                 .output
                 .chain_id()
