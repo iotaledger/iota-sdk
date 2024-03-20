@@ -30,7 +30,7 @@ impl TransactionBuilder {
         Ok(())
     }
 
-    /// Gets the remainder address from configuration of finds one from the inputs.
+    /// Gets the remainder address from configuration or finds one from the inputs.
     pub(crate) fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, TransactionBuilderError> {
         if let Some(remainder_address) = &self.remainders.address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
@@ -50,7 +50,7 @@ impl TransactionBuilder {
             return Ok(Some((remainder_address.clone(), None)));
         }
 
-        for input in &self.selected_inputs {
+        for input in self.selected_inputs.iter() {
             let required_address = input
                 .output
                 .required_address(
@@ -136,8 +136,8 @@ impl TransactionBuilder {
         // Find the first value that matches the remainder address
         self.non_remainder_outputs().any(|o| {
             (o.is_basic() || o.is_account() || o.is_anchor() || o.is_nft())
-                && o.unlock_conditions()
-                    .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
+                && o.unlock_conditions().expiration().is_none()
+                && o.unlock_conditions().timelock().is_none()
                 && matches!(o.required_address(
                     self.latest_slot_commitment_id.slot_index(),
                     self.protocol_parameters.committable_age_range(),
@@ -156,10 +156,7 @@ impl TransactionBuilder {
             .provided_outputs
             .iter_mut()
             .chain(&mut self.added_outputs)
-            .filter(|o| {
-                o.unlock_conditions()
-                    .map_or(true, |uc| uc.expiration().is_none() && uc.timelock().is_none())
-            })
+            .filter(|o| o.unlock_conditions().expiration().is_none() && o.unlock_conditions().timelock().is_none())
             .filter_map(|o| sort_order.get(&o.kind()).map(|order| (*order, o)))
             .collect::<BTreeMap<_, _>>();
 

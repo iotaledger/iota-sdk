@@ -7,6 +7,7 @@ from typing import Optional
 from dataclasses_json import config
 from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.common import hex_str_decoder, HexStr, json
+from iota_sdk.types.feature import MetadataFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_params import ReturnStrategy
 
@@ -81,7 +82,7 @@ class CreateNativeTokenParams:
         encoder=hex,
         decoder=hex_str_decoder,
     ))
-    foundry_metadata: Optional[str] = None
+    foundry_metadata: Optional[MetadataFeature] = None
     account_id: Optional[str] = None
 
 
@@ -134,10 +135,10 @@ class MintNftParams:
     """
     address: Optional[str] = None
     sender: Optional[str] = None
-    metadata: Optional[str] = None
+    metadata: Optional[MetadataFeature] = None
     tag: Optional[str] = None
     issuer: Optional[str] = None
-    immutable_metadata: Optional[str] = None
+    immutable_metadata: Optional[MetadataFeature] = None
 
 
 @json
@@ -151,8 +152,8 @@ class CreateAccountOutputParams:
         metadata: Account metadata.
     """
     address: str
-    immutable_metadata: Optional[str] = None
-    metadata: Optional[str] = None
+    immutable_metadata: Optional[MetadataFeature] = None
+    metadata: Optional[MetadataFeature] = None
 
 
 @json

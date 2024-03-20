@@ -139,7 +139,7 @@ impl TransactionBuilder {
                 let TokenScheme::Simple(output_foundry_simple_ts) = output_foundry.token_scheme();
                 let mut initial_creation = true;
 
-                for input in &self.selected_inputs {
+                for input in self.selected_inputs.iter() {
                     if let Output::Foundry(input_foundry) = &input.output {
                         let token_id = output_foundry.token_id();
 
