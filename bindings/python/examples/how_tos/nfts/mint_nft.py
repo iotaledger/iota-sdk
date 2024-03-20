@@ -22,7 +22,8 @@ wallet.sync()
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 outputs = [MintNftParams(
-    immutable_metadata=utf8_to_hex("some immutable nft metadata"),
+    immutable_metadata=MetadataFeature(
+        {'data': utf8_to_hex("some immutable nft metadata")}),
 )]
 
 transaction = wallet.mint_nfts(outputs)
