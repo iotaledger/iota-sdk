@@ -138,7 +138,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
                         // Add amount
                         balance.base_coin.total += output.amount();
-                        if address_unlock_cond.address().kind() == ImplicitAccountCreationAddress::KIND {
+                        if address_unlock_cond.address().is_implicit_account_creation() {
                             locked_amount += output.amount();
                         }
                         // Add decayed mana
