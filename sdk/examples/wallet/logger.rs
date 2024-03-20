@@ -9,10 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-    },
+    client::{constants::SHIMMER_COIN_TYPE, secret::mnemonic::MnemonicSecretManager},
     crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Wallet},
 };
@@ -38,9 +35,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Restore a wallet
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
-        std::env::var("MNEMONIC").unwrap(),
-    )?);
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
