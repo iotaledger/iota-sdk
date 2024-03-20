@@ -159,12 +159,7 @@ impl TransactionBuilder {
     }
 
     // Score an input based on how desirable it is.
-    fn score_for_amount(
-        &self,
-        input: &InputSigningData,
-        mut missing_amount: u64,
-        slot_index: SlotIndex,
-    ) -> Option<usize> {
+    fn score_for_amount(&self, input: &InputSigningData, missing_amount: u64, slot_index: SlotIndex) -> Option<usize> {
         ([
             BasicOutput::KIND,
             NftOutput::KIND,
@@ -176,29 +171,33 @@ impl TransactionBuilder {
             let mut work_score = self
                 .protocol_parameters
                 .work_score(&UtxoInput::from(*input.output_id()));
-            let amount = input.output.amount();
+            let mut amount_gained = input.output.amount();
             let mut remainder_work_score = 0;
             if let Some(sdruc) = sdruc_not_expired(&input.output, slot_index) {
-                missing_amount += sdruc.amount();
+                amount_gained = amount_gained.saturating_sub(sdruc.amount());
                 remainder_work_score = self.protocol_parameters.work_score(self.basic_remainder())
             }
 
             if let Ok(Some(output)) = self.transition_input(input) {
-                missing_amount += output.amount();
+                amount_gained = amount_gained.saturating_sub(output.amount());
                 work_score += self.protocol_parameters.work_score(&output);
             } else if input.output.native_token().is_some() {
-                missing_amount += self.native_token_remainder().amount();
+                amount_gained = amount_gained.saturating_sub(self.native_token_remainder().amount());
                 remainder_work_score += self.protocol_parameters.work_score(self.native_token_remainder());
-            } else if amount > missing_amount {
-                missing_amount += self.basic_remainder().amount();
+            } else if amount_gained > missing_amount {
+                amount_gained = amount_gained.saturating_sub(self.basic_remainder().amount());
                 remainder_work_score = self.protocol_parameters.work_score(self.basic_remainder());
             }
             work_score += remainder_work_score;
 
-            let amount_diff = amount.abs_diff(missing_amount) as f64;
+            if amount_gained == 0 {
+                return None;
+            }
+
+            let amount_diff = amount_gained.abs_diff(missing_amount) as f64;
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
             // If the amount is insufficient, the score will decrease the more inputs are selected
-            let amount_score = if amount >= missing_amount {
+            let amount_score = if amount_gained >= missing_amount {
                 (-amount_diff / u64::MAX as f64).exp()
             } else {
                 (-amount_diff / missing_amount as f64).exp()
@@ -206,7 +205,8 @@ impl TransactionBuilder {
             };
             let work_score = (-(work_score as f64) / u32::MAX as f64).exp();
             // Normalize scores between 0..1 with 1 being desirable
-            (amount_score * work_score * usize::MAX as f64).round() as _
+            Some((amount_score * work_score * usize::MAX as f64).round() as _)
         })
+        .flatten()
     }
 }

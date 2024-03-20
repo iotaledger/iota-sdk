@@ -455,7 +455,11 @@ impl TransactionBuilder {
                 mana_gained = mana_gained.saturating_sub(work_score as u64 * allotment.reference_mana_cost);
             }
 
-            let mana_diff = missing_mana.abs_diff(mana_gained) as f64;
+            if mana_gained == 0 {
+                return None;
+            }
+
+            let mana_diff = mana_gained.abs_diff(missing_mana) as f64;
             // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
             // If the mana is insufficient, the score will decrease the more inputs are selected
             let mana_score = if mana_gained >= missing_mana {
@@ -466,7 +470,8 @@ impl TransactionBuilder {
             };
             let work_score = (-(work_score as f64) / u32::MAX as f64).exp();
             // Normalize scores between 0..1 with 1 being desirable
-            (mana_score * work_score * usize::MAX as f64).round() as _
+            Some((mana_score * work_score * usize::MAX as f64).round() as _)
         })
+        .flatten()
     }
 }
