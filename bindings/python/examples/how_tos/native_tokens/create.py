@@ -42,7 +42,7 @@ metadata = Irc30Metadata(
 params = CreateNativeTokenParams(
     100,
     100,
-    metadata.as_hex(),
+    metadata.as_feature(),
 )
 
 prepared_transaction = wallet.prepare_create_native_token(params, None)

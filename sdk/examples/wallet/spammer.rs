@@ -12,14 +12,10 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{mnemonic::MnemonicSecretManager, SecretManage, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    types::block::{
-        address::{Address, Bech32Address, Hrp},
-        output::BasicOutput,
-        payload::signed_transaction::TransactionId,
-    },
+    types::block::{address::Bech32Address, output::BasicOutput, payload::signed_transaction::TransactionId},
     wallet::{ClientOptions, FilterOptions, SendParams, Wallet},
 };
 
