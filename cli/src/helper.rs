@@ -73,9 +73,7 @@ pub fn enter_address() -> Result<Bech32Address, Error> {
 
 pub fn parse_bip_path(input: &str) -> Result<Bip44, Error> {
     if input.is_empty() || !input.is_ascii() {
-        return Err(eyre!(
-            "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`"
-        ));
+        bail!("invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`");
     }
 
     let mut segments = Vec::with_capacity(4);
@@ -83,15 +81,13 @@ pub fn parse_bip_path(input: &str) -> Result<Bip44, Error> {
         match segment.parse::<u32>() {
             Ok(s) => segments.push(s),
             Err(err) => {
-                return Err(eyre!("invalid BIP path segment. {i}/`{segment}`: {err}"));
+                bail!("invalid BIP path segment. {i}/`{segment}`: {err}");
             }
         }
     }
 
     if segments.len() != 4 {
-        return Err(eyre!(
-            "invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`"
-        ));
+        bail!("invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`");
     }
 
     let bip_path = Bip44::new(segments[0])
