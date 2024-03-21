@@ -35,7 +35,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, enter_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -1408,7 +1408,7 @@ async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
     if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
-        let password = get_password("Stronghold password", false)?;
+        let password = enter_password("Stronghold password", false)?;
         wallet.set_stronghold_password(password).await?;
     }
 
