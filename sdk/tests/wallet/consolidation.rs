@@ -44,8 +44,8 @@ async fn consolidation() -> Result<(), Box<dyn std::error::Error>> {
     let balance = wallet_1.sync(None).await.unwrap();
     // Balance still the same
     assert_eq!(balance.base_coin().available(), 2009968300);
-    // Account and basic unspent output
-    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 2);
+    // Account output
+    assert_eq!(wallet_1.ledger().await.unspent_outputs().len(), 1);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;

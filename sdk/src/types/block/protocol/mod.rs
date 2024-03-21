@@ -175,14 +175,14 @@ impl ProtocolParameters {
         }
     }
 
-    #[cfg(feature = "std")]
     /// Calculates the number of slots in a duration.
+    #[cfg(feature = "std")]
     pub fn slots_in_duration(&self, duration: Duration) -> u32 {
         (duration.as_secs() / self.slot_duration_in_seconds() as u64) as u32
     }
 
-    #[cfg(feature = "std")]
     /// Calculates the [`Duration`] of a number of slots.
+    #[cfg(feature = "std")]
     pub fn duration_of_slots(&self, slots: u32) -> Duration {
         Duration::from_secs((slots * self.slot_duration_in_seconds() as u32) as u64)
     }
