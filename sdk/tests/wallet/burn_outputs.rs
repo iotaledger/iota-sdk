@@ -227,16 +227,6 @@ async fn destroy_account(wallet: &Wallet, account_id: AccountId) -> Result<(), B
 #[ignore]
 #[tokio::test]
 async fn create_and_burn_native_tokens() -> Result<(), Box<dyn std::error::Error>> {
-    let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
-        .name("client.log")
-        .target_exclusions(&["h2", "hyper", "rustls"])
-        .level_filter(log::LevelFilter::Debug);
-
-    let config = fern_logger::LoggerConfig::build()
-        .with_output(logger_output_config)
-        .finish();
-
-    fern_logger::logger_init(config).unwrap();
     let storage_path = "test-storage/create_and_burn_native_tokens";
     setup(storage_path)?;
 
