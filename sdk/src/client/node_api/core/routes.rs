@@ -96,6 +96,25 @@ impl ClientInner {
 
         self.get_request(PATH, None, false).await
     }
+
+    /// Returns whether the network is healthy (finalization is not delayed).
+    /// GET /api/core/v3/network/health
+    pub async fn get_network_health(&self) -> Result<bool, ClientError> {
+        const PATH: &str = "api/core/v3/network/health";
+
+        let nodes = self.node_manager.read().await.get_nodes(PATH, None)?;
+        let client = crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string());
+
+        for node in &nodes {
+            if let Ok(res) = client.get(node, DEFAULT_API_TIMEOUT).await {
+                if res.status() == 200 {
+                    return Ok(true);
+                }
+            }
+        }
+
+        Ok(false)
+    }
 }
 
 impl Client {

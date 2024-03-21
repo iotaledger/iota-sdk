@@ -104,7 +104,7 @@ impl NodeManager {
         NodeManagerBuilder::new()
     }
 
-    fn get_nodes(&self, path: &str, query: Option<&str>) -> Result<Vec<Node>, ClientError> {
+    pub(crate) fn get_nodes(&self, path: &str, query: Option<&str>) -> Result<Vec<Node>, ClientError> {
         let mut nodes_with_modified_url: Vec<Node> = Vec::new();
 
         // Set primary nodes first, so they will also be used first for requests.
