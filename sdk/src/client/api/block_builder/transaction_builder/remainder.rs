@@ -168,13 +168,15 @@ impl TransactionBuilder {
     fn output_for_remainder_exists(&self, chain_id: Option<ChainId>, remainder_address: &Address) -> bool {
         // Find the first value that matches the remainder address
         self.added_outputs.iter().any(|o| {
-            (o.chain_id() == chain_id || chain_id.is_none() && (o.is_basic() || o.is_account() || o.is_nft()))
+            (o.chain_id() == chain_id
+                || (chain_id.is_none()
+                    && (o.is_basic() || o.is_account() || o.is_nft())
+                    && matches!(o.required_address(
+                        self.latest_slot_commitment_id.slot_index(),
+                        self.protocol_parameters.committable_age_range(),
+                    ), Ok(Some(address)) if &address == remainder_address)))
                 && o.unlock_conditions().expiration().is_none()
                 && o.unlock_conditions().timelock().is_none()
-                && matches!(o.required_address(
-                    self.latest_slot_commitment_id.slot_index(),
-                    self.protocol_parameters.committable_age_range(),
-                ), Ok(Some(address)) if &address == remainder_address)
         })
     }
 
@@ -184,13 +186,15 @@ impl TransactionBuilder {
         remainder_address: &Address,
     ) -> Option<&mut Output> {
         self.added_outputs.iter_mut().find(|o| {
-            (o.chain_id() == chain_id || chain_id.is_none() && (o.is_basic() || o.is_account() || o.is_nft()))
-                && o.unlock_conditions().expiration().is_none()
-                && o.unlock_conditions().timelock().is_none()
-                && matches!(o.required_address(
+            (o.chain_id() == chain_id
+                || (chain_id.is_none()
+                    && (o.is_basic() || o.is_account() || o.is_nft())
+                    && matches!(o.required_address(
                         self.latest_slot_commitment_id.slot_index(),
                         self.protocol_parameters.committable_age_range(),
-                    ), Ok(Some(address)) if &address == remainder_address)
+                    ), Ok(Some(address)) if &address == remainder_address)))
+                && o.unlock_conditions().expiration().is_none()
+                && o.unlock_conditions().timelock().is_none()
         })
     }
 
