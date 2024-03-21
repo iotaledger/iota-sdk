@@ -348,8 +348,8 @@ path = "examples/how_tos/account_output/destroy.rs"
 required-features = ["wallet", "stronghold"]
 
 [[example]]
-name = "implicit_account_creation"
-path = "examples/how_tos/account_output/implicit_account_creation.rs"
+name = "implicit_account_creation_address"
+path = "examples/how_tos/account_output/implicit_account_creation_address.rs"
 required-features = ["wallet", "storage"]
 
 # Outputs
