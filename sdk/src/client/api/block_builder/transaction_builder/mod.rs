@@ -33,8 +33,8 @@ use crate::{
         input::{Input, UtxoInput, INPUT_COUNT_MAX, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
-            AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId, NftOutputBuilder, Output, OutputId,
-            OUTPUT_COUNT_RANGE,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId, FoundryOutputBuilder, NftOutputBuilder,
+            Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
             signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
@@ -415,6 +415,9 @@ impl TransactionBuilder {
                     Output::Nft(n) => NftOutputBuilder::from(&*n)
                         .with_amount(new_amount)
                         .with_mana(new_mana)
+                        .finish_output()?,
+                    Output::Foundry(f) => FoundryOutputBuilder::from(&*f)
+                        .with_amount(new_amount)
                         .finish_output()?,
                     _ => unreachable!(),
                 };
