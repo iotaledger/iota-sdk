@@ -20,10 +20,8 @@ class OutputData:
         metadata: With the output corresponding metadata.
         output: The output object itself.
         output_id_proof: The output ID proof.
-        address: The address associated with the output.
         network_id: The network ID the output belongs to.
         remainder: Whether the output represents a remainder amount.
-        chain: A list of chain state indexes.
     """
     output_id: OutputId
     metadata: OutputMetadata
