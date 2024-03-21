@@ -150,8 +150,17 @@ impl TransactionBuilder {
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
+        // Block issuers cannot move their mana elsewhere.
         if input.is_block_issuer() {
-            builder = builder.with_mana(input.mana());
+            if self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
+                builder = builder.with_mana(input.mana());
+            } else {
+                builder = builder.with_mana(input.available_mana(
+                    &self.protocol_parameters,
+                    output_id.transaction_id().slot_index(),
+                    self.creation_slot,
+                )?);
+            }
         }
 
         let output = builder.finish_output()?;
