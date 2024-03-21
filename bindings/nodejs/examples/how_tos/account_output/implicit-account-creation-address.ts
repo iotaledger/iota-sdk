@@ -11,7 +11,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/account_output/implicit-account-creation.ts
+// yarn run-example ./how_tos/account_output/implicit-account-creation-address.ts
 
 // In this example we create an implicit account creation address.
 async function run() {
