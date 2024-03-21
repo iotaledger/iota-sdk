@@ -38,11 +38,11 @@ pub fn enter_password(prompt: &str, confirmation: bool) -> Result<Password, Erro
     Ok(password.interact()?.into())
 }
 
-pub fn enter_decision(prompt: &str) -> Result<bool, Error> {
+pub fn enter_decision(prompt: &str, default: &str) -> Result<bool, Error> {
     loop {
         let input = Input::<String>::new()
             .with_prompt(prompt)
-            .default("yes".into())
+            .default(default.to_string())
             .interact_text()?;
 
         match input.to_lowercase().as_str() {

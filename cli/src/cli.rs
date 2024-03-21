@@ -324,7 +324,7 @@ pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
 
             let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
             if !snapshot_path.exists() {
-                if enter_decision("Create a new wallet with default parameters?")? {
+                if enter_decision("Create a new wallet with default parameters?", "yes")? {
                     Some(init_command(storage_path, init_params).await?)
                 } else {
                     Cli::print_help()?;
@@ -385,7 +385,7 @@ pub async fn init_command(storage_path: &Path, init_params: InitParameters) -> R
     let mut address = init_params.address.map(|s| Bech32Address::from_str(&s)).transpose()?;
     let mut forced = false;
     if address.is_none() {
-        if enter_decision("Do you want to set the address of the new wallet?")? {
+        if enter_decision("Do you want to set the address of the new wallet?", "no")? {
             address.replace(enter_address()?);
         } else {
             forced = true;
@@ -394,14 +394,14 @@ pub async fn init_command(storage_path: &Path, init_params: InitParameters) -> R
 
     let mut bip_path = init_params.bip_path;
     if bip_path.is_none() {
-        if forced || enter_decision("Do you want to set the bip path of the new wallet?")? {
+        if forced || enter_decision("Do you want to set the bip path of the new wallet?", "yes")? {
             bip_path.replace(select_or_enter_bip_path()?);
         }
     }
 
     let mut alias = init_params.alias;
     if alias.is_none() {
-        if enter_decision("Do you want to set an alias for the new wallet?")? {
+        if enter_decision("Do you want to set an alias for the new wallet?", "yes")? {
             alias.replace(enter_alias()?);
         }
     }
