@@ -37,7 +37,6 @@ hashbrown = { version = "0.14.3", default-features = false, features = [
     "inline-more",
 ] }
 hex = { version = "0.4.3", default-features = false }
-instant = { version = "0.1.12", default-features = false }
 iota-crypto = { version = "0.23.1", default-features = false, features = [
     "blake2b",
     "ed25519",
@@ -67,6 +66,7 @@ fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.30", default-features = false, features = [
     "thread-pool",
 ], optional = true }
+instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.4-alpha.3", default-features = false, features = [
     "nova",
 ], optional = true }
@@ -176,6 +176,7 @@ std = [
     "iota_stronghold?/std",
     "iota-crypto/std",
     "once_cell?/std",
+    "dep:instant"
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
