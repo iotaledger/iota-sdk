@@ -8,8 +8,13 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use eyre::{bail, eyre, Error};
 use iota_sdk::{
-    client::{utils::Password, verify_mnemonic},
-    crypto::keys::bip39::Mnemonic,
+    client::{
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        utils::Password,
+        verify_mnemonic,
+    },
+    crypto::keys::{bip39::Mnemonic, bip44::Bip44},
+    types::block::address::Bech32Address,
 };
 use tokio::{
     fs::{self, OpenOptions},
@@ -21,7 +26,7 @@ use crate::{println_log_error, println_log_info};
 
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
-pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
+pub fn enter_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
     let mut password = dialoguer::Password::new().with_prompt(prompt);
 
     if confirmation {
@@ -33,11 +38,11 @@ pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error>
     Ok(password.interact()?.into())
 }
 
-pub fn get_decision(prompt: &str) -> Result<bool, Error> {
+pub fn enter_decision(prompt: &str, default: &str) -> Result<bool, Error> {
     loop {
         let input = Input::<String>::new()
             .with_prompt(prompt)
-            .default("yes".into())
+            .default(default.to_string())
             .interact_text()?;
 
         match input.to_lowercase().as_str() {
@@ -50,13 +55,70 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn get_alias(prompt: &str) -> Result<String, Error> {
+pub fn enter_address() -> Result<Bech32Address, Error> {
     loop {
-        let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
-        if input.is_empty() || !input.is_ascii() {
-            println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
-        } else {
+        let input = Input::<String>::new()
+            .with_prompt("Enter a Bech32 wallet address")
+            .interact_text()?;
+        match Bech32Address::from_str(&input) {
+            Ok(address) => {
+                return Ok(address);
+            }
+            Err(err) => {
+                println_log_error!("Invalid input, please enter a valid Bech32 address: {err}");
+            }
+        }
+    }
+}
+
+pub fn parse_bip_path(input: &str) -> Result<Bip44, Error> {
+    if input.is_empty() || !input.is_ascii() {
+        bail!("invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`");
+    }
+
+    let mut segments = Vec::with_capacity(4);
+    for (i, segment) in input.split_terminator('/').map(|p| p.trim()).enumerate() {
+        match segment.parse::<u32>() {
+            Ok(s) => segments.push(s),
+            Err(err) => {
+                bail!("invalid BIP path segment. {i}/`{segment}`: {err}");
+            }
+        }
+    }
+
+    if segments.len() != 4 {
+        bail!("invalid BIP path format. Expected: `<coin_type>/<account_index>/<change_address>/<address_index>`");
+    }
+
+    let bip_path = Bip44::new(segments[0])
+        .with_account(segments[1])
+        .with_change(segments[2])
+        .with_address_index(segments[3]);
+
+    Ok(bip_path)
+}
+
+pub fn enter_alias() -> Result<String, Error> {
+    loop {
+        let input = Input::<String>::new()
+            .with_prompt("Enter a wallet alias")
+            .interact_text()?;
+        if !input.is_empty() && input.is_ascii() {
             return Ok(input);
+        } else {
+            println_log_error!("Invalid input, please enter a valid alias (non-empty, ASCII).");
+        }
+    }
+}
+
+pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
+    loop {
+        let mnemonic = Mnemonic::from(Input::<String>::new().with_prompt("Enter a mnemonic").interact_text()?);
+        match verify_mnemonic(&*mnemonic) {
+            Ok(_) => return Ok(mnemonic),
+            Err(err) => {
+                println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic: {err}");
+            }
         }
     }
 }
@@ -82,7 +144,7 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
     let mnemonic = match selected_choice {
         0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
-        _ => panic!("invalid choice index"),
+        _ => panic!("invalid choice"),
     };
 
     Ok(mnemonic)
@@ -136,21 +198,6 @@ pub async fn generate_mnemonic(
     );
 
     Ok(mnemonic)
-}
-
-pub fn enter_mnemonic() -> Result<Mnemonic, Error> {
-    loop {
-        let input = Mnemonic::from(
-            Input::<String>::new()
-                .with_prompt("Enter your mnemonic")
-                .interact_text()?,
-        );
-        if verify_mnemonic(&*input).is_err() {
-            println_log_error!("Invalid mnemonic. Please enter a bip-39 conform mnemonic.");
-        } else {
-            return Ok(input);
-        }
-    }
 }
 
 pub async fn import_mnemonic(path: &str) -> Result<Mnemonic, Error> {
@@ -324,7 +371,7 @@ impl From<usize> for SecretManagerChoice {
             0 => Self::Stronghold,
             1 => Self::LedgerNano,
             2 => Self::LedgerNanoSimulator,
-            _ => panic!("invalid secret manager choice index"),
+            _ => panic!("invalid secret manager choice"),
         }
     }
 }
@@ -342,7 +389,7 @@ impl FromStr for SecretManagerChoice {
     }
 }
 
-pub async fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
+pub fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
     let choices = ["Stronghold", "Ledger Nano", "Ledger Nano Simulator"];
 
     Ok(Select::with_theme(&ColorfulTheme::default())
@@ -351,4 +398,36 @@ pub async fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
         .default(0)
         .interact_on(&Term::stderr())?
         .into())
+}
+
+pub fn select_or_enter_bip_path() -> Result<Bip44, Error> {
+    let choices = ["IOTA [4218/0/0/0]", "Shimmer [4219/0/0/0]", "Custom"];
+
+    Ok(
+        match Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Select bip path")
+            .items(&choices)
+            .default(0)
+            .interact_on(&Term::stderr())?
+            .into()
+        {
+            0 => Bip44::new(IOTA_COIN_TYPE),
+            1 => Bip44::new(SHIMMER_COIN_TYPE),
+            2 => enter_bip_path()?,
+            _ => panic!("invalid choice"),
+        },
+    )
+}
+
+fn enter_bip_path() -> Result<Bip44, Error> {
+    loop {
+        let input = Input::<String>::new().with_prompt("Enter a bip path").interact_text()?;
+        match parse_bip_path(&input) {
+            Ok(bip_path) => return Ok(bip_path),
+            Err(err) => {
+                let s = err.to_string();
+                println_log_error!("{s}");
+            }
+        }
+    }
 }
