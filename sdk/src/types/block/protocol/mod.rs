@@ -179,6 +179,11 @@ impl ProtocolParameters {
         (duration.as_secs() / self.slot_duration_in_seconds() as u64) as u32
     }
 
+    /// Calculates the [`Duration`] of a number of slots.
+    pub fn duration_of_slots(&self, slots: u32) -> Duration {
+        Duration::from_secs((slots * self.slot_duration_in_seconds() as u32) as u64)
+    }
+
     /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
     pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
         EpochIndex::from_slot_index(slot_index, self.genesis_slot, self.slots_per_epoch_exponent())

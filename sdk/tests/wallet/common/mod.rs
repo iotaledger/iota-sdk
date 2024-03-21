@@ -139,21 +139,19 @@ pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::er
     // prepare a big tx and wait the time it takes until enough mana is generated
     #[allow(unused_variables)]
     if let Err(WalletError::Client(ClientError::TransactionBuilder(TransactionBuilderError::InsufficientMana {
-        found,
-        required,
         slots_remaining,
+        ..
     }))) = wallet
         .prepare_send(vec![SendParams::new(1_000_000, wallet.address().await)?; 10], None)
         .await
     {
-        tokio::time::sleep(std::time::Duration::from_secs(
-            slots_remaining as u64
-                * wallet
-                    .client()
-                    .get_protocol_parameters()
-                    .await?
-                    .slot_duration_in_seconds() as u64,
-        ))
+        tokio::time::sleep(
+            wallet
+                .client()
+                .get_protocol_parameters()
+                .await?
+                .duration_of_slots(slots_remaining),
+        )
         .await;
     }
 
