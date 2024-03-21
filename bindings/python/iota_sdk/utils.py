@@ -85,7 +85,15 @@ class Utils:
         """Compute the account id for the given account output id.
         """
         return _call_method('blake2b256Hash', {
-            'bytes': repr(output_id)
+            'bytes': output_id
+        })
+
+    @staticmethod
+    def compute_delegation_id(output_id: OutputId) -> HexStr:
+        """Compute the delegation id for the given account output id.
+        """
+        return _call_method('blake2b256Hash', {
+            'bytes': output_id
         })
 
     @staticmethod
@@ -113,7 +121,7 @@ class Utils:
         """Compute the NFT id for the given NFT output id.
         """
         return _call_method('blake2b256Hash', {
-            'bytes': repr(output_id)
+            'bytes': output_id
         })
 
     @staticmethod

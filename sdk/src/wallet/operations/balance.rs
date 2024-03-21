@@ -11,7 +11,7 @@ use crate::{
         unlock_condition::UnlockCondition, DecayedMana, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
-        operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
+        operations::{helpers::time::can_output_be_unlocked_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
         Wallet, WalletError,
     },
@@ -32,13 +32,18 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
+        let mut locked_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
         let voting_output = wallet_ledger.get_voting_output();
 
-        let claimable_outputs =
-            wallet_ledger.claimable_outputs(&wallet_address, OutputsToClaim::All, slot_index, &protocol_parameters)?;
+        let claimable_outputs = wallet_ledger.claimable_outputs(
+            wallet_address.inner().clone(),
+            OutputsToClaim::All,
+            slot_index,
+            &protocol_parameters,
+        )?;
 
         #[cfg(feature = "participation")]
         {
@@ -48,6 +53,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 }
             }
         }
+
+        let controlled_addresses = wallet_ledger.controlled_addresses(wallet_address.inner().clone());
 
         let mut reward_outputs = HashSet::new();
 
@@ -104,6 +111,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 Output::Delegation(delegation) => {
                     // Add amount
                     balance.base_coin.total += delegation.amount();
+                    locked_amount += delegation.amount();
                     // Add mana rewards
                     reward_outputs.insert(*output_id);
                     // Add storage deposit
@@ -118,11 +126,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
                     // without restrictions
-                    if let [UnlockCondition::Address(_)] = output
-                        .unlock_conditions()
-                        .expect("output needs to have unlock conditions")
-                        .as_ref()
-                    {
+                    if let [UnlockCondition::Address(address_unlock_cond)] = output.unlock_conditions().as_ref() {
                         // add nft_id for nft outputs
                         if let Output::Nft(nft) = &output {
                             let nft_id = nft.nft_id_non_null(output_id);
@@ -131,6 +135,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
                         // Add amount
                         balance.base_coin.total += output.amount();
+                        if address_unlock_cond.address().is_implicit_account_creation() {
+                            locked_amount += output.amount();
+                        }
                         // Add decayed mana
                         balance.mana.total += output.decayed_mana(
                             &protocol_parameters,
@@ -168,11 +175,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         if is_claimable {
                             // check if output can be unlocked always from now on, in that case it should be
                             // added to the total amount
-                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_forever_from_now_on(
-                                // We use the addresses with unspent outputs, because other addresses of
-                                // the account without unspent
-                                // outputs can't be related to this output
-                                wallet_address.inner(),
+                            let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_from_now_on(
+                                &controlled_addresses,
                                 output,
                                 slot_index,
                                 protocol_parameters.committable_age_range(),
@@ -182,21 +186,18 @@ impl<S: 'static + SecretManage> Wallet<S> {
                                 // If output has a StorageDepositReturnUnlockCondition, the amount of it should
                                 // be subtracted, because this part
                                 // needs to be sent back
-                                let amount = output
-                                    .unlock_conditions()
-                                    .and_then(|u| u.storage_deposit_return())
-                                    .map_or_else(
-                                        || output.amount(),
-                                        |sdr| {
-                                            if wallet_address.inner() == sdr.return_address() {
-                                                // sending to ourself, we get the full amount
-                                                output.amount()
-                                            } else {
-                                                // Sending to someone else
-                                                output.amount() - sdr.amount()
-                                            }
-                                        },
-                                    );
+                                let amount = output.unlock_conditions().storage_deposit_return().map_or_else(
+                                    || output.amount(),
+                                    |sdr| {
+                                        if wallet_address.inner() == sdr.return_address() {
+                                            // sending to ourself, we get the full amount
+                                            output.amount()
+                                        } else {
+                                            // Sending to someone else
+                                            output.amount() - sdr.amount()
+                                        }
+                                    },
+                                );
 
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {
@@ -240,11 +241,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                             }
                         } else {
                             // Don't add expired outputs that can't ever be unlocked by us
-                            if let Some(expiration) = output
-                                .unlock_conditions()
-                                .expect("output needs to have unlock conditions")
-                                .expiration()
-                            {
+                            if let Some(expiration) = output.unlock_conditions().expiration() {
                                 // Not expired, could get unlockable when it's expired, so we insert it
                                 if slot_index < expiration.slot_index() {
                                     balance.potentially_locked_outputs.insert(*output_id, false);
@@ -261,7 +258,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_ledger.locked_outputs);
 
-        let mut locked_amount = 0;
         let mut locked_mana = DecayedMana::default();
         let mut locked_native_tokens = NativeTokensBuilder::default();
 

@@ -10,7 +10,11 @@ use iota_sdk::{
     },
     types::block::{
         address::Address,
-        output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, NftId},
+        output::{
+            feature::{BlockIssuerFeature, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
+            unlock_condition::AddressUnlockCondition,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, NftId,
+        },
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
@@ -600,7 +604,7 @@ fn insufficient_mana() {
         [
             (
                 Basic {
-                    amount: 1_000_000,
+                    amount: 1_014_100,
                     mana: 0,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     native_token: None,
@@ -682,6 +686,92 @@ fn insufficient_mana() {
         SLOT_COMMITMENT_ID,
         protocol_parameters.clone(),
     )
+    .finish()
+    .unwrap();
+}
+
+#[test]
+fn do_not_select_too_many_inputs_for_mana_requirement() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
+    let ed25519_address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
+
+    let mut inputs = build_inputs(
+        vec![
+            (
+                Basic {
+                    amount: 1_000_000,
+                    mana: 1,
+                    address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                    native_token: None,
+                    sender: None,
+                    sdruc: None,
+                    timelock: None,
+                    expiration: None,
+                },
+                None,
+            );
+            130
+        ],
+        Some(SLOT_INDEX),
+    );
+    inputs.extend(build_inputs(
+        [(
+            Nft {
+                amount: 100_000,
+                mana: 130,
+                nft_id: nft_id_1,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                sender: None,
+                issuer: None,
+                sdruc: None,
+                expiration: None,
+            },
+            None,
+        )],
+        Some(SLOT_INDEX),
+    ));
+    inputs.push(InputSigningData {
+        output: AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
+            .with_mana(11_000)
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .with_features([BlockIssuerFeature::new(
+                u32::MAX,
+                BlockIssuerKeys::from_vec(vec![
+                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
+                ])
+                .unwrap(),
+            )
+            .unwrap()])
+            .finish_output()
+            .unwrap(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+        chain: None,
+    });
+
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        mana: 130,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
+
+    TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
     .finish()
     .unwrap();
 }

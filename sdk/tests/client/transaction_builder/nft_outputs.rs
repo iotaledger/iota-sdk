@@ -1168,7 +1168,7 @@ fn take_amount_from_nft_to_fund_basic() {
         [
             (
                 Nft {
-                    amount: 2_000_000,
+                    amount: 1_000_000,
                     mana: 0,
                     nft_id: nft_id_1,
                     address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1223,7 +1223,7 @@ fn take_amount_from_nft_to_fund_basic() {
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
             assert!(output.is_nft());
-            assert_eq!(output.amount(), 1_800_000);
+            assert_eq!(output.amount(), 800_000);
             assert_eq!(output.as_nft().unlock_conditions().len(), 1);
             assert_eq!(output.as_nft().features().len(), 0);
             assert_eq!(
@@ -1598,12 +1598,7 @@ fn auto_transition_nft_less_than_min_additional() {
     .unwrap();
 
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 2);
-    let min_amount = NftOutputBuilder::from(inputs[0].output.as_nft())
-        .with_minimum_amount(protocol_parameters.storage_score_parameters())
-        .finish_output()
-        .unwrap()
-        .amount();
+    assert_eq!(selected.transaction.outputs().len(), 1);
     let nft_output = selected
         .transaction
         .outputs()
@@ -1611,5 +1606,5 @@ fn auto_transition_nft_less_than_min_additional() {
         .filter_map(Output::as_nft_opt)
         .find(|o| o.nft_id() == &nft_id_1)
         .unwrap();
-    assert_eq!(nft_output.amount(), min_amount);
+    assert_eq!(nft_output.amount(), 1_000_000 + small_amount);
 }

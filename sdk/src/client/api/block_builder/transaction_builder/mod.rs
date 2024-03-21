@@ -4,18 +4,19 @@
 //! Builder for transactions
 
 pub(crate) mod burn;
+pub(crate) mod context_inputs;
 pub(crate) mod error;
 pub(crate) mod remainder;
 pub(crate) mod requirement;
 pub(crate) mod transition;
 
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, VecDeque};
+use core::borrow::Borrow;
 use std::collections::{HashMap, HashSet};
 
 use crypto::keys::bip44::Bip44;
-use packable::PackableExt;
 
-pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement};
+pub use self::{burn::Burn, error::TransactionBuilderError, requirement::Requirement, transition::Transitions};
 use crate::{
     client::{
         api::{
@@ -29,17 +30,17 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput, ContextInput, RewardContextInput},
-        input::{Input, UtxoInput, INPUT_COUNT_RANGE},
+        input::{Input, UtxoInput, INPUT_COUNT_MAX, INPUT_COUNT_RANGE},
         mana::ManaAllotment,
         output::{
-            AccountId, AccountOutputBuilder, AnchorOutputBuilder, BasicOutputBuilder, NftOutputBuilder, Output,
-            OutputId, OUTPUT_COUNT_RANGE,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId, FoundryOutputBuilder, NftOutputBuilder,
+            Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::{
             signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
             TaggedDataPayload,
         },
-        protocol::{CommittableAgeRange, ProtocolParameters},
+        protocol::ProtocolParameters,
         slot::{SlotCommitmentId, SlotIndex},
     },
 };
@@ -158,6 +159,7 @@ impl Client {
         .with_payload(options.tagged_data_payload)
         .with_mana_allotments(options.mana_allotments)
         .with_remainder_address(remainder_address)
+        .with_transitions(options.transitions)
         .with_burn(options.burn);
 
         if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
@@ -168,11 +170,7 @@ impl Client {
             transaction_builder = transaction_builder.disable_additional_input_selection();
         }
 
-        let prepared_transaction_data = transaction_builder.finish()?;
-
-        prepared_transaction_data.transaction.validate_length()?;
-
-        Ok(prepared_transaction_data)
+        Ok(transaction_builder.finish()?)
     }
 }
 
@@ -181,13 +179,14 @@ impl Client {
 pub struct TransactionBuilder {
     available_inputs: Vec<InputSigningData>,
     required_inputs: HashSet<OutputId>,
-    selected_inputs: Vec<InputSigningData>,
+    selected_inputs: OrderedInputs,
     bic_context_inputs: HashSet<BlockIssuanceCreditContextInput>,
     commitment_context_input: Option<CommitmentContextInput>,
     reward_context_inputs: HashSet<OutputId>,
     provided_outputs: Vec<Output>,
     added_outputs: Vec<Output>,
     addresses: HashSet<Address>,
+    transitions: Option<Transitions>,
     burn: Option<Burn>,
     remainders: Remainders,
     creation_slot: SlotIndex,
@@ -208,6 +207,7 @@ pub(crate) struct MinManaAllotment {
     issuer_id: AccountId,
     reference_mana_cost: u64,
     allotment_debt: u64,
+    required_allotment: Option<u64>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -215,7 +215,8 @@ pub(crate) struct Remainders {
     address: Option<Address>,
     data: Vec<RemainderData>,
     storage_deposit_returns: Vec<Output>,
-    added_mana: u64,
+    added_amount: HashMap<Option<ChainId>, u64>,
+    added_mana: HashMap<Option<ChainId>, u64>,
 }
 
 impl TransactionBuilder {
@@ -253,13 +254,14 @@ impl TransactionBuilder {
         Self {
             available_inputs,
             required_inputs: HashSet::new(),
-            selected_inputs: Vec::new(),
+            selected_inputs: Default::default(),
             bic_context_inputs: HashSet::new(),
             commitment_context_input: None,
             reward_context_inputs: HashSet::new(),
             provided_outputs: outputs.into_iter().collect(),
             added_outputs: Vec::new(),
             addresses,
+            transitions: None,
             burn: None,
             remainders: Default::default(),
             creation_slot: creation_slot_index.into(),
@@ -287,12 +289,10 @@ impl TransactionBuilder {
             *allotment_debt = self.mana_allotments.get(issuer_id).copied().unwrap_or_default();
         }
         // Add initial requirements
-        self.requirements.extend([
-            Requirement::Mana,
-            Requirement::ContextInputs,
-            Requirement::Amount,
-            Requirement::NativeTokens,
-        ]);
+        self.requirements
+            .extend([Requirement::Mana, Requirement::Amount, Requirement::NativeTokens]);
+
+        self.fulfill_output_context_inputs_requirements()?;
 
         for required_input in self.required_inputs.clone() {
             // Checks that required input is available.
@@ -313,7 +313,6 @@ impl TransactionBuilder {
         }
 
         // Gets requirements from outputs.
-        // TODO this may re-evaluate outputs added by inputs
         self.outputs_requirements();
 
         // Gets requirements from burn.
@@ -380,25 +379,50 @@ impl TransactionBuilder {
             return Err(TransactionBuilderError::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        if self.remainders.added_mana > 0 {
-            let remainder_address = self
-                .get_remainder_address()?
-                .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
-                .0;
-            let added_mana = self.remainders.added_mana;
-            if let Some(output) = self.get_output_for_added_mana(&remainder_address) {
-                log::debug!("Adding {added_mana} excess input mana to output with address {remainder_address}");
+        let remainder_address = self
+            .get_remainder_address()?
+            .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
+            .0;
+
+        let mut added_amount_mana = HashMap::<Option<ChainId>, (u64, u64)>::new();
+        for (chain_id, added_amount) in self.remainders.added_amount.drain() {
+            added_amount_mana.entry(chain_id).or_default().0 = added_amount;
+        }
+        for (chain_id, added_mana) in self.remainders.added_mana.drain() {
+            added_amount_mana.entry(chain_id).or_default().1 = added_mana;
+        }
+
+        for (chain_id, (added_amount, added_mana)) in added_amount_mana {
+            let mut output = self.get_output_for_remainder(chain_id, &remainder_address);
+            if output.is_none() {
+                output = self.get_output_for_remainder(None, &remainder_address);
+            }
+            if let Some(output) = output {
+                log::debug!(
+                    "Adding {added_amount} excess amount and {added_mana} excess mana to output with address {remainder_address} and {chain_id:?}"
+                );
+                let new_amount = output.amount() + added_amount;
                 let new_mana = output.mana() + added_mana;
                 *output = match output {
-                    Output::Basic(b) => BasicOutputBuilder::from(&*b).with_mana(new_mana).finish_output()?,
-                    Output::Account(a) => AccountOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Anchor(a) => AnchorOutputBuilder::from(&*a).with_mana(new_mana).finish_output()?,
-                    Output::Nft(n) => NftOutputBuilder::from(&*n).with_mana(new_mana).finish_output()?,
+                    Output::Basic(b) => BasicOutputBuilder::from(&*b)
+                        .with_amount(new_amount)
+                        .with_mana(new_mana)
+                        .finish_output()?,
+                    Output::Account(a) => AccountOutputBuilder::from(&*a)
+                        .with_amount(new_amount)
+                        .with_mana(new_mana)
+                        .finish_output()?,
+                    Output::Nft(n) => NftOutputBuilder::from(&*n)
+                        .with_amount(new_amount)
+                        .with_mana(new_mana)
+                        .finish_output()?,
+                    Output::Foundry(f) => FoundryOutputBuilder::from(&*f)
+                        .with_amount(new_amount)
+                        .finish_output()?,
                     _ => unreachable!(),
                 };
             }
         }
-
         // If we're burning generated mana, set the capability flag.
         if self.burn.as_ref().map_or(false, |b| b.generated_mana()) {
             // Get the mana sums with generated mana to see whether there's a difference.
@@ -431,12 +455,6 @@ impl TransactionBuilder {
             }
         }
 
-        let inputs_data = Self::sort_input_signing_data(
-            self.selected_inputs,
-            self.latest_slot_commitment_id.slot_index(),
-            self.protocol_parameters.committable_age_range(),
-        )?;
-
         let mut inputs: Vec<Input> = Vec::new();
         let mut context_inputs = self
             .bic_context_inputs
@@ -445,7 +463,7 @@ impl TransactionBuilder {
             .chain(self.commitment_context_input.map(ContextInput::from))
             .collect::<Vec<_>>();
 
-        for (idx, input) in inputs_data.iter().enumerate() {
+        for (idx, input) in self.selected_inputs.iter().enumerate() {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
             if self.reward_context_inputs.contains(input.output_id()) {
                 context_inputs.push(RewardContextInput::new(idx as u16).unwrap().into());
@@ -476,7 +494,7 @@ impl TransactionBuilder {
 
         let data = PreparedTransactionData {
             transaction,
-            inputs_data,
+            inputs_data: self.selected_inputs.into_sorted_iter().collect(),
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
         };
@@ -486,10 +504,17 @@ impl TransactionBuilder {
         Ok(data)
     }
 
-    fn select_input(&mut self, input: InputSigningData) -> Result<Option<&Output>, TransactionBuilderError> {
+    /// Select an input and return whether an output was created.
+    fn select_input(&mut self, input: InputSigningData) -> Result<bool, TransactionBuilderError> {
         log::debug!("Selecting input {:?}", input.output_id());
 
-        let mut added_output = None;
+        if self.selected_inputs.len() >= INPUT_COUNT_MAX as usize {
+            return Err(TransactionBuilderError::InvalidInputCount(
+                self.selected_inputs.len() + 1,
+            ));
+        }
+
+        let mut added_output = false;
         if let Some(output) = self.transition_input(&input)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
@@ -497,7 +522,7 @@ impl TransactionBuilder {
             // - input doesn't need to be checked for as we just transitioned it
             // - foundry account requirement should have been met already by a prior `required_account_nft_addresses`
             self.added_outputs.push(output);
-            added_output = self.added_outputs.last();
+            added_output = true;
         }
 
         if let Some(requirement) = self.required_account_nft_addresses(&input)? {
@@ -505,35 +530,53 @@ impl TransactionBuilder {
             self.requirements.push(requirement);
         }
 
-        self.selected_inputs.push(input);
+        // New input may need context inputs
+        self.fulfill_context_inputs_requirements(&input);
 
-        // New inputs/outputs may need context inputs
-        if !self.requirements.contains(&Requirement::ContextInputs) {
-            self.requirements.push(Requirement::ContextInputs);
+        let required_address = input
+            .output
+            .required_address(
+                self.latest_slot_commitment_id.slot_index(),
+                self.protocol_parameters.committable_age_range(),
+            )
+            // PANIC: safe to unwrap as non basic/account/foundry/nft/delegation outputs are already filtered out.
+            .unwrap()
+            .expect("expiration unlockable outputs already filtered out");
+        self.selected_inputs.insert(required_address, input);
+
+        // Remove the cached allotment value because it's no longer valid
+        if let Some(MinManaAllotment { required_allotment, .. }) = self.min_mana_allotment.as_mut() {
+            *required_allotment = None;
         }
 
         Ok(added_output)
     }
 
-    /// Sets the required inputs of an [`TransactionBuilder`].
+    /// Sets the required inputs of a [`TransactionBuilder`].
     pub fn with_required_inputs(mut self, inputs: impl IntoIterator<Item = OutputId>) -> Self {
         self.required_inputs = inputs.into_iter().collect();
         self
     }
 
-    /// Sets the burn of an [`TransactionBuilder`].
+    /// Sets the transitions of a [`TransactionBuilder`].
+    pub fn with_transitions(mut self, transitions: impl Into<Option<Transitions>>) -> Self {
+        self.transitions = transitions.into();
+        self
+    }
+
+    /// Sets the burn of a [`TransactionBuilder`].
     pub fn with_burn(mut self, burn: impl Into<Option<Burn>>) -> Self {
         self.burn = burn.into();
         self
     }
 
-    /// Sets the remainder address of an [`TransactionBuilder`].
+    /// Sets the remainder address of a [`TransactionBuilder`].
     pub fn with_remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
         self.remainders.address = address.into();
         self
     }
 
-    /// Sets the mana allotments of an [`TransactionBuilder`].
+    /// Sets the mana allotments of a [`TransactionBuilder`].
     pub fn with_mana_allotments(mut self, mana_allotments: impl IntoIterator<Item = (AccountId, u64)>) -> Self {
         self.mana_allotments = mana_allotments.into_iter().collect();
         self
@@ -563,6 +606,7 @@ impl TransactionBuilder {
             issuer_id: account_id,
             reference_mana_cost,
             allotment_debt: 0,
+            required_allotment: None,
         });
         self
     }
@@ -647,10 +691,7 @@ impl TransactionBuilder {
                 return false;
             }
 
-            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-            let unlock_conditions = input.output.unlock_conditions().unwrap();
-
-            if unlock_conditions.is_timelocked(
+            if input.output.unlock_conditions().is_timelocked(
                 self.latest_slot_commitment_id.slot_index(),
                 self.protocol_parameters.min_committable_age(),
             ) {
@@ -691,99 +732,113 @@ impl TransactionBuilder {
             }
         })
     }
+}
 
-    // Inputs need to be sorted before signing, because the reference unlock conditions can only reference a lower index
-    pub(crate) fn sort_input_signing_data(
-        mut inputs: Vec<InputSigningData>,
-        commitment_slot_index: SlotIndex,
-        committable_age_range: CommittableAgeRange,
-    ) -> Result<Vec<InputSigningData>, TransactionBuilderError> {
-        // initially sort by output to make it deterministic
-        // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
-        // might be a more efficient way to do this
-        inputs.sort_by_key(|i| i.output.pack_to_vec());
-        // filter for ed25519 address first
-        let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
-            inputs.into_iter().partition(|input_signing_data| {
-                let required_address = input_signing_data
-                    .output
-                    .required_address(commitment_slot_index, committable_age_range)
-                    // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-                    .unwrap()
-                    .expect("expiration unlockable outputs already filtered out");
+#[derive(Clone, Debug, Default)]
+pub(crate) struct OrderedInputs {
+    ed25519: VecDeque<InputSigningData>,
+    other: BTreeMap<Address, VecDeque<InputSigningData>>,
+    len: usize,
+}
 
-                required_address.is_ed25519()
-            });
+impl OrderedInputs {
+    pub(crate) fn sorted_iter(&self) -> OrderedInputsIter<&Address, &InputSigningData> {
+        OrderedInputsIter {
+            queue: self.ed25519.iter().collect(),
+            other: self.other.iter().map(|(k, v)| (k, v.iter().collect())).collect(),
+        }
+    }
 
-        for input in account_nft_address_inputs {
-            let required_address = input
-                .output
-                .required_address(commitment_slot_index, committable_age_range)?
-                .expect("expiration unlockable outputs already filtered out");
+    pub(crate) fn into_sorted_iter(self) -> OrderedInputsIter<Address, InputSigningData> {
+        OrderedInputsIter {
+            queue: self.ed25519,
+            other: self.other,
+        }
+    }
 
-            match sorted_inputs
-                .iter()
-                .position(|input_signing_data| match required_address {
-                    Address::Account(unlock_address) => {
-                        if let Output::Account(account_output) = &input_signing_data.output {
-                            *unlock_address.account_id()
-                                == account_output.account_id_non_null(input_signing_data.output_id())
-                        } else {
-                            false
-                        }
-                    }
-                    Address::Nft(unlock_address) => {
-                        if let Output::Nft(nft_output) = &input_signing_data.output {
-                            *unlock_address.nft_id() == nft_output.nft_id_non_null(input_signing_data.output_id())
-                        } else {
-                            false
-                        }
-                    }
-                    _ => false,
-                }) {
-                Some(position) => {
-                    // Insert after the output we need
-                    sorted_inputs.insert(position + 1, input);
-                }
-                None => {
-                    // insert before address
-                    let account_or_nft_address = match &input.output {
-                        Output::Account(account_output) => Some(Address::Account(AccountAddress::new(
-                            account_output.account_id_non_null(input.output_id()),
-                        ))),
-                        Output::Nft(nft_output) => Some(Address::Nft(NftAddress::new(
-                            nft_output.nft_id_non_null(input.output_id()),
-                        ))),
-                        _ => None,
-                    };
+    pub(crate) fn iter(&self) -> impl Iterator<Item = &InputSigningData> + Clone {
+        self.ed25519.iter().chain(self.other.values().flatten())
+    }
 
-                    if let Some(account_or_nft_address) = account_or_nft_address {
-                        // Check for existing outputs for this address, and insert before
-                        match sorted_inputs.iter().position(|input_signing_data| {
-                            let required_address = input_signing_data
-                                .output
-                                .required_address(commitment_slot_index, committable_age_range)
-                                // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
-                                .unwrap()
-                                .expect("expiration unlockable outputs already filtered out");
+    pub(crate) fn insert(&mut self, required_address: Address, input: InputSigningData) {
+        if required_address.is_ed25519_backed() {
+            self.ed25519.push_back(input);
+        } else {
+            self.other.entry(required_address).or_default().push_back(input);
+        }
+        self.len += 1;
+    }
 
-                            required_address == account_or_nft_address
-                        }) {
-                            Some(position) => {
-                                // Insert before the output with this address required for unlocking
-                                sorted_inputs.insert(position, input);
-                            }
-                            // just push output
-                            None => sorted_inputs.push(input),
-                        }
-                    } else {
-                        // just push basic or foundry output
-                        sorted_inputs.push(input);
+    pub(crate) fn len(&self) -> usize {
+        self.len
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct OrderedInputsIter<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> {
+    queue: VecDeque<I>,
+    other: BTreeMap<A, VecDeque<I>>,
+}
+
+impl<A: Borrow<Address> + Ord + core::hash::Hash, I: Borrow<InputSigningData>> Iterator for OrderedInputsIter<A, I> {
+    type Item = I;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Inputs that are unlocked by Ed25519 addresses go in the queue first
+        // because they do not need to reference other inputs for their unlocks.
+        // Each one may have additional dependents which are added to the front of
+        // the queue to be sorted immediately after the input they depend upon.
+        // Those can also have dependents which will go after them.
+        // This creates a tree structure with many to one relationship, which is
+        // flattened by this loop in insertion order.
+        if let Some(input) = self.queue.pop_front() {
+            // Add associated inputs to the front of the queue
+            match &input.borrow().output {
+                Output::Account(account_output) => {
+                    for input in self
+                        .other
+                        .remove(&Address::Account(AccountAddress::new(
+                            account_output.account_id_non_null(input.borrow().output_id()),
+                        )))
+                        .into_iter()
+                        .flatten()
+                        .rev()
+                    {
+                        self.queue.push_front(input);
                     }
                 }
+                Output::Nft(nft_output) => {
+                    for input in self
+                        .other
+                        .remove(&Address::Nft(NftAddress::new(
+                            nft_output.nft_id_non_null(input.borrow().output_id()),
+                        )))
+                        .into_iter()
+                        .flatten()
+                        .rev()
+                    {
+                        self.queue.push_front(input);
+                    }
+                }
+                _ => (),
+            };
+            return Some(input);
+        }
+        // When the queue is empty, just add anything that is left over to the end of the list.
+        if let Some(mut entry) = self.other.first_entry() {
+            if let Some(input) = entry.get_mut().pop_front() {
+                // Since the structure is a list-of-lists, we need to pop
+                // the inner list if it's empty.
+                if entry.get().is_empty() {
+                    self.other.pop_first();
+                }
+                return Some(input);
             }
         }
-
-        Ok(sorted_inputs)
+        None
     }
 }

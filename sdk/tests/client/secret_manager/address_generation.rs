@@ -3,26 +3,21 @@
 
 #[cfg(feature = "stronghold")]
 use crypto::keys::bip39::Mnemonic;
-use crypto::keys::bip44::Bip44;
+#[cfg(feature = "ledger_nano")]
+use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::{ledger_nano::LedgerSecretManager, GenerateAddressOptions};
-#[cfg(feature = "events")]
-use iota_sdk::wallet::events::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions,
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
         ClientError,
     },
-    types::block::address::{Hrp, ToBech32Ext},
-    wallet::{ClientOptions, Wallet},
+    types::block::address::ToBech32Ext,
 };
 use pretty_assertions::assert_eq;
 
-use crate::client::common::{setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
+use crate::client::common::{setup, tear_down, DEFAULT_MNEMONIC};
 
 #[tokio::test]
 async fn address_generation_mnemonic() -> Result<(), Box<dyn std::error::Error>> {

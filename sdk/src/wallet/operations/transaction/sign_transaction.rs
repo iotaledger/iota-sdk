@@ -84,8 +84,6 @@ where
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", payload);
 
-        payload.validate_length()?;
-
         Ok(SignedTransactionData {
             payload,
             inputs_data: prepared_transaction_data.inputs_data.clone(),

@@ -20,7 +20,7 @@ use iota_sdk::{
             OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
-        slot::SlotIndex,
+        slot::{EpochIndex, SlotIndex},
         IdentifierError,
     },
     utils::ConvertTo,
@@ -35,7 +35,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, enter_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -103,6 +103,8 @@ pub enum WalletCommand {
     },
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
+    /// Get the committee for the given epoch.
+    Committee { epoch: Option<EpochIndex> },
     /// Checks if an account is ready to issue a block.
     Congestion {
         account_id: Option<AccountId>,
@@ -325,6 +327,10 @@ pub enum WalletCommand {
     },
     /// List the unspent outputs.
     UnspentOutputs,
+    /// Get information of a validator.
+    Validator { account_id: AccountId },
+    /// List all validators known to the node.
+    Validators,
     // /// Cast votes for an event.
     // Vote {
     //     /// Event ID for which to cast votes, e.g.
@@ -443,11 +449,12 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
@@ -594,29 +601,35 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
             println_log_info!("    + {} {}", native_token.amount(), native_token.token_id());
         }
 
-        if let Some(unlock_conditions) = output.unlock_conditions() {
-            let deposit_return = unlock_conditions
-                .storage_deposit_return()
-                .map(|deposit_return| deposit_return.amount())
-                .unwrap_or(0);
-            let amount = output.amount() - deposit_return;
-            println_log_info!("  - base coin amount: {}", amount);
+        let deposit_return = output
+            .unlock_conditions()
+            .storage_deposit_return()
+            .map(|deposit_return| deposit_return.amount())
+            .unwrap_or(0);
+        let amount = output.amount() - deposit_return;
+        println_log_info!("  - base coin amount: {}", amount);
 
-            if let Some(expiration) = unlock_conditions.expiration() {
-                let slot_index = wallet.client().get_slot_index().await?;
+        if let Some(expiration) = output.unlock_conditions().expiration() {
+            let slot_index = wallet.client().get_slot_index().await?;
 
-                if *expiration.slot_index() > *slot_index {
-                    println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
-                } else {
-                    println_log_info!(
-                        "  - expired {} slot indices ago",
-                        *slot_index - *expiration.slot_index()
-                    );
-                }
+            if *expiration.slot_index() > *slot_index {
+                println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
+            } else {
+                println_log_info!(
+                    "  - expired {} slot indices ago",
+                    *slot_index - *expiration.slot_index()
+                );
             }
         }
     }
 
+    Ok(())
+}
+
+/// `committee` command
+pub async fn committee_command(wallet: &Wallet, epoch: Option<EpochIndex>) -> Result<(), Error> {
+    let committee = wallet.client().get_committee(epoch).await?;
+    println_log_info!("{committee:#?}");
     Ok(())
 }
 
@@ -626,11 +639,12 @@ pub async fn congestion_command(
     account_id: Option<AccountId>,
     work_score: Option<u32>,
 ) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let congestion = wallet.client().get_account_congestion(&account_id, work_score).await?;
@@ -1191,6 +1205,20 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     )
 }
 
+/// `validator` command
+pub async fn validator_command(wallet: &Wallet, account_id: &AccountId) -> Result<(), Error> {
+    let validator = wallet.client().get_validator(account_id).await?;
+    println_log_info!("{validator:#?}");
+    Ok(())
+}
+
+/// `validators` command
+pub async fn validators_command(wallet: &Wallet) -> Result<(), Error> {
+    let validators = wallet.client().get_validators(None, None).await?;
+    println_log_info!("{validators:#?}");
+    Ok(())
+}
+
 // pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
 //     let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
 
@@ -1313,11 +1341,9 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
                 Output::Delegation(delegation) => delegations.push(delegation.delegation_id_non_null(&output_id)),
                 Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(&output_id)),
             }
-            let unlock_conditions = output_data
+            let sdr_amount = output_data
                 .output
                 .unlock_conditions()
-                .expect("output must have unlock conditions");
-            let sdr_amount = unlock_conditions
                 .storage_deposit_return()
                 .map(|sdr| sdr.amount())
                 .unwrap_or(0);
@@ -1382,7 +1408,7 @@ async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
     if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
-        let password = get_password("Stronghold password", false)?;
+        let password = enter_password("Stronghold password", false)?;
         wallet.set_stronghold_password(password).await?;
     }
 
@@ -1457,6 +1483,7 @@ pub async fn prompt_internal(
                             claim_command(wallet, output_id).await
                         }
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        WalletCommand::Committee { epoch } => committee_command(wallet, epoch).await,
                         WalletCommand::Congestion { account_id, work_score } => {
                             congestion_command(wallet, account_id, work_score).await
                         }
@@ -1632,6 +1659,8 @@ pub async fn prompt_internal(
                         //     decrease_voting_power_command(wallet, amount).await
                         // }
                         // WalletCommand::VotingOutput => voting_output_command(wallet).await,
+                        WalletCommand::Validator { account_id } => validator_command(wallet, &account_id).await,
+                        WalletCommand::Validators => validators_command(wallet).await,
                     }
                     .unwrap_or_else(|err| {
                         println_log_error!("{err}");
