@@ -159,6 +159,7 @@ impl Client {
         .with_payload(options.tagged_data_payload)
         .with_mana_allotments(options.mana_allotments)
         .with_remainder_address(remainder_address)
+        .with_transitions(options.transitions)
         .with_burn(options.burn);
 
         if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
