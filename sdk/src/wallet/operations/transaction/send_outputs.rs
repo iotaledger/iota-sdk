@@ -66,12 +66,12 @@ where
     /// Get inputs and build the transaction
     pub async fn prepare_send_outputs(
         &self,
-        outputs: impl Into<Vec<Output>> + Send,
+        outputs: impl IntoIterator<Item = Output> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_send_outputs");
         let options = options.into().unwrap_or_default();
-        let outputs = outputs.into();
+        let outputs = outputs.into_iter().collect::<Vec<_>>();
         let prepare_send_outputs_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 

@@ -2,17 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
-    types::block::{
-        address::Address,
-        output::{
-            feature::{
-                BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeySource, BlockIssuerKeys,
-                Ed25519PublicKeyHashBlockIssuerKey,
-            },
-            unlock_condition::AddressUnlockCondition,
-            AccountId, AccountOutput, OutputId,
-        },
+    client::{
+        api::{transaction_builder::transition::Transitions, PreparedTransactionData},
+        secret::SecretManage,
+        ClientError,
+    },
+    types::block::output::{
+        feature::{BlockIssuerKey, BlockIssuerKeySource, Ed25519PublicKeyHashBlockIssuerKey},
+        AccountId, OutputId,
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -52,20 +49,22 @@ where
     where
         WalletError: From<S::Error>,
     {
-        let wallet_ledger = self.ledger().await;
-        let implicit_account_data = wallet_ledger
-            .unspent_outputs
-            .get(output_id)
-            .ok_or(WalletError::ImplicitAccountNotFound)?;
-        let implicit_account = if implicit_account_data.output.is_implicit_account() {
-            implicit_account_data.output.as_basic()
-        } else {
-            return Err(WalletError::ImplicitAccountNotFound);
+        let ed25519_address = {
+            let wallet_ledger = self.ledger().await;
+            let implicit_account_data = wallet_ledger
+                .unspent_outputs
+                .get(output_id)
+                .ok_or(WalletError::ImplicitAccountNotFound)?;
+            let implicit_account = if implicit_account_data.output.is_implicit_account() {
+                implicit_account_data.output.as_basic()
+            } else {
+                return Err(WalletError::ImplicitAccountNotFound);
+            };
+            *implicit_account
+                .address()
+                .as_implicit_account_creation()
+                .ed25519_address()
         };
-        let ed25519_address = *implicit_account
-            .address()
-            .as_implicit_account_creation()
-            .ed25519_address();
 
         let block_issuer_key = BlockIssuerKey::from(match key_source.into() {
             BlockIssuerKeySource::ImplicitAccountAddress => Ed25519PublicKeyHashBlockIssuerKey::new(*ed25519_address),
@@ -86,24 +85,13 @@ where
             ),
         });
 
-        let account_id = AccountId::from(output_id);
-        let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
-            .with_unlock_conditions([AddressUnlockCondition::from(Address::from(ed25519_address))])
-            .with_features([BlockIssuerFeature::new(
-                u32::MAX,
-                BlockIssuerKeys::from_vec(vec![block_issuer_key])?,
-            )?])
-            .finish_output()?;
-
-        drop(wallet_ledger);
-
         let transaction_options = TransactionOptions {
             required_inputs: [*output_id].into(),
-            issuer_id: Some(account_id),
+            issuer_id: Some(AccountId::from(output_id)),
+            transitions: Some(Transitions::new().add_implicit_account(*output_id, block_issuer_key)),
             ..Default::default()
         };
 
-        self.prepare_send_outputs(vec![account], transaction_options.clone())
-            .await
+        self.prepare_send_outputs(None, transaction_options).await
     }
 }
