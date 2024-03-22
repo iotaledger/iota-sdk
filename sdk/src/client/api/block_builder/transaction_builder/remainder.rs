@@ -293,7 +293,7 @@ impl TransactionBuilder {
         self.remainders.data.push(RemainderData {
             output: catchall,
             chain: remainder_address_chain,
-            address: remainder_address.clone(),
+            address: remainder_address,
         });
 
         Ok(())

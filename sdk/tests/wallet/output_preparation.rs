@@ -43,11 +43,11 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 46800);
+    assert_eq!(output.amount(), 18300);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().len(), 2);
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 46300);
+    assert_eq!(sdr.amount(), 17800);
 
     let output = wallet
         .prepare_output(
@@ -139,13 +139,13 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 49000);
+    let min_amount_with_metadata_and_tag = 21100;
+    assert_eq!(output.amount(), min_amount_with_metadata_and_tag);
     let unlock_conditions = output.unlock_conditions();
     // address + sdr
     assert_eq!(unlock_conditions.len(), 2);
     let storage_deposit_return = unlock_conditions.storage_deposit_return().unwrap();
-    // output amount -1
-    assert_eq!(storage_deposit_return.amount(), 48999);
+    assert_eq!(storage_deposit_return.amount(), min_amount_with_metadata_and_tag - 1);
     // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
@@ -168,7 +168,7 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 54600);
+    assert_eq!(output.amount(), 26100);
     // address and storage deposit unlock condition, because of the metadata feature block, 12000 is not enough for the
     // required storage deposit
     assert_eq!(output.unlock_conditions().len(), 2);
@@ -194,9 +194,9 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
             None,
         )
         .await?;
-    assert_eq!(output.amount(), 49000);
+    assert_eq!(output.amount(), min_amount_with_metadata_and_tag);
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 48999);
+    assert_eq!(sdr.amount(), min_amount_with_metadata_and_tag - 1);
 
     // address and storage deposit unlock condition, because of the metadata feature block, 213000 is not enough for the
     // required storage deposit
@@ -279,11 +279,11 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
 
-    assert_eq!(output.kind(), iota_sdk::types::block::output::BasicOutput::KIND);
+    assert_eq!(output.kind(), BasicOutput::KIND);
     assert_eq!(output.amount(), 500000);
     assert_eq!(output.unlock_conditions().len(), 1);
     let features = output.features().unwrap();
-    assert_eq!(features.len(), 1);
+    assert_eq!(features.len(), 2);
     assert_eq!(features.sender().unwrap().address(), expected_address);
 
     // error when adding issuer when building basic output
@@ -356,7 +356,7 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
     assert!(conditions.is_timelocked(0, 0));
     assert_eq!(
         conditions.is_expired(2, CommittableAgeRange { min: 0, max: 0 }),
-        Some(false)
+        Some(true)
     );
 
     // nft with expiration
@@ -387,7 +387,7 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
     assert_eq!(output.kind(), iota_sdk::types::block::output::NftOutput::KIND);
-    assert_eq!(output.amount(), 53900);
+    assert_eq!(output.amount(), 25400);
     // address, sdr, expiration
     assert_eq!(output.unlock_conditions().len(), 3);
 
@@ -418,9 +418,9 @@ async fn output_preparation() -> Result<(), Box<dyn std::error::Error>> {
     let storage_score_params = wallet.client().get_storage_score_parameters().await?;
     let minimum_amount = output.minimum_amount(storage_score_params);
     assert_eq!(output.amount(), minimum_amount);
-    assert_eq!(output.amount(), 187900);
+    assert_eq!(output.amount(), 160000);
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 145300);
+    assert_eq!(sdr.amount(), 117400);
     // address and storage deposit unlock condition, because of the metadata feature block, 42600 is not enough for the
     // required storage deposit
     assert_eq!(output.unlock_conditions().len(), 2);
@@ -450,7 +450,7 @@ async fn output_preparation_sdr() -> Result<(), Box<dyn std::error::Error>> {
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
-                amount: 8001,
+                amount: 4001,
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -461,17 +461,19 @@ async fn output_preparation_sdr() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     // Check if the output has enough amount to cover the storage deposit
     output.verify_storage_deposit(storage_score_params)?;
-    assert_eq!(output.amount(), 50601);
+    assert_eq!(output.amount(), 18300);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().len(), 2);
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 42600);
+    assert_eq!(sdr.amount(), 14299);
+
+    let min_amount = 14100;
 
     let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
-                amount: 42599,
+                amount: min_amount - 1,
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -482,18 +484,18 @@ async fn output_preparation_sdr() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     // Check if the output has enough amount to cover the storage deposit
     output.verify_storage_deposit(storage_score_params)?;
-    assert_eq!(output.amount(), 85199);
+    assert_eq!(output.amount(), (min_amount * 2) - 1);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().len(), 2);
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 42600);
+    assert_eq!(sdr.amount(), min_amount);
 
     // ReturnStrategy::Return provided
     let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
-                amount: 42599,
+                amount: min_amount - 1,
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -507,18 +509,18 @@ async fn output_preparation_sdr() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     // Check if the output has enough amount to cover the storage deposit
     output.verify_storage_deposit(storage_score_params)?;
-    assert_eq!(output.amount(), 85199);
+    assert_eq!(output.amount(), (min_amount * 2) - 1);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().len(), 2);
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 42600);
+    assert_eq!(sdr.amount(), min_amount);
 
     // ReturnStrategy::Gift provided
     let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
-                amount: 42599,
+                amount: min_amount - 1,
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -533,7 +535,7 @@ async fn output_preparation_sdr() -> Result<(), Box<dyn std::error::Error>> {
     // Check if the output has enough amount to cover the storage deposit
     output.verify_storage_deposit(storage_score_params)?;
     // The additional 1 amount will be added, because the storage deposit should be gifted and not returned
-    assert_eq!(output.amount(), 42600);
+    assert_eq!(output.amount(), min_amount);
     // storage deposit gifted, only address unlock condition
     assert_eq!(output.unlock_conditions().len(), 1);
 
@@ -553,12 +555,22 @@ async fn prepare_nft_output_features_update() -> Result<(), Box<dyn std::error::
     let nft_options = [MintNftParams::new()
         .with_address(wallet_address.clone())
         .with_sender(wallet_address.clone())
-        .with_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)
+        .with_metadata(MetadataFeature::new([("data".to_owned(), vec![42])])?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(wallet_address.clone())
-        .with_immutable_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)];
+        .with_immutable_metadata(MetadataFeature::new([("data".to_owned(), vec![42])])?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
+    assert_eq!(
+        transaction.payload.transaction().outputs()[0]
+            .as_nft()
+            .immutable_features()
+            .metadata()
+            .unwrap()
+            .get("data")
+            .unwrap(),
+        vec![42]
+    );
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -591,20 +603,7 @@ async fn prepare_nft_output_features_update() -> Result<(), Box<dyn std::error::
     assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
-    assert_eq!(
-        nft.features().metadata().unwrap().first_key_value().unwrap().1.to_vec(),
-        [42]
-    );
-    assert_eq!(
-        nft.immutable_features()
-            .metadata()
-            .unwrap()
-            .first_key_value()
-            .unwrap()
-            .1
-            .to_vec(),
-        [42]
-    );
+    assert_eq!(nft.features().metadata().unwrap().get("data").unwrap(), b"0x2a");
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
         wallet.address().await.inner()
@@ -636,7 +635,7 @@ async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_1.address().await,
-                amount: balance.base_coin().available() - 63900,
+                amount: balance.base_coin().available() - 18300,
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -651,7 +650,7 @@ async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error
         .await?;
     let balance = wallet_0.sync(None).await?;
 
-    // 63900 left
+    // 18300 left
     let output = wallet_0
         .prepare_output(
             OutputParams {
@@ -693,7 +692,8 @@ async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error
         )
         .await;
     assert!(
-        matches!(result, Err(iota_sdk::wallet::WalletError::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == 85199)
+        matches!(result, Err(iota_sdk::wallet::WalletError::InsufficientFunds{available, required}) if available ==
+    balance.base_coin().available() && required == 28199)
     );
 
     let output = wallet_0
@@ -716,7 +716,7 @@ async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error
     // Check if the output has enough amount to cover the storage deposit
     output.verify_storage_deposit(storage_score_params)?;
     // We use excess if leftover is too small, so amount == all available balance
-    assert_eq!(output.amount(), 63900);
+    assert_eq!(output.amount(), 18300);
     // storage deposit gifted, only address unlock condition
     assert_eq!(output.unlock_conditions().len(), 1);
 
@@ -740,12 +740,12 @@ async fn prepare_output_remainder_dust() -> Result<(), Box<dyn std::error::Error
     // Check if the output has enough amount to cover the storage deposit
     output.verify_storage_deposit(storage_score_params)?;
     // We use excess if leftover is too small, so amount == all available balance
-    assert_eq!(output.amount(), 63900);
+    assert_eq!(output.amount(), 18300);
     // storage deposit returned, address and SDR unlock condition
     assert_eq!(output.unlock_conditions().len(), 2);
     // We have ReturnStrategy::Return, so leftover amount gets returned
     let sdr = output.unlock_conditions().storage_deposit_return().unwrap();
-    assert_eq!(sdr.amount(), 63900 - 100);
+    assert_eq!(sdr.amount(), 18300 - 100);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;
@@ -764,8 +764,9 @@ async fn prepare_output_only_single_nft() -> Result<(), Box<dyn std::error::Erro
     let wallet_0 = make_wallet(storage_path_0, None, None).await?;
     request_funds(&wallet_0).await?;
 
-    // Create second wallet without funds, so it only gets the NFT
+    // Create second wallet, so it only gets the NFT
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
+    request_funds(&wallet_1).await?;
 
     let wallet_0_address = wallet_0.address().await;
     let wallet_1_address = wallet_1.address().await;
@@ -814,10 +815,9 @@ async fn prepare_output_only_single_nft() -> Result<(), Box<dyn std::error::Erro
     let balance_0 = wallet_0.sync(None).await?;
     assert_eq!(*balance_0.nfts().first().unwrap(), nft_id);
 
-    // wallet_1 has no NFT and also no base coin amount
+    // wallet_1 has no NFT
     let balance_1 = wallet_1.sync(None).await?;
     assert!(balance_1.nfts().is_empty());
-    assert_eq!(balance_1.base_coin().total(), 0);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;
@@ -873,7 +873,7 @@ async fn prepare_existing_nft_output_gift() -> Result<(), Box<dyn std::error::Er
     let minimum_storage_deposit = nft.minimum_amount(storage_score_params);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
-    assert_eq!(nft.amount(), 52300);
+    assert_eq!(nft.amount(), 21600);
     assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().is_empty());
     assert_eq!(

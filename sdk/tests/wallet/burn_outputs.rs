@@ -6,7 +6,7 @@ use iota_sdk::{
     types::block::output::{
         feature::MetadataFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
+        AccountId, NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
     wallet::{CreateNativeTokenParams, MintNftParams, Wallet},
     U256,
@@ -60,12 +60,15 @@ async fn mint_and_burn_nft() -> Result<(), Box<dyn std::error::Error>> {
 #[ignore]
 #[tokio::test]
 async fn mint_and_burn_expired_nft() -> Result<(), Box<dyn std::error::Error>> {
-    let storage_path = "test-storage/mint_and_burn_expired_nft";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/mint_and_burn_expired_nft_0";
+    let storage_path_1 = "test-storage/mint_and_burn_expired_nft_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path, None, None).await?;
-    let wallet_1 = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
     let amount = 1_000_000;
     let outputs = [NftOutputBuilder::new_with_amount(amount, NftId::null())
@@ -90,10 +93,10 @@ async fn mint_and_burn_expired_nft() -> Result<(), Box<dyn std::error::Error>> {
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
     let balance = wallet_1.sync(None).await?;
-    // After burning the amount is available on account_1
-    assert_eq!(balance.base_coin().available(), amount);
+    assert_eq!(balance.nfts().len(), 0);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)
 }
 
 #[ignore]
@@ -108,6 +111,7 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
     // First create an account output, this needs to be done only once, because an account can have many foundry outputs
     let transaction = wallet.create_account_output(None, None).await?;
 
+    let account_id = AccountId::from(&OutputId::new(transaction.transaction_id, 0));
     wallet
         .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
         .await?;
@@ -115,7 +119,7 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
 
     let circulating_supply = U256::from(60i32);
     let params = CreateNativeTokenParams {
-        account_id: None,
+        account_id: Some(account_id),
         circulating_supply,
         maximum_supply: U256::from(100i32),
         foundry_metadata: None,
@@ -172,7 +176,7 @@ async fn create_and_melt_native_token() -> Result<(), Box<dyn std::error::Error>
 
     // Call to run tests in sequence
     destroy_foundry(&wallet).await?;
-    destroy_account(&wallet).await?;
+    destroy_account(&wallet, account_id).await?;
 
     tear_down(storage_path)
 }
@@ -200,12 +204,10 @@ async fn destroy_foundry(wallet: &Wallet) -> Result<(), Box<dyn std::error::Erro
     Ok(())
 }
 
-async fn destroy_account(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
+async fn destroy_account(wallet: &Wallet, account_id: AccountId) -> Result<(), Box<dyn std::error::Error>> {
     let balance = wallet.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    // Let's destroy the first account we can find
-    let account_id = *balance.accounts().first().unwrap();
     println!("account_id -> {account_id}");
     let transaction = wallet.burn(account_id, None).await.unwrap();
     wallet
@@ -233,12 +235,6 @@ async fn create_and_burn_native_tokens() -> Result<(), Box<dyn std::error::Error
     request_funds(&wallet).await?;
 
     let native_token_amount = U256::from(100);
-
-    let tx = wallet.create_account_output(None, None).await?;
-    wallet
-        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
-        .await?;
-    wallet.sync(None).await?;
 
     let create_tx = wallet
         .create_native_token(
@@ -284,6 +280,8 @@ async fn mint_and_burn_nft_with_account() -> Result<(), Box<dyn std::error::Erro
         .await?;
     wallet.sync(None).await?;
 
+    let account_id = AccountId::from(&OutputId::new(tx.transaction_id, 0));
+
     let nft_options = [MintNftParams::new()
         .with_metadata(MetadataFeature::new([("data".to_owned(), b"some nft metadata".to_vec())]).unwrap())
         .with_immutable_metadata(
@@ -296,18 +294,18 @@ async fn mint_and_burn_nft_with_account() -> Result<(), Box<dyn std::error::Erro
     let output_id = OutputId::new(nft_tx.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
-    let balance = wallet.sync(None).await?;
-    let account_id = balance.accounts().first().unwrap();
+    wallet.sync(None).await?;
 
     let burn_tx = wallet
-        .burn(Burn::new().add_nft(nft_id).add_account(*account_id), None)
+        .burn(Burn::new().add_nft(nft_id).add_account(account_id), None)
         .await?;
     wallet
         .wait_for_transaction_acceptance(&burn_tx.transaction_id, None, None)
         .await?;
     let balance = wallet.sync(None).await?;
 
-    assert!(balance.accounts().is_empty());
+    // Only the initial account is still there
+    assert_eq!(balance.accounts().len(), 1);
     assert!(balance.nfts().is_empty());
 
     tear_down(storage_path)

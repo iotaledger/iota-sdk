@@ -517,14 +517,9 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{basic::dto::BasicOutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::basic::dto::BasicOutputDto,
         protocol::iota_mainnet_protocol_parameters,
-        rand::{
-            address::rand_account_address,
-            output::{
-                feature::rand_allowed_features, rand_basic_output, unlock_condition::rand_address_unlock_condition,
-            },
-        },
+        rand::output::{rand_basic_output, unlock_condition::rand_address_unlock_condition},
     };
 
     #[test]
