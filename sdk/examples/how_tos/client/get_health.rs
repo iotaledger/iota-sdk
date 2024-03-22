@@ -29,8 +29,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get node health.
     let is_healthy = client.get_health(&node_url).await?;
+    let is_network_healthy = client.get_network_health().await?;
 
-    println!("Healthy: {is_healthy}");
+    println!("Healthy: node {is_healthy}, network {is_network_healthy}");
 
     Ok(())
 }
