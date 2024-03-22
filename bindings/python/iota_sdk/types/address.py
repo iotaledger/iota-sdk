@@ -91,24 +91,7 @@ class ImplicitAccountCreationAddress:
     """
     type: int = field(default_factory=lambda: int(
         AddressType.IMPLICIT_ACCOUNT_CREATION), init=False)
-    address: Ed25519Address
-
-    def to_dict(self) -> dict:
-        """Converts an implicit account creation address to the dictionary representation.
-        """
-
-        return {
-            "type": self.type,
-            "pubKeyHash": self.address.pub_key_hash
-        }
-
-    @staticmethod
-    def from_dict(addr_dict: dict):
-        """Creates an implicit account creation address from a dictionary representation.
-        """
-
-        return ImplicitAccountCreationAddress(
-            Ed25519Address(addr_dict['pubKeyHash']))
+    pub_key_hash: HexStr
 
 
 @json

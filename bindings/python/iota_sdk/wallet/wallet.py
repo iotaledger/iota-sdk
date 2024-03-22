@@ -478,7 +478,7 @@ class Wallet:
         """Prepares to transition an implicit account to an account.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
-            'implicitAccountTransition', {
+            'prepareImplicitAccountTransition', {
                 'outputId': output_id
             }
         ))

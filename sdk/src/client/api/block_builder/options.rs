@@ -6,7 +6,7 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::api::transaction_builder::Burn,
+    client::api::transaction_builder::{transition::Transitions, Burn},
     types::block::{
         address::Address,
         output::{AccountId, OutputId},
@@ -25,6 +25,8 @@ pub struct TransactionOptions {
     pub tagged_data_payload: Option<TaggedDataPayload>,
     /// Inputs that must be used for the transaction.
     pub required_inputs: BTreeSet<OutputId>,
+    /// Specifies what needs to be transitioned in the transaction and how.
+    pub transitions: Option<Transitions>,
     /// Specifies what needs to be burned in the transaction.
     pub burn: Option<Burn>,
     /// A string attached to the transaction.
@@ -45,6 +47,7 @@ impl Default for TransactionOptions {
             remainder_value_strategy: Default::default(),
             tagged_data_payload: Default::default(),
             required_inputs: Default::default(),
+            transitions: Default::default(),
             burn: Default::default(),
             note: Default::default(),
             allow_micro_amount: false,

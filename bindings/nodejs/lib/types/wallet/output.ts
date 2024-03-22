@@ -16,20 +16,20 @@ export enum OutputsToClaim {
 
 /** An output with extended metadata */
 export class OutputWithExtendedMetadata {
-    /** The output object itself */
+    /** The output itself */
     @Type(() => Output, {
         discriminator: OutputDiscriminator,
     })
     output!: Output;
     /** The metadata of the output */
     metadata!: OutputMetadataResponse;
-    /** The identifier of an Output */
-    outputId!: OutputId;
     /** The output ID proof */
     OutputIdProof!: OutputIdProof;
-    /** Network ID */
+    /** The corresponding output ID */
+    outputId!: OutputId;
+    /** The network ID the output belongs to */
     networkId!: string;
-    /** Remainder */
+    /** Whether the output represents a remainder amount */
     remainder!: boolean;
 }
 

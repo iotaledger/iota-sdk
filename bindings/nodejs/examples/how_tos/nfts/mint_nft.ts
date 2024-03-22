@@ -10,6 +10,7 @@ import {
     Utils,
     Wallet,
     Irc27Metadata,
+    MetadataFeature,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
@@ -64,10 +65,10 @@ async function run() {
         const params: MintNftParams = {
             address: NFT1_OWNER_ADDRESS, // Remove or change to senderAddress to send to self
             sender: senderAddress,
-            metadata: NFT1_METADATA,
+            metadata: new MetadataFeature({ data: NFT1_METADATA }),
             tag: NFT1_TAG,
             issuer: senderAddress,
-            immutableMetadata: metadata.asHex(),
+            immutableMetadata: metadata.asFeature(),
         };
         let transaction = await wallet.mintNfts([params]);
         console.log(`Transaction sent: ${transaction.transactionId}`);

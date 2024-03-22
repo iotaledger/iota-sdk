@@ -16,16 +16,16 @@ class OutputWithExtendedMetadata:
     """Output with extended metadata.
 
     Attributes:
-        output: The output object itself.
-        metadata: With the output corresponding metadata.
-        output_id: With the output data corresponding output ID.
+        output: The output itself.
+        metadata: The metadata of the output.
         output_id_proof: The output ID proof.
+        output_id: The corresponding output ID.
         network_id: The network ID the output belongs to.
         remainder: Whether the output represents a remainder amount.
     """
     output: Output
     metadata: OutputMetadata
-    output_id: OutputId
     output_id_proof: OutputIdProof
+    output_id: OutputId
     network_id: str
     remainder: bool

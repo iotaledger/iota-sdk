@@ -1,21 +1,22 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{collections::HashMap, sync::OnceLock};
+use std::collections::HashMap;
 
 use super::{TransactionBuilder, TransactionBuilderError};
 use crate::{
     client::{
-        api::transaction_builder::{requirement::PriorityMap, MinManaAllotment, Requirement},
+        api::transaction_builder::{MinManaAllotment, Requirement},
         secret::types::InputSigningData,
     },
     types::block::{
         address::Address,
-        input::{Input, UtxoInput},
+        input::{Input, UtxoInput, INPUT_COUNT_MAX},
         mana::ManaAllotment,
-        output::{AccountOutput, AccountOutputBuilder, BasicOutput, FoundryOutput, NftOutput, Output},
+        output::{AccountOutput, AccountOutputBuilder, BasicOutput, ChainId, FoundryOutput, NftOutput, Output},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         signature::Ed25519Signature,
+        slot::{SlotCommitmentId, SlotIndex},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         BlockError,
     },
@@ -23,76 +24,27 @@ use crate::{
 
 impl TransactionBuilder {
     pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<(), TransactionBuilderError> {
-        let Some(MinManaAllotment {
-            issuer_id,
-            reference_mana_cost,
-            ..
-        }) = self.min_mana_allotment
-        else {
+        if self.min_mana_allotment.is_none() {
             // If there is no min allotment calculation needed, just check mana
             self.get_inputs_for_mana_balance()?;
             return Ok(());
-        };
+        }
 
         let mut should_recalculate = false;
 
-        if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
-            self.selected_inputs = Self::sort_input_signing_data(
-                std::mem::take(&mut self.selected_inputs),
-                self.latest_slot_commitment_id.slot_index(),
-                self.protocol_parameters.committable_age_range(),
-            )?;
-
-            let inputs = self
-                .selected_inputs
-                .iter()
-                .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
-
-            let outputs = self.all_outputs().cloned();
-
-            let mut builder = Transaction::builder(self.protocol_parameters.network_id())
-                .with_inputs(inputs)
-                .with_outputs(outputs);
-
-            if let Some(payload) = &self.payload {
-                builder = builder.with_payload(payload.clone());
-            }
-
-            // Add the empty allotment so the work score includes it
-            self.mana_allotments.entry(issuer_id).or_default();
-
-            let transaction = builder
-                .with_context_inputs(self.context_inputs())
-                .with_mana_allotments(
-                    self.mana_allotments
-                        .iter()
-                        .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
-                )
-                .finish_with_params(&self.protocol_parameters)?;
-
-            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
-
-            let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
-                + self.protocol_parameters.work_score_parameters().block();
-
-            let required_allotment_mana = block_work_score as u64 * reference_mana_cost;
-
+        if let Some(required_allotment) = self.required_allotment()? {
             let MinManaAllotment {
                 issuer_id,
                 allotment_debt,
                 ..
-            } = self
-                .min_mana_allotment
-                .as_mut()
-                .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
-
+            } = self.min_mana_allotment.as_mut().unwrap();
             // Add the required allotment to the issuing allotment
-            if required_allotment_mana > self.mana_allotments[issuer_id] {
-                log::debug!("Allotting at least {required_allotment_mana} mana to account ID {issuer_id}");
-                let additional_allotment = required_allotment_mana - self.mana_allotments[issuer_id];
+            if required_allotment > self.mana_allotments[issuer_id] {
+                log::debug!("Allotting at least {required_allotment} mana to account ID {issuer_id}");
+                let additional_allotment = required_allotment - self.mana_allotments[issuer_id];
                 log::debug!("{additional_allotment} additional mana required to meet minimum allotment");
                 // Unwrap: safe because we always add the record above
-                *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment_mana;
+                *self.mana_allotments.get_mut(issuer_id).unwrap() = required_allotment;
                 log::debug!("Adding {additional_allotment} to allotment debt {allotment_debt}");
                 *allotment_debt += additional_allotment;
                 should_recalculate = true;
@@ -128,6 +80,58 @@ impl TransactionBuilder {
         Ok(())
     }
 
+    pub(crate) fn required_allotment(&mut self) -> Result<Option<u64>, TransactionBuilderError> {
+        let Some(MinManaAllotment {
+            issuer_id,
+            reference_mana_cost,
+            required_allotment,
+            ..
+        }) = self.min_mana_allotment
+        else {
+            return Ok(None);
+        };
+
+        if required_allotment.is_none() && !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
+            let inputs = self
+                .selected_inputs
+                .sorted_iter()
+                .map(|i| Input::Utxo(UtxoInput::from(*i.output_id())));
+
+            let mut builder = Transaction::builder(self.protocol_parameters.network_id())
+                .with_inputs(inputs)
+                .with_outputs(self.all_outputs().cloned());
+
+            if let Some(payload) = &self.payload {
+                builder = builder.with_payload(payload.clone());
+            }
+
+            // Add the empty allotment so the work score includes it
+            self.mana_allotments.entry(issuer_id).or_default();
+
+            let transaction = builder
+                .with_context_inputs(self.context_inputs())
+                .with_mana_allotments(
+                    self.mana_allotments
+                        .iter()
+                        .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
+                )
+                .finish_with_params(&self.protocol_parameters)?;
+
+            let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
+
+            let block_work_score = self.protocol_parameters.work_score(&signed_transaction)
+                + self.protocol_parameters.work_score_parameters().block();
+
+            let MinManaAllotment { required_allotment, .. } = self.min_mana_allotment.as_mut().unwrap();
+            required_allotment.replace(block_work_score as u64 * reference_mana_cost);
+
+            return Ok(*required_allotment);
+        }
+        Ok(required_allotment)
+    }
+
+    /// Reduce an account output by an allotment value, if one exists.
+    /// This will only affect automatically transitioned accounts.
     fn reduce_account_output(&mut self) -> Result<bool, TransactionBuilderError> {
         let MinManaAllotment {
             issuer_id,
@@ -138,9 +142,8 @@ impl TransactionBuilder {
             .as_mut()
             .ok_or(TransactionBuilderError::UnfulfillableRequirement(Requirement::Mana))?;
         if let Some(output) = self
-            .provided_outputs
+            .added_outputs
             .iter_mut()
-            .chain(&mut self.added_outputs)
             .filter(|o| o.is_account() && o.mana() != 0)
             .find(|o| o.as_account().account_id() == issuer_id)
         {
@@ -246,31 +249,39 @@ impl TransactionBuilder {
         let mut added_inputs = false;
         if selected_mana >= required_mana {
             log::debug!("Mana requirement already fulfilled");
-        } else {
-            if !self.allow_additional_input_selection {
-                return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Mana));
-            }
-            let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
-            let mut priority_map = PriorityMap::<ManaPriority>::generate(&mut self.available_inputs);
-            loop {
-                let Some(input) = priority_map.next(required_mana - selected_mana) else {
-                    break;
-                };
-                selected_mana += self.total_mana(&input, include_generated)?;
-                if let Some(output) = self.select_input(input)? {
-                    required_mana += output.mana();
+            return Ok(false);
+        }
+        if !self.allow_additional_input_selection {
+            return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Mana));
+        }
+        let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
+        while let Some(input) = self.next_input_for_mana(
+            required_mana - selected_mana,
+            include_generated,
+            self.latest_slot_commitment_id,
+        ) {
+            selected_mana += self.total_mana(&input, include_generated)?;
+            if self.select_input(input)? {
+                let output = self.added_outputs.last().unwrap();
+                // If we're allotting, it's possible the added output should be reduced, so just exit early and
+                // We will re-calculate the allotment.
+                if let Some(MinManaAllotment { issuer_id, .. }) = &self.min_mana_allotment {
+                    if output
+                        .as_account_opt()
+                        .is_some_and(|account| account.account_id() == issuer_id)
+                    {
+                        return Ok(true);
+                    }
                 }
-                added_inputs = true;
+                required_mana += output.mana();
+            }
+            added_inputs = true;
 
-                if selected_mana >= required_mana {
-                    break;
-                }
-            }
-            // Return unselected inputs to the available list
-            for input in priority_map.into_inputs() {
-                self.available_inputs.push(input);
+            if selected_mana >= required_mana {
+                break;
             }
         }
+
         Ok(added_inputs)
     }
 
@@ -290,13 +301,28 @@ impl TransactionBuilder {
         Ok(input_mana.saturating_sub(output_mana))
     }
 
-    pub(crate) fn mana_sums(&self, include_remainders: bool) -> Result<(u64, u64), TransactionBuilderError> {
-        let mut required_mana =
-            self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.mana_allotments.values().sum::<u64>();
+    pub(crate) fn mana_sums(&mut self, include_remainders: bool) -> Result<(u64, u64), TransactionBuilderError> {
+        let allotments_sum = if let Some(MinManaAllotment { issuer_id, .. }) = self.min_mana_allotment {
+            let required_allotment = self.required_allotment()?.unwrap_or_default();
+            self.mana_allotments
+                .iter()
+                .filter_map(|(id, value)| (id != &issuer_id).then_some(value))
+                .sum::<u64>()
+                + self
+                    .mana_allotments
+                    .get(&issuer_id)
+                    .copied()
+                    .unwrap_or_default()
+                    .max(required_allotment)
+        } else {
+            self.mana_allotments.values().sum::<u64>()
+        };
+        let mut required_mana = self.non_remainder_outputs().map(|o| o.mana()).sum::<u64>() + allotments_sum;
         if include_remainders {
             // Add the remainder outputs mana as well as the excess mana we've allocated to add to existing outputs
             // later.
-            required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>() + self.remainders.added_mana;
+            required_mana += self.remainder_outputs().map(|o| o.mana()).sum::<u64>()
+                + self.remainders.added_mana.values().sum::<u64>();
         }
 
         Ok((self.total_selected_mana(None)?, required_mana))
@@ -311,14 +337,18 @@ impl TransactionBuilder {
             .into()
             .unwrap_or_else(|| self.burn.as_ref().map_or(true, |b| !b.generated_mana()));
 
-        for input in &self.selected_inputs {
+        for input in self.selected_inputs.iter() {
             selected_mana += self.total_mana(input, include_generated)?;
         }
 
         Ok(selected_mana)
     }
 
-    fn total_mana(&self, input: &InputSigningData, include_generated: bool) -> Result<u64, TransactionBuilderError> {
+    pub(crate) fn total_mana(
+        &self,
+        input: &InputSigningData,
+        include_generated: bool,
+    ) -> Result<u64, TransactionBuilderError> {
         Ok(self.mana_rewards.get(input.output_id()).copied().unwrap_or_default()
             + if include_generated {
                 input.output.available_mana(
@@ -330,72 +360,112 @@ impl TransactionBuilder {
                 input.output.mana()
             })
     }
-}
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-struct ManaPriority {
-    kind_priority: usize,
-    has_native_token: bool,
-}
-
-impl PartialOrd for ManaPriority {
-    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        Some(self.cmp(other))
+    pub(crate) fn mana_chains(&self) -> Result<HashMap<ChainId, (u64, u64)>, TransactionBuilderError> {
+        let include_generated = self.burn.as_ref().map_or(true, |b| !b.generated_mana());
+        let mut res = self
+            .non_remainder_outputs()
+            .filter_map(|o| o.chain_id().map(|id| (id, (0, o.mana()))))
+            .collect::<HashMap<_, _>>();
+        for input in self.selected_inputs.iter() {
+            if let Some(chain_id) = input
+                .output
+                .chain_id()
+                .map(|id| id.or_from_output_id(input.output_id()))
+            {
+                res.entry(chain_id).or_default().0 += self.total_mana(input, include_generated)?;
+            }
+        }
+        Ok(res)
     }
-}
-impl Ord for ManaPriority {
-    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        (self.kind_priority, self.has_native_token).cmp(&(other.kind_priority, other.has_native_token))
-    }
-}
 
-impl From<&InputSigningData> for Option<ManaPriority> {
-    fn from(value: &InputSigningData) -> Self {
-        sort_order_type()
-            .get(&value.output.kind())
-            .map(|&kind_priority| ManaPriority {
-                kind_priority,
-                has_native_token: value.output.native_token().is_some(),
+    fn next_input_for_mana(
+        &mut self,
+        missing_mana: u64,
+        include_generated: bool,
+        slot_commitment_id: SlotCommitmentId,
+    ) -> Option<InputSigningData> {
+        self.available_inputs
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, input)| {
+                self.score_for_mana(input, missing_mana, include_generated, slot_commitment_id.slot_index())
+                    .map(|score| (score, idx))
             })
+            .max_by_key(|(score, _)| *score)
+            .map(|(_, idx)| self.available_inputs.swap_remove(idx))
     }
-}
 
-/// Establish the order in which we want to pick an input
-pub fn sort_order_type() -> &'static HashMap<u8, usize> {
-    static MAP: OnceLock<HashMap<u8, usize>> = OnceLock::new();
-    MAP.get_or_init(|| {
-        [
+    // Score an input based on how desirable it is.
+    fn score_for_mana(
+        &self,
+        input: &InputSigningData,
+        missing_mana: u64,
+        include_generated: bool,
+        slot_index: SlotIndex,
+    ) -> Option<usize> {
+        ([
             BasicOutput::KIND,
             NftOutput::KIND,
             AccountOutput::KIND,
             FoundryOutput::KIND,
         ]
-        .into_iter()
-        .zip(0_usize..)
-        .collect::<HashMap<_, _>>()
-    })
-}
+        .contains(&input.output.kind()))
+        .then(|| {
+            let mut work_score = self
+                .protocol_parameters
+                .work_score(&UtxoInput::from(*input.output_id()));
+            let mut mana_gained = self.total_mana(input, include_generated).unwrap_or_default();
+            let mut remainder_work_score = 0;
+            if super::amount::sdruc_not_expired(&input.output, slot_index).is_some() {
+                remainder_work_score = self.protocol_parameters.work_score(self.basic_remainder())
+            }
 
-impl PriorityMap<ManaPriority> {
-    fn next(&mut self, missing_mana: u64) -> Option<InputSigningData> {
-        let mana_sort = |mana: u64| {
-            // If the mana is greater than the missing mana, we want the smallest ones first
-            if mana >= missing_mana {
-                (false, mana)
-            // Otherwise, we want the biggest first
+            if let Ok(Some(output)) = self.transition_input(input) {
+                work_score += self.protocol_parameters.work_score(&output);
+                if let Some(allotment) = self.min_mana_allotment {
+                    // If we're allotting to this output account, we will have more mana from the reduction.
+                    if output
+                        .as_account_opt()
+                        .is_some_and(|account| account.account_id() == &allotment.issuer_id)
+                    {
+                        // We can regain as much as the full account mana value
+                        // by reducing the mana on the account.
+                        let new_required_allotment = allotment.required_allotment.unwrap_or_default()
+                            + (work_score as u64 * allotment.reference_mana_cost);
+                        mana_gained += new_required_allotment.min(output.mana());
+                    }
+                }
+                mana_gained = mana_gained.saturating_sub(output.mana());
+            } else if input.output.native_token().is_some() {
+                remainder_work_score += self.protocol_parameters.work_score(self.native_token_remainder())
+            } else if mana_gained > missing_mana {
+                remainder_work_score = self.protocol_parameters.work_score(self.basic_remainder())
+            }
+            work_score += remainder_work_score;
+
+            // The gained mana is reduced by the amount we'll need to allot later.
+            if let Some(allotment) = self.min_mana_allotment {
+                mana_gained = mana_gained.saturating_sub(work_score as u64 * allotment.reference_mana_cost);
+            }
+
+            if mana_gained == 0 {
+                return None;
+            }
+
+            let mana_diff = mana_gained.abs_diff(missing_mana) as f64;
+            // Exp(-x) creates a curve which is 1 when x is 0, and approaches 0 as x increases
+            // If the mana is insufficient, the score will decrease the more inputs are selected
+            let mana_score = if mana_gained >= missing_mana {
+                (-mana_diff / u64::MAX as f64).exp()
             } else {
-                (true, u64::MAX - mana)
-            }
-        };
-        if let Some((priority, mut inputs)) = self.0.pop_first() {
-            // Sort in reverse so we can pop from the back
-            inputs.sort_unstable_by(|i1, i2| mana_sort(i2.output.mana()).cmp(&mana_sort(i1.output.mana())));
-            let input = inputs.pop();
-            if !inputs.is_empty() {
-                self.0.insert(priority, inputs);
-            }
-            return input;
-        }
-        None
+                (-mana_diff / missing_mana as f64).exp()
+                    * ((INPUT_COUNT_MAX as f64 - self.selected_inputs.len() as f64) / INPUT_COUNT_MAX as f64)
+            };
+            let work_score = (-(work_score as f64) / u32::MAX as f64).exp();
+            // Normalize scores between 0..1 with 1 being desirable
+            Some((mana_score * work_score * usize::MAX as f64).round() as _)
+        })
+        .flatten()
     }
 }

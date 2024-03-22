@@ -3,11 +3,15 @@
 
 use crate::{
     client::{
-        api::{options::TransactionOptions, PreparedTransactionData},
+        api::{
+            options::TransactionOptions,
+            transaction_builder::transition::{AccountChange, Transitions},
+            PreparedTransactionData,
+        },
         secret::SecretManage,
         ClientError,
     },
-    types::block::output::{AccountId, AccountOutputBuilder},
+    types::block::output::AccountId,
     wallet::{types::TransactionWithMetadata, Wallet, WalletError},
 };
 
@@ -35,46 +39,19 @@ where
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_end_staking");
 
-        let account_output_with_ext_metadata = self
-            .ledger()
-            .await
-            .unspent_account_output(&account_id)
-            .cloned()
-            .ok_or_else(|| WalletError::AccountNotFound)?;
-
-        let staking_feature = account_output_with_ext_metadata
-            .output
-            .features()
-            .and_then(|f| f.staking())
-            .ok_or_else(|| WalletError::StakingFailed(format!("account id {account_id} is not staking")))?;
-
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
-
-        let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
-        let future_bounded_epoch = protocol_parameters.future_bounded_epoch(slot_commitment_id);
-
-        if future_bounded_epoch <= staking_feature.end_epoch() {
-            let end_epoch = protocol_parameters.epoch_index_of(slot_commitment_id.slot_index())
-                + (staking_feature.end_epoch() - future_bounded_epoch);
-            return Err(WalletError::StakingFailed(format!(
-                "account id {account_id} cannot end staking until {end_epoch}"
-            )));
+        let mut options = options.into();
+        if let Some(options) = options.as_mut() {
+            if let Some(transitions) = options.transitions.take() {
+                options.transitions = Some(transitions.add_account(account_id, AccountChange::EndStaking));
+            }
+        } else {
+            options.replace(TransactionOptions {
+                transitions: Some(Transitions::new().add_account(account_id, AccountChange::EndStaking)),
+                ..Default::default()
+            });
         }
 
-        let features = account_output_with_ext_metadata
-            .output
-            .features()
-            .map(|f| f.iter().filter(|f| !f.is_staking()))
-            .into_iter()
-            .flatten()
-            .cloned();
-
-        let output = AccountOutputBuilder::from(account_output_with_ext_metadata.output.as_account())
-            .with_account_id(account_id)
-            .with_features(features)
-            .finish_output()?;
-
-        let transaction = self.prepare_send_outputs([output], options).await?;
+        let transaction = self.prepare_send_outputs(None, options).await?;
 
         Ok(transaction)
     }

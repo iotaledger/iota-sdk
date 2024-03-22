@@ -40,16 +40,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_unlock_condition(AddressUnlockCondition::new(wallet_address.clone()))
         .finish_output()?;
 
-    let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output
-        .unlock_conditions()
-        .expect("output needs to have unlock conditions")
-        .as_ref()
-    {
-        // Check that the address in the unlock condition belongs to the wallet
-        wallet_address.inner() == address_unlock_condition.address()
-    } else {
-        false
-    };
+    let controlled_by_account =
+        if let [UnlockCondition::Address(address_unlock_condition)] = output.unlock_conditions().as_ref() {
+            // Check that the address in the unlock condition belongs to the wallet
+            wallet_address.inner() == address_unlock_condition.address()
+        } else {
+            false
+        };
 
     println!(
         "The output has only an address unlock condition and the address is from the account: {controlled_by_account:?}"
