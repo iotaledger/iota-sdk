@@ -176,6 +176,7 @@ std = [
     "iota_stronghold?/std",
     "iota-crypto/std",
     "once_cell?/std",
+    "dep:instant"
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
@@ -199,7 +200,6 @@ client = [
     "iota-crypto/slip10",
     "dep:async-trait",
     "dep:futures",
-    "dep:instant",
     "dep:log",
     "dep:reqwest",
     "dep:thiserror",
