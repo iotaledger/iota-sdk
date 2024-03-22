@@ -27,8 +27,6 @@ use crate::{
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
-    // TODO: can we rename this to `set_fallback_sync_options`? It's no biggie, but if I read `default` in Rust
-    // if feels like it would use `SyncOptions::default()`, but that's not what we mean here, right?
     /// Set the default SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> Result<(), WalletError> {
