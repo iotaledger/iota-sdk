@@ -20,12 +20,14 @@ use crate::{
 };
 
 impl TransactionBuilder {
-    /// Updates the remainders, overwriting old values.
-    pub(crate) fn update_remainders(&mut self) -> Result<(), TransactionBuilderError> {
-        self.remainders = Remainders {
-            address: self.remainders.address.take(),
+    /// Updates the remainders, overwriting old values. Returns whether any changes were made.
+    pub(crate) fn update_remainders(&mut self) -> Result<bool, TransactionBuilderError> {
+        // Swap the remainders so we can keep the old ones to compare to later.
+        let mut old_remainders = Remainders {
+            address: self.remainders.address.clone(),
             ..Default::default()
         };
+        core::mem::swap(&mut self.remainders, &mut old_remainders);
         let (input_amount, output_amount, inputs_sdr, outputs_sdr) = self.amount_sums();
 
         for (address, amount) in inputs_sdr {
@@ -120,12 +122,11 @@ impl TransactionBuilder {
 
         if amount_diff == 0 && mana_diff == 0 && native_tokens_diff.is_empty() {
             log::debug!("No remainder required");
-            return Ok(());
+        } else {
+            self.create_remainder_outputs(amount_diff, mana_diff, native_tokens_diff, remainder_address, chain)?;
         }
 
-        self.create_remainder_outputs(amount_diff, mana_diff, native_tokens_diff, remainder_address, chain)?;
-
-        Ok(())
+        Ok(self.remainders != old_remainders)
     }
 
     /// Gets the remainder address from configuration or finds one from the inputs.

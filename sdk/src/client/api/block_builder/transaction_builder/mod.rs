@@ -210,7 +210,7 @@ pub(crate) struct MinManaAllotment {
     required_allotment: Option<u64>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Remainders {
     address: Option<Address>,
     data: Vec<RemainderData>,
@@ -544,11 +544,6 @@ impl TransactionBuilder {
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");
         self.selected_inputs.insert(required_address, input);
-
-        // Remove the cached allotment value because it's no longer valid
-        if let Some(MinManaAllotment { required_allotment, .. }) = self.min_mana_allotment.as_mut() {
-            *required_allotment = None;
-        }
 
         Ok(added_output)
     }
