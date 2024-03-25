@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-alpha.1 - 2024-03-22
+
+Initial alpha release of the Nodejs 2.0 bindings.
+
 ## 1.1.5 - 2024-01-29
 
 ### Added

@@ -1,13 +1,17 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use instant::Duration;
 use iota_sdk::{
-    client::api::options::TransactionOptions,
+    client::{
+        api::{options::TransactionOptions, transaction_builder::TransactionBuilderError},
+        ClientError,
+    },
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{CreateNativeTokenParams, OutputsToClaim, SendNativeTokenParams, SendParams},
+    wallet::{CreateNativeTokenParams, OutputsToClaim, SendNativeTokenParams, SendParams, WalletError},
     U256,
 };
 use pretty_assertions::assert_eq;
@@ -80,7 +84,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<(), Box<dyn std::error::Error>> 
     setup(storage_path_1)?;
 
     let wallet_0 = make_wallet(storage_path_0, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
@@ -130,9 +134,9 @@ async fn claim_1_of_2_basic_outputs() -> Result<(), Box<dyn std::error::Error>> 
 
 #[ignore]
 #[tokio::test]
-async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
-    let storage_path_0 = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account_0";
-    let storage_path_1 = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account_1";
+async fn claim_2_basic_outputs_no_available_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/claim_2_basic_outputs_no_available_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_basic_outputs_no_available_in_claim_account_1";
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
@@ -140,10 +144,31 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<(), Box<d
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
+
+    // Send all available from wallet 1 away
+    let balance = wallet_1.sync(None).await?;
+    let tx = wallet_1
+        .send_with_params(
+            [SendParams::new(
+                balance.base_coin().available(),
+                wallet_0.address().await,
+            )?],
+            None,
+        )
+        .await?;
+    wallet_1
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
 
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
-    // TODO more fitting value
-    let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
+    let slots_in_one_day = wallet_0
+        .client()
+        .get_protocol_parameters()
+        .await?
+        .slots_in_duration(Duration::from_secs(86400));
+
+    let expiration_slot = wallet_0.client().get_slot_index().await? + slots_in_one_day;
 
     let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
@@ -278,9 +303,9 @@ async fn claim_2_native_tokens() -> Result<(), Box<dyn std::error::Error>> {
 
 #[ignore]
 #[tokio::test]
-async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
-    let storage_path_0 = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account_0";
-    let storage_path_1 = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account_1";
+async fn claim_2_native_tokens_no_available_balance_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/claim_2_native_tokens_no_available_balance_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_native_tokens_no_available_balance_in_claim_account_1";
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
@@ -288,6 +313,22 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<(), Box<d
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
+
+    // Send all available from wallet 1 away
+    let balance = wallet_1.sync(None).await?;
+    let tx = wallet_1
+        .send_with_params(
+            [SendParams::new(
+                balance.base_coin().available(),
+                wallet_0.address().await,
+            )?],
+            None,
+        )
+        .await?;
+    wallet_1
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
 
     let native_token_amount = U256::from(100);
 
@@ -447,9 +488,9 @@ async fn claim_2_nft_outputs() -> Result<(), Box<dyn std::error::Error>> {
 
 #[ignore]
 #[tokio::test]
-async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
-    let storage_path_0 = "test-storage/claim_2_nft_outputs_no_outputs_in_claim_wallet_0";
-    let storage_path_1 = "test-storage/claim_2_nft_outputs_no_outputs_in_claim_wallet_1";
+async fn claim_2_nft_outputs_no_available_in_claim_account() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path_0 = "test-storage/claim_2_nft_outputs_no_available_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_nft_outputs_no_available_in_claim_account_1";
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
@@ -457,6 +498,22 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<(), Box<dyn
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
+
+    // Send all available from wallet 1 away
+    let balance = wallet_1.sync(None).await?;
+    let tx = wallet_1
+        .send_with_params(
+            [SendParams::new(
+                balance.base_coin().available(),
+                wallet_0.address().await,
+            )?],
+            None,
+        )
+        .await?;
+    wallet_1
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
 
     let outputs = [
         // address of the owner of the NFT
@@ -518,6 +575,22 @@ async fn claim_basic_micro_output_error() -> Result<(), Box<dyn std::error::Erro
     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
+
+    // Send all available from wallet 1 away
+    let balance = wallet_1.sync(None).await?;
+    let tx = wallet_1
+        .send_with_params(
+            [SendParams::new(
+                balance.base_coin().available(),
+                wallet_0.address().await,
+            )?],
+            None,
+        )
+        .await?;
+    wallet_1
+        .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
+        .await?;
 
     let micro_amount = 1;
     let tx = wallet_0
@@ -543,7 +616,9 @@ async fn claim_basic_micro_output_error() -> Result<(), Box<dyn std::error::Erro
         .await;
     assert!(matches!(
         result,
-        Err(iota_sdk::wallet::WalletError::InsufficientFunds { .. })
+        Err(WalletError::Client(ClientError::TransactionBuilder(
+            TransactionBuilderError::InsufficientAmount { .. }
+        )))
     ));
 
     tear_down(storage_path_0)?;
