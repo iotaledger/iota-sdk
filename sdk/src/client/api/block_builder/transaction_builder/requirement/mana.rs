@@ -61,8 +61,6 @@ impl TransactionBuilder {
             }
 
             should_recalculate |= self.reduce_account_output()?;
-        } else {
-            should_recalculate = true;
         }
 
         // Remainders can only be calculated when the input mana is >= the output mana
