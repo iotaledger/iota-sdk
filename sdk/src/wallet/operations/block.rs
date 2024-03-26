@@ -26,22 +26,23 @@ where
         allow_negative_bic: bool,
     ) -> Result<BlockId, WalletError> {
         log::debug!("submit_basic_block");
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = match issuer_id.into() {
             Some(id) => id,
             None => {
                 let current_slot = self.client().get_slot_index().await?;
-                let network_id = self.client().get_network_id().await?;
+
                 self.ledger()
                     .await
-                    .first_block_issuer_account_id(current_slot, network_id)
+                    .first_block_issuer_account_id(current_slot, protocol_parameters.network_id())
                     .ok_or(WalletError::AccountNotFound)?
             }
         };
 
         let unsigned_block = self.client().build_basic_block(issuer_id, payload).await?;
 
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
         if !allow_negative_bic {
             let work_score = protocol_parameters.work_score(unsigned_block.body.as_basic());
             let congestion = self.client().get_account_congestion(&issuer_id, work_score).await?;
@@ -71,21 +72,6 @@ where
             .await;
 
         log::debug!("submitting block {}", block.id(&protocol_parameters));
-        log::debug!(
-            "submitting block alloted {}/{} max burned mana",
-            block
-                .as_basic()
-                .payload()
-                .unwrap()
-                .as_signed_transaction()
-                .transaction()
-                .allotments()
-                .first()
-                .unwrap()
-                .mana(),
-            block.as_basic().max_burned_mana(),
-        );
-        log::debug!("submitting block {:?}", block);
         for attempt in 1..MAX_POST_BLOCK_ATTEMPTS {
             if let Ok(block_id) = self.client().post_block(&block).await {
                 log::debug!("submitted block {}", block_id);
@@ -94,9 +80,11 @@ where
             tokio::time::sleep(std::time::Duration::from_secs(attempt)).await;
         }
 
+        log::debug!("submitting block {block:?}");
+
         let block_id = self.client().post_block(&block).await?;
 
-        log::debug!("submitted block {}", block_id);
+        log::debug!("submitted block {block_id}");
 
         Ok(block_id)
     }
