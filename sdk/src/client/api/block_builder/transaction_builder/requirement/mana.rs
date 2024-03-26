@@ -166,7 +166,7 @@ impl TransactionBuilder {
         let mut block_indexes = HashMap::<Address, usize>::new();
 
         // Assuming inputs_data is ordered by address type
-        for (current_block_index, input) in self.selected_inputs.iter().enumerate() {
+        for (current_block_index, input) in self.selected_inputs.sorted_iter().enumerate() {
             // Get the address that is required to unlock the input
             let required_address = input
                 .output
