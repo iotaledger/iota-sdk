@@ -71,6 +71,20 @@ where
             .await;
 
         log::debug!("submitting block {}", block.id(&protocol_parameters));
+        log::debug!(
+            "submitting block alloted {}/{} max burned mana",
+            block
+                .as_basic()
+                .payload()
+                .unwrap()
+                .as_signed_transaction()
+                .transaction()
+                .allotments()
+                .first()
+                .unwrap()
+                .mana(),
+            block.as_basic().max_burned_mana(),
+        );
         log::debug!("submitting block {:?}", block);
         for attempt in 1..MAX_POST_BLOCK_ATTEMPTS {
             if let Ok(block_id) = self.client().post_block(&block).await {
