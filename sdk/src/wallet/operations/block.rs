@@ -72,20 +72,20 @@ where
             .await;
 
         log::debug!("submitting block {}", block.id(&protocol_parameters));
-        for attempt in 1..MAX_POST_BLOCK_ATTEMPTS {
-            if let Ok(block_id) = self.client().post_block(&block).await {
-                log::debug!("submitted block {}", block_id);
-                return Ok(block_id);
-            }
-            tokio::time::sleep(std::time::Duration::from_secs(attempt)).await;
-        }
-
         log::debug!("submitting block {block:?}");
 
-        let block_id = self.client().post_block(&block).await?;
-
-        log::debug!("submitted block {block_id}");
-
-        Ok(block_id)
+        let mut attempt = 1;
+        loop {
+            match self.client().post_block(&block).await {
+                Ok(block_id) => break Ok(block_id),
+                Err(err) => {
+                    if attempt >= MAX_POST_BLOCK_ATTEMPTS {
+                        return Err(err.into());
+                    }
+                }
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(attempt)).await;
+            attempt += 1;
+        }
     }
 }
