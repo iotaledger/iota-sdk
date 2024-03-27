@@ -37,11 +37,11 @@ from .types.filter_options import *
 from .types.native_token import *
 from .types.node_info import *
 from .types.output import *
-from .types.output_data import *
 from .types.output_id import *
 from .types.output_id_proof import *
 from .types.output_metadata import *
 from .types.output_params import *
+from .types.output_with_extended_metadata import *
 from .types.payload import *
 from .types.send_params import *
 from .types.slot import *

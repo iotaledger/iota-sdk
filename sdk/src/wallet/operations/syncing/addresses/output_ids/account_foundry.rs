@@ -55,7 +55,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     ) -> Result<Vec<OutputId>, WalletError> {
         log::debug!("[SYNC] get_foundry_output_ids");
         // Get account outputs, so we can then get the foundry outputs with the account addresses
-        let account_outputs_with_meta = self.get_outputs(account_output_ids.to_vec()).await?;
+        let account_outputs_with_meta = self.get_outputs_request_unknown(account_output_ids).await?;
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 
@@ -77,14 +77,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
             }
         }
 
-        let mut output_ids = HashSet::new();
         let results: Vec<Result<OutputIdsResponse, WalletError>> = futures::future::try_join_all(tasks).await?;
+        let responses: Vec<OutputIdsResponse> = results.into_iter().collect::<Result<Vec<_>, _>>()?;
 
-        for res in results {
-            let foundry_output_ids = res?;
-            output_ids.extend(foundry_output_ids.items);
-        }
-
-        Ok(output_ids.into_iter().collect())
+        Ok(responses.into_iter().flat_map(|res| res.items).collect())
     }
 }

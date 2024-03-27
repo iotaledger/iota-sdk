@@ -57,7 +57,7 @@ async fn create_wallet() -> Result<(), Error> {
         .await;
 
     match response {
-        Response::OutputsData(_) => {}
+        Response::OutputsWithExtendedMetadata(_) => {}
         _ => panic!("unexpected response {response:?}"),
     }
 

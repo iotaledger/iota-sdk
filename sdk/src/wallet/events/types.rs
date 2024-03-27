@@ -12,7 +12,7 @@ use crate::{
         payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
     },
     wallet::{
-        types::{InclusionState, OutputData},
+        types::{InclusionState, OutputWithExtendedMetadata},
         WalletError,
     },
 };
@@ -167,7 +167,7 @@ impl TryFrom<u8> for WalletEventType {
 #[serde(rename_all = "camelCase")]
 pub struct NewOutputEvent {
     /// The new output.
-    pub output: OutputData,
+    pub output: OutputWithExtendedMetadata,
     /// The transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction: Option<SignedTransactionPayloadDto>,
@@ -179,7 +179,7 @@ pub struct NewOutputEvent {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SpentOutputEvent {
     /// The spent output.
-    pub output: OutputData,
+    pub output: OutputWithExtendedMetadata,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]

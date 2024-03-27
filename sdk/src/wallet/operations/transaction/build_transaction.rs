@@ -19,7 +19,10 @@ use crate::{
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
-    wallet::{operations::helpers::time::can_output_be_unlocked_from_now_on, types::OutputData, Wallet, WalletError},
+    wallet::{
+        operations::helpers::time::can_output_be_unlocked_from_now_on, types::OutputWithExtendedMetadata, Wallet,
+        WalletError,
+    },
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
@@ -107,18 +110,18 @@ fn filter_inputs<'a>(
     wallet_address: &Bech32Address,
     controlled_addresses: &HashSet<Address>,
     wallet_bip_path: Option<Bip44>,
-    available_outputs: impl IntoIterator<Item = &'a OutputData>,
+    available_outputs: impl IntoIterator<Item = &'a OutputWithExtendedMetadata>,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
     required_inputs: &BTreeSet<OutputId>,
 ) -> Result<Vec<InputSigningData>, WalletError> {
     let mut available_outputs_signing_data = Vec::new();
 
-    for output_data in available_outputs {
-        if !required_inputs.contains(&output_data.output_id) {
+    for output_with_ext_metadata in available_outputs {
+        if !required_inputs.contains(&output_with_ext_metadata.output_id) {
             let output_can_be_unlocked_now_and_in_future = can_output_be_unlocked_from_now_on(
                 controlled_addresses,
-                &output_data.output,
+                &output_with_ext_metadata.output,
                 slot_index,
                 committable_age_range,
             );
@@ -129,9 +132,12 @@ fn filter_inputs<'a>(
             }
         }
 
-        if let Some(available_input) =
-            output_data.input_signing_data(wallet_address, wallet_bip_path, slot_index, committable_age_range)?
-        {
+        if let Some(available_input) = output_with_ext_metadata.input_signing_data(
+            wallet_address,
+            wallet_bip_path,
+            slot_index,
+            committable_age_range,
+        )? {
             available_outputs_signing_data.push(available_input);
         }
     }

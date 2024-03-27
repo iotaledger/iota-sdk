@@ -91,14 +91,15 @@ where
                 {
                     let wallet_ledger = self.ledger().await;
                     // Safe to unwrap, we just got the output
-                    let confirmed_output_data = wallet_ledger.outputs.get(&transaction_output).expect("output exists");
+                    let confirmed_output_with_ext_metadata =
+                        wallet_ledger.outputs.get(&transaction_output).expect("output exists");
                     log::debug!(
                         "[SYNC] confirmed transaction {transaction_id} in block {}",
-                        confirmed_output_data.metadata.block_id()
+                        confirmed_output_with_ext_metadata.metadata.block_id()
                     );
                     updated_transaction_and_outputs(
                         transaction,
-                        Some(*confirmed_output_data.metadata.block_id()),
+                        Some(*confirmed_output_with_ext_metadata.metadata.block_id()),
                         InclusionState::Confirmed,
                         &mut updated_transactions,
                         &mut spent_output_ids,
@@ -246,8 +247,8 @@ fn process_transaction_with_unknown_state(
     let mut all_inputs_spent = true;
     for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;
-        if let Some(output_data) = wallet_ledger.outputs.get(input.output_id()) {
-            if !output_data.is_spent() {
+        if let Some(output_with_ext_metadata) = wallet_ledger.outputs.get(input.output_id()) {
+            if !output_with_ext_metadata.is_spent() {
                 // unspent output needs to be made available again
                 output_ids_to_unlock.push(*input.output_id());
                 all_inputs_spent = false;

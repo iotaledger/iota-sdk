@@ -41,7 +41,7 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::{operations::syncing::SyncOptions, types::OutputData, FilterOptions, WalletError},
+    wallet::{operations::syncing::SyncOptions, types::OutputWithExtendedMetadata, FilterOptions, WalletError},
 };
 
 /// The stateful wallet used to interact with an IOTA network.
@@ -112,14 +112,14 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 pub struct WalletLedger {
     /// Outputs
     // stored separated from the wallet for performance?
-    pub(crate) outputs: HashMap<OutputId, OutputData>,
+    pub(crate) outputs: HashMap<OutputId, OutputWithExtendedMetadata>,
     /// Unspent outputs that are currently used as input for transactions
     // outputs used in transactions should be locked here so they don't get used again, which would result in a
     // conflicting transaction
     pub(crate) locked_outputs: HashSet<OutputId>,
     /// Unspent outputs
     // have unspent outputs in a separated hashmap so we don't need to iterate over all outputs we have
-    pub(crate) unspent_outputs: HashMap<OutputId, OutputData>,
+    pub(crate) unspent_outputs: HashMap<OutputId, OutputWithExtendedMetadata>,
     /// Sent transactions
     // stored separated from the wallet for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
@@ -140,9 +140,9 @@ pub struct WalletLedger {
 
 impl WalletLedger {
     fn filter_outputs<'a>(
-        outputs: impl Iterator<Item = &'a OutputData>,
+        outputs: impl Iterator<Item = &'a OutputWithExtendedMetadata>,
         filter: FilterOptions,
-    ) -> impl Iterator<Item = &'a OutputData> {
+    ) -> impl Iterator<Item = &'a OutputWithExtendedMetadata> {
         outputs.filter(move |output| {
             match &output.output {
                 Output::Account(account) => {
@@ -220,27 +220,27 @@ impl WalletLedger {
     }
 
     /// Returns outputs map of the wallet.
-    pub fn outputs(&self) -> &HashMap<OutputId, OutputData> {
+    pub fn outputs(&self) -> &HashMap<OutputId, OutputWithExtendedMetadata> {
         &self.outputs
     }
 
     /// Returns unspent outputs map of the wallet.
-    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputData> {
+    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputWithExtendedMetadata> {
         &self.unspent_outputs
     }
 
     /// Returns outputs of the wallet.
-    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
+    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputWithExtendedMetadata> {
         Self::filter_outputs(self.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the wallet.
-    pub fn filtered_unspent_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
+    pub fn filtered_unspent_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputWithExtendedMetadata> {
         Self::filter_outputs(self.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputData> {
+    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputWithExtendedMetadata> {
         self.filtered_unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()
@@ -249,7 +249,7 @@ impl WalletLedger {
     }
 
     /// Gets the unspent anchor output matching the given ID.
-    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputData> {
+    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputWithExtendedMetadata> {
         self.filtered_unspent_outputs(FilterOptions {
             anchor_ids: Some([*anchor_id].into()),
             ..Default::default()
@@ -258,7 +258,7 @@ impl WalletLedger {
     }
 
     /// Gets the unspent foundry output matching the given ID.
-    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputData> {
+    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputWithExtendedMetadata> {
         self.filtered_unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
             ..Default::default()
@@ -267,7 +267,7 @@ impl WalletLedger {
     }
 
     /// Gets the unspent nft output matching the given ID.
-    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputData> {
+    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputWithExtendedMetadata> {
         self.filtered_unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
             ..Default::default()
@@ -276,7 +276,7 @@ impl WalletLedger {
     }
 
     /// Gets the unspent delegation output matching the given ID.
-    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputData> {
+    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputWithExtendedMetadata> {
         self.filtered_unspent_outputs(FilterOptions {
             delegation_ids: Some([*delegation_id].into()),
             ..Default::default()
@@ -285,17 +285,17 @@ impl WalletLedger {
     }
 
     /// Returns implicit accounts of the wallet.
-    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData> {
+    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputWithExtendedMetadata> {
         self.unspent_outputs
             .values()
-            .filter(|output_data| output_data.output.is_implicit_account())
+            .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_implicit_account())
     }
 
     /// Returns accounts of the wallet.
-    pub fn accounts(&self) -> impl Iterator<Item = &OutputData> {
+    pub fn accounts(&self) -> impl Iterator<Item = &OutputWithExtendedMetadata> {
         self.unspent_outputs
             .values()
-            .filter(|output_data| output_data.output.is_account())
+            .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_account())
     }
 
     // Returns the first possible unexpired block issuer Account id, which can be an implicit account.
@@ -314,8 +314,8 @@ impl WalletLedger {
             .or_else(|| self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
     }
 
-    /// Get the [`OutputData`] of an output stored in the wallet.
-    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
+    /// Get the [`OutputWithExtendedMetadata`] of an output stored in the wallet.
+    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputWithExtendedMetadata> {
         self.outputs.get(output_id)
     }
 
@@ -379,10 +379,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output, WalletError> {
         let foundry_id = FoundryId::from(native_token_id);
 
-        for output_data in self.ledger.read().await.outputs.values() {
-            if let Output::Foundry(foundry_output) = &output_data.output {
+        for output_with_ext_metadata in self.ledger.read().await.outputs.values() {
+            if let Output::Foundry(foundry_output) = &output_with_ext_metadata.output {
                 if foundry_output.id() == foundry_id {
-                    return Ok(output_data.output.clone());
+                    return Ok(output_with_ext_metadata.output.clone());
                 }
             }
         }
@@ -529,9 +529,9 @@ impl<S: SecretManage> Drop for WalletInner<S> {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletLedgerDto {
-    pub outputs: HashMap<OutputId, OutputData>,
+    pub outputs: HashMap<OutputId, OutputWithExtendedMetadata>,
     pub locked_outputs: HashSet<OutputId>,
-    pub unspent_outputs: HashMap<OutputId, OutputData>,
+    pub unspent_outputs: HashMap<OutputId, OutputWithExtendedMetadata>,
     pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     pub pending_transactions: HashSet<TransactionId>,
     pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,

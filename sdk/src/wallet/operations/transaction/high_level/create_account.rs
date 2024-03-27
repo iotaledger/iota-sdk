@@ -13,7 +13,7 @@ use crate::{
     },
     wallet::{
         operations::transaction::TransactionOptions,
-        types::{OutputData, TransactionWithMetadata},
+        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -107,22 +107,19 @@ where
     pub(crate) async fn get_account_output(
         &self,
         account_id: impl Into<Option<AccountId>> + Send,
-    ) -> Option<(AccountId, OutputData)> {
+    ) -> Option<(AccountId, OutputWithExtendedMetadata)> {
         log::debug!("[get_account_output]");
         let account_id = account_id.into();
-        self.ledger()
-            .await
-            .unspent_outputs
-            .values()
-            .find_map(|output_data| match &output_data.output {
+        self.ledger().await.unspent_outputs.values().find_map(
+            |output_with_ext_metadata| match &output_with_ext_metadata.output {
                 Output::Account(account_output) => {
-                    let output_account_id = account_output.account_id_non_null(&output_data.output_id);
+                    let output_account_id = account_output.account_id_non_null(&output_with_ext_metadata.output_id);
 
                     account_id.map_or_else(
-                        || Some((output_account_id, output_data.clone())),
+                        || Some((output_account_id, output_with_ext_metadata.clone())),
                         |account_id| {
                             if output_account_id == account_id {
-                                Some((output_account_id, output_data.clone()))
+                                Some((output_account_id, output_with_ext_metadata.clone()))
                             } else {
                                 None
                             }
@@ -130,7 +127,8 @@ where
                     )
                 }
                 _ => None,
-            })
+            },
+        )
     }
 }
 

@@ -12,7 +12,7 @@ import {
     FilterOptions,
     CreateNativeTokenParams,
     MintNftParams,
-    OutputData,
+    OutputWithExtendedMetadata,
     OutputParams,
     OutputsToClaim,
     TransactionWithMetadata,
@@ -303,13 +303,15 @@ export class Wallet {
      *
      * @returns The accounts of the wallet.
      */
-    async accounts(): Promise<OutputData[]> {
+    async accounts(): Promise<OutputWithExtendedMetadata[]> {
         const response = await this.methodHandler.callMethod({
             name: 'accounts',
         });
 
-        const parsed = JSON.parse(response) as Response<OutputData[]>;
-        return plainToInstance(OutputData, parsed.payload);
+        const parsed = JSON.parse(response) as Response<
+            OutputWithExtendedMetadata[]
+        >;
+        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
     }
 
     /**
@@ -701,17 +703,19 @@ export class Wallet {
     /**
      * Get the data for an output.
      * @param outputId The output to get.
-     * @returns The `OutputData`.
+     * @returns The `OutputWithExtendedMetadata`.
      */
-    async getOutput(outputId: OutputId): Promise<OutputData> {
+    async getOutput(outputId: OutputId): Promise<OutputWithExtendedMetadata> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutput',
             data: {
                 outputId,
             },
         });
-        const parsed = JSON.parse(response) as Response<OutputData>;
-        return plainToInstance(OutputData, parsed.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<OutputWithExtendedMetadata>;
+        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
     }
 
     /**
@@ -873,14 +877,18 @@ export class Wallet {
      * @param filterOptions Options to filter the to be returned outputs.
      * @returns The outputs with metadata.
      */
-    async outputs(filterOptions?: FilterOptions): Promise<OutputData[]> {
+    async outputs(
+        filterOptions?: FilterOptions,
+    ): Promise<OutputWithExtendedMetadata[]> {
         const response = await this.methodHandler.callMethod({
             name: 'outputs',
             data: { filterOptions },
         });
 
-        const parsed = JSON.parse(response) as Response<OutputData[]>;
-        return plainToInstance(OutputData, parsed.payload);
+        const parsed = JSON.parse(response) as Response<
+            OutputWithExtendedMetadata[]
+        >;
+        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
     }
 
     /**
@@ -951,13 +959,15 @@ export class Wallet {
      *
      * @returns The implicit accounts of the wallet.
      */
-    async implicitAccounts(): Promise<OutputData[]> {
+    async implicitAccounts(): Promise<OutputWithExtendedMetadata[]> {
         const response = await this.methodHandler.callMethod({
             name: 'implicitAccounts',
         });
 
-        const parsed = JSON.parse(response) as Response<OutputData[]>;
-        return plainToInstance(OutputData, parsed.payload);
+        const parsed = JSON.parse(response) as Response<
+            OutputWithExtendedMetadata[]
+        >;
+        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
     }
 
     /**
@@ -996,13 +1006,17 @@ export class Wallet {
      * @param filterOptions Options to filter the to be returned outputs.
      * @returns The outputs with metadata.
      */
-    async unspentOutputs(filterOptions?: FilterOptions): Promise<OutputData[]> {
+    async unspentOutputs(
+        filterOptions?: FilterOptions,
+    ): Promise<OutputWithExtendedMetadata[]> {
         const response = await this.methodHandler.callMethod({
             name: 'unspentOutputs',
             data: { filterOptions },
         });
-        const parsed = JSON.parse(response) as Response<OutputData[]>;
-        return plainToInstance(OutputData, parsed.payload);
+        const parsed = JSON.parse(response) as Response<
+            OutputWithExtendedMetadata[]
+        >;
+        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
     }
 
     /**

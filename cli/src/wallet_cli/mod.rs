@@ -25,9 +25,9 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams, SendNftParams,
-        SendParams, SyncOptions, Wallet, WalletError,
+        types::OutputWithExtendedMetadata, BeginStakingParams, ConsolidationParams, CreateDelegationParams,
+        CreateNativeTokenParams, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
+        SendNftParams, SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };
@@ -1317,12 +1317,12 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let mut delegations = Vec::new();
     let mut anchors = Vec::new();
 
-    for output_data in wallet.ledger().await.unspent_outputs().values() {
-        let output_id = output_data.output_id;
+    for output_with_ext_metadata in wallet.ledger().await.unspent_outputs().values() {
+        let output_id = output_with_ext_metadata.output_id;
         output_ids.push(output_id);
 
         // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-        let required_address = &output_data
+        let required_address = &output_with_ext_metadata
             .output
             .required_address(slot_index, protocol_parameters.committable_age_range())?;
 
@@ -1330,10 +1330,10 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
             .as_ref()
             .is_some_and(|required_address| required_address == address.inner())
         {
-            if let Some(nt) = output_data.output.native_token() {
+            if let Some(nt) = output_with_ext_metadata.output.native_token() {
                 native_tokens.add_native_token(*nt)?;
             }
-            match &output_data.output {
+            match &output_with_ext_metadata.output {
                 Output::Basic(_) => {}
                 Output::Account(account) => accounts.push(account.account_id_non_null(&output_id)),
                 Output::Foundry(foundry) => foundries.push(foundry.id()),
@@ -1341,14 +1341,14 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
                 Output::Delegation(delegation) => delegations.push(delegation.delegation_id_non_null(&output_id)),
                 Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(&output_id)),
             }
-            let sdr_amount = output_data
+            let sdr_amount = output_with_ext_metadata
                 .output
                 .unlock_conditions()
                 .storage_deposit_return()
                 .map(|sdr| sdr.amount())
                 .unwrap_or(0);
 
-            amount += output_data.output.amount() - sdr_amount;
+            amount += output_with_ext_metadata.output.amount() - sdr_amount;
         }
     }
 
@@ -1679,26 +1679,30 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
-    if outputs.is_empty() {
+fn print_outputs(mut outputs_with_ext_metadata: Vec<OutputWithExtendedMetadata>, title: &str) -> Result<(), Error> {
+    if outputs_with_ext_metadata.is_empty() {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_unstable_by_key(|o| o.output_id);
+        outputs_with_ext_metadata.sort_unstable_by_key(|o| o.output_id);
 
-        for (i, output_data) in outputs.into_iter().enumerate() {
-            let kind_str = if output_data.output.is_implicit_account() {
+        for (i, output_with_ext_metadata) in outputs_with_ext_metadata.into_iter().enumerate() {
+            let kind_str = if output_with_ext_metadata.output.is_implicit_account() {
                 "ImplicitAccount"
             } else {
-                output_data.output.kind_str()
+                output_with_ext_metadata.output.kind_str()
             };
 
             println_log_info!(
                 "{:<5}{} {:<16}{}",
                 i,
-                &output_data.output_id,
+                &output_with_ext_metadata.output_id,
                 kind_str,
-                if output_data.is_spent() { "Spent" } else { "Unspent" },
+                if output_with_ext_metadata.is_spent() {
+                    "Spent"
+                } else {
+                    "Unspent"
+                },
             );
         }
     }

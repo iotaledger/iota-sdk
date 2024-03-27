@@ -16,10 +16,10 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
-from iota_sdk.types.output_data import OutputData
-from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
+from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output_params import OutputParams
+from iota_sdk.types.output_with_extended_metadata import OutputWithExtendedMetadata
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.transaction_id import TransactionId
 from iota_sdk.types.send_params import BeginStakingParams, CreateAccountOutputParams, CreateDelegationParams, CreateNativeTokenParams, MintNftParams, SendManaParams, SendNativeTokenParams, SendNftParams, SendParams
@@ -230,13 +230,13 @@ class Wallet:
             }
         )
 
-    def accounts(self) -> List[OutputData]:
+    def accounts(self) -> List[OutputWithExtendedMetadata]:
         """Returns the accounts of the wallet.
         """
         outputs = self._call_method(
             'accounts'
         )
-        return [OutputData.from_dict(o) for o in outputs]
+        return [OutputWithExtendedMetadata.from_dict(o) for o in outputs]
 
     def burn(
             self, burn: Burn, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
@@ -397,10 +397,10 @@ class Wallet:
             'getBalance'
         ))
 
-    def get_output(self, output_id: OutputId) -> OutputData:
+    def get_output(self, output_id: OutputId) -> OutputWithExtendedMetadata:
         """Get output.
         """
-        return OutputData.from_dict(self._call_method(
+        return OutputWithExtendedMetadata.from_dict(self._call_method(
             'getOutput', {
                 'outputId': output_id
             }
@@ -442,7 +442,7 @@ class Wallet:
         )
 
     def outputs(
-            self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:
+            self, filter_options: Optional[FilterOptions] = None) -> List[OutputWithExtendedMetadata]:
         """Returns all outputs of the wallet.
         """
         outputs = self._call_method(
@@ -450,7 +450,7 @@ class Wallet:
                 'filterOptions': filter_options
             }
         )
-        return [OutputData.from_dict(o) for o in outputs]
+        return [OutputWithExtendedMetadata.from_dict(o) for o in outputs]
 
     def pending_transactions(self):
         """Returns all pending transactions of the wallet.
@@ -484,13 +484,13 @@ class Wallet:
         ))
         return PreparedTransaction(self, prepared)
 
-    def implicit_accounts(self) -> List[OutputData]:
+    def implicit_accounts(self) -> List[OutputWithExtendedMetadata]:
         """Returns the implicit accounts of the wallet.
         """
         outputs = self._call_method(
             'implicitAccounts'
         )
-        return [OutputData.from_dict(o) for o in outputs]
+        return [OutputWithExtendedMetadata.from_dict(o) for o in outputs]
 
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
         """Returns all incoming transactions of the wallet.
@@ -509,7 +509,7 @@ class Wallet:
         return [TransactionWithMetadata.from_dict(tx) for tx in transactions]
 
     def unspent_outputs(
-            self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:
+            self, filter_options: Optional[FilterOptions] = None) -> List[OutputWithExtendedMetadata]:
         """Returns all unspent outputs of the wallet.
         """
         outputs = self._call_method(
@@ -517,7 +517,7 @@ class Wallet:
                 'filterOptions': filter_options
             }
         )
-        return [OutputData.from_dict(o) for o in outputs]
+        return [OutputWithExtendedMetadata.from_dict(o) for o in outputs]
 
     def mint_native_token(self, token_id: HexStr, mint_amount: int,
                           options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:

@@ -10,7 +10,7 @@ use crate::{
     },
     wallet::{
         operations::transaction::TransactionOptions,
-        types::{OutputData, TransactionWithMetadata},
+        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -51,14 +51,14 @@ where
         let foundry_id = FoundryId::from(token_id);
         let account_id = *foundry_id.account_address().account_id();
 
-        let (existing_account_output_data, existing_foundry_output) = self
-            .find_account_and_foundry_output_data(account_id, foundry_id)
+        let (existing_account_output_with_ext_metadata, existing_foundry_output) = self
+            .find_account_and_foundry_output_with_ext_metadata(account_id, foundry_id)
             .await
             .map(|(account_data, foundry_data)| match foundry_data.output {
                 Output::Foundry(foundry_output) => (account_data, foundry_output),
                 _ => unreachable!("We already checked it's a foundry output"),
             })?;
-        let account_output_id = existing_account_output_data.output_id;
+        let account_output_id = existing_account_output_with_ext_metadata.output_id;
         let mut options = options.into();
         if let Some(options) = options.as_mut() {
             options.required_inputs.insert(account_output_id);
@@ -81,43 +81,46 @@ where
         self.prepare_send_outputs(outputs, options).await
     }
 
-    /// Find and return unspent `OutputData` for given `account_id` and `foundry_id`
-    async fn find_account_and_foundry_output_data(
+    /// Find and return unspent `OutputWithExtendedMetadata` for given `account_id` and `foundry_id`
+    async fn find_account_and_foundry_output_with_ext_metadata(
         &self,
         account_id: AccountId,
         foundry_id: FoundryId,
-    ) -> Result<(OutputData, OutputData), WalletError> {
-        let mut existing_account_output_data = None;
+    ) -> Result<(OutputWithExtendedMetadata, OutputWithExtendedMetadata), WalletError> {
+        let mut existing_account_output_with_ext_metadata = None;
         let mut existing_foundry_output = None;
 
-        for (output_id, output_data) in self.ledger().await.unspent_outputs.iter() {
-            match &output_data.output {
+        for (output_id, output_with_ext_metadata) in self.ledger().await.unspent_outputs.iter() {
+            match &output_with_ext_metadata.output {
                 Output::Account(output) => {
                     if output.account_id_non_null(output_id) == account_id {
-                        existing_account_output_data = Some(output_data.clone());
+                        existing_account_output_with_ext_metadata = Some(output_with_ext_metadata.clone());
                     }
                 }
                 Output::Foundry(output) => {
                     if output.id() == foundry_id {
-                        existing_foundry_output = Some(output_data.clone());
+                        existing_foundry_output = Some(output_with_ext_metadata.clone());
                     }
                 }
                 // Not interested in these outputs here
                 _ => {}
             }
 
-            if existing_account_output_data.is_some() && existing_foundry_output.is_some() {
+            if existing_account_output_with_ext_metadata.is_some() && existing_foundry_output.is_some() {
                 break;
             }
         }
 
-        let existing_account_output_data = existing_account_output_data.ok_or_else(|| {
+        let existing_account_output_with_ext_metadata = existing_account_output_with_ext_metadata.ok_or_else(|| {
             WalletError::BurningOrMeltingFailed("required account output for foundry not found".to_string())
         })?;
 
-        let existing_foundry_output_data = existing_foundry_output
+        let existing_foundry_output_with_ext_metadata = existing_foundry_output
             .ok_or_else(|| WalletError::BurningOrMeltingFailed("required foundry output not found".to_string()))?;
 
-        Ok((existing_account_output_data, existing_foundry_output_data))
+        Ok((
+            existing_account_output_with_ext_metadata,
+            existing_foundry_output_with_ext_metadata,
+        ))
     }
 }

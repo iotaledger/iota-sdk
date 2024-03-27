@@ -25,7 +25,7 @@ use crate::{
     wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::helpers::time::can_output_be_unlocked_now,
-        types::{OutputData, TransactionWithMetadata},
+        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -125,11 +125,11 @@ where
     /// Determines whether an output should be consolidated or not.
     async fn should_consolidate_output(
         &self,
-        output_data: &OutputData,
+        output_with_ext_metadata: &OutputWithExtendedMetadata,
         slot_index: SlotIndex,
         controlled_addresses: &HashSet<Address>,
     ) -> Result<bool, WalletError> {
-        Ok(if let Output::Basic(basic_output) = &output_data.output {
+        Ok(if let Output::Basic(basic_output) = &output_with_ext_metadata.output {
             let protocol_parameters = self.client().get_protocol_parameters().await?;
             let unlock_conditions = basic_output.unlock_conditions();
 
@@ -157,7 +157,7 @@ where
 
             can_output_be_unlocked_now(
                 controlled_addresses,
-                output_data,
+                output_with_ext_metadata,
                 slot_index,
                 protocol_parameters.committable_age_range(),
             )?
@@ -167,7 +167,10 @@ where
     }
 
     /// Returns all outputs that should be consolidated.
-    async fn get_outputs_to_consolidate(&self, params: &ConsolidationParams) -> Result<Vec<OutputData>, WalletError> {
+    async fn get_outputs_to_consolidate(
+        &self,
+        params: &ConsolidationParams,
+    ) -> Result<Vec<OutputWithExtendedMetadata>, WalletError> {
         // #[cfg(feature = "participation")]
         // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
@@ -180,48 +183,54 @@ where
 
         let controlled_addresses = wallet_ledger.controlled_addresses(wallet_address.inner().clone());
 
-        for (output_id, output_data) in &wallet_ledger.unspent_outputs {
+        for (output_id, output_with_ext_metadata) in &wallet_ledger.unspent_outputs {
             // #[cfg(feature = "participation")]
             // if let Some(ref voting_output) = voting_output {
             //     // Remove voting output from inputs, because we want to keep its features and not consolidate it.
-            //     if output_data.output_id == voting_output.output_id {
+            //     if output_with_ext_metadata.output_id == voting_output.output_id {
             //         continue;
             //     }.await
             // }
 
             let is_locked_output = wallet_ledger.locked_outputs.contains(output_id);
             let should_consolidate_output = self
-                .should_consolidate_output(output_data, slot_index, &controlled_addresses)
+                .should_consolidate_output(output_with_ext_metadata, slot_index, &controlled_addresses)
                 .await?;
             if !is_locked_output && should_consolidate_output {
-                outputs_to_consolidate.push(output_data.clone());
+                outputs_to_consolidate.push(output_with_ext_metadata.clone());
 
                 // Keep track of inputs with native tokens.
-                if let Some(nt) = &output_data.output.native_token() {
+                if let Some(nt) = &output_with_ext_metadata.output.native_token() {
                     native_token_inputs
                         .entry(*nt.token_id())
                         .or_insert_with(HashSet::new)
-                        .insert(output_data.output_id);
+                        .insert(output_with_ext_metadata.output_id);
                 }
             }
         }
 
         // Remove outputs if they have a native token, <= minimum amount and there are no other outputs with the same
         // native token.
-        outputs_to_consolidate.retain(|output_data| {
-            output_data.output.native_token().as_ref().map_or(true, |nt| {
-                // `<=` because outputs in genesis snapshot can have a lower amount than min amount.
-                if output_data.output.amount() <= output_data.output.minimum_amount(storage_score_parameters) {
-                    // If there is only a single output with this native token, then it shouldn't be consolidated,
-                    // because no amount will be made available, since we need to create a remainder output with the
-                    // native token again.
-                    native_token_inputs
-                        .get(nt.token_id())
-                        .map_or_else(|| false, |ids| ids.len() > 1)
-                } else {
-                    true
-                }
-            })
+        outputs_to_consolidate.retain(|output_with_ext_metadata| {
+            output_with_ext_metadata
+                .output
+                .native_token()
+                .as_ref()
+                .map_or(true, |nt| {
+                    // `<=` because outputs in genesis snapshot can have a lower amount than min amount.
+                    if output_with_ext_metadata.output.amount()
+                        <= output_with_ext_metadata.output.minimum_amount(storage_score_parameters)
+                    {
+                        // If there is only a single output with this native token, then it shouldn't be consolidated,
+                        // because no amount will be made available, since we need to create a remainder output with the
+                        // native token again.
+                        native_token_inputs
+                            .get(nt.token_id())
+                            .map_or_else(|| false, |ids| ids.len() > 1)
+                    } else {
+                        true
+                    }
+                })
         });
 
         drop(wallet_ledger);
