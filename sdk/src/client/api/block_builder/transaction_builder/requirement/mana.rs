@@ -72,7 +72,7 @@ impl TransactionBuilder {
         should_recalculate |= self.get_inputs_for_mana_balance()?;
 
         if should_recalculate && !self.requirements.contains(&Requirement::Mana) {
-            self.requirements.push(Requirement::Mana);
+            self.requirements.insert(0, Requirement::Mana);
         }
 
         Ok(())
