@@ -203,6 +203,7 @@ impl TransactionBuilder {
                         Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
                         _ => {
                             log::debug!("MissingInputWithEd25519Address from null_transaction_unlocks required_address {required_address:?}");
+                            log::debug!("Tx Builder {self:?}");
                             Err(TransactionBuilderError::MissingInputWithEd25519Address)?
                         }
                     }
