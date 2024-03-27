@@ -13,7 +13,7 @@ use iota_sdk::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
             TransactionId,
         },
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScoreParameters},
         signature::Ed25519Signature,
         slot::{SlotCommitment, SlotIndex},
         unlock::Unlock,
@@ -187,4 +187,13 @@ pub enum UtilsMethod {
     },
     IotaMainnetProtocolParameters,
     ShimmerMainnetProtocolParameters,
+    /// Returns the work score of a block.
+    /// Expected response: [`WorkScore`](crate::Response::WorkScore)
+    #[serde(rename_all = "camelCase")]
+    BlockWorkScore {
+        /// Block
+        block: BlockDto,
+        /// Work score parameters
+        work_score_parameters: WorkScoreParameters,
+    },
 }
