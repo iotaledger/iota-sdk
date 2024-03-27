@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 2.0.0-alpha.2 - 2024-MM-DD
 
-Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.
+Same changes as https://github.com/iotaledger/iota-sdk/blob/2.0/bindings/nodejs/CHANGELOG.md.
 
 ## 2.0.0-alpha.1 - 2024-03-26
 
