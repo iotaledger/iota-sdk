@@ -379,14 +379,10 @@ impl TransactionBuilder {
             return Err(TransactionBuilderError::InvalidInputCount(self.selected_inputs.len()));
         }
 
-        let remainder_address = match self.get_remainder_address()? {
-            Some(a) => a,
-            None => {
-                log::debug!("MissingInputWithEd25519Address from finish");
-                return Err(TransactionBuilderError::MissingInputWithEd25519Address);
-            }
-        }
-        .0;
+        let remainder_address = self
+            .get_remainder_address()?
+            .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?
+            .0;
 
         let mut added_amount_mana = HashMap::<Option<ChainId>, (u64, u64)>::new();
         for (chain_id, added_amount) in self.remainders.added_amount.drain() {
