@@ -62,9 +62,13 @@ impl TransactionBuilder {
             mana_diff = mana_diff.saturating_sub(self.initial_mana_excess()?);
         }
 
-        let (remainder_address, chain) = self
-            .get_remainder_address()?
-            .ok_or(TransactionBuilderError::MissingInputWithEd25519Address)?;
+        let (remainder_address, chain) = match self.get_remainder_address()? {
+            Some(a) => a,
+            None => {
+                log::debug!("MissingInputWithEd25519Address from update_remainders");
+                return Err(TransactionBuilderError::MissingInputWithEd25519Address);
+            }
+        };
 
         // Amount can be just multiplied, because all remainder outputs with a native token have the same storage
         // cost.

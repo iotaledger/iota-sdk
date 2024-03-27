@@ -609,7 +609,10 @@ where
                 // than the current block index
                 match &required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                    _ => Err(TransactionBuilderError::MissingInputWithEd25519Address)?,
+                    _ => {
+                        log::debug!("MissingInputWithEd25519Address from default_transaction_unlocks, required_address {required_address:?}");
+                        Err(TransactionBuilderError::MissingInputWithEd25519Address)?
+                    }
                 }
 
                 let chain = input.chain.ok_or(ClientError::MissingBip32Chain)?;
