@@ -210,7 +210,7 @@ pub(crate) struct MinManaAllotment {
     required_allotment: Option<u64>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Remainders {
     address: Option<Address>,
     data: Vec<RemainderData>,
@@ -449,8 +449,9 @@ impl TransactionBuilder {
             return Err(TransactionBuilderError::InvalidOutputCount(outputs.len()));
         }
 
+        let inputs_data: Vec<InputSigningData> = self.selected_inputs.into_sorted_iter().collect();
         for output_id in self.mana_rewards.keys() {
-            if !self.selected_inputs.iter().any(|i| output_id == i.output_id()) {
+            if !inputs_data.iter().any(|i| output_id == i.output_id()) {
                 return Err(TransactionBuilderError::ExtraManaRewards(*output_id));
             }
         }
@@ -463,7 +464,7 @@ impl TransactionBuilder {
             .chain(self.commitment_context_input.map(ContextInput::from))
             .collect::<Vec<_>>();
 
-        for (idx, input) in self.selected_inputs.iter().enumerate() {
+        for (idx, input) in inputs_data.iter().enumerate() {
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
             if self.reward_context_inputs.contains(input.output_id()) {
                 context_inputs.push(RewardContextInput::new(idx as u16).unwrap().into());
@@ -494,7 +495,7 @@ impl TransactionBuilder {
 
         let data = PreparedTransactionData {
             transaction,
-            inputs_data: self.selected_inputs.into_sorted_iter().collect(),
+            inputs_data,
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
         };
@@ -543,11 +544,6 @@ impl TransactionBuilder {
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");
         self.selected_inputs.insert(required_address, input);
-
-        // Remove the cached allotment value because it's no longer valid
-        if let Some(MinManaAllotment { required_allotment, .. }) = self.min_mana_allotment.as_mut() {
-            *required_allotment = None;
-        }
 
         Ok(added_output)
     }

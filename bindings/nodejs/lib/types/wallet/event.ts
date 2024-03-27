@@ -5,7 +5,7 @@ import type { OutputWithExtendedMetadata } from './output';
 import { InclusionState } from './transaction';
 import { InputSigningData, Remainder } from '../client';
 import { Transaction, SignedTransactionPayload, TransactionId } from '../block';
-import { OutputResponse } from '../models';
+import { OutputWithMetadata } from '../models';
 import { HexEncodedString } from '../utils';
 
 /**
@@ -59,7 +59,7 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
 class NewOutputWalletEvent extends WalletEvent {
     output: OutputWithExtendedMetadata;
     transaction?: SignedTransactionPayload;
-    transactionInputs?: OutputResponse[];
+    transactionInputs?: OutputWithMetadata[];
 
     /**
      * @param output The new output.
@@ -69,7 +69,7 @@ class NewOutputWalletEvent extends WalletEvent {
     constructor(
         output: OutputWithExtendedMetadata,
         transaction?: SignedTransactionPayload,
-        transactionInputs?: OutputResponse[],
+        transactionInputs?: OutputWithMetadata[],
     ) {
         super(WalletEventType.NewOutput);
         this.output = output;

@@ -80,7 +80,8 @@ regex = { version = "1.10.3", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
 reqwest = { version = "0.12.0", default-features = false, features = [
-    "json",
+    "json", 
+    "http2",
 ], optional = true }
 rocksdb = { version = "0.22.0", default-features = false, features = [
     "lz4",
@@ -176,6 +177,7 @@ std = [
     "iota_stronghold?/std",
     "iota-crypto/std",
     "once_cell?/std",
+    "dep:instant"
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
@@ -199,7 +201,6 @@ client = [
     "iota-crypto/slip10",
     "dep:async-trait",
     "dep:futures",
-    "dep:instant",
     "dep:log",
     "dep:reqwest",
     "dep:thiserror",

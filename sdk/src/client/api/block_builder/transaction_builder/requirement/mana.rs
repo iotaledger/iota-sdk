@@ -61,14 +61,12 @@ impl TransactionBuilder {
             }
 
             should_recalculate |= self.reduce_account_output()?;
-        } else {
-            should_recalculate = true;
         }
 
         // Remainders can only be calculated when the input mana is >= the output mana
         let (input_mana, output_mana) = self.mana_sums(false)?;
         if input_mana >= output_mana {
-            self.update_remainders()?;
+            should_recalculate |= self.update_remainders()?;
         }
 
         should_recalculate |= self.get_inputs_for_mana_balance()?;
@@ -91,7 +89,7 @@ impl TransactionBuilder {
             return Ok(None);
         };
 
-        if required_allotment.is_none() && !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
+        if !self.selected_inputs.is_empty() && self.all_outputs().next().is_some() {
             let inputs = self
                 .selected_inputs
                 .sorted_iter()
@@ -168,7 +166,7 @@ impl TransactionBuilder {
         let mut block_indexes = HashMap::<Address, usize>::new();
 
         // Assuming inputs_data is ordered by address type
-        for (current_block_index, input) in self.selected_inputs.iter().enumerate() {
+        for (current_block_index, input) in self.selected_inputs.sorted_iter().enumerate() {
             // Get the address that is required to unlock the input
             let required_address = input
                 .output
@@ -303,7 +301,10 @@ impl TransactionBuilder {
 
     pub(crate) fn mana_sums(&mut self, include_remainders: bool) -> Result<(u64, u64), TransactionBuilderError> {
         let allotments_sum = if let Some(MinManaAllotment { issuer_id, .. }) = self.min_mana_allotment {
-            let required_allotment = self.required_allotment()?.unwrap_or_default();
+            let mut required_allotment = self.min_mana_allotment.and_then(|a| a.required_allotment);
+            if required_allotment.is_none() {
+                required_allotment = self.required_allotment()?;
+            }
             self.mana_allotments
                 .iter()
                 .filter_map(|(id, value)| (id != &issuer_id).then_some(value))
@@ -313,7 +314,7 @@ impl TransactionBuilder {
                     .get(&issuer_id)
                     .copied()
                     .unwrap_or_default()
-                    .max(required_allotment)
+                    .max(required_allotment.unwrap_or_default())
         } else {
             self.mana_allotments.values().sum::<u64>()
         };
