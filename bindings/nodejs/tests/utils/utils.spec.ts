@@ -8,8 +8,11 @@ import 'dotenv/config';
 import { BasicOutput, BlockId, OutputId, TransactionId, Utils } from '../../out';
 import '../customMatchers';
 import { SlotCommitment } from '../../out/types/block/slot';
-import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
 import { ProtocolParameters } from '../../lib/types/models/api';
+import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
+import * as basic_block_transaction_payload_json from '../../../../sdk/tests/types/fixtures/basic_block_transaction_payload.json';
+import * as validation_block_json from '../../../../sdk/tests/types/fixtures/validation_block.json';
+import { parseBlock } from '../../lib';
 
 describe('Utils methods', () => {
     it('invalid mnemonic error', () => {
@@ -147,4 +150,15 @@ describe('Utils methods', () => {
             BigInt(output.amount) - minimumOutputAmount, creationSlot, targetSlot, protocolParameters)
         expect(decayedPotentialMana).toBe(BigInt(2502459));
     });
+
+    it('compute block work score', async () => {
+        const block = parseBlock(basic_block_transaction_payload_json.block);
+        const workScore = Utils.blockWorkScore(block, protocol_parameters.params.workScoreParameters);
+        expect(workScore).toEqual(basic_block_transaction_payload_json.workScore);
+
+        const validationBlock = parseBlock(validation_block_json.block);
+        const validationBlockWorkScore = Utils.blockWorkScore(validationBlock, protocol_parameters.params.workScoreParameters);
+        expect(validationBlockWorkScore).toEqual(0);
+    });
+
 });
