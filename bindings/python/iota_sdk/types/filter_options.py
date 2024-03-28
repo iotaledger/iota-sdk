@@ -4,7 +4,7 @@
 from __future__ import annotations
 from typing import List, Optional
 from dataclasses import dataclass
-from iota_sdk.types.common import json
+from iota_sdk.types.common import json, SlotIndex
 
 
 @json
@@ -13,8 +13,8 @@ class FilterOptions:
     """Options to filter outputs.
     """
 
-    lowerBoundBookedTimestamp: Optional[int] = None
-    upperBoundBookedTimestamp: Optional[int] = None
+    includedBelowSlot: Optional[SlotIndex] = None
+    includedAboveSlot: Optional[SlotIndex] = None
     outputTypes: Optional[List[int]] = None
     accountIds: Optional[List[str]] = None
     foundryIds: Optional[List[str]] = None

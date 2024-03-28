@@ -69,10 +69,9 @@ class SyncOptions:
 
     **Attributes**
     force_syncing :
-        Usually syncing is skipped if it's called in between 200ms, because there can only be new
-        changes every milestone and calling it twice "at the same time" will not return new data.
-        When this is set to true, we will sync anyways, even if it's called 0ms after the last sync
-        finished.
+        Syncing is usually skipped if it's called repeatedly in a short amount of time as there can only be new changes every
+        slot and calling it twice "at the same time" will not return new data.
+        When this to true, we sync anyways, even if it's called 0ms after the last sync finished.
     sync_incoming_transactions :
         Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained
         if it has been pruned.

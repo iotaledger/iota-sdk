@@ -7,7 +7,6 @@ pub(crate) mod high_level;
 pub(crate) mod prepare_output;
 mod send_outputs;
 mod sign_transaction;
-pub(crate) mod submit_transaction;
 
 #[cfg(feature = "storage")]
 use crate::wallet::core::WalletLedgerDto;
@@ -17,7 +16,10 @@ use crate::{
         secret::SecretManage,
         ClientError,
     },
-    types::block::{output::OutputWithMetadata, payload::signed_transaction::SignedTransactionPayload},
+    types::block::{
+        output::OutputWithMetadata,
+        payload::{signed_transaction::SignedTransactionPayload, Payload},
+    },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
         Wallet, WalletError,
@@ -85,11 +87,11 @@ where
         }
         drop(wallet_ledger);
 
-        // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_signed_transaction(
-                signed_transaction_data.payload.clone(),
+            .submit_basic_block(
+                Some(Payload::from(signed_transaction_data.payload.clone())),
                 options.as_ref().and_then(|options| options.issuer_id),
+                true,
             )
             .await
         {
@@ -119,7 +121,6 @@ where
             payload: signed_transaction_data.payload,
             block_id,
             network_id,
-            timestamp: crate::client::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
             note: options.and_then(|o| o.note),
