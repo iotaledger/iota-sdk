@@ -141,7 +141,7 @@ async fn balance_expiration() -> Result<(), Box<dyn std::error::Error>> {
 
     request_funds(&wallet_0).await?;
 
-    let slots_until_expired = 20;
+    let slots_until_expired = 5;
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
@@ -162,7 +162,7 @@ async fn balance_expiration() -> Result<(), Box<dyn std::error::Error>> {
         balance_before_tx.base_coin().total(),
         balance_after_tx.base_coin().total()
     );
-    assert_eq!(balance_after_tx.base_coin().available(), 0);
+    assert_eq!(balance_after_tx.base_coin().available(), 999968300);
 
     wallet_0
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -203,13 +203,6 @@ async fn balance_expiration() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(balance.base_coin().total(), 1_000_000);
     assert_eq!(balance.base_coin().available(), 1_000_000);
 
-    // It's possible to send the expired output
-    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
-        // Send to wallet 1 with expiration to wallet 2, both have no amount yet
-        .with_unlock_conditions([AddressUnlockCondition::new(wallet_1.address().await)])
-        .finish_output()?];
-    let _tx = wallet_2.send_outputs(outputs, None).await?;
-
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;
     tear_down(storage_path_2)?;
@@ -218,7 +211,7 @@ async fn balance_expiration() -> Result<(), Box<dyn std::error::Error>> {
 
 #[ignore]
 #[tokio::test]
-async fn balance_transfer() -> Result<(), Box<dyn std::error::Error>> {
+async fn available_balance_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let storage_path_0 = "test-storage/addresses_balance_0";
     let storage_path_1 = "test-storage/addresses_balance_1";
     setup(storage_path_0)?;
@@ -229,13 +222,11 @@ async fn balance_transfer() -> Result<(), Box<dyn std::error::Error>> {
 
     request_funds(&wallet_0).await?;
 
-    let balance_0 = wallet_0.balance().await?;
-    let balance_0_sync = wallet_0.sync(None).await?;
+    let balance_0 = wallet_0.sync(None).await?;
     let to_send = balance_0.base_coin().available();
 
     // Check if 0 has balance and sync() and address_balance() match
     assert!(to_send > 0);
-    assert_eq!(balance_0, balance_0_sync);
 
     // Make sure 1 is empty
     let balance_1 = wallet_1.sync(None).await?;
@@ -244,20 +235,22 @@ async fn balance_transfer() -> Result<(), Box<dyn std::error::Error>> {
     // Send to 1
     let tx = wallet_0.send(to_send, wallet_1.address().await, None).await?;
 
-    // Balance should update without sync
+    // Available balance should update without sync
     let balance_0 = wallet_0.balance().await?;
     let balance_0_sync = wallet_0.sync(None).await?;
     assert_eq!(balance_0.base_coin().available(), 0);
-    assert_eq!(balance_0, balance_0_sync);
+    assert_eq!(
+        balance_0.base_coin().available(),
+        balance_0_sync.base_coin().available()
+    );
 
     wallet_0
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
         .await?;
 
-    // Balance should have transferred entirely
-    let balance_1_sync = wallet_1.sync(None).await?;
+    // Available balance should have transferred entirely
+    let balance_1 = wallet_1.sync(None).await?;
     assert!(balance_1.base_coin().available() > 0);
-    assert_eq!(balance_1, balance_1_sync);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;

@@ -35,7 +35,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, enter_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -601,25 +601,24 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
             println_log_info!("    + {} {}", native_token.amount(), native_token.token_id());
         }
 
-        if let Some(unlock_conditions) = output.unlock_conditions() {
-            let deposit_return = unlock_conditions
-                .storage_deposit_return()
-                .map(|deposit_return| deposit_return.amount())
-                .unwrap_or(0);
-            let amount = output.amount() - deposit_return;
-            println_log_info!("  - base coin amount: {}", amount);
+        let deposit_return = output
+            .unlock_conditions()
+            .storage_deposit_return()
+            .map(|deposit_return| deposit_return.amount())
+            .unwrap_or(0);
+        let amount = output.amount() - deposit_return;
+        println_log_info!("  - base coin amount: {}", amount);
 
-            if let Some(expiration) = unlock_conditions.expiration() {
-                let slot_index = wallet.client().get_slot_index().await?;
+        if let Some(expiration) = output.unlock_conditions().expiration() {
+            let slot_index = wallet.client().get_slot_index().await?;
 
-                if *expiration.slot_index() > *slot_index {
-                    println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
-                } else {
-                    println_log_info!(
-                        "  - expired {} slot indices ago",
-                        *slot_index - *expiration.slot_index()
-                    );
-                }
+            if *expiration.slot_index() > *slot_index {
+                println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
+            } else {
+                println_log_info!(
+                    "  - expired {} slot indices ago",
+                    *slot_index - *expiration.slot_index()
+                );
             }
         }
     }
@@ -1358,11 +1357,9 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
                 Output::Delegation(delegation) => delegations.push(delegation.delegation_id_non_null(&output_id)),
                 Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(&output_id)),
             }
-            let unlock_conditions = output_data
+            let sdr_amount = output_data
                 .output
                 .unlock_conditions()
-                .expect("output must have unlock conditions");
-            let sdr_amount = unlock_conditions
                 .storage_deposit_return()
                 .map(|sdr| sdr.amount())
                 .unwrap_or(0);
@@ -1427,7 +1424,7 @@ async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
     if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
-        let password = get_password("Stronghold password", false)?;
+        let password = enter_password("Stronghold password", false)?;
         wallet.set_stronghold_password(password).await?;
     }
 

@@ -23,12 +23,12 @@ class InclusionState(str, Enum):
         Conflicting: The transaction is conflicting.
         UnknownPruned: The transaction is unknown or already pruned.
     """
-    Pending = 'pending'
-    Accepted = 'accepted'
-    Confirmed = 'confirmed'
-    Finalized = 'finalized'
-    Conflicting = 'conflicting'
-    UnknownPruned = 'unknownPruned'
+    Pending = 'Pending'
+    Accepted = 'Accepted'
+    Confirmed = 'Confirmed'
+    Finalized = 'Finalized'
+    Conflicting = 'Conflicting'
+    UnknownPruned = 'UnknownPruned'
 
 
 @json
@@ -51,7 +51,7 @@ class TransactionWithMetadata:
     transaction_id: TransactionId
     network_id: int
     incoming: bool
-    inputs = List[OutputWithMetadata]
+    inputs: List[OutputWithMetadata]
     note: Optional[str] = None
     block_id: Optional[BlockId] = None
 

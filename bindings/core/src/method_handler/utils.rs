@@ -13,9 +13,10 @@ use iota_sdk::{
             input::UtxoInput,
             output::{FoundryId, MinimumOutputAmount, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
+            protocol::WorkScore,
             semantic::SemanticValidationContext,
             signature::SignatureError,
-            Block,
+            Block, BlockBody,
         },
         TryFromDto,
     },
@@ -169,6 +170,18 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ShimmerMainnetProtocolParameters => Response::ProtocolParameters(
             iota_sdk::types::block::protocol::shimmer_mainnet_protocol_parameters().clone(),
         ),
+        UtilsMethod::BlockWorkScore {
+            block,
+            work_score_parameters,
+        } => {
+            let block = Block::try_from_dto(block)?;
+            let work_score = match block.body() {
+                BlockBody::Basic(basic) => basic.work_score(work_score_parameters),
+                // Validation blocks have a work score of 0.
+                BlockBody::Validation(_validation) => 0,
+            };
+            Response::WorkScore(work_score)
+        }
     };
 
     Ok(response)
