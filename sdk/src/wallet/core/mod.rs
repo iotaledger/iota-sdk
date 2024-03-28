@@ -188,17 +188,17 @@ impl WalletLedger {
                 _ => {}
             }
 
-            // TODO filter based on slot index
-            // if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
-            //     if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
-            //         continue;
-            //     }
-            // }
-            // if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
-            //     if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
-            //         continue;
-            //     }
-            // }
+            if let Some(included_below_slot) = filter.included_below_slot {
+                if output.metadata.included().slot() > included_below_slot {
+                    return false;
+                }
+            }
+
+            if let Some(included_above_slot) = filter.included_above_slot {
+                if output.metadata.included().slot() < included_above_slot {
+                    return false;
+                }
+            }
 
             if let Some(output_types) = &filter.output_types {
                 if !output_types.contains(&output.output.kind()) {
@@ -655,7 +655,6 @@ mod test {
             payload: tx_payload,
             block_id: None,
             network_id: 0,
-            timestamp: 0,
             inclusion_state: InclusionState::Pending,
             incoming: false,
             note: None,

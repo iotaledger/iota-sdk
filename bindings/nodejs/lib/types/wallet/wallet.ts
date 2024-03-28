@@ -11,7 +11,7 @@ import {
 import { DecayedMana, HexEncodedString, u256, u64 } from '../utils';
 import { ClientOptions } from '../client';
 import { Bip44, SecretManagerType } from '../secret_manager/secret-manager';
-import { Bech32Address } from '../block';
+import { Bech32Address, SlotIndex } from '../block';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {
@@ -99,9 +99,9 @@ export interface NativeTokenBalance {
 /** Sync options for a wallet */
 export interface SyncOptions {
     /**
-     * Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
-     * milestone and calling it twice "at the same time" will not return new data
-     * When this to true, we will sync anyways, even if it's called 0ms after the las sync finished. Default: false.
+     * Syncing is usually skipped if it's called repeatedly in a short amount of time as there can only be new changes every
+     * slot and calling it twice "at the same time" will not return new data.
+     * When this to true, we sync anyways, even if it's called 0ms after the last sync finished. Default: false.
      */
     forceSyncing?: boolean;
     /// Try to sync transactions from incoming outputs with their inputs. Some data may not be obtained if it has been
@@ -163,10 +163,10 @@ export interface NftSyncOptions {
 
 /** Options to filter outputs */
 export interface FilterOptions {
-    /** Filter all outputs where the booked milestone index is below the specified timestamp */
-    lowerBoundBookedTimestamp?: number;
-    /** Filter all outputs where the booked milestone index is above the specified timestamp */
-    upperBoundBookedTimestamp?: number;
+    /** Include all outputs where the included slot is below the specified slot */
+    includedBelowSlot?: SlotIndex;
+    /** Include all outputs where the included slot is above the specified slot */
+    includedAboveSlot?: SlotIndex;
     /** Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6) */
     outputTypes?: number[];
     /** Return all account outputs matching these IDs. */

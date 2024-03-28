@@ -78,6 +78,7 @@ use crate::{
         block::{
             output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputWithMetadata},
             payload::signed_transaction::{SignedTransactionPayload, TransactionId},
+            slot::SlotIndex,
         },
     },
     wallet::types::InclusionState,
@@ -87,10 +88,10 @@ use crate::{
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
-    /// Filter all outputs where the booked milestone index is below the specified timestamp
-    pub lower_bound_booked_timestamp: Option<u32>,
-    /// Filter all outputs where the booked milestone index is above the specified timestamp
-    pub upper_bound_booked_timestamp: Option<u32>,
+    /// Include all outputs where the included slot is below the specified slot.
+    pub included_below_slot: Option<SlotIndex>,
+    /// Include all outputs where the included slot is above the specified slot.
+    pub included_above_slot: Option<SlotIndex>,
     /// Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,
     /// Return all account outputs matching these IDs.
@@ -114,12 +115,6 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         payload: tx_payload.clone(),
         block_id: inputs.first().map(|i| *i.metadata.block_id()),
         inclusion_state: InclusionState::Confirmed,
-        timestamp: 0,
-        // TODO use slot index since milestone_timestamp_spent is gone
-        // inputs
-        //     .first()
-        //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
-        //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
         network_id: tx_payload.transaction().network_id(),
         incoming: true,

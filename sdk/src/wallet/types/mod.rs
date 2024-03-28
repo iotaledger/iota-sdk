@@ -97,8 +97,6 @@ pub struct TransactionWithMetadata {
     pub payload: SignedTransactionPayload,
     pub block_id: Option<BlockId>,
     pub inclusion_state: InclusionState,
-    // Transaction creation time
-    pub timestamp: u128,
     pub transaction_id: TransactionId,
     // network id to ignore outputs when set_client_options is used to switch to another network
     pub network_id: u64,
@@ -122,8 +120,6 @@ pub struct TransactionWithMetadataDto {
     pub block_id: Option<BlockId>,
     /// Inclusion state of the transaction
     pub inclusion_state: InclusionState,
-    /// Timestamp
-    pub timestamp: String,
     pub transaction_id: TransactionId,
     /// Network id to ignore outputs when set_client_options is used to switch to another network
     pub network_id: String,
@@ -140,7 +136,6 @@ impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             block_id: value.block_id,
             inclusion_state: value.inclusion_state,
-            timestamp: value.timestamp.to_string(),
             transaction_id: value.transaction_id,
             network_id: value.network_id.to_string(),
             incoming: value.incoming,
@@ -161,10 +156,6 @@ impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
             payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)?,
             block_id: dto.block_id,
             inclusion_state: dto.inclusion_state,
-            timestamp: dto
-                .timestamp
-                .parse::<u128>()
-                .map_err(|e| PayloadError::Timestamp(e.to_string()))?,
             transaction_id: dto.transaction_id,
             network_id: dto
                 .network_id
