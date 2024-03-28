@@ -206,6 +206,7 @@ class RestrictedAddress extends Address {
      */
     @Type(() => Address, {
         discriminator: RestrictedAddressDiscriminator,
+        keepDiscriminatorProperty: true,
     })
     readonly address: Address;
     /**

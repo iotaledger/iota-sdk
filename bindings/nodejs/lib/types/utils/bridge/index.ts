@@ -28,6 +28,7 @@ import type {
     __BlockBytes__,
     __IotaMainnetProtocolParameters__,
     __ShimmerMainnetProtocolParameters__,
+    __BlockWorkScore__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -59,4 +60,5 @@ export type __UtilsMethods__ =
     | __VerifyTransactionSyntax__
     | __BlockBytes__
     | __IotaMainnetProtocolParameters__
-    | __ShimmerMainnetProtocolParameters__;
+    | __ShimmerMainnetProtocolParameters__
+    | __BlockWorkScore__;

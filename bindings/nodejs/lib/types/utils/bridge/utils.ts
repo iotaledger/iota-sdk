@@ -17,6 +17,7 @@ import {
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
 import { InputSigningData } from '../../client';
+import { WorkScoreParameters } from '../../models';
 import { NumericString } from '../numeric';
 
 export interface __GenerateMnemonicMethod__ {
@@ -241,4 +242,12 @@ export interface __IotaMainnetProtocolParameters__ {
 
 export interface __ShimmerMainnetProtocolParameters__ {
     name: 'shimmerMainnetProtocolParameters';
+}
+
+export interface __BlockWorkScore__ {
+    name: 'blockWorkScore';
+    data: {
+        block: Block;
+        workScoreParameters: WorkScoreParameters;
+    };
 }
