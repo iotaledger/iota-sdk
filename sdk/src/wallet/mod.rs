@@ -88,9 +88,9 @@ use crate::{
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FilterOptions {
-    /// Filter all outputs where the included slot is below the specified slot.
+    /// Include all outputs where the included slot is below the specified slot.
     pub included_below_slot: Option<SlotIndex>,
-    /// Filter all outputs where the included slot is above the specified slot.
+    /// Include all outputs where the included slot is above the specified slot.
     pub included_above_slot: Option<SlotIndex>,
     /// Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6).
     pub output_types: Option<Vec<u8>>,

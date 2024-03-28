@@ -163,9 +163,9 @@ export interface NftSyncOptions {
 
 /** Options to filter outputs */
 export interface FilterOptions {
-    /** Filter all outputs where the included slot is below the specified slot */
+    /** Include all outputs where the included slot is below the specified slot */
     includedBelowSlot?: SlotIndex;
-    /** Filter all outputs where the included slot is above the specified slot */
+    /** Include all outputs where the included slot is above the specified slot */
     includedAboveSlot?: SlotIndex;
     /** Filter all outputs for the provided types (Basic = 3, Account = 4, Foundry = 5, NFT = 6) */
     outputTypes?: number[];
