@@ -288,7 +288,7 @@ class Utils:
 
     @staticmethod
     def block_work_score(
-            block: Block, work_score_parameters: WorkScoreParameters) -> bytes:
+            block: Block, work_score_parameters: WorkScoreParameters) -> int:
         """Returns the work score of a block.
         """
         return _call_method('blockWorkScore', {
