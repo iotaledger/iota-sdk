@@ -3,23 +3,37 @@
 
 use std::str::FromStr;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError, Transitions},
-        secret::types::InputSigningData,
+        api::{
+            transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError, Transitions},
+            GetAddressesOptions,
+        },
+        constants::SHIMMER_COIN_TYPE,
+        secret::{mnemonic::MnemonicSecretManager, types::InputSigningData, SecretManage, SecretManager},
+        Client,
     },
     types::block::{
         address::{Address, ImplicitAccountCreationAddress},
+        core::{
+            basic::{MaxBurnedManaAmount, StrongParents},
+            BlockHeader,
+        },
         mana::ManaAllotment,
         output::{
             feature::{BlockIssuerFeature, BlockIssuerKeys, Ed25519PublicKeyHashBlockIssuerKey},
             unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutputBuilder, BasicOutputBuilder, Output,
         },
-        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
-        protocol::iota_mainnet_protocol_parameters,
+        payload::{
+            signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+            Payload, SignedTransactionPayload,
+        },
+        protocol::{iota_mainnet_protocol_parameters, WorkScore},
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
-        slot::SlotIndex,
+        slot::{SlotCommitmentId, SlotIndex},
+        BlockBody, BlockId, UnsignedBlock,
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};

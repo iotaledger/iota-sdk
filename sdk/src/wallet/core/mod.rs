@@ -299,9 +299,12 @@ impl WalletLedger {
     }
 
     // Returns the first possible unexpired block issuer Account id, which can be an implicit account.
-    pub fn first_block_issuer_account_id(&self, current_slot: SlotIndex) -> Option<AccountId> {
+    pub fn first_block_issuer_account_id(&self, current_slot: SlotIndex, network_id: u64) -> Option<AccountId> {
         self.accounts()
             .find_map(|o| {
+                if o.network_id != network_id {
+                    return None;
+                }
                 let account = o.output.as_account();
                 account.features().block_issuer().and_then(|block_issuer| {
                     if block_issuer.expiry_slot() > current_slot {
