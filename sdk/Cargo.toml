@@ -53,14 +53,14 @@ prefix-hex = { version = "0.7.1", default-features = false, features = [
 ] }
 primitive-types = { version = "0.12.2", default-features = false }
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.114", default-features = false, features = [
+serde_json = { version = "1.0.115", default-features = false, features = [
     "alloc",
 ] }
 strum = { version = "0.26.2", default-features = false, features = ["derive"] }
 
 # Optional dependencies
 anymap = { version = "0.12.1", default-features = false, optional = true }
-async-trait = { version = "0.1.78", default-features = false, optional = true }
+async-trait = { version = "0.1.79", default-features = false, optional = true }
 bs58 = { version = "0.5.1", default-features = false, optional = true }
 fern-logger = { version = "0.5.0", default-features = false, optional = true }
 futures = { version = "0.3.30", default-features = false, features = [
@@ -76,11 +76,11 @@ once_cell = { version = "1.19.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [
     "min_const_gen",
 ], optional = true }
-regex = { version = "1.10.3", default-features = false, features = [
+regex = { version = "1.10.4", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
-reqwest = { version = "0.12.0", default-features = false, features = [
-    "json", 
+reqwest = { version = "0.12.2", default-features = false, features = [
+    "json",
     "http2",
 ], optional = true }
 rocksdb = { version = "0.22.0", default-features = false, features = [
@@ -137,7 +137,7 @@ dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 num_cpus = { version = "1.16.0", default-features = false }
 once_cell = { version = "1.19.0", default-features = false }
-regex = { version = "1.10.3", default-features = false }
+regex = { version = "1.10.4", default-features = false }
 time = { version = "0.3.34", default-features = false }
 tokio = { version = "1.36.0", default-features = false, features = [
     "macros",
@@ -177,7 +177,7 @@ std = [
     "iota_stronghold?/std",
     "iota-crypto/std",
     "once_cell?/std",
-    "dep:instant"
+    "dep:instant",
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
