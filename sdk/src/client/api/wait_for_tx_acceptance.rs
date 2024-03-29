@@ -40,7 +40,7 @@ impl Client {
                                     .output
                                     .required_address(slot_index, protocol_parameters.committable_age_range())?
                                 {
-                                    // Even thought the output was created already, the indexer might take some time
+                                    // Even though the output was created already, the indexer might take some time
                                     // until it returns the output id for the address, that's why we wait for this here.
                                     for _ in 0..20 {
                                         if let Ok(output_ids) = self
