@@ -70,6 +70,8 @@ export interface ManaBalance {
     total: DecayedMana;
     /** The mana of the outputs that isn't used in a transaction */
     available: DecayedMana;
+    /** Mana rewards. */
+    rewards: u64;
 }
 
 /** The required storage deposit per output type */

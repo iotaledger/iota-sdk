@@ -25,8 +25,8 @@ iota-sdk = { path = "../sdk", default-features = false, features = [
     "ledger_nano",
 ] }
 
-chrono = { version = "0.4.35", default-features = false, features = ["std"] }
-clap = { version = "4.5.3", default-features = false, features = [
+chrono = { version = "0.4.37", default-features = false, features = ["std"] }
+clap = { version = "4.5.4", default-features = false, features = [
     "std",
     "color",
     "help",
@@ -48,7 +48,7 @@ fern-logger = { version = "0.5.0", default-features = false }
 log = { version = "0.4.21", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false, features = ["std"] }
 rustyline = { version = "14.0.0", features = ["derive"] }
-serde_json = { version = "1.0.114", default-features = false }
+serde_json = { version = "1.0.115", default-features = false }
 strum = { version = "0.26.2", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.58", default-features = false }
 tokio = { version = "1.36.0", default-features = false, features = ["fs"] }
