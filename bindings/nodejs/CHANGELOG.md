@@ -19,11 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## Unreleased - 2024-04-04
+## 2.0.0-alpha.4 - 2024-04-DD
 
-### Fixed
+### Changed
 
-- Updated the TypeScript types for Unlock Conditions to match their Rust equivalent.;
+- Renamed `{TimelockUnlockCondition, ExpirationUnlockCondition}::slotIndex to slot`;
 
 ## 2.0.0-alpha.3 - 2024-04-03
 
