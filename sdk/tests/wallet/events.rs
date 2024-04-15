@@ -122,6 +122,7 @@ fn wallet_events_serde() {
                 inputs_data: Vec::new(),
                 remainders: Vec::new(),
                 mana_rewards: Default::default(),
+                issuer_id: None,
             })),
         ));
 

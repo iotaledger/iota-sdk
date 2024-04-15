@@ -149,11 +149,11 @@ class TimelockUnlockCondition extends UnlockCondition {
     /**
      * Slot index starting from which the output can be consumed.
      */
-    readonly slotIndex: SlotIndex;
+    readonly slot: SlotIndex;
 
-    constructor(slotIndex: SlotIndex) {
+    constructor(slot: SlotIndex) {
         super(UnlockConditionType.Timelock);
-        this.slotIndex = slotIndex;
+        this.slot = slot;
     }
 }
 
@@ -172,16 +172,16 @@ class ExpirationUnlockCondition extends UnlockCondition {
     /**
      * Before this slot index, the Address Unlock Condition is allowed to unlock the output, after that only the address defined in Return Address can.
      */
-    readonly slotIndex: SlotIndex;
+    readonly slot: SlotIndex;
 
     /**
      * @param returnAddress The address that can unlock the expired output.
-     * @param slotIndex The slot index timestamp marking the end of the claim period.
+     * @param slot The slot index timestamp marking the end of the claim period.
      */
-    constructor(returnAddress: Address, slotIndex: SlotIndex) {
+    constructor(returnAddress: Address, slot: SlotIndex) {
         super(UnlockConditionType.Expiration);
         this.returnAddress = returnAddress;
-        this.slotIndex = slotIndex;
+        this.slot = slot;
     }
 }
 

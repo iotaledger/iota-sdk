@@ -71,6 +71,7 @@ where
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_send_outputs");
         let options = options.into().unwrap_or_default();
+        log::debug!("prepare_send_outputs {options:#?}");
         let outputs = outputs.into_iter().collect::<Vec<_>>();
         let prepare_send_outputs_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;

@@ -225,6 +225,8 @@ pub enum Response {
     CustomJson(serde_json::Value),
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
     SlotCommitmentId(SlotCommitmentId),
+    /// Response for [`BlockWorkScore`](crate::method::UtilsMethod::BlockWorkScore)
+    WorkScore(u32),
 
     // Responses in client and wallet
     /// Response for:

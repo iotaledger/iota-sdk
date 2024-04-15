@@ -1159,7 +1159,12 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
         TransactionSelector::Id(id) => wallet_ledger.get_transaction(&id),
         TransactionSelector::Index(index) => {
             let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
-            transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
+            transactions.sort_unstable_by(|a, b| {
+                b.payload
+                    .transaction()
+                    .creation_slot()
+                    .cmp(&a.payload.transaction().creation_slot())
+            });
             transactions.into_iter().nth(index)
         }
     };
@@ -1177,7 +1182,12 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
     let wallet_ledger = wallet.ledger().await;
     let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
-    transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    transactions.sort_unstable_by(|a, b| {
+        b.payload
+            .transaction()
+            .creation_slot()
+            .cmp(&a.payload.transaction().creation_slot())
+    });
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -1186,10 +1196,16 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
-                let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
+                let protocol_parameters = wallet.client().get_protocol_parameters().await?;
+                let creation_slot = tx.payload.transaction().creation_slot();
+                let creation_time = to_utc_date_time(creation_slot.to_timestamp(
+                    protocol_parameters.genesis_unix_timestamp(),
+                    protocol_parameters.slot_duration_in_seconds(),
+                ) as u128)?
+                .format("%Y-%m-%d %H:%M:%S UTC")
+                .to_string();
 
-                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
+                println_log_info!("{:<5}{}\t{}\t{}", i, tx.transaction_id, creation_slot, creation_time);
             }
         }
     }

@@ -32,7 +32,7 @@ pub(crate) fn sdruc_not_expired(
 
 impl TransactionBuilder {
     pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<(), TransactionBuilderError> {
-        let (mut input_amount, mut output_amount) = self.amount_balance()?;
+        let (input_amount, output_amount) = self.amount_balance()?;
         if input_amount >= output_amount {
             log::debug!("Amount requirement already fulfilled");
             return Ok(());
@@ -43,22 +43,11 @@ impl TransactionBuilder {
         if !self.allow_additional_input_selection {
             return Err(TransactionBuilderError::AdditionalInputsRequired(Requirement::Amount));
         }
-        if self.available_inputs.is_empty() {
-            return Err(TransactionBuilderError::InsufficientAmount {
-                found: input_amount,
-                required: output_amount,
-            });
-        }
 
-        while let Some(input) = self.next_input_for_amount(output_amount - input_amount, self.latest_slot_commitment_id)
-        {
+        if let Some(input) = self.next_input_for_amount(output_amount - input_amount, self.latest_slot_commitment_id) {
+            self.requirements.push(Requirement::Amount);
             self.select_input(input)?;
-            (input_amount, output_amount) = self.amount_balance()?;
-            if input_amount >= output_amount {
-                break;
-            }
-        }
-        if output_amount > input_amount {
+        } else {
             return Err(TransactionBuilderError::InsufficientAmount {
                 found: input_amount,
                 required: output_amount,

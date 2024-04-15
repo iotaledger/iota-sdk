@@ -26,7 +26,7 @@ iota-sdk-bindings-core = { path = "../core", default-features = false, features 
 console_error_panic_hook = { version = "0.1.7", default-features = false }
 js-sys = { version = "0.3.69", default-features = false, features = [] }
 log = { version = "0.4.21", default-features = false }
-serde_json = { version = "1.0.114", default-features = false }
+serde_json = { version = "1.0.115", default-features = false }
 tokio = { version = "1.36.0", default-features = false, features = ["sync"] }
 wasm-bindgen = { version = "0.2.92", default-features = false, features = [
     "spans",

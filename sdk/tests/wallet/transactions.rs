@@ -35,6 +35,82 @@ async fn send_amount() -> Result<(), Box<dyn std::error::Error>> {
     tear_down(storage_path_1)
 }
 
+#[ignore]
+#[tokio::test]
+async fn two_implicit_account_transitions() -> Result<(), Box<dyn std::error::Error>> {
+    let storage_path = "test-storage/two_implicit_account_transitions";
+    setup(storage_path)?;
+
+    let wallet = make_wallet(storage_path, None, None).await?;
+    request_funds(&wallet).await?;
+
+    iota_sdk::client::request_funds_from_faucet(
+        crate::wallet::common::FAUCET_URL,
+        &wallet.implicit_account_creation_address().await?,
+    )
+    .await?;
+
+    // Continue only after funds are received
+    let mut attempts = 0;
+    let implicit_account = loop {
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        wallet
+            .sync(Some(iota_sdk::wallet::SyncOptions {
+                sync_implicit_accounts: true,
+                ..Default::default()
+            }))
+            .await?;
+        if let Some(account) = wallet.ledger().await.implicit_accounts().next() {
+            break account.clone();
+        }
+        attempts += 1;
+        if attempts == 30 {
+            panic!("Faucet no longer wants to hand over coins");
+        }
+    };
+
+    let mut tries = 0;
+    while let Err(iota_sdk::client::ClientError::Node(iota_sdk::client::node_api::error::Error::NotFound(_))) = wallet
+        .client()
+        .get_account_congestion(
+            &iota_sdk::types::block::output::AccountId::from(&implicit_account.output_id),
+            None,
+        )
+        .await
+    {
+        tries += 1;
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        if tries > 100 {
+            panic!("Can't get account for implicit account");
+        }
+    }
+
+    // Using the prepare method so we test that the issuer id is correctly forwarded in the PreparedTransactionData to
+    // sign_and_submit_transaction()
+    let prepared_transaction = wallet
+        .prepare_implicit_account_transition(
+            &implicit_account.output_id,
+            iota_sdk::types::block::output::feature::BlockIssuerKeySource::ImplicitAccountAddress,
+        )
+        .await?;
+
+    let transaction = wallet.sign_and_submit_transaction(prepared_transaction, None).await?;
+
+    wallet
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
+        .await?;
+
+    let balance = wallet.sync(None).await.unwrap();
+    assert_eq!(balance.accounts().len(), 2);
+
+    for account_id in balance.accounts() {
+        let congestion_response = wallet.client().get_account_congestion(&account_id, None).await?;
+        assert_eq!(congestion_response.block_issuance_credits, 0);
+    }
+
+    tear_down(storage_path)
+}
+
 // #[ignore]
 // #[tokio::test]
 // async fn send_amount_127_outputs() -> Result<(), Box<dyn std::error::Error>> {

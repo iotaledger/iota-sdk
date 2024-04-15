@@ -1,7 +1,8 @@
-// Copyright 2021-2023 IOTA Stiftung
+// Copyright 2021-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
+import { AccountId } from '../block';
 import { Address, AddressDiscriminator } from '../block/address';
 import { Output, OutputDiscriminator } from '../block/output/output';
 import { Transaction } from '../block/payload/signed_transaction';
@@ -29,6 +30,10 @@ export class PreparedTransactionData {
      * Mana rewards by input.
      */
     manaRewards?: { [outputId: HexEncodedString]: NumericString };
+    /**
+     * The block issuer id from which the BIC for the block containing this transaction should be burned.
+     */
+    issuerId?: AccountId;
 }
 
 /**

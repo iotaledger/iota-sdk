@@ -160,6 +160,7 @@ impl Client {
         .with_mana_allotments(options.mana_allotments)
         .with_remainder_address(remainder_address)
         .with_transitions(options.transitions)
+        .with_issuer_id(options.issuer_id)
         .with_burn(options.burn);
 
         if let (Some(account_id), Some(reference_mana_cost)) = (options.issuer_id, reference_mana_cost) {
@@ -193,6 +194,7 @@ pub struct TransactionBuilder {
     latest_slot_commitment_id: SlotCommitmentId,
     requirements: Vec<Requirement>,
     min_mana_allotment: Option<MinManaAllotment>,
+    issuer_id: Option<AccountId>,
     mana_allotments: BTreeMap<AccountId, u64>,
     mana_rewards: HashMap<OutputId, u64>,
     payload: Option<TaggedDataPayload>,
@@ -268,6 +270,7 @@ impl TransactionBuilder {
             latest_slot_commitment_id,
             requirements: Vec::new(),
             min_mana_allotment: None,
+            issuer_id: None,
             mana_allotments: Default::default(),
             mana_rewards: Default::default(),
             allow_additional_input_selection: true,
@@ -498,6 +501,7 @@ impl TransactionBuilder {
             inputs_data,
             remainders: self.remainders.data,
             mana_rewards: self.mana_rewards.into_iter().collect(),
+            issuer_id: self.issuer_id,
         };
 
         data.verify_semantic(&self.protocol_parameters)?;
@@ -604,6 +608,12 @@ impl TransactionBuilder {
             allotment_debt: 0,
             required_allotment: None,
         });
+        self
+    }
+
+    /// Specifies the block issuer id that should be used when sending a block.
+    pub fn with_issuer_id(mut self, issuer_id: impl Into<Option<AccountId>>) -> Self {
+        self.issuer_id = issuer_id.into();
         self
     }
 

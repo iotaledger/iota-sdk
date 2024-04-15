@@ -12,6 +12,8 @@ use crate::{
     wallet::{Wallet, WalletError},
 };
 
+const MAX_POST_BLOCK_ATTEMPTS: u64 = 3;
+
 impl<S: 'static + SecretManage> Wallet<S>
 where
     WalletError: From<S::Error>,
@@ -24,14 +26,17 @@ where
         allow_negative_bic: bool,
     ) -> Result<BlockId, WalletError> {
         log::debug!("submit_basic_block");
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = match issuer_id.into() {
             Some(id) => id,
             None => {
                 let current_slot = self.client().get_slot_index().await?;
+
                 self.ledger()
                     .await
-                    .first_block_issuer_account_id(current_slot)
+                    .first_block_issuer_account_id(current_slot, protocol_parameters.network_id())
                     .ok_or(WalletError::AccountNotFound)?
             }
         };
@@ -39,7 +44,6 @@ where
         let unsigned_block = self.client().build_basic_block(issuer_id, payload).await?;
 
         if !allow_negative_bic {
-            let protocol_parameters = self.client().get_protocol_parameters().await?;
             let work_score = protocol_parameters.work_score(unsigned_block.body.as_basic());
             let congestion = self.client().get_account_congestion(&issuer_id, work_score).await?;
             if (congestion.reference_mana_cost * work_score as u64) as i128 > congestion.block_issuance_credits {
@@ -67,10 +71,21 @@ where
         self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
             .await;
 
-        let block_id = self.client().post_block(&block).await?;
+        log::debug!("submitting block {}", block.id(&protocol_parameters));
+        log::debug!("submitting block {block:?}");
 
-        log::debug!("submitted block {}", block_id);
-
-        Ok(block_id)
+        let mut attempt = 1;
+        loop {
+            match self.client().post_block(&block).await {
+                Ok(block_id) => break Ok(block_id),
+                Err(err) => {
+                    if attempt >= MAX_POST_BLOCK_ATTEMPTS {
+                        return Err(err.into());
+                    }
+                }
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(attempt)).await;
+            attempt += 1;
+        }
     }
 }
