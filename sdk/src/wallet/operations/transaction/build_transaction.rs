@@ -19,10 +19,7 @@ use crate::{
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
-    wallet::{
-        operations::helpers::time::can_output_be_unlocked_from_now_on, types::OutputWithExtendedMetadata, Wallet,
-        WalletError,
-    },
+    wallet::{operations::helpers::time::can_output_be_unlocked_from_now_on, types::OutputData, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
@@ -110,7 +107,7 @@ fn filter_inputs<'a>(
     wallet_address: &Bech32Address,
     controlled_addresses: &HashSet<Address>,
     wallet_bip_path: Option<Bip44>,
-    available_outputs: impl IntoIterator<Item = &'a OutputWithExtendedMetadata>,
+    available_outputs: impl IntoIterator<Item = &'a OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
     required_inputs: &BTreeSet<OutputId>,

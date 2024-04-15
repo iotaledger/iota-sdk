@@ -10,7 +10,7 @@ use crate::{
     },
     wallet::{
         operations::transaction::TransactionOptions,
-        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
+        types::{OutputData, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -86,7 +86,7 @@ where
         &self,
         account_id: AccountId,
         foundry_id: FoundryId,
-    ) -> Result<(OutputWithExtendedMetadata, OutputWithExtendedMetadata), WalletError> {
+    ) -> Result<(OutputData, OutputData), WalletError> {
         let mut existing_account_output_with_ext_metadata = None;
         let mut existing_foundry_output = None;
 

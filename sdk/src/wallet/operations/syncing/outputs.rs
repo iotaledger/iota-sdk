@@ -14,7 +14,7 @@ use crate::{
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
         },
     },
-    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputWithExtendedMetadata, Wallet, WalletError},
+    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet, WalletError},
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
@@ -23,7 +23,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         outputs_with_metadata: Vec<OutputWithMetadataResponse>,
         network_id: u64,
-    ) -> Result<Vec<OutputWithExtendedMetadata>, WalletError> {
+    ) -> Result<Vec<OutputData>, WalletError> {
         log::debug!("[SYNC] convert output_responses");
 
         let wallet_ledger = self.ledger().await;
@@ -43,7 +43,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         .get(metadata.output_id().transaction_id())
                         .map_or(false, |tx| !tx.incoming);
 
-                    OutputWithExtendedMetadata {
+                    OutputData {
                         output_id: metadata.output_id().to_owned(),
                         metadata,
                         output,

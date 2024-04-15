@@ -35,7 +35,7 @@ use crate::{
 /// An output with extended metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputWithExtendedMetadata {
+pub struct OutputData {
     /// The output itself.
     pub output: Output,
     /// The metadata of the output.
@@ -50,7 +50,7 @@ pub struct OutputWithExtendedMetadata {
     pub remainder: bool,
 }
 
-impl OutputWithExtendedMetadata {
+impl OutputData {
     /// Returns whether the [`OutputMetadata`] is spent or not.
     pub fn is_spent(&self) -> bool {
         self.metadata.is_spent()

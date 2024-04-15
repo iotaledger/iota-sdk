@@ -32,7 +32,7 @@ use iota_sdk::{
             AddressData, NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, TransactionProgressEvent,
             WalletEvent,
         },
-        types::{InclusionState, OutputWithExtendedMetadata},
+        types::{InclusionState, OutputData},
     },
 };
 use pretty_assertions::assert_eq;
@@ -55,7 +55,7 @@ fn wallet_events_serde() {
             .unwrap(),
     }));
 
-    let output_with_extended_metadata = OutputWithExtendedMetadata {
+    let output_with_extended_metadata = OutputData {
         output_id: TransactionHash::null().into_transaction_id(0).into_output_id(0),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),

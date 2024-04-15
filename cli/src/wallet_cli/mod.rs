@@ -25,9 +25,9 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputWithExtendedMetadata, BeginStakingParams, ConsolidationParams, CreateDelegationParams,
-        CreateNativeTokenParams, MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams,
-        SendNftParams, SendParams, SyncOptions, Wallet, WalletError,
+        types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
+        MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams, SendNftParams,
+        SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };
@@ -1679,7 +1679,7 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-fn print_outputs(mut outputs_with_ext_metadata: Vec<OutputWithExtendedMetadata>, title: &str) -> Result<(), Error> {
+fn print_outputs(mut outputs_with_ext_metadata: Vec<OutputData>, title: &str) -> Result<(), Error> {
     if outputs_with_ext_metadata.is_empty() {
         println_log_info!("No outputs found");
     } else {

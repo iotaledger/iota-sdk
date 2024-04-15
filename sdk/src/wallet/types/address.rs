@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{address::Bech32Address, output::OutputId},
-    wallet::OutputWithExtendedMetadata,
+    wallet::OutputData,
 };
 
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, derive_more::Deref)]
@@ -24,7 +24,7 @@ pub(crate) struct AddressWithUnspentOutputIds {
 pub(crate) struct AddressWithUnspentOutputs {
     #[serde(flatten)]
     pub(crate) address_with_unspent_output_ids: AddressWithUnspentOutputIds,
-    pub(crate) unspent_outputs: Vec<OutputWithExtendedMetadata>,
+    pub(crate) unspent_outputs: Vec<OutputData>,
 }
 
 pub(crate) type SpentOutputId = OutputId;

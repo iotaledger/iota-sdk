@@ -5,13 +5,13 @@ use std::collections::HashSet;
 
 use crate::{
     types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex},
-    wallet::{types::OutputWithExtendedMetadata, WalletError},
+    wallet::{types::OutputData, WalletError},
 };
 
 // Check if an output can be unlocked by one of the provided addresses at the current time
 pub(crate) fn can_output_be_unlocked_now(
     controlled_addresses: &HashSet<Address>,
-    output_with_ext_metadata: &OutputWithExtendedMetadata,
+    output_with_ext_metadata: &OutputData,
     commitment_slot_index: impl Into<SlotIndex> + Copy,
     committable_age_range: CommittableAgeRange,
 ) -> Result<bool, WalletError> {

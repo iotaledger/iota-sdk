@@ -20,7 +20,7 @@ use crate::{
         constants::MIN_SYNC_INTERVAL,
         types::{
             address::{AddressWithUnspentOutputIds, AddressWithUnspentOutputs, SpentOutputId},
-            Balance, OutputWithExtendedMetadata,
+            Balance, OutputData,
         },
         Wallet, WalletError,
     },
@@ -51,14 +51,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         addresses: &[AddressWithUnspentOutputIds],
         options: &SyncOptions,
-    ) -> Result<
-        (
-            Vec<AddressWithUnspentOutputIds>,
-            Vec<SpentOutputId>,
-            Vec<OutputWithExtendedMetadata>,
-        ),
-        WalletError,
-    > {
+    ) -> Result<(Vec<AddressWithUnspentOutputIds>, Vec<SpentOutputId>, Vec<OutputData>), WalletError> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         let network_id = self.client().get_network_id().await?;
 

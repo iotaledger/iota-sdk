@@ -18,9 +18,7 @@ pub(crate) async fn call_wallet_method_internal(
     method: WalletMethod,
 ) -> Result<Response, crate::Error> {
     let response = match method {
-        WalletMethod::Accounts => {
-            Response::OutputsWithExtendedMetadata(wallet.ledger().await.accounts().cloned().collect())
-        }
+        WalletMethod::Accounts => Response::OutputsWithData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::BackupToStrongholdSnapshot { destination, password } => {
             wallet.backup_to_stronghold_snapshot(destination, password).await?;
@@ -140,7 +138,7 @@ pub(crate) async fn call_wallet_method_internal(
                 |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(transaction)))),
             ),
         WalletMethod::GetOutput { output_id } => {
-            Response::OutputWithExtendedMetadata(wallet.ledger().await.get_output(&output_id).cloned().map(Box::new))
+            Response::OutputData(wallet.ledger().await.get_output(&output_id).cloned().map(Box::new))
         }
         // #[cfg(feature = "participation")]
         // WalletMethod::GetParticipationEvent { event_id } => {
@@ -205,7 +203,7 @@ pub(crate) async fn call_wallet_method_internal(
             Response::PreparedTransaction(data)
         }
         WalletMethod::ImplicitAccounts => {
-            Response::OutputsWithExtendedMetadata(wallet.ledger().await.implicit_accounts().cloned().collect())
+            Response::OutputsWithData(wallet.ledger().await.implicit_accounts().cloned().collect())
         }
         WalletMethod::IncomingTransactions => Response::Transactions(
             wallet
@@ -218,7 +216,7 @@ pub(crate) async fn call_wallet_method_internal(
         ),
         WalletMethod::Outputs { filter_options } => {
             let wallet_ledger = wallet.ledger().await;
-            Response::OutputsWithExtendedMetadata(if let Some(filter) = filter_options {
+            Response::OutputsWithData(if let Some(filter) = filter_options {
                 wallet_ledger.filtered_outputs(filter).cloned().collect()
             } else {
                 wallet_ledger.outputs().values().cloned().collect()
@@ -422,7 +420,7 @@ pub(crate) async fn call_wallet_method_internal(
         ),
         WalletMethod::UnspentOutputs { filter_options } => {
             let wallet_ledger = wallet.ledger().await;
-            Response::OutputsWithExtendedMetadata(if let Some(filter) = filter_options {
+            Response::OutputsWithData(if let Some(filter) = filter_options {
                 wallet_ledger.filtered_unspent_outputs(filter).cloned().collect()
             } else {
                 wallet_ledger.unspent_outputs().values().cloned().collect()

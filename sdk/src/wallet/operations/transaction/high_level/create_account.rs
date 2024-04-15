@@ -13,7 +13,7 @@ use crate::{
     },
     wallet::{
         operations::transaction::TransactionOptions,
-        types::{OutputWithExtendedMetadata, TransactionWithMetadata},
+        types::{OutputData, TransactionWithMetadata},
         Wallet, WalletError,
     },
 };
@@ -107,7 +107,7 @@ where
     pub(crate) async fn get_account_output(
         &self,
         account_id: impl Into<Option<AccountId>> + Send,
-    ) -> Option<(AccountId, OutputWithExtendedMetadata)> {
+    ) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
         let account_id = account_id.into();
         self.ledger().await.unspent_outputs.values().find_map(
