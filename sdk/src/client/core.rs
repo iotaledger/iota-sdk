@@ -62,12 +62,13 @@ pub struct ClientInner {
     pub(crate) request_pool: RequestPool,
 }
 
+#[cfg(not(target_family = "wasm"))]
 #[derive(Default)]
 pub(crate) struct SyncHandle(pub(crate) Option<tokio::task::JoinHandle<()>>);
 
+#[cfg(not(target_family = "wasm"))]
 impl Drop for SyncHandle {
     fn drop(&mut self) {
-        #[cfg(not(target_family = "wasm"))]
         if let Some(sync_handle) = self.0.take() {
             sync_handle.abort();
         }
