@@ -90,10 +90,9 @@ where
         let block_id = match self
             .submit_basic_block(
                 Some(Payload::from(signed_transaction_data.payload.clone())),
-                options
-                    .as_ref()
-                    .and_then(|options| options.issuer_id)
-                    .or(signed_transaction_data.issuer_id),
+                signed_transaction_data
+                    .issuer_id
+                    .or_else(|| options.as_ref().and_then(|options| options.issuer_id)),
                 true,
             )
             .await
