@@ -52,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         payload: signed_transaction,
         inputs_data: prepared_transaction_data.inputs_data,
         mana_rewards: prepared_transaction_data.mana_rewards,
+        issuer_id: prepared_transaction_data.issuer_id,
     };
 
     println!("Signed transaction.");
