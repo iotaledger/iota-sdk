@@ -662,6 +662,7 @@ where
         transaction,
         inputs_data,
         mana_rewards,
+        issuer_id,
         ..
     } = prepared_transaction_data;
     let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
@@ -670,6 +671,7 @@ where
         payload: tx_payload,
         inputs_data,
         mana_rewards,
+        issuer_id,
     };
 
     data.verify_semantic(protocol_parameters).inspect_err(|e| {

@@ -10,7 +10,7 @@ from iota_sdk.types.output import Output
 from iota_sdk.types.output_metadata import OutputMetadata
 from iota_sdk.types.payload import Transaction, SignedTransactionPayload
 from iota_sdk.types.signature import Bip44
-from iota_sdk.types.common import json
+from iota_sdk.types.common import json, HexStr
 
 
 @json
@@ -53,11 +53,13 @@ class PreparedTransactionData:
         inputs_data: Data about the inputs which is required for signing.
         remainders: Data about remainder outputs.
         mana_rewards: Mana rewards by input.
+        issuer_id: The block issuer id from which the BIC for the block containing this transaction should be burned.
     """
     transaction: Transaction
     inputs_data: List[InputSigningData]
     remainders: Optional[List[RemainderData]] = None
     mana_rewards: Optional[dict[OutputId, int]] = None
+    issuer_id: Optional[HexStr] = None
 
 
 @json
@@ -69,7 +71,9 @@ class SignedTransactionData:
         payload: The transaction payload.
         inputs_data: Data about the inputs consumed in the transaction.
         mana_rewards: Mana rewards by input.
+        issuer_id: The block issuer id from which the BIC for the block containing this transaction should be burned.
     """
     payload: SignedTransactionPayload
     inputs_data: List[InputSigningData]
     mana_rewards: Optional[dict[OutputId, int]] = None
+    issuer_id: Optional[HexStr] = None

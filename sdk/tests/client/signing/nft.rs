@@ -136,6 +136,7 @@ async fn nft_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager

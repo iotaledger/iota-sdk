@@ -11,7 +11,7 @@ use crate::{
     types::{
         block::{
             address::Address,
-            output::{Output, OutputId},
+            output::{AccountId, Output, OutputId},
             payload::{
                 signed_transaction::{
                     dto::{SignedTransactionPayloadDto, TransactionDto},
@@ -37,6 +37,8 @@ pub struct PreparedTransactionData {
     pub remainders: Vec<RemainderData>,
     /// Mana rewards
     pub mana_rewards: BTreeMap<OutputId, u64>,
+    /// The block issuer id from which the BIC for the block containing this transaction should be burned.
+    pub issuer_id: Option<AccountId>,
 }
 
 /// PreparedTransactionData Dto
@@ -53,6 +55,8 @@ pub struct PreparedTransactionDataDto {
     /// Mana rewards
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty", with = "mana_rewards")]
     pub mana_rewards: BTreeMap<OutputId, u64>,
+    /// The block issuer id from which the BIC for the block containing this transaction should be burned.
+    pub issuer_id: Option<AccountId>,
 }
 
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
@@ -62,6 +66,7 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
             inputs_data: value.inputs_data.clone(),
             remainders: value.remainders.clone(),
             mana_rewards: value.mana_rewards.clone(),
+            issuer_id: value.issuer_id,
         }
     }
 }
@@ -78,6 +83,7 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
             inputs_data: dto.inputs_data,
             remainders: dto.remainders,
             mana_rewards: dto.mana_rewards,
+            issuer_id: dto.issuer_id,
         })
     }
 }
@@ -100,6 +106,8 @@ pub struct SignedTransactionData {
     pub inputs_data: Vec<InputSigningData>,
     /// Mana rewards
     pub mana_rewards: BTreeMap<OutputId, u64>,
+    /// The block issuer id from which the BIC for the block containing this transaction should be burned.
+    pub issuer_id: Option<AccountId>,
 }
 
 /// SignedTransactionData Dto
@@ -113,6 +121,8 @@ pub struct SignedTransactionDataDto {
     /// Mana rewards
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty", with = "mana_rewards")]
     pub mana_rewards: BTreeMap<OutputId, u64>,
+    /// The block issuer id from which the BIC for the block containing this transaction should be burned.
+    pub issuer_id: Option<AccountId>,
 }
 
 impl From<&SignedTransactionData> for SignedTransactionDataDto {
@@ -121,6 +131,7 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.clone(),
             mana_rewards: value.mana_rewards.clone(),
+            issuer_id: value.issuer_id,
         }
     }
 }
@@ -136,6 +147,7 @@ impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
             payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)?,
             inputs_data: dto.inputs_data,
             mana_rewards: dto.mana_rewards,
+            issuer_id: dto.issuer_id,
         })
     }
 }

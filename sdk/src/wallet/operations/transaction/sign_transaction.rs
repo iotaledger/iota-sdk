@@ -88,6 +88,7 @@ where
             payload,
             inputs_data: prepared_transaction_data.inputs_data.clone(),
             mana_rewards: prepared_transaction_data.mana_rewards.clone(),
+            issuer_id: prepared_transaction_data.issuer_id,
         })
     }
 }

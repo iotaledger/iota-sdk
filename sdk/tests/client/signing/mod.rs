@@ -420,6 +420,7 @@ async fn all_combined() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: selected.inputs_data,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager

@@ -91,6 +91,7 @@ async fn sign_account_state_transition() -> Result<(), Box<dyn std::error::Error
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -207,6 +208,7 @@ async fn account_reference_unlocks() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager

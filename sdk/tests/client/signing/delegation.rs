@@ -96,6 +96,7 @@ async fn valid_creation() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -240,6 +241,7 @@ async fn non_null_id_creation() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -323,6 +325,7 @@ async fn mismatch_amount_creation() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -406,6 +409,7 @@ async fn non_zero_end_epoch_creation() -> Result<(), Box<dyn std::error::Error>>
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -487,6 +491,7 @@ async fn invalid_start_epoch_creation() -> Result<(), Box<dyn std::error::Error>
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -578,6 +583,7 @@ async fn delay_not_null_id() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -672,6 +678,7 @@ async fn delay_modified_amount() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -763,6 +770,7 @@ async fn delay_modified_validator() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -854,6 +862,7 @@ async fn delay_modified_start_epoch() -> Result<(), Box<dyn std::error::Error>> 
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -945,6 +954,7 @@ async fn delay_pre_registration_slot_end_epoch() -> Result<(), Box<dyn std::erro
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -1038,6 +1048,7 @@ async fn destroy_null_id() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards,
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
@@ -1123,6 +1134,7 @@ async fn destroy_reward_missing() -> Result<(), Box<dyn std::error::Error>> {
         inputs_data: inputs,
         remainders: Vec::new(),
         mana_rewards: Default::default(),
+        issuer_id: None,
     };
 
     let unlocks = secret_manager
