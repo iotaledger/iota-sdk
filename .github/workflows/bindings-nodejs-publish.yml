@@ -113,9 +113,14 @@ jobs:
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
 
       - name: Install gon (macOS)
+        # Fork of https://github.com/mitchellh/gon
+        # https://github.com/Bearer/gon
+        # Since we're dealing with code signing secrets we want to pin the version of gon
         if: ${{ startsWith(matrix.os, 'macos') }}
-        # https://github.com/mitchellh/gon
-        run: brew install mitchellh/gon/gon
+        run: |
+          wget https://raw.githubusercontent.com/Bearer/homebrew-tap/366bc999e14a8d04e07e24f9387bcbaf89c1bc53/Formula/gon.rb
+          brew install --formula gon.rb
+          rm gon.rb
 
       - name: Set deployment target (macOS)
         if: matrix.os == 'macos-13'
