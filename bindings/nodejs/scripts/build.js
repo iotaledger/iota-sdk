@@ -6,6 +6,7 @@ const { spawnSync } = require('child_process');
 const { status } = spawnSync(process.platform === 'win32' ? 'yarn.cmd' : 'yarn', ['build'], {
     stdio: 'inherit',
     cwd: resolve(__dirname, '../'),
+    shell: true
 });
 
 if (status === null) {
