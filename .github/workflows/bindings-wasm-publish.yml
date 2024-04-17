@@ -46,7 +46,7 @@ jobs:
         shell: sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: yarn publish --access public
+        run: yarn publish --access public --tag alpha
 
       - name: Prepare Github release
         id: prepare_release

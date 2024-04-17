@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-alpha.6 - 2024-04-17
+
+### Fixed
+
+- MacOS binary build;
+
 ## 2.0.0-alpha.5 - 2024-04-15
 
 ### Added
