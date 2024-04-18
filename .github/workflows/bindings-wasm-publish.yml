@@ -62,3 +62,4 @@ jobs:
           body: "https://github.com/iotaledger/iota-sdk/blob/develop/bindings/wasm/CHANGELOG.md \n https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md"
           files: bindings/wasm/*.tgz
           tag_name: ${{ steps.prepare_release.outputs.tag_name }}
+          target_commitish: ${{ github.sha }}
