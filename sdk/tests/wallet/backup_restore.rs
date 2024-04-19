@@ -1,130 +1,135 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2022-2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// use std::path::PathBuf;
+use std::path::PathBuf;
 
-// use crypto::keys::bip39::Mnemonic;
-// use iota_sdk::{
-//     client::{
-//         api::GetAddressesOptions,
-//         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
-//         node_manager::node::{Node, NodeDto},
-//         secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
-//     },
-//     crypto::keys::bip44::Bip44,
-//     wallet::{ClientOptions, Result, Wallet},
-// };
-// use pretty_assertions::assert_eq;
-// use url::Url;
+use crypto::keys::bip39::Mnemonic;
+use iota_sdk::{
+    client::{
+        api::GetAddressesOptions,
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        node_manager::node::{Node, NodeDto},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+    },
+    crypto::keys::bip44::Bip44,
+    wallet::{ClientOptions, Wallet},
+};
+use pretty_assertions::assert_eq;
+use url::Url;
 
-// use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
+use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
 
-// // Backup and restore with Stronghold
-// #[tokio::test]
-// async fn backup_and_restore() -> Result<(), WalletError> {
-//     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+// Backup and restore with Stronghold
+#[ignore]
+#[tokio::test]
+async fn backup_and_restore() -> Result<(), Box<dyn std::error::Error>> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
 
-//     let storage_path = "test-storage/backup_and_restore";
-//     setup(storage_path)?;
+    let storage_path = "test-storage/backup_and_restore";
+    setup(storage_path)?;
 
-//     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
-//     let stronghold_password = "some_hopefully_secure_password".to_owned();
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
 
-//     // Create directory if not existing, because stronghold panics otherwise
-//     std::fs::create_dir_all(storage_path).ok();
-//     let stronghold = StrongholdSecretManager::builder()
-//         .password(stronghold_password.clone())
-//         .build("test-storage/backup_and_restore/1.stronghold")?;
+    // Create directory if not existing, because stronghold panics otherwise
+    std::fs::create_dir_all(storage_path).ok();
+    let stronghold = StrongholdSecretManager::builder()
+        .password(stronghold_password.clone())
+        .build("test-storage/backup_and_restore/1.stronghold")?;
 
-//     stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
 
-//     let wallet = Wallet::builder()
-//         .with_secret_manager(SecretManager::Stronghold(stronghold))
-//         .with_client_options(client_options.clone())
-//         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
-//         .with_storage_path("test-storage/backup_and_restore/1")
-//         .finish()
-//         .await?;
+    let wallet = Wallet::builder()
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(client_options.clone())
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_storage_path("test-storage/backup_and_restore/1")
+        .finish()
+        .await?;
 
-//     wallet
-//         .backup(
-//             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-//             stronghold_password.clone(),
-//         )
-//         .await?;
+    wallet
+        .backup_to_stronghold_snapshot(
+            PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
+            stronghold_password.clone(),
+        )
+        .await?;
 
-//     // restore from backup
+    // restore from backup
 
-//     let stronghold = StrongholdSecretManager::builder().build("test-storage/backup_and_restore/2.stronghold")?;
+    let stronghold = StrongholdSecretManager::builder()
+        .password(stronghold_password.clone())
+        .build("test-storage/backup_and_restore/2.stronghold")?;
 
-//     let restored_wallet = Wallet::builder()
-//         .with_storage_path("test-storage/backup_and_restore/2")
-//         .with_secret_manager(SecretManager::Stronghold(stronghold))
-//         .with_client_options(ClientOptions::new().with_node(NODE_OTHER)?)
-//         // Build with a different coin type, to check if it gets replaced by the one from the backup
-//         .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
-//         .finish()
-//         .await?;
+    stronghold.store_mnemonic(Mnemonic::from("surprise own liquid gold embrace indoor cereal magnet wink purse similar unusual setup woman catch chuckle critic wet weasel ahead wasp cruise luggage pig".to_string())).await.unwrap();
 
-//     // Wrong password fails
-//     restored_wallet
-//         .restore_backup(
-//             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-//             "wrong password".to_owned(),
-//             None,
-//             None,
-//         )
-//         .await
-//         .unwrap_err();
+    let restored_wallet = Wallet::builder()
+        .with_storage_path("test-storage/backup_and_restore/2")
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(ClientOptions::new().with_ignore_node_health().with_node(NODE_LOCAL)?)
+        // Build with a different coin type, to check if it gets replaced by the one from the backup
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
+        .finish()
+        .await?;
 
-//     // Correct password works, even after trying with a wrong one before
-//     restored_wallet
-//         .restore_backup(
-//             PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
-//             stronghold_password,
-//             None,
-//             None,
-//         )
-//         .await?;
+    // Wrong password fails
+    restored_wallet
+        .restore_from_stronghold_snapshot(
+            PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
+            "wrong password".to_owned(),
+            None,
+            None,
+        )
+        .await
+        .unwrap_err();
 
-//     // Validate restored data
+    // Correct password works, even after trying with a wrong one before
+    restored_wallet
+        .restore_from_stronghold_snapshot(
+            PathBuf::from("test-storage/backup_and_restore/backup.stronghold"),
+            stronghold_password,
+            None,
+            None,
+        )
+        .await?;
 
-//     // Restored coin type is used
-//     assert_eq!(restored_wallet.bip_path().await.unwrap().coin_type, SHIMMER_COIN_TYPE);
+    // Validate restored data
 
-//     // compare restored client options
-//     let client_options = restored_wallet.client_options().await;
-//     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
-//     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
+    // Restored coin type is used
+    assert_eq!(restored_wallet.bip_path().await.unwrap().coin_type, SHIMMER_COIN_TYPE);
 
-//     assert_eq!(wallet.address().clone(), restored_wallet.address().clone());
+    // compare restored client options
+    let client_options = restored_wallet.client_options().await;
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
+    assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-//     // secret manager is the same
-//     assert_eq!(
-//         wallet
-//             .get_secret_manager()
-//             .read()
-//             .await
-//             .generate_ed25519_addresses(GetAddressesOptions {
-//                 coin_type: SHIMMER_COIN_TYPE,
-//                 range: 0..1,
-//                 ..Default::default()
-//             })
-//             .await?,
-//         restored_wallet
-//             .get_secret_manager()
-//             .read()
-//             .await
-//             .generate_ed25519_addresses(GetAddressesOptions {
-//                 coin_type: SHIMMER_COIN_TYPE,
-//                 range: 0..1,
-//                 ..Default::default()
-//             })
-//             .await?,
-//     );
-//     tear_down(storage_path)
-// }
+    assert_eq!(wallet.address().await.clone(), restored_wallet.address().await.clone());
+
+    // secret manager is the same
+    assert_eq!(
+        wallet
+            .secret_manager()
+            .read()
+            .await
+            .generate_ed25519_addresses(GetAddressesOptions {
+                coin_type: SHIMMER_COIN_TYPE,
+                range: 0..1,
+                ..Default::default()
+            })
+            .await?,
+        restored_wallet
+            .secret_manager()
+            .read()
+            .await
+            .generate_ed25519_addresses(GetAddressesOptions {
+                coin_type: SHIMMER_COIN_TYPE,
+                range: 0..1,
+                ..Default::default()
+            })
+            .await?,
+    );
+    tear_down(storage_path)
+}
 
 // // Backup and restore with Stronghold and MnemonicSecretManager
 // #[tokio::test]
