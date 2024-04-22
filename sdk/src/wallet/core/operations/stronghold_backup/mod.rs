@@ -134,7 +134,7 @@ impl Wallet {
                 .map_err(|_| WalletError::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location
-            if backup_path != new_snapshot_path {
+            if backup_path.canonicalize()? != new_snapshot_path.canonicalize()? {
                 fs::copy(backup_path, new_snapshot_path)?;
             }
 
@@ -146,7 +146,7 @@ impl Wallet {
         } else {
             // If no secret manager data was in the backup, just copy the Stronghold file so the seed is available in
             // the new location.
-            if backup_path != new_snapshot_path {
+            if backup_path.canonicalize()? != new_snapshot_path.canonicalize()? {
                 fs::copy(backup_path, new_snapshot_path)?;
             }
         }
@@ -298,7 +298,7 @@ impl Wallet<StrongholdSecretManager> {
                 .map_err(|_| WalletError::Backup("invalid secret_manager"))?;
 
             // Copy Stronghold file so the seed is available in the new location
-            if backup_path != new_snapshot_path {
+            if backup_path.canonicalize()? != new_snapshot_path.canonicalize()? {
                 fs::copy(backup_path, new_snapshot_path)?;
             }
 

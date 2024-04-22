@@ -27,10 +27,10 @@ runs:
         go-version-file: "iota-core/go.mod"
         cache: false
 
-    - name: Unblock port 8084
+    - name: Replace port 8084 by 8087 as it's already used by Mono
       shell: bash
-      run: |
-        sudo kill -9 `sudo lsof -t -i:8084`
+      run: sed -i 's#8084#8087#g' docker-compose.yml
+      working-directory: iota-core/tools/docker-network
 
     - name: Setup private tangle
       shell: bash
