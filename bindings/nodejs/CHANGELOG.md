@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-alpha.8 - 2024-04-22
+
+### Fixed
+
+- `Wallet::restoreFromStrongholdSnapshot()` with same source and target path;
+
 ## 2.0.0-alpha.7 - 2024-04-19
 
 ### Fixed

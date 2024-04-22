@@ -131,6 +131,105 @@ async fn backup_and_restore() -> Result<(), Box<dyn std::error::Error>> {
     tear_down(storage_path)
 }
 
+// Backup and restore with Stronghold and same path
+#[ignore]
+#[tokio::test]
+async fn backup_and_restore_same_path() -> Result<(), Box<dyn std::error::Error>> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+
+    let storage_path = "test-storage/backup_and_restore_same_path";
+    setup(storage_path)?;
+
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+
+    let stronghold_password = "some_hopefully_secure_password".to_owned();
+
+    // Create directory if not existing, because stronghold panics otherwise
+    std::fs::create_dir_all(storage_path).ok();
+    let stronghold = StrongholdSecretManager::builder()
+        .password(stronghold_password.clone())
+        .build("test-storage/backup_and_restore_same_path/1.stronghold")?;
+
+    stronghold.store_mnemonic(Mnemonic::from("inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak".to_string())).await.unwrap();
+
+    let wallet = Wallet::builder()
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(client_options.clone())
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_storage_path("test-storage/backup_and_restore_same_path/1")
+        .finish()
+        .await?;
+
+    wallet
+        .backup_to_stronghold_snapshot(
+            PathBuf::from("test-storage/backup_and_restore_same_path/backup.stronghold"),
+            stronghold_password.clone(),
+        )
+        .await?;
+
+    // restore from backup
+
+    let stronghold = StrongholdSecretManager::builder()
+        .password(stronghold_password.clone())
+        .build("test-storage/backup_and_restore_same_path/backup.stronghold")?;
+
+    let restored_wallet = Wallet::builder()
+        .with_storage_path("test-storage/backup_and_restore_same_path/2")
+        .with_secret_manager(SecretManager::Stronghold(stronghold))
+        .with_client_options(ClientOptions::new().with_ignore_node_health().with_node(NODE_LOCAL)?)
+        // Build with a different coin type, to check if it gets replaced by the one from the backup
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
+        .finish()
+        .await?;
+
+    // Correct password works
+    restored_wallet
+        .restore_from_stronghold_snapshot(
+            PathBuf::from("test-storage/backup_and_restore_same_path/backup.stronghold"),
+            stronghold_password,
+            None,
+            None,
+        )
+        .await?;
+
+    // Validate restored data
+
+    // Restored coin type is used
+    assert_eq!(restored_wallet.bip_path().await.unwrap().coin_type, SHIMMER_COIN_TYPE);
+
+    // compare restored client options
+    let client_options = restored_wallet.client_options().await;
+    let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
+    assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
+
+    assert_eq!(wallet.address().await.clone(), restored_wallet.address().await.clone());
+
+    // secret manager is the same
+    assert_eq!(
+        wallet
+            .secret_manager()
+            .read()
+            .await
+            .generate_ed25519_addresses(GetAddressesOptions {
+                coin_type: SHIMMER_COIN_TYPE,
+                range: 0..1,
+                ..Default::default()
+            })
+            .await?,
+        restored_wallet
+            .secret_manager()
+            .read()
+            .await
+            .generate_ed25519_addresses(GetAddressesOptions {
+                coin_type: SHIMMER_COIN_TYPE,
+                range: 0..1,
+                ..Default::default()
+            })
+            .await?,
+    );
+    tear_down(storage_path)
+}
+
 // // Backup and restore with Stronghold and MnemonicSecretManager
 // #[tokio::test]
 // async fn backup_and_restore_mnemonic_secret_manager() -> Result<(), WalletError> {
