@@ -27,6 +27,11 @@ runs:
         go-version-file: "iota-core/go.mod"
         cache: false
 
+    - name: Unblock port 8084
+      shell: bash
+      run: |
+        sudo kill -9 `sudo lsof -t -i:8084`
+
     - name: Setup private tangle
       shell: bash
       # setup-go sets the PATH for the correct version, but sudo uses a different PATH by default
