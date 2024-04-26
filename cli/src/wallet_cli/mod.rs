@@ -200,7 +200,7 @@ pub enum WalletCommand {
     AddBlockIssuerKey {
         /// The account to which the key should be added.
         account_id: AccountId,
-        /// The hex-encoded key to add.
+        /// The hex-encoded public key to add.
         // TODO: Use the actual type somehow?
         issuer_key: String,
     },
@@ -941,7 +941,13 @@ pub async fn add_block_issuer_key(wallet: &Wallet, account_id: &AccountId, issue
         keys_to_remove: vec![],
     };
 
-    wallet.modify_account_output_block_issuer_keys(params, None).await?;
+    let transaction = wallet.modify_account_output_block_issuer_keys(params, None).await?;
+
+    println_log_info!(
+        "Block issuer key adding transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
@@ -1603,6 +1609,7 @@ pub async fn prompt_internal(
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::AddBlockIssuerKey { account_id, issuer_key } => {
+                            ensure_password(wallet).await?;
                             add_block_issuer_key(wallet, &account_id, &issuer_key).await
                         }
                         WalletCommand::MeltNativeToken { token_id, amount } => {

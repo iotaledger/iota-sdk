@@ -1,6 +1,8 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeSet;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -72,6 +74,12 @@ where
         } else {
             options.replace(TransactionOptions {
                 transitions: Some(Transitions::new().add_account(params.account_id, change)),
+                required_inputs: BTreeSet::from([self
+                    .get_account_output(params.account_id)
+                    .await
+                    .ok_or(WalletError::AccountNotFound)?
+                    .1
+                    .output_id]),
                 ..Default::default()
             });
         }

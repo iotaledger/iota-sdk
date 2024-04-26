@@ -1,14 +1,20 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeSet;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage, ClientError},
-    types::block::output::{
-        feature::{BlockIssuerFeature, BlockIssuerKey},
-        AccountId, AccountOutput, AccountOutputBuilder,
+    client::{
+        api::{
+            transaction_builder::{transition::AccountChange, Transitions},
+            PreparedTransactionData,
+        },
+        secret::SecretManage,
+        ClientError,
     },
+    types::block::output::{feature::BlockIssuerKey, AccountId},
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet, WalletError},
 };
 
@@ -48,43 +54,32 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_modify_account_output_block_issuer_keys");
-        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
-        let (_, output_data) = self
-            .get_account_output(params.account)
-            .await
-            .ok_or(WalletError::AccountNotFound)?;
+        let change = AccountChange::ModifyBlockIssuerKeys {
+            keys_to_add: params.keys_to_add,
+            keys_to_remove: params.keys_to_remove,
+        };
 
-        let previous_account: &AccountOutput = output_data.output.as_account();
+        let account_id = params.account;
 
-        if !previous_account.is_block_issuer() {
-            return Err(WalletError::InvalidParameter(
-                "block issuer keys can only be modified on an account with an existing block issuer feature",
-            ));
+        let mut options = options.into();
+        if let Some(options) = options.as_mut() {
+            if let Some(transitions) = options.transitions.take() {
+                options.transitions = Some(transitions.add_account(account_id, change));
+            }
+        } else {
+            options.replace(TransactionOptions {
+                transitions: Some(Transitions::new().add_account(account_id, change)),
+                required_inputs: BTreeSet::from([self
+                    .get_account_output(account_id)
+                    .await
+                    .ok_or(WalletError::AccountNotFound)?
+                    .1
+                    .output_id]),
+                ..Default::default()
+            });
         }
 
-        let previous_block_issuer_feature = previous_account
-            .features()
-            .block_issuer()
-            .expect("we should not support adding a new block issuer feature in this method for now");
-        let mut block_issuer_keys = previous_block_issuer_feature.block_issuer_keys().to_vec();
-
-        block_issuer_keys.extend(params.keys_to_add);
-        params.keys_to_remove.iter().for_each(|key_to_remove| {
-            if let Ok(index) = block_issuer_keys.binary_search(key_to_remove) {
-                block_issuer_keys.remove(index);
-            }
-        });
-
-        let updated_block_issuer_feature =
-            BlockIssuerFeature::new(previous_block_issuer_feature.expiry_slot(), block_issuer_keys)?;
-
-        let account_output_builder = AccountOutputBuilder::from(previous_account)
-            .with_amount_or_minimum(previous_account.amount(), storage_score_params)
-            .replace_feature(updated_block_issuer_feature);
-
-        let outputs = [account_output_builder.finish_output()?];
-
-        self.prepare_send_outputs(outputs, options).await
+        self.prepare_send_outputs(None, options).await
     }
 }

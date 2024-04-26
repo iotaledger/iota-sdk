@@ -140,6 +140,24 @@ impl TransactionBuilder {
                     }
                     features.retain(|f| !f.is_staking());
                 }
+                AccountChange::ModifyBlockIssuerKeys {
+                    keys_to_add,
+                    keys_to_remove,
+                } => {
+                    if let Some(feature) = features.iter_mut().find(|f| f.is_block_issuer()) {
+                        let block_issuer_feature = feature.as_block_issuer();
+                        let updated_keys = block_issuer_feature
+                            .block_issuer_keys()
+                            .iter()
+                            .filter(|k| !keys_to_remove.contains(k))
+                            .chain(keys_to_add)
+                            .cloned()
+                            .collect::<Vec<BlockIssuerKey>>();
+                        *feature = BlockIssuerFeature::new(block_issuer_feature.expiry_slot(), updated_keys)?.into();
+                    } else {
+                        return Err(TransactionBuilderError::MissingBlockIssuerFeature(account_id));
+                    }
+                }
             }
         }
 
@@ -308,6 +326,12 @@ pub enum AccountChange {
         additional_epochs: u32,
     },
     EndStaking,
+    ModifyBlockIssuerKeys {
+        /// The keys that will be added.
+        keys_to_add: Vec<BlockIssuerKey>,
+        /// The keys that will be removed.
+        keys_to_remove: Vec<BlockIssuerKey>,
+    },
 }
 
 /// A type to specify intended transitions.
