@@ -18,7 +18,7 @@ use crate::{
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet, WalletError},
 };
 
-/// Params `modify_account_block_issuer_key()`
+/// Params for `modify_account_block_issuer_key()`
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ModifyAccountBlockIssuerKey {
