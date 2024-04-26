@@ -46,7 +46,7 @@ jobs:
         shell: sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: yarn publish --access public
+        run: yarn publish --access public --tag alpha
 
       - name: Prepare Github release
         id: prepare_release
@@ -62,3 +62,4 @@ jobs:
           body: "https://github.com/iotaledger/iota-sdk/blob/develop/bindings/wasm/CHANGELOG.md \n https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md"
           files: bindings/wasm/*.tgz
           tag_name: ${{ steps.prepare_release.outputs.tag_name }}
+          target_commitish: ${{ github.sha }}

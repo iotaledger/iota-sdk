@@ -113,6 +113,7 @@ impl TransactionBuilder {
                         .iter()
                         .map(|(&account_id, &mana)| ManaAllotment { account_id, mana }),
                 )
+                .with_capabilities(self.transaction_capabilities.clone())
                 .finish_with_params(&self.protocol_parameters)?;
 
             let signed_transaction = SignedTransactionPayload::new(transaction, self.null_transaction_unlocks()?)?;
