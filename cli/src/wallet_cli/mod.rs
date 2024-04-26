@@ -944,7 +944,7 @@ pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
 pub async fn add_block_issuer_key(wallet: &Wallet, account_id: &AccountId, issuer_key: &str) -> Result<(), Error> {
     let issuer_key: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH] = prefix_hex::decode(issuer_key)?;
     let params = ModifyAccountBlockIssuerKey {
-        account: account_id.clone(),
+        account_id: account_id.clone(),
         keys_to_add: vec![Ed25519PublicKeyHashBlockIssuerKey::new(issuer_key).into()],
         keys_to_remove: vec![],
     };
@@ -964,7 +964,7 @@ pub async fn add_block_issuer_key(wallet: &Wallet, account_id: &AccountId, issue
 pub async fn remove_block_issuer_key(wallet: &Wallet, account_id: &AccountId, issuer_key: &str) -> Result<(), Error> {
     let issuer_key: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH] = prefix_hex::decode(issuer_key)?;
     let params = ModifyAccountBlockIssuerKey {
-        account: account_id.clone(),
+        account_id: account_id.clone(),
         keys_to_add: vec![],
         keys_to_remove: vec![Ed25519PublicKeyHashBlockIssuerKey::new(issuer_key).into()],
     };

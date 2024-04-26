@@ -22,7 +22,7 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ModifyAccountBlockIssuerKey {
-    pub account: AccountId,
+    pub account_id: AccountId,
     /// The keys that will be added.
     pub keys_to_add: Vec<BlockIssuerKey>,
     /// The keys that will be removed.
@@ -60,7 +60,7 @@ where
             keys_to_remove: params.keys_to_remove,
         };
 
-        let account_id = params.account;
+        let account_id = params.account_id;
 
         let mut options = options.into();
         if let Some(options) = options.as_mut() {
