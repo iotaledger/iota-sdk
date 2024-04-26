@@ -204,6 +204,7 @@ pub enum WalletCommand {
         // TODO: Use the actual type somehow?
         block_issuer_key: String,
     },
+    /// Removes a block issuer key from an account.
     RemoveBlockIssuerKey {
         /// The account from which the key should be removed.
         account_id: AccountId,
