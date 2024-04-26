@@ -971,7 +971,7 @@ pub async fn remove_block_issuer_key(wallet: &Wallet, account_id: &AccountId, is
     let transaction = wallet.modify_account_output_block_issuer_keys(params, None).await?;
 
     println_log_info!(
-        "Block issuer key adding transaction sent:\n{:?}\n{:?}",
+        "Block issuer key removing transaction sent:\n{:?}\n{:?}",
         transaction.transaction_id,
         transaction.block_id
     );
