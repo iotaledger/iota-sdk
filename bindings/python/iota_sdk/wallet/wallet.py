@@ -286,18 +286,19 @@ class Wallet:
         return PreparedTransaction(self, prepared)
 
     def claim_outputs(
-            self, output_ids_to_claim: List[OutputId]) -> TransactionWithMetadata:
+            self, output_ids_to_claim: List[OutputId], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Claim outputs.
         """
-        return self.prepare_claim_outputs(output_ids_to_claim).send()
+        return self.prepare_claim_outputs(output_ids_to_claim, options).send()
 
     def prepare_claim_outputs(
-            self, output_ids_to_claim: List[OutputId]) -> PreparedTransaction:
+            self, output_ids_to_claim: List[OutputId], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Claim outputs.
         """
         return PreparedTransaction(self, PreparedTransactionData.from_dict(self._call_method(
             'prepareClaimOutputs', {
-                'outputIdsToClaim': output_ids_to_claim
+                'outputIdsToClaim': output_ids_to_claim,
+                'options': options
             }
         )))
 

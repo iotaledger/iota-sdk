@@ -419,8 +419,11 @@ export class Wallet {
      */
     async claimOutputs(
         outputIds: OutputId[],
+        transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
-        return (await this.prepareClaimOutputs(outputIds)).send();
+        return (
+            await this.prepareClaimOutputs(outputIds, transactionOptions)
+        ).send();
     }
 
     /**
@@ -431,11 +434,13 @@ export class Wallet {
      */
     async prepareClaimOutputs(
         outputIds: OutputId[],
+        transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
             name: 'prepareClaimOutputs',
             data: {
                 outputIdsToClaim: outputIds,
+                options: transactionOptions,
             },
         });
         const parsed = JSON.parse(

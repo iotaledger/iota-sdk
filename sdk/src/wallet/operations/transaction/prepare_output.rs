@@ -259,7 +259,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 
     // Get a remainder address based on transaction_options or use the first account address
-    async fn get_remainder_address(
+    pub(crate) async fn get_remainder_address(
         &self,
         transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<Address, WalletError> {
