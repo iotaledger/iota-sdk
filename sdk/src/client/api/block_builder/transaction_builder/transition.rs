@@ -172,7 +172,11 @@ impl TransactionBuilder {
             .with_features(features);
         match new_amount {
             Some(amount) => builder = builder.with_amount(amount),
-            None => builder = builder.with_minimum_amount(self.protocol_parameters.storage_score_parameters()),
+            None => {
+                if input.features().staking().is_none() {
+                    builder = builder.with_minimum_amount(self.protocol_parameters.storage_score_parameters());
+                }
+            }
         }
 
         // Block issuers cannot move their mana elsewhere.
