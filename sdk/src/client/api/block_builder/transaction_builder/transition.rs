@@ -69,6 +69,8 @@ impl TransactionBuilder {
             .cloned()
             .collect::<Vec<_>>();
 
+        let mut new_amount = None;
+
         if let Some(change) = self.transitions.as_ref().and_then(|t| t.accounts.get(&account_id)) {
             match change {
                 AccountChange::BeginStaking {
@@ -83,6 +85,7 @@ impl TransactionBuilder {
                         self.protocol_parameters
                             .past_bounded_slot(self.latest_slot_commitment_id),
                     );
+                    new_amount = Some(*staked_amount);
                     features.push(
                         StakingFeature::new(
                             *staked_amount,
@@ -101,6 +104,7 @@ impl TransactionBuilder {
                             .protocol_parameters
                             .future_bounded_epoch(self.latest_slot_commitment_id);
                         let staking_feature = feature.as_staking();
+                        new_amount = Some(staking_feature.staked_amount());
                         // Just extend the end epoch if it's still possible
                         if future_bounded_epoch <= staking_feature.end_epoch() {
                             *feature = StakingFeature::new(
@@ -140,15 +144,36 @@ impl TransactionBuilder {
                     }
                     features.retain(|f| !f.is_staking());
                 }
+                AccountChange::ModifyBlockIssuerKeys {
+                    keys_to_add,
+                    keys_to_remove,
+                } => {
+                    if let Some(feature) = features.iter_mut().find(|f| f.is_block_issuer()) {
+                        let block_issuer_feature = feature.as_block_issuer();
+                        let updated_keys = block_issuer_feature
+                            .block_issuer_keys()
+                            .iter()
+                            .filter(|k| !keys_to_remove.contains(k))
+                            .chain(keys_to_add)
+                            .cloned()
+                            .collect::<Vec<BlockIssuerKey>>();
+                        *feature = BlockIssuerFeature::new(block_issuer_feature.expiry_slot(), updated_keys)?.into();
+                    } else {
+                        return Err(TransactionBuilderError::MissingBlockIssuerFeature(account_id));
+                    }
+                }
             }
         }
 
         let mut builder = AccountOutputBuilder::from(input)
-            .with_minimum_amount(self.protocol_parameters.storage_score_parameters())
             .with_mana(0)
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
+        match new_amount {
+            Some(amount) => builder = builder.with_amount(amount),
+            None => builder = builder.with_minimum_amount(self.protocol_parameters.storage_score_parameters()),
+        }
 
         // Block issuers cannot move their mana elsewhere.
         if input.is_block_issuer() {
@@ -308,6 +333,12 @@ pub enum AccountChange {
         additional_epochs: u32,
     },
     EndStaking,
+    ModifyBlockIssuerKeys {
+        /// The keys that will be added.
+        keys_to_add: Vec<BlockIssuerKey>,
+        /// The keys that will be removed.
+        keys_to_remove: Vec<BlockIssuerKey>,
+    },
 }
 
 /// A type to specify intended transitions.
