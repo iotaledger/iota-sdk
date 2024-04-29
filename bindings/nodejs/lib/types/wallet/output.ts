@@ -15,7 +15,7 @@ export enum OutputsToClaim {
 }
 
 /** An output with extended metadata */
-export class OutputWithExtendedMetadata {
+export class OutputData {
     /** The output itself */
     @Type(() => Output, {
         discriminator: OutputDiscriminator,

@@ -12,7 +12,7 @@ import {
     FilterOptions,
     CreateNativeTokenParams,
     MintNftParams,
-    OutputWithExtendedMetadata,
+    OutputData,
     OutputParams,
     OutputsToClaim,
     TransactionWithMetadata,
@@ -303,15 +303,13 @@ export class Wallet {
      *
      * @returns The accounts of the wallet.
      */
-    async accounts(): Promise<OutputWithExtendedMetadata[]> {
+    async accounts(): Promise<OutputData[]> {
         const response = await this.methodHandler.callMethod({
             name: 'accounts',
         });
 
-        const parsed = JSON.parse(response) as Response<
-            OutputWithExtendedMetadata[]
-        >;
-        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
@@ -703,19 +701,17 @@ export class Wallet {
     /**
      * Get the data for an output.
      * @param outputId The output to get.
-     * @returns The `OutputWithExtendedMetadata`.
+     * @returns The `OutputData`.
      */
-    async getOutput(outputId: OutputId): Promise<OutputWithExtendedMetadata> {
+    async getOutput(outputId: OutputId): Promise<OutputData> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutput',
             data: {
                 outputId,
             },
         });
-        const parsed = JSON.parse(
-            response,
-        ) as Response<OutputWithExtendedMetadata>;
-        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
+        const parsed = JSON.parse(response) as Response<OutputData>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
@@ -877,18 +873,14 @@ export class Wallet {
      * @param filterOptions Options to filter the to be returned outputs.
      * @returns The outputs with metadata.
      */
-    async outputs(
-        filterOptions?: FilterOptions,
-    ): Promise<OutputWithExtendedMetadata[]> {
+    async outputs(filterOptions?: FilterOptions): Promise<OutputData[]> {
         const response = await this.methodHandler.callMethod({
             name: 'outputs',
             data: { filterOptions },
         });
 
-        const parsed = JSON.parse(response) as Response<
-            OutputWithExtendedMetadata[]
-        >;
-        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
@@ -959,15 +951,13 @@ export class Wallet {
      *
      * @returns The implicit accounts of the wallet.
      */
-    async implicitAccounts(): Promise<OutputWithExtendedMetadata[]> {
+    async implicitAccounts(): Promise<OutputData[]> {
         const response = await this.methodHandler.callMethod({
             name: 'implicitAccounts',
         });
 
-        const parsed = JSON.parse(response) as Response<
-            OutputWithExtendedMetadata[]
-        >;
-        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
@@ -1006,17 +996,13 @@ export class Wallet {
      * @param filterOptions Options to filter the to be returned outputs.
      * @returns The outputs with metadata.
      */
-    async unspentOutputs(
-        filterOptions?: FilterOptions,
-    ): Promise<OutputWithExtendedMetadata[]> {
+    async unspentOutputs(filterOptions?: FilterOptions): Promise<OutputData[]> {
         const response = await this.methodHandler.callMethod({
             name: 'unspentOutputs',
             data: { filterOptions },
         });
-        const parsed = JSON.parse(response) as Response<
-            OutputWithExtendedMetadata[]
-        >;
-        return plainToInstance(OutputWithExtendedMetadata, parsed.payload);
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
     }
 
     /**
