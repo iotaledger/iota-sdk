@@ -82,6 +82,8 @@ pub enum TransactionBuilderError {
     NoAvailableInputsProvided,
     #[error("account {0} is not staking")]
     NotStaking(AccountId),
+    #[error("account {0} has no block issuer feature")]
+    MissingBlockIssuerFeature(AccountId),
     /// Required input is not available.
     #[error("required input {0} is not available")]
     RequiredInputIsNotAvailable(OutputId),

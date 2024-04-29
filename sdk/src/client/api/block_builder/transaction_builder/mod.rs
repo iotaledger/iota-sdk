@@ -321,6 +321,13 @@ impl TransactionBuilder {
         // Gets requirements from burn.
         self.burn_requirements()?;
 
+        // Add requirements from transitions.
+        if let Some(transitions) = &self.transitions {
+            for account_id in transitions.accounts().keys() {
+                self.requirements.push(Requirement::Account(*account_id));
+            }
+        }
+
         Ok(())
     }
 
@@ -331,7 +338,10 @@ impl TransactionBuilder {
             // If burn or mana allotments are provided, outputs will be added later, in the other cases it will just
             // create remainder outputs.
             if !self.provided_outputs.is_empty()
-                || (self.burn.is_none() && self.mana_allotments.is_empty() && self.required_inputs.is_empty())
+                || (self.burn.is_none()
+                    && self.mana_allotments.is_empty()
+                    && self.required_inputs.is_empty()
+                    && self.transitions.is_none())
             {
                 return Err(TransactionBuilderError::InvalidOutputCount(self.provided_outputs.len()));
             }
