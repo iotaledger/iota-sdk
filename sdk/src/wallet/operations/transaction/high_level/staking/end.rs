@@ -1,8 +1,6 @@
 // Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::collections::BTreeSet;
-
 use crate::{
     client::{
         api::{
@@ -49,12 +47,6 @@ where
         } else {
             options.replace(TransactionOptions {
                 transitions: Some(Transitions::new().add_account(account_id, AccountChange::EndStaking)),
-                required_inputs: BTreeSet::from([self
-                    .get_account_output(account_id)
-                    .await
-                    .ok_or(WalletError::AccountNotFound)?
-                    .1
-                    .output_id]),
                 ..Default::default()
             });
         }
