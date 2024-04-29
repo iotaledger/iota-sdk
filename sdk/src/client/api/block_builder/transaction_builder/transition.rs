@@ -69,6 +69,8 @@ impl TransactionBuilder {
             .cloned()
             .collect::<Vec<_>>();
 
+        let mut new_amount = None;
+
         if let Some(change) = self.transitions.as_ref().and_then(|t| t.accounts.get(&account_id)) {
             match change {
                 AccountChange::BeginStaking {
@@ -83,6 +85,7 @@ impl TransactionBuilder {
                         self.protocol_parameters
                             .past_bounded_slot(self.latest_slot_commitment_id),
                     );
+                    new_amount = Some(*staked_amount);
                     features.push(
                         StakingFeature::new(
                             *staked_amount,
@@ -101,6 +104,7 @@ impl TransactionBuilder {
                             .protocol_parameters
                             .future_bounded_epoch(self.latest_slot_commitment_id);
                         let staking_feature = feature.as_staking();
+                        new_amount = Some(staking_feature.staked_amount());
                         // Just extend the end epoch if it's still possible
                         if future_bounded_epoch <= staking_feature.end_epoch() {
                             *feature = StakingFeature::new(
@@ -144,11 +148,14 @@ impl TransactionBuilder {
         }
 
         let mut builder = AccountOutputBuilder::from(input)
-            .with_minimum_amount(self.protocol_parameters.storage_score_parameters())
             .with_mana(0)
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
+        match new_amount {
+            Some(amount) => builder = builder.with_amount(amount),
+            None => builder = builder.with_minimum_amount(self.protocol_parameters.storage_score_parameters()),
+        }
 
         // Block issuers cannot move their mana elsewhere.
         if input.is_block_issuer() {
