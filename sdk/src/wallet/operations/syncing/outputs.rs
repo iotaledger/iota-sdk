@@ -18,7 +18,7 @@ use crate::{
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
-    /// Convert `OutputWithMetadataResponse` to `OutputWithExtendedMetadata` with the network_id added.
+    /// Convert `OutputWithMetadataResponse` to `OutputData` with the network_id added.
     pub(crate) async fn output_response_to_output_with_extended_metadata(
         &self,
         outputs_with_metadata: Vec<OutputWithMetadataResponse>,

@@ -81,7 +81,7 @@ where
         self.prepare_send_outputs(outputs, options).await
     }
 
-    /// Find and return unspent `OutputWithExtendedMetadata` for given `account_id` and `foundry_id`
+    /// Find and return unspent `OutputData` for given `account_id` and `foundry_id`
     async fn find_account_and_foundry_output_with_ext_metadata(
         &self,
         account_id: AccountId,

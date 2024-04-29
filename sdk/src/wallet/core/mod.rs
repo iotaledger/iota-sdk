@@ -317,7 +317,7 @@ impl WalletLedger {
             .or_else(|| self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
     }
 
-    /// Get the [`OutputWithExtendedMetadata`] of an output stored in the wallet.
+    /// Get the [`OutputData`] of an output stored in the wallet.
     pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
         self.outputs.get(output_id)
     }
