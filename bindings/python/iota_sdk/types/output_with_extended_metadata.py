@@ -12,7 +12,7 @@ from iota_sdk.types.output_metadata import OutputMetadata
 
 @json
 @dataclass
-class OutputWithExtendedMetadata:
+class OutputData:
     """Output with extended metadata.
 
     Attributes:
