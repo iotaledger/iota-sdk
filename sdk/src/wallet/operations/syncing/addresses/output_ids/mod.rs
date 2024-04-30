@@ -20,8 +20,10 @@ use crate::{
     },
     types::block::{address::Bech32Address, output::OutputId},
     wallet::{
-        constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
-        types::address::AddressWithUnspentOutputs, Wallet, WalletError,
+        constants::PARALLEL_REQUESTS_AMOUNT,
+        operations::syncing::SyncOptions,
+        types::address::{AddressWithUnspentOutputIds, SpentOutputId},
+        Wallet, WalletError,
     },
 };
 
@@ -217,11 +219,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let results = futures::future::try_join_all(tasks).await?;
 
         // Get all results
-        let mut output_ids = HashSet::new();
-        for res in results {
-            let found_output_ids = res?;
-            output_ids.extend(found_output_ids);
-        }
+        let output_ids = results.into_iter().collect::<Result<Vec<_>, _>>()?;
+        let output_ids: HashSet<OutputId> = HashSet::from_iter(output_ids.into_iter().flat_map(|v| v.into_iter()));
 
         Ok(output_ids.into_iter().collect())
     }
@@ -230,20 +229,20 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// return spent outputs separated
     pub(crate) async fn get_output_ids_for_addresses(
         &self,
-        addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
+        addresses: &[AddressWithUnspentOutputIds],
         options: &SyncOptions,
-    ) -> Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>), WalletError> {
+    ) -> Result<(Vec<AddressWithUnspentOutputIds>, Vec<SpentOutputId>), WalletError> {
         log::debug!("[SYNC] start get_output_ids_for_addresses");
         let address_output_ids_start_time = Instant::now();
 
-        let mut addresses_with_outputs = Vec::new();
+        let mut addresses_with_unspent_outputs = Vec::new();
         // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
-        let mut spent_or_not_anymore_synced_outputs = Vec::new();
+        let mut spent_or_ignored_outputs = Vec::new();
 
         // We split the addresses into chunks so we don't get timeouts if we have thousands
-        for addresses_chunk in &mut addresses_with_unspent_outputs
+        for addresses_chunk in addresses
             .chunks(PARALLEL_REQUESTS_AMOUNT)
-            .map(|x: &[AddressWithUnspentOutputs]| x.to_vec())
+            .map(|x: &[AddressWithUnspentOutputIds]| x.to_vec())
         {
             let results: Vec<Result<_, WalletError>>;
             #[cfg(target_family = "wasm")]
@@ -276,35 +275,36 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 results = futures::future::try_join_all(tasks).await?;
             }
 
-            for res in results {
-                let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
+            let addresses_with_new_unspent_output_ids = results.into_iter().collect::<Result<Vec<_>, _>>()?;
+
+            for (mut address, new_unspent_output_ids) in addresses_with_new_unspent_output_ids {
                 // only return addresses with outputs
-                if !output_ids.is_empty() {
+                if !new_unspent_output_ids.is_empty() {
                     // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't
                     // get synced anymore because of other sync options
-                    for output_id in address.output_ids {
-                        if !output_ids.contains(&output_id) {
-                            spent_or_not_anymore_synced_outputs.push(output_id);
+                    for output_id in address.unspent_output_ids {
+                        if !new_unspent_output_ids.contains(&output_id) {
+                            spent_or_ignored_outputs.push(output_id);
                         }
                     }
-                    address.output_ids = output_ids;
-                    addresses_with_outputs.push(address);
+                    address.unspent_output_ids = new_unspent_output_ids;
+                    addresses_with_unspent_outputs.push(address);
                 } else {
                     // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't
                     // get synced anymore because of other sync options
-                    spent_or_not_anymore_synced_outputs.extend(address.output_ids);
+                    spent_or_ignored_outputs.extend(address.unspent_output_ids);
                 }
             }
         }
 
         log::debug!(
-            "[SYNC] spent or not anymore synced account/nft/foundries outputs: {:?}",
-            spent_or_not_anymore_synced_outputs
+            "[SYNC] spent or ignored account/nft/foundries outputs: {:?}",
+            spent_or_ignored_outputs
         );
         log::debug!(
             "[SYNC] finished get_output_ids_for_addresses in {:.2?}",
             address_output_ids_start_time.elapsed()
         );
-        Ok((addresses_with_outputs, spent_or_not_anymore_synced_outputs))
+        Ok((addresses_with_unspent_outputs, spent_or_ignored_outputs))
     }
 }

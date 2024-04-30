@@ -13,19 +13,19 @@ from iota_sdk.types.output_metadata import OutputMetadata
 @json
 @dataclass
 class OutputData:
-    """Output data.
+    """An output with additional data.
 
     Attributes:
-        output_id: With the output data corresponding output ID.
-        metadata: With the output corresponding metadata.
-        output: The output object itself.
+        output: The output itself.
+        metadata: The metadata of the output.
         output_id_proof: The output ID proof.
+        output_id: The corresponding output ID.
         network_id: The network ID the output belongs to.
         remainder: Whether the output represents a remainder amount.
     """
-    output_id: OutputId
-    metadata: OutputMetadata
     output: Output
+    metadata: OutputMetadata
     output_id_proof: OutputIdProof
+    output_id: OutputId
     network_id: str
     remainder: bool

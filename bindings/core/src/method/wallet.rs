@@ -139,8 +139,8 @@ pub enum WalletMethod {
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetIncomingTransaction { transaction_id: TransactionId },
-    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored in the wallet.
-    /// Expected response: [`OutputData`](crate::Response::OutputData)
+    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored
+    /// in the wallet. Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
     // /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)

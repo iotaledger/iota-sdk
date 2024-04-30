@@ -16,9 +16,9 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.transaction_id import TransactionId

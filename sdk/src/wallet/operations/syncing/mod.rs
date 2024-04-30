@@ -18,13 +18,16 @@ use crate::{
     },
     wallet::{
         constants::MIN_SYNC_INTERVAL,
-        types::{address::AddressWithUnspentOutputs, Balance, OutputData},
+        types::{
+            address::{AddressWithUnspentOutputIds, AddressWithUnspentOutputs, SpentOutputId},
+            Balance, OutputData,
+        },
         Wallet, WalletError,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
-    /// Set the fallback SyncOptions for account syncing.
+    /// Set the default SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> Result<(), WalletError> {
         #[cfg(feature = "storage")]
@@ -46,51 +49,55 @@ impl<S: 'static + SecretManage> Wallet<S> {
     // are found.
     async fn request_outputs_recursively(
         &self,
-        addresses_to_sync: Vec<AddressWithUnspentOutputs>,
+        addresses: &[AddressWithUnspentOutputIds],
         options: &SyncOptions,
-    ) -> Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>), WalletError> {
+    ) -> Result<(Vec<AddressWithUnspentOutputIds>, Vec<SpentOutputId>, Vec<OutputData>), WalletError> {
+        let bech32_hrp = self.client().get_bech32_hrp().await?;
+        let network_id = self.client().get_network_id().await?;
+
+        // Get the unspent and spent/not-synced output ids per address to sync
+        let (addresses_with_unspent_output_ids, mut spent_or_not_synced_output_ids) =
+            self.get_output_ids_for_addresses(addresses, options).await?;
+
+        // Get the corresponding unspent outputs
+        let mut addresses_with_unspent_outputs = self
+            .get_outputs_from_address_output_ids(&addresses_with_unspent_output_ids)
+            .await?;
+
         // Cache account and nft addresses with the related Ed25519 address, so we can update the account
         // address with the new output ids.
         let mut addresses_to_scan: HashMap<Address, Address> = HashMap::new();
-        let mut addresses_with_unspent_output_ids_all = Vec::new();
-        let mut unspent_outputs_data_all = Vec::new();
-
-        let bech32_hrp = self.client().get_bech32_hrp().await?;
-
-        // Get the unspent and spent/not-synced output ids per address to sync
-        let (addresses_to_sync_with_unspent_output_ids, mut spent_or_not_synced_output_ids) = self
-            .get_output_ids_for_addresses(addresses_to_sync.clone(), options)
-            .await?;
-
-        // Get the corresponding unspent output data
-        let mut new_unspent_outputs_data = self
-            .get_outputs_from_address_output_ids(addresses_to_sync_with_unspent_output_ids)
-            .await?;
+        let mut new_addresses_with_unspent_output_ids = Vec::new();
+        let mut unspent_outputs_data = Vec::new();
 
         loop {
-            // Try to discover new addresses
+            // Try to discover new addresses and collect them in `addresses_to_scan`.
             // See https://github.com/rust-lang/rust-clippy/issues/8539 regarding this lint.
             #[allow(clippy::iter_with_drain)]
-            for (address_with_unspent, unspent_data) in new_unspent_outputs_data.drain(..) {
-                for unspent_data in &unspent_data {
-                    match &unspent_data.output {
+            for AddressWithUnspentOutputs {
+                address_with_unspent_output_ids,
+                unspent_outputs,
+            } in addresses_with_unspent_outputs.drain(..)
+            {
+                for unspent_output in &unspent_outputs {
+                    match &unspent_output.output {
                         Output::Account(account) => {
                             addresses_to_scan.insert(
-                                AccountAddress::from(account.account_id_non_null(&unspent_data.output_id)).into(),
-                                address_with_unspent.address.inner().clone(),
+                                AccountAddress::from(account.account_id_non_null(&unspent_output.output_id)).into(),
+                                (*address_with_unspent_output_ids).inner().clone(),
                             );
                         }
                         Output::Nft(nft) => {
                             addresses_to_scan.insert(
-                                NftAddress::from(nft.nft_id_non_null(&unspent_data.output_id)).into(),
-                                address_with_unspent.address.inner().clone(),
+                                NftAddress::from(nft.nft_id_non_null(&unspent_output.output_id)).into(),
+                                (*address_with_unspent_output_ids).inner().clone(),
                             );
                         }
                         _ => {}
                     }
                 }
-                addresses_with_unspent_output_ids_all.push(address_with_unspent);
-                unspent_outputs_data_all.extend(unspent_data);
+                new_addresses_with_unspent_output_ids.push(address_with_unspent_output_ids);
+                unspent_outputs_data.extend(unspent_outputs);
             }
 
             log::debug!("[SYNC] new_addresses: {addresses_to_scan:?}");
@@ -102,7 +109,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
             // Get the unspent outputs of the new addresses
             for (account_or_nft_address, output_address) in addresses_to_scan.drain() {
-                let address_with_unspent_output_ids = addresses_with_unspent_output_ids_all
+                let address_with_unspent_output_ids = new_addresses_with_unspent_output_ids
                     .iter_mut()
                     .find(|address| address.address.inner() == &output_address)
                     // Panic: can't happen because one is a superset of the other
@@ -114,15 +121,19 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
                 // Update address with new associated unspent outputs
                 address_with_unspent_output_ids
-                    .output_ids
+                    .unspent_output_ids
                     .extend(account_or_nft_output_ids.clone());
 
-                let account_or_nft_outputs_with_metadata = self.get_outputs(account_or_nft_output_ids).await?;
+                let account_or_nft_outputs_with_metadata =
+                    self.get_outputs_request_unknown(&account_or_nft_output_ids).await?;
                 let account_or_nft_outputs_data = self
-                    .output_response_to_output_data(account_or_nft_outputs_with_metadata)
+                    .output_response_to_output_data(account_or_nft_outputs_with_metadata, network_id)
                     .await?;
 
-                new_unspent_outputs_data.push((address_with_unspent_output_ids.clone(), account_or_nft_outputs_data));
+                addresses_with_unspent_outputs.push(AddressWithUnspentOutputs {
+                    address_with_unspent_output_ids: address_with_unspent_output_ids.clone(),
+                    unspent_outputs: account_or_nft_outputs_data,
+                });
             }
         }
 
@@ -131,13 +142,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // calculated more efficient in the future, by comparing the new and old outputs only at this point. Then this
         // retain isn't needed anymore.
         let unspent_output_ids_all: HashSet<OutputId> =
-            HashSet::from_iter(unspent_outputs_data_all.iter().map(|o| o.output_id));
+            HashSet::from_iter(unspent_outputs_data.iter().map(|o| o.output_id));
         spent_or_not_synced_output_ids.retain(|o| !unspent_output_ids_all.contains(o));
 
         Ok((
-            addresses_with_unspent_output_ids_all,
+            new_addresses_with_unspent_output_ids,
             spent_or_not_synced_output_ids,
-            unspent_outputs_data_all,
+            unspent_outputs_data,
         ))
     }
 }
@@ -149,8 +160,8 @@ where
 {
     /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
-    pub async fn sync(&self, options: Option<SyncOptions>) -> Result<Balance, WalletError> {
-        let options = match options {
+    pub async fn sync(&self, options: impl Into<Option<SyncOptions>> + Send) -> Result<Balance, WalletError> {
+        let options = match options.into() {
             Some(opt) => opt,
             None => self.default_sync_options().await,
         };
@@ -196,17 +207,17 @@ where
     async fn sync_internal(&self, options: &SyncOptions) -> Result<(), WalletError> {
         log::debug!("[SYNC] sync_internal");
 
-        let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
+        let wallet_address_with_unspent_outputs = AddressWithUnspentOutputIds {
             address: self.address().await,
-            output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
+            unspent_output_ids: self.ledger().await.unspent_outputs().keys().copied().collect(),
         };
 
         let mut addresses_to_sync = vec![wallet_address_with_unspent_outputs];
 
         if options.sync_implicit_accounts {
             if let Ok(implicit_account_creation_address) = self.implicit_account_creation_address().await {
-                addresses_to_sync.push(AddressWithUnspentOutputs {
-                    output_ids: self
+                addresses_to_sync.push(AddressWithUnspentOutputIds {
+                    unspent_output_ids: self
                         .ledger()
                         .await
                         .implicit_accounts()
@@ -224,7 +235,7 @@ where
         }
 
         let (_addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data) =
-            self.request_outputs_recursively(addresses_to_sync, options).await?;
+            self.request_outputs_recursively(&addresses_to_sync, options).await?;
 
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");

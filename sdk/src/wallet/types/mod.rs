@@ -32,19 +32,21 @@ use crate::{
     wallet::WalletError,
 };
 
-/// An output with metadata
+/// An output with additional data.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputData {
-    /// The output id
-    pub output_id: OutputId,
-    pub metadata: OutputMetadata,
-    /// The actual Output
+    /// The output itself.
     pub output: Output,
-    /// The output ID proof
+    /// The metadata of the output.
+    pub metadata: OutputMetadata,
+    /// The output ID proof.
     pub output_id_proof: OutputIdProof,
-    /// Network ID
+    /// The corresponding output ID.
+    pub output_id: OutputId,
+    /// The network ID the output belongs to.
     pub network_id: u64,
+    /// Whether the output represents a remainder amount.
     pub remainder: bool,
 }
 

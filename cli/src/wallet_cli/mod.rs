@@ -1765,14 +1765,14 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
-    if outputs.is_empty() {
+fn print_outputs(mut outputs_data: Vec<OutputData>, title: &str) -> Result<(), Error> {
+    if outputs_data.is_empty() {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_unstable_by_key(|o| o.output_id);
+        outputs_data.sort_unstable_by_key(|o| o.output_id);
 
-        for (i, output_data) in outputs.into_iter().enumerate() {
+        for (i, output_data) in outputs_data.into_iter().enumerate() {
             let kind_str = if output_data.output.is_implicit_account() {
                 "ImplicitAccount"
             } else {
