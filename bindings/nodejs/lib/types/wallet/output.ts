@@ -14,7 +14,7 @@ export enum OutputsToClaim {
     All = 'All',
 }
 
-/** An output with extended metadata */
+/** An output with additional data */
 export class OutputData {
     /** The output itself */
     @Type(() => Output, {

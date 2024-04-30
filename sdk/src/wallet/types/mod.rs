@@ -32,7 +32,7 @@ use crate::{
     wallet::WalletError,
 };
 
-/// An output with extended metadata.
+/// An output with additional data.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputData {
