@@ -68,7 +68,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // address with the new output ids.
         let mut addresses_to_scan: HashMap<Address, Address> = HashMap::new();
         let mut new_addresses_with_unspent_output_ids = Vec::new();
-        let mut unspent_outputs_with_extra_metadata = Vec::new();
+        let mut unspent_outputs_data = Vec::new();
 
         loop {
             // Try to discover new addresses and collect them in `addresses_to_scan`.
@@ -97,7 +97,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     }
                 }
                 new_addresses_with_unspent_output_ids.push(address_with_unspent_output_ids);
-                unspent_outputs_with_extra_metadata.extend(unspent_outputs);
+                unspent_outputs_data.extend(unspent_outputs);
             }
 
             log::debug!("[SYNC] new_addresses: {addresses_to_scan:?}");
@@ -126,13 +126,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
                 let account_or_nft_outputs_with_metadata =
                     self.get_outputs_request_unknown(&account_or_nft_output_ids).await?;
-                let account_or_nft_outputs_with_extra_metadata = self
-                    .output_response_to_output_with_extended_metadata(account_or_nft_outputs_with_metadata, network_id)
+                let account_or_nft_outputs_data = self
+                    .output_response_to_output_data(account_or_nft_outputs_with_metadata, network_id)
                     .await?;
 
                 addresses_with_unspent_outputs.push(AddressWithUnspentOutputs {
                     address_with_unspent_output_ids: address_with_unspent_output_ids.clone(),
-                    unspent_outputs: account_or_nft_outputs_with_extra_metadata,
+                    unspent_outputs: account_or_nft_outputs_data,
                 });
             }
         }
@@ -142,13 +142,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
         // calculated more efficient in the future, by comparing the new and old outputs only at this point. Then this
         // retain isn't needed anymore.
         let unspent_output_ids_all: HashSet<OutputId> =
-            HashSet::from_iter(unspent_outputs_with_extra_metadata.iter().map(|o| o.output_id));
+            HashSet::from_iter(unspent_outputs_data.iter().map(|o| o.output_id));
         spent_or_not_synced_output_ids.retain(|o| !unspent_output_ids_all.contains(o));
 
         Ok((
             new_addresses_with_unspent_output_ids,
             spent_or_not_synced_output_ids,
-            unspent_outputs_with_extra_metadata,
+            unspent_outputs_data,
         ))
     }
 }
@@ -221,11 +221,9 @@ where
                         .ledger()
                         .await
                         .implicit_accounts()
-                        .filter_map(|output_with_ext_metadata| {
-                            if output_with_ext_metadata.output.as_basic().address()
-                                == implicit_account_creation_address.inner()
-                            {
-                                Some(output_with_ext_metadata.output_id)
+                        .filter_map(|output_data| {
+                            if output_data.output.as_basic().address() == implicit_account_creation_address.inner() {
+                                Some(output_data.output_id)
                             } else {
                                 None
                             }

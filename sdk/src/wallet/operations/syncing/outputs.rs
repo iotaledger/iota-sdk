@@ -19,7 +19,7 @@ use crate::{
 
 impl<S: 'static + SecretManage> Wallet<S> {
     /// Convert `OutputWithMetadataResponse` to `OutputData` with the network_id added.
-    pub(crate) async fn output_response_to_output_with_extended_metadata(
+    pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_metadata: Vec<OutputWithMetadataResponse>,
         network_id: u64,
@@ -73,16 +73,16 @@ impl<S: 'static + SecretManage> Wallet<S> {
         for output_id in output_ids {
             match wallet_ledger.outputs.get_mut(&output_id) {
                 // set unspent if not already
-                Some(output_with_ext_metadata) => {
-                    if output_with_ext_metadata.is_spent() {
+                Some(output_data) => {
+                    if output_data.is_spent() {
                         log::warn!("Removing spent output metadata for {output_id}, because it's still unspent");
-                        output_with_ext_metadata.metadata.spent = None;
+                        output_data.metadata.spent = None;
                     }
-                    unspent_outputs.push((*output_id, output_with_ext_metadata.clone()));
+                    unspent_outputs.push((*output_id, output_data.clone()));
                     outputs.push(OutputWithMetadataResponse::new(
-                        output_with_ext_metadata.output.clone(),
-                        output_with_ext_metadata.output_id_proof.clone(),
-                        output_with_ext_metadata.metadata,
+                        output_data.output.clone(),
+                        output_data.output_id_proof.clone(),
+                        output_data.metadata,
                     ));
                 }
                 None => unknown_outputs.push(*output_id),
@@ -90,10 +90,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
         }
         // known output is unspent, so insert it to the unspent outputs again, because if it was an
         // account/nft/foundry output it could have been removed when syncing without them
-        for (output_id, output_with_ext_metadata) in unspent_outputs {
-            wallet_ledger
-                .unspent_outputs
-                .insert(output_id, output_with_ext_metadata);
+        for (output_id, output_data) in unspent_outputs {
+            wallet_ledger.unspent_outputs.insert(output_id, output_data);
         }
 
         drop(wallet_ledger);

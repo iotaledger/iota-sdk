@@ -40,7 +40,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                             .get_outputs_request_unknown(address_with_unspent_output_ids.unspent_output_ids())
                             .await?;
                         let unspent_outputs = wallet
-                            .output_response_to_output_with_extended_metadata(unspent_outputs_with_metadata, network_id)
+                            .output_response_to_output_data(unspent_outputs_with_metadata, network_id)
                             .await?;
 
                         Ok(AddressWithUnspentOutputs {

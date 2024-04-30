@@ -288,14 +288,14 @@ impl WalletLedger {
     pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData> {
         self.unspent_outputs
             .values()
-            .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_implicit_account())
+            .filter(|output_data| output_data.output.is_implicit_account())
     }
 
     /// Returns accounts of the wallet.
     pub fn accounts(&self) -> impl Iterator<Item = &OutputData> {
         self.unspent_outputs
             .values()
-            .filter(|output_with_ext_metadata| output_with_ext_metadata.output.is_account())
+            .filter(|output_data| output_data.output.is_account())
     }
 
     // Returns the first possible unexpired block issuer Account id, which can be an implicit account.
@@ -382,10 +382,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
     pub async fn get_foundry_output(&self, native_token_id: TokenId) -> Result<Output, WalletError> {
         let foundry_id = FoundryId::from(native_token_id);
 
-        for output_with_ext_metadata in self.ledger.read().await.outputs.values() {
-            if let Output::Foundry(foundry_output) = &output_with_ext_metadata.output {
+        for output_data in self.ledger.read().await.outputs.values() {
+            if let Output::Foundry(foundry_output) = &output_data.output {
                 if foundry_output.id() == foundry_id {
-                    return Ok(output_with_ext_metadata.output.clone());
+                    return Ok(output_data.output.clone());
                 }
             }
         }

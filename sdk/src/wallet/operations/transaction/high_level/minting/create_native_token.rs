@@ -96,24 +96,22 @@ where
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let storage_score_params = protocol_parameters.storage_score_parameters();
 
-        let (account_id, account_output_with_ext_metadata) = self
+        let (account_id, account_output_data) = self
             .get_account_output(params.account_id)
             .await
             .ok_or_else(|| WalletError::MintingFailed("Missing account output".to_string()))?;
 
         let mut options = options.into();
         if let Some(options) = options.as_mut() {
-            options
-                .required_inputs
-                .insert(account_output_with_ext_metadata.output_id);
+            options.required_inputs.insert(account_output_data.output_id);
         } else {
             options.replace(TransactionOptions {
-                required_inputs: [account_output_with_ext_metadata.output_id].into(),
+                required_inputs: [account_output_data.output_id].into(),
                 ..Default::default()
             });
         }
 
-        if let Output::Account(account_output) = &account_output_with_ext_metadata.output {
+        if let Output::Account(account_output) = &account_output_data.output {
             // create foundry output with minted native tokens
             let foundry_id = FoundryId::build(
                 &AccountAddress::new(account_id),

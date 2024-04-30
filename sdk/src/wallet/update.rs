@@ -58,7 +58,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Update wallet with newly synced data and emit events for outputs.
     pub(crate) async fn update_after_sync(
         &self,
-        unspent_outputs_with_ext_metadata: Vec<OutputData>,
+        unspent_outputs_data: Vec<OutputData>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
     ) -> Result<(), WalletError> {
         log::debug!("[SYNC] Update wallet ledger with new synced transactions");
@@ -72,8 +72,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
             if let Some(output_metadata) = output_metadata_opt {
                 if output_metadata.is_spent() {
                     wallet_ledger.unspent_outputs.remove(&output_id);
-                    if let Some(output_with_ext_metadata) = wallet_ledger.outputs.get_mut(&output_id) {
-                        output_with_ext_metadata.metadata = output_metadata;
+                    if let Some(output_data) = wallet_ledger.outputs.get_mut(&output_id) {
+                        output_data.metadata = output_metadata;
                     }
                 } else {
                     // not spent, just not synced, skip
@@ -88,15 +88,15 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     wallet_ledger.locked_outputs.remove(&output_id);
                     wallet_ledger.unspent_outputs.remove(&output_id);
                     // Update spent data fields
-                    if let Some(output_with_ext_metadata) = wallet_ledger.outputs.get_mut(&output_id) {
-                        if !output_with_ext_metadata.is_spent() {
+                    if let Some(output_data) = wallet_ledger.outputs.get_mut(&output_id) {
+                        if !output_data.is_spent() {
                             log::warn!(
                                 "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
                                 output_id
                             );
                             // Set 0 values because we don't have the actual metadata and also couldn't get it, probably
                             // because it got pruned.
-                            output_with_ext_metadata.metadata.spent = Some(OutputConsumptionMetadata::new(
+                            output_data.metadata.spent = Some(OutputConsumptionMetadata::new(
                                 0.into(),
                                 TransactionId::new([0u8; TransactionId::LENGTH]),
                                 None,
@@ -106,7 +106,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         #[cfg(feature = "events")]
                         {
                             self.emit(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-                                output: output_with_ext_metadata.clone(),
+                                output: output_data.clone(),
                             })))
                             .await;
                         }
@@ -116,23 +116,20 @@ impl<S: 'static + SecretManage> Wallet<S> {
         }
 
         // Add new synced outputs
-        for unspent_output_with_ext_metadata in unspent_outputs_with_ext_metadata {
+        for unspent_output_data in unspent_outputs_data {
             // Insert output, if it's unknown emit the NewOutputEvent
             if wallet_ledger
                 .outputs
-                .insert(
-                    unspent_output_with_ext_metadata.output_id,
-                    unspent_output_with_ext_metadata.clone(),
-                )
+                .insert(unspent_output_data.output_id, unspent_output_data.clone())
                 .is_none()
             {
                 #[cfg(feature = "events")]
                 {
                     let transaction = wallet_ledger
                         .incoming_transactions
-                        .get(unspent_output_with_ext_metadata.output_id.transaction_id());
+                        .get(unspent_output_data.output_id.transaction_id());
                     self.emit(WalletEvent::NewOutput(Box::new(NewOutputEvent {
-                        output: unspent_output_with_ext_metadata.clone(),
+                        output: unspent_output_data.clone(),
                         transaction: transaction
                             .as_ref()
                             .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
@@ -141,11 +138,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     .await;
                 }
             };
-            if !unspent_output_with_ext_metadata.is_spent() {
-                wallet_ledger.unspent_outputs.insert(
-                    unspent_output_with_ext_metadata.output_id,
-                    unspent_output_with_ext_metadata,
-                );
+            if !unspent_output_data.is_spent() {
+                wallet_ledger
+                    .unspent_outputs
+                    .insert(unspent_output_data.output_id, unspent_output_data);
             }
         }
 
@@ -196,15 +192,15 @@ impl<S: 'static + SecretManage> Wallet<S> {
         }
 
         for output_to_unlock in &spent_output_ids {
-            if let Some(output_with_ext_metadata) = wallet_ledger.outputs.get_mut(output_to_unlock) {
-                if !output_with_ext_metadata.is_spent() {
+            if let Some(output_data) = wallet_ledger.outputs.get_mut(output_to_unlock) {
+                if !output_data.is_spent() {
                     log::warn!(
                         "[SYNC] Setting output {} as spent without having the OutputConsumptionMetadata",
-                        output_with_ext_metadata.output_id
+                        output_data.output_id
                     );
                     // Set 0 values because we don't have the actual metadata and also couldn't get it, probably because
                     // it got pruned.
-                    output_with_ext_metadata.metadata.spent = Some(OutputConsumptionMetadata::new(
+                    output_data.metadata.spent = Some(OutputConsumptionMetadata::new(
                         0.into(),
                         TransactionId::new([0u8; TransactionId::LENGTH]),
                         None,

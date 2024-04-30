@@ -55,7 +55,7 @@ fn wallet_events_serde() {
             .unwrap(),
     }));
 
-    let output_with_extended_metadata = OutputData {
+    let output_data = OutputData {
         output_id: TransactionHash::null().into_transaction_id(0).into_output_id(0),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
@@ -70,13 +70,13 @@ fn wallet_events_serde() {
     };
 
     assert_serde_eq(WalletEvent::NewOutput(Box::new(NewOutputEvent {
-        output: output_with_extended_metadata.clone(),
+        output: output_data.clone(),
         transaction: None,
         transaction_inputs: None,
     })));
 
     assert_serde_eq(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-        output: output_with_extended_metadata,
+        output: output_data,
     })));
 
     assert_serde_eq(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
