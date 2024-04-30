@@ -18,7 +18,7 @@ pub(crate) async fn call_wallet_method_internal(
     method: WalletMethod,
 ) -> Result<Response, crate::Error> {
     let response = match method {
-        WalletMethod::Accounts => Response::OutputsWithData(wallet.ledger().await.accounts().cloned().collect()),
+        WalletMethod::Accounts => Response::OutputsData(wallet.ledger().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::BackupToStrongholdSnapshot { destination, password } => {
             wallet.backup_to_stronghold_snapshot(destination, password).await?;
@@ -203,7 +203,7 @@ pub(crate) async fn call_wallet_method_internal(
             Response::PreparedTransaction(data)
         }
         WalletMethod::ImplicitAccounts => {
-            Response::OutputsWithData(wallet.ledger().await.implicit_accounts().cloned().collect())
+            Response::OutputsData(wallet.ledger().await.implicit_accounts().cloned().collect())
         }
         WalletMethod::IncomingTransactions => Response::Transactions(
             wallet
@@ -216,7 +216,7 @@ pub(crate) async fn call_wallet_method_internal(
         ),
         WalletMethod::Outputs { filter_options } => {
             let wallet_ledger = wallet.ledger().await;
-            Response::OutputsWithData(if let Some(filter) = filter_options {
+            Response::OutputsData(if let Some(filter) = filter_options {
                 wallet_ledger.filtered_outputs(filter).cloned().collect()
             } else {
                 wallet_ledger.outputs().values().cloned().collect()
@@ -420,7 +420,7 @@ pub(crate) async fn call_wallet_method_internal(
         ),
         WalletMethod::UnspentOutputs { filter_options } => {
             let wallet_ledger = wallet.ledger().await;
-            Response::OutputsWithData(if let Some(filter) = filter_options {
+            Response::OutputsData(if let Some(filter) = filter_options {
                 wallet_ledger.filtered_unspent_outputs(filter).cloned().collect()
             } else {
                 wallet_ledger.unspent_outputs().values().cloned().collect()
