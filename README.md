@@ -4,15 +4,15 @@
 
 The IOTA SDK is a Rust-based project that provides a convenient and efficient way to interact with nodes in the
 Shimmer and IOTA networks running
-the [Stardust protocol](https://wiki.iota.org/shimmer/develop/explanations/what-is-stardust). It consists of two main
+the [IOTA 2.0 protocol](https://wiki.iota.org/learn/protocols/iota2.0/introduction-to-digital-autonomy/). It consists of two main
 modules: `client` and `wallet`.
 
 ## Table of Contents
 
 - [Requirements](#requirements)
-    - [Dependencies](#dependencies)
+  - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
-    - [Install the IOTA SDK](#install-the-iota-sdk)
+  - [Install the IOTA SDK](#install-the-iota-sdk)
 - [Client](#client-usage)
 - [Wallet](#wallet-usage)
 - [Examples](#examples)
@@ -41,7 +41,7 @@ modules: `client` and `wallet`.
 This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
-|--------------|--------------------------------------------------------------------------------------------------------------------------------|
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on release.            |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
