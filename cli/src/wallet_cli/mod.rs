@@ -568,7 +568,7 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
     if let Some(output_id) = output_id {
         println_log_info!("Claiming output {output_id}");
 
-        let transaction = wallet.claim_outputs([output_id]).await?;
+        let transaction = wallet.claim_outputs([output_id], None).await?;
 
         println_log_info!(
             "Claiming transaction sent:\n{:?}\n{:?}",
@@ -587,7 +587,7 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
         // Doing chunks of only 60, because we might need to create the double amount of outputs, because of potential
         // storage deposit return unlock conditions and also consider the remainder output.
         for output_ids_chunk in output_ids.chunks(60) {
-            let transaction = wallet.claim_outputs(output_ids_chunk.to_vec()).await?;
+            let transaction = wallet.claim_outputs(output_ids_chunk.to_vec(), None).await?;
             println_log_info!(
                 "Claiming transaction sent:\n{:?}\n{:?}",
                 transaction.transaction_id,

@@ -153,6 +153,7 @@ export type __PrepareClaimOutputsMethod__ = {
     name: 'prepareClaimOutputs';
     data: {
         outputIdsToClaim: OutputId[];
+        options?: TransactionOptions;
     };
 };
 

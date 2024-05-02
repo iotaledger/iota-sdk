@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-alpha.9 - 2024-05-02
+
+### Added
+
+- `Wallet::prepareClaimOutputs()` optional transactionOptions parameter;
+
 ## 2.0.0-alpha.8 - 2024-04-22
 
 ### Fixed

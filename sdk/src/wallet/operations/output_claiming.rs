@@ -230,12 +230,15 @@ where
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
-        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await?;
+        let prepared_transaction = self
+            .prepare_claim_outputs(output_ids_to_claim, transaction_options)
+            .await?;
 
         let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
@@ -251,6 +254,7 @@ where
     pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
@@ -278,7 +282,8 @@ where
             ));
         }
 
-        let wallet_address = self.address().await;
+        let transaction_options = transaction_options.into();
+        let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
         drop(wallet_ledger);
 
         let mut nft_outputs_to_send = Vec::new();
@@ -301,13 +306,13 @@ where
                     // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(remainder_address.clone())])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(remainder_address.clone())])
                         .finish_output()?
                 };
 
@@ -315,17 +320,25 @@ where
             }
         }
 
+        let required_inputs = outputs_to_claim
+            .iter()
+            .map(|o| o.output_id)
+            // add additional inputs
+            .chain(possible_additional_inputs.iter().map(|o| o.output_id))
+            .collect();
+
         self.prepare_send_outputs(
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
-            TransactionOptions {
-                required_inputs: outputs_to_claim
-                    .iter()
-                    .map(|o| o.output_id)
-                    // add additional inputs
-                    .chain(possible_additional_inputs.iter().map(|o| o.output_id))
-                    .collect(),
-                ..Default::default()
+            match transaction_options {
+                Some(mut tx_options) => {
+                    tx_options.required_inputs = required_inputs;
+                    tx_options
+                }
+                None => TransactionOptions {
+                    required_inputs,
+                    ..Default::default()
+                },
             },
         )
         .await

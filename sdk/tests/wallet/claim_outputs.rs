@@ -56,7 +56,10 @@ async fn claim_2_basic_micro_outputs() -> Result<(), Box<dyn std::error::Error>>
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = wallet_0
-        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
+        .claim_outputs(
+            wallet_0.claimable_outputs(OutputsToClaim::MicroTransactions).await?,
+            None,
+        )
         .await?;
     wallet_0
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -113,7 +116,7 @@ async fn claim_1_of_2_basic_outputs() -> Result<(), Box<dyn std::error::Error>> 
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = wallet_0
-        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Amount).await?)
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Amount).await?, None)
         .await?;
     wallet_0
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -193,7 +196,7 @@ async fn claim_2_basic_outputs_no_available_in_claim_account() -> Result<(), Box
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
     let tx = wallet_1
-        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::All).await?)
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::All).await?, None)
         .await?;
     wallet_1
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -281,7 +284,7 @@ async fn claim_2_native_tokens() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = wallet_0
-        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::NativeTokens).await?)
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::NativeTokens).await?, None)
         .await?;
     wallet_0
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -404,7 +407,7 @@ async fn claim_2_native_tokens_no_available_balance_in_claim_account() -> Result
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = wallet_1
-        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::NativeTokens).await?, None)
         .await?;
     wallet_1
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -470,7 +473,7 @@ async fn claim_2_nft_outputs() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = wallet_0
-        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Nfts).await?)
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Nfts).await?, None)
         .await?;
     wallet_0
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -547,7 +550,7 @@ async fn claim_2_nft_outputs_no_available_in_claim_account() -> Result<(), Box<d
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
     let tx = wallet_1
-        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::Nfts).await?)
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::Nfts).await?, None)
         .await?;
     wallet_1
         .wait_for_transaction_acceptance(&tx.transaction_id, None, None)
@@ -612,7 +615,10 @@ async fn claim_basic_micro_output_error() -> Result<(), Box<dyn std::error::Erro
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
 
     let result = wallet_1
-        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
+        .claim_outputs(
+            wallet_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?,
+            None,
+        )
         .await;
     assert!(matches!(
         result,

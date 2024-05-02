@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}", output_id);
     }
 
-    let transaction = wallet.claim_outputs(output_ids).await?;
+    let transaction = wallet.claim_outputs(output_ids, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     wallet
