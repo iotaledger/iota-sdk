@@ -25,8 +25,8 @@ class Block:
     protocolVersion: int
     parents: List[HexStr]
     nonce: str
-    payload: Optional[Union[TaggedDataPayload,
-                      TransactionPayload, MilestonePayload]] = None
+    payload: Optional[Union[TransactionPayload,
+                            MilestonePayload, TaggedDataPayload]] = None
 
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:

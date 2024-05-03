@@ -141,7 +141,6 @@ class TaggedDataPayload(Payload):
     """A tagged data payload.
 
     Attributes:
-        type: The type of the tagged data payload, must be 5.
         tag: The tag part of the tagged data payload.
         data: The data part of the tagged data payload.
     """
@@ -150,12 +149,7 @@ class TaggedDataPayload(Payload):
     type: int = field(
         default_factory=lambda: int(
             PayloadType.TaggedData),
-        init=True)
-
-    def __post_init__(self):
-        if self.type != PayloadType.TaggedData:
-            raise dacite.UnionMatchError(
-                "invalid TaggedDataPayload type", self)
+        init=False)
 
 
 @dataclass
