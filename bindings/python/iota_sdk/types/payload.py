@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any, Optional, List, Union
-import dacite
 from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
