@@ -7,6 +7,7 @@ const moveArtifact = require('./move-artifact');
 const { status } = spawnSync(process.platform === 'win32' ? 'yarn.cmd' : 'yarn', ['build:neon'], {
     stdio: 'inherit',
     cwd: resolve(__dirname, '../'),
+    shell: true
 });
 
 if (status === null) {
