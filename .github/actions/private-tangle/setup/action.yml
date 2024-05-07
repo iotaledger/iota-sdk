@@ -9,13 +9,9 @@ runs:
         repository: iotaledger/iota-core
         path: iota-core
 
-    - name: Prepare files for start and stop
+    - name: Prepare file for start
       shell: bash
       run: |
-        echo "docker compose down -v" >> cleanup.sh
-        echo "rm *.snapshot" >> cleanup.sh
-        chmod +x cleanup.sh
-
         # remove the last 5 lines and add docker compose with `-d` to run it in the background
         sed -i -n -e :a -e '1,5!{P;N;D;};N;ba' run.sh
         echo "docker compose -f docker-compose.yml up -d" >> run.sh
