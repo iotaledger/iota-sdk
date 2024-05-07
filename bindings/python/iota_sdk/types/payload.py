@@ -40,8 +40,8 @@ class TaggedDataPayload:
         default_factory=lambda: int(
             PayloadType.TaggedData),
         init=False)
-    tag: HexStr
-    data: HexStr
+    tag: Optional[HexStr] = None
+    data: Optional[HexStr] = None
 
 
 def deserialize_payload(d: Dict[str, Any]) -> Payload:
