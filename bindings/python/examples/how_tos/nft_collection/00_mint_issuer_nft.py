@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from iota_sdk import MintNftParams, Utils, Wallet, WalletOptions, utf8_to_hex
+from iota_sdk import MintNftParams, Utils, Wallet, WalletOptions, utf8_to_hex, MetadataFeature
 
 load_dotenv()
 
@@ -20,8 +20,8 @@ wallet.sync()
 # Issue the minting transaction and wait for its inclusion
 print('Sending NFT minting transaction...')
 params = MintNftParams(
-    immutable_metadata=utf8_to_hex(
-        "This NFT will be the issuer from the awesome NFT collection"),
+    immutable_metadata=MetadataFeature({'data': utf8_to_hex(
+        "This NFT will be the issuer from the awesome NFT collection")}),
 )
 
 

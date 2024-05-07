@@ -16,7 +16,7 @@ pub(crate) const DEFAULT_QUORUM_THRESHOLD: usize = 66;
 pub(crate) const DEFAULT_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
 #[cfg(not(target_family = "wasm"))]
 pub(crate) const MAX_PARALLEL_API_REQUESTS: usize = 100;
-/// Max allowed difference between the local time and latest milestone time, 5 minutes in seconds
+/// Max allowed difference between local time and tangle time, 5 minutes in seconds
 pub(crate) const FIVE_MINUTES_IN_NANOSECONDS: u64 = 300_000_000_000;
 /// Delay for caching a node info response in WASM runtime
 #[cfg(target_family = "wasm")]

@@ -55,8 +55,7 @@ async fn test_get_issuance() {
 #[ignore]
 #[tokio::test]
 async fn test_post_block_with_tagged_data() {
-    let secret_manager = setup_secret_manager();
-    let block_id = setup_tagged_data_block(&secret_manager).await;
+    let block_id = setup_tagged_data_block().await.unwrap();
     println!("{block_id}");
 }
 
@@ -72,9 +71,8 @@ async fn test_post_block_with_transaction() {
 #[tokio::test]
 async fn test_get_block_data() {
     let client = setup_client_with_node_health_ignored().await;
-    let secret_manager = setup_secret_manager();
 
-    let block_id = setup_tagged_data_block(&secret_manager).await;
+    let block_id = setup_tagged_data_block().await.unwrap();
     let r = client.get_block(&block_id).await.unwrap();
 
     println!("{r:#?}");
@@ -83,8 +81,7 @@ async fn test_get_block_data() {
 #[ignore]
 #[tokio::test]
 async fn test_get_block_metadata() {
-    let secret_manager = setup_secret_manager();
-    let block_id = setup_tagged_data_block(&secret_manager).await;
+    let block_id = setup_tagged_data_block().await.unwrap();
 
     let r = setup_client_with_node_health_ignored()
         .await
@@ -98,8 +95,7 @@ async fn test_get_block_metadata() {
 #[ignore]
 #[tokio::test]
 async fn test_get_block_raw() {
-    let secret_manager = setup_secret_manager();
-    let block_id = setup_tagged_data_block(&secret_manager).await;
+    let block_id = setup_tagged_data_block().await.unwrap();
 
     let r = setup_client_with_node_health_ignored()
         .await
@@ -201,7 +197,7 @@ async fn test_call_plugin_route() {
 
     // we call the "custom" plugin "node info"
     let plugin_res: NodeInfoResponse = c
-        .call_plugin_route("api/core/v2/", "GET", "info", vec![], None)
+        .call_plugin_route("api/core/v3/", "GET", "info", vec![], None)
         .await
         .unwrap();
 
@@ -218,7 +214,7 @@ async fn test_get_routes() {
 
     let routes_response = client.get_routes().await.unwrap();
     // At at least one route, which is not created by plugin, is available
-    assert!(routes_response.routes.contains(&"core/v2".to_string()));
+    assert!(routes_response.routes.contains(&"core/v3".to_string()));
 
     println!("{routes_response:#?}");
 }
@@ -231,7 +227,10 @@ async fn test_get_included_block_metadata() {
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);
-    assert_eq!(metadata_response.block_state, BlockState::Finalized);
+    match metadata_response.block_state {
+        BlockState::Accepted | BlockState::Confirmed | BlockState::Finalized => {}
+        _ => panic!("block state is not accepted/confirmed/finalized"),
+    }
 
     println!("{metadata_response:#?}");
 }

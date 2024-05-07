@@ -14,20 +14,20 @@ use iota_sdk::{
         address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
         output::{
-            feature::{BlockIssuerKeySource, MetadataFeature},
+            feature::{BlockIssuerKeySource, Ed25519PublicKeyHashBlockIssuerKey, MetadataFeature},
             unlock_condition::AddressUnlockCondition,
             AccountId, BasicOutputBuilder, DelegationId, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output,
             OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
-        slot::SlotIndex,
+        slot::{EpochIndex, SlotIndex},
         IdentifierError,
     },
     utils::ConvertTo,
     wallet::{
         types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        MintNftParams, OutputsToClaim, ReturnStrategy, SendManaParams, SendNativeTokenParams, SendNftParams,
-        SendParams, SyncOptions, Wallet, WalletError,
+        MintNftParams, ModifyAccountBlockIssuerKey, OutputsToClaim, ReturnStrategy, SendManaParams,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };
@@ -35,7 +35,7 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use self::completer::WalletCommandHelper;
 use crate::{
-    helper::{bytes_from_hex_or_file, get_password, to_utc_date_time},
+    helper::{bytes_from_hex_or_file, enter_password, to_utc_date_time},
     println_log_error, println_log_info,
 };
 
@@ -103,6 +103,8 @@ pub enum WalletCommand {
     },
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
+    /// Get the committee for the given epoch.
+    Committee { epoch: Option<EpochIndex> },
     /// Checks if an account is ready to issue a block.
     Congestion {
         account_id: Option<AccountId>,
@@ -194,6 +196,22 @@ pub enum WalletCommand {
     },
     /// Lists the implicit accounts of the wallet.
     ImplicitAccounts,
+    /// Adds a block issuer key to an account.
+    AddBlockIssuerKey {
+        /// The account to which the key should be added.
+        account_id: AccountId,
+        /// The hex-encoded public key to add.
+        // TODO: Use the actual type somehow?
+        block_issuer_key: String,
+    },
+    /// Removes a block issuer key from an account.
+    RemoveBlockIssuerKey {
+        /// The account from which the key should be removed.
+        account_id: AccountId,
+        /// The hex-encoded public key to remove.
+        // TODO: Use the actual type somehow?
+        block_issuer_key: String,
+    },
     /// Mint additional native tokens.
     MintNativeToken {
         /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -325,6 +343,10 @@ pub enum WalletCommand {
     },
     /// List the unspent outputs.
     UnspentOutputs,
+    /// Get information of a validator.
+    Validator { account_id: AccountId },
+    /// List all validators known to the node.
+    Validators,
     // /// Cast votes for an event.
     // Vote {
     //     /// Event ID for which to cast votes, e.g.
@@ -443,11 +465,12 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
@@ -545,7 +568,7 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
     if let Some(output_id) = output_id {
         println_log_info!("Claiming output {output_id}");
 
-        let transaction = wallet.claim_outputs([output_id]).await?;
+        let transaction = wallet.claim_outputs([output_id], None).await?;
 
         println_log_info!(
             "Claiming transaction sent:\n{:?}\n{:?}",
@@ -564,7 +587,7 @@ pub async fn claim_command(wallet: &Wallet, output_id: Option<OutputId>) -> Resu
         // Doing chunks of only 60, because we might need to create the double amount of outputs, because of potential
         // storage deposit return unlock conditions and also consider the remainder output.
         for output_ids_chunk in output_ids.chunks(60) {
-            let transaction = wallet.claim_outputs(output_ids_chunk.to_vec()).await?;
+            let transaction = wallet.claim_outputs(output_ids_chunk.to_vec(), None).await?;
             println_log_info!(
                 "Claiming transaction sent:\n{:?}\n{:?}",
                 transaction.transaction_id,
@@ -594,29 +617,35 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
             println_log_info!("    + {} {}", native_token.amount(), native_token.token_id());
         }
 
-        if let Some(unlock_conditions) = output.unlock_conditions() {
-            let deposit_return = unlock_conditions
-                .storage_deposit_return()
-                .map(|deposit_return| deposit_return.amount())
-                .unwrap_or(0);
-            let amount = output.amount() - deposit_return;
-            println_log_info!("  - base coin amount: {}", amount);
+        let deposit_return = output
+            .unlock_conditions()
+            .storage_deposit_return()
+            .map(|deposit_return| deposit_return.amount())
+            .unwrap_or(0);
+        let amount = output.amount() - deposit_return;
+        println_log_info!("  - base coin amount: {}", amount);
 
-            if let Some(expiration) = unlock_conditions.expiration() {
-                let slot_index = wallet.client().get_slot_index().await?;
+        if let Some(expiration) = output.unlock_conditions().expiration() {
+            let slot_index = wallet.client().get_slot_index().await?;
 
-                if *expiration.slot_index() > *slot_index {
-                    println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
-                } else {
-                    println_log_info!(
-                        "  - expired {} slot indices ago",
-                        *slot_index - *expiration.slot_index()
-                    );
-                }
+            if *expiration.slot_index() > *slot_index {
+                println_log_info!("  - expires in {} slot indices", *expiration.slot_index() - *slot_index);
+            } else {
+                println_log_info!(
+                    "  - expired {} slot indices ago",
+                    *slot_index - *expiration.slot_index()
+                );
             }
         }
     }
 
+    Ok(())
+}
+
+/// `committee` command
+pub async fn committee_command(wallet: &Wallet, epoch: Option<EpochIndex>) -> Result<(), Error> {
+    let committee = wallet.client().get_committee(epoch).await?;
+    println_log_info!("{committee:#?}");
     Ok(())
 }
 
@@ -626,11 +655,12 @@ pub async fn congestion_command(
     account_id: Option<AccountId>,
     work_score: Option<u32>,
 ) -> Result<(), Error> {
-    let account_id = {
-        let wallet_ledger = wallet.ledger().await;
-        account_id
-            .or_else(|| wallet_ledger.first_account_id())
-            .ok_or(WalletError::AccountNotFound)?
+    let account_id = match account_id {
+        Some(account_id) => account_id,
+        None => wallet
+            .first_block_issuer_account_id()
+            .await?
+            .ok_or(WalletError::AccountNotFound)?,
     };
 
     let congestion = wallet.client().get_account_congestion(&account_id, work_score).await?;
@@ -910,6 +940,46 @@ pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
+// `add-block-issuer-key` command
+pub async fn add_block_issuer_key(wallet: &Wallet, account_id: AccountId, issuer_key: &str) -> Result<(), Error> {
+    let issuer_key: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH] = prefix_hex::decode(issuer_key)?;
+    let params = ModifyAccountBlockIssuerKey {
+        account_id,
+        keys_to_add: vec![Ed25519PublicKeyHashBlockIssuerKey::new(issuer_key).into()],
+        keys_to_remove: vec![],
+    };
+
+    let transaction = wallet.modify_account_output_block_issuer_keys(params, None).await?;
+
+    println_log_info!(
+        "Block issuer key adding transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
+// `remove-block-issuer-key` command
+pub async fn remove_block_issuer_key(wallet: &Wallet, account_id: AccountId, issuer_key: &str) -> Result<(), Error> {
+    let issuer_key: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH] = prefix_hex::decode(issuer_key)?;
+    let params = ModifyAccountBlockIssuerKey {
+        account_id,
+        keys_to_add: vec![],
+        keys_to_remove: vec![Ed25519PublicKeyHashBlockIssuerKey::new(issuer_key).into()],
+    };
+
+    let transaction = wallet.modify_account_output_block_issuer_keys(params, None).await?;
+
+    println_log_info!(
+        "Block issuer key removing transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `melt-native-token` command
 pub async fn melt_native_token_command(wallet: &Wallet, token_id: TokenId, amount: U256) -> Result<(), Error> {
     let transaction = wallet.melt_native_token(token_id, amount, None).await?;
@@ -1145,7 +1215,12 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
         TransactionSelector::Id(id) => wallet_ledger.get_transaction(&id),
         TransactionSelector::Index(index) => {
             let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
-            transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
+            transactions.sort_unstable_by(|a, b| {
+                b.payload
+                    .transaction()
+                    .creation_slot()
+                    .cmp(&a.payload.transaction().creation_slot())
+            });
             transactions.into_iter().nth(index)
         }
     };
@@ -1163,7 +1238,12 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
     let wallet_ledger = wallet.ledger().await;
     let mut transactions = wallet_ledger.transactions().values().collect::<Vec<_>>();
-    transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    transactions.sort_unstable_by(|a, b| {
+        b.payload
+            .transaction()
+            .creation_slot()
+            .cmp(&a.payload.transaction().creation_slot())
+    });
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -1172,10 +1252,16 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
-                let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
+                let protocol_parameters = wallet.client().get_protocol_parameters().await?;
+                let creation_slot = tx.payload.transaction().creation_slot();
+                let creation_time = to_utc_date_time(creation_slot.to_timestamp(
+                    protocol_parameters.genesis_unix_timestamp(),
+                    protocol_parameters.slot_duration_in_seconds(),
+                ) as u128)?
+                .format("%Y-%m-%d %H:%M:%S UTC")
+                .to_string();
 
-                println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
+                println_log_info!("{:<5}{}\t{}\t{}", i, tx.transaction_id, creation_slot, creation_time);
             }
         }
     }
@@ -1189,6 +1275,20 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         wallet.ledger().await.unspent_outputs().values().cloned().collect(),
         "Unspent outputs:",
     )
+}
+
+/// `validator` command
+pub async fn validator_command(wallet: &Wallet, account_id: &AccountId) -> Result<(), Error> {
+    let validator = wallet.client().get_validator(account_id).await?;
+    println_log_info!("{validator:#?}");
+    Ok(())
+}
+
+/// `validators` command
+pub async fn validators_command(wallet: &Wallet) -> Result<(), Error> {
+    let validators = wallet.client().get_validators(None, None).await?;
+    println_log_info!("{validators:#?}");
+    Ok(())
 }
 
 // pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -1313,11 +1413,9 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
                 Output::Delegation(delegation) => delegations.push(delegation.delegation_id_non_null(&output_id)),
                 Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(&output_id)),
             }
-            let unlock_conditions = output_data
+            let sdr_amount = output_data
                 .output
                 .unlock_conditions()
-                .expect("output must have unlock conditions");
-            let sdr_amount = unlock_conditions
                 .storage_deposit_return()
                 .map(|sdr| sdr.amount())
                 .unwrap_or(0);
@@ -1382,7 +1480,7 @@ async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
     if matches!(*wallet.secret_manager().read().await, SecretManager::Stronghold(_))
         && !wallet.is_stronghold_password_available().await?
     {
-        let password = get_password("Stronghold password", false)?;
+        let password = enter_password("Stronghold password", false)?;
         wallet.set_stronghold_password(password).await?;
     }
 
@@ -1457,6 +1555,7 @@ pub async fn prompt_internal(
                             claim_command(wallet, output_id).await
                         }
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        WalletCommand::Committee { epoch } => committee_command(wallet, epoch).await,
                         WalletCommand::Congestion { account_id, work_score } => {
                             congestion_command(wallet, account_id, work_score).await
                         }
@@ -1537,6 +1636,20 @@ pub async fn prompt_internal(
                             implicit_account_transition_command(wallet, output_id).await
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
+                        WalletCommand::AddBlockIssuerKey {
+                            account_id,
+                            block_issuer_key,
+                        } => {
+                            ensure_password(wallet).await?;
+                            add_block_issuer_key(wallet, account_id, &block_issuer_key).await
+                        }
+                        WalletCommand::RemoveBlockIssuerKey {
+                            account_id,
+                            block_issuer_key,
+                        } => {
+                            ensure_password(wallet).await?;
+                            remove_block_issuer_key(wallet, account_id, &block_issuer_key).await
+                        }
                         WalletCommand::MeltNativeToken { token_id, amount } => {
                             ensure_password(wallet).await?;
                             melt_native_token_command(wallet, token_id, amount).await
@@ -1632,6 +1745,8 @@ pub async fn prompt_internal(
                         //     decrease_voting_power_command(wallet, amount).await
                         // }
                         // WalletCommand::VotingOutput => voting_output_command(wallet).await,
+                        WalletCommand::Validator { account_id } => validator_command(wallet, &account_id).await,
+                        WalletCommand::Validators => validators_command(wallet).await,
                     }
                     .unwrap_or_else(|err| {
                         println_log_error!("{err}");
@@ -1650,14 +1765,14 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
-    if outputs.is_empty() {
+fn print_outputs(mut outputs_data: Vec<OutputData>, title: &str) -> Result<(), Error> {
+    if outputs_data.is_empty() {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_unstable_by_key(|o| o.output_id);
+        outputs_data.sort_unstable_by_key(|o| o.output_id);
 
-        for (i, output_data) in outputs.into_iter().enumerate() {
+        for (i, output_data) in outputs_data.into_iter().enumerate() {
             let kind_str = if output_data.output.is_implicit_account() {
                 "ImplicitAccount"
             } else {

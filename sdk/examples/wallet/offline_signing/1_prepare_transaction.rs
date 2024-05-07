@@ -9,10 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{
-        api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager,
-        stronghold::StrongholdAdapter,
-    },
+    client::{api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager},
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
     wallet::{ClientOptions, SendParams, Wallet},

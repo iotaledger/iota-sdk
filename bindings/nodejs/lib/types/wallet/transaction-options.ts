@@ -6,6 +6,7 @@ import {
     AccountId,
     Address,
     Bech32Address,
+    MetadataFeature,
     OutputId,
 } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
@@ -62,8 +63,8 @@ export interface CreateNativeTokenParams {
     circulatingSupply: u256;
     /** Hex encoded number */
     maximumSupply: u256;
-    /** Hex encoded bytes */
-    foundryMetadata?: HexEncodedString;
+    /** The metadata feature for the foundry output */
+    foundryMetadata?: MetadataFeature;
 }
 
 /** Options for minting NFTs. */
@@ -74,14 +75,14 @@ export interface MintNftParams {
     address?: Bech32Address;
     /** Bech32 encoded sender address **/
     sender?: Bech32Address;
-    /** Hex encoded bytes */
-    metadata?: HexEncodedString;
+    /** Metadata feature */
+    metadata?: MetadataFeature;
     /** Hex encoded bytes */
     tag?: HexEncodedString;
     /** Bech32 encoded issuer address **/
     issuer?: Bech32Address;
-    /** Hex encoded bytes */
-    immutableMetadata?: HexEncodedString;
+    /** Immutable metadata feature */
+    immutableMetadata?: MetadataFeature;
 }
 
 /** Options for the account output creation */

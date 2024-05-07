@@ -32,7 +32,7 @@ impl From<Infallible> for CapabilityError {
 }
 
 /// A list of bitflags that represent capabilities.
-#[derive(Debug, Deref)]
+#[derive(Deref)]
 #[repr(transparent)]
 pub struct Capabilities<Flag> {
     #[deref]
@@ -55,6 +55,12 @@ impl<Flag> Capabilities<Flag> {
     pub fn set_none(&mut self) -> &mut Self {
         *self = Default::default();
         self
+    }
+}
+
+impl<Flag: CapabilityFlag> core::fmt::Debug for Capabilities<Flag> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_list().entries(self.capabilities_iter()).finish()
     }
 }
 
@@ -234,7 +240,7 @@ impl<Flag: 'static + CapabilityFlag> Packable for Capabilities<Flag> {
     }
 }
 
-pub trait CapabilityFlag {
+pub trait CapabilityFlag: core::fmt::Debug {
     type Iterator: Iterator<Item = Self>;
 
     /// Converts the flag into the byte representation.

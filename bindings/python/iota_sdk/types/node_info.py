@@ -16,6 +16,7 @@ class StatusResponse:
 
     Attributes:
         is_healthy: Tells whether the node is healthy or not.
+        is_network_healthy: Tells whether the network is healthy (finalization is not delayed).
         accepted_tangle_time: A notion of time that is anchored to the latest accepted block.
         relative_accepted_tangle_time: The time after Accepted Tangle Time has advanced with the system clock.
         confirmed_tangle_time: A notion of time that is anchored to the latest confirmed block.
@@ -27,6 +28,7 @@ class StatusResponse:
         pruning_epoch: The index of the epoch before which the tangle history is pruned.
     """
     is_healthy: bool
+    is_network_healthy: bool
     accepted_tangle_time: int = field(metadata=config(
         encoder=str
     ))

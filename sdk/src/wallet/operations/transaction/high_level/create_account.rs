@@ -18,7 +18,7 @@ use crate::{
     },
 };
 
-/// Params `create_account_output()`
+/// Params for `create_account_output()`
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAccountParams {

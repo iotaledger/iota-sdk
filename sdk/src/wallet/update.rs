@@ -58,7 +58,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Update wallet with newly synced data and emit events for outputs.
     pub(crate) async fn update_after_sync(
         &self,
-        unspent_outputs: Vec<OutputData>,
+        unspent_outputs_data: Vec<OutputData>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
     ) -> Result<(), WalletError> {
         log::debug!("[SYNC] Update wallet ledger with new synced transactions");
@@ -67,13 +67,13 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let mut wallet_ledger = self.ledger_mut().await;
 
         // Update spent outputs
-        for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
+        for (output_id, output_metadata_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it
-            if let Some(output_metadata_response) = output_metadata_response_opt {
-                if output_metadata_response.is_spent() {
+            if let Some(output_metadata) = output_metadata_opt {
+                if output_metadata.is_spent() {
                     wallet_ledger.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = wallet_ledger.outputs.get_mut(&output_id) {
-                        output_data.metadata = output_metadata_response;
+                        output_data.metadata = output_metadata;
                     }
                 } else {
                     // not spent, just not synced, skip
@@ -116,20 +116,20 @@ impl<S: 'static + SecretManage> Wallet<S> {
         }
 
         // Add new synced outputs
-        for output_data in unspent_outputs {
+        for unspent_output_data in unspent_outputs_data {
             // Insert output, if it's unknown emit the NewOutputEvent
             if wallet_ledger
                 .outputs
-                .insert(output_data.output_id, output_data.clone())
+                .insert(unspent_output_data.output_id, unspent_output_data.clone())
                 .is_none()
             {
                 #[cfg(feature = "events")]
                 {
                     let transaction = wallet_ledger
                         .incoming_transactions
-                        .get(output_data.output_id.transaction_id());
+                        .get(unspent_output_data.output_id.transaction_id());
                     self.emit(WalletEvent::NewOutput(Box::new(NewOutputEvent {
-                        output: output_data.clone(),
+                        output: unspent_output_data.clone(),
                         transaction: transaction
                             .as_ref()
                             .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
@@ -138,8 +138,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     .await;
                 }
             };
-            if !output_data.is_spent() {
-                wallet_ledger.unspent_outputs.insert(output_data.output_id, output_data);
+            if !unspent_output_data.is_spent() {
+                wallet_ledger
+                    .unspent_outputs
+                    .insert(unspent_output_data.output_id, unspent_output_data);
             }
         }
 

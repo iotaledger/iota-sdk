@@ -62,7 +62,7 @@ async function run() {
         const params: CreateNativeTokenParams = {
             circulatingSupply: CIRCULATING_SUPPLY,
             maximumSupply: MAXIMUM_SUPPLY,
-            foundryMetadata: metadata.asHex(),
+            foundryMetadata: metadata.asFeature(),
         };
 
         const prepared = await wallet.prepareCreateNativeToken(params);

@@ -11,7 +11,7 @@ from iota_sdk.types.address import Address, Ed25519Address, deserialize_address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.decayed_mana import DecayedMana
 from iota_sdk.types.payload import Transaction, SignedTransactionPayload
-from iota_sdk.types.node_info import ProtocolParameters
+from iota_sdk.types.node_info import ProtocolParameters, WorkScoreParameters
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.unlock import Unlock
@@ -285,6 +285,16 @@ class Utils:
         """
         return ProtocolParameters.from_dict(
             _call_method('shimmerMainnetProtocolParameters'))
+
+    @staticmethod
+    def block_work_score(
+            block: Block, work_score_parameters: WorkScoreParameters) -> int:
+        """Returns the work score of a block.
+        """
+        return _call_method('blockWorkScore', {
+            'block': block,
+            'workScoreParameters': work_score_parameters,
+        })
 
 
 class UtilsError(Exception):

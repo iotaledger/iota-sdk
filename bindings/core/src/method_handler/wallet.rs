@@ -234,8 +234,11 @@ pub(crate) async fn call_wallet_method_internal(
             let data = wallet.prepare_burn(burn, options).await?;
             Response::PreparedTransaction(data)
         }
-        WalletMethod::PrepareClaimOutputs { output_ids_to_claim } => {
-            let data = wallet.prepare_claim_outputs(output_ids_to_claim).await?;
+        WalletMethod::PrepareClaimOutputs {
+            output_ids_to_claim,
+            options,
+        } => {
+            let data = wallet.prepare_claim_outputs(output_ids_to_claim, options).await?;
             Response::PreparedTransaction(data)
         }
         WalletMethod::PrepareConsolidateOutputs { params } => {

@@ -6,21 +6,32 @@ use std::{
     str::FromStr,
 };
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
-        secret::types::InputSigningData,
+        api::{
+            transaction_builder::{Burn, Requirement, TransactionBuilder, TransactionBuilderError},
+            GetAddressesOptions,
+        },
+        constants::SHIMMER_COIN_TYPE,
+        secret::{types::InputSigningData, SecretManage, SecretManager},
+        Client,
     },
     types::block::{
         address::Address,
+        core::basic::StrongParents,
         output::{
             unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, BasicOutputBuilder, ChainId,
             NftId, SimpleTokenScheme, TokenId,
         },
-        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+        payload::{
+            signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+            Payload, SignedTransactionPayload,
+        },
         protocol::iota_mainnet_protocol_parameters,
         rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
         slot::SlotIndex,
+        BlockBody, BlockId,
     },
 };
 use pretty_assertions::assert_eq;
@@ -771,6 +782,98 @@ fn burn_nfts_present() {
     assert!(unsorted_eq(selected.transaction.outputs(), &outputs));
 }
 
+#[tokio::test]
+async fn burn_nft_correct_mana_allotment() {
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic().unwrap()).unwrap();
+
+    let ed25519_address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::default().with_range(0..1))
+        .await
+        .unwrap()[0]
+        .clone()
+        .into_inner();
+
+    let protocol_parameters = iota_mainnet_protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
+    let reference_mana_cost = 1;
+
+    let inputs = build_inputs(
+        [(
+            Nft {
+                amount: 1_000_000,
+                mana: 1_000_000,
+                nft_id: nft_id_1,
+                address: ed25519_address.clone(),
+                sender: None,
+                issuer: None,
+                sdruc: None,
+                expiration: None,
+            },
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
+        )],
+        Some(SLOT_INDEX),
+    );
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        [],
+        [ed25519_address],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_burn(Burn::new().set_nfts(HashSet::from([nft_id_1])))
+    .with_min_mana_allotment(account_id_1, reference_mana_cost)
+    .finish()
+    .unwrap();
+
+    assert_eq!(
+        selected.transaction.capabilities(),
+        &TransactionCapabilities::from([TransactionCapabilityFlag::DestroyNftOutputs])
+    );
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+
+    let inputs = selected
+        .inputs_data
+        .iter()
+        .map(|input| (input.output_id(), &input.output))
+        .collect::<Vec<_>>();
+
+    iota_sdk::types::block::semantic::SemanticValidationContext::new(
+        &selected.transaction,
+        &inputs,
+        None,
+        None,
+        &protocol_parameters,
+    )
+    .validate()
+    .unwrap();
+
+    assert_eq!(selected.transaction.outputs().len(), 1);
+
+    let unlocks = secret_manager
+        .transaction_unlocks(&selected, &protocol_parameters)
+        .await
+        .unwrap();
+
+    let signed_transaction_payload = SignedTransactionPayload::new(selected.transaction.clone(), unlocks).unwrap();
+
+    let basic_block_body = BlockBody::build_basic(
+        StrongParents::from_vec(vec![BlockId::new([0; 36])]).unwrap(),
+        (protocol_parameters.work_score_parameters(), reference_mana_cost),
+    )
+    .with_payload(Payload::from(signed_transaction_payload))
+    .finish()
+    .unwrap();
+
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments().first().unwrap().mana(),
+        basic_block_body.max_burned_mana(),
+    );
+}
+
 #[test]
 fn burn_nft_in_outputs() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
@@ -922,7 +1025,7 @@ fn burn_foundry_present() {
     assert_eq!(selected.inputs_data.len(), 2);
     assert!(selected.inputs_data.contains(&inputs[0]));
     assert!(selected.inputs_data.contains(&inputs[1]));
-    assert_eq!(selected.transaction.outputs().len(), 3);
+    assert_eq!(selected.transaction.outputs().len(), 2);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
     selected.transaction.outputs().iter().for_each(|output| {
         if !outputs.contains(output) {
@@ -934,7 +1037,7 @@ fn burn_foundry_present() {
                     None,
                 );
             } else if output.is_account() {
-                assert_eq!(output.amount(), 1_000_000);
+                assert_eq!(output.amount(), 1_500_000);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
                 assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
@@ -1415,7 +1518,7 @@ fn burn_mana_need_additional() {
     let protocol_parameters = iota_mainnet_protocol_parameters().clone();
 
     let inputs = [
-        BasicOutputBuilder::new_with_amount(100_000)
+        BasicOutputBuilder::new_with_amount(114_100)
             .with_mana(1000)
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1465,8 +1568,11 @@ fn burn_mana_need_additional() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 1);
-    assert_eq!(selected.transaction.outputs()[0].mana(), 700);
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
+        700
+    );
 }
 
 #[test]
@@ -1686,7 +1792,7 @@ fn burn_generated_mana_account() {
         &TransactionCapabilities::from([TransactionCapabilityFlag::BurnMana])
     );
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
-    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(selected.transaction.outputs().len(), 1);
     assert_eq!(
         selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
         1200

@@ -16,9 +16,9 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.client_options import ClientOptions
 from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.transaction_id import TransactionId
@@ -286,18 +286,19 @@ class Wallet:
         return PreparedTransaction(self, prepared)
 
     def claim_outputs(
-            self, output_ids_to_claim: List[OutputId]) -> TransactionWithMetadata:
+            self, output_ids_to_claim: List[OutputId], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Claim outputs.
         """
-        return self.prepare_claim_outputs(output_ids_to_claim).send()
+        return self.prepare_claim_outputs(output_ids_to_claim, options).send()
 
     def prepare_claim_outputs(
-            self, output_ids_to_claim: List[OutputId]) -> PreparedTransaction:
+            self, output_ids_to_claim: List[OutputId], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Claim outputs.
         """
         return PreparedTransaction(self, PreparedTransactionData.from_dict(self._call_method(
             'prepareClaimOutputs', {
-                'outputIdsToClaim': output_ids_to_claim
+                'outputIdsToClaim': output_ids_to_claim,
+                'options': options
             }
         )))
 
@@ -478,7 +479,7 @@ class Wallet:
         """Prepares to transition an implicit account to an account.
         """
         prepared = PreparedTransactionData.from_dict(self._call_method(
-            'implicitAccountTransition', {
+            'prepareImplicitAccountTransition', {
                 'outputId': output_id
             }
         ))

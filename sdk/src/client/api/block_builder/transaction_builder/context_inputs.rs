@@ -44,7 +44,8 @@ impl TransactionBuilder {
         if input
             .output
             .unlock_conditions()
-            .map_or(false, |u| u.iter().any(|u| u.is_timelock() || u.is_expiration()))
+            .iter()
+            .any(|u| u.is_timelock() || u.is_expiration())
         {
             log::debug!("Adding commitment context input for timelocked or expiring output");
             needs_commitment_context = true;

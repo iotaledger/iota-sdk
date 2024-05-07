@@ -11,12 +11,14 @@ use iota_sdk::{
     client::{
         api::GetAddressesOptions,
         constants::IOTA_COIN_TYPE,
+        generate_mnemonic,
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
         request_funds_from_faucet,
-        secret::{SecretManager, SignBlock},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager, SignBlock},
         Client,
     },
     types::block::{
+        address::{Address, Bech32Address, ImplicitAccountCreationAddress},
         output::AccountId,
         payload::{signed_transaction::TransactionId, tagged_data::TaggedDataPayload, Payload},
         BlockId,
@@ -29,24 +31,63 @@ use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL};
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
 
 // Sends a tagged data block to the node to test against it.
-async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
+async fn setup_tagged_data_block() -> Result<BlockId, Box<dyn std::error::Error>> {
     let client = setup_client_with_node_health_ignored().await;
 
-    let protocol_params = client.get_protocol_parameters().await.unwrap();
+    let secret_manager = SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(generate_mnemonic()?)?);
 
-    client
+    let bech32_hrp = client.get_bech32_hrp().await?;
+
+    let address = secret_manager
+        .generate_ed25519_address(IOTA_COIN_TYPE, 0, 0, bech32_hrp, None)
+        .await?;
+    let address =
+        Address::ImplicitAccountCreation(ImplicitAccountCreationAddress::new(**address.into_inner().as_ed25519()));
+    let bech32_address = Bech32Address::new(bech32_hrp, address);
+
+    request_funds_from_faucet(FAUCET_URL, &bech32_address).await?;
+
+    let mut account_id = AccountId::null();
+    // Continue only after funds are received
+    for i in 0..30 {
+        let output_ids = client
+            .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+                bech32_address.clone(),
+            ))
+            .await?
+            .items;
+        if !output_ids.is_empty() {
+            account_id = AccountId::from(&output_ids[0]);
+            break;
+        }
+        if i == 29 {
+            panic!("Faucet no longer wants to hand over coins");
+        }
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    }
+    // Wait until account is read to issue blocks
+    for _ in 0..60 {
+        if client.get_account_congestion(&account_id, None).await.is_ok() {
+            break;
+        }
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    }
+
+    let block = client
         .build_basic_block(
-            AccountId::null(),
+            account_id,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
             ))),
         )
         .await
         .unwrap()
-        .sign_ed25519(secret_manager, Bip44::new(IOTA_COIN_TYPE))
-        .await
-        .unwrap()
-        .id(&protocol_params)
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
+        .await?;
+    client.post_block(&block).await?;
+
+    let protocol_params = client.get_protocol_parameters().await.unwrap();
+    Ok(block.id(&protocol_params))
 }
 
 pub fn setup_secret_manager() -> SecretManager {

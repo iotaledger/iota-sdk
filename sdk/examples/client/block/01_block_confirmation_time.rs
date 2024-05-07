@@ -8,6 +8,8 @@
 //! cargo run --release --example block_confirmation_time
 //! ```
 
+use std::time::Instant;
+
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
@@ -45,34 +47,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{block:#?}");
 
+    let mut block_state = BlockState::Pending;
+    let start = Instant::now();
+
     // Wait for the block to get included
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let metadata = client.get_block_metadata(&block_id).await?;
-        if let BlockState::Confirmed | BlockState::Finalized = metadata.block_state {
+        block_state = metadata.block_state;
+
+        if let BlockState::Confirmed | BlockState::Finalized = block_state {
             break;
         }
     }
 
-    println!(
-        "Block with no payload included: {}/block/{}",
-        std::env::var("EXPLORER_URL").unwrap(),
-        block_id
-    );
+    if let BlockState::Confirmed | BlockState::Finalized = block_state {
+        let duration = start.elapsed();
 
-    // TODO uncomment when we have a new confirmation logic
-    // Get the block metadata.
-    // let metadata = client.get_block_metadata(&block_id).await?;
-
-    // if let Some(ms_index) = metadata.referenced_by_milestone_index {
-    //     let ms = client.get_milestone_by_index(ms_index).await?;
-    //     println!(
-    //         "Block {block_id} got confirmed by milestone {ms_index} at timestamp {}.",
-    //         ms.essence().timestamp()
-    //     );
-    // } else {
-    //     println!("Block {block_id} is not confirmed.")
-    // }
+        println!(
+            "Block with no payload included after {} seconds: {}/block/{}",
+            duration.as_secs(),
+            std::env::var("EXPLORER_URL").unwrap(),
+            block_id
+        );
+    } else {
+        println!("Block with no payload was not included");
+    }
 
     Ok(())
 }

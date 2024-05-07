@@ -14,6 +14,10 @@ export interface StatusResponse {
      */
     isHealthy: boolean;
     /**
+     * Tells whether the network is healthy (finalization is not delayed).
+     */
+    isNetworkHealthy: boolean;
+    /**
      * A notion of time that is anchored to the latest accepted block.
      */
     acceptedTangleTime?: string;

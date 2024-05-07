@@ -22,6 +22,7 @@ import {
     DecayedMana,
     NumericString,
     Ed25519Address,
+    WorkScoreParameters,
 } from '../types';
 import {
     AccountId,
@@ -637,5 +638,25 @@ export class Utils {
             name: 'shimmerMainnetProtocolParameters',
         });
         return params;
+    }
+
+    /**
+     * Returns the work score of a block.
+     *
+     * @param block The block.
+     * @param workScoreParameters The WorkScoreParameters.
+     * @returns The work score of the block.
+     */
+    static blockWorkScore(
+        block: Block,
+        workScoreParameters: WorkScoreParameters,
+    ): number {
+        return callUtilsMethod({
+            name: 'blockWorkScore',
+            data: {
+                block,
+                workScoreParameters,
+            },
+        });
     }
 }

@@ -2,7 +2,7 @@
     "source": ["./build/Release/index.node"],
     "bundle_id": "org.iota.sdk-nodejs",
     "apple_id": {
-        "password": "@env:AC_PASSWORD"
+        "provider": "UG77RJKZHH"
     },
     "sign": {
         "application_identity": "Developer ID Application: IOTA Stiftung (UG77RJKZHH)"

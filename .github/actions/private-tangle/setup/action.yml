@@ -27,6 +27,11 @@ runs:
         go-version-file: "iota-core/go.mod"
         cache: false
 
+    - name: Replace port 8084 by 8087 as it's already used by Mono
+      shell: bash
+      run: sed -i 's#8084#8087#g' docker-compose.yml
+      working-directory: iota-core/tools/docker-network
+
     - name: Setup private tangle
       shell: bash
       # setup-go sets the PATH for the correct version, but sudo uses a different PATH by default

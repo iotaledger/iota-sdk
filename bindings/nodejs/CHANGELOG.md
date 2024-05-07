@@ -19,6 +19,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-alpha.9 - 2024-05-02
+
+### Added
+
+- `Wallet::prepareClaimOutputs()` optional transactionOptions parameter;
+
+## 2.0.0-alpha.8 - 2024-04-22
+
+### Fixed
+
+- `Wallet::restoreFromStrongholdSnapshot()` with same source and target path;
+
+## 2.0.0-alpha.7 - 2024-04-19
+
+### Fixed
+
+- Mana allotment when burning something/setting a TransactionCapabilityFlag;
+- Stronghold backup/restore;
+
+## 2.0.0-alpha.6 - 2024-04-17
+
+### Fixed
+
+- MacOS binary build;
+
+## 2.0.0-alpha.5 - 2024-04-15
+
+### Added
+
+- `{PreparedTransactionData, SignedTransactionData}::issuerId`;
+
+### Fixed
+
+- Implicit account transition with existing account;
+
+## 2.0.0-alpha.4 - 2024-04-04
+
+### Changed
+
+- Renamed `{TimelockUnlockCondition, ExpirationUnlockCondition}::slotIndex to slot`;
+
+## 2.0.0-alpha.3 - 2024-04-03
+
+### Fixed
+
+- Downgraded rocksdb to fix macOS build;
+
+## 2.0.0-alpha.2 - 2024-04-02
+
+### Added
+
+- `Utils::blockWorkScore()`;
+- `ManaBalance::rewards` field;
+
+### Fixed
+
+- `RestrictedAddress` discriminator usage;
+
+## 2.0.0-alpha.1 - 2024-03-22
+
+Initial alpha release of the Nodejs 2.0 bindings.
+
 ## 1.1.5 - 2024-01-29
 
 ### Added

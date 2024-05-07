@@ -116,7 +116,6 @@ where
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| wallet_address.into_inner()),
             ),
-            allow_additional_input_selection: false,
             ..Default::default()
         });
 

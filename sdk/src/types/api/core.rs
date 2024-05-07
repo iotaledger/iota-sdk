@@ -89,6 +89,7 @@ impl PermanodeInfoResponse {
 #[serde(rename_all = "camelCase")]
 pub struct StatusResponse {
     pub is_healthy: bool,
+    pub is_network_healthy: bool,
     #[serde(with = "option_string")]
     pub accepted_tangle_time: Option<u64>,
     #[serde(with = "option_string")]

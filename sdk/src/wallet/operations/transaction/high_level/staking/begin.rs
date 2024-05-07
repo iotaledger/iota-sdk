@@ -5,14 +5,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{
-        api::{options::TransactionOptions, PreparedTransactionData},
+        api::{
+            options::TransactionOptions,
+            transaction_builder::transition::{AccountChange, Transitions},
+            PreparedTransactionData,
+        },
         secret::SecretManage,
         ClientError,
     },
-    types::block::{
-        output::{feature::StakingFeature, AccountId, AccountOutputBuilder},
-        slot::EpochIndex,
-    },
+    types::block::output::AccountId,
     utils::serde::string,
     wallet::{types::TransactionWithMetadata, Wallet, WalletError},
 };
@@ -57,52 +58,25 @@ where
     ) -> Result<PreparedTransactionData, WalletError> {
         log::debug!("[TRANSACTION] prepare_begin_staking");
 
-        let account_id = params.account_id;
-        let account_output_data = self
-            .ledger()
-            .await
-            .unspent_account_output(&account_id)
-            .cloned()
-            .ok_or_else(|| WalletError::AccountNotFound)?;
+        let change = AccountChange::BeginStaking {
+            staked_amount: params.staked_amount,
+            fixed_cost: params.fixed_cost,
+            staking_period: params.staking_period,
+        };
 
-        if account_output_data
-            .output
-            .features()
-            .map_or(false, |f| f.staking().is_some())
-        {
-            return Err(WalletError::StakingFailed(format!(
-                "account id {account_id} already has a staking feature"
-            )));
-        }
-
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
-
-        if let Some(staking_period) = params.staking_period {
-            if staking_period < protocol_parameters.staking_unbonding_period() {
-                return Err(WalletError::StakingFailed(format!(
-                    "staking period {staking_period} is less than the minimum {}",
-                    protocol_parameters.staking_unbonding_period()
-                )));
+        let mut options = options.into();
+        if let Some(options) = options.as_mut() {
+            if let Some(transitions) = options.transitions.take() {
+                options.transitions = Some(transitions.add_account(params.account_id, change));
             }
+        } else {
+            options.replace(TransactionOptions {
+                transitions: Some(Transitions::new().add_account(params.account_id, change)),
+                ..Default::default()
+            });
         }
 
-        let slot_commitment_id = self.client().get_issuance().await?.latest_commitment.id();
-        let start_epoch = protocol_parameters.epoch_index_of(protocol_parameters.past_bounded_slot(slot_commitment_id));
-
-        let output = AccountOutputBuilder::from(account_output_data.output.as_account())
-            .with_account_id(account_id)
-            .add_feature(StakingFeature::new(
-                params.staked_amount,
-                params.fixed_cost,
-                start_epoch,
-                params
-                    .staking_period
-                    .map(|period| start_epoch + period)
-                    .unwrap_or(EpochIndex(u32::MAX)),
-            ))
-            .finish_output()?;
-
-        let transaction = self.prepare_send_outputs([output], options).await?;
+        let transaction = self.prepare_send_outputs(None, options).await?;
 
         Ok(transaction)
     }

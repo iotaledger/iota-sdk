@@ -3,13 +3,25 @@
 
 use std::str::FromStr;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::api::transaction_builder::{Requirement, TransactionBuilder, TransactionBuilderError},
+    client::{
+        api::{
+            transaction_builder::{Requirement, TransactionBuilder, TransactionBuilderError},
+            GetAddressesOptions,
+        },
+        constants::SHIMMER_COIN_TYPE,
+        secret::{SecretManage, SecretManager},
+        Client,
+    },
     types::block::{
         address::{Address, AddressCapabilities, MultiAddress, RestrictedAddress, WeightedAddress},
+        core::basic::StrongParents,
         mana::ManaAllotment,
         output::{unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, NftId},
+        payload::{Payload, SignedTransactionPayload},
         protocol::iota_mainnet_protocol_parameters,
+        BlockBody, BlockId,
     },
 };
 use pretty_assertions::assert_eq;
@@ -2595,4 +2607,80 @@ fn automatic_allotment_provided_in_and_output() {
         ManaAllotment::new(account_id_1, mana_cost).unwrap()
     );
     assert_eq!(selected.transaction.outputs()[0].mana(), 1);
+}
+
+#[tokio::test]
+async fn basic_input_automatic_allotment() {
+    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic().unwrap()).unwrap();
+
+    let ed25519_address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::default().with_range(0..1))
+        .await
+        .unwrap()[0]
+        .clone()
+        .into_inner();
+
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+
+    let reference_mana_cost = 1;
+
+    let inputs = build_inputs(
+        [(
+            Basic {
+                amount: 10_000_000,
+                mana: 10_000,
+                address: ed25519_address.clone(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
+        )],
+        Some(SLOT_INDEX),
+    );
+
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+            .finish_output()
+            .unwrap(),
+    ];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [ed25519_address],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters.clone(),
+    )
+    .with_min_mana_allotment(account_id_1, reference_mana_cost)
+    .finish()
+    .unwrap();
+
+    let unlocks = secret_manager
+        .transaction_unlocks(&selected, &protocol_parameters)
+        .await
+        .unwrap();
+
+    let signed_transaction_payload = SignedTransactionPayload::new(selected.transaction.clone(), unlocks).unwrap();
+
+    let basic_block_body = BlockBody::build_basic(
+        StrongParents::from_vec(vec![BlockId::new([0; 36])]).unwrap(),
+        (protocol_parameters.work_score_parameters(), reference_mana_cost),
+    )
+    .with_payload(Payload::from(signed_transaction_payload))
+    .finish()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 2);
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments().first().unwrap().mana(),
+        basic_block_body.max_burned_mana(),
+    );
 }

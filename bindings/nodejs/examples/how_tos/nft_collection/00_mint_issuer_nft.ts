@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+    MetadataFeature,
     MintNftParams,
     NftId,
     NftOutput,
@@ -48,9 +49,11 @@ async function run() {
         // Issue the minting transaction and wait for its inclusion
         console.log(`Sending NFT minting transaction...`);
         const params: MintNftParams = {
-            immutableMetadata: utf8ToHex(
-                'This NFT will be the issuer from the awesome NFT collection',
-            ),
+            immutableMetadata: new MetadataFeature({
+                data: utf8ToHex(
+                    'This NFT will be the issuer from the awesome NFT collection',
+                ),
+            }),
         };
         const transaction = await wallet.mintNfts([params]);
 

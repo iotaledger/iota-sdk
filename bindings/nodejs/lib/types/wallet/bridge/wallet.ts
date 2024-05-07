@@ -153,6 +153,7 @@ export type __PrepareClaimOutputsMethod__ = {
     name: 'prepareClaimOutputs';
     data: {
         outputIdsToClaim: OutputId[];
+        options?: TransactionOptions;
     };
 };
 
@@ -265,7 +266,7 @@ export type __GetTransactionMethod__ = {
     };
 };
 
-export type __AddressMethod__ = {
+export type __GetAddressMethod__ = {
     name: 'getAddress';
 };
 

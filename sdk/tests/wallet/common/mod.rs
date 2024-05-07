@@ -6,13 +6,17 @@ mod constants;
 use crypto::keys::{bip39::Mnemonic, bip44::Bip44};
 use iota_sdk::{
     client::{
+        api::transaction_builder::TransactionBuilderError,
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Client,
+        Client, ClientError,
     },
-    types::block::protocol::iota_mainnet_protocol_parameters,
-    wallet::{ClientOptions, Wallet},
+    types::block::{
+        output::{feature::BlockIssuerKeySource, AccountId},
+        protocol::iota_mainnet_protocol_parameters,
+    },
+    wallet::{ClientOptions, SendParams, SyncOptions, Wallet, WalletError},
 };
 
 pub use self::constants::{DEFAULT_MNEMONIC, FAUCET_URL, NODE_LOCAL, NODE_OTHER};
@@ -79,20 +83,79 @@ pub(crate) async fn make_ledger_nano_wallet(
     Ok(wallet_builder.finish().await?)
 }
 
-/// Request funds from the faucet and sync the wallet.
+/// Create an implicit account creation address, request funds from the faucet to it, transition it to an account and
+/// wait until enough mana is generated to send a transaction.
 #[allow(dead_code)]
 pub(crate) async fn request_funds(wallet: &Wallet) -> Result<(), Box<dyn std::error::Error>> {
+    request_funds_from_faucet(FAUCET_URL, &wallet.implicit_account_creation_address().await?).await?;
     request_funds_from_faucet(FAUCET_URL, &wallet.address().await).await?;
 
     // Continue only after funds are received
-    for _ in 0..30 {
+    let mut attempts = 0;
+    let implicit_account = loop {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-        let balance = wallet.sync(None).await?;
-        if balance.base_coin().available() > 0 {
-            return Ok(());
+        wallet
+            .sync(Some(SyncOptions {
+                sync_implicit_accounts: true,
+                ..Default::default()
+            }))
+            .await?;
+        if let Some(account) = wallet.ledger().await.implicit_accounts().next() {
+            break account.clone();
+        }
+        attempts += 1;
+        if attempts == 30 {
+            panic!("Faucet no longer wants to hand over coins");
+        }
+    };
+
+    let mut tries = 0;
+    while let Err(ClientError::Node(iota_sdk::client::node_api::error::Error::NotFound(_))) = wallet
+        .client()
+        .get_account_congestion(&AccountId::from(&implicit_account.output_id), None)
+        .await
+    {
+        tries += 1;
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        if tries > 100 {
+            panic!("Can't get account for implicit account");
         }
     }
-    panic!("Faucet no longer wants to hand over coins");
+
+    let transaction = wallet
+        .implicit_account_transition(
+            &implicit_account.output_id,
+            BlockIssuerKeySource::ImplicitAccountAddress,
+        )
+        .await?;
+
+    wallet
+        .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
+        .await?;
+
+    wallet.sync(None).await?;
+
+    // Is this better than using the congestion endpoint?
+    // prepare a big tx and wait the time it takes until enough mana is generated
+    #[allow(unused_variables)]
+    if let Err(WalletError::Client(ClientError::TransactionBuilder(TransactionBuilderError::InsufficientMana {
+        slots_remaining,
+        ..
+    }))) = wallet
+        .prepare_send(vec![SendParams::new(1_000_000, wallet.address().await)?; 10], None)
+        .await
+    {
+        tokio::time::sleep(
+            wallet
+                .client()
+                .get_protocol_parameters()
+                .await?
+                .duration_of_slots(slots_remaining),
+        )
+        .await;
+    }
+
+    Ok(())
 }
 
 #[allow(dead_code)]

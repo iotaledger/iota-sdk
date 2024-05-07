@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk",
-    "version": "1.1.6",
+    "version": "2.0.0-alpha.9",
     "description": "Node.js binding to the IOTA SDK library",
     "main": "out/index.js",
     "types": "out/index.d.ts",
@@ -12,7 +12,7 @@
         "format-check": "prettier --ignore-path .eslintignore -c \"{,*/**/}*.{ts,js,json}\"",
         "prebuild-x64": "prebuild --runtime napi --target 6 --prepack scripts/build.js --strip --arch x64",
         "prebuild-macos-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-macos-arm64' --strip --arch arm64",
-        "napi-build-macos-arm64": "napi build --cargo-flags=--profile=production --target aarch64-apple-darwin",
+        "napi-build-macos-arm64": "napi build --release --target aarch64-apple-darwin",
         "prebuild-linux-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-linux-arm64' --strip --arch arm64",
         "napi-build-linux-arm64": "napi build --cargo-flags=--profile=production --target aarch64-unknown-linux-gnu",
         "prebuild-windows-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-windows-arm64' --strip --arch arm64",

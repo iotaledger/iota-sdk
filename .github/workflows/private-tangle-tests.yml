@@ -65,10 +65,7 @@ jobs:
         uses: "./.github/actions/ledger-nano"
 
       - name: Run tests
-        run: |
-          cargo nextest run test_get_info --all-features --run-ignored ignored-only --profile ci --cargo-profile ci -p iota-sdk -p iota-sdk-bindings-core --no-capture
-          # TODO: change in the future to run all tests and not only test_get_info
-          # cargo ci-tangle-test
+        run: cargo ci-tangle-test
 
       - name: Tear down private tangle
         if: always()

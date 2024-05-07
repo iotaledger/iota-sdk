@@ -1,5 +1,5 @@
 /target
-/stardust-cli-wallet-db
+/*wallet-db
 *.stronghold
 archive.log
 mnemonic.txt

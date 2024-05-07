@@ -7,7 +7,7 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: iotaledger/ledger-iota-app
-        ref: develop
+        ref: feat/nova
         path: ledger-iota-app
 
     - name: Update submodules
@@ -17,5 +17,5 @@ runs:
 
     - name: Run the simulator
       shell: bash
-      run: ./build.sh -s -v shimmer -b
+      run: ./build.sh -s -b
       working-directory: ledger-iota-app

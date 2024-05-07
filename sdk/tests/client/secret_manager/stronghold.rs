@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{
-    api::GetAddressesOptions,
     constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
     secret::SecretManager,
     ClientError,

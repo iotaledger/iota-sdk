@@ -12,9 +12,9 @@ pub enum UnlockConditionError {
     Kind(u8),
     #[display(fmt = "invalid unlock condition count: {_0}")]
     Count(<UnlockConditionCount as TryFrom<usize>>::Error),
-    #[display(fmt = "expiration unlock condition with milestone index and timestamp set to 0")]
+    #[display(fmt = "expiration unlock condition with slot index set to 0")]
     ExpirationZero,
-    #[display(fmt = "timelock unlock condition with milestone index and timestamp set to 0")]
+    #[display(fmt = "timelock unlock condition with slot index set to 0")]
     TimelockZero,
     #[display(fmt = "unlock conditions are not unique and/or sorted")]
     NotUniqueSorted,

@@ -4,15 +4,27 @@
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::{address::Bech32Address, output::OutputId};
+use crate::{
+    types::block::{address::Bech32Address, output::OutputId},
+    wallet::OutputData,
+};
 
-/// An account address with unspent output_ids for unspent outputs.
+#[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq, derive_more::Deref)]
+#[serde(rename_all = "camelCase")]
+#[getset(get = "pub")]
+pub(crate) struct AddressWithUnspentOutputIds {
+    #[deref]
+    pub(crate) address: Bech32Address,
+    pub(crate) unspent_output_ids: Vec<OutputId>,
+}
+
 #[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 #[getset(get = "pub")]
 pub(crate) struct AddressWithUnspentOutputs {
-    /// The address.
-    pub(crate) address: Bech32Address,
-    /// Output ids
-    pub(crate) output_ids: Vec<OutputId>,
+    #[serde(flatten)]
+    pub(crate) address_with_unspent_output_ids: AddressWithUnspentOutputIds,
+    pub(crate) unspent_outputs: Vec<OutputData>,
 }
+
+pub(crate) type SpentOutputId = OutputId;

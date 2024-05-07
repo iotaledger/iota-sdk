@@ -65,65 +65,70 @@ impl WalletLedger {
         {
             // Don't use outputs that are locked for other transactions
             if !self.locked_outputs.contains(output_id) && self.outputs.contains_key(output_id) {
-                if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
-                    // If there is a single [UnlockCondition], then it's an
-                    // [AddressUnlockCondition] and we own it already without
-                    // further restrictions
-                    if unlock_conditions.len() != 1
-                        && can_output_be_unlocked_now(
-                            // We use the addresses with unspent outputs, because other addresses of the
-                            // account without unspent outputs can't be related to this output
-                            &controlled_addresses,
-                            output_data,
-                            slot_index,
-                            protocol_parameters.committable_age_range(),
-                        )?
-                    {
-                        match outputs_to_claim {
-                            OutputsToClaim::MicroTransactions => {
-                                if let Some(sdr) = unlock_conditions.storage_deposit_return() {
-                                    // If expired, it's not a micro transaction anymore
-                                    match unlock_conditions
-                                        .is_expired(slot_index, protocol_parameters.committable_age_range())
-                                    {
-                                        Some(false) => {
-                                            // Only micro transaction if not the same amount needs to be returned
-                                            // (resulting in 0 amount to claim)
-                                            if sdr.amount() != output_data.output.amount() {
-                                                output_ids_to_claim.insert(output_data.output_id);
-                                            }
-                                        }
-                                        _ => continue,
-                                    }
-                                }
-                            }
-                            OutputsToClaim::NativeTokens => {
-                                if output_data.output.native_token().is_some() {
-                                    output_ids_to_claim.insert(output_data.output_id);
-                                }
-                            }
-                            OutputsToClaim::Nfts => {
-                                if output_data.output.is_nft() {
-                                    output_ids_to_claim.insert(output_data.output_id);
-                                }
-                            }
-                            OutputsToClaim::Amount => {
-                                let mut claimable_amount = output_data.output.amount();
-                                if unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age_range())
-                                    == Some(false)
+                // If there is a single [UnlockCondition], then it's an
+                // [AddressUnlockCondition] and we own it already without
+                // further restrictions
+                if output_data.output.unlock_conditions().len() != 1
+                    && can_output_be_unlocked_now(
+                        // We use the addresses with unspent outputs, because other addresses of the
+                        // account without unspent outputs can't be related to this output
+                        &controlled_addresses,
+                        output_data,
+                        slot_index,
+                        protocol_parameters.committable_age_range(),
+                    )?
+                {
+                    match outputs_to_claim {
+                        OutputsToClaim::MicroTransactions => {
+                            if let Some(sdr) = output_data.output.unlock_conditions().storage_deposit_return() {
+                                // If expired, it's not a micro transaction anymore
+                                match output_data
+                                    .output
+                                    .unlock_conditions()
+                                    .is_expired(slot_index, protocol_parameters.committable_age_range())
                                 {
-                                    claimable_amount -= unlock_conditions
-                                        .storage_deposit_return()
-                                        .map(|s| s.amount())
-                                        .unwrap_or_default()
-                                };
-                                if claimable_amount > 0 {
-                                    output_ids_to_claim.insert(output_data.output_id);
+                                    Some(false) => {
+                                        // Only micro transaction if not the same amount needs to be returned
+                                        // (resulting in 0 amount to claim)
+                                        if sdr.amount() != output_data.output.amount() {
+                                            output_ids_to_claim.insert(output_data.output_id);
+                                        }
+                                    }
+                                    _ => continue,
                                 }
                             }
-                            OutputsToClaim::All => {
+                        }
+                        OutputsToClaim::NativeTokens => {
+                            if output_data.output.native_token().is_some() {
                                 output_ids_to_claim.insert(output_data.output_id);
                             }
+                        }
+                        OutputsToClaim::Nfts => {
+                            if output_data.output.is_nft() {
+                                output_ids_to_claim.insert(output_data.output_id);
+                            }
+                        }
+                        OutputsToClaim::Amount => {
+                            let mut claimable_amount = output_data.output.amount();
+                            if output_data
+                                .output
+                                .unlock_conditions()
+                                .is_expired(slot_index, protocol_parameters.committable_age_range())
+                                == Some(false)
+                            {
+                                claimable_amount -= output_data
+                                    .output
+                                    .unlock_conditions()
+                                    .storage_deposit_return()
+                                    .map(|s| s.amount())
+                                    .unwrap_or_default()
+                            };
+                            if claimable_amount > 0 {
+                                output_ids_to_claim.insert(output_data.output_id);
+                            }
+                        }
+                        OutputsToClaim::All => {
+                            output_ids_to_claim.insert(output_data.output_id);
                         }
                     }
                 }
@@ -225,12 +230,15 @@ where
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<TransactionWithMetadata, WalletError>
     where
         I::IntoIter: Send,
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
-        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await?;
+        let prepared_transaction = self
+            .prepare_claim_outputs(output_ids_to_claim, transaction_options)
+            .await?;
 
         let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
@@ -246,6 +254,7 @@ where
     pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
+        transaction_options: impl Into<Option<TransactionOptions>> + Send,
     ) -> Result<PreparedTransactionData, WalletError>
     where
         I::IntoIter: Send,
@@ -273,7 +282,8 @@ where
             ));
         }
 
-        let wallet_address = self.address().await;
+        let transaction_options = transaction_options.into();
+        let remainder_address = self.get_remainder_address(transaction_options.clone()).await?;
         drop(wallet_ledger);
 
         let mut nft_outputs_to_send = Vec::new();
@@ -296,13 +306,13 @@ where
                     // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(remainder_address.clone())])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(&wallet_address)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(remainder_address.clone())])
                         .finish_output()?
                 };
 
@@ -310,17 +320,25 @@ where
             }
         }
 
+        let required_inputs = outputs_to_claim
+            .iter()
+            .map(|o| o.output_id)
+            // add additional inputs
+            .chain(possible_additional_inputs.iter().map(|o| o.output_id))
+            .collect();
+
         self.prepare_send_outputs(
             // We only need to provide the NFT outputs, ISA automatically creates basic outputs as remainder outputs
             nft_outputs_to_send,
-            TransactionOptions {
-                required_inputs: outputs_to_claim
-                    .iter()
-                    .map(|o| o.output_id)
-                    // add additional inputs
-                    .chain(possible_additional_inputs.iter().map(|o| o.output_id))
-                    .collect(),
-                ..Default::default()
+            match transaction_options {
+                Some(mut tx_options) => {
+                    tx_options.required_inputs = required_inputs;
+                    tx_options
+                }
+                None => TransactionOptions {
+                    required_inputs,
+                    ..Default::default()
+                },
             },
         )
         .await

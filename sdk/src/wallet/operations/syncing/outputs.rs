@@ -18,46 +18,53 @@ use crate::{
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {
-    /// Convert OutputWithMetadataResponse to OutputData with the network_id added
+    /// Convert `OutputWithMetadataResponse` to `OutputData` with the network_id added.
     pub(crate) async fn output_response_to_output_data(
         &self,
-        outputs_with_meta: Vec<OutputWithMetadataResponse>,
+        outputs_with_metadata: Vec<OutputWithMetadataResponse>,
+        network_id: u64,
     ) -> Result<Vec<OutputData>, WalletError> {
         log::debug!("[SYNC] convert output_responses");
-        // store outputs with network_id
-        let network_id = self.client().get_network_id().await?;
+
         let wallet_ledger = self.ledger().await;
 
-        Ok(outputs_with_meta
+        Ok(outputs_with_metadata
             .into_iter()
-            .map(|output_with_meta| {
-                // check if we know the transaction that created this output and if we created it (if we store incoming
-                // transactions separated, then this check wouldn't be required)
-                let remainder = wallet_ledger
-                    .transactions
-                    .get(output_with_meta.metadata().output_id().transaction_id())
-                    .map_or(false, |tx| !tx.incoming);
+            .map(
+                |OutputWithMetadataResponse {
+                     output,
+                     output_id_proof,
+                     metadata,
+                 }| {
+                    // check if we know the transaction that created this output and if we created it (if we store
+                    // incoming transactions separated, then this check wouldn't be required)
+                    let remainder = wallet_ledger
+                        .transactions
+                        .get(metadata.output_id().transaction_id())
+                        .map_or(false, |tx| !tx.incoming);
 
-                OutputData {
-                    output_id: output_with_meta.metadata().output_id().to_owned(),
-                    metadata: *output_with_meta.metadata(),
-                    output: output_with_meta.output().clone(),
-                    output_id_proof: output_with_meta.output_id_proof().clone(),
-                    network_id,
-                    remainder,
-                }
-            })
+                    OutputData {
+                        output_id: metadata.output_id().to_owned(),
+                        metadata,
+                        output,
+                        output_id_proof,
+                        network_id,
+                        remainder,
+                    }
+                },
+            )
             .collect())
     }
 
     /// Gets outputs by their id, already known outputs are not requested again, but loaded from the account set as
     /// unspent, because we wouldn't get them from the node if they were spent
-    pub(crate) async fn get_outputs(
+    pub(crate) async fn get_outputs_request_unknown(
         &self,
-        output_ids: Vec<OutputId>,
+        output_ids: &[OutputId],
     ) -> Result<Vec<OutputWithMetadataResponse>, WalletError> {
         log::debug!("[SYNC] start get_outputs");
         let get_outputs_start_time = Instant::now();
+
         let mut outputs = Vec::new();
         let mut unknown_outputs = Vec::new();
         let mut unspent_outputs = Vec::new();
@@ -71,14 +78,14 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         log::warn!("Removing spent output metadata for {output_id}, because it's still unspent");
                         output_data.metadata.spent = None;
                     }
-                    unspent_outputs.push((output_id, output_data.clone()));
+                    unspent_outputs.push((*output_id, output_data.clone()));
                     outputs.push(OutputWithMetadataResponse::new(
                         output_data.output.clone(),
                         output_data.output_id_proof.clone(),
                         output_data.metadata,
                     ));
                 }
-                None => unknown_outputs.push(output_id),
+                None => unknown_outputs.push(*output_id),
             }
         }
         // known output is unspent, so insert it to the unspent outputs again, because if it was an

@@ -41,15 +41,15 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         }
 
         // Store the wallet address
-        stronghold
-            .set(WALLET_ADDRESS_KEY, self.address().await.as_ref())
-            .await?;
+        stronghold.set(WALLET_ADDRESS_KEY, &self.address().await).await?;
 
         // Store the wallet bip path
         stronghold.set(WALLET_BIP_PATH_KEY, &self.bip_path().await).await?;
 
         // Store the wallet alias
-        stronghold.set(WALLET_ALIAS_KEY, &self.alias().await).await?;
+        if let Some(alias) = self.alias().await {
+            stronghold.set(WALLET_ALIAS_KEY, &alias).await?;
+        }
 
         let serialized_wallet_ledger = serde_json::to_value(&WalletLedgerDto::from(&*self.ledger.read().await))?;
         stronghold.set(WALLET_LEDGER_KEY, &serialized_wallet_ledger).await?;
@@ -71,6 +71,7 @@ pub(crate) async fn read_fields_from_stronghold_snapshot<S: 'static + SecretMana
     ),
     WalletError,
 > {
+    log::debug!("[read_fields_from_stronghold_snapshot]");
     migrate(stronghold).await?;
 
     // Get client_options

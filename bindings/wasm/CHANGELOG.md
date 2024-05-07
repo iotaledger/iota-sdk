@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-alpha.3 - 2024-04-19
+
+Same changes as https://github.com/iotaledger/iota-sdk/blob/2.0/bindings/nodejs/CHANGELOG.md.
+
+## 2.0.0-alpha.2 - 2024-04-02
+
+Same changes as https://github.com/iotaledger/iota-sdk/blob/2.0/bindings/nodejs/CHANGELOG.md.
+
+## 2.0.0-alpha.1 - 2024-03-26
+
+Initial alpha release of the wasm 2.0 bindings.
+
 ## 1.1.3 - 2024-01-29
 
 Same changes as https://github.com/iotaledger/iota-sdk/blob/develop/bindings/nodejs/CHANGELOG.md.

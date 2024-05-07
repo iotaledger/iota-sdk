@@ -139,8 +139,8 @@ pub enum WalletMethod {
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetIncomingTransaction { transaction_id: TransactionId },
-    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored in the wallet.
-    /// Expected response: [`OutputData`](crate::Response::OutputData)
+    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored
+    /// in the wallet. Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
     // /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)
@@ -226,7 +226,11 @@ pub enum WalletMethod {
     /// Claim outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[serde(rename_all = "camelCase")]
-    PrepareClaimOutputs { output_ids_to_claim: Vec<OutputId> },
+    PrepareClaimOutputs {
+        output_ids_to_claim: Vec<OutputId>,
+        #[serde(default)]
+        options: Option<TransactionOptions>,
+    },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareConsolidateOutputs { params: ConsolidationParams },
