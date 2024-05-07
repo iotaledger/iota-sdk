@@ -75,10 +75,10 @@ calling [`Client.getNodeInfo()`](https://wiki.iota.org/shimmer/iota-sdk/referenc
 and then print the node's information.
 
 ```javascript
-const { Client, initLogger } = require('@iota/sdk');
+import { Client } from '@iota/sdk';
 
+// In this example we will get information about the node
 async function run() {
-    initLogger();
 
     const client = await Client.create({
         nodes: ['https://api.testnet.shimmer.network'],
