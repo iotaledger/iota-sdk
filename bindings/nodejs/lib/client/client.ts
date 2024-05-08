@@ -198,13 +198,13 @@ export class Client {
      */
     async getOutputManaRewards(
         outputId: OutputId,
-        slotIndex?: SlotIndex,
+        slot?: SlotIndex,
     ): Promise<ManaRewardsResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getOutputManaRewards',
             data: {
                 outputId,
-                slotIndex,
+                slot,
             },
         });
 

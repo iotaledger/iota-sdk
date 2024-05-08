@@ -112,7 +112,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 tasks.push(
                     async {
                         let bech32_address = address.clone();
-                        let sync_options = sync_options.clone();
+                        let sync_options = *sync_options;
                         let wallet = self.clone();
                         tokio::spawn(async move {
                             wallet
@@ -260,7 +260,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 let mut tasks = Vec::new();
                 for address in addresses_chunk {
                     let wallet = self.clone();
-                    let sync_options = options.clone();
+                    let sync_options = *options;
                     tasks.push(async move {
                         tokio::spawn(async move {
                             let output_ids = wallet

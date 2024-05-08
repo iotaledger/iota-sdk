@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-beta.1 - 2024-05-08
+
+### Fixed
+
+- `Client::get_output_mana_rewards()` slot query parameter;
+
 ## 2.0.0-alpha.1 - 2024-05-07
 
 Initial alpha release of the Python 2.0 bindings.

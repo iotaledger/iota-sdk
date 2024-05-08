@@ -4,7 +4,7 @@
 use core::str::FromStr;
 use std::path::Path;
 
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use eyre::{bail, eyre, Error};
 use iota_sdk::{
@@ -342,10 +342,7 @@ pub fn to_utc_date_time(ts_millis: u128) -> Result<DateTime<Utc>, Error> {
     let secs_int = i64::try_from(secs).map_err(|e| eyre!("Failed to convert timestamp to i64: {e}"))?;
     let nanos = u32::try_from(millis * 1000000).map_err(|e| eyre!("Failed to convert timestamp to u32: {e}"))?;
 
-    let naive_time = NaiveDateTime::from_timestamp_opt(secs_int, nanos)
-        .ok_or(eyre!("Failed to convert timestamp to NaiveDateTime"))?;
-
-    Ok(naive_time.and_utc())
+    DateTime::from_timestamp(secs_int, nanos).ok_or(eyre!("Failed to convert timestamp to DateTime"))
 }
 
 pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
@@ -409,7 +406,6 @@ pub fn select_or_enter_bip_path() -> Result<Bip44, Error> {
             .items(&choices)
             .default(0)
             .interact_on(&Term::stderr())?
-            .into()
         {
             0 => Bip44::new(IOTA_COIN_TYPE),
             1 => Bip44::new(SHIMMER_COIN_TYPE),

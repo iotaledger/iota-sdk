@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-beta.1 - 2024-05-08
+
+### Fixed
+
+- `Client::getOutputManaRewards()` slot query parameter;
+
 ## 2.0.0-alpha.9 - 2024-05-02
 
 ### Added

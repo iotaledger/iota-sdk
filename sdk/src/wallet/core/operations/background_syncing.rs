@@ -56,7 +56,7 @@ where
             loop {
                 log::debug!("[background_syncing]: syncing wallet");
 
-                if let Err(err) = wallet.sync(options.clone()).await {
+                if let Err(err) = wallet.sync(options).await {
                     log::debug!("[background_syncing] error: {}", err)
                 }
 

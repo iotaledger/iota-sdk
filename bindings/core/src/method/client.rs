@@ -169,7 +169,7 @@ pub enum ClientMethod {
         /// epoch - 1 is also used as the last epoch for which rewards are fetched. Callers that do not build
         /// transactions with the returned values may omit this value in which case it defaults to the latest committed
         /// slot, which is good enough to, e.g. display estimated rewards to users.
-        slot_index: Option<SlotIndex>,
+        slot: Option<SlotIndex>,
     },
     /// Returns information of all registered validators and if they are active, ordered by their holding stake.
     #[serde(rename_all = "camelCase")]

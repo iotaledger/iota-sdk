@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashSet;
-
 use crate::{
     client::{
         node_api::indexer::query_parameters::{AccountOutputQueryParameters, FoundryOutputQueryParameters},

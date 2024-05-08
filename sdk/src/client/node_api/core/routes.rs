@@ -146,10 +146,10 @@ impl Client {
     pub async fn get_output_mana_rewards(
         &self,
         output_id: &OutputId,
-        slot_index: impl Into<Option<SlotIndex>> + Send,
+        slot: impl Into<Option<SlotIndex>> + Send,
     ) -> Result<ManaRewardsResponse, ClientError> {
         let path = &format!("api/core/v3/rewards/{output_id}");
-        let query = query_tuples_to_query_string([slot_index.into().map(|i| ("slotIndex", i.to_string()))]);
+        let query = query_tuples_to_query_string([slot.into().map(|i| ("slot", i.to_string()))]);
 
         self.get_request(path, query.as_deref(), false).await
     }

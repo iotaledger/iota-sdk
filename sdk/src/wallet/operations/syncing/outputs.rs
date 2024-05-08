@@ -71,7 +71,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let mut wallet_ledger = self.ledger_mut().await;
 
         for output_id in output_ids {
-            match wallet_ledger.outputs.get_mut(&output_id) {
+            match wallet_ledger.outputs.get_mut(output_id) {
                 // set unspent if not already
                 Some(output_data) => {
                     if output_data.is_spent() {

@@ -393,17 +393,13 @@ pub async fn init_command(storage_path: &Path, init_params: InitParameters) -> R
     }
 
     let mut bip_path = init_params.bip_path;
-    if bip_path.is_none() {
-        if forced || enter_decision("Do you want to set the bip path of the new wallet?", "yes")? {
-            bip_path.replace(select_or_enter_bip_path()?);
-        }
+    if bip_path.is_none() && forced || enter_decision("Do you want to set the bip path of the new wallet?", "yes")? {
+        bip_path.replace(select_or_enter_bip_path()?);
     }
 
     let mut alias = init_params.alias;
-    if alias.is_none() {
-        if enter_decision("Do you want to set an alias for the new wallet?", "yes")? {
-            alias.replace(enter_alias()?);
-        }
+    if alias.is_none() && enter_decision("Do you want to set an alias for the new wallet?", "yes")? {
+        alias.replace(enter_alias()?);
     }
 
     let wallet = Wallet::builder()

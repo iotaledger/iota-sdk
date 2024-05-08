@@ -41,7 +41,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
     // Get the default sync options we use when none are provided.
     pub async fn default_sync_options(&self) -> SyncOptions {
-        self.default_sync_options.lock().await.clone()
+        *self.default_sync_options.lock().await
     }
 
     // First request all outputs directly related to the wallet address, then for each nft and account output we got,

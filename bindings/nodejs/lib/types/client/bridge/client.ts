@@ -78,7 +78,7 @@ export interface __GetOutputManaRewardsMethod__ {
     name: 'getOutputManaRewards';
     data: {
         outputId: OutputId;
-        slotIndex?: SlotIndex;
+        slot?: SlotIndex;
     };
 }
 

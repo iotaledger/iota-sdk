@@ -11,6 +11,8 @@ use crate::{
 };
 
 impl TransactionBuilder {
+    // Clippy's suggestion greatly degrades readability.
+    #[allow(clippy::useless_let_if_seq)]
     pub(crate) fn fulfill_context_inputs_requirements(&mut self, input: &InputSigningData) {
         match &input.output {
             // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
