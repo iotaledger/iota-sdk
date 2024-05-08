@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Client::getOutputManaRewards()` slot query parameter;
+- Allow custom allotment of account bound mana;
 
 ## 2.0.0-alpha.9 - 2024-05-02
 

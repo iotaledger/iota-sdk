@@ -438,7 +438,6 @@ impl TransactionBuilder {
                         mana_gained += new_required_allotment.min(output.mana());
                     }
                 }
-                mana_gained = mana_gained.saturating_sub(output.mana());
             } else if input.output.native_token().is_some() {
                 remainder_work_score += self.protocol_parameters.work_score(self.native_token_remainder())
             } else if mana_gained > missing_mana {

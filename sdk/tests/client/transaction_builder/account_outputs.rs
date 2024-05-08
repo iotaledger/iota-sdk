@@ -1557,28 +1557,24 @@ fn two_accounts_required() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 3);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(
-        selected
-            .transaction
-            .outputs()
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .transaction
-            .outputs()
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .transaction
+        .outputs()
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .transaction
+        .outputs()
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -2372,9 +2368,10 @@ fn account_transition_with_required_context_inputs() {
             ))
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![
-                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
-                ])
+                BlockIssuerKeys::from_vec(vec![Ed25519PublicKeyHashBlockIssuerKey::new(
+                    **ed25519_address.as_ed25519(),
+                )
+                .into()])
                 .unwrap(),
             )
             .unwrap()])
@@ -2390,12 +2387,10 @@ fn account_transition_with_required_context_inputs() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
-            .finish_output()
-            .unwrap(),
-    ];
+    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+        .finish_output()
+        .unwrap()];
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
@@ -2435,9 +2430,10 @@ fn send_amount_from_block_issuer_account_with_generated_mana() {
         ))
         .with_features([BlockIssuerFeature::new(
             u32::MAX,
-            BlockIssuerKeys::from_vec(vec![
-                Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
-            ])
+            BlockIssuerKeys::from_vec(vec![Ed25519PublicKeyHashBlockIssuerKey::new(
+                **ed25519_address.as_ed25519(),
+            )
+            .into()])
             .unwrap(),
         )
         .unwrap()])
@@ -2452,12 +2448,10 @@ fn send_amount_from_block_issuer_account_with_generated_mana() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = vec![
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
-            .finish_output()
-            .unwrap(),
-    ];
+    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)
+        .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+        .finish_output()
+        .unwrap()];
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
@@ -2482,5 +2476,70 @@ fn send_amount_from_block_issuer_account_with_generated_mana() {
     assert_eq!(
         selected.transaction.context_inputs().block_issuance_credits().count(),
         1
+    );
+}
+
+#[test]
+fn custom_allot_account_bound_mana() {
+    let protocol_parameters = iota_mainnet_protocol_parameters().clone();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let ed25519_address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
+
+    let provided_allotment = 500_000;
+    let account_mana = 2_000_000;
+
+    let inputs = [AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
+        .with_mana(account_mana)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_feature(
+            BlockIssuerFeature::new(
+                u32::MAX,
+                BlockIssuerKeys::from_vec(vec![Ed25519PublicKeyHashBlockIssuerKey::new(
+                    **ed25519_address.as_ed25519(),
+                )
+                .into()])
+                .unwrap(),
+            )
+            .unwrap(),
+        )
+        .finish_output()
+        .unwrap()];
+    let inputs = inputs
+        .into_iter()
+        .map(|input| InputSigningData {
+            output: input,
+            output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
+            chain: None,
+        })
+        .collect::<Vec<_>>();
+
+    let outputs = [];
+
+    let selected = TransactionBuilder::new(
+        inputs.clone(),
+        outputs.clone(),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
+        SLOT_COMMITMENT_ID,
+        protocol_parameters,
+    )
+    .with_min_mana_allotment(account_id_1, 2)
+    .with_mana_allotments(Some((account_id_1, provided_allotment)))
+    .finish()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs_data, &inputs));
+    assert_eq!(selected.transaction.outputs().len(), 1);
+
+    assert_eq!(selected.transaction.allotments().len(), 1);
+    assert_eq!(
+        selected.transaction.allotments()[0],
+        ManaAllotment::new(account_id_1, provided_allotment).unwrap()
+    );
+    assert_eq!(
+        selected.transaction.outputs().iter().map(|o| o.mana()).sum::<u64>(),
+        account_mana - provided_allotment
     );
 }
