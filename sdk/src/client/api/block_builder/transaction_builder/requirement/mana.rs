@@ -427,10 +427,9 @@ impl TransactionBuilder {
                 work_score += self.protocol_parameters.work_score(&output);
                 if let Some(allotment) = self.min_mana_allotment {
                     // If we're allotting to this output account, we will have more mana from the reduction.
-                    if output
-                        .as_account_opt()
-                        .is_some_and(|account| account.account_id() == &allotment.issuer_id)
-                    {
+                    if output.as_account_opt().is_some_and(|account| {
+                        account.is_block_issuer() && account.account_id() == &allotment.issuer_id
+                    }) {
                         // We can regain as much as the full account mana value
                         // by reducing the mana on the account.
                         let new_required_allotment = allotment.required_allotment.unwrap_or_default()
@@ -438,6 +437,7 @@ impl TransactionBuilder {
                         mana_gained += new_required_allotment.min(output.mana());
                     }
                 }
+                mana_gained = mana_gained.saturating_sub(output.mana());
             } else if input.output.native_token().is_some() {
                 remainder_work_score += self.protocol_parameters.work_score(self.native_token_remainder())
             } else if mana_gained > missing_mana {
@@ -450,7 +450,14 @@ impl TransactionBuilder {
                 mana_gained = mana_gained.saturating_sub(work_score as u64 * allotment.reference_mana_cost);
             }
 
-            if mana_gained == 0 {
+            if mana_gained == 0
+                && !(input.output.as_account_opt().is_some_and(|account| {
+                    account.is_block_issuer()
+                        && self
+                            .min_mana_allotment
+                            .is_some_and(|allotment| *account.account_id() == allotment.issuer_id)
+                }))
+            {
                 return None;
             }
 
