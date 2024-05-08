@@ -1557,24 +1557,28 @@ fn two_accounts_required() {
     assert!(unsorted_eq(&selected.inputs_data, &inputs));
     assert_eq!(selected.transaction.outputs().len(), 3);
     assert!(selected.transaction.outputs().contains(&outputs[0]));
-    assert!(selected
-        .transaction
-        .outputs()
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.account_id() == &account_id_1
-        } else {
-            false
-        }));
-    assert!(selected
-        .transaction
-        .outputs()
-        .iter()
-        .any(|output| if let Output::Account(output) = output {
-            output.account_id() == &account_id_2
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.account_id() == &account_id_1
+            } else {
+                false
+            })
+    );
+    assert!(
+        selected
+            .transaction
+            .outputs()
+            .iter()
+            .any(|output| if let Output::Account(output) = output {
+                output.account_id() == &account_id_2
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -2368,10 +2372,9 @@ fn account_transition_with_required_context_inputs() {
             ))
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![Ed25519PublicKeyHashBlockIssuerKey::new(
-                    **ed25519_address.as_ed25519(),
-                )
-                .into()])
+                BlockIssuerKeys::from_vec(vec![
+                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
+                ])
                 .unwrap(),
             )
             .unwrap()])
@@ -2387,10 +2390,12 @@ fn account_transition_with_required_context_inputs() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
-        .finish_output()
-        .unwrap()];
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+            .finish_output()
+            .unwrap(),
+    ];
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
@@ -2430,10 +2435,9 @@ fn send_amount_from_block_issuer_account_with_generated_mana() {
         ))
         .with_features([BlockIssuerFeature::new(
             u32::MAX,
-            BlockIssuerKeys::from_vec(vec![Ed25519PublicKeyHashBlockIssuerKey::new(
-                **ed25519_address.as_ed25519(),
-            )
-            .into()])
+            BlockIssuerKeys::from_vec(vec![
+                Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
+            ])
             .unwrap(),
         )
         .unwrap()])
@@ -2448,10 +2452,12 @@ fn send_amount_from_block_issuer_account_with_generated_mana() {
         })
         .collect::<Vec<_>>();
 
-    let outputs = vec![BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
-        .finish_output()
-        .unwrap()];
+    let outputs = vec![
+        BasicOutputBuilder::new_with_amount(1_000_000)
+            .add_unlock_condition(AddressUnlockCondition::new(ed25519_address.clone()))
+            .finish_output()
+            .unwrap(),
+    ];
 
     let selected = TransactionBuilder::new(
         inputs.clone(),
@@ -2496,10 +2502,9 @@ fn custom_allot_account_bound_mana() {
         .add_feature(
             BlockIssuerFeature::new(
                 u32::MAX,
-                BlockIssuerKeys::from_vec(vec![Ed25519PublicKeyHashBlockIssuerKey::new(
-                    **ed25519_address.as_ed25519(),
-                )
-                .into()])
+                BlockIssuerKeys::from_vec(vec![
+                    Ed25519PublicKeyHashBlockIssuerKey::new(**ed25519_address.as_ed25519()).into(),
+                ])
                 .unwrap(),
             )
             .unwrap(),
