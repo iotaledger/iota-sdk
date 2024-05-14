@@ -10,6 +10,7 @@ use colored::Colorize;
 use eyre::Error;
 use iota_sdk::{
     client::{api::options::TransactionOptions, request_funds_from_faucet, secret::SecretManager},
+    crypto::signatures::ed25519::PublicKey,
     types::block::{
         address::{AccountAddress, Bech32Address, ToBech32Ext},
         mana::ManaAllotment,
@@ -942,10 +943,10 @@ pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
 
 // `add-block-issuer-key` command
 pub async fn add_block_issuer_key(wallet: &Wallet, account_id: AccountId, issuer_key: &str) -> Result<(), Error> {
-    let issuer_key: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH] = prefix_hex::decode(issuer_key)?;
+    let public_key = PublicKey::try_from_bytes(prefix_hex::decode(issuer_key)?)?;
     let params = ModifyAccountBlockIssuerKey {
         account_id,
-        keys_to_add: vec![Ed25519PublicKeyHashBlockIssuerKey::new(issuer_key).into()],
+        keys_to_add: vec![Ed25519PublicKeyHashBlockIssuerKey::from_public_key(public_key).into()],
         keys_to_remove: vec![],
     };
 
@@ -962,11 +963,11 @@ pub async fn add_block_issuer_key(wallet: &Wallet, account_id: AccountId, issuer
 
 // `remove-block-issuer-key` command
 pub async fn remove_block_issuer_key(wallet: &Wallet, account_id: AccountId, issuer_key: &str) -> Result<(), Error> {
-    let issuer_key: [u8; Ed25519PublicKeyHashBlockIssuerKey::LENGTH] = prefix_hex::decode(issuer_key)?;
+    let public_key = PublicKey::try_from_bytes(prefix_hex::decode(issuer_key)?)?;
     let params = ModifyAccountBlockIssuerKey {
         account_id,
         keys_to_add: vec![],
-        keys_to_remove: vec![Ed25519PublicKeyHashBlockIssuerKey::new(issuer_key).into()],
+        keys_to_remove: vec![Ed25519PublicKeyHashBlockIssuerKey::from_public_key(public_key).into()],
     };
 
     let transaction = wallet.modify_account_output_block_issuer_keys(params, None).await?;
