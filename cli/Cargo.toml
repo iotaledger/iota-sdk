@@ -1,6 +1,6 @@
 [package]
 name = "cli-wallet"
-version = "2.0.0-beta.1"
+version = "2.0.0-beta.2"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 homepage = "https://iota.org"

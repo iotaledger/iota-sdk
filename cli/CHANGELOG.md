@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 2.0.0-beta.2 - 2024-05-14
+
+### Changed
+
+- Set `SyncOptions::account::basic_outputs` to true;
+
+### Fixed
+
+- Hash public key in `add-block-issuer-key` and `remove-block-issuer-key`;
+
 ## 2.0.0-beta.1 - 2024-05-08
 
 ### Fixed

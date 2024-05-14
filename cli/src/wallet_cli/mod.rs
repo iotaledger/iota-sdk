@@ -26,9 +26,9 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, BeginStakingParams, ConsolidationParams, CreateDelegationParams, CreateNativeTokenParams,
-        MintNftParams, ModifyAccountBlockIssuerKey, OutputsToClaim, ReturnStrategy, SendManaParams,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, Wallet, WalletError,
+        types::OutputData, AccountSyncOptions, BeginStakingParams, ConsolidationParams, CreateDelegationParams,
+        CreateNativeTokenParams, MintNftParams, ModifyAccountBlockIssuerKey, OutputsToClaim, ReturnStrategy,
+        SendManaParams, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, Wallet, WalletError,
     },
     U256,
 };
@@ -752,7 +752,17 @@ pub async fn create_native_token_command(
             .wait_for_transaction_acceptance(&transaction.transaction_id, None, None)
             .await?;
         // Sync wallet after the transaction got confirmed, so the account output is available
-        wallet.sync(None).await?;
+        wallet
+            .sync(Some(SyncOptions {
+                sync_native_token_foundries: true,
+                sync_implicit_accounts: true,
+                account: AccountSyncOptions {
+                    basic_outputs: true,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }))
+            .await?;
     }
 
     let params = CreateNativeTokenParams {
@@ -1200,6 +1210,10 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
         .sync(Some(SyncOptions {
             sync_native_token_foundries: true,
             sync_implicit_accounts: true,
+            account: AccountSyncOptions {
+                basic_outputs: true,
+                ..Default::default()
+            },
             ..Default::default()
         }))
         .await?;
