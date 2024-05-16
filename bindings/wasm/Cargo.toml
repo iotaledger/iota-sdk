@@ -17,11 +17,7 @@ crate-type = ["cdylib"]
 doc = false
 
 [dependencies]
-iota-sdk-bindings-core = { path = "../core", default-features = false, features = [
-    "events",
-    "storage",
-    "private_key_secret_manager",
-] }
+iota-sdk-bindings-core = { path = "../core", default-features = false }
 
 console_error_panic_hook = { version = "0.1.7", default-features = false }
 js-sys = { version = "0.3.69", default-features = false, features = [] }
@@ -41,3 +37,9 @@ getrandom = { version = "0.2.12", default-features = false, features = ["js"] }
 instant = { version = "0.1.12", default-features = false, features = [
     "wasm-bindgen",
 ] }
+
+[features]
+default = ["private_key_secret_manager", "wallet"]
+
+private_key_secret_manager = [ "iota-sdk-bindings-core/private_key_secret_manager" ]
+wallet = [ "iota-sdk-bindings-core/events", "iota-sdk-bindings-core/storage", "iota-sdk-bindings-core/wallet" ]

@@ -4,6 +4,9 @@
 mod client;
 mod secret_manager;
 mod utils;
+#[cfg(feature = "wallet")]
 mod wallet;
 
-pub use self::{client::ClientMethod, secret_manager::SecretManagerMethod, utils::UtilsMethod, wallet::WalletMethod};
+#[cfg(feature = "wallet")]
+pub use self::wallet::WalletMethod;
+pub use self::{client::ClientMethod, secret_manager::SecretManagerMethod, utils::UtilsMethod};

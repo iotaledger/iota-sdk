@@ -77,6 +77,7 @@ pub(crate) struct PermanodeInfoResponse {
     pub base_token: BaseTokenResponse,
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl PermanodeInfoResponse {
     pub(crate) fn protocol_parameters_by_version(&self, protocol_version: u8) -> Option<&ProtocolParametersResponse> {
         self.protocol_parameters.by_version(protocol_version)

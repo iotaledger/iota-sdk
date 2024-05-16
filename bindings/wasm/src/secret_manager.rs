@@ -17,6 +17,7 @@ use crate::{build_js_error, map_err};
 #[wasm_bindgen(js_name = SecretManagerMethodHandler)]
 pub struct SecretManagerMethodHandler(Arc<RwLock<SecretManager>>);
 
+#[cfg(feature = "wallet")]
 impl SecretManagerMethodHandler {
     pub(crate) fn new(secret_manager: Arc<RwLock<SecretManager>>) -> Self {
         Self(secret_manager)

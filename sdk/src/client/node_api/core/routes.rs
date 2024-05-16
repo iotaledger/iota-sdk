@@ -7,6 +7,8 @@ use packable::PackableExt;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+#[cfg(not(target_family = "wasm"))]
+use crate::types::api::core::PermanodeInfoResponse;
 use crate::{
     client::{
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
@@ -18,9 +20,8 @@ use crate::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
             IssuanceBlockHeaderResponse, ManaRewardsResponse, NetworkMetricsResponse, OutputResponse,
-            OutputWithMetadataResponse, PermanodeInfoResponse, RoutesResponse, SubmitBlockResponse,
-            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
-            ValidatorsResponse,
+            OutputWithMetadataResponse, RoutesResponse, SubmitBlockResponse, TransactionMetadataResponse,
+            UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -456,6 +457,7 @@ impl Client {
         Ok(resp)
     }
 
+    #[cfg(not(target_family = "wasm"))]
     /// GET /api/core/v3/info endpoint
     pub(crate) async fn get_permanode_info(mut node: Node) -> Result<PermanodeInfoResponse, ClientError> {
         log::debug!("get_permanode_info");

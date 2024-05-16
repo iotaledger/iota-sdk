@@ -17,6 +17,7 @@ use crate::{build_js_error, destroyed_err, map_err, ArrayString};
 #[wasm_bindgen(js_name = ClientMethodHandler)]
 pub struct ClientMethodHandler(Arc<RwLock<Option<Client>>>);
 
+#[cfg(feature = "wallet")]
 impl ClientMethodHandler {
     pub(crate) fn new(client: Client) -> Self {
         Self(Arc::new(RwLock::new(Some(client))))

@@ -1,8 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "wallet")]
 use std::sync::Arc;
 
+#[cfg(feature = "wallet")]
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
     iota_sdk::wallet::{
@@ -11,18 +13,30 @@ use iota_sdk_bindings_core::{
     },
     Response, WalletOptions,
 };
+#[cfg(feature = "wallet")]
 use tokio::sync::{
     mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
     RwLock,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsError, JsValue};
+#[cfg(feature = "wallet")]
+use wasm_bindgen::JsError;
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
+#[cfg(feature = "wallet")]
 use crate::{client::ClientMethodHandler, destroyed_err, map_err, secret_manager::SecretManagerMethodHandler};
 
+#[cfg(feature = "wallet")]
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
 pub struct WalletMethodHandler(Arc<RwLock<Option<Wallet>>>);
 
+#[cfg(not(feature = "wallet"))]
+#[wasm_bindgen(js_name = createWallet)]
+#[allow(non_snake_case)]
+pub fn create_wallet(_options: String) -> Result<js_sys::Object, JsValue> {
+    Err(JsValue::from(js_sys::Error::new("wallet feature not enabled")))
+}
+#[cfg(feature = "wallet")]
 /// Creates a method handler with the given options.
 #[wasm_bindgen(js_name = createWallet)]
 #[allow(non_snake_case)]
@@ -33,12 +47,24 @@ pub async fn create_wallet(options: String) -> Result<WalletMethodHandler, JsErr
     Ok(WalletMethodHandler(Arc::new(RwLock::new(Some(wallet_method_handler)))))
 }
 
+#[cfg(not(feature = "wallet"))]
+#[wasm_bindgen(js_name = destroyWallet)]
+pub async fn destroy_wallet(_method_handler: &js_sys::Object) -> Result<(), JsValue> {
+    Err(JsValue::from(js_sys::Error::new("wallet feature not enabled")))
+}
+#[cfg(feature = "wallet")]
 #[wasm_bindgen(js_name = destroyWallet)]
 pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsError> {
     method_handler.0.write().await.take();
     Ok(())
 }
 
+#[cfg(not(feature = "wallet"))]
+#[wasm_bindgen(js_name = getClient)]
+pub async fn get_client(_method_handler: &js_sys::Object) -> Result<(), JsValue> {
+    Err(JsValue::from(js_sys::Error::new("wallet feature not enabled")))
+}
+#[cfg(feature = "wallet")]
 #[wasm_bindgen(js_name = getClient)]
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsError> {
     if let Some(wallet) = &*method_handler.0.read().await {
@@ -49,6 +75,12 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
     }
 }
 
+#[cfg(not(feature = "wallet"))]
+#[wasm_bindgen(js_name = getSecretManager)]
+pub async fn get_secret_manager(_method_handler: &js_sys::Object) -> Result<(), JsValue> {
+    Err(JsValue::from(js_sys::Error::new("wallet feature not enabled")))
+}
+#[cfg(feature = "wallet")]
 #[wasm_bindgen(js_name = getSecretManager)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsError> {
     if let Some(wallet) = &*method_handler.0.read().await {
@@ -59,6 +91,12 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
     }
 }
 
+#[cfg(not(feature = "wallet"))]
+#[wasm_bindgen(js_name = callWalletMethod)]
+pub async fn call_wallet_method(_method_handler: &js_sys::Object, _method: String) -> Result<String, JsValue> {
+    Err(JsValue::from(js_sys::Error::new("wallet feature not enabled")))
+}
+#[cfg(feature = "wallet")]
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
@@ -78,6 +116,16 @@ pub async fn call_wallet_method(method_handler: &WalletMethodHandler, method: St
     }
 }
 
+#[cfg(not(feature = "wallet"))]
+#[wasm_bindgen(js_name = listenWallet)]
+pub async fn listen_wallet(
+    _vec: js_sys::Array,
+    _callback: js_sys::Function,
+    _method_handler: &js_sys::Object,
+) -> Result<JsValue, JsValue> {
+    Err(JsValue::from(js_sys::Error::new("wallet feature not enabled")))
+}
+#[cfg(feature = "wallet")]
 /// It takes a list of event types, registers a callback function, and then listens for events of those
 /// types
 ///

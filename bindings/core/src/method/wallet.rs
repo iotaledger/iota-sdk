@@ -6,22 +6,25 @@ use std::path::PathBuf;
 
 use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
-use iota_sdk::client::api::options::TransactionOptions;
-#[cfg(feature = "events")]
-use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 // #[cfg(feature = "participation")]
 // use iota_sdk::{
 //     client::node_manager::node::Node,
 //     types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
 //     wallet::types::participation::ParticipationEventRegistrationOptions,
 // };
+#[cfg(feature = "stronghold")]
+use iota_sdk::types::block::address::Hrp;
+#[cfg(feature = "events")]
+use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{
-        api::{transaction_builder::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
+        api::{
+            options::TransactionOptions, transaction_builder::Burn, PreparedTransactionDataDto,
+            SignedTransactionDataDto,
+        },
         node_manager::node::NodeAuth,
     },
     types::block::{
-        address::Hrp,
         output::{AccountId, DelegationId, Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },

@@ -4,19 +4,20 @@
 use std::pin::Pin;
 
 use futures::Future;
-use iota_sdk::{
-    client::{
-        secret::{DowncastSecretManager, SecretManage},
-        Client,
-    },
-    wallet::Wallet,
+use iota_sdk::client::{
+    secret::{DowncastSecretManager, SecretManage},
+    Client,
 };
+#[cfg(feature = "wallet")]
+use iota_sdk::wallet::Wallet;
 
+#[cfg(feature = "wallet")]
+use crate::{method::WalletMethod, method_handler::wallet::call_wallet_method_internal};
 use crate::{
-    method::{ClientMethod, SecretManagerMethod, WalletMethod},
+    method::{ClientMethod, SecretManagerMethod},
     method_handler::{
         client::call_client_method_internal, secret_manager::call_secret_manager_method_internal,
-        utils::call_utils_method_internal, wallet::call_wallet_method_internal,
+        utils::call_utils_method_internal,
     },
     panic::{convert_async_panics, convert_panics},
     response::Response,
@@ -38,6 +39,7 @@ impl CallMethod for Client {
     }
 }
 
+#[cfg(feature = "wallet")]
 impl CallMethod for Wallet {
     type Method = WalletMethod;
 
@@ -57,6 +59,7 @@ pub async fn call_client_method(client: &Client, method: ClientMethod) -> Respon
     response
 }
 
+#[cfg(feature = "wallet")]
 /// Call a wallet method.
 pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Response {
     log::debug!("Wallet method: {method:?}");

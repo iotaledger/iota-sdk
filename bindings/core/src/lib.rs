@@ -11,16 +11,21 @@ mod response;
 
 use std::fmt::{Formatter, Result as FmtResult};
 
+#[cfg(feature = "wallet")]
 use crypto::keys::bip44::Bip44;
+#[cfg(feature = "wallet")]
 use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
+use iota_sdk::client::secret::SecretManagerDto;
+#[cfg(feature = "wallet")]
 use iota_sdk::{
-    client::secret::{SecretManager, SecretManagerDto},
+    client::secret::SecretManager,
     types::block::address::Bech32Address,
     utils::serde::bip44::option_bip44,
     wallet::{ClientOptions, Wallet, WalletError},
 };
+#[cfg(feature = "wallet")]
 use serde::Deserialize;
 
 #[cfg(feature = "mqtt")]
@@ -29,10 +34,12 @@ pub use self::method_handler::listen_mqtt;
 pub use self::method_handler::CallMethod;
 pub use self::{
     error::Error,
-    method::{ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
-    method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
+    method::{ClientMethod, SecretManagerMethod, UtilsMethod},
+    method_handler::{call_client_method, call_secret_manager_method, call_utils_method},
     response::Response,
 };
+#[cfg(feature = "wallet")]
+pub use self::{method::WalletMethod, method_handler::call_wallet_method};
 
 pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error> {
     let output_config: LoggerOutputConfigBuilder = serde_json::from_str(&config).expect("invalid logger config");
@@ -40,6 +47,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
     logger_init(config)
 }
 
+#[cfg(feature = "wallet")]
 #[derive(Derivative, Deserialize, Default)]
 #[derivative(Debug)]
 #[serde(rename_all = "camelCase")]
@@ -54,6 +62,7 @@ pub struct WalletOptions {
     pub storage_path: Option<String>,
 }
 
+#[cfg(feature = "wallet")]
 impl WalletOptions {
     pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
         self.address = address.into();

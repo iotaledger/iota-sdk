@@ -34,6 +34,7 @@ pub enum Error {
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::ClientError),
+    #[cfg(feature = "wallet")]
     /// Wallet errors.
     #[error("{0}")]
     Wallet(#[from] iota_sdk::wallet::WalletError),
@@ -80,6 +81,7 @@ impl Serialize for Error {
             error: match &self {
                 // Only Client and wallet have a proper serde impl
                 Self::Client(e) => serde_json::to_value(e).map_err(serde::ser::Error::custom)?,
+                #[cfg(feature = "wallet")]
                 Self::Wallet(e) => serde_json::to_value(e).map_err(serde::ser::Error::custom)?,
                 _ => serde_json::Value::String(self.to_string()),
             },

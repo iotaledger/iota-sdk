@@ -421,6 +421,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         *self.bip_path.read().await
     }
 
+    #[cfg(feature = "stronghold")]
     pub(crate) async fn bip_path_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, Option<Bip44>> {
         self.bip_path.write().await
     }

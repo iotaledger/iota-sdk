@@ -7,6 +7,11 @@ use std::collections::HashSet;
 use derivative::Derivative;
 #[cfg(feature = "ledger_nano")]
 use iota_sdk::client::secret::LedgerNanoStatus;
+#[cfg(feature = "wallet")]
+use iota_sdk::wallet::{
+    types::{Balance, OutputData, TransactionWithMetadataDto},
+    PreparedCreateDelegationTransaction, PreparedCreateNativeTokenTransaction,
+};
 use iota_sdk::{
     client::{
         api::{PreparedTransactionData, SignedTransactionDataDto},
@@ -36,10 +41,6 @@ use iota_sdk::{
         },
     },
     utils::serde::string,
-    wallet::{
-        types::{Balance, OutputData, TransactionWithMetadataDto},
-        PreparedCreateDelegationTransaction, PreparedCreateNativeTokenTransaction,
-    },
 };
 use serde::Serialize;
 #[cfg(feature = "participation")]
@@ -287,6 +288,7 @@ pub enum Response {
     Panic(String),
 
     // wallet responses
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetAddress`](crate::method::WalletMethod::GetAddress)
     Address(Bech32Address),
@@ -302,9 +304,11 @@ pub enum Response {
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetOutput`](crate::method::WalletMethod::GetOutput)
     OutputData(Option<Box<OutputData>>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`Outputs`](crate::method::WalletMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::WalletMethod::UnspentOutputs)
@@ -328,16 +332,20 @@ pub enum Response {
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
     /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
     PreparedTransaction(PreparedTransactionData),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::WalletMethod::PrepareCreateNativeToken),
     PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransaction),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`PrepareCreateDelegation`](crate::method::WalletMethod::PrepareCreateDelegation),
     PreparedCreateDelegationTransaction(PreparedCreateDelegationTransaction),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::WalletMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::WalletMethod::GetTransaction),
     Transaction(Option<Box<TransactionWithMetadataDto>>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`IncomingTransactions`](crate::method::WalletMethod::IncomingTransactions)
     /// - [`PendingTransactions`](crate::method::WalletMethod::PendingTransactions),
@@ -346,10 +354,12 @@ pub enum Response {
     /// Response for:
     /// - [`SignTransaction`](crate::method::WalletMethod::SignTransaction)
     SignedTransactionData(SignedTransactionDataDto),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetBalance`](crate::method::WalletMethod::GetBalance),
     /// - [`Sync`](crate::method::WalletMethod::Sync)
     Balance(Balance),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`SignAndSubmitTransaction`](crate::method::WalletMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::WalletMethod::SubmitAndStoreTransaction)
