@@ -16,7 +16,7 @@
 //!    .await?;
 //!
 //! let block = client
-//!    .block()
+//!    .build_block()
 //!    .finish()
 //!    .await?;
 //!
