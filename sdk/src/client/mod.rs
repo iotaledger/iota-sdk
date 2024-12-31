@@ -31,6 +31,7 @@ macro_rules! lazy_static {
         static INIT: std::sync::Once = std::sync::Once::new();
 
         INIT.call_once(|| unsafe { VALUE = Some($init) });
+        #[allow(static_mut_refs)]
         unsafe { VALUE.as_ref() }.expect("failed to get lazy static value")
     }};
 }
