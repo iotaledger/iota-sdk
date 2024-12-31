@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.6 - 2025-MM-DD
+
+### Added
+
+- `StrongholdAdapter::get_seed()`;
+
 ## 1.1.5 - 2024-05-22
 
 ### Added

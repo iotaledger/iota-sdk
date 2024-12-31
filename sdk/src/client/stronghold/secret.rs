@@ -21,7 +21,7 @@ use crypto::{
 };
 use instant::Duration;
 use iota_stronghold::{
-    procedures::{self, Curve, KeyType, Slip10DeriveInput},
+    procedures::{self, Curve, GetSecret, KeyType, Slip10DeriveInput},
     Location,
 };
 
@@ -493,6 +493,21 @@ impl StrongholdAdapter {
 
         Ok(())
     }
+
+    /// Execute [GetSecret](procedures::GetSecret) procedure in Stronghold to get the hex encoded seed, that's stored
+    /// when calling `store_mnemonic()`.
+    pub async fn get_seed(&self) -> Result<String, Error> {
+        let client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
+
+        let seed_location = Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH);
+        let seed_bytes = client.execute_procedure(GetSecret {
+            location: seed_location,
+        })?;
+
+        let hex_encoded_seed = prefix_hex::encode(seed_bytes);
+
+        Ok(hex_encoded_seed)
+    }
 }
 
 #[cfg(test)]
@@ -592,12 +607,10 @@ mod tests {
         stronghold_adapter.clear_key().await;
 
         // Address generation returns an error when the key is cleared.
-        assert!(
-            stronghold_adapter
-                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
-                .await
-                .is_err()
-        );
+        assert!(stronghold_adapter
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+            .await
+            .is_err());
 
         stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 

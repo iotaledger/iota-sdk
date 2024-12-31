@@ -240,6 +240,11 @@ class SecretManager():
             'mnemonic': mnemonic
         })
 
+    def get_seed(self) -> HexStr:
+        """Get the seed from the Stronghold vault, that was stored by `StoreMnemonic`.
+        """
+        return self._call_method('getSeed')
+
     def sign_ed25519(self, message: HexStr, chain: Bip44) -> Ed25519Signature:
         """Signs a message with an Ed25519 private key.
 

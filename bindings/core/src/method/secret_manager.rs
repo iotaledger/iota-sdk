@@ -69,6 +69,10 @@ pub enum SecretManagerMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
+    /// Get the seed from the Stronghold vault, that was stored by `StoreMnemonic`.
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    GetSeed,
 }
 
 #[cfg(test)]

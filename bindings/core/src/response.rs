@@ -202,6 +202,7 @@ pub enum Response {
     /// - [`ParseBech32Address`](crate::method::UtilsMethod::ParseBech32Address)
     ParsedBech32Address(AddressDto),
     /// Response for:
+    /// - [`GetSeed`](crate::method::SecretManagerMethod::GetSeed)
     /// - [`MnemonicToHexSeed`](crate::method::UtilsMethod::MnemonicToHexSeed)
     MnemonicHexSeed(#[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))] String),
     /// Response for:
