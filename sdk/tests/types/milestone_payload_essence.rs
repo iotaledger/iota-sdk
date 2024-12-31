@@ -25,20 +25,18 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn new_valid() {
-    assert!(
-        MilestoneEssence::new(
-            MilestoneIndex(0),
-            0,
-            protocol_parameters().protocol_version(),
-            rand_milestone_id(),
-            rand_parents(),
-            rand_merkle_root(),
-            rand_merkle_root(),
-            [],
-            MilestoneOptions::from_vec(vec![]).unwrap(),
-        )
-        .is_ok()
-    );
+    assert!(MilestoneEssence::new(
+        MilestoneIndex(0),
+        0,
+        protocol_parameters().protocol_version(),
+        rand_milestone_id(),
+        rand_parents(),
+        rand_merkle_root(),
+        rand_merkle_root(),
+        [],
+        MilestoneOptions::from_vec(vec![]).unwrap(),
+    )
+    .is_ok());
 }
 
 #[test]

@@ -24,24 +24,22 @@ fn kind() {
 
 #[test]
 fn new_valid() {
-    assert!(
-        MilestonePayload::new(
-            MilestoneEssence::new(
-                MilestoneIndex(0),
-                0,
-                protocol_parameters().protocol_version(),
-                rand_milestone_id(),
-                rand_parents(),
-                rand_merkle_root(),
-                rand_merkle_root(),
-                [],
-                MilestoneOptions::from_vec(vec![]).unwrap(),
-            )
-            .unwrap(),
-            [rand_signature()]
+    assert!(MilestonePayload::new(
+        MilestoneEssence::new(
+            MilestoneIndex(0),
+            0,
+            protocol_parameters().protocol_version(),
+            rand_milestone_id(),
+            rand_parents(),
+            rand_merkle_root(),
+            rand_merkle_root(),
+            [],
+            MilestoneOptions::from_vec(vec![]).unwrap(),
         )
-        .is_ok()
-    );
+        .unwrap(),
+        [rand_signature()]
+    )
+    .is_ok());
 }
 
 #[test]

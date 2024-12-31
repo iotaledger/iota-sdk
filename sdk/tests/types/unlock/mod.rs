@@ -93,35 +93,31 @@ fn new_invalid_too_many_blocks() {
 
 #[test]
 fn new_valid() {
-    assert!(
-        Unlocks::new([
-            SignatureUnlock::from(rand_signature()).into(),
-            ReferenceUnlock::new(0).unwrap().into(),
-            ReferenceUnlock::new(0).unwrap().into(),
-            SignatureUnlock::from(rand_signature()).into(),
-            SignatureUnlock::from(rand_signature()).into(),
-            SignatureUnlock::from(rand_signature()).into(),
-            ReferenceUnlock::new(3).unwrap().into(),
-            ReferenceUnlock::new(4).unwrap().into(),
-            ReferenceUnlock::new(3).unwrap().into(),
-            ReferenceUnlock::new(4).unwrap().into(),
-            ReferenceUnlock::new(5).unwrap().into(),
-            SignatureUnlock::from(rand_signature()).into(),
-            ReferenceUnlock::new(11).unwrap().into(),
-            SignatureUnlock::from(rand_signature()).into(),
-        ])
-        .is_ok()
-    );
+    assert!(Unlocks::new([
+        SignatureUnlock::from(rand_signature()).into(),
+        ReferenceUnlock::new(0).unwrap().into(),
+        ReferenceUnlock::new(0).unwrap().into(),
+        SignatureUnlock::from(rand_signature()).into(),
+        SignatureUnlock::from(rand_signature()).into(),
+        SignatureUnlock::from(rand_signature()).into(),
+        ReferenceUnlock::new(3).unwrap().into(),
+        ReferenceUnlock::new(4).unwrap().into(),
+        ReferenceUnlock::new(3).unwrap().into(),
+        ReferenceUnlock::new(4).unwrap().into(),
+        ReferenceUnlock::new(5).unwrap().into(),
+        SignatureUnlock::from(rand_signature()).into(),
+        ReferenceUnlock::new(11).unwrap().into(),
+        SignatureUnlock::from(rand_signature()).into(),
+    ])
+    .is_ok());
 }
 
 #[test]
 fn get_none() {
-    assert!(
-        Unlocks::new([SignatureUnlock::from(rand_signature()).into()])
-            .unwrap()
-            .get(42)
-            .is_none()
-    );
+    assert!(Unlocks::new([SignatureUnlock::from(rand_signature()).into()])
+        .unwrap()
+        .get(42)
+        .is_none());
 }
 
 #[test]
