@@ -5,7 +5,7 @@ use std::cmp;
 
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
-    wallet::account::{operations::syncing::SyncOptions, types::AddressWithUnspentOutputs, Account},
+    wallet::account::{Account, operations::syncing::SyncOptions, types::AddressWithUnspentOutputs},
 };
 
 impl<S: 'static + SecretManage> Account<S>
@@ -102,11 +102,7 @@ where
                 .map(|a| {
                     // If the index is 1, then we only have the single address before we got during account creation
                     // To also sync that, we set the index to 0
-                    if a.key_index == 1 {
-                        0
-                    } else {
-                        a.key_index
-                    }
+                    if a.key_index == 1 { 0 } else { a.key_index }
                 })
                 // +1, because we don't want to sync the latest address again
                 .unwrap_or(highest_public_address_index + 1);

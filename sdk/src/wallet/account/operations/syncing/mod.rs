@@ -17,9 +17,9 @@ use crate::{
         output::{FoundryId, Output, OutputId, OutputMetadata},
     },
     wallet::account::{
+        Account, Balance,
         constants::MIN_SYNC_INTERVAL,
         types::{AddressWithUnspentOutputs, OutputData},
-        Account, Balance,
     },
 };
 

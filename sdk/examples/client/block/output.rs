@@ -9,8 +9,8 @@
 //! ```
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, secret::SecretManager, utils::request_funds_from_faucet, Client, Result},
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+    client::{Client, Result, api::GetAddressesOptions, secret::SecretManager, utils::request_funds_from_faucet},
+    types::block::output::{BasicOutputBuilder, unlock_condition::AddressUnlockCondition},
 };
 
 #[tokio::main]

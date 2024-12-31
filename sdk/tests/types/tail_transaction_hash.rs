@@ -1,8 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{payload::milestone::option::TailTransactionHash, Error};
-use packable::{error::UnpackError, PackableExt};
+use iota_sdk::types::block::{Error, payload::milestone::option::TailTransactionHash};
+use packable::{PackableExt, error::UnpackError};
 use pretty_assertions::assert_eq;
 
 const HASH_TRYTES: &str = "TZTXLMTAURX9DYQICXZEUMCDBPNXVOHNBBZDSSVCNCTWKSMUALAYPMHUCKGOGSTBUHSQIMSY9HQEP9AXJ";

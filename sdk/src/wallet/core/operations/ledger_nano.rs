@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::{ledger_nano::LedgerSecretManager, LedgerNanoStatus, SecretManager},
+    client::secret::{LedgerNanoStatus, SecretManager, ledger_nano::LedgerSecretManager},
     wallet::Wallet,
 };
 

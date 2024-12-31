@@ -8,7 +8,7 @@
 //! cargo run --release --example address_consolidation [ADDRESS INDEX START] [ADDRESS COUNT]
 //! ```
 
-use iota_sdk::client::{api::GetAddressesOptions, secret::SecretManager, Client, Result};
+use iota_sdk::client::{Client, Result, api::GetAddressesOptions, secret::SecretManager};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -35,13 +35,10 @@ async fn main() -> Result<()> {
 
     // Here all funds will be send to the address with the lowest index in the range
     let address = client
-        .consolidate_funds(
-            &secret_manager,
-            GetAddressesOptions {
-                range: address_range,
-                ..Default::default()
-            },
-        )
+        .consolidate_funds(&secret_manager, GetAddressesOptions {
+            range: address_range,
+            ..Default::default()
+        })
         .await?;
 
     println!(

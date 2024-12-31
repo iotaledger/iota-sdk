@@ -10,7 +10,7 @@ use crate::{
     wallet::{
         account::{AccountDetails, AccountDetailsDto, SyncOptions},
         migration::migrate,
-        storage::{constants::*, DynStorageAdapter, Storage},
+        storage::{DynStorageAdapter, Storage, constants::*},
     },
 };
 
@@ -139,7 +139,7 @@ mod tests {
     use super::*;
     use crate::{
         client::secret::SecretManager,
-        wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
+        wallet::{WalletBuilder, core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory},
     };
 
     #[tokio::test]
@@ -182,17 +182,21 @@ mod tests {
     #[tokio::test]
     async fn save_get_wallet_data() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
-            .await
-            .unwrap()
-            .is_none());
+        assert!(
+            WalletBuilder::<SecretManager>::load(&storage_manager)
+                .await
+                .unwrap()
+                .is_none()
+        );
 
         let wallet_builder = WalletBuilder::<SecretManager>::new();
         wallet_builder.save(&storage_manager).await.unwrap();
 
-        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
-            .await
-            .unwrap()
-            .is_some());
+        assert!(
+            WalletBuilder::<SecretManager>::load(&storage_manager)
+                .await
+                .unwrap()
+                .is_some()
+        );
     }
 }

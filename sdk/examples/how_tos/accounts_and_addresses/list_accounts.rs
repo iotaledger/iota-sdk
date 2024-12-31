@@ -8,7 +8,7 @@
 //! cargo run --release --all-features --example list_accounts
 //! ```
 
-use iota_sdk::{wallet::Result, Wallet};
+use iota_sdk::{Wallet, wallet::Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {

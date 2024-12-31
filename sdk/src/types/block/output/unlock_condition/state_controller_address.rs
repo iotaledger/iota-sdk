@@ -33,7 +33,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::{Error, address::dto::AddressDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct StateControllerAddressUnlockConditionDto {

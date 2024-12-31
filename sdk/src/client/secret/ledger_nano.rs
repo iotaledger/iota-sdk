@@ -13,18 +13,17 @@ use crypto::{
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
 use iota_ledger_nano::{
-    api::errors::APIError, get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index,
-    Packable as LedgerNanoPackable, TransportTypes,
+    LedgerBIP32Index, Packable as LedgerNanoPackable, TransportTypes, api::errors::APIError, get_app_config,
+    get_buffer_size, get_ledger, get_opened_app,
 };
-use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
+use packable::{Packable, PackableExt, error::UnexpectedEOF, unpacker::SliceUnpacker};
 use tokio::sync::Mutex;
 
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
-        is_alias_transition,
+        LedgerNanoStatus, PreparedTransactionData, is_alias_transition,
         types::{LedgerApp, LedgerDeviceType},
-        LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
         address::{Address, AliasAddress, Ed25519Address, NftAddress},
@@ -299,13 +298,10 @@ impl SecretManage for LedgerSecretManager {
             let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
                 Some(remainder) => {
                     if let Some(chain) = remainder.chain {
-                        (
-                            Some(&remainder.output),
-                            LedgerBIP32Index {
-                                bip32_change: chain.change.harden().into(),
-                                bip32_index: chain.address_index.harden().into(),
-                            },
-                        )
+                        (Some(&remainder.output), LedgerBIP32Index {
+                            bip32_change: chain.change.harden().into(),
+                            bip32_index: chain.address_index.harden().into(),
+                        })
                     } else {
                         (None, LedgerBIP32Index::default())
                     }

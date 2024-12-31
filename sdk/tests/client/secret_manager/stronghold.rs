@@ -3,10 +3,10 @@
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::client::{
+    Result,
     api::GetAddressesOptions,
     constants::SHIMMER_TESTNET_BECH32_HRP,
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    Result,
+    secret::{SecretManager, stronghold::StrongholdSecretManager},
 };
 use iota_stronghold::engine::snapshot::try_set_encrypt_work_factor;
 use pretty_assertions::assert_eq;

@@ -7,7 +7,7 @@ use pretty_assertions::assert_eq;
 use {
     iota_sdk::client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{SecretManager, stronghold::StrongholdSecretManager},
     },
     iota_sdk::wallet::{ClientOptions, Wallet},
 };

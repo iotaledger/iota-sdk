@@ -5,32 +5,33 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use hashbrown::HashMap;
 use packable::{
+    Packable,
     bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable,
 };
 
 use super::verify_output_amount_packable;
 use crate::types::{
+    ValidationParams,
     block::{
+        Error,
         address::{Address, AliasAddress},
         output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            StateTransitionError, StateTransitionVerifier,
+            feature::{Feature, FeatureFlags, Features, verify_allowed_features},
             unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+                UnlockCondition, UnlockConditionFlags, UnlockConditions, verify_allowed_unlock_conditions,
             },
-            verify_output_amount, AliasId, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            verify_output_amount,
         },
         protocol::ProtocolParameters,
         semantic::{ConflictReason, ValidationContext},
         unlock::Unlock,
-        Error,
     },
-    ValidationParams,
 };
 
 /// Types of alias transition.
@@ -718,13 +719,13 @@ pub(crate) mod dto {
     use super::*;
     use crate::{
         types::{
+            TryFromDto,
             block::{
+                Error,
                 output::{
                     dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
                 },
-                Error,
             },
-            TryFromDto,
         },
         utils::serde::prefix_hex_bytes,
     };
@@ -889,11 +890,12 @@ mod tests {
 
     use super::*;
     use crate::types::{
+        TryFromDto,
         block::{
             address::AliasAddress,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
                 FoundryId, SimpleTokenScheme, TokenId,
+                dto::{OutputBuilderAmountDto, OutputDto},
             },
             protocol::protocol_parameters,
             rand::{
@@ -908,7 +910,6 @@ mod tests {
                 },
             },
         },
-        TryFromDto,
     };
 
     #[test]

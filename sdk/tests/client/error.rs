@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{api::input_selection::Error as IsaError, Error},
+    client::{Error, api::input_selection::Error as IsaError},
     types::block::Error as BlockError,
 };
 use pretty_assertions::assert_eq;

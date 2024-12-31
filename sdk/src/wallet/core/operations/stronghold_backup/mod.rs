@@ -5,17 +5,17 @@ pub(crate) mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf, sync::atomic::Ordering};
 
-use futures::{future::try_join_all, FutureExt};
+use futures::{FutureExt, future::try_join_all};
 
 use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::{
     client::storage::StorageAdapter,
-    wallet::{migration::chrysalis::CHRYSALIS_STORAGE_KEY, WalletBuilder},
+    wallet::{WalletBuilder, migration::chrysalis::CHRYSALIS_STORAGE_KEY},
 };
 use crate::{
     client::{
-        secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
+        secret::{SecretManager, SecretManagerConfig, SecretManagerDto, stronghold::StrongholdSecretManager},
         utils::Password,
     },
     types::block::address::Hrp,

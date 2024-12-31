@@ -19,7 +19,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
     },
     types::block::payload::transaction::TransactionId,
     wallet::{Account, ClientOptions, Result, Wallet},

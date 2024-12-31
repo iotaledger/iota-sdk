@@ -5,25 +5,26 @@
 use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{
+        Client,
         api::{PreparedTransactionData, PreparedTransactionDataDto},
-        request_funds_from_faucet, Client,
+        request_funds_from_faucet,
     },
     types::{
+        TryFromDto,
         api::core::response::OutputWithMetadataResponse,
         block::{
+            Block, BlockDto,
             input::dto::UtxoInputDto,
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
                 AliasOutput, BasicOutput, FoundryOutput, NftOutput, Output, Rent,
+                dto::{OutputBuilderAmountDto, OutputDto},
             },
-            payload::{dto::MilestonePayloadDto, Payload},
-            Block, BlockDto,
+            payload::{Payload, dto::MilestonePayloadDto},
         },
-        TryFromDto,
     },
 };
 
-use crate::{method::ClientMethod, response::Response, Result};
+use crate::{Result, method::ClientMethod, response::Response};
 
 /// Listen to MQTT events
 #[cfg(feature = "mqtt")]

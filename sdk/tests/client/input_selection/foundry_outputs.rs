@@ -11,9 +11,9 @@ use iota_sdk::{
     types::block::{
         address::{Address, AliasAddress},
         output::{
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, AliasTransition, FoundryId, Output, OutputMetadata, SimpleTokenScheme,
             TokenId,
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
         },
         protocol::protocol_parameters,
         rand::{block::rand_block_id, output::rand_output_id},
@@ -22,9 +22,9 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ED25519_0,
     Build::{Alias, Basic, Foundry},
-    ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, TOKEN_SUPPLY,
+    TOKEN_SUPPLY, addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
 };
 
 #[test]

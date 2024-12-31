@@ -32,10 +32,10 @@ use core::ops::RangeInclusive;
 
 use derive_more::From;
 use packable::{
+    Packable, PackableExt,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable, PackableExt,
 };
 
 pub(crate) use self::{
@@ -67,7 +67,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
-use crate::types::block::{address::Address, semantic::ValidationContext, Error};
+use crate::types::block::{Error, address::Address, semantic::ValidationContext};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -527,7 +527,7 @@ pub mod dto {
         token_scheme::dto::{SimpleTokenSchemeDto, TokenSchemeDto},
         treasury::dto::TreasuryOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
+    use crate::types::{TryFromDto, ValidationParams, block::Error};
 
     #[derive(Clone, Debug, From, Deserialize)]
     pub enum OutputBuilderAmountDto {

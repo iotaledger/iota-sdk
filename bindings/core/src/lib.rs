@@ -12,7 +12,7 @@ mod response;
 use std::fmt::{Formatter, Result as FmtResult};
 
 use derivative::Derivative;
-use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
+use fern_logger::{LoggerConfig, LoggerOutputConfigBuilder, logger_init};
 pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
@@ -20,10 +20,10 @@ use iota_sdk::{
 };
 use serde::Deserialize;
 
-#[cfg(feature = "mqtt")]
-pub use self::method_handler::listen_mqtt;
 #[cfg(not(target_family = "wasm"))]
 pub use self::method_handler::CallMethod;
+#[cfg(feature = "mqtt")]
+pub use self::method_handler::listen_mqtt;
 pub use self::{
     error::{Error, Result},
     method::{AccountMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},

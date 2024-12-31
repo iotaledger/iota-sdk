@@ -14,10 +14,10 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic, Nft},
     ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
+    BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER,
+    Build::{Alias, Basic, Nft},
+    NFT_ID_0, NFT_ID_1, addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
 };
 
 #[test]
@@ -494,10 +494,12 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -586,10 +588,12 @@ fn alias_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| input.output.is_alias() && *input.output.as_alias().alias_id() == alias_id_1));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_alias() && *input.output.as_alias().alias_id() == alias_id_1)
+    );
     // Provided output + alias
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -641,10 +645,12 @@ fn alias_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| output.is_alias() && *output.as_alias().alias_id() == alias_id));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| output.is_alias() && *output.as_alias().alias_id() == alias_id)
+    );
 }
 
 #[test]
@@ -730,10 +736,12 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
+    );
     // Provided output + nft
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&inputs[2].output));
@@ -786,10 +794,12 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
+    );
 }
 
 #[test]

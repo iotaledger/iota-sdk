@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
+    U256,
     types::block::output::{
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
     },
     wallet::{
-        account::{OutputsToClaim, TransactionOptions},
         CreateNativeTokenParams, Result, SendNativeTokensParams, SendParams,
+        account::{OutputsToClaim, TransactionOptions},
     },
-    U256,
 };
 use pretty_assertions::assert_eq;
 
@@ -225,14 +225,14 @@ async fn claim_2_native_tokens() -> Result<()> {
     let tx = accounts[1]
         .send_native_tokens(
             [
-                SendNativeTokensParams::new(
-                    *accounts[0].addresses().await?[0].address(),
-                    [(create_tx_0.token_id, native_token_amount)],
-                )?,
-                SendNativeTokensParams::new(
-                    *accounts[0].addresses().await?[0].address(),
-                    [(create_tx_1.token_id, native_token_amount)],
-                )?,
+                SendNativeTokensParams::new(*accounts[0].addresses().await?[0].address(), [(
+                    create_tx_0.token_id,
+                    native_token_amount,
+                )])?,
+                SendNativeTokensParams::new(*accounts[0].addresses().await?[0].address(), [(
+                    create_tx_1.token_id,
+                    native_token_amount,
+                )])?,
             ],
             None,
         )

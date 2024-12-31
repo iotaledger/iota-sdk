@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
+    Error,
     parent::Parents,
     payload::milestone::{MilestoneEssence, MilestoneIndex, MilestoneOptions, MilestonePayload},
     protocol::protocol_parameters,
@@ -12,9 +13,8 @@ use iota_sdk::types::block::{
         parents::rand_parents,
         signature::rand_signature,
     },
-    Error,
 };
-use packable::{bounded::TryIntoBoundedU8Error, PackableExt};
+use packable::{PackableExt, bounded::TryIntoBoundedU8Error};
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -24,22 +24,24 @@ fn kind() {
 
 #[test]
 fn new_valid() {
-    assert!(MilestonePayload::new(
-        MilestoneEssence::new(
-            MilestoneIndex(0),
-            0,
-            protocol_parameters().protocol_version(),
-            rand_milestone_id(),
-            rand_parents(),
-            rand_merkle_root(),
-            rand_merkle_root(),
-            [],
-            MilestoneOptions::from_vec(vec![]).unwrap(),
+    assert!(
+        MilestonePayload::new(
+            MilestoneEssence::new(
+                MilestoneIndex(0),
+                0,
+                protocol_parameters().protocol_version(),
+                rand_milestone_id(),
+                rand_parents(),
+                rand_merkle_root(),
+                rand_merkle_root(),
+                [],
+                MilestoneOptions::from_vec(vec![]).unwrap(),
+            )
+            .unwrap(),
+            [rand_signature()]
         )
-        .unwrap(),
-        [rand_signature()]
-    )
-    .is_ok());
+        .is_ok()
+    );
 }
 
 #[test]

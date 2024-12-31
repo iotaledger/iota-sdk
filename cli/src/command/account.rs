@@ -5,27 +5,27 @@ use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use iota_sdk::{
+    U256,
     client::request_funds_from_faucet,
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
+            ConvertTo,
             address::{Address, Bech32Address, ToBech32Ext},
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, AliasOutput, BasicOutputBuilder, FoundryId,
-                NativeToken, NativeTokensBuilder, NftId, NftOutput, Output, OutputId, TokenId,
+                AliasId, AliasOutput, BasicOutputBuilder, FoundryId, NativeToken, NativeTokensBuilder, NftId,
+                NftOutput, Output, OutputId, TokenId, unlock_condition::AddressUnlockCondition,
             },
             payload::transaction::TransactionId,
-            ConvertTo,
         },
     },
     wallet::{
-        account::{
-            types::{AccountIdentifier, OutputData, Transaction},
-            Account, ConsolidationParams, FilterOptions, OutputsToClaim, SyncOptions, TransactionOptions,
-        },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
+        account::{
+            Account, ConsolidationParams, FilterOptions, OutputsToClaim, SyncOptions, TransactionOptions,
+            types::{AccountIdentifier, OutputData, Transaction},
+        },
     },
-    U256,
 };
 
 use crate::{error::Error, helper::to_utc_date_time, println_log_info};
@@ -737,13 +737,10 @@ pub async fn send_command(
         .with_return_address(return_address.map(ConvertTo::convert).transpose()?)
         .with_expiration(expiration)];
     let transaction = account
-        .send_with_params(
-            params,
-            TransactionOptions {
-                allow_micro_amount,
-                ..Default::default()
-            },
-        )
+        .send_with_params(params, TransactionOptions {
+            allow_micro_amount,
+            ..Default::default()
+        })
         .await?;
 
     println_log_info!(
@@ -782,13 +779,10 @@ pub async fn send_native_token_command(
         account.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = [SendNativeTokensParams::new(
-            address,
-            [(
-                TokenId::from_str(&token_id)?,
-                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )],
-        )?];
+        let outputs = [SendNativeTokensParams::new(address, [(
+            TokenId::from_str(&token_id)?,
+            U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+        )])?];
         account.send_native_tokens(outputs, None).await?
     };
 

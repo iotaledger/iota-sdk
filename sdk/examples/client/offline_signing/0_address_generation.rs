@@ -9,7 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result},
+    client::{Result, api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager},
     types::block::address::Bech32Address,
 };
 

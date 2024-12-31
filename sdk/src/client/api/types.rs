@@ -7,19 +7,19 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::secret::types::{InputSigningData, InputSigningDataDto},
     types::{
-        block::{
-            address::{dto::AddressDto, Address},
-            output::{dto::OutputDto, Output},
-            payload::{
-                transaction::{
-                    dto::{TransactionEssenceDto, TransactionPayloadDto},
-                    TransactionEssence,
-                },
-                TransactionPayload,
-            },
-            Error,
-        },
         TryFromDto, ValidationParams,
+        block::{
+            Error,
+            address::{Address, dto::AddressDto},
+            output::{Output, dto::OutputDto},
+            payload::{
+                TransactionPayload,
+                transaction::{
+                    TransactionEssence,
+                    dto::{TransactionEssenceDto, TransactionPayloadDto},
+                },
+            },
+        },
     },
     utils::serde::bip44::option_bip44,
 };

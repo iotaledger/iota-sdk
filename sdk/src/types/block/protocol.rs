@@ -4,10 +4,10 @@
 use alloc::string::String;
 use core::borrow::Borrow;
 
-use packable::{prefix::StringPrefix, Packable};
+use packable::{Packable, prefix::StringPrefix};
 
 use super::address::Hrp;
-use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
+use crate::types::block::{ConvertTo, Error, PROTOCOL_VERSION, helper::network_name_to_id, output::RentStructure};
 
 /// Defines the parameters of the protocol.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]

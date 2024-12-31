@@ -10,7 +10,7 @@ use hashbrown::HashMap;
 
 use crate::types::{
     api::plugins::participation::types::ParticipationEventId,
-    block::{output::OutputId, BlockId},
+    block::{BlockId, output::OutputId},
 };
 
 /// EventsResponse defines the response of a GET RouteParticipationEvents REST API call.
@@ -65,16 +65,13 @@ pub struct AddressOutputsResponse {
 impl OutputStatusResponse {
     pub fn mock() -> Self {
         Self {
-            participations: [(
-                ParticipationEventId::new([42; 32]),
-                TrackedParticipation {
-                    block_id: BlockId::new([23; 32]),
-                    amount: 100,
-                    start_milestone_index: 1000,
-                    end_milestone_index: 9999,
-                    answers: None,
-                },
-            )]
+            participations: [(ParticipationEventId::new([42; 32]), TrackedParticipation {
+                block_id: BlockId::new([23; 32]),
+                amount: 100,
+                start_milestone_index: 1000,
+                end_milestone_index: 9999,
+                answers: None,
+            })]
             .into(),
         }
     }

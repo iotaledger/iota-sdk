@@ -11,14 +11,14 @@ use core::ops::RangeInclusive;
 
 use hashbrown::HashMap;
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU16, prefix::VecPrefix, Packable, PackableExt};
+use packable::{Packable, PackableExt, bounded::BoundedU16, prefix::VecPrefix};
 
 pub use self::{migrated_funds_entry::MigratedFundsEntry, tail_transaction_hash::TailTransactionHash};
 use crate::types::block::{
-    output::OUTPUT_COUNT_RANGE,
-    payload::{milestone::MilestoneIndex, Payload, TreasuryTransactionPayload},
-    protocol::ProtocolParameters,
     Error,
+    output::OUTPUT_COUNT_RANGE,
+    payload::{Payload, TreasuryTransactionPayload, milestone::MilestoneIndex},
+    protocol::ProtocolParameters,
 };
 
 const MIGRATED_FUNDS_ENTRY_RANGE: RangeInclusive<u16> = OUTPUT_COUNT_RANGE;
@@ -155,11 +155,11 @@ pub(crate) mod dto {
     pub use super::migrated_funds_entry::dto::MigratedFundsEntryDto;
     use super::*;
     use crate::types::{
-        block::{
-            payload::dto::{PayloadDto, TreasuryTransactionPayloadDto},
-            Error,
-        },
         TryFromDto, ValidationParams,
+        block::{
+            Error,
+            payload::dto::{PayloadDto, TreasuryTransactionPayloadDto},
+        },
     };
 
     ///

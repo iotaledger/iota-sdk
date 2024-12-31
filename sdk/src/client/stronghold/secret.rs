@@ -8,7 +8,7 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
+    hashes::{Digest, blake2b::Blake2b256},
     keys::{
         bip39::{Mnemonic, MnemonicRef, Passphrase},
         bip44::Bip44,
@@ -21,18 +21,18 @@ use crypto::{
 };
 use instant::Duration;
 use iota_stronghold::{
-    procedures::{self, Curve, GetSecret, KeyType, Slip10DeriveInput},
     Location,
+    procedures::{self, Curve, GetSecret, KeyType, Slip10DeriveInput},
 };
 
 use super::{
-    common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
     StrongholdAdapter,
+    common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
 };
 use crate::{
     client::{
         api::PreparedTransactionData,
-        secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
+        secret::{GenerateAddressOptions, SecretManage, SecretManagerConfig, types::StrongholdDto},
         stronghold::Error,
     },
     types::block::{
@@ -494,8 +494,8 @@ impl StrongholdAdapter {
         Ok(())
     }
 
-    /// Execute [GetSecret](procedures::GetSecret) procedure in Stronghold to get the hex encoded seed, that's stored
-    /// when calling `store_mnemonic()`.
+    /// Execute [GetSecret] procedure in Stronghold to get the hex encoded seed, that's stored when calling
+    /// `store_mnemonic()`.
     pub async fn get_seed(&self) -> Result<String, Error> {
         let client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
 
@@ -607,10 +607,12 @@ mod tests {
         stronghold_adapter.clear_key().await;
 
         // Address generation returns an error when the key is cleared.
-        assert!(stronghold_adapter
-            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
-            .await
-            .is_err());
+        assert!(
+            stronghold_adapter
+                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+                .await
+                .is_err()
+        );
 
         stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 

@@ -10,8 +10,8 @@ use crate::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AliasOutputBuilder, AliasTransition,
-            FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output, OutputId, Rent, TokenId,
+            AliasOutputBuilder, AliasTransition, FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output,
+            OutputId, Rent, TokenId, unlock_condition::StorageDepositReturnUnlockCondition,
         },
     },
 };
@@ -27,11 +27,7 @@ pub(crate) fn sdruc_not_expired(output: &Output, current_time: u32) -> Option<&S
             .map_or(false, |expiration| current_time >= expiration.timestamp());
 
         // We only have to send the storage deposit return back if the output is not expired
-        if !expired {
-            Some(sdr)
-        } else {
-            None
-        }
+        if !expired { Some(sdr) } else { None }
     })
 }
 

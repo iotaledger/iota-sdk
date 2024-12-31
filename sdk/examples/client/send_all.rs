@@ -11,10 +11,10 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client,
-        Result,
+        Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
+        secret::SecretManager,
     },
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder},
+    types::block::output::{BasicOutputBuilder, NativeTokensBuilder, unlock_condition::AddressUnlockCondition},
 };
 
 #[tokio::main]

@@ -6,10 +6,10 @@ mod constants;
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
+        Client,
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Client,
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
     },
     wallet::{Account, ClientOptions, Result, Wallet},
 };

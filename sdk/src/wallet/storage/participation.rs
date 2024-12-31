@@ -148,11 +148,13 @@ mod tests {
     #[tokio::test]
     async fn set_get_cached_participation_output_status() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager
-            .get_cached_participation_output_status(0)
-            .await
-            .unwrap()
-            .is_empty());
+        assert!(
+            storage_manager
+                .get_cached_participation_output_status(0)
+                .await
+                .unwrap()
+                .is_empty()
+        );
 
         let outputs_participation = std::iter::once((
             OutputId::new(TransactionId::new([3; 32]), 0).unwrap(),

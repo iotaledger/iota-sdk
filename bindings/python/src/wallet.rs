@@ -4,17 +4,16 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_wallet_method as rust_call_wallet_method,
-    iota_sdk::wallet::{events::types::WalletEventType, Wallet as RustWallet},
-    Response, WalletMethod, WalletOptions,
+    Response, WalletMethod, WalletOptions, call_wallet_method as rust_call_wallet_method,
+    iota_sdk::wallet::{Wallet as RustWallet, events::types::WalletEventType},
 };
 use pyo3::{prelude::*, types::PyTuple};
 use tokio::sync::RwLock;
 
 use crate::{
+    SecretManager,
     client::Client,
     error::{Error, Result},
-    SecretManager,
 };
 
 #[pyclass]

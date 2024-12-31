@@ -17,9 +17,9 @@ use crate::{
         constants::{DEFAULT_MIN_QUORUM_SIZE, DEFAULT_QUORUM_THRESHOLD, DEFAULT_USER_AGENT, NODE_SYNC_INTERVAL},
         error::{Error, Result},
         node_manager::{
+            NodeManager,
             http_client::HttpClient,
             node::{Node, NodeAuth, NodeDto},
-            NodeManager,
         },
     },
     types::api::core::response::InfoResponse,

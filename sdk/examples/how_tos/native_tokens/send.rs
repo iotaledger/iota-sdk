@@ -12,9 +12,9 @@
 //! ```
 
 use iota_sdk::{
+    Wallet,
     types::block::address::Bech32Address,
     wallet::{Result, SendNativeTokensParams},
-    Wallet,
 };
 use primitive_types::U256;
 
@@ -63,10 +63,10 @@ async fn main() -> Result<()> {
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
-        let outputs = [SendNativeTokensParams::new(
-            bech32_address,
-            [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
-        )?];
+        let outputs = [SendNativeTokensParams::new(bech32_address, [(
+            *token_id,
+            U256::from(SEND_NATIVE_TOKEN_AMOUNT),
+        )])?];
 
         let transaction = account.send_native_tokens(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

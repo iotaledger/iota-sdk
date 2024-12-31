@@ -4,11 +4,11 @@
 //! Contains utilities to score Proof of Work.
 
 use crypto::{
-    encoding::ternary::{b1t6, Btrit, T1B1Buf, TritBuf, Trits, T1B1},
+    encoding::ternary::{Btrit, T1B1, T1B1Buf, TritBuf, Trits, b1t6},
     hashes::{
-        blake2b::Blake2b256,
-        ternary::{curl_p::CurlP, HASH_LENGTH},
         Digest,
+        blake2b::Blake2b256,
+        ternary::{HASH_LENGTH, curl_p::CurlP},
     },
 };
 

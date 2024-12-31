@@ -12,7 +12,7 @@
 //! cargo run --release --all-features --example destroy_foundry
 //! ```
 
-use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
+use iota_sdk::{Wallet, types::block::output::TokenId, wallet::Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {

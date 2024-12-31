@@ -7,8 +7,8 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::output::{AliasOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme},
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
         Error,
+        account::{Account, TransactionOptions, types::Transaction},
     },
 };
 

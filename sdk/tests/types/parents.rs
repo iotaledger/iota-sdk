@@ -5,11 +5,11 @@ use core::ops::Deref;
 use std::collections::BTreeSet;
 
 use iota_sdk::types::block::{
+    BlockId, Error,
     parent::Parents,
     rand::block::{rand_block_id, rand_block_ids},
-    BlockId, Error,
 };
-use packable::{bounded::TryIntoBoundedU8Error, error::UnpackError, prefix::VecPrefix, PackableExt};
+use packable::{PackableExt, bounded::TryIntoBoundedU8Error, error::UnpackError, prefix::VecPrefix};
 use pretty_assertions::assert_eq;
 
 #[test]

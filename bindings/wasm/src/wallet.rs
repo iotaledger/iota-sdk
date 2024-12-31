@@ -4,18 +4,17 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_wallet_method,
+    Response, WalletMethod, WalletOptions, call_wallet_method,
     iota_sdk::wallet::{
-        events::types::{Event, WalletEventType},
         Wallet,
+        events::types::{Event, WalletEventType},
     },
-    Response, WalletMethod, WalletOptions,
 };
 use tokio::sync::{
-    mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender},
     Mutex,
+    mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel},
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 
 use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
 

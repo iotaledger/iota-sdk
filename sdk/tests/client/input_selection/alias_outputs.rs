@@ -11,8 +11,8 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
             AliasId, AliasOutputBuilder, AliasTransition, Output, OutputMetadata,
+            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
         },
         protocol::protocol_parameters,
         rand::{block::rand_block_id, output::rand_output_id},
@@ -21,10 +21,10 @@ use iota_sdk::{
 use pretty_assertions::{assert_eq, assert_ne};
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
     ALIAS_ID_0, ALIAS_ID_1, ALIAS_ID_2, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ALIAS_2, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
+    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1,
+    Build::{Alias, Basic},
+    TOKEN_SUPPLY, addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
 };
 
 #[test]
@@ -1418,22 +1418,26 @@ fn two_aliases_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Alias(output) = output {
-            output.alias_id() == &alias_id_1
-        } else {
-            false
-        }));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Alias(output) = output {
-            output.alias_id() == &alias_id_2
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Alias(output) = output {
+                output.alias_id() == &alias_id_1
+            } else {
+                false
+            })
+    );
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Alias(output) = output {
+                output.alias_id() == &alias_id_2
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1475,14 +1479,16 @@ fn state_controller_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Alias(output) = output {
-            output.state_index() == inputs[0].output.as_alias().state_index() + 1
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Alias(output) = output {
+                output.state_index() == inputs[0].output.as_alias().state_index() + 1
+            } else {
+                false
+            })
+    )
 }
 
 #[test]
@@ -1636,14 +1642,16 @@ fn governor_sender_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| if let Output::Alias(output) = output {
-            output.state_index() == inputs[0].output.as_alias().state_index()
-        } else {
-            false
-        }))
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| if let Output::Alias(output) = output {
+                output.state_index() == inputs[0].output.as_alias().state_index()
+            } else {
+                false
+            })
+    )
 }
 
 #[test]

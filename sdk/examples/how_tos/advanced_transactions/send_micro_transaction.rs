@@ -12,8 +12,8 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::TransactionOptions, Result},
     Wallet,
+    wallet::{Result, account::TransactionOptions},
 };
 
 // The base coin micro amount to send
@@ -48,14 +48,10 @@ async fn main() -> Result<()> {
 
     // Send a micro transaction
     let transaction = account
-        .send(
-            SEND_MICRO_AMOUNT,
-            RECV_ADDRESS,
-            TransactionOptions {
-                allow_micro_amount: true,
-                ..Default::default()
-            },
-        )
+        .send(SEND_MICRO_AMOUNT, RECV_ADDRESS, TransactionOptions {
+            allow_micro_amount: true,
+            ..Default::default()
+        })
         .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 

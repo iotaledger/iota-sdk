@@ -6,10 +6,10 @@ use alloc::{string::String, vec::Vec};
 use serde::{Deserialize, Serialize};
 
 use crate::types::block::{
-    output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
-    payload::milestone::{option::dto::ReceiptMilestoneOptionDto, MilestoneId},
-    protocol::ProtocolParameters,
     BlockId,
+    output::{OutputId, OutputMetadata, OutputWithMetadata, dto::OutputDto},
+    payload::milestone::{MilestoneId, option::dto::ReceiptMilestoneOptionDto},
+    protocol::ProtocolParameters,
 };
 
 /// Response of GET /api/core/v2/info.

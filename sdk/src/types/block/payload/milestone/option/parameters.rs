@@ -6,9 +6,9 @@
 use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
-use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
+use packable::{Packable, bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
-use crate::types::block::{payload::milestone::MilestoneIndex, Error};
+use crate::types::block::{Error, payload::milestone::MilestoneIndex};
 
 pub(crate) type BinaryParametersLength = BoundedU16<
     { *ParametersMilestoneOption::BINARY_PARAMETERS_LENGTH_RANGE.start() },

@@ -7,13 +7,13 @@ use iota_sdk::{
         secret::{SecretManage, SecretManager},
     },
     types::{
-        block::{signature::dto::Ed25519SignatureDto, unlock::Unlock},
         TryFromDto,
+        block::{signature::dto::Ed25519SignatureDto, unlock::Unlock},
     },
 };
 use tokio::sync::RwLock;
 
-use crate::{method::SecretManagerMethod, response::Response, Result};
+use crate::{Result, method::SecretManagerMethod, response::Response};
 
 /// Call a secret manager method.
 pub(crate) async fn call_secret_manager_method_internal(

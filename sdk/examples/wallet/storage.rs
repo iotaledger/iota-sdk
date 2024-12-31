@@ -11,9 +11,9 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
     },
-    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
+    wallet::{Account, ClientOptions, Result, Wallet, account::types::AccountAddress},
 };
 
 // The maximum number of addresses to generate

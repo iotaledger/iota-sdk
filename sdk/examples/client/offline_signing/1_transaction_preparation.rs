@@ -12,8 +12,8 @@
 
 use iota_sdk::{
     client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
         Client, Result,
+        api::{PreparedTransactionData, PreparedTransactionDataDto},
     },
     types::block::address::Bech32Address,
 };

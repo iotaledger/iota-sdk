@@ -18,7 +18,7 @@ impl MigrationData for Migrate {
 impl Migration<crate::wallet::storage::Storage> for Migrate {
     async fn migrate(storage: &crate::wallet::storage::Storage) -> Result<()> {
         use crate::wallet::storage::constants::{
-            ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, WALLET_INDEXATION_KEY,
+            ACCOUNT_INDEXATION_KEY, ACCOUNTS_INDEXATION_KEY, WALLET_INDEXATION_KEY,
         };
 
         if let Some(account_indexes) = storage.get::<Vec<u32>>(ACCOUNTS_INDEXATION_KEY).await? {

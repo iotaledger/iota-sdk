@@ -9,8 +9,8 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, Result},
     Wallet,
+    wallet::{Result, account::SyncOptions},
 };
 
 #[tokio::main]

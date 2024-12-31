@@ -8,7 +8,7 @@ use core::ops::RangeInclusive;
 
 use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{Packable, bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
 use crate::types::block::{BlockId, Error};
 
