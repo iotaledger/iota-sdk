@@ -8,6 +8,11 @@ use std::collections::HashSet;
 use derivative::Derivative;
 #[cfg(feature = "ledger_nano")]
 use iota_sdk::client::secret::LedgerNanoStatus;
+#[cfg(feature = "wallet")]
+use iota_sdk::wallet::account::{
+    types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
+    AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
+};
 use iota_sdk::{
     client::{
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
@@ -37,10 +42,6 @@ use iota_sdk::{
             unlock::dto::UnlockDto,
             BlockDto, BlockId,
         },
-    },
-    wallet::account::{
-        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
-        AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
 use serde::Serialize;
@@ -300,6 +301,7 @@ pub enum Response {
     Panic(String),
 
     // wallet responses
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`CreateAccount`](crate::method::WalletMethod::CreateAccount),
     /// - [`GetAccount`](crate::method::WalletMethod::GetAccount)
@@ -307,12 +309,15 @@ pub enum Response {
     /// Response for:
     /// - [`GetAccountIndexes`](crate::method::WalletMethod::GetAccountIndexes)
     AccountIndexes(Vec<u32>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetAccounts`](crate::method::WalletMethod::GetAccounts)
     Accounts(Vec<AccountDetailsDto>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`Addresses`](crate::method::AccountMethod::Addresses)
     Addresses(Vec<AccountAddress>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
     AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
@@ -326,9 +331,11 @@ pub enum Response {
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetOutput`](crate::method::AccountMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`Outputs`](crate::method::AccountMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::AccountMethod::UnspentOutputs)
@@ -350,13 +357,16 @@ pub enum Response {
     /// - [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
     /// - [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
     PreparedTransaction(PreparedTransactionDataDto),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::AccountMethod::PrepareCreateNativeToken),
     PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
     Transaction(Option<Box<TransactionDto>>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
     /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
@@ -365,14 +375,17 @@ pub enum Response {
     /// Response for:
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
     SignedTransactionData(SignedTransactionDataDto),
+    #[cfg(feature = "wallet")]
     /// GenerateAddress response.
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
     GeneratedAccountAddresses(Vec<AccountAddress>),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
     /// - [`Sync`](crate::method::AccountMethod::Sync)
     Balance(Balance),
+    #[cfg(feature = "wallet")]
     /// Response for:
     /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
     /// - [`Send`](crate::method::AccountMethod::Send)

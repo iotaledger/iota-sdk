@@ -11,13 +11,17 @@ mod response;
 
 use std::fmt::{Formatter, Result as FmtResult};
 
+#[cfg(feature = "wallet")]
 use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
+use iota_sdk::client::secret::SecretManagerDto;
+#[cfg(feature = "wallet")]
 use iota_sdk::{
-    client::secret::{SecretManager, SecretManagerDto},
+    client::secret::SecretManager,
     wallet::{ClientOptions, Wallet},
 };
+#[cfg(feature = "wallet")]
 use serde::Deserialize;
 
 #[cfg(feature = "mqtt")]
@@ -26,9 +30,14 @@ pub use self::method_handler::listen_mqtt;
 pub use self::method_handler::CallMethod;
 pub use self::{
     error::{Error, Result},
-    method::{AccountMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
-    method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
+    method::{ClientMethod, SecretManagerMethod, UtilsMethod},
+    method_handler::{call_client_method, call_secret_manager_method, call_utils_method},
     response::Response,
+};
+#[cfg(feature = "wallet")]
+pub use self::{
+    method::{AccountMethod, WalletMethod},
+    method_handler::call_wallet_method,
 };
 
 pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error> {
@@ -37,6 +46,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
     logger_init(config)
 }
 
+#[cfg(feature = "wallet")]
 #[derive(Derivative, Deserialize, Default)]
 #[derivative(Debug)]
 #[serde(rename_all = "camelCase")]
@@ -48,6 +58,7 @@ pub struct WalletOptions {
     pub secret_manager: Option<SecretManagerDto>,
 }
 
+#[cfg(feature = "wallet")]
 impl WalletOptions {
     pub fn with_storage_path(mut self, storage_path: impl Into<Option<String>>) -> Self {
         self.storage_path = storage_path.into();

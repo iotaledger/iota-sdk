@@ -16,6 +16,7 @@ pub enum Error {
     /// Client errors.
     #[error("{0}")]
     Client(#[from] iota_sdk::client::Error),
+    #[cfg(feature = "wallet")]
     /// Wallet errors.
     #[error("{0}")]
     Wallet(#[from] iota_sdk::wallet::Error),

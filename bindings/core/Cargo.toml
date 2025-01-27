@@ -10,7 +10,7 @@ publish = false
 
 [dependencies]
 iota-sdk = { path = "../../sdk", default-features = false, features = [
-    "wallet",
+    "client",
     "tls",
 ] }
 
@@ -46,3 +46,4 @@ rocksdb = ["iota-sdk/rocksdb"]
 storage = ["iota-sdk/storage"]
 stronghold = ["iota-sdk/stronghold"]
 private_key_secret_manager = ["iota-sdk/private_key_secret_manager"]
+wallet = ["iota-sdk/wallet"]

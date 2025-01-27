@@ -24,3 +24,12 @@ codegen-units = 1
 inherits = "release"
 lto = true
 strip = "symbols"
+incremental = false
+
+[profile.wasm]
+codegen-units = 1
+inherits = "release"
+lto = true
+strip = "symbols"
+opt-level = "z"
+incremental = false
