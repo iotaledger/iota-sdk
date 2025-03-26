@@ -279,7 +279,9 @@ where
         for output_data in &outputs_to_claim {
             if let Some(native_tokens) = output_data.output.native_tokens() {
                 // Skip output if the max native tokens count would be exceeded
-                if get_new_native_token_count(&new_native_tokens, native_tokens)? > NativeTokens::COUNT_MAX.into() {
+                if get_new_native_token_count(&new_native_tokens, native_tokens)?
+                    > <u8 as Into<usize>>::into(NativeTokens::COUNT_MAX)
+                {
                     log::debug!("[OUTPUT_CLAIMING] skipping output to not exceed the max native tokens count");
                     continue;
                 }
@@ -362,7 +364,7 @@ where
                         if let Some(native_tokens) = output_data.output.native_tokens() {
                             // Skip input if the max native tokens count would be exceeded
                             if get_new_native_token_count(&new_native_tokens, native_tokens)?
-                                > NativeTokens::COUNT_MAX.into()
+                                > <u8 as Into<usize>>::into(NativeTokens::COUNT_MAX)
                             {
                                 log::debug!(
                                     "[OUTPUT_CLAIMING] skipping input to not exceed the max native tokens count"

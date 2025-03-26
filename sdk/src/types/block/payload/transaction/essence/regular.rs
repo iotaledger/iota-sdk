@@ -242,7 +242,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
 
             total_native_tokens.extend(native_tokens.iter().map(|n| n.token_id()));
 
-            if total_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
+            if total_native_tokens.len() > <u8 as Into<usize>>::into(NativeTokens::COUNT_MAX) {
                 return Err(Error::InvalidTransactionNativeTokensCount(
                     total_native_tokens.len() as u16
                 ));

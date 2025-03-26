@@ -164,7 +164,7 @@ impl AmountSelection {
 
                 selected_native_tokens.extend(nt.iter().map(|t| t.token_id()));
                 // Don't select input if the tx would end up with more than allowed native tokens.
-                if selected_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
+                if selected_native_tokens.len() > <u8 as Into<usize>>::into(NativeTokens::COUNT_MAX) {
                     continue;
                 } else {
                     // Update selected with NTs from this output.
@@ -348,9 +348,10 @@ impl InputSelection {
                 .flatten(),
         )
         .len()
-            > NativeTokens::COUNT_MAX.into();
+            > <u8 as Into<usize>>::into(NativeTokens::COUNT_MAX);
 
-        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into()
+        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len()
+            > <u16 as Into<usize>>::into(INPUT_COUNT_MAX)
             || potentially_too_many_native_tokens
         {
             // Clear before trying with reversed ordering.
@@ -367,7 +368,9 @@ impl InputSelection {
             }
         }
 
-        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into() {
+        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len()
+            > <u16 as Into<usize>>::into(INPUT_COUNT_MAX)
+        {
             return Err(Error::InvalidInputCount(
                 self.selected_inputs.len() + amount_selection.newly_selected_inputs.len(),
             ));
@@ -446,7 +449,9 @@ impl InputSelection {
             );
             log::debug!("Triggering another amount round as non-basic outputs need to be transitioned first");
 
-            if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() <= INPUT_COUNT_MAX.into() {
+            if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len()
+                <= <u16 as Into<usize>>::into(INPUT_COUNT_MAX)
+            {
                 self.available_inputs
                     .retain(|input| !amount_selection.newly_selected_inputs.contains_key(input.output_id()));
 

@@ -148,7 +148,7 @@ impl<'a> ClientBlockBuilder<'a> {
     pub fn with_input(mut self, input: UtxoInput) -> Result<Self> {
         let inputs = self.inputs.get_or_insert_with(Vec::new);
         // 128 is the maximum input amount
-        if inputs.len() >= INPUT_COUNT_MAX as _ {
+        if inputs.len() >= <u16 as Into<usize>>::into(INPUT_COUNT_MAX) {
             return Err(Error::ConsolidationRequired(inputs.len()));
         }
         inputs.push(input);
