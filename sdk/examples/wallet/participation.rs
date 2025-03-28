@@ -66,6 +66,7 @@ async fn main() -> Result<()> {
         .register_participation_events(&ParticipationEventRegistrationOptions {
             node,
             // We ignore this particular event
+            #[allow(clippy::const_is_empty)]
             events_to_ignore: (!IGNORED_PARTICIPATION_EVENT_ID.is_empty())
                 .then_some(vec![IGNORED_PARTICIPATION_EVENT_ID.parse()?]),
             // We register all others. If you want to register only particular events provide their ids with a
@@ -102,6 +103,7 @@ async fn main() -> Result<()> {
     ////////////////////////////////////////////////
     // deregister an event
     ////////////////////////////////////////////////
+    #[allow(clippy::const_is_empty)]
     if !DEREGISTERED_PARTICIPATION_EVENT.is_empty() {
         account
             .deregister_participation_event(&DEREGISTERED_PARTICIPATION_EVENT.parse()?)

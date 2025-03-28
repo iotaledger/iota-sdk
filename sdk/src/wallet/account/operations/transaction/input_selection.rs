@@ -61,9 +61,9 @@ where
         // Prevent consuming the voting output if not actually wanted
         #[cfg(feature = "participation")]
         if let Some(voting_output) = &voting_output {
-            let required = mandatory_inputs.as_ref().map_or(false, |mandatory_inputs| {
-                mandatory_inputs.contains(&voting_output.output_id)
-            });
+            let required = mandatory_inputs
+                .as_ref()
+                .is_some_and(|mandatory_inputs| mandatory_inputs.contains(&voting_output.output_id));
             if !required {
                 forbidden_inputs.insert(voting_output.output_id);
             }

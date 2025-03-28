@@ -112,7 +112,7 @@ impl Wallet {
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
-        let ignore_backup_values = ignore_if_coin_type_mismatch.map_or(false, |ignore| {
+        let ignore_backup_values = ignore_if_coin_type_mismatch.is_some_and(|ignore| {
             if ignore {
                 read_coin_type.map_or(true, |read_coin_type| {
                     self.coin_type.load(Ordering::Relaxed) != read_coin_type
@@ -196,8 +196,7 @@ impl Wallet {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    self
-                        .storage_options
+                    self.storage_options
                         .path
                         .clone()
                         .into_os_string()
@@ -294,7 +293,7 @@ impl Wallet<StrongholdSecretManager> {
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
-        let ignore_backup_values = ignore_if_coin_type_mismatch.map_or(false, |ignore| {
+        let ignore_backup_values = ignore_if_coin_type_mismatch.is_some_and(|ignore| {
             if ignore {
                 read_coin_type.map_or(true, |read_coin_type| {
                     self.coin_type.load(Ordering::Relaxed) != read_coin_type
@@ -369,8 +368,7 @@ impl Wallet<StrongholdSecretManager> {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    self
-                        .storage_options
+                    self.storage_options
                         .path
                         .clone()
                         .into_os_string()
