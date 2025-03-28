@@ -3,6 +3,9 @@
 
 //! Core library for iota-sdk bindings
 
+// to fix linting errors from `derivative::Derivative` usage
+#![allow(clippy::needless_lifetimes)]
+
 mod error;
 mod method;
 mod method_handler;
