@@ -142,7 +142,7 @@ impl InputSelection {
                     input
                         .output
                         .native_tokens()
-                        .map_or(false, |native_tokens| native_tokens.contains(diff.token_id()))
+                        .is_some_and(|native_tokens| native_tokens.contains(diff.token_id()))
                 });
 
                 for input in inputs {

@@ -428,14 +428,14 @@ impl UnlockConditions {
     #[inline(always)]
     pub fn is_time_locked(&self, milestone_timestamp: u32) -> bool {
         self.timelock()
-            .map_or(false, |timelock| milestone_timestamp < timelock.timestamp())
+            .is_some_and(|timelock| milestone_timestamp < timelock.timestamp())
     }
 
     /// Returns whether an expiration exists and is expired.
     #[inline(always)]
     pub fn is_expired(&self, milestone_timestamp: u32) -> bool {
         self.expiration()
-            .map_or(false, |expiration| milestone_timestamp >= expiration.timestamp())
+            .is_some_and(|expiration| milestone_timestamp >= expiration.timestamp())
     }
 }
 

@@ -337,7 +337,7 @@ where
             balance.native_tokens.push(NativeTokensBalance {
                 token_id: *native_token.token_id(),
                 total: native_token.amount(),
-                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+                available: native_token.amount() - locked_native_token_amount.map_or_else(|| U256::from(0u8), |v| *v),
                 metadata,
             })
         }

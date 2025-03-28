@@ -46,7 +46,7 @@ where
                 let remainder = account_details
                     .transactions
                     .get(output_with_meta.metadata().transaction_id())
-                    .map_or(false, |tx| !tx.incoming);
+                    .is_some_and(|tx| !tx.incoming);
 
                 // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
                 let chain = Bip44::new(account_details.coin_type)

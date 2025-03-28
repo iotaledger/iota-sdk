@@ -9,7 +9,8 @@
     clippy::redundant_pub_crate,
     clippy::missing_const_for_fn,
     clippy::significant_drop_in_scrutinee,
-    clippy::significant_drop_tightening
+    clippy::significant_drop_tightening,
+    clippy::empty_docs
 )]
 // Allowed in Cargo.toml for examples
 #![deny(clippy::expect_fun_call, clippy::single_element_loop)]
