@@ -31,7 +31,7 @@ const SINGLE_UNLOCK_LENGTH: usize = 1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH 
 // Type + reference index
 const REFERENCE_ALIAS_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 
-impl<'a> ClientBlockBuilder<'a> {
+impl ClientBlockBuilder<'_> {
     /// Prepare a transaction
     pub async fn prepare_transaction(&self) -> Result<PreparedTransactionData> {
         log::debug!("[prepare_transaction]");
@@ -151,6 +151,7 @@ pub fn validate_transaction_payload_length(transaction_payload: &TransactionPayl
 }
 
 /// Verifies that the transaction essence doesn't exceed the block size limit with 8 parents.
+///
 /// Assuming one signature unlock and otherwise reference/alias/nft unlocks. `validate_transaction_payload_length()`
 /// should later be used to check the length again with the correct unlocks.
 pub fn validate_regular_transaction_essence_length(

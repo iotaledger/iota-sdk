@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-impl<'a> ClientBlockBuilder<'a> {
+impl ClientBlockBuilder<'_> {
     pub(crate) async fn get_inputs_for_sender_and_issuer(
         &self,
         utxo_chain_inputs: &[InputSigningData],

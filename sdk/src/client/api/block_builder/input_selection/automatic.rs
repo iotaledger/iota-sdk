@@ -23,7 +23,7 @@ use crate::{
     utils::unix_timestamp_now,
 };
 
-impl<'a> ClientBlockBuilder<'a> {
+impl ClientBlockBuilder<'_> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,

@@ -112,7 +112,7 @@ impl fmt::Debug for Ed25519Signature {
         #[repr(transparent)]
         struct UnquotedStr<'a>(&'a str);
 
-        impl<'a> fmt::Debug for UnquotedStr<'a> {
+        impl fmt::Debug for UnquotedStr<'_> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "{}", self.0)
             }
