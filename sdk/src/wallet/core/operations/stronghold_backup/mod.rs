@@ -196,7 +196,7 @@ impl Wallet {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    &self
+                    self
                         .storage_options
                         .path
                         .clone()
@@ -369,7 +369,7 @@ impl Wallet<StrongholdSecretManager> {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    &self
+                    self
                         .storage_options
                         .path
                         .clone()
