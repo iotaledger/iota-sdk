@@ -10,20 +10,20 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client, Result,
+        Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager,
     },
     types::block::{
         address::{AliasAddress, ToBech32Ext},
         output::{
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, NftId,
+            NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, NftId,
-            NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
         payload::Payload,
     },

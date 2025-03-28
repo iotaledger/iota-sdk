@@ -12,8 +12,8 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::TransactionOptions, Result},
     Wallet,
+    wallet::{Result, account::TransactionOptions},
 };
 
 // The base coin micro amount to send

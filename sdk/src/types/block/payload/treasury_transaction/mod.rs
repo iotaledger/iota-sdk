@@ -4,10 +4,10 @@
 //! Module describing the treasury payload.
 
 use crate::types::block::{
+    Error,
     input::{Input, TreasuryInput},
     output::{Output, TreasuryOutput},
     protocol::ProtocolParameters,
-    Error,
 };
 
 /// [`TreasuryTransactionPayload`] represents a transaction which moves funds from the treasury.
@@ -71,12 +71,12 @@ pub mod dto {
 
     use super::*;
     use crate::types::{
+        TryFromDto, ValidationParams,
         block::{
+            Error,
             input::dto::{InputDto, TreasuryInputDto},
             output::dto::{OutputDto, TreasuryOutputDto},
-            Error,
         },
-        TryFromDto, ValidationParams,
     };
 
     /// The payload type to define a treasury transaction.

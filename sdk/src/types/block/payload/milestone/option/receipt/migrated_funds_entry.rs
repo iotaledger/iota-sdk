@@ -4,7 +4,7 @@
 use packable::Packable;
 
 use crate::types::block::{
-    address::Address, payload::milestone::option::receipt::TailTransactionHash, protocol::ProtocolParameters, Error,
+    Error, address::Address, payload::milestone::option::receipt::TailTransactionHash, protocol::ProtocolParameters,
 };
 
 /// Describes funds which were migrated from a legacy network.
@@ -81,8 +81,8 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{address::dto::AddressDto, Error},
         TryFromDto, ValidationParams,
+        block::{Error, address::dto::AddressDto},
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

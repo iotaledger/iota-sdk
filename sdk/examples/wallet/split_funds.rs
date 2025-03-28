@@ -14,10 +14,10 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
     },
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    wallet::{account::types::AccountAddress, Account, ClientOptions, Result, Wallet},
+    types::block::output::{BasicOutputBuilder, unlock_condition::AddressUnlockCondition},
+    wallet::{Account, ClientOptions, Result, Wallet, account::types::AccountAddress},
 };
 
 // The base coin amount to send

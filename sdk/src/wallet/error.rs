@@ -4,8 +4,8 @@
 use std::fmt::Debug;
 
 use serde::{
-    ser::{SerializeMap, Serializer},
     Serialize,
+    ser::{SerializeMap, Serializer},
 };
 
 use crate::types::block::{address::Bech32Address, payload::transaction::TransactionId};

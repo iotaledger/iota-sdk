@@ -4,15 +4,15 @@
 use crypto::keys::bip39::Mnemonic;
 #[cfg(feature = "storage")]
 use iota_sdk::{
+    Url,
     client::constants::SHIMMER_COIN_TYPE,
     client::node_manager::node::{Node, NodeDto},
     wallet::Error,
-    Url,
 };
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
     },
     types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, Wallet},
@@ -21,7 +21,7 @@ use pretty_assertions::assert_eq;
 
 #[cfg(feature = "storage")]
 use crate::wallet::common::NODE_OTHER;
-use crate::wallet::common::{make_wallet, setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
+use crate::wallet::common::{DEFAULT_MNEMONIC, NODE_LOCAL, make_wallet, setup, tear_down};
 
 #[cfg(feature = "storage")]
 #[tokio::test]

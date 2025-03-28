@@ -3,7 +3,7 @@
 
 use iota_sdk::types::block::{
     address::ToBech32Ext,
-    payload::{transaction::TransactionEssence, Payload},
+    payload::{Payload, transaction::TransactionEssence},
 };
 use pretty_assertions::assert_eq;
 

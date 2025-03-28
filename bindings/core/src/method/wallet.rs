@@ -8,22 +8,22 @@ use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
+    Url,
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
     types::block::address::Hrp,
     wallet::{
-        account::{
-            types::{AccountAddress, AccountIdentifier},
-            SyncOptions,
-        },
         ClientOptions,
+        account::{
+            SyncOptions,
+            types::{AccountAddress, AccountIdentifier},
+        },
     },
-    Url,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::method::account::AccountMethod;
 #[cfg(feature = "stronghold")]
 use crate::OmittedDebug;
+use crate::method::account::AccountMethod;
 
 /// The methods that can be sent to the actor.
 #[derive(Clone, Derivative, Serialize, Deserialize)]

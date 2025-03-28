@@ -3,7 +3,7 @@
 
 use derive_more::From;
 
-use crate::types::block::{address::Address, Error};
+use crate::types::block::{Error, address::Address};
 
 /// Defines a unix time until which only Address, defined in Address Unlock Condition, is allowed to unlock the output.
 /// After or at the unix time, only Return Address can unlock it.
@@ -69,7 +69,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{address::dto::AddressDto, Error};
+    use crate::types::block::{Error, address::dto::AddressDto};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]

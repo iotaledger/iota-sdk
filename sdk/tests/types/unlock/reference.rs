@@ -1,8 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{unlock::ReferenceUnlock, Error};
-use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
+use iota_sdk::types::block::{Error, unlock::ReferenceUnlock};
+use packable::{PackableExt, bounded::InvalidBoundedU16, error::UnpackError};
 use pretty_assertions::assert_eq;
 
 #[test]

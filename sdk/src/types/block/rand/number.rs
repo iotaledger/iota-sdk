@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use rand::{
-    distributions::{
-        uniform::{SampleRange, SampleUniform},
-        Distribution, Standard,
-    },
     Rng,
+    distributions::{
+        Distribution, Standard,
+        uniform::{SampleRange, SampleUniform},
+    },
 };
 
 /// Generates a random number.

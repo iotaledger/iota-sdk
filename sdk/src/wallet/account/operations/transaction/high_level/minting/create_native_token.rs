@@ -12,13 +12,13 @@ use crate::{
     types::block::{
         address::AliasAddress,
         output::{
-            feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId,
-            AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
+            AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId,
+            TokenScheme, feature::MetadataFeature, unlock_condition::ImmutableAliasAddressUnlockCondition,
         },
     },
     wallet::account::{
-        types::{Transaction, TransactionDto},
         Account, TransactionOptions,
+        types::{Transaction, TransactionDto},
     },
 };
 

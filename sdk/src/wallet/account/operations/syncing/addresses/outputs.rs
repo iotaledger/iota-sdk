@@ -7,7 +7,7 @@ use crate::{
     client::secret::SecretManage,
     wallet::{
         account::{
-            constants::PARALLEL_REQUESTS_AMOUNT, types::address::AddressWithUnspentOutputs, Account, OutputData,
+            Account, OutputData, constants::PARALLEL_REQUESTS_AMOUNT, types::address::AddressWithUnspentOutputs,
         },
         task,
     },

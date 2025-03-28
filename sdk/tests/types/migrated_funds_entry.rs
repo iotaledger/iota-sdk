@@ -4,13 +4,13 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
+    Error,
     address::{Address, Ed25519Address},
     payload::milestone::option::MigratedFundsEntry,
     protocol::protocol_parameters,
     rand::receipt::rand_tail_transaction_hash,
-    Error,
 };
-use packable::{error::UnpackError, PackableExt};
+use packable::{PackableExt, error::UnpackError};
 use pretty_assertions::assert_eq;
 
 const ED25519_ADDRESS: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";

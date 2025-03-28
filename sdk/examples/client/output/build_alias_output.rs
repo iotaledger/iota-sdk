@@ -13,9 +13,9 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
+            AliasId, AliasOutputBuilder,
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder,
         },
     },
 };

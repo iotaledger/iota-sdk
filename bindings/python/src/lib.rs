@@ -11,8 +11,8 @@ mod wallet;
 use std::sync::Mutex;
 
 use iota_sdk_bindings_core::{
-    call_utils_method as rust_call_utils_method, init_logger as rust_init_logger,
-    iota_sdk::client::stronghold::StrongholdAdapter, UtilsMethod,
+    UtilsMethod, call_utils_method as rust_call_utils_method, init_logger as rust_init_logger,
+    iota_sdk::client::stronghold::StrongholdAdapter,
 };
 use once_cell::sync::OnceCell;
 use pyo3::{prelude::*, wrap_pyfunction};

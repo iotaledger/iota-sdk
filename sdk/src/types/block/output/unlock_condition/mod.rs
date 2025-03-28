@@ -15,12 +15,12 @@ use bitflags::bitflags;
 use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{
+    Packable,
     bounded::BoundedU8,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable,
 };
 
 pub use self::{
@@ -29,7 +29,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, Error};
+use crate::types::block::{Error, address::Address, create_bitflags, protocol::ProtocolParameters};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -510,7 +510,7 @@ pub mod dto {
         storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto, timelock::dto::TimelockUnlockConditionDto,
     };
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
+    use crate::types::{TryFromDto, ValidationParams, block::Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum UnlockConditionDto {

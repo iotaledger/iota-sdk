@@ -3,11 +3,11 @@
 
 use iota_sdk::{
     types::block::output::{
+        BasicOutputBuilder, UnlockCondition,
         feature::SenderFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, UnlockCondition,
     },
-    wallet::{account::types::Balance, Result},
+    wallet::{Result, account::types::Balance},
 };
 use pretty_assertions::assert_eq;
 

@@ -5,8 +5,8 @@
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
-    types::block::{payload::Payload, BlockId},
-    wallet::account::{operations::transaction::TransactionPayload, Account},
+    types::block::{BlockId, payload::Payload},
+    wallet::account::{Account, operations::transaction::TransactionPayload},
 };
 
 impl<S: 'static + SecretManage> Account<S>

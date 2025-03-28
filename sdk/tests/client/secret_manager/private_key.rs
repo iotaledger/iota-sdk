@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::{
+    Result,
     api::GetAddressesOptions,
     constants::SHIMMER_TESTNET_BECH32_HRP,
-    secret::{private_key::PrivateKeySecretManager, SecretManager},
-    Result,
+    secret::{SecretManager, private_key::PrivateKeySecretManager},
 };
 use pretty_assertions::assert_eq;
 

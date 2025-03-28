@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
+use crate::client::secret::{DowncastSecretManager, ledger_nano::LedgerSecretManager};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
     types::block::address::Bech32Address,
-    wallet::account::{types::address::AccountAddress, Account},
+    wallet::account::{Account, types::address::AccountAddress},
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::{

@@ -3,7 +3,7 @@
 
 use std::{path::Path, sync::Arc};
 
-use rocksdb::{DBCompressionType, Options, DB};
+use rocksdb::{DB, DBCompressionType, Options};
 use tokio::sync::Mutex;
 
 use crate::client::storage::StorageAdapter;

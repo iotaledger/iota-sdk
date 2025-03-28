@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
+    client::{Client, Result, node_api::indexer::query_parameters::QueryParameter},
     types::block::address::Bech32Address,
 };
 

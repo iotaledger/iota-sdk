@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
+use crypto::hashes::{Digest, blake2b::Blake2b256};
 use derive_more::{Deref, From};
 use packable::PackableExt;
 

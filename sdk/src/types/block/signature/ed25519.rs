@@ -4,17 +4,17 @@
 use core::{fmt, ops::Deref};
 
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
+    hashes::{Digest, blake2b::Blake2b256},
     signatures::ed25519::{PublicKey, PublicKeyBytes, Signature},
 };
 use packable::{
+    Packable,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
 };
 
-use crate::types::block::{address::Ed25519Address, Error};
+use crate::types::block::{Error, address::Ed25519Address};
 
 /// An Ed25519 signature.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]

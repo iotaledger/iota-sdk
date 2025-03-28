@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
+    Block, Error,
     payload::tagged_data::TaggedDataPayload,
     rand::bytes::{rand_bytes, rand_bytes_array},
-    Block, Error,
 };
 use packable::{
-    bounded::{TryIntoBoundedU32Error, TryIntoBoundedU8Error},
-    error::UnpackError,
     PackableExt,
+    bounded::{TryIntoBoundedU8Error, TryIntoBoundedU32Error},
+    error::UnpackError,
 };
 use pretty_assertions::assert_eq;
 

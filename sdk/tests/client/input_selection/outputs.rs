@@ -10,9 +10,9 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
-    Build::{Alias, Basic},
     ALIAS_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    Build::{Alias, Basic},
+    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
 };
 
 #[test]

@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk_bindings_core::{call_utils_method as rust_call_utils_method, UtilsMethod};
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use iota_sdk_bindings_core::{UtilsMethod, call_utils_method as rust_call_utils_method};
+use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 
 /// Handles a method, returns the response as a JSON-encoded string.
 ///

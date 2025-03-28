@@ -16,7 +16,7 @@ use std::{
     time::Duration,
 };
 
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Value;
 
 use self::{http_client::HttpClient, node::Node};

@@ -15,15 +15,15 @@ use iota_sdk::{
         secret::SecretManagerDto,
     },
     types::block::{
+        BlockDto, BlockId,
         address::{Bech32Address, Hrp},
         output::{
+            AliasId, FoundryId, NativeToken, NftId, OutputId,
             dto::{OutputDto, TokenSchemeDto},
             feature::dto::FeatureDto,
             unlock_condition::dto::UnlockConditionDto,
-            AliasId, FoundryId, NativeToken, NftId, OutputId,
         },
         payload::{dto::PayloadDto, milestone::MilestoneId, transaction::TransactionId},
-        BlockDto, BlockId,
     },
 };
 use serde::{Deserialize, Serialize};
