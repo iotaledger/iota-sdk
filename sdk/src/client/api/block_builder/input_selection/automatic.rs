@@ -213,7 +213,7 @@ impl ClientBlockBuilder<'_> {
                             cached_error.replace(Error::from(err));
                             continue;
                         }
-                        Err(err @ InputSelectionError::NoAvailableInputsProvided { .. }) => {
+                        Err(err @ InputSelectionError::NoAvailableInputsProvided) => {
                             cached_error.replace(Error::from(err));
                             continue;
                         }

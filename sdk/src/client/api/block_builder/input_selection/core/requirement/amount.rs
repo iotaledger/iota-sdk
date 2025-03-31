@@ -253,7 +253,7 @@ impl InputSelection {
                     self.automatically_transitioned
                         .get(chain_id)
                         .is_some_and(|alias_transition| {
-                            alias_transition.map_or(true, |alias_transition| alias_transition.is_state())
+                            alias_transition.is_none_or(|alias_transition| alias_transition.is_state())
                         })
                 })
                 .unwrap_or(false)

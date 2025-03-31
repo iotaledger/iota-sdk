@@ -14,7 +14,7 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::{api::core::response::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
+    types::block::payload::transaction::dto::TransactionPayloadDto,
     wallet::{
         account::types::OutputDataDto,
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
@@ -155,13 +155,7 @@ where
                         WalletEvent::NewOutput(Box::new(NewOutputEvent {
                             output: OutputDataDto::from(&output_data),
                             transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
-                            transaction_inputs: transaction.as_ref().map(|tx| {
-                                tx.inputs
-                                    .clone()
-                                    .into_iter()
-                                    .map(OutputWithMetadataResponse::from)
-                                    .collect()
-                            }),
+                            transaction_inputs: transaction.as_ref().map(|tx| tx.inputs.clone()),
                         })),
                     )
                     .await;
