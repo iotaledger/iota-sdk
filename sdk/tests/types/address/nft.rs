@@ -4,12 +4,12 @@
 use std::str::FromStr;
 
 use iota_sdk::types::block::{
-    Error,
     address::{
-        Address, Bech32Address, NftAddress, ToBech32Ext,
         dto::{AddressDto, NftAddressDto},
+        Address, Bech32Address, NftAddress, ToBech32Ext,
     },
     output::NftId,
+    Error,
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;

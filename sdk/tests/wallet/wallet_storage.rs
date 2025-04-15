@@ -5,7 +5,7 @@ use std::{fs, io, path::Path};
 
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::stronghold::StrongholdAdapter;
-use iota_sdk::{Wallet, wallet::Result};
+use iota_sdk::{wallet::Result, Wallet};
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{setup, tear_down};

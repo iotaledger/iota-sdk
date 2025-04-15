@@ -9,18 +9,18 @@
 //! ```
 
 use iota_sdk::{
-    client::{Client, Result, api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::{
         address::AliasAddress,
         output::{
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, NftId,
-            NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, NftId,
+            NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
         payload::Payload,
     },

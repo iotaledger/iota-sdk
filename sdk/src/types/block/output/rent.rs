@@ -4,20 +4,20 @@
 use core::mem::size_of;
 
 use packable::{
-    Packable,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
+    Packable,
 };
 
 use crate::types::block::{
-    BlockId, Error,
     address::{Address, Ed25519Address},
     output::{
-        BasicOutputBuilder, NativeTokens, Output, OutputId,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
+        BasicOutputBuilder, NativeTokens, Output, OutputId,
     },
     payload::milestone::MilestoneIndex,
+    BlockId, Error,
 };
 
 const DEFAULT_BYTE_COST: u32 = 100;

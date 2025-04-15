@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::hashes::{Digest, blake2b::Blake2b256};
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 
 /// Hashes a string network name to a digit network ID.
 pub fn network_name_to_id(network_name: &str) -> u64 {

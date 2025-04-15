@@ -6,8 +6,8 @@ use core::str::FromStr;
 use derive_more::{AsRef, Deref, From};
 
 use crate::types::block::{
-    Error,
     output::{NftId, OutputId},
+    Error,
 };
 
 /// An NFT address.

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{Result, SendParams, account::ConsolidationParams};
+use iota_sdk::wallet::{account::ConsolidationParams, Result, SendParams};
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};

@@ -9,8 +9,8 @@ use iota_sdk::{
         output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
     },
     wallet::{
-        MintNftParams, Result,
         account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
+        MintNftParams, Result,
     },
 };
 use pretty_assertions::assert_eq;

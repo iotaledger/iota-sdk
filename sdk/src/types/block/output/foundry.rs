@@ -5,32 +5,31 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use core::cmp::Ordering;
 
 use packable::{
-    Packable,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
+    Packable,
 };
 use primitive_types::U256;
 
 use super::verify_output_amount_packable;
 use crate::types::{
-    ValidationParams,
     block::{
-        Error,
         address::{Address, AliasAddress},
         output::{
-            ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
-            StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
-            feature::{Feature, FeatureFlags, Features, verify_allowed_features},
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
-                UnlockCondition, UnlockConditionFlags, UnlockConditions, verify_allowed_unlock_conditions,
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount,
+            verify_output_amount, ChainId, FoundryId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+            Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
         semantic::{ConflictReason, ValidationContext},
         unlock::Unlock,
+        Error,
     },
+    ValidationParams,
 };
 
 ///
@@ -622,14 +621,14 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        TryFromDto,
         block::{
-            Error,
             output::{
                 dto::OutputBuilderAmountDto, feature::dto::FeatureDto, token_scheme::dto::TokenSchemeDto,
                 unlock_condition::dto::UnlockConditionDto,
             },
+            Error,
         },
+        TryFromDto,
     };
 
     /// Describes a foundry output that is controlled by an alias.
@@ -763,11 +762,10 @@ mod tests {
 
     use super::*;
     use crate::types::{
-        TryFromDto,
         block::{
             output::{
-                FoundryId, SimpleTokenScheme, TokenId, dto::OutputDto,
-                unlock_condition::ImmutableAliasAddressUnlockCondition,
+                dto::OutputDto, unlock_condition::ImmutableAliasAddressUnlockCondition, FoundryId, SimpleTokenScheme,
+                TokenId,
             },
             protocol::protocol_parameters,
             rand::{
@@ -778,6 +776,7 @@ mod tests {
                 },
             },
         },
+        TryFromDto,
     };
 
     #[test]

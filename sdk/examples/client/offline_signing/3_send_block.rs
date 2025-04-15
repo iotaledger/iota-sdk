@@ -12,12 +12,12 @@
 
 use iota_sdk::{
     client::{
+        api::{verify_semantic, SignedTransactionData, SignedTransactionDataDto},
         Client, Error, Result,
-        api::{SignedTransactionData, SignedTransactionDataDto, verify_semantic},
     },
     types::{
-        TryFromDto,
         block::{payload::Payload, semantic::ConflictReason},
+        TryFromDto,
     },
 };
 

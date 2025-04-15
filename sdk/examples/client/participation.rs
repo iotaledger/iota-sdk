@@ -15,12 +15,12 @@
 
 use iota_sdk::{
     client::{
-        Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client, Result,
     },
     types::{
-        api::plugins::participation::types::{PARTICIPATION_TAG, Participation, ParticipationEventId, Participations},
-        block::output::{BasicOutputBuilder, unlock_condition::AddressUnlockCondition},
+        api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
+        block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
 };
 

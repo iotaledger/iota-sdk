@@ -10,8 +10,8 @@
 
 use iota_sdk::{
     client::{
-        Client, Result,
         mqtt::{BrokerOptions, MqttEvent, MqttPayload, Topic},
+        Client, Result,
     },
     types::block::address::Bech32Address,
 };

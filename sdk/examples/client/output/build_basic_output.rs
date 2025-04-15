@@ -13,12 +13,12 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            BasicOutputBuilder,
             feature::{MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
+            BasicOutputBuilder,
         },
     },
 };

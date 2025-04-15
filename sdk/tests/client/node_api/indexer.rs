@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::{Result, api::GetAddressesOptions},
+    client::{api::GetAddressesOptions, Result},
     types::block::{
         address::AliasAddress,
         output::{
-            AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder, SimpleTokenScheme,
-            TokenScheme,
             unlock_condition::{
                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
                 StateControllerAddressUnlockCondition, UnlockCondition,
             },
+            AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder, SimpleTokenScheme,
+            TokenScheme,
         },
     },
 };

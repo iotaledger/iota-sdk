@@ -6,15 +6,15 @@
 mod essence;
 mod transaction_id;
 
-use crypto::hashes::{Digest, blake2b::Blake2b256};
-use packable::{Packable, PackableExt, error::UnpackError, packer::Packer, unpacker::Unpacker};
+use crypto::hashes::{blake2b::Blake2b256, Digest};
+use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
 
 pub(crate) use self::essence::{InputCount, OutputCount};
 pub use self::{
     essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
     transaction_id::TransactionId,
 };
-use crate::types::block::{Error, protocol::ProtocolParameters, unlock::Unlocks};
+use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
 /// A transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -105,8 +105,8 @@ pub mod dto {
     pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};
     use super::*;
     use crate::types::{
+        block::{unlock::dto::UnlockDto, Error},
         TryFromDto, ValidationParams,
-        block::{Error, unlock::dto::UnlockDto},
     };
 
     /// The payload type to define a value transaction.

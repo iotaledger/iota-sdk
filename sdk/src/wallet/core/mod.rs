@@ -5,8 +5,8 @@ pub(crate) mod builder;
 pub(crate) mod operations;
 
 use std::sync::{
-    Arc,
     atomic::{AtomicU32, AtomicUsize},
+    Arc,
 };
 
 use crypto::keys::bip39::{Mnemonic, MnemonicRef};
@@ -15,18 +15,17 @@ use tokio::sync::RwLock;
 pub use self::builder::WalletBuilder;
 #[cfg(feature = "events")]
 use crate::wallet::events::{
-    EventEmitter,
     types::{Event, WalletEventType},
+    EventEmitter,
 };
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::{
-        Client,
         secret::{SecretManage, SecretManager},
-        verify_mnemonic,
+        verify_mnemonic, Client,
     },
-    wallet::account::{Account, builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance},
+    wallet::account::{builder::AccountBuilder, operations::syncing::SyncOptions, types::Balance, Account},
 };
 
 /// The wallet, used to create and get accounts. One wallet can hold many accounts, but they should

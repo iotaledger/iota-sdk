@@ -14,10 +14,10 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER,
+    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Alias, Basic, Nft},
-    NFT_ID_0, NFT_ID_1, addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    ALIAS_ID_0, ALIAS_ID_1, BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
 };
 
 #[test]

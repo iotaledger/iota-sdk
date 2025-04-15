@@ -10,13 +10,13 @@ use iota_sdk::{
         secret::types::{InputSigningData, InputSigningDataDto},
     },
     types::{
-        TryFromDto,
         block::{
-            BlockId,
             address::Address,
-            output::{BasicOutput, OutputId, OutputMetadata, unlock_condition::AddressUnlockCondition},
+            output::{unlock_condition::AddressUnlockCondition, BasicOutput, OutputId, OutputMetadata},
             protocol::protocol_parameters,
+            BlockId,
         },
+        TryFromDto,
     },
 };
 use pretty_assertions::assert_eq;

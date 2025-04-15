@@ -8,7 +8,7 @@
 //! cargo run --release --example client_split_funds
 //! ```
 
-use iota_sdk::client::{Client, Result, api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager};
+use iota_sdk::client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {

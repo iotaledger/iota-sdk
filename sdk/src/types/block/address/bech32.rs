@@ -10,13 +10,13 @@ use core::str::FromStr;
 use bech32::{FromBase32, ToBase32, Variant};
 use derive_more::{AsRef, Deref};
 use packable::{
-    Packable, PackableExt,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
+    Packable, PackableExt,
 };
 
-use crate::types::block::{ConvertTo, Error, address::Address};
+use crate::types::block::{address::Address, ConvertTo, Error};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Hrp {

@@ -11,12 +11,12 @@
 //! ```
 
 use iota_sdk::{
-    Wallet,
     types::block::{
         address::Bech32Address,
-        output::{BasicOutputBuilder, UnlockCondition, unlock_condition::AddressUnlockCondition},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
     },
     wallet::Result,
+    Wallet,
 };
 
 // The amount to build the basic output with

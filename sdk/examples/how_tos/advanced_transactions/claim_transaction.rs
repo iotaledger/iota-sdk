@@ -7,8 +7,8 @@
 //! `cargo run --release --all-features --example claim_transaction`
 
 use iota_sdk::{
+    wallet::{account::OutputsToClaim, Result},
     Wallet,
-    wallet::{Result, account::OutputsToClaim},
 };
 
 #[tokio::main]

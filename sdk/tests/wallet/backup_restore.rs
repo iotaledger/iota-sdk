@@ -5,17 +5,17 @@ use std::path::PathBuf;
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    Url,
     client::{
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
         node_manager::node::{Node, NodeDto},
-        secret::{SecretManager, mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager},
+        secret::{mnemonic::MnemonicSecretManager, stronghold::StrongholdSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
+    Url,
 };
 use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{NODE_LOCAL, NODE_OTHER, setup, tear_down};
+use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};
 
 // Backup and restore with Stronghold
 #[tokio::test]

@@ -4,14 +4,14 @@
 use std::{fs, io, path::Path};
 
 use iota_sdk::{
-    Wallet,
-    client::{Password, constants::IOTA_COIN_TYPE, secret::SecretManager},
+    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Password},
     types::block::address::{Hrp, ToBech32Ext},
     wallet::{
-        ClientOptions, Result,
         migration::migrate_db_chrysalis_to_stardust,
         storage::{StorageKind, StorageOptions},
+        ClientOptions, Result,
     },
+    Wallet,
 };
 use pretty_assertions::assert_eq;
 use zeroize::Zeroizing;

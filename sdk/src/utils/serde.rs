@@ -5,7 +5,7 @@ pub mod string {
     use alloc::string::String;
     use core::{fmt::Display, str::FromStr};
 
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -29,7 +29,7 @@ pub mod option_string {
     use alloc::string::String;
     use core::{fmt::Display, str::FromStr};
 
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<T, S>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -58,7 +58,7 @@ pub mod prefix_hex_bytes {
     use alloc::string::String;
 
     use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S, T>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -81,7 +81,7 @@ pub mod option_prefix_hex_bytes {
     use alloc::string::String;
 
     use prefix_hex::{FromHexPrefixed, ToHexPrefixed};
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S, T>(value: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -109,7 +109,7 @@ pub mod string_prefix {
     use alloc::string::String;
 
     use packable::{bounded::Bounded, prefix::StringPrefix};
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<T: Bounded, S>(value: &StringPrefix<T>, serializer: S) -> Result<S::Ok, S::Error>
     where

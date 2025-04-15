@@ -25,19 +25,18 @@ use tokio::sync::{Mutex, RwLock};
 #[cfg(feature = "participation")]
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
-    Balance, OutputData, Transaction, TransactionDto,
     address::{AccountAddress, AddressWithUnspentOutputs},
+    Balance, OutputData, Transaction, TransactionDto,
 };
 pub use self::{
     operations::{
         output_claiming::OutputsToClaim,
         output_consolidation::ConsolidationParams,
         syncing::{
-            SyncOptions,
             options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
+            SyncOptions,
         },
         transaction::{
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
             high_level::{
                 create_alias::CreateAliasParams,
                 minting::{
@@ -49,6 +48,7 @@ pub use self::{
                 },
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
+            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },
     types::OutputDataDto,
@@ -56,21 +56,21 @@ pub use self::{
 use super::core::WalletInner;
 use crate::{
     client::{
-        Client,
         secret::{SecretManage, SecretManager},
+        Client,
     },
     types::{
-        TryFromDto,
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId, dto::FoundryOutputDto},
+            output::{dto::FoundryOutputDto, AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
-                TransactionPayload,
                 transaction::{TransactionEssence, TransactionId},
+                TransactionPayload,
             },
         },
+        TryFromDto,
     },
-    wallet::{Result, account::types::InclusionState},
+    wallet::{account::types::InclusionState, Result},
 };
 
 /// Options to filter outputs

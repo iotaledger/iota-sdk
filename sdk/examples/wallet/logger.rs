@@ -11,7 +11,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManager, mnemonic::MnemonicSecretManager},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
 };

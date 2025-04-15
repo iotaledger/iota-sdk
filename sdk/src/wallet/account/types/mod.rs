@@ -19,14 +19,14 @@ pub use self::{
 use crate::{
     client::secret::types::InputSigningData,
     types::{
-        TryFromDto,
         api::core::response::OutputWithMetadataResponse,
         block::{
+            address::{dto::AddressDto, Address},
+            output::{dto::OutputDto, AliasTransition, Output, OutputId, OutputMetadata},
+            payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             BlockId, Error as BlockError,
-            address::{Address, dto::AddressDto},
-            output::{AliasTransition, Output, OutputId, OutputMetadata, dto::OutputDto},
-            payload::transaction::{TransactionId, TransactionPayload, dto::TransactionPayloadDto},
         },
+        TryFromDto,
     },
     utils::serde::bip44::option_bip44,
     wallet::account::AccountDetails,

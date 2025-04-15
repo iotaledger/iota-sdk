@@ -5,11 +5,11 @@ use iota_sdk::types::block::{
     input::TreasuryInput,
     output::TreasuryOutput,
     payload::{
-        TreasuryTransactionPayload,
         milestone::{
             MilestoneEssence, MilestoneIndex, MilestoneOption, MilestoneOptions, ParametersMilestoneOption,
             ReceiptMilestoneOption,
         },
+        TreasuryTransactionPayload,
     },
     protocol::protocol_parameters,
     rand::{

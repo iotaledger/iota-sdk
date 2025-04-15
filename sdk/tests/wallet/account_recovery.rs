@@ -7,10 +7,10 @@ use std::time::Duration;
 
 use iota_sdk::{
     client::{
-        Client,
         api::GetAddressesOptions,
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManager, mnemonic::MnemonicSecretManager},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        Client,
     },
     wallet::Result,
 };

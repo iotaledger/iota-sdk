@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::account::{Account, operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs},
+    wallet::account::{operations::syncing::SyncOptions, types::address::AddressWithUnspentOutputs, Account},
 };
 
 impl<S: 'static + SecretManage> Account<S>

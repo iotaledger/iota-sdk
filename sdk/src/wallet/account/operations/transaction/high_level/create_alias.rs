@@ -8,12 +8,12 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            AliasId, AliasOutputBuilder, Output,
             feature::MetadataFeature,
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            AliasId, AliasOutputBuilder, Output,
         },
     },
-    wallet::account::{Account, OutputData, TransactionOptions, types::Transaction},
+    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
 };
 
 /// Params `create_alias_output()`

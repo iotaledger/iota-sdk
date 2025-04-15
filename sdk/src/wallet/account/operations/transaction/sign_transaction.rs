@@ -5,8 +5,8 @@
 use {
     crate::client::api::PreparedTransactionDataDto,
     crate::client::secret::{
+        ledger_nano::{needs_blind_signing, LedgerSecretManager},
         DowncastSecretManager,
-        ledger_nano::{LedgerSecretManager, needs_blind_signing},
     },
 };
 
@@ -14,10 +14,10 @@ use {
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::{PreparedTransactionData, SignedTransactionData, transaction::validate_transaction_payload_length},
+        api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
         secret::SecretManage,
     },
-    wallet::account::{Account, operations::transaction::TransactionPayload},
+    wallet::account::{operations::transaction::TransactionPayload, Account},
 };
 
 impl<S: 'static + SecretManage> Account<S>

@@ -5,16 +5,16 @@ use std::collections::{HashMap, HashSet};
 
 use super::storage::SaveLoadWallet;
 use crate::{
-    Url,
     client::{
-        Client, ClientBuilder,
         node_manager::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
         secret::SecretManage,
+        Client, ClientBuilder,
     },
     wallet::{Wallet, WalletBuilder},
+    Url,
 };
 
 impl<S: 'static + SecretManage> Wallet<S> {

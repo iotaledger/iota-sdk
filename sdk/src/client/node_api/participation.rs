@@ -16,7 +16,7 @@ use crate::{
                 ParticipationEventType,
             },
         },
-        block::{ConvertTo, address::Bech32Address, output::OutputId},
+        block::{address::Bech32Address, output::OutputId, ConvertTo},
     },
 };
 

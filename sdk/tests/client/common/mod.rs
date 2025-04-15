@@ -5,8 +5,8 @@ mod constants;
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::client::{
-    Client, Result, api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE,
-    node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet, secret::SecretManager,
+    api::GetAddressesOptions, constants::SHIMMER_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
+    request_funds_from_faucet, secret::SecretManager, Client, Result,
 };
 
 pub use self::constants::{FAUCET_URL, NODE_LOCAL};

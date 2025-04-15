@@ -7,9 +7,9 @@ use crate::{
     client::secret::SecretManage,
     types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
-        Account, AccountAddress,
         operations::syncing::options::SyncOptions,
-        types::{InclusionState, OutputData, Transaction, address::AddressWithUnspentOutputs},
+        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
+        Account, AccountAddress,
     },
 };
 #[cfg(feature = "events")]

@@ -3,10 +3,10 @@
 
 use crate::types::block::{
     payload::{
-        Payload,
         milestone::{MilestoneEssence, MilestoneOptions, MilestonePayload},
         tagged_data::TaggedDataPayload,
         treasury_transaction::TreasuryTransactionPayload,
+        Payload,
     },
     rand::{
         bytes::rand_bytes,

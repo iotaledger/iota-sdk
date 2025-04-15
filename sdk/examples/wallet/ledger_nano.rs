@@ -17,7 +17,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManager, ledger_nano::LedgerSecretManager},
+        secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
 };

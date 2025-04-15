@@ -1,8 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{Error, output::TreasuryOutput, protocol::protocol_parameters};
-use packable::{PackableExt, error::UnpackError};
+use iota_sdk::types::block::{output::TreasuryOutput, protocol::protocol_parameters, Error};
+use packable::{error::UnpackError, PackableExt};
 use pretty_assertions::assert_eq;
 
 #[test]

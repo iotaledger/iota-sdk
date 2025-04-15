@@ -12,10 +12,10 @@ use alloc::boxed::Box;
 use core::ops::Deref;
 
 use packable::{
-    Packable, PackableExt,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
+    Packable, PackableExt,
 };
 
 pub(crate) use self::{
@@ -222,7 +222,7 @@ pub mod dto {
         milestone::dto::MilestonePayloadDto, tagged_data::dto::TaggedDataPayloadDto,
         transaction::dto::TransactionPayloadDto, treasury_transaction::dto::TreasuryTransactionPayloadDto,
     };
-    use crate::types::{TryFromDto, ValidationParams, block::Error};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

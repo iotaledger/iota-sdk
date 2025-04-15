@@ -9,10 +9,10 @@
 //! ```
 
 use iota_sdk::client::{
-    Client, Result,
-    api::{GetAddressesOptions, search_address},
+    api::{search_address, GetAddressesOptions},
     constants::SHIMMER_COIN_TYPE,
     secret::SecretManager,
+    Client, Result,
 };
 
 #[tokio::main]

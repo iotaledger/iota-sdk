@@ -4,19 +4,19 @@
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::{
-        api::plugins::participation::types::{PARTICIPATION_TAG, Participations},
+        api::plugins::participation::types::{Participations, PARTICIPATION_TAG},
         block::{
             output::{
-                BasicOutput, BasicOutputBuilder, Output,
                 feature::{MetadataFeature, TagFeature},
                 unlock_condition::AddressUnlockCondition,
+                BasicOutput, BasicOutputBuilder, Output,
             },
             payload::TaggedDataPayload,
         },
     },
     wallet::{
+        account::{types::Transaction, Account, TransactionOptions},
         Error, Result,
-        account::{Account, TransactionOptions, types::Transaction},
     },
 };
 

@@ -29,13 +29,13 @@ pub(crate) mod task;
 
 pub use self::{
     account::{
-        Account,
         operations::transaction::high_level::{
             minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
             send::SendParams,
             send_native_tokens::SendNativeTokensParams,
             send_nft::SendNftParams,
         },
+        Account,
     },
     core::{Wallet, WalletBuilder},
     error::Error,

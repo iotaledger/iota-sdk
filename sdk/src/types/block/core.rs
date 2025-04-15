@@ -4,19 +4,19 @@
 use alloc::vec::Vec;
 use core::ops::Deref;
 
-use crypto::hashes::{Digest, blake2b::Blake2b256};
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
-    Packable, PackableExt,
     error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
+    Packable, PackableExt,
 };
 
 use super::protocol::ProtocolParameters;
 use crate::types::block::{
-    BlockId, Error, PROTOCOL_VERSION,
     parent::Parents,
     payload::{OptionalPayload, Payload},
+    BlockId, Error, PROTOCOL_VERSION,
 };
 
 /// A builder to build a [`Block`].
@@ -264,8 +264,8 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
+        block::{payload::dto::PayloadDto, Error},
         TryFromDto, ValidationParams,
-        block::{Error, payload::dto::PayloadDto},
     };
 
     /// The block object that nodes gossip around in the network.

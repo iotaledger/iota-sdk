@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk_bindings_core::{
-    ClientMethod, call_client_method as rust_call_client_method,
+    call_client_method as rust_call_client_method,
     iota_sdk::client::{
-        Client as RustClient, ClientBuilder,
         mqtt::{Error as MqttError, Topic},
+        Client as RustClient, ClientBuilder,
     },
-    listen_mqtt as rust_listen_mqtt,
+    listen_mqtt as rust_listen_mqtt, ClientMethod,
 };
 use pyo3::{prelude::*, types::PyTuple};
 

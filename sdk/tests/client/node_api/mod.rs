@@ -8,18 +8,18 @@ mod mqtt;
 
 use iota_sdk::{
     client::{
-        Client, Result, api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager,
+        api::GetAddressesOptions, bech32_to_hex, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager, Client, Result,
     },
     types::block::{
-        BlockId,
         address::ToBech32Ext,
         output::{Output, OutputId},
-        payload::{Payload, transaction::TransactionId},
+        payload::{transaction::TransactionId, Payload},
+        BlockId,
     },
 };
 
-use crate::client::common::{FAUCET_URL, setup_client_with_node_health_ignored};
+use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL};
 
 // THIS SEED SERVES FOR TESTING PURPOSES! DON'T USE THIS SEED IN PRODUCTION!
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";

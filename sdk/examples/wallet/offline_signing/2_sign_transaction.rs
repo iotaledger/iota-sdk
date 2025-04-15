@@ -11,12 +11,12 @@
 use iota_sdk::{
     client::{
         api::{
-            PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
-            transaction::validate_transaction_payload_length,
+            transaction::validate_transaction_payload_length, PreparedTransactionData, PreparedTransactionDataDto,
+            SignedTransactionData, SignedTransactionDataDto,
         },
-        secret::{SecretManage, SecretManager, stronghold::StrongholdSecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
-    types::{TryFromDto, block::payload::TransactionPayload},
+    types::{block::payload::TransactionPayload, TryFromDto},
     wallet::Result,
 };
 

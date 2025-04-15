@@ -4,24 +4,24 @@
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
     client::{
-        Client, api::verify_semantic, hex_public_key_to_bech32_address, hex_to_bech32, secret::types::InputSigningData,
-        verify_mnemonic,
+        api::verify_semantic, hex_public_key_to_bech32_address, hex_to_bech32, secret::types::InputSigningData,
+        verify_mnemonic, Client,
     },
     types::{
-        TryFromDto,
         block::{
-            Block, Error,
-            address::{Address, AliasAddress, ToBech32Ext, dto::AddressDto},
+            address::{dto::AddressDto, Address, AliasAddress, ToBech32Ext},
             input::UtxoInput,
             output::{AliasId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
-            payload::{MilestonePayload, TransactionPayload, transaction::TransactionEssence},
+            payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
             signature::Ed25519Signature,
+            Block, Error,
         },
+        TryFromDto,
     },
 };
 use packable::PackableExt;
 
-use crate::{Result, method::UtilsMethod, response::Response};
+use crate::{method::UtilsMethod, response::Response, Result};
 
 /// Call a utils method.
 pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {

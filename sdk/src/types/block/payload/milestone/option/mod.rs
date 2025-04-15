@@ -8,14 +8,14 @@ use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 
 use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{Packable, bounded::BoundedU8, prefix::BoxedSlicePrefix};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 pub(crate) use self::{parameters::BinaryParametersLength, receipt::ReceiptFundsCount};
 pub use self::{
     parameters::ParametersMilestoneOption,
     receipt::{MigratedFundsEntry, ReceiptMilestoneOption, TailTransactionHash},
 };
-use crate::types::block::{Error, protocol::ProtocolParameters};
+use crate::types::block::{protocol::ProtocolParameters, Error};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
@@ -175,7 +175,7 @@ pub mod dto {
         receipt::dto::{MigratedFundsEntryDto, ReceiptMilestoneOptionDto},
     };
     use super::*;
-    use crate::types::{TryFromDto, ValidationParams, block::Error};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum MilestoneOptionDto {

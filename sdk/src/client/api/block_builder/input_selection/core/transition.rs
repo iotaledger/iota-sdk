@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{
-    Error, InputSelection,
     requirement::{alias::is_alias_with_id_non_null, foundry::is_foundry_with_id, nft::is_nft_with_id_non_null},
+    Error, InputSelection,
 };
 use crate::{
     client::secret::types::InputSigningData,

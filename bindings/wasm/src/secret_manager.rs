@@ -4,11 +4,12 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    Response, SecretManagerMethod, call_secret_manager_method,
+    call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager, SecretManagerDto},
+    Response, SecretManagerMethod,
 };
 use tokio::sync::RwLock;
-use wasm_bindgen::{JsCast, JsValue, prelude::wasm_bindgen};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::future_to_promise;
 
 use crate::PromiseString;

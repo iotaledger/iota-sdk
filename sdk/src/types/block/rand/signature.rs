@@ -3,7 +3,7 @@
 
 use crypto::{
     keys::{
-        bip39::{Passphrase, mnemonic_to_seed, wordlist},
+        bip39::{mnemonic_to_seed, wordlist, Passphrase},
         slip10::{Seed, Segment},
     },
     signatures::ed25519,

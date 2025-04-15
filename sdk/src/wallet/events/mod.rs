@@ -108,16 +108,16 @@ mod tests {
     use std::{
         str::FromStr,
         sync::{
-            Arc,
             atomic::{AtomicUsize, Ordering},
+            Arc,
         },
     };
 
     use pretty_assertions::assert_eq;
 
     use super::{
-        EventEmitter,
         types::{TransactionInclusionEvent, TransactionProgressEvent, WalletEvent, WalletEventType},
+        EventEmitter,
     };
     use crate::{types::block::payload::transaction::TransactionId, wallet::account::types::InclusionState};
 

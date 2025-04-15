@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{Error, unlock::UnlockIndex};
+use crate::types::block::{unlock::UnlockIndex, Error};
 
 /// Points to the unlock of a consumed alias output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]

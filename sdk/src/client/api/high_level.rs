@@ -7,26 +7,26 @@ use futures::{StreamExt, TryStreamExt};
 
 use crate::{
     client::{
-        Client,
-        api::{ClientBlockBuilder, input_selection::Error as InputSelectionError},
+        api::{input_selection::Error as InputSelectionError, ClientBlockBuilder},
         constants::{
             DEFAULT_RETRY_UNTIL_INCLUDED_INTERVAL, DEFAULT_RETRY_UNTIL_INCLUDED_MAX_AMOUNT, FIVE_MINUTES_IN_SECONDS,
         },
         error::{Error, Result},
         node_api::indexer::query_parameters::QueryParameter,
+        Client,
     },
     types::{
         api::core::response::LedgerInclusionState,
         block::{
-            Block, BlockId,
             address::Bech32Address,
-            input::{INPUT_COUNT_MAX, Input, UtxoInput},
+            input::{Input, UtxoInput, INPUT_COUNT_MAX},
             output::OutputWithMetadata,
             parent::Parents,
             payload::{
-                Payload,
                 transaction::{TransactionEssence, TransactionId},
+                Payload,
             },
+            Block, BlockId,
         },
     },
     utils::unix_timestamp_now,

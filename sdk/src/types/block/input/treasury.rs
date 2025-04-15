@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use derive_more::{Deref, From};
 
-use crate::types::block::{Error, payload::milestone::MilestoneId};
+use crate::types::block::{payload::milestone::MilestoneId, Error};
 
 /// [`TreasuryInput`] is an input which references a milestone which generated a
 /// [`TreasuryOutput`](crate::types::block::output::TreasuryOutput).

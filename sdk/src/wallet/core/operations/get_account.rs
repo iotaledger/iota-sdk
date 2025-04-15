@@ -4,8 +4,8 @@
 use crate::{
     client::secret::SecretManage,
     wallet::{
+        account::{types::AccountIdentifier, Account},
         Wallet,
-        account::{Account, types::AccountIdentifier},
     },
 };
 

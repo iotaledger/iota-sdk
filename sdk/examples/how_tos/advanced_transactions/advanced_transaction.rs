@@ -7,15 +7,15 @@
 //! `cargo run --release --all-features --example advanced_transaction`
 
 use iota_sdk::{
-    Wallet,
     types::block::{
         address::Bech32Address,
         output::{
-            BasicOutputBuilder,
             unlock_condition::{AddressUnlockCondition, TimelockUnlockCondition},
+            BasicOutputBuilder,
         },
     },
     wallet::Result,
+    Wallet,
 };
 
 #[tokio::main]

@@ -12,10 +12,10 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{SecretManager, mnemonic::MnemonicSecretManager},
+        secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
-    wallet::{Account, ClientOptions, Result, SendParams, Wallet, account::FilterOptions},
+    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
 };
 
 // The account alias used in this example.

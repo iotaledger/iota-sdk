@@ -4,9 +4,9 @@
 use alloc::vec::Vec;
 
 use crate::types::block::{
-    Block, BlockBuilder, BlockId,
     parent::Parents,
     rand::{bytes::rand_bytes_array, number::rand_number, parents::rand_parents, payload::rand_payload_for_block},
+    Block, BlockBuilder, BlockId,
 };
 
 /// Generates a random block id.

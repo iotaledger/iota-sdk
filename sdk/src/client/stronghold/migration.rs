@@ -12,17 +12,17 @@ use crypto::ciphers::{
     traits::Aead,
 };
 use iota_stronghold::{
-    Client, Location, SnapshotPath, Stronghold,
     procedures::{self, AeadCipher},
+    Client, Location, SnapshotPath, Stronghold,
 };
 use zeroize::{Zeroize, Zeroizing};
 
 use super::{
-    Error, StrongholdAdapter,
     common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
+    Error, StrongholdAdapter,
 };
 use crate::client::{
-    stronghold::{Error as StrongholdError, check_or_create_snapshot},
+    stronghold::{check_or_create_snapshot, Error as StrongholdError},
     utils::Password,
 };
 
@@ -37,7 +37,7 @@ impl StrongholdAdapter {
         new_password: Option<Password>,
     ) -> Result<(), Error> {
         log::debug!("migrate_snapshot_v2_to_v3");
-        use iota_stronghold::engine::snapshot::migration::{Version, migrate};
+        use iota_stronghold::engine::snapshot::migration::{migrate, Version};
 
         let mut buffer = [0u8; 32];
         let mut tmp_path = current_path.as_ref().as_os_str().to_os_string();

@@ -12,7 +12,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManager, stronghold::StrongholdSecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
     wallet::{ClientOptions, Result, Wallet},
 };

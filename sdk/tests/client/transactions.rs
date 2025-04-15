@@ -4,11 +4,11 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter},
+    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Result},
     types::block::{
         address::ToBech32Ext,
         input::{Input, UtxoInput},
-        output::{BasicOutputBuilder, OutputId, unlock_condition::AddressUnlockCondition},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, OutputId},
         payload::Payload,
     },
 };

@@ -12,8 +12,8 @@
 //! ```
 
 use iota_sdk::{
-    Wallet,
     wallet::{Result, SendNftParams},
+    Wallet,
 };
 
 // The address to send the tokens to

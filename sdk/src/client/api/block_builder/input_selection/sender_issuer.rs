@@ -9,19 +9,19 @@ use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
-        Error, Result,
         api::{
-            ClientBlockBuilder,
             address::search_address,
             block_builder::input_selection::core::{
                 error::Error as InputSelectionError, requirement::alias::is_alias_transition,
             },
+            ClientBlockBuilder,
         },
         secret::types::InputSigningData,
+        Error, Result,
     },
     types::block::{
         address::{Address, ToBech32Ext},
-        output::{Output, feature::Features},
+        output::{feature::Features, Output},
     },
 };
 

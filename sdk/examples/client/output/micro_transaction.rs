@@ -13,10 +13,10 @@
 //! ```
 
 use iota_sdk::{
-    client::{Client, Result, api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager},
+    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
     types::block::output::{
-        BasicOutputBuilder,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
+        BasicOutputBuilder,
     },
 };
 

@@ -5,18 +5,17 @@ use std::{collections::HashMap, path::Path, sync::atomic::Ordering};
 
 use crate::{
     client::{
-        Error as ClientError, constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter,
-        stronghold::StrongholdAdapter,
+        constants::IOTA_COIN_TYPE, secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter,
+        Error as ClientError,
     },
     types::TryFromDto,
     wallet::{
-        ClientOptions, Error as WalletError, Wallet,
         account::{AccountDetails, AccountDetailsDto},
         migration::{
-            MIGRATION_VERSION_KEY, MigrationData,
-            chrysalis::{CHRYSALIS_STORAGE_KEY, migrate_from_chrysalis_data, to_chrysalis_key},
-            latest_backup_migration_version, migrate,
+            chrysalis::{migrate_from_chrysalis_data, to_chrysalis_key, CHRYSALIS_STORAGE_KEY},
+            latest_backup_migration_version, migrate, MigrationData, MIGRATION_VERSION_KEY,
         },
+        ClientOptions, Error as WalletError, Wallet,
     },
 };
 

@@ -29,14 +29,14 @@ use iota_sdk::{
     types::block::{
         address::{Address, AliasAddress, Bech32Address},
         output::{
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens, NftId,
-            NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
             feature::{IssuerFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens, NftId,
+            NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
         },
         rand::{block::rand_block_id, transaction::rand_transaction_id},
     },

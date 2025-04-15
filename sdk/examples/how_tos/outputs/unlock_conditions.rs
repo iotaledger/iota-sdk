@@ -13,13 +13,13 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
             dto::OutputDto,
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
                 ImmutableAliasAddressUnlockCondition, StateControllerAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
         },
     },
 };

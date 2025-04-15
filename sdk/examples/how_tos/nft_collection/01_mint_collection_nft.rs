@@ -15,13 +15,13 @@
 //! ```
 
 use iota_sdk::{
-    Wallet,
     types::block::{
         address::{Bech32Address, NftAddress},
-        output::{NftId, feature::Irc27Metadata},
+        output::{feature::Irc27Metadata, NftId},
         payload::transaction::TransactionId,
     },
     wallet::{Account, MintNftParams, Result},
+    Wallet,
 };
 
 // The NFT collection size

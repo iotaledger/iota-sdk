@@ -8,8 +8,8 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, Build::Basic, addresses, build_inputs, build_outputs,
-    unsorted_eq,
+    addresses, build_inputs, build_outputs, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0,
+    BECH32_ADDRESS_ED25519_1,
 };
 
 #[test]

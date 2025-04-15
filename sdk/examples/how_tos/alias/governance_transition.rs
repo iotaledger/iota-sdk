@@ -12,11 +12,11 @@
 //! ```
 
 use iota_sdk::{
-    Wallet,
     types::block::output::{
-        AliasOutputBuilder, UnlockCondition, unlock_condition::StateControllerAddressUnlockCondition,
+        unlock_condition::StateControllerAddressUnlockCondition, AliasOutputBuilder, UnlockCondition,
     },
     wallet::Result,
+    Wallet,
 };
 
 #[tokio::main]

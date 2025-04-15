@@ -6,17 +6,17 @@ use instant::Instant;
 use crate::{
     client::{
         api::{
-            PreparedTransactionData, input_selection::Selected,
-            transaction::validate_regular_transaction_essence_length,
+            input_selection::Selected, transaction::validate_regular_transaction_essence_length,
+            PreparedTransactionData,
         },
-        secret::{SecretManage, types::InputSigningData},
+        secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
         input::{Input, UtxoInput},
         output::{InputsCommitment, Output},
         payload::transaction::{RegularTransactionEssence, TransactionEssence},
     },
-    wallet::account::{Account, operations::transaction::TransactionOptions},
+    wallet::account::{operations::transaction::TransactionOptions, Account},
 };
 
 impl<S: 'static + SecretManage> Account<S>

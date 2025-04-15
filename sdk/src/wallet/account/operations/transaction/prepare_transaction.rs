@@ -12,11 +12,11 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         input::INPUT_COUNT_RANGE,
-        output::{OUTPUT_COUNT_RANGE, Output},
+        output::{Output, OUTPUT_COUNT_RANGE},
     },
     wallet::account::{
-        Account,
         operations::transaction::{RemainderValueStrategy, TransactionOptions},
+        Account,
     },
 };
 

@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::Error as ClientError,
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{Error, Result, SendParams, account::OutputParams},
+    wallet::{account::OutputParams, Error, Result, SendParams},
 };
 use pretty_assertions::assert_eq;
 

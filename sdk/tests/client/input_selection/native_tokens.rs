@@ -11,8 +11,8 @@ use pretty_assertions::assert_eq;
 use primitive_types::U256;
 
 use crate::client::{
-    BECH32_ADDRESS_ED25519_0, Build::Basic, TOKEN_ID_1, TOKEN_ID_2, addresses, build_inputs, build_outputs,
-    is_remainder_or_return, unsorted_eq,
+    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq, Build::Basic,
+    BECH32_ADDRESS_ED25519_0, TOKEN_ID_1, TOKEN_ID_2,
 };
 
 #[test]

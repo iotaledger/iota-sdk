@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk_bindings_core::{
-    ClientMethod, Response, call_client_method,
+    call_client_method,
     iota_sdk::client::{Client, ClientBuilder},
+    ClientMethod, Response,
 };
-use wasm_bindgen::{JsCast, JsValue, prelude::wasm_bindgen};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::future_to_promise;
 
 use crate::{ArrayString, PromiseString};

@@ -10,8 +10,8 @@
 //! ```
 
 use iota_sdk::client::{
-    Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
-    request_funds_from_faucet, secret::SecretManager,
+    api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
+    secret::SecretManager, Client, Result,
 };
 
 #[tokio::main]

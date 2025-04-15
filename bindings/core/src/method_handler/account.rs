@@ -9,15 +9,15 @@ use iota_sdk::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
     types::{
+        block::output::{dto::OutputDto, Output},
         TryFromDto,
-        block::output::{Output, dto::OutputDto},
     },
     wallet::account::{
-        Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions, types::TransactionDto,
+        types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto, TransactionOptions,
     },
 };
 
-use crate::{Response, Result, method::AccountMethod};
+use crate::{method::AccountMethod, Response, Result};
 
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {

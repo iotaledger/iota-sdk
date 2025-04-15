@@ -4,8 +4,8 @@
 use derive_more::From;
 
 use crate::types::block::{
-    Error,
     address::{Address, AliasAddress},
+    Error,
 };
 
 /// Defines the permanent [`AliasAddress`] that owns this output.
@@ -52,7 +52,7 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::{Error, address::dto::AddressDto};
+    use crate::types::block::{address::dto::AddressDto, Error};
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct ImmutableAliasAddressUnlockConditionDto {

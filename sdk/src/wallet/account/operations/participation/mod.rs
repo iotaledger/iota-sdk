@@ -12,23 +12,22 @@ pub(crate) mod event;
 pub(crate) mod voting;
 pub(crate) mod voting_power;
 
-use std::collections::{HashMap, HashSet, hash_map::Entry};
+use std::collections::{hash_map::Entry, HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{Client, node_manager::node::Node, secret::SecretManage},
+    client::{node_manager::node::Node, secret::SecretManage, Client},
     types::{
         api::plugins::participation::{
             responses::TrackedParticipation,
-            types::{PARTICIPATION_TAG, ParticipationEventData, ParticipationEventId, Participations},
+            types::{ParticipationEventData, ParticipationEventId, Participations, PARTICIPATION_TAG},
         },
-        block::output::{Output, OutputId, unlock_condition::UnlockCondition},
+        block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
     wallet::{
-        Result,
         account::{Account, AccountDetails, OutputData},
-        task,
+        task, Result,
     },
 };
 

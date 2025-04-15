@@ -11,8 +11,8 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            NftId, NftOutputBuilder, Output, OutputMetadata, feature::MetadataFeature,
-            unlock_condition::AddressUnlockCondition,
+            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output,
+            OutputMetadata,
         },
         protocol::protocol_parameters,
         rand::{block::rand_block_id, output::rand_output_id},
@@ -21,9 +21,10 @@ use iota_sdk::{
 use pretty_assertions::{assert_eq, assert_ne};
 
 use crate::client::{
-    BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1,
+    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Basic, Nft},
-    NFT_ID_0, NFT_ID_1, NFT_ID_2, addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    BECH32_ADDRESS_ALIAS_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, NFT_ID_0,
+    NFT_ID_1, NFT_ID_2,
 };
 
 #[test]

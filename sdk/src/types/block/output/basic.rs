@@ -7,22 +7,22 @@ use packable::Packable;
 
 use super::verify_output_amount_packable;
 use crate::types::{
-    ValidationParams,
     block::{
-        Error,
         address::Address,
         output::{
-            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
-            feature::{Feature, FeatureFlags, Features, verify_allowed_features},
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
-                UnlockCondition, UnlockConditionFlags, UnlockConditions, verify_allowed_unlock_conditions,
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount,
+            verify_output_amount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent,
+            RentStructure,
         },
         protocol::ProtocolParameters,
         semantic::{ConflictReason, ValidationContext},
         unlock::Unlock,
+        Error,
     },
+    ValidationParams,
 };
 
 ///
@@ -344,13 +344,13 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        TryFromDto,
         block::{
-            Error,
             output::{
                 dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
             },
+            Error,
         },
+        TryFromDto,
     };
 
     /// Describes a basic output.
@@ -451,11 +451,10 @@ mod tests {
 
     use super::*;
     use crate::types::{
-        TryFromDto,
         block::{
             output::{
-                FoundryId, SimpleTokenScheme, TokenId,
                 dto::{OutputBuilderAmountDto, OutputDto},
+                FoundryId, SimpleTokenScheme, TokenId,
             },
             protocol::protocol_parameters,
             rand::{
@@ -467,6 +466,7 @@ mod tests {
                 },
             },
         },
+        TryFromDto,
     };
 
     #[test]

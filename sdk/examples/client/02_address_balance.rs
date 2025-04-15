@@ -11,8 +11,8 @@
 
 use iota_sdk::{
     client::{
-        Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
-        secret::SecretManager,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client,
+        Result,
     },
     types::block::output::NativeTokensBuilder,
 };

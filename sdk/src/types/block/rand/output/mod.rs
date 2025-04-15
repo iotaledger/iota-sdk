@@ -13,9 +13,9 @@ use primitive_types::U256;
 pub use self::metadata::rand_output_metadata;
 use crate::types::block::{
     output::{
-        AliasId, AliasOutput, BasicOutput, FoundryOutput, InputsCommitment, NftId, NftOutput, OUTPUT_INDEX_RANGE,
-        Output, OutputId, SimpleTokenScheme, TokenScheme, TreasuryOutput,
-        unlock_condition::ImmutableAliasAddressUnlockCondition,
+        unlock_condition::ImmutableAliasAddressUnlockCondition, AliasId, AliasOutput, BasicOutput, FoundryOutput,
+        InputsCommitment, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, TreasuryOutput,
+        OUTPUT_INDEX_RANGE,
     },
     rand::{
         address::rand_alias_address,

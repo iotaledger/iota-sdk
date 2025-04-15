@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use super::{Error, InputSelection, Requirement, alias::is_alias_transition};
+use super::{alias::is_alias_transition, Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
     types::block::{address::Address, output::AliasTransition},

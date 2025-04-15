@@ -13,7 +13,7 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         hex_public_key_to_bech32_address,
-        secret::{SecretManage, SecretManager, stronghold::StrongholdSecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
     crypto::keys::bip39::Mnemonic,
     wallet::Result,

@@ -3,7 +3,7 @@
 
 use alloc::string::String;
 
-use rand::{Rng, distributions::Alphanumeric, thread_rng};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 /// Generates a random string with a given charset.
 pub fn rand_string_charset(charset: &str, len: usize) -> String {

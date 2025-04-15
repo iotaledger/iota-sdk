@@ -8,7 +8,7 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{Digest, blake2b::Blake2b256},
+    hashes::{blake2b::Blake2b256, Digest},
     keys::{
         bip39::{Mnemonic, MnemonicRef, Passphrase},
         bip44::Bip44,
@@ -21,18 +21,18 @@ use crypto::{
 };
 use instant::Duration;
 use iota_stronghold::{
-    Location,
     procedures::{self, Curve, KeyType, Slip10DeriveInput},
+    Location,
 };
 
 use super::{
-    StrongholdAdapter,
     common::{DERIVE_OUTPUT_RECORD_PATH, PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, SEED_RECORD_PATH},
+    StrongholdAdapter,
 };
 use crate::{
     client::{
         api::PreparedTransactionData,
-        secret::{GenerateAddressOptions, SecretManage, SecretManagerConfig, types::StrongholdDto},
+        secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
         stronghold::Error,
     },
     types::block::{

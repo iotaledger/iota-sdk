@@ -7,14 +7,14 @@ mod storage_stub {
 
     use crate::{
         client::{
-            secret::{SecretManagerConfig, mnemonic::MnemonicSecretManager},
+            secret::{mnemonic::MnemonicSecretManager, SecretManagerConfig},
             storage::StorageAdapter,
         },
         wallet::{
-            Wallet, WalletBuilder,
             core::builder::dto::WalletBuilderDto,
             migration::chrysalis::CHRYSALIS_STORAGE_KEY,
             storage::constants::{SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY},
+            Wallet, WalletBuilder,
         },
     };
 

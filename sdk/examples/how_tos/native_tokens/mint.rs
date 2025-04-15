@@ -16,7 +16,7 @@
 //! cargo run --release --all-features --example mint_native_token [TOKEN_ID]
 //! ```
 
-use iota_sdk::{Wallet, types::block::output::TokenId, wallet::Result};
+use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
 
 // The amount of native tokens to mint
 const MINT_AMOUNT: u64 = 10;

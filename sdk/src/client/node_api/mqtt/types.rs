@@ -6,13 +6,13 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use regex::RegexSet;
-use serde::{Deserialize, Deserializer, Serialize, de::Error as _};
+use serde::{de::Error as _, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::Error;
 use crate::types::block::{
-    BlockDto,
     payload::{dto::MilestonePayloadDto, milestone::option::dto::ReceiptMilestoneOptionDto},
+    BlockDto,
 };
 
 type TopicHandler = Box<dyn Fn(&TopicEvent) + Send + Sync>;

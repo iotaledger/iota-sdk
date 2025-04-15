@@ -4,13 +4,13 @@
 use std::collections::HashMap;
 
 use crate::{
-    client::{Client, node_manager::node::Node, secret::SecretManage},
+    client::{node_manager::node::Node, secret::SecretManage, Client},
     types::api::plugins::participation::types::{
         ParticipationEventId, ParticipationEventStatus, ParticipationEventType,
     },
     wallet::account::{
-        Account, operations::participation::ParticipationEventWithNodes,
-        types::participation::ParticipationEventRegistrationOptions,
+        operations::participation::ParticipationEventWithNodes,
+        types::participation::ParticipationEventRegistrationOptions, Account,
     },
 };
 

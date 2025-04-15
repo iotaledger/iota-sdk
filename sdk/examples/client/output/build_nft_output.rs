@@ -13,9 +13,9 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            NftId, NftOutputBuilder,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
+            NftId, NftOutputBuilder,
         },
     },
 };

@@ -18,7 +18,7 @@ use serde_json::Value;
 use zeroize::Zeroizing;
 
 use crate::{
-    client::{Password, constants::IOTA_COIN_TYPE},
+    client::{constants::IOTA_COIN_TYPE, Password},
     types::block::address::Bech32Address,
     wallet::{Error, Result},
 };
@@ -209,18 +209,18 @@ pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
 #[cfg(not(target_family = "wasm"))]
 #[cfg(feature = "rocksdb")]
 pub(crate) mod rocksdb {
-    use ::rocksdb::{DB, IteratorMode};
+    use ::rocksdb::{IteratorMode, DB};
 
     use super::*;
     use crate::{
         client::storage::StorageAdapter,
         wallet::{
-            migration::{MIGRATION_VERSION_KEY, MigrationData},
+            migration::{MigrationData, MIGRATION_VERSION_KEY},
             storage::{
-                StorageManager,
                 constants::{
-                    ACCOUNT_INDEXATION_KEY, ACCOUNTS_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
+                    ACCOUNTS_INDEXATION_KEY, ACCOUNT_INDEXATION_KEY, SECRET_MANAGER_KEY, WALLET_INDEXATION_KEY,
                 },
+                StorageManager,
             },
         },
     };

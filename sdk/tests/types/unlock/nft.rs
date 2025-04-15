@@ -1,8 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{Error, unlock::NftUnlock};
-use packable::{PackableExt, bounded::InvalidBoundedU16};
+use iota_sdk::types::block::{unlock::NftUnlock, Error};
+use packable::{bounded::InvalidBoundedU16, PackableExt};
 use pretty_assertions::assert_eq;
 
 #[test]

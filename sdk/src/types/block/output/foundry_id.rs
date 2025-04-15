@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::{Packable, packer::SlicePacker};
+use packable::{packer::SlicePacker, Packable};
 
 use crate::types::block::{
     address::{Address, AliasAddress},

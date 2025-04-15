@@ -6,17 +6,17 @@ use primitive_types::U256;
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        ConvertTo,
         address::Bech32Address,
-        output::{FoundryId, NativeTokensBuilder, Output, Rent, unlock_condition::UnlockCondition},
+        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+        ConvertTo,
     },
     wallet::{
-        Error, Result,
         account::{
-            Account, AccountDetails, OutputsToClaim,
             operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
             types::{AddressWithUnspentOutputs, Balance, NativeTokensBalance},
+            Account, AccountDetails, OutputsToClaim,
         },
+        Error, Result,
     },
 };
 

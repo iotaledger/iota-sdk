@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use packable::{
-    Packable,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
+    Packable,
 };
 use primitive_types::U256;
 

@@ -6,7 +6,7 @@ mod secret_manager;
 mod wallet;
 
 use iota_sdk_bindings_core::{
-    Response, UtilsMethod, call_utils_method as rust_call_utils_method, init_logger as rust_init_logger,
+    call_utils_method as rust_call_utils_method, init_logger as rust_init_logger, Response, UtilsMethod,
 };
 use neon::prelude::*;
 use once_cell::sync::Lazy;

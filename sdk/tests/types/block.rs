@@ -4,7 +4,6 @@
 use iota_sdk::{
     pow::{miner::get_miner, score::PowScorer},
     types::block::{
-        Block, BlockBuilder, Error,
         parent::Parents,
         payload::{Payload, TaggedDataPayload},
         protocol::protocol_parameters,
@@ -14,9 +13,10 @@ use iota_sdk::{
             parents::rand_parents,
             payload::{rand_tagged_data_payload, rand_treasury_transaction_payload},
         },
+        Block, BlockBuilder, Error,
     },
 };
-use packable::{PackableExt, error::UnpackError};
+use packable::{error::UnpackError, PackableExt};
 use pretty_assertions::assert_eq;
 
 #[test]

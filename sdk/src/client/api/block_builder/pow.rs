@@ -9,7 +9,7 @@ use crate::pow::miner::{Miner, MinerBuilder, MinerCancel};
 use crate::pow::wasm_miner::{SingleThreadedMiner, SingleThreadedMinerBuilder};
 use crate::{
     client::{ClientInner, Error, Result},
-    types::block::{Block, BlockBuilder, Error as BlockError, parent::Parents, payload::Payload},
+    types::block::{parent::Parents, payload::Payload, Block, BlockBuilder, Error as BlockError},
 };
 
 impl ClientInner {

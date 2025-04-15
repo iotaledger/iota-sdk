@@ -4,11 +4,12 @@
 use std::{ops::Deref, sync::Arc};
 
 use iota_sdk_bindings_core::{
-    Response, Result, SecretManagerMethod, call_secret_manager_method as rust_call_secret_manager_method,
+    call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::{
         secret::{SecretManager, SecretManagerDto},
         stronghold::StrongholdAdapter,
     },
+    Response, Result, SecretManagerMethod,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;

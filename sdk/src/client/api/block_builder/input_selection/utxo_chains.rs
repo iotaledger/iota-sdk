@@ -7,9 +7,9 @@ use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
-        Client, Result,
         api::{block_builder::ClientBlockBuilder, search_address},
         secret::types::InputSigningData,
+        Client, Result,
     },
     types::block::{
         address::Address,

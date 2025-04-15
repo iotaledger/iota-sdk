@@ -8,7 +8,7 @@
 //! cargo run --release --example address_consolidation [ADDRESS INDEX START] [ADDRESS COUNT]
 //! ```
 
-use iota_sdk::client::{Client, Result, api::GetAddressesOptions, secret::SecretManager};
+use iota_sdk::client::{api::GetAddressesOptions, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {

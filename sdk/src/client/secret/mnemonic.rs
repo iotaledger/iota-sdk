@@ -7,7 +7,7 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{Digest, blake2b::Blake2b256},
+    hashes::{blake2b::Blake2b256, Digest},
     keys::{bip39::Mnemonic, bip44::Bip44, slip10::Seed},
     signatures::{
         ed25519,
@@ -18,7 +18,7 @@ use zeroize::Zeroizing;
 
 use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{Client, Error, api::PreparedTransactionData},
+    client::{api::PreparedTransactionData, Client, Error},
     types::block::{
         address::Ed25519Address, payload::transaction::TransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
     },

@@ -5,7 +5,7 @@ use core::str::FromStr;
 use std::path::Path;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use dialoguer::{Input, Select, console::Term, theme::ColorfulTheme};
+use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
     crypto::keys::bip39::Mnemonic,
@@ -224,7 +224,7 @@ pub fn restrict_file_permissions<P: AsRef<Path>>(path: P) -> std::io::Result<()>
 
     use winapi::um::winnt::{FILE_GENERIC_READ, FILE_GENERIC_WRITE, PSID, STANDARD_RIGHTS_ALL};
     use windows_acl::{
-        acl::{ACL, AceType},
+        acl::{AceType, ACL},
         helper::sid_to_string,
     };
 

@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example request_funds
 //! ```
 
-use iota_sdk::{Wallet, client::request_funds_from_faucet, wallet::Result};
+use iota_sdk::{client::request_funds_from_faucet, wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {

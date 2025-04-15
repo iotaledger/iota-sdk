@@ -7,8 +7,8 @@ use std::fmt::Debug;
 
 use packable::error::UnexpectedEOF;
 use serde::{
-    Serialize,
     ser::{SerializeMap, Serializer},
+    Serialize,
 };
 
 use crate::{

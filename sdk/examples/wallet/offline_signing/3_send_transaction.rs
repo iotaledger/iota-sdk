@@ -9,14 +9,14 @@
 //! ```
 
 use iota_sdk::{
-    Wallet,
     client::{
-        Client,
         api::{SignedTransactionData, SignedTransactionDataDto},
         secret::SecretManager,
+        Client,
     },
-    types::{TryFromDto, block::payload::transaction::TransactionId},
+    types::{block::payload::transaction::TransactionId, TryFromDto},
     wallet::{Account, Result},
+    Wallet,
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";

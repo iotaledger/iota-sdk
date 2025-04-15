@@ -5,7 +5,7 @@ use instant::Instant;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::{Account, Wallet, account::SyncOptions, task},
+    wallet::{account::SyncOptions, task, Account, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>

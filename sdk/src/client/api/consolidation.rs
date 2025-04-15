@@ -3,11 +3,11 @@
 
 use super::GetAddressesOptions;
 use crate::{
-    client::{Client, Result, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager},
+    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client, Result},
     types::block::{
         address::Bech32Address,
-        input::{INPUT_COUNT_MAX, UtxoInput},
-        output::{BasicOutputBuilder, NativeTokensBuilder, unlock_condition::AddressUnlockCondition},
+        input::{UtxoInput, INPUT_COUNT_MAX},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder},
     },
 };
 

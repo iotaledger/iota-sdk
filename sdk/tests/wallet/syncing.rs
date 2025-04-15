@@ -3,13 +3,13 @@
 
 use iota_sdk::{
     types::block::output::{
-        AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
         unlock_condition::{
             AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
             StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
         },
+        AliasId, AliasOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{Result, account::SyncOptions},
+    wallet::{account::SyncOptions, Result},
 };
 use pretty_assertions::assert_eq;
 

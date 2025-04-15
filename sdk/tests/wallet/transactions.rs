@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::wallet::{MintNftParams, Result, SendNftParams, SendParams, account::TransactionOptions};
+use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendNftParams, SendParams};
 use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
@@ -261,7 +261,7 @@ async fn conflicting_transaction() -> Result<()> {
 #[cfg(all(feature = "ledger_nano", feature = "events"))]
 #[ignore = "requires ledger nano instance"]
 async fn prepare_transaction_ledger() -> Result<()> {
-    use iota_sdk::wallet::events::{WalletEvent, WalletEventType, types::TransactionProgressEvent};
+    use iota_sdk::wallet::events::{types::TransactionProgressEvent, WalletEvent, WalletEventType};
 
     let storage_path = "test-storage/wallet_address_generation_ledger";
     setup(storage_path)?;

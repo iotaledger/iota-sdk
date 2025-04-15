@@ -4,21 +4,20 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    Error,
     address::{Address, AliasAddress, Ed25519Address},
     input::{Input, TreasuryInput, UtxoInput},
     output::{
-        AliasId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
-        SimpleTokenScheme, TokenId, TokenScheme, TreasuryOutput,
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
             StateControllerAddressUnlockCondition,
         },
+        AliasId, AliasOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput, Output,
+        SimpleTokenScheme, TokenId, TokenScheme, TreasuryOutput,
     },
     payload::{
-        Payload,
         milestone::MilestoneId,
         transaction::{RegularTransactionEssence, TransactionId},
+        Payload,
     },
     protocol::protocol_parameters,
     rand::{
@@ -26,6 +25,7 @@ use iota_sdk::types::block::{
         output::rand_inputs_commitment,
         payload::{rand_tagged_data_payload, rand_treasury_transaction_payload},
     },
+    Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
 use pretty_assertions::assert_eq;

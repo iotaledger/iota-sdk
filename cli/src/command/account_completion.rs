@@ -5,7 +5,7 @@ use std::borrow::Cow;
 
 use colored::Colorize;
 use rustyline::{
-    Completer, Context, Helper, Hinter, Validator, completion::Completer, highlight::Highlighter, hint::HistoryHinter,
+    completion::Completer, highlight::Highlighter, hint::HistoryHinter, Completer, Context, Helper, Hinter, Validator,
 };
 
 #[derive(Default)]

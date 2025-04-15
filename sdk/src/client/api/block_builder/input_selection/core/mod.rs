@@ -24,8 +24,8 @@ use crate::{
         address::{Address, AliasAddress, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
-            AliasOutput, AliasTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, OUTPUT_COUNT_RANGE,
-            Output, OutputId,
+            AliasOutput, AliasTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
+            OUTPUT_COUNT_RANGE,
         },
         protocol::ProtocolParameters,
     },

@@ -11,13 +11,13 @@ use primitive_types::U256;
 use crate::types::block::{
     input::UtxoInput,
     output::{
-        AliasId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
-        TagFeatureLength, feature::FeatureCount, unlock_condition::UnlockConditionCount,
+        feature::FeatureCount, unlock_condition::UnlockConditionCount, AliasId, ChainId, MetadataFeatureLength,
+        NativeTokenCount, NftId, OutputIndex, StateMetadataLength, TagFeatureLength,
     },
     parent::ParentCount,
     payload::{
-        InputCount, MilestoneMetadataLength, MilestoneOptionCount, OutputCount, ReceiptFundsCount, SignatureCount,
-        TagLength, TaggedDataLength, milestone::BinaryParametersLength,
+        milestone::BinaryParametersLength, InputCount, MilestoneMetadataLength, MilestoneOptionCount, OutputCount,
+        ReceiptFundsCount, SignatureCount, TagLength, TaggedDataLength,
     },
     unlock::{UnlockCount, UnlockIndex},
 };

@@ -5,11 +5,11 @@ use std::time::Duration;
 
 use iota_sdk::{
     types::block::address::ToBech32Ext,
-    wallet::{Wallet, account::AccountDetailsDto},
+    wallet::{account::AccountDetailsDto, Wallet},
 };
 
 use super::account::call_account_method_internal;
-use crate::{Result, method::WalletMethod, response::Response};
+use crate::{method::WalletMethod, response::Response, Result};
 
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {

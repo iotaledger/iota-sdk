@@ -6,18 +6,18 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
-use super::{ClientInner, node_manager::builder::NodeManagerBuilder};
+use super::{node_manager::builder::NodeManagerBuilder, ClientInner};
 #[cfg(feature = "mqtt")]
 use crate::client::node_api::mqtt::{BrokerOptions, MqttEvent};
 use crate::{
     client::{
-        Client,
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_REMOTE_POW_API_TIMEOUT, DEFAULT_TIPS_INTERVAL},
         error::Result,
         node_manager::{
             builder::validate_url,
             node::{Node, NodeAuth},
         },
+        Client,
     },
     types::block::protocol::ProtocolParameters,
 };

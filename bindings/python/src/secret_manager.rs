@@ -4,8 +4,9 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    SecretManagerMethod, call_secret_manager_method as rust_call_secret_manager_method,
+    call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager as RustSecretManager, SecretManagerDto},
+    SecretManagerMethod,
 };
 use pyo3::prelude::*;
 use tokio::sync::RwLock;

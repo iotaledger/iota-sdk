@@ -9,8 +9,8 @@ mod nft;
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    Error,
     address::{Address, AliasAddress, Ed25519Address, NftAddress},
+    Error,
 };
 use pretty_assertions::assert_eq;
 

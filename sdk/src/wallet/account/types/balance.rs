@@ -7,7 +7,7 @@ use getset::{CopyGetters, Getters};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::output::{AliasId, FoundryId, NftId, OutputId, TokenId, feature::MetadataFeature};
+use crate::types::block::output::{feature::MetadataFeature, AliasId, FoundryId, NftId, OutputId, TokenId};
 
 /// The balance of an account, returned from [`crate::wallet::account::Account::sync()`] and
 /// [`crate::wallet::account::Account::balance()`].

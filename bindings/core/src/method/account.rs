@@ -1,30 +1,30 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::{
-    U256,
-    client::{
-        api::{PreparedTransactionDataDto, SignedTransactionDataDto, input_selection::BurnDto},
-        secret::GenerateAddressOptions,
-    },
-    types::block::{
-        address::Bech32Address,
-        output::{OutputId, TokenId, dto::OutputDto},
-        payload::transaction::TransactionId,
-    },
-    wallet::{
-        SendNativeTokensParams, SendNftParams, SendParams,
-        account::{
-            ConsolidationParams, CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
-        },
-    },
-};
 #[cfg(feature = "participation")]
 use iota_sdk::{
     client::node_manager::node::Node,
     types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
     wallet::account::types::participation::ParticipationEventRegistrationOptions,
+};
+use iota_sdk::{
+    client::{
+        api::{input_selection::BurnDto, PreparedTransactionDataDto, SignedTransactionDataDto},
+        secret::GenerateAddressOptions,
+    },
+    types::block::{
+        address::Bech32Address,
+        output::{dto::OutputDto, OutputId, TokenId},
+        payload::transaction::TransactionId,
+    },
+    wallet::{
+        account::{
+            ConsolidationParams, CreateAliasParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
+            OutputParams, OutputsToClaim, SyncOptions, TransactionOptionsDto,
+        },
+        SendNativeTokensParams, SendNftParams, SendParams,
+    },
+    U256,
 };
 use serde::{Deserialize, Serialize};
 

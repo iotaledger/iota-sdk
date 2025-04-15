@@ -5,18 +5,18 @@ use std::path::PathBuf;
 
 use iota_sdk::{
     client::{
-        Error as ClientError,
         api::GetAddressesOptions,
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{SecretManager, stronghold::StrongholdSecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
         storage::StorageAdapter,
         stronghold::{Error as StrongholdError, StrongholdAdapter},
+        Error as ClientError,
     },
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{NODE_LOCAL, setup, tear_down};
+use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
 
 const PBKDF_SALT: &str = "wallet.rs";
 const PBKDF_ITER: u32 = 100;

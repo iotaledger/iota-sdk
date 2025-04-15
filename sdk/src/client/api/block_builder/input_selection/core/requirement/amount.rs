@@ -10,8 +10,8 @@ use crate::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            AliasOutputBuilder, AliasTransition, FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output,
-            OutputId, Rent, TokenId, unlock_condition::StorageDepositReturnUnlockCondition,
+            unlock_condition::StorageDepositReturnUnlockCondition, AliasOutputBuilder, AliasTransition,
+            FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output, OutputId, Rent, TokenId,
         },
     },
 };

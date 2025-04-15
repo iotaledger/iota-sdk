@@ -18,8 +18,8 @@ use crate::{
         output::OutputId,
     },
     wallet::account::{
-        Account, constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
-        types::address::AddressWithUnspentOutputs,
+        constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
+        types::address::AddressWithUnspentOutputs, Account,
     },
 };
 

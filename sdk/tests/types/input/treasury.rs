@@ -4,12 +4,12 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    Error,
     input::{
-        Input, TreasuryInput,
         dto::{InputDto, TreasuryInputDto},
+        Input, TreasuryInput,
     },
     payload::milestone::MilestoneId,
+    Error,
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;

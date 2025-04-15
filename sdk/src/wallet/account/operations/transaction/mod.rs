@@ -13,21 +13,21 @@ pub(crate) mod submit_transaction;
 pub use self::options::{RemainderValueStrategy, TransactionOptions, TransactionOptionsDto};
 use crate::{
     client::{
+        api::{verify_semantic, PreparedTransactionData, SignedTransactionData},
+        secret::{types::InputSigningData, SecretManage},
         Error,
-        api::{PreparedTransactionData, SignedTransactionData, verify_semantic},
-        secret::{SecretManage, types::InputSigningData},
     },
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{Output, dto::OutputDto},
+            output::{dto::OutputDto, Output},
             payload::transaction::TransactionPayload,
             semantic::ConflictReason,
         },
     },
     wallet::account::{
-        Account,
         types::{InclusionState, Transaction},
+        Account,
     },
 };
 

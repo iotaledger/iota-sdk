@@ -4,21 +4,21 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    Error,
     address::{Address, Ed25519Address},
     input::TreasuryInput,
     output::TreasuryOutput,
     payload::{
-        TreasuryTransactionPayload,
         milestone::{
-            MilestoneId, MilestoneIndex,
             option::{MigratedFundsEntry, ReceiptMilestoneOption, TailTransactionHash},
+            MilestoneId, MilestoneIndex,
         },
+        TreasuryTransactionPayload,
     },
     protocol::protocol_parameters,
     rand::number::rand_number,
+    Error,
 };
-use packable::{PackableExt, bounded::TryIntoBoundedU16Error};
+use packable::{bounded::TryIntoBoundedU16Error, PackableExt};
 use pretty_assertions::assert_eq;
 
 const AMOUNT: u64 = 1_000_000;

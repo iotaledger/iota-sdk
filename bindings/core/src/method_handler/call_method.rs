@@ -5,13 +5,12 @@ use std::pin::Pin;
 
 use futures::Future;
 use iota_sdk::{
-    client::{Client, secret::SecretManager},
+    client::{secret::SecretManager, Client},
     wallet::Wallet,
 };
 use tokio::sync::RwLock;
 
 use crate::{
-    UtilsMethod,
     method::{ClientMethod, SecretManagerMethod, WalletMethod},
     method_handler::{
         client::call_client_method_internal, secret_manager::call_secret_manager_method_internal,
@@ -19,6 +18,7 @@ use crate::{
     },
     panic::{convert_async_panics, convert_panics},
     response::Response,
+    UtilsMethod,
 };
 
 pub trait CallMethod {

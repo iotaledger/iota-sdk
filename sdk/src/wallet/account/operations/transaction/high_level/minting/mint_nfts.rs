@@ -7,17 +7,17 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        ConvertTo,
         address::Bech32Address,
         output::{
-            NftId, NftOutputBuilder,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
+            NftId, NftOutputBuilder,
         },
+        ConvertTo,
     },
     wallet::{
+        account::{operations::transaction::Transaction, Account, TransactionOptions},
         Error as WalletError,
-        account::{Account, TransactionOptions, operations::transaction::Transaction},
     },
 };
 

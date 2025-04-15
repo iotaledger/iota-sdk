@@ -6,8 +6,8 @@ use alloc::sync::Arc;
 use async_trait::async_trait;
 use futures::Future;
 use tokio::sync::{
-    RwLock,
     mpsc::{UnboundedReceiver, UnboundedSender},
+    RwLock,
 };
 
 #[derive(Debug, Clone)]

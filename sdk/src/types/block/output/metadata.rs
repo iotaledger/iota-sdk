@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{BlockId, output::OutputId, payload::transaction::TransactionId};
+use crate::types::block::{output::OutputId, payload::transaction::TransactionId, BlockId};
 
 /// Metadata of an [`Output`](crate::types::block::output::Output).
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]

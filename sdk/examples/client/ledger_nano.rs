@@ -17,10 +17,10 @@
 //! ```
 
 use iota_sdk::client::{
-    Result,
     api::GetAddressesOptions,
     constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{SecretManager, ledger_nano::LedgerSecretManager},
+    secret::{ledger_nano::LedgerSecretManager, SecretManager},
+    Result,
 };
 
 #[tokio::main]

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::{
     self,
-    block::{ConvertTo, address::Bech32Address, output::OutputId},
+    block::{address::Bech32Address, output::OutputId, ConvertTo},
 };
 
 /// An account address.

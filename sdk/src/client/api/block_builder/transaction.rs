@@ -7,20 +7,20 @@ use packable::PackableExt;
 
 use crate::{
     client::{
+        api::{types::PreparedTransactionData, ClientBlockBuilder},
+        secret::{types::InputSigningData, SecretManage},
         Error, Result,
-        api::{ClientBlockBuilder, types::PreparedTransactionData},
-        secret::{SecretManage, types::InputSigningData},
     },
     types::block::{
-        Block, BlockId,
         input::{Input, UtxoInput},
         output::{InputsCommitment, Output, OutputId},
         payload::{
-            TaggedDataPayload,
             transaction::{RegularTransactionEssence, TransactionEssence, TransactionPayload},
+            TaggedDataPayload,
         },
-        semantic::{ConflictReason, ValidationContext, semantic_validation},
+        semantic::{semantic_validation, ConflictReason, ValidationContext},
         signature::Ed25519Signature,
+        Block, BlockId,
     },
 };
 

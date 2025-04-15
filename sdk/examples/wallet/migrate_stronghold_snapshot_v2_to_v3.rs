@@ -8,11 +8,11 @@
 //! ```
 
 use iota_sdk::client::{
-    Result,
     api::GetAddressesOptions,
     constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{SecretManager, stronghold::StrongholdSecretManager},
+    secret::{stronghold::StrongholdSecretManager, SecretManager},
     stronghold::StrongholdAdapter,
+    Result,
 };
 
 const V2_PATH: &str = "./tests/wallet/fixtures/v2.stronghold";

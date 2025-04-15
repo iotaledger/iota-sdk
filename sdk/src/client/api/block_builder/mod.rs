@@ -14,22 +14,22 @@ use self::input_selection::BurnDto;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{
-        Client, Error, Result, api::block_builder::input_selection::Burn, constants::SHIMMER_COIN_TYPE,
-        secret::SecretManager,
+        api::block_builder::input_selection::Burn, constants::SHIMMER_COIN_TYPE, secret::SecretManager, Client, Error,
+        Result,
     },
     types::{
-        TryFromDto,
         block::{
-            Block, BlockId, ConvertTo,
             address::{Address, Bech32Address, Ed25519Address},
-            input::{INPUT_COUNT_MAX, UtxoInput, dto::UtxoInputDto},
+            input::{dto::UtxoInputDto, UtxoInput, INPUT_COUNT_MAX},
             output::{
-                BasicOutputBuilder, OUTPUT_COUNT_RANGE, Output, dto::OutputDto,
-                unlock_condition::AddressUnlockCondition,
+                dto::OutputDto, unlock_condition::AddressUnlockCondition, BasicOutputBuilder, Output,
+                OUTPUT_COUNT_RANGE,
             },
             parent::Parents,
             payload::{Payload, TaggedDataPayload},
+            Block, BlockId, ConvertTo,
         },
+        TryFromDto,
     },
 };
 

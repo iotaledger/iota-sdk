@@ -3,10 +3,10 @@
 
 use core::str::FromStr;
 
-use crypto::hashes::{Digest, blake2b::Blake2b256};
-use packable::{PackableExt, bounded::BoundedU16};
+use crypto::hashes::{blake2b::Blake2b256, Digest};
+use packable::{bounded::BoundedU16, PackableExt};
 
-use crate::types::block::{Error, output::OUTPUT_INDEX_RANGE, payload::transaction::TransactionId};
+use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::transaction::TransactionId, Error};
 
 pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUTPUT_INDEX_RANGE.end() }>;
 

@@ -8,11 +8,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::{
-        TryFromDto, ValidationParams,
         block::{
             address::Address,
-            output::{Output, OutputId, OutputMetadata, dto::OutputDto},
+            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
         },
+        TryFromDto, ValidationParams,
     },
     utils::serde::bip44::option_bip44,
 };

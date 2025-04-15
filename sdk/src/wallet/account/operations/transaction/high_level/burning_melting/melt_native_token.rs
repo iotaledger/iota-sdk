@@ -9,8 +9,8 @@ use crate::{
         AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
+        account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
         Error,
-        account::{Account, TransactionOptions, operations::transaction::Transaction, types::OutputData},
     },
 };
 

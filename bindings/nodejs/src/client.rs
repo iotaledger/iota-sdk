@@ -4,9 +4,9 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    ClientMethod, Response, Result, call_client_method as rust_call_client_method,
-    iota_sdk::client::{Client, ClientBuilder, mqtt::Topic},
-    listen_mqtt as rust_listen_mqtt,
+    call_client_method as rust_call_client_method,
+    iota_sdk::client::{mqtt::Topic, Client, ClientBuilder},
+    listen_mqtt as rust_listen_mqtt, ClientMethod, Response, Result,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;

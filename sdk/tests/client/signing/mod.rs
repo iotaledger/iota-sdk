@@ -10,21 +10,21 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        Result,
         api::{
-            GetAddressesOptions, PreparedTransactionData, input_selection::InputSelection,
-            transaction::validate_transaction_payload_length, verify_semantic,
+            input_selection::InputSelection, transaction::validate_transaction_payload_length, verify_semantic,
+            GetAddressesOptions, PreparedTransactionData,
         },
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{SecretManage, SecretManager},
+        Result,
     },
     types::block::{
         address::{Address, AliasAddress, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{AliasId, InputsCommitment, NftId},
         payload::{
-            TransactionPayload,
             transaction::{RegularTransactionEssence, TransactionEssence},
+            TransactionPayload,
         },
         protocol::protocol_parameters,
         semantic::ConflictReason,
@@ -34,9 +34,9 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    ALIAS_ID_1, ALIAS_ID_2,
+    build_inputs, build_outputs,
     Build::{Alias, Basic, Nft},
-    NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4, build_inputs, build_outputs,
+    ALIAS_ID_1, ALIAS_ID_2, NFT_ID_1, NFT_ID_2, NFT_ID_3, NFT_ID_4,
 };
 
 #[tokio::test]

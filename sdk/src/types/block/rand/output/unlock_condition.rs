@@ -4,10 +4,10 @@
 use crate::types::block::{
     address::Address,
     output::{
-        AliasId, NftId,
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition,
         },
+        AliasId, NftId,
     },
     rand::address::{rand_address, rand_alias_address, rand_nft_address},
 };

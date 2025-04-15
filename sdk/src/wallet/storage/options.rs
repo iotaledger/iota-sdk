@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
 
-use crate::wallet::storage::{StorageKind, constants::default_storage_path};
+use crate::wallet::storage::{constants::default_storage_path, StorageKind};
 
 #[cfg(feature = "storage")]
 #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]

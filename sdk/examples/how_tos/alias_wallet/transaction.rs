@@ -7,13 +7,13 @@
 //! `cargo run --release --all-features --example alias_wallet_transaction`
 
 use iota_sdk::{
-    Wallet,
     client::node_api::indexer::query_parameters::QueryParameter,
     types::block::address::{AliasAddress, ToBech32Ext},
     wallet::{
-        Result,
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
+        Result,
     },
+    Wallet,
 };
 
 #[tokio::main]

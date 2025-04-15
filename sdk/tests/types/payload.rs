@@ -6,11 +6,11 @@ use core::str::FromStr;
 use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, TreasuryInput, UtxoInput},
-    output::{BasicOutput, Output, TreasuryOutput, unlock_condition::AddressUnlockCondition},
+    output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, TreasuryOutput},
     payload::{
-        Payload, TaggedDataPayload, TreasuryTransactionPayload,
-        milestone::{MilestoneEssence, MilestoneIndex, MilestonePayload, option::MilestoneOptions},
+        milestone::{option::MilestoneOptions, MilestoneEssence, MilestoneIndex, MilestonePayload},
         transaction::{RegularTransactionEssence, TransactionEssence, TransactionId, TransactionPayload},
+        Payload, TaggedDataPayload, TreasuryTransactionPayload,
     },
     protocol::protocol_parameters,
     rand::{

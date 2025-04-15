@@ -1,21 +1,21 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::{HashSet, hash_map::Values};
+use std::collections::{hash_map::Values, HashSet};
 
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::input_selection::{Burn, InputSelection, Selected, is_alias_transition},
-        secret::{SecretManage, types::InputSigningData},
+        api::input_selection::{is_alias_transition, Burn, InputSelection, Selected},
+        secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
         address::Address,
         output::{Output, OutputId},
     },
     wallet::account::{
-        Account, AccountDetails, OutputData, operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
+        operations::helpers::time::can_output_be_unlocked_forever_from_now_on, Account, AccountDetails, OutputData,
     },
 };
 

@@ -7,11 +7,11 @@ use crypto::keys::bip39::Mnemonic;
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
     client::{
-        Client, Result,
         api::GetAddressesOptions,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         generate_mnemonic,
         secret::{GenerateAddressOptions, SecretManager},
+        Client, Result,
     },
     types::block::address::{Address, Hrp},
 };

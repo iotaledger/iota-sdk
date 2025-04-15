@@ -18,9 +18,9 @@
 //! ```
 
 use iota_sdk::client::{
-    Client, Result,
     api::GetAddressesOptions,
-    secret::{SecretManager, ledger_nano::LedgerSecretManager},
+    secret::{ledger_nano::LedgerSecretManager, SecretManager},
+    Client, Result,
 };
 
 const AMOUNT: u64 = 1_000_000;

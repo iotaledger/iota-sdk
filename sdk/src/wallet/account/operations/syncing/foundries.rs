@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use crate::{
     client::secret::SecretManage,
     types::block::output::{FoundryId, Output},
-    wallet::{Account, task},
+    wallet::{task, Account},
 };
 
 impl<S: 'static + SecretManage> Account<S>
