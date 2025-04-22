@@ -21,7 +21,7 @@ use crate::{
     types::block::{address::Address, protocol::ProtocolParameters},
 };
 
-impl<'a> ClientBlockBuilder<'a> {
+impl ClientBlockBuilder<'_> {
     /// If custom inputs are provided we check if they are unspent, get the balance and search the Ed25519 addresses for
     /// them with the provided input_range so we can later sign them.
     /// Forwards to input selection with all inputs in `mandatory_inputs`, so they will all be included in the

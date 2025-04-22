@@ -39,7 +39,7 @@ impl Wallet {
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
                 let options = options.into();
-                if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
+                if options.as_ref().is_some_and(|o| o.ledger_nano_prompt) {
                     #[cfg(feature = "events")]
                     {
                         let changed_options = options.map(|mut options| {

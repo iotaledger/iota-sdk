@@ -14,7 +14,7 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::{api::core::response::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
+    types::block::payload::transaction::dto::TransactionPayloadDto,
     wallet::{
         account::types::OutputDataDto,
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
@@ -158,9 +158,7 @@ where
                             transaction_inputs: transaction.as_ref().map(|tx| {
                                 tx.inputs
                                     .clone()
-                                    .into_iter()
-                                    .map(OutputWithMetadataResponse::from)
-                                    .collect()
+                                    .into_iter().collect()
                             }),
                         })),
                     )
@@ -279,7 +277,7 @@ where
 
     // Should only be called from the Wallet so all accounts are on the same state
     // Will update the addresses with a possible new Bech32 HRP and clear the inaccessible_incoming_transactions.
-    pub(crate) async fn update_account_bech32_hrp(&mut self) -> crate::wallet::Result<()> {
+    pub(crate) async fn update_account_bech32_hrp(&self) -> crate::wallet::Result<()> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
         log::debug!("[UPDATE ACCOUNT WITH BECH32 HRP] new bech32_hrp: {}", bech32_hrp);
         let mut account_details = self.details_mut().await;

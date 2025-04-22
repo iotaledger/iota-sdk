@@ -112,9 +112,9 @@ impl Wallet {
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
-        let ignore_backup_values = ignore_if_coin_type_mismatch.map_or(false, |ignore| {
+        let ignore_backup_values = ignore_if_coin_type_mismatch.is_some_and(|ignore| {
             if ignore {
-                read_coin_type.map_or(true, |read_coin_type| {
+                read_coin_type.is_none_or(|read_coin_type| {
                     self.coin_type.load(Ordering::Relaxed) != read_coin_type
                 })
             } else {
@@ -164,9 +164,9 @@ impl Wallet {
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
-                let restore_accounts = ignore_if_bech32_hrp_mismatch.map_or(true, |expected_bech32_hrp| {
+                let restore_accounts = ignore_if_bech32_hrp_mismatch.is_none_or(|expected_bech32_hrp| {
                     // Only restore if bech32 hrps match
-                    read_accounts.first().map_or(true, |account| {
+                    read_accounts.first().is_none_or(|account| {
                         account
                             .public_addresses
                             .first()
@@ -196,7 +196,7 @@ impl Wallet {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    &self
+                    self
                         .storage_options
                         .path
                         .clone()
@@ -294,9 +294,9 @@ impl Wallet<StrongholdSecretManager> {
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
         // correct, so we will not restore them
-        let ignore_backup_values = ignore_if_coin_type_mismatch.map_or(false, |ignore| {
+        let ignore_backup_values = ignore_if_coin_type_mismatch.is_some_and(|ignore| {
             if ignore {
-                read_coin_type.map_or(true, |read_coin_type| {
+                read_coin_type.is_none_or(|read_coin_type| {
                     self.coin_type.load(Ordering::Relaxed) != read_coin_type
                 })
             } else {
@@ -337,9 +337,9 @@ impl Wallet<StrongholdSecretManager> {
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
-                let restore_accounts = ignore_if_bech32_hrp_mismatch.map_or(true, |expected_bech32_hrp| {
+                let restore_accounts = ignore_if_bech32_hrp_mismatch.is_none_or(|expected_bech32_hrp| {
                     // Only restore if bech32 hrps match
-                    read_accounts.first().map_or(true, |account| {
+                    read_accounts.first().is_none_or(|account| {
                         account
                             .public_addresses
                             .first()
@@ -369,7 +369,7 @@ impl Wallet<StrongholdSecretManager> {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    &self
+                    self
                         .storage_options
                         .path
                         .clone()
