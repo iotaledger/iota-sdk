@@ -322,7 +322,7 @@ fn is_valid_participation_output(output: &Output) -> bool {
         basic_output
             .features()
             .tag()
-            .map_or(false, |tag| tag.tag() == PARTICIPATION_TAG.as_bytes())
+            .is_some_and(|tag| tag.tag() == PARTICIPATION_TAG.as_bytes())
     } else {
         false
     }

@@ -334,7 +334,7 @@ pub(crate) mod rocksdb {
 
             chrysalis_data.insert(key.to_vec(), value);
         }
-        if !chrysalis_data.contains_key(&b"iota-wallet-account-indexation".to_vec()) {
+        if !chrysalis_data.contains_key(b"iota-wallet-account-indexation".as_slice()) {
             return Err(crate::wallet::Error::Migration(
                 "no chrysalis data to migrate".to_string(),
             ));

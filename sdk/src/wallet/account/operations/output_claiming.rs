@@ -358,6 +358,7 @@ where
                         .finish()?;
 
                 if available_amount < required_amount {
+                    #[allow(clippy::set_contains_or_insert)]
                     if !additional_inputs_used.contains(&output_data.output_id) {
                         if let Some(native_tokens) = output_data.output.native_tokens() {
                             // Skip input if the max native tokens count would be exceeded
@@ -437,7 +438,7 @@ pub(crate) fn sdr_not_expired(output: &Output, current_time: u32) -> Option<&Sto
         unlock_conditions.storage_deposit_return().and_then(|sdr| {
             let expired = unlock_conditions
                 .expiration()
-                .map_or(false, |expiration| current_time >= expiration.timestamp());
+                .is_some_and(|expiration| current_time >= expiration.timestamp());
 
             // We only have to send the storage deposit return back if the output is not expired
             (!expired).then_some(sdr)

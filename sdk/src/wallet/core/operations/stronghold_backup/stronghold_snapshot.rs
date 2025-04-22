@@ -44,7 +44,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
         let mut serialized_accounts = Vec::new();
         for account in self.accounts.read().await.iter() {
-            serialized_accounts.push(serde_json::to_value(&AccountDetailsDto::from(
+            serialized_accounts.push(serde_json::to_value(AccountDetailsDto::from(
                 &*account.details().await,
             ))?);
         }

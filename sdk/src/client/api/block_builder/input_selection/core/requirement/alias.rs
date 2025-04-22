@@ -69,7 +69,7 @@ impl InputSelection {
             && self
                 .burn
                 .as_ref()
-                .map_or(false, |burn| burn.aliases.contains(&alias_id))
+                .is_some_and(|burn| burn.aliases.contains(&alias_id))
         {
             return Err(Error::UnfulfillableRequirement(Requirement::Alias(
                 alias_id,

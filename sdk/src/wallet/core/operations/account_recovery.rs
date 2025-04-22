@@ -122,7 +122,7 @@ where
 
             // Generate account with addresses and get their outputs in parallel
             let results = futures::future::try_join_all((0..updated_account_gap_limit).map(|_| {
-                let mut new_account = self.create_account();
+                let new_account = self.create_account();
                 let sync_options_ = sync_options.clone();
                 async move {
                     task::spawn(async move {

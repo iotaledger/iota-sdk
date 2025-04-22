@@ -27,11 +27,8 @@
 #[cfg(feature = "mqtt")]
 macro_rules! lazy_static {
     ($init:expr => $type:ty) => {{
-        static mut VALUE: Option<$type> = None;
-        static INIT: std::sync::Once = std::sync::Once::new();
-
-        INIT.call_once(|| unsafe { VALUE = Some($init) });
-        unsafe { VALUE.as_ref() }.expect("failed to get lazy static value")
+        static VALUE: std::sync::LazyLock<$type> = std::sync::LazyLock::new(|| $init);
+        &VALUE
     }};
 }
 

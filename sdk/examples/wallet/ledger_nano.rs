@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     let secret_manager = LedgerSecretManager::new(true);
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
-        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .with_storage_path(std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()

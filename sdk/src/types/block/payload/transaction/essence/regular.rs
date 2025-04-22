@@ -361,7 +361,6 @@ pub(crate) mod dto {
                 builder
             };
 
-            builder.finish_with_params(params).map_err(Into::into)
-        }
+            builder.finish_with_params(params)}
     }
 }

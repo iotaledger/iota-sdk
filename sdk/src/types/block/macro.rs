@@ -145,6 +145,8 @@ macro_rules! string_serde_impl {
 #[cfg(feature = "serde")]
 pub(crate) use string_serde_impl;
 
+/// Macro to create bitflags.
+/// 
 /// Convenience macro to work around the fact the `[bitflags]` crate does not yet support iterating over the
 /// individual flags. This macro essentially creates the `[bitflags]` and puts the individual flags into an associated
 /// constant `pub const ALL_FLAGS: &'static []`.

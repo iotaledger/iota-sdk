@@ -419,7 +419,9 @@ impl SecretManagerConfig for LedgerSecretManager {
     }
 }
 
-/// the Ledger Nano S(+)/X app can present the user a detailed view of the transaction before it
+/// Checks if blind signing is needed for a transaction.
+/// 
+/// The Ledger Nano S(+)/X app can present the user a detailed view of the transaction before it
 /// is signed but only with BasicOutputs, without extra-features and if the Essence is not too large.
 /// If criteria are not met, blind signing is needed.
 /// This method finds out if we have to switch to blind signing mode.

@@ -23,7 +23,7 @@ use crate::{
     utils::unix_timestamp_now,
 };
 
-impl<'a> ClientBlockBuilder<'a> {
+impl ClientBlockBuilder<'_> {
     // Get basic outputs for an address without storage deposit return unlock condition
     pub(crate) async fn basic_address_outputs(
         &self,
@@ -213,7 +213,7 @@ impl<'a> ClientBlockBuilder<'a> {
                             cached_error.replace(Error::from(err));
                             continue;
                         }
-                        Err(err @ InputSelectionError::NoAvailableInputsProvided { .. }) => {
+                        Err(err @ InputSelectionError::NoAvailableInputsProvided) => {
                             cached_error.replace(Error::from(err));
                             continue;
                         }
