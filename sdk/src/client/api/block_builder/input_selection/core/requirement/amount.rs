@@ -10,8 +10,8 @@ use crate::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AliasOutputBuilder, AliasTransition,
-            FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output, OutputId, Rent, TokenId,
+            AliasOutputBuilder, AliasTransition, FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output,
+            OutputId, Rent, TokenId, unlock_condition::StorageDepositReturnUnlockCondition,
         },
     },
 };
@@ -122,11 +122,7 @@ impl AmountSelection {
         if self.inputs_sum > self.outputs_sum {
             let diff = self.inputs_sum - self.outputs_sum;
 
-            if self.remainder_amount > diff {
-                self.remainder_amount - diff
-            } else {
-                0
-            }
+            self.remainder_amount.saturating_sub(diff)
         } else if self.inputs_sum < self.outputs_sum {
             self.outputs_sum - self.inputs_sum
         } else if self.native_tokens_remainder {
