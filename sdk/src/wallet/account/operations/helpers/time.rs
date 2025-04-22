@@ -33,7 +33,7 @@ pub(crate) fn can_output_be_unlocked_now(
     Ok(account_addresses
         .iter()
         .any(|a| a.address.inner == required_unlock_address)
-        || alias_and_nft_addresses.iter().any(|a| *a == required_unlock_address))
+        || alias_and_nft_addresses.contains(&required_unlock_address))
 }
 
 // Check if an output can be unlocked by one of the account addresses at the current time and at any
