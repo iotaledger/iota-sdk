@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.6 - 2025-04-24
+
+### Added
+
+- `SecretManager::getSeed()`;
+
 ## 1.1.5 - 2024-01-29
 
 ### Added

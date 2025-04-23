@@ -22,7 +22,7 @@ use crypto::{
 use instant::Duration;
 use iota_stronghold::{
     Location,
-    procedures::{self, Curve, KeyType, Slip10DeriveInput},
+    procedures::{self, Curve, GetSecret, KeyType, Slip10DeriveInput},
 };
 
 use super::{
@@ -492,6 +492,21 @@ impl StrongholdAdapter {
         self.write_stronghold_snapshot(None).await?;
 
         Ok(())
+    }
+
+    /// Execute [GetSecret](procedures::GetSecret) procedure in Stronghold to get the hex encoded seed, that's stored
+    /// when calling `store_mnemonic()`.
+    pub async fn get_seed(&self) -> Result<String, Error> {
+        let client = self.stronghold.lock().await.get_client(PRIVATE_DATA_CLIENT_PATH)?;
+
+        let seed_location = Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH);
+        let seed_bytes = client.execute_procedure(GetSecret {
+            location: seed_location,
+        })?;
+
+        let hex_encoded_seed = prefix_hex::encode(seed_bytes);
+
+        Ok(hex_encoded_seed)
     }
 }
 

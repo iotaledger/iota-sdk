@@ -35,6 +35,10 @@ describe('Wallet', () => {
         });
 
         expect(account.getMetadata().index).toStrictEqual(0);
+        
+        const secretManager = await wallet.getSecretManager();
+        const seed = await secretManager.getSeed();
+        expect(seed).toStrictEqual("0x35c11ac650f8f00d5c66d1d0ac1d9a3ac536ed03d705931cce7275d08167091608fa7e09013bc1f3990fe3611c07a2685631b6dd25f49ac64b80132a35228d1a");
 
         await wallet.destroy()
         removeDir(storagePath)
