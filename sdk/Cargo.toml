@@ -100,7 +100,7 @@ zeroize = { version = "1.7.0", default-features = false, features = [
 ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-tokio = { version = "1.36.0", default-features = false, features = [
+tokio = { version = "1.44.2", default-features = false, features = [
     "macros",
     "rt-multi-thread",
     "time",
@@ -116,7 +116,7 @@ instant = { version = "0.1.12", default-features = false, features = [
     "wasm-bindgen",
 ], optional = true }
 lazy_static = { version = "1.4.0", default-features = false }
-tokio = { version = "1.36.0", default-features = false, features = [
+tokio = { version = "1.44.2", default-features = false, features = [
     "macros",
     "rt",
     "time",
@@ -132,7 +132,7 @@ pretty_assertions = { version = "1.4.0", default-features = false, features = [
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-tokio = { version = "1.36.0", default-features = false, features = [
+tokio = { version = "1.44.2", default-features = false, features = [
     "macros",
     "rt",
     "rt-multi-thread",

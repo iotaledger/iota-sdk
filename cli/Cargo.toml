@@ -48,7 +48,7 @@ prefix-hex = { version = "0.7.1", default-features = false, features = ["std"] }
 rustyline = { version = "13.0.0", features = ["derive"] }
 serde_json = { version = "1.0.113", default-features = false }
 thiserror = { version = "1.0.57", default-features = false }
-tokio = { version = "1.36.0", default-features = false, features = ["fs"] }
+tokio = { version = "1.44.2", default-features = false, features = ["fs"] }
 zeroize = { version = "1.7.0", default-features = false }
 
 [target.'cfg(target_os = "windows")'.dependencies]

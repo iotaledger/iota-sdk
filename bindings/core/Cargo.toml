@@ -29,7 +29,7 @@ primitive-types = { version = "0.12.2", default-features = false }
 serde = { version = "1.0.196", default-features = false }
 serde_json = { version = "1.0.113", default-features = false }
 thiserror = { version = "1.0.57", default-features = false }
-tokio = { version = "1.36.0", default-features = false }
+tokio = { version = "1.44.2", default-features = false }
 zeroize = { version = "1.7.0", default-features = false }
 
 [dev-dependencies]

@@ -81,7 +81,7 @@ pub fn listen_wallet(wallet: &Wallet, events: Vec<u8>, handler: PyObject) {
             .listen(rust_events, move |event| {
                 let event_string = serde_json::to_string(&event).expect("json to string error");
                 Python::with_gil(|py| {
-                    let args = PyTuple::new(py, &[event_string]);
+                    let args = PyTuple::new(py, &[event_string]).expect("failed to convert event string");
                     handler.call1(py, args).expect("failed to call python callback");
                 });
             })
