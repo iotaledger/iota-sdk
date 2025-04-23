@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk_bindings_core::{
-    call_client_method as rust_call_client_method,
+    ClientMethod, call_client_method as rust_call_client_method,
     iota_sdk::client::{
-        mqtt::{Error as MqttError, Topic},
         Client as RustClient, ClientBuilder,
+        mqtt::{Error as MqttError, Topic},
     },
-    listen_mqtt as rust_listen_mqtt, ClientMethod,
+    listen_mqtt as rust_listen_mqtt,
 };
 use pyo3::{prelude::*, types::PyTuple};
 
@@ -42,6 +42,7 @@ pub fn call_client_method(client: &Client, method: String) -> Result<String> {
 
 #[pyfunction]
 pub fn listen_mqtt(client: &Client, topics: Vec<String>, handler: PyObject) -> Result<()> {
+    let handler = std::sync::Arc::new(handler);
     let topics = topics
         .iter()
         .map(Topic::new)
@@ -50,7 +51,7 @@ pub fn listen_mqtt(client: &Client, topics: Vec<String>, handler: PyObject) -> R
         rust_listen_mqtt(&client.client, topics, move |event| {
             let event_string = serde_json::to_string(&event).expect("json to string error");
             Python::with_gil(|py| {
-                let args = PyTuple::new(py, &[event_string]);
+                let args = PyTuple::new(py, &[event_string]).expect("failed to convert event string");
                 handler.call1(py, args).expect("failed to call python callback");
             })
         })
