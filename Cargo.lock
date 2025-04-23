@@ -1909,7 +1909,7 @@ dependencies = [
 [[package]]
 name = "iota_stronghold"
 version = "2.1.0"
-source = "git+https://github.com/Thoralf-M/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
 dependencies = [
  "bincode",
  "hkdf",
@@ -3393,7 +3393,7 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "stronghold-derive"
 version = "1.0.0"
-source = "git+https://github.com/Thoralf-M/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3403,7 +3403,7 @@ dependencies = [
 [[package]]
 name = "stronghold-runtime"
 version = "2.0.1"
-source = "git+https://github.com/Thoralf-M/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
 dependencies = [
  "dirs",
  "iota-crypto",
@@ -3421,7 +3421,7 @@ dependencies = [
 [[package]]
 name = "stronghold-utils"
 version = "1.0.0"
-source = "git+https://github.com/Thoralf-M/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
 dependencies = [
  "rand",
  "stronghold-derive",
@@ -3430,7 +3430,7 @@ dependencies = [
 [[package]]
 name = "stronghold_engine"
 version = "2.0.1"
-source = "git+https://github.com/Thoralf-M/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
+source = "git+https://github.com/iotaledger/stronghold.rs?rev=ccda33a7f52b3ebcd915cac6c5466409a12188ad#ccda33a7f52b3ebcd915cac6c5466409a12188ad"
 dependencies = [
  "anyhow",
  "dirs-next",
