@@ -12,11 +12,11 @@
 
 use iota_sdk::{
     client::{
+        Result,
         api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
         secret::{SecretManage, SecretManager},
-        Result,
     },
-    types::{block::payload::transaction::TransactionPayload, TryFromDto},
+    types::{TryFromDto, block::payload::transaction::TransactionPayload},
 };
 
 const PREPARED_TRANSACTION_FILE_NAME: &str = "examples/client/offline_signing/prepared_transaction.json";

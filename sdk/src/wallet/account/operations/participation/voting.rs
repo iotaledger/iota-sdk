@@ -4,18 +4,18 @@
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::{
-        api::plugins::participation::types::{Participation, ParticipationEventId, Participations, PARTICIPATION_TAG},
+        api::plugins::participation::types::{PARTICIPATION_TAG, Participation, ParticipationEventId, Participations},
         block::{
             output::{
-                feature::{MetadataFeature, TagFeature},
                 BasicOutputBuilder, Feature,
+                feature::{MetadataFeature, TagFeature},
             },
             payload::TaggedDataPayload,
         },
     },
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
         Result,
+        account::{Account, TransactionOptions, types::Transaction},
     },
 };
 

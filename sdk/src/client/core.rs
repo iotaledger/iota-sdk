@@ -19,10 +19,10 @@ use super::request_pool::RequestPool;
 use crate::client::constants::CACHE_NETWORK_INFO_TIMEOUT_IN_SECONDS;
 use crate::{
     client::{
+        Error,
         builder::{ClientBuilder, NetworkInfo},
         error::Result,
         node_manager::NodeManager,
-        Error,
     },
     types::block::{address::Hrp, output::RentStructure, protocol::ProtocolParameters},
 };

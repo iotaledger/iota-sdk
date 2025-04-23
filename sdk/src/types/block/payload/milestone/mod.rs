@@ -17,7 +17,7 @@ use core::{fmt::Debug, ops::RangeInclusive};
 use crypto::Error as CryptoError;
 use iterator_sorted::is_unique_sorted;
 pub(crate) use option::{MilestoneOptionCount, ReceiptFundsCount};
-use packable::{bounded::BoundedU8, prefix::VecPrefix, Packable};
+use packable::{Packable, bounded::BoundedU8, prefix::VecPrefix};
 
 pub use self::{
     essence::MilestoneEssence,
@@ -27,7 +27,7 @@ pub use self::{
     option::{MilestoneOption, MilestoneOptions, ParametersMilestoneOption, ReceiptMilestoneOption},
 };
 pub(crate) use self::{essence::MilestoneMetadataLength, option::BinaryParametersLength};
-use crate::types::block::{protocol::ProtocolParameters, signature::Signature, Error};
+use crate::types::block::{Error, protocol::ProtocolParameters, signature::Signature};
 
 #[derive(Debug)]
 #[allow(missing_docs)]
@@ -172,10 +172,10 @@ pub mod dto {
     use super::*;
     use crate::{
         types::{
-            block::{
-                parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error,
-            },
             TryFromDto, ValidationParams,
+            block::{
+                BlockId, Error, parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto,
+            },
         },
         utils::serde::prefix_hex_bytes,
     };

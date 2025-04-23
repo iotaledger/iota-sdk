@@ -4,10 +4,10 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Result},
+    client::{Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter},
     types::block::{
         address::ToBech32Ext,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+        output::{BasicOutputBuilder, unlock_condition::AddressUnlockCondition},
     },
 };
 use pretty_assertions::assert_eq;

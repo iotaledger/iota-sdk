@@ -15,11 +15,11 @@ pub use self::{
     nft::NftAddress,
 };
 use crate::types::block::{
+    ConvertTo, Error,
     output::{Output, OutputId},
     semantic::{ConflictReason, ValidationContext},
     signature::Signature,
     unlock::Unlock,
-    ConvertTo, Error,
 };
 
 /// A generic address supporting different address kinds.

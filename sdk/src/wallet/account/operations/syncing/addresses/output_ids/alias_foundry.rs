@@ -8,9 +8,9 @@ use crate::{
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
+            ConvertTo,
             address::{AliasAddress, Bech32Address, ToBech32Ext},
             output::{Output, OutputId},
-            ConvertTo,
         },
     },
     wallet::{

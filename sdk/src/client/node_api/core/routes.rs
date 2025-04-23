@@ -9,24 +9,24 @@ use url::Url;
 
 use crate::{
     client::{
+        Client, ClientInner, Error, Result,
         constants::{DEFAULT_API_TIMEOUT, DEFAULT_USER_AGENT},
         node_manager::node::{Node, NodeAuth},
-        Client, ClientInner, Error, Result,
     },
     types::{
+        TryFromDto,
         api::core::response::{
             BlockMetadataResponse, InfoResponse, OutputWithMetadataResponse, PeerResponse, ReceiptResponse,
             ReceiptsResponse, RoutesResponse, SubmitBlockResponse, TipsResponse, TreasuryResponse, UtxoChangesResponse,
         },
         block::{
+            Block, BlockDto, BlockId,
             output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
             payload::{
-                milestone::{dto::MilestonePayloadDto, MilestoneId, MilestonePayload},
+                milestone::{MilestoneId, MilestonePayload, dto::MilestonePayloadDto},
                 transaction::TransactionId,
             },
-            Block, BlockDto, BlockId,
         },
-        TryFromDto,
     },
 };
 

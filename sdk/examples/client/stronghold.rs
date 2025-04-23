@@ -10,10 +10,10 @@
 
 use iota_sdk::{
     client::{
+        Result,
         api::GetAddressesOptions,
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
-        Result,
+        secret::{SecretManager, stronghold::StrongholdSecretManager},
     },
     crypto::keys::bip39::Mnemonic,
 };

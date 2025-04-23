@@ -15,12 +15,12 @@
 //! ```
 
 use iota_sdk::{
+    Wallet,
     types::block::{
         output::{NftId, Output, OutputId},
         payload::transaction::TransactionId,
     },
     wallet::{Account, MintNftParams, Result},
-    Wallet,
 };
 
 #[tokio::main]

@@ -13,9 +13,9 @@
 //! ```
 
 use iota_sdk::{
-    types::block::address::ToBech32Ext,
-    wallet::{account::ConsolidationParams, Result},
     Wallet,
+    types::block::address::ToBech32Ext,
+    wallet::{Result, account::ConsolidationParams},
 };
 
 #[tokio::main]

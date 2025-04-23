@@ -4,18 +4,18 @@
 //! Single-threaded PoW miner.
 
 use crypto::{
-    encoding::ternary::{b1t6, T1B1Buf, TritBuf},
+    encoding::ternary::{T1B1Buf, TritBuf, b1t6},
     hashes::{
+        Digest,
         blake2b::Blake2b256,
         ternary::{
-            curl_p::{CurlPBatchHasher, BATCH_SIZE},
             HASH_LENGTH,
+            curl_p::{BATCH_SIZE, CurlPBatchHasher},
         },
-        Digest,
     },
 };
 
-use super::{score::count_trailing_zeros, LN_3};
+use super::{LN_3, score::count_trailing_zeros};
 
 // Should take around one second to reach on an average CPU, so shouldn't cause a noticeable delay on
 // `timeout_in_seconds`.

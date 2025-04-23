@@ -7,9 +7,9 @@ mod reference;
 mod signature;
 
 use iota_sdk::types::block::{
+    Error,
     rand::signature::rand_signature,
     unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-    Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
 use pretty_assertions::assert_eq;

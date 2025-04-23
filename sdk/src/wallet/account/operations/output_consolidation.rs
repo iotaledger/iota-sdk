@@ -4,14 +4,14 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
+use crate::client::secret::{DowncastSecretManager, ledger_nano::LedgerSecretManager};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Bech32Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
+            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output, unlock_condition::AddressUnlockCondition,
         },
     },
 };
@@ -28,13 +28,13 @@ const MIN_OUTPUT_SIZE_IN_ESSENCE: usize = 46;
 #[cfg(feature = "ledger_nano")]
 use crate::wallet::account::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD;
 use crate::wallet::{
+    Result,
     account::{
+        Account, AddressWithUnspentOutputs, TransactionOptions,
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
         types::{OutputData, Transaction},
-        Account, AddressWithUnspentOutputs, TransactionOptions,
     },
-    Result,
 };
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

@@ -17,7 +17,7 @@ use async_trait::async_trait;
 #[cfg(feature = "rocksdb")]
 pub use chrysalis::rocksdb::migrate_db_chrysalis_to_stardust;
 use once_cell::sync::Lazy;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 use crate::{
     client::storage::StorageAdapter,

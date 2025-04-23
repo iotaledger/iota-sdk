@@ -14,8 +14,8 @@
 //! ```
 
 use iota_sdk::client::{
-    api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client,
-    Result,
+    Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
+    secret::SecretManager,
 };
 
 #[tokio::main]

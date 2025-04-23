@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{unlock::UnlockIndex, Error};
+use crate::types::block::{Error, unlock::UnlockIndex};
 
 /// Points to the unlock of a consumed NFT output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]

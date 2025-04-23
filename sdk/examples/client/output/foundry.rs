@@ -10,22 +10,22 @@
 
 use iota_sdk::{
     client::{
-        api::{input_selection::Burn, GetAddressesOptions},
+        Client, Result,
+        api::{GetAddressesOptions, input_selection::Burn},
         node_api::indexer::query_parameters::QueryParameter,
         request_funds_from_faucet,
         secret::SecretManager,
-        Client, Result,
     },
     types::block::{
         address::{AliasAddress, ToBech32Ext},
         output::{
+            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, Output,
+            OutputId, SimpleTokenScheme, TokenId, TokenScheme,
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
             unlock_condition::{
                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
                 StateControllerAddressUnlockCondition,
             },
-            AliasId, AliasOutputBuilder, BasicOutputBuilder, FoundryId, FoundryOutputBuilder, NativeToken, Output,
-            OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
         payload::Payload,
     },

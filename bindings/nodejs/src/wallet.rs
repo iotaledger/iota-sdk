@@ -4,13 +4,12 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_wallet_method as rust_call_wallet_method,
+    Response, Result, WalletMethod, WalletOptions, call_wallet_method as rust_call_wallet_method,
     iota_sdk::wallet::{
+        Wallet,
         events::types::{Event, WalletEventType},
         migration::migrate_db_chrysalis_to_stardust as rust_migrate_db_chrysalis_to_stardust,
-        Wallet,
     },
-    Response, Result, WalletMethod, WalletOptions,
 };
 use neon::prelude::*;
 use tokio::sync::RwLock;

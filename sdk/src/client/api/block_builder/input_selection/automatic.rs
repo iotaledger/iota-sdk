@@ -10,16 +10,16 @@ use itertools::Itertools;
 
 use crate::{
     client::{
+        Error, Result,
         api::{
+            ADDRESS_GAP_RANGE, ClientBlockBuilder, GetAddressesOptions,
             block_builder::input_selection::core::{Error as InputSelectionError, InputSelection, Selected},
             input_selection::is_alias_transition,
-            ClientBlockBuilder, GetAddressesOptions, ADDRESS_GAP_RANGE,
         },
         node_api::indexer::query_parameters::QueryParameter,
         secret::types::InputSigningData,
-        Error, Result,
     },
-    types::block::{address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters, ConvertTo},
+    types::block::{ConvertTo, address::Bech32Address, output::OutputWithMetadata, protocol::ProtocolParameters},
     utils::unix_timestamp_now,
 };
 

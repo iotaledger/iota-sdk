@@ -5,18 +5,18 @@ use derivative::Derivative;
 use iota_sdk::{
     client::secret::types::InputSigningDataDto,
     types::block::{
+        BlockDto,
         address::{Bech32Address, Hrp},
-        output::{dto::OutputDto, AliasId, NftId, OutputId, RentStructure},
+        output::{AliasId, NftId, OutputId, RentStructure, dto::OutputDto},
         payload::{
             dto::MilestonePayloadDto,
             transaction::{
-                dto::{TransactionEssenceDto, TransactionPayloadDto},
                 TransactionId,
+                dto::{TransactionEssenceDto, TransactionPayloadDto},
             },
         },
         protocol::ProtocolParameters,
         signature::dto::Ed25519SignatureDto,
-        BlockDto,
     },
 };
 use serde::{Deserialize, Serialize};

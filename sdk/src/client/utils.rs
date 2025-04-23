@@ -7,8 +7,8 @@ use core::borrow::Borrow;
 use std::collections::HashMap;
 
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
-    keys::bip39::{wordlist, Mnemonic, MnemonicRef, Passphrase, Seed},
+    hashes::{Digest, blake2b::Blake2b256},
+    keys::bip39::{Mnemonic, MnemonicRef, Passphrase, Seed, wordlist},
     utils,
 };
 use serde::{Deserialize, Serialize};
@@ -18,10 +18,10 @@ use super::{Client, ClientInner};
 use crate::{
     client::{Error, Result},
     types::block::{
+        ConvertTo,
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AliasId, NftId},
         payload::TaggedDataPayload,
-        ConvertTo,
     },
 };
 

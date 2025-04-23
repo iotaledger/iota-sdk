@@ -12,11 +12,11 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
     },
     types::block::{
         address::Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+        output::{BasicOutputBuilder, unlock_condition::AddressUnlockCondition},
     },
     wallet::{ClientOptions, Result, Wallet},
 };

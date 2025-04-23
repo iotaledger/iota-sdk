@@ -4,21 +4,21 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
+        Client, Result,
         api::{
-            transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
+            GetAddressesOptions, PreparedTransactionData, transaction::validate_transaction_payload_length,
+            verify_semantic,
         },
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{SecretManage, SecretManager},
-        Client, Result,
     },
     types::block::{
         address::ToBech32Ext,
         input::{Input, UtxoInput},
         output::InputsCommitment,
         payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
+            transaction::{RegularTransactionEssence, TransactionEssence},
         },
         protocol::protocol_parameters,
         semantic::ConflictReason,
@@ -27,7 +27,7 @@ use iota_sdk::{
 };
 use pretty_assertions::assert_eq;
 
-use crate::client::{build_inputs, build_outputs, Build::Basic};
+use crate::client::{Build::Basic, build_inputs, build_outputs};
 
 #[tokio::test]
 async fn single_ed25519_unlock() -> Result<()> {

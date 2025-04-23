@@ -4,30 +4,31 @@
 use alloc::collections::BTreeSet;
 
 use packable::{
+    Packable,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
 };
 
 use super::verify_output_amount_packable;
 use crate::types::{
+    ValidationParams,
     block::{
+        Error,
         address::{Address, NftAddress},
         output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            StateTransitionError, StateTransitionVerifier,
+            feature::{Feature, FeatureFlags, Features, verify_allowed_features},
             unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+                UnlockCondition, UnlockConditionFlags, UnlockConditions, verify_allowed_unlock_conditions,
             },
-            verify_output_amount, ChainId, NativeToken, NativeTokens, NftId, Output, OutputBuilderAmount, OutputId,
-            Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            verify_output_amount,
         },
         protocol::ProtocolParameters,
         semantic::{ConflictReason, ValidationContext},
         unlock::Unlock,
-        Error,
     },
-    ValidationParams,
 };
 
 ///
@@ -494,13 +495,13 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
+        TryFromDto,
         block::{
+            Error,
             output::{
                 dto::OutputBuilderAmountDto, feature::dto::FeatureDto, unlock_condition::dto::UnlockConditionDto,
             },
-            Error,
         },
-        TryFromDto,
     };
 
     /// Describes an NFT output, a globally unique token with metadata attached.
@@ -626,10 +627,11 @@ mod tests {
 
     use super::*;
     use crate::types::{
+        TryFromDto,
         block::{
             output::{
-                dto::{OutputBuilderAmountDto, OutputDto},
                 FoundryId, SimpleTokenScheme, TokenId,
+                dto::{OutputBuilderAmountDto, OutputDto},
             },
             protocol::protocol_parameters,
             rand::{
@@ -641,7 +643,6 @@ mod tests {
                 },
             },
         },
-        TryFromDto,
     };
 
     #[test]

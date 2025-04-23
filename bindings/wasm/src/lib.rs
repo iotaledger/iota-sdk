@@ -8,7 +8,7 @@ pub mod secret_manager;
 pub mod utils;
 pub mod wallet;
 
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::{JsValue, prelude::wasm_bindgen};
 
 /// Initializes the console error panic hook for better panic messages.
 /// Gets automatically called when using wasm

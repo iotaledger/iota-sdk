@@ -4,18 +4,18 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
+    client::{Client, NodeInfoWrapper, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter},
     types::block::{
+        Block,
         output::{Output, OutputId},
         payload::Payload,
-        Block,
     },
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
 use super::{setup_secret_manager, setup_tagged_data_block, setup_transaction_block};
-use crate::client::common::{setup_client_with_node_health_ignored, NODE_LOCAL};
+use crate::client::common::{NODE_LOCAL, setup_client_with_node_health_ignored};
 
 #[ignore]
 #[tokio::test]

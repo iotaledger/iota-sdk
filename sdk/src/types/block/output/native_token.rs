@@ -9,10 +9,10 @@ use alloc::{
 
 use derive_more::{Deref, DerefMut, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{Packable, bounded::BoundedU8, prefix::BoxedSlicePrefix};
 use primitive_types::U256;
 
-use crate::types::block::{output::TokenId, Error};
+use crate::types::block::{Error, output::TokenId};
 
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]

@@ -7,9 +7,9 @@ use crate::{
     client::secret::SecretManage,
     types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
-        operations::syncing::options::SyncOptions,
-        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
         Account, AccountAddress,
+        operations::syncing::options::SyncOptions,
+        types::{InclusionState, OutputData, Transaction, address::AddressWithUnspentOutputs},
     },
 };
 #[cfg(feature = "events")]
@@ -155,11 +155,7 @@ where
                         WalletEvent::NewOutput(Box::new(NewOutputEvent {
                             output: OutputDataDto::from(&output_data),
                             transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
-                            transaction_inputs: transaction.as_ref().map(|tx| {
-                                tx.inputs
-                                    .clone()
-                                    .into_iter().collect()
-                            }),
+                            transaction_inputs: transaction.as_ref().map(|tx| tx.inputs.clone().into_iter().collect()),
                         })),
                     )
                     .await;

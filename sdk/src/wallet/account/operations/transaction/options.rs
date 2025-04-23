@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::input_selection::{Burn, BurnDto},
     types::block::{
+        Error,
         output::OutputId,
         payload::{dto::TaggedDataPayloadDto, tagged_data::TaggedDataPayload},
-        Error,
     },
     wallet::account::types::address::AccountAddress,
 };

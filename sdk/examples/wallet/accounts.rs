@@ -14,7 +14,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{SecretManager, mnemonic::MnemonicSecretManager},
         utils::request_funds_from_faucet,
     },
     wallet::{ClientOptions, Result, Wallet},

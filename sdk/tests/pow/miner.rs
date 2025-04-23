@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     pow::{
-        miner::{get_miner, get_miner_num_workers, MinerBuilder, MinerCancel},
+        miner::{MinerBuilder, MinerCancel, get_miner, get_miner_num_workers},
         score::PowScorer,
     },
     types::block::rand::bytes::rand_bytes,

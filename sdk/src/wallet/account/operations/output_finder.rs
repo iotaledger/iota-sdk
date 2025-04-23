@@ -5,7 +5,7 @@ use std::cmp;
 
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage},
-    wallet::account::{operations::syncing::SyncOptions, types::AddressWithUnspentOutputs, Account},
+    wallet::account::{Account, operations::syncing::SyncOptions, types::AddressWithUnspentOutputs},
 };
 
 impl<S: 'static + SecretManage> Account<S>

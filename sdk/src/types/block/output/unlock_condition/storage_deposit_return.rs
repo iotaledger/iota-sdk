@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error};
+use crate::types::block::{Error, address::Address, output::verify_output_amount, protocol::ProtocolParameters};
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -66,8 +66,8 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{address::dto::AddressDto, Error},
         TryFromDto, ValidationParams,
+        block::{Error, address::dto::AddressDto},
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

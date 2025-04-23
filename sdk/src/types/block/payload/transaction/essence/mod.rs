@@ -3,7 +3,7 @@
 
 mod regular;
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
+use crypto::hashes::{Digest, blake2b::Blake2b256};
 use derive_more::From;
 use packable::PackableExt;
 
@@ -53,7 +53,7 @@ pub(crate) mod dto {
 
     pub use super::regular::dto::RegularTransactionEssenceDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
+    use crate::types::{TryFromDto, ValidationParams, block::Error};
 
     /// Describes all the different essence types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]

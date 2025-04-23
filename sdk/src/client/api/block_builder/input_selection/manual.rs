@@ -9,14 +9,14 @@ use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
+        Result,
         api::{
+            ClientBlockBuilder,
             address::search_address,
             block_builder::input_selection::{Burn, InputSelection, Selected},
             input_selection::is_alias_transition,
-            ClientBlockBuilder,
         },
         secret::types::InputSigningData,
-        Result,
     },
     types::block::{address::Address, protocol::ProtocolParameters},
 };

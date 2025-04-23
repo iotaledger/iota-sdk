@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
+    Error,
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
-    output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
+    output::{BasicOutput, Output, unlock_condition::AddressUnlockCondition},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
     protocol::protocol_parameters,
     rand::output::rand_inputs_commitment,
-    Error,
 };
-use packable::{error::UnpackError, PackableExt};
+use packable::{PackableExt, error::UnpackError};
 use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";

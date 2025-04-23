@@ -10,7 +10,7 @@ use crate::{
     wallet::{
         account::{AccountDetails, AccountDetailsDto, SyncOptions},
         migration::migrate,
-        storage::{constants::*, DynStorageAdapter, Storage},
+        storage::{DynStorageAdapter, Storage, constants::*},
     },
 };
 
@@ -139,7 +139,7 @@ mod tests {
     use super::*;
     use crate::{
         client::secret::SecretManager,
-        wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
+        wallet::{WalletBuilder, core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory},
     };
 
     #[tokio::test]

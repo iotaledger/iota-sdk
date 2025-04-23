@@ -10,13 +10,13 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client, Result,
+        Client, Result, api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager,
     },
     types::block::{
         address::{Bech32Address, NftAddress},
         output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NftId, NftOutputBuilder, Output, OutputId,
+            BasicOutputBuilder, NftId, NftOutputBuilder, Output, OutputId, unlock_condition::AddressUnlockCondition,
         },
         payload::Payload,
     },
