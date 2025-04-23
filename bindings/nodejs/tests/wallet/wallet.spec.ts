@@ -27,7 +27,7 @@ describe('Wallet', () => {
 
         const wallet = new Wallet(walletOptions);
         await wallet.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+            'acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast',
         );
 
         const account = await wallet.createAccount({
@@ -35,10 +35,10 @@ describe('Wallet', () => {
         });
 
         expect(account.getMetadata().index).toStrictEqual(0);
-        
+
         const secretManager = await wallet.getSecretManager();
         const seed = await secretManager.getSeed();
-        expect(seed).toStrictEqual("0x35c11ac650f8f00d5c66d1d0ac1d9a3ac536ed03d705931cce7275d08167091608fa7e09013bc1f3990fe3611c07a2685631b6dd25f49ac64b80132a35228d1a");
+        expect(seed).toStrictEqual("0x65d378f26a101366d2b2bc982de128382f260205a8b99266fdcee14cc12f4680eb66171c27be01066c3ea30c9c0b87e27fb90f8cab9ac7b8e205f259d275240f");
 
         await wallet.destroy()
         removeDir(storagePath)
