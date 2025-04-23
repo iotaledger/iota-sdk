@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, CreateNativeTokenParams, Result},
     U256,
+    wallet::{CreateNativeTokenParams, Result, account::SyncOptions},
 };
 use pretty_assertions::assert_eq;
 

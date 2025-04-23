@@ -4,8 +4,8 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{Address, Bech32Address, Ed25519Address, Hrp},
     Error,
+    address::{Address, Bech32Address, Ed25519Address, Hrp},
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;

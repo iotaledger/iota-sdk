@@ -4,14 +4,14 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
+    Error,
     input::{
-        dto::{InputDto, UtxoInputDto},
         Input, UtxoInput,
+        dto::{InputDto, UtxoInputDto},
     },
     output::OutputId,
-    Error,
 };
-use packable::{bounded::InvalidBoundedU16, PackableExt};
+use packable::{PackableExt, bounded::InvalidBoundedU16};
 use pretty_assertions::assert_eq;
 
 const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00";

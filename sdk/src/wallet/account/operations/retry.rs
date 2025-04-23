@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{secret::SecretManage, Error as ClientError},
+    client::{Error as ClientError, secret::SecretManage},
     types::{
         api::core::response::LedgerInclusionState,
         block::{
-            payload::{transaction::TransactionId, Payload},
             Block, BlockId,
+            payload::{Payload, transaction::TransactionId},
         },
     },
     wallet::{
-        account::{types::InclusionState, Account},
         Error,
+        account::{Account, types::InclusionState},
     },
 };
 

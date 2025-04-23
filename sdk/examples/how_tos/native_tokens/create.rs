@@ -12,9 +12,9 @@
 //! ```
 
 use iota_sdk::{
+    U256, Wallet,
     types::block::output::feature::Irc30Metadata,
     wallet::{CreateNativeTokenParams, Result},
-    Wallet, U256,
 };
 
 // The circulating supply of the native token

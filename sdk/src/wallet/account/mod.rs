@@ -25,18 +25,19 @@ use tokio::sync::{Mutex, RwLock};
 #[cfg(feature = "participation")]
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
-    address::{AccountAddress, AddressWithUnspentOutputs},
     Balance, OutputData, Transaction, TransactionDto,
+    address::{AccountAddress, AddressWithUnspentOutputs},
 };
 pub use self::{
     operations::{
         output_claiming::OutputsToClaim,
         output_consolidation::ConsolidationParams,
         syncing::{
-            options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
             SyncOptions,
+            options::{AccountSyncOptions, AliasSyncOptions, NftSyncOptions},
         },
         transaction::{
+            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
             high_level::{
                 create_alias::CreateAliasParams,
                 minting::{
@@ -48,7 +49,6 @@ pub use self::{
                 },
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions, TransactionOptionsDto,
         },
     },
     types::OutputDataDto,
@@ -56,21 +56,21 @@ pub use self::{
 use super::core::WalletInner;
 use crate::{
     client::{
-        secret::{SecretManage, SecretManager},
         Client,
+        secret::{SecretManage, SecretManager},
     },
     types::{
+        TryFromDto,
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{dto::FoundryOutputDto, AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
+            output::{AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId, dto::FoundryOutputDto},
             payload::{
-                transaction::{TransactionEssence, TransactionId},
                 TransactionPayload,
+                transaction::{TransactionEssence, TransactionId},
             },
         },
-        TryFromDto,
     },
-    wallet::{account::types::InclusionState, Result},
+    wallet::{Result, account::types::InclusionState},
 };
 
 /// Options to filter outputs

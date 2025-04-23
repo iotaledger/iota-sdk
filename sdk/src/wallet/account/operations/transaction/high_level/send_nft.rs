@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::Bech32Address,
-        output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
         ConvertTo,
+        address::Bech32Address,
+        output::{NftId, NftOutputBuilder, Output, unlock_condition::AddressUnlockCondition},
     },
-    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
+    wallet::account::{Account, TransactionOptions, operations::transaction::Transaction},
 };
 
 /// Params for `send_nft()`

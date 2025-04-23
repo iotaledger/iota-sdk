@@ -6,7 +6,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, OutputId},
+        output::{BasicOutput, Output, OutputId, unlock_condition::AddressUnlockCondition},
         payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
         protocol::protocol_parameters,
         rand::output::{rand_basic_output, rand_inputs_commitment, rand_output_metadata},

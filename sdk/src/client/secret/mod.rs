@@ -29,7 +29,7 @@ use crypto::{
     keys::{bip39::Mnemonic, bip44::Bip44},
     signatures::secp256k1_ecdsa::{self, EvmAddress},
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
@@ -44,17 +44,18 @@ pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
 use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
-        api::{
-            input_selection::{is_alias_transition, Error as InputSelectionError},
-            transaction::validate_transaction_payload_length,
-            verify_semantic, PreparedTransactionData,
-        },
         Error,
+        api::{
+            PreparedTransactionData,
+            input_selection::{Error as InputSelectionError, is_alias_transition},
+            transaction::validate_transaction_payload_length,
+            verify_semantic,
+        },
     },
     types::block::{
         address::{Address, Ed25519Address},
         output::Output,
-        payload::{transaction::TransactionEssence, TransactionPayload},
+        payload::{TransactionPayload, transaction::TransactionEssence},
         semantic::ConflictReason,
         signature::{Ed25519Signature, Signature},
         unlock::{AliasUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},

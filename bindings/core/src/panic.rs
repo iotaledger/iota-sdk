@@ -3,13 +3,13 @@
 
 use std::{
     any::Any,
-    panic::{catch_unwind, AssertUnwindSafe},
+    panic::{AssertUnwindSafe, catch_unwind},
 };
 
 use backtrace::Backtrace;
 use futures::{Future, FutureExt};
 
-use crate::{response::Response, Result};
+use crate::{Result, response::Response};
 
 fn panic_to_response_message(panic: Box<dyn Any>) -> Response {
     let msg = panic.downcast_ref::<String>().map_or_else(
@@ -58,7 +58,7 @@ pub(crate) fn convert_panics<F: FnOnce() -> Result<Response>>(f: F) -> Result<Re
 
 #[cfg(test)]
 mod tests {
-    use super::super::{panic::convert_async_panics, Response};
+    use super::super::{Response, panic::convert_async_panics};
 
     #[tokio::test]
     async fn panic_to_response() {

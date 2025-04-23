@@ -5,12 +5,12 @@ use alloc::string::String;
 use core::fmt;
 
 use bytemuck::cast_slice;
-use crypto::encoding::ternary::{T5B1Buf, TritBuf, Trits, T5B1};
+use crypto::encoding::ternary::{T5B1, T5B1Buf, TritBuf, Trits};
 use packable::{
+    Packable,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
 };
 
 use crate::types::block::Error;

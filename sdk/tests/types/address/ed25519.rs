@@ -4,11 +4,11 @@
 use core::str::FromStr;
 
 use iota_sdk::types::block::{
-    address::{
-        dto::{AddressDto, Ed25519AddressDto},
-        Address, Bech32Address, Ed25519Address, ToBech32Ext,
-    },
     Error,
+    address::{
+        Address, Bech32Address, Ed25519Address, ToBech32Ext,
+        dto::{AddressDto, Ed25519AddressDto},
+    },
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;

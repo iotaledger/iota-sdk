@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::{input_selection::Burn, PreparedTransactionData},
+    client::api::{PreparedTransactionData, input_selection::Burn},
     wallet::{
-        account::{types::Transaction, TransactionOptions},
         Account,
+        account::{TransactionOptions, types::Transaction},
     },
 };
 

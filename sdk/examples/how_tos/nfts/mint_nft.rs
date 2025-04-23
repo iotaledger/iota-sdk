@@ -12,13 +12,13 @@
 //! ```
 
 use iota_sdk::{
+    Wallet,
     types::block::output::{
+        NftId, NftOutputBuilder,
         feature::{Irc27Metadata, IssuerFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
-        NftId, NftOutputBuilder,
     },
     wallet::{MintNftParams, Result},
-    Wallet,
 };
 
 // The owner address of the first NFT we'll mint

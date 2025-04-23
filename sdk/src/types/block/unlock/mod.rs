@@ -11,12 +11,12 @@ use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};
 use hashbrown::HashSet;
-use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
+use packable::{Packable, bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
 pub use self::{alias::AliasUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
 use crate::types::block::{
-    input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX, INPUT_INDEX_RANGE},
     Error,
+    input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX, INPUT_INDEX_RANGE},
 };
 
 /// The maximum number of unlocks of a transaction.
@@ -150,8 +150,8 @@ pub mod dto {
         signature::dto::SignatureUnlockDto,
     };
     use crate::types::block::{
-        signature::{dto::SignatureDto, Ed25519Signature, Signature},
         Error,
+        signature::{Ed25519Signature, Signature, dto::SignatureDto},
     };
 
     /// Describes all the different unlock types.

@@ -11,7 +11,7 @@
 //! cargo run --release --all-features --example state_transition
 //! ```
 
-use iota_sdk::{types::block::output::AliasOutputBuilder, wallet::Result, Wallet};
+use iota_sdk::{Wallet, types::block::output::AliasOutputBuilder, wallet::Result};
 
 // The metadata for the next state
 const NEW_STATE_METADATA: &str = "updated state metadata 1";

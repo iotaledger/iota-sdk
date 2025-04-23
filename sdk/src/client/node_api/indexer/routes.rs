@@ -5,15 +5,15 @@
 
 use crate::{
     client::{
-        node_api::indexer::{
-            query_parameters::{
-                verify_query_parameters_alias_outputs, verify_query_parameters_basic_outputs,
-                verify_query_parameters_foundry_outputs, verify_query_parameters_nft_outputs,
-                verify_query_parameters_outputs, QueryParameter,
-            },
-            QueryParameters,
-        },
         ClientInner, Error, Result,
+        node_api::indexer::{
+            QueryParameters,
+            query_parameters::{
+                QueryParameter, verify_query_parameters_alias_outputs, verify_query_parameters_basic_outputs,
+                verify_query_parameters_foundry_outputs, verify_query_parameters_nft_outputs,
+                verify_query_parameters_outputs,
+            },
+        },
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,

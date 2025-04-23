@@ -4,18 +4,18 @@
 use crypto::keys::bip44::Bip44;
 
 use super::{
+    Error, InputSelection,
     requirement::{
         alias::is_alias_transition,
         amount::amount_sums,
         native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     },
-    Error, InputSelection,
 };
 use crate::{
     client::api::RemainderData,
     types::block::{
         address::{Address, Ed25519Address},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
+        output::{BasicOutputBuilder, NativeTokensBuilder, Output, unlock_condition::AddressUnlockCondition},
     },
 };
 

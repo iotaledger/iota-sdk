@@ -6,14 +6,14 @@
 use async_trait::async_trait;
 use crypto::ciphers::{chacha::XChaCha20Poly1305, traits::Aead};
 use iota_stronghold::{
-    procedures::{self, AeadCipher},
     Location,
+    procedures::{self, AeadCipher},
 };
 use zeroize::Zeroizing;
 
 use super::{
-    common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
     StrongholdAdapter,
+    common::{PRIVATE_DATA_CLIENT_PATH, SECRET_VAULT_PATH, USERDATA_STORE_KEY_RECORD_PATH},
 };
 use crate::client::{storage::StorageAdapter, stronghold::Error};
 

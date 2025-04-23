@@ -8,11 +8,11 @@ use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
 use crate::types::block::{
+    Error,
     address::Address,
     output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
     unlock::Unlocks,
-    Error,
 };
 
 /// Errors related to ledger types.

@@ -7,9 +7,9 @@ use alloc::boxed::Box;
 use core::ops::RangeInclusive;
 
 use packable::{
-    bounded::{BoundedU32, BoundedU8},
-    prefix::BoxedSlicePrefix,
     Packable,
+    bounded::{BoundedU8, BoundedU32},
+    prefix::BoxedSlicePrefix,
 };
 
 use crate::types::block::{Block, Error};

@@ -12,9 +12,9 @@
 //! ```
 
 use iota_sdk::{
+    Wallet,
     types::block::address::Bech32Address,
     wallet::{Result, SendNativeTokensParams},
-    Wallet,
 };
 use primitive_types::U256;
 

@@ -9,9 +9,9 @@
 //! ```
 
 use iota_sdk::client::{
+    Client, Result,
     api::GetAddressesOptions,
     secret::{GenerateAddressOptions, SecretManager},
-    Client, Result,
 };
 
 #[tokio::main]

@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use std::sync::{
-    atomic::{AtomicU32, AtomicUsize},
     Arc,
+    atomic::{AtomicU32, AtomicUsize},
 };
 #[cfg(feature = "storage")]
 use std::{collections::HashSet, sync::atomic::Ordering};
 
-use futures::{future::try_join_all, FutureExt};
+use futures::{FutureExt, future::try_join_all};
 use serde::Serialize;
 use tokio::sync::RwLock;
 
@@ -24,7 +24,7 @@ use crate::wallet::{
 };
 use crate::{
     client::secret::{SecretManage, SecretManager},
-    wallet::{core::WalletInner, Account, ClientOptions, Wallet},
+    wallet::{Account, ClientOptions, Wallet, core::WalletInner},
 };
 
 /// Builder for the wallet.

@@ -9,8 +9,8 @@ use crate::{
     client::secret::{SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address, Ed25519Address, Hrp},
     wallet::{
-        account::{types::AccountAddress, Account, AccountDetails},
         Error, Wallet,
+        account::{Account, AccountDetails, types::AccountAddress},
     },
 };
 

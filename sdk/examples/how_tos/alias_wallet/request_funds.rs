@@ -7,13 +7,13 @@
 //! `cargo run --release --all-features --example alias_wallet_request_funds`
 
 use iota_sdk::{
+    Wallet,
     client::request_funds_from_faucet,
     types::block::address::{AliasAddress, ToBech32Ext},
     wallet::{
-        account::{AliasSyncOptions, SyncOptions},
         Result,
+        account::{AliasSyncOptions, SyncOptions},
     },
-    Wallet,
 };
 
 #[tokio::main]

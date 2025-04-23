@@ -14,7 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::SecretManager,
     },
-    wallet::{account::types::AccountAddress, ClientOptions, Result, SendParams, Wallet},
+    wallet::{ClientOptions, Result, SendParams, Wallet, account::types::AccountAddress},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";

@@ -5,17 +5,17 @@ pub(crate) mod stronghold_snapshot;
 
 use std::{fs, path::PathBuf, sync::atomic::Ordering};
 
-use futures::{future::try_join_all, FutureExt};
+use futures::{FutureExt, future::try_join_all};
 
 use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
 use crate::{
     client::storage::StorageAdapter,
-    wallet::{migration::chrysalis::CHRYSALIS_STORAGE_KEY, WalletBuilder},
+    wallet::{WalletBuilder, migration::chrysalis::CHRYSALIS_STORAGE_KEY},
 };
 use crate::{
     client::{
-        secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
+        secret::{SecretManager, SecretManagerConfig, SecretManagerDto, stronghold::StrongholdSecretManager},
         utils::Password,
     },
     types::block::address::Hrp,
@@ -114,9 +114,7 @@ impl Wallet {
         // correct, so we will not restore them
         let ignore_backup_values = ignore_if_coin_type_mismatch.is_some_and(|ignore| {
             if ignore {
-                read_coin_type.is_none_or(|read_coin_type| {
-                    self.coin_type.load(Ordering::Relaxed) != read_coin_type
-                })
+                read_coin_type.is_none_or(|read_coin_type| self.coin_type.load(Ordering::Relaxed) != read_coin_type)
             } else {
                 false
             }
@@ -196,8 +194,7 @@ impl Wallet {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    self
-                        .storage_options
+                    self.storage_options
                         .path
                         .clone()
                         .into_os_string()
@@ -296,9 +293,7 @@ impl Wallet<StrongholdSecretManager> {
         // correct, so we will not restore them
         let ignore_backup_values = ignore_if_coin_type_mismatch.is_some_and(|ignore| {
             if ignore {
-                read_coin_type.is_none_or(|read_coin_type| {
-                    self.coin_type.load(Ordering::Relaxed) != read_coin_type
-                })
+                read_coin_type.is_none_or(|read_coin_type| self.coin_type.load(Ordering::Relaxed) != read_coin_type)
             } else {
                 false
             }
@@ -369,8 +364,7 @@ impl Wallet<StrongholdSecretManager> {
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(
-                    self
-                        .storage_options
+                    self.storage_options
                         .path
                         .clone()
                         .into_os_string()

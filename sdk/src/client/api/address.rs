@@ -8,13 +8,13 @@ use serde::{Deserialize, Serialize};
 use super::ADDRESS_GAP_RANGE;
 use crate::{
     client::{
+        Client, Result,
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
         secret::{GenerateAddressOptions, SecretManage, SecretManager},
-        Client, Result,
     },
     types::block::{
-        address::{Address, Bech32Address, Hrp, ToBech32Ext},
         ConvertTo,
+        address::{Address, Bech32Address, Hrp, ToBech32Ext},
     },
 };
 

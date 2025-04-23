@@ -4,21 +4,21 @@
 use std::path::Path;
 
 use iota_sdk::{
-    client::secret::{ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, SecretManager},
-    wallet::{account::types::AccountIdentifier, Wallet},
+    client::secret::{SecretManager, ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager},
+    wallet::{Wallet, account::types::AccountIdentifier},
 };
 
 use crate::{
     command::wallet::{
-        accounts_command, add_account, backup_command_stronghold, change_password_command, init_command,
-        migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command, new_account_command, node_info_command,
-        restore_command_stronghold, set_node_url_command, set_pow_command, sync_command, InitParameters, WalletCli,
-        WalletCommand,
+        InitParameters, WalletCli, WalletCommand, accounts_command, add_account, backup_command_stronghold,
+        change_password_command, init_command, migrate_stronghold_snapshot_v2_to_v3_command, mnemonic_command,
+        new_account_command, node_info_command, restore_command_stronghold, set_node_url_command, set_pow_command,
+        sync_command,
     },
     error::Error,
     helper::{
-        enter_or_generate_mnemonic, get_account_alias, get_decision, get_password, import_mnemonic, pick_account,
-        select_secret_manager, SecretManagerChoice,
+        SecretManagerChoice, enter_or_generate_mnemonic, get_account_alias, get_decision, get_password,
+        import_mnemonic, pick_account, select_secret_manager,
     },
     println_log_error, println_log_info,
 };

@@ -10,7 +10,7 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
-            payload::transaction::{dto::TransactionPayloadDto, TransactionId},
+            payload::transaction::{TransactionId, dto::TransactionPayloadDto},
         },
     },
     wallet::account::types::{InclusionState, OutputDataDto},

@@ -9,13 +9,13 @@
 //! ```
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager, Client, Result},
+    client::{Client, Result, api::GetAddressesOptions, request_funds_from_faucet, secret::SecretManager},
     types::block::{
         address::{Address, AliasAddress},
         output::{
+            AliasId, AliasOutputBuilder, Output, OutputId,
             feature::{IssuerFeature, SenderFeature},
             unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AliasId, AliasOutputBuilder, Output, OutputId,
         },
         payload::Payload,
     },

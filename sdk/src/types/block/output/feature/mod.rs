@@ -11,7 +11,7 @@ use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use bitflags::bitflags;
 use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{Packable, bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
 #[cfg(feature = "irc_27")]
 pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
@@ -19,7 +19,7 @@ pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
 pub use self::metadata::irc_30::Irc30Metadata;
 pub use self::{issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, tag::TagFeature};
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
-use crate::types::block::{create_bitflags, Error};
+use crate::types::block::{Error, create_bitflags};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -302,7 +302,7 @@ pub mod dto {
         tag::dto::TagFeatureDto,
     };
     use super::*;
-    use crate::types::block::{address::Address, Error};
+    use crate::types::block::{Error, address::Address};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
     pub enum FeatureDto {

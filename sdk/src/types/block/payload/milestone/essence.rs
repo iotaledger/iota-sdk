@@ -3,21 +3,21 @@
 
 use alloc::vec::Vec;
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
+use crypto::hashes::{Digest, blake2b::Blake2b256};
 use packable::{
+    Packable, PackableExt,
     bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable, PackableExt,
 };
 
 use crate::types::block::{
+    Error,
     parent::Parents,
     payload::milestone::{MerkleRoot, MilestoneId, MilestoneIndex, MilestoneOptions},
     protocol::ProtocolParameters,
-    Error,
 };
 
 pub(crate) type MilestoneMetadataLength = BoundedU16<{ u16::MIN }, { u16::MAX }>;

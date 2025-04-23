@@ -11,7 +11,7 @@
 //! cargo run --release --example node_api_indexer_get_random_basic_outputs [NODE_URL]
 //! ```
 
-use iota_sdk::client::{node_api::indexer::query_parameters::QueryParameter, Client, Result};
+use iota_sdk::client::{Client, Result, node_api::indexer::query_parameters::QueryParameter};
 
 #[tokio::main]
 async fn main() -> Result<()> {

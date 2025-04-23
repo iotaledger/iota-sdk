@@ -10,7 +10,7 @@ use hashbrown::HashMap;
 
 use crate::types::{
     api::plugins::participation::types::ParticipationEventId,
-    block::{output::OutputId, BlockId},
+    block::{BlockId, output::OutputId},
 };
 
 /// EventsResponse defines the response of a GET RouteParticipationEvents REST API call.

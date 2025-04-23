@@ -3,21 +3,21 @@
 
 use std::path::Path;
 
-use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand};
+use clap::{Args, CommandFactory, Parser, Subcommand, builder::BoolishValueParser};
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{SecretManager, stronghold::StrongholdSecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
     },
-    wallet::{account::types::AccountIdentifier, ClientOptions, Wallet},
+    wallet::{ClientOptions, Wallet, account::types::AccountIdentifier},
 };
 use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{check_file_exists, generate_mnemonic, get_password, SecretManagerChoice},
+    helper::{SecretManagerChoice, check_file_exists, generate_mnemonic, get_password},
     println_log_info,
 };
 

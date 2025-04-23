@@ -10,9 +10,9 @@ use derivative::Derivative;
 use iota_sdk::client::secret::LedgerNanoStatus;
 use iota_sdk::{
     client::{
+        NetworkInfo, NodeInfoWrapper,
         api::{PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::Node,
-        NetworkInfo, NodeInfoWrapper,
     },
     types::{
         api::{
@@ -23,9 +23,10 @@ use iota_sdk::{
             plugins::indexer::OutputIdsResponse,
         },
         block::{
-            address::{dto::AddressDto, Bech32Address, Hrp},
+            BlockDto, BlockId,
+            address::{Bech32Address, Hrp, dto::AddressDto},
             input::dto::UtxoInputDto,
-            output::{dto::OutputDto, AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
+            output::{AliasId, FoundryId, NftId, OutputId, OutputMetadata, TokenId, dto::OutputDto},
             payload::{
                 dto::{MilestonePayloadDto, TransactionPayloadDto},
                 milestone::MilestoneId,
@@ -35,12 +36,11 @@ use iota_sdk::{
             semantic::ConflictReason,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
-            BlockDto, BlockId,
         },
     },
     wallet::account::{
-        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
         AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
+        types::{AccountAddress, AddressWithUnspentOutputs, Balance, OutputDataDto, TransactionDto},
     },
 };
 use serde::Serialize;
@@ -50,7 +50,7 @@ use {
     iota_sdk::wallet::account::{AccountParticipationOverview, ParticipationEventWithNodes},
 };
 
-use crate::{error::Error, OmittedDebug};
+use crate::{OmittedDebug, error::Error};
 
 /// The response message.
 #[derive(Serialize, Derivative)]

@@ -18,8 +18,8 @@ pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
     types::block::{
-        payload::{milestone::ReceiptMilestoneOption, Payload},
         Block,
+        payload::{Payload, milestone::ReceiptMilestoneOption},
     },
 };
 
