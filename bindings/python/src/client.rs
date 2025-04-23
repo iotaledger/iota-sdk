@@ -42,8 +42,7 @@ pub fn call_client_method(client: &Client, method: String) -> Result<String> {
 
 #[pyfunction]
 pub fn listen_mqtt(client: &Client, topics: Vec<String>, handler: PyObject) -> Result<()> {
-    let handler_arc = std::sync::Arc::new(handler);
-    let handler = handler_arc.clone();
+    let handler = std::sync::Arc::new(handler);
     let topics = topics
         .iter()
         .map(Topic::new)
