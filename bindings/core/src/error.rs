@@ -9,6 +9,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error)]
+#[allow(clippy::large_enum_variant)]
 pub enum Error {
     /// Block errors.
     #[error("{0}")]

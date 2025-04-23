@@ -24,6 +24,7 @@ use packable::PackableExt;
 use crate::{Result, method::UtilsMethod, response::Response};
 
 /// Call a utils method.
+#[allow(clippy::result_large_err)]
 pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response> {
     let response = match method {
         UtilsMethod::Bech32ToHex { bech32 } => Response::Bech32ToHex(Client::bech32_to_hex(bech32)?),
