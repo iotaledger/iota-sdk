@@ -62,7 +62,7 @@ jobs:
         # (which is used by neon-sys) sadly fails to recognize it. As a mitigation, we still run the
         # tests on Windows 2019, until we can figure out a way to fix the problem.
         # os: [ubuntu-22.04, macos-13, windows-2019]
-        os: [macos-13]
+        os: [macos-13, macos-latest]
         node-version: ["18.x"]
 
     steps:
@@ -115,23 +115,23 @@ jobs:
         if: matrix.os == 'windows-2019'
         run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
 
-      - name: Install gon (macOS)
-        # Fork of https://github.com/mitchellh/gon
-        # https://github.com/Bearer/gon
-        # Since we're dealing with code signing secrets we want to pin the version of gon
-        run: |
-          wget https://raw.githubusercontent.com/Bearer/homebrew-tap/366bc999e14a8d04e07e24f9387bcbaf89c1bc53/Formula/gon.rb
-          brew install --formula gon.rb
-          rm gon.rb
-        if: ${{ startsWith(matrix.os, 'macos') }}
+      # - name: Install gon (macOS)
+      #   # Fork of https://github.com/mitchellh/gon
+      #   # https://github.com/Bearer/gon
+      #   # Since we're dealing with code signing secrets we want to pin the version of gon
+      #   run: |
+      #     wget https://raw.githubusercontent.com/Bearer/homebrew-tap/366bc999e14a8d04e07e24f9387bcbaf89c1bc53/Formula/gon.rb
+      #     brew install --formula gon.rb
+      #     rm gon.rb
+      #   if: ${{ startsWith(matrix.os, 'macos') }}
 
       - name: Set deployment target (macOS)
         if: matrix.os == 'macos-13'
         run: echo "MACOSX_DEPLOYMENT_TARGET=10.13" >> $GITHUB_ENV
 
-      - name: Add aarch64 target (macOS)
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        run: rustup target add aarch64-apple-darwin
+      # - name: Add aarch64 target (macOS)
+      #   if: ${{ startsWith(matrix.os, 'macos') }}
+      #   run: rustup target add aarch64-apple-darwin
 
       #  TODO: enable https://github.com/iotaledger/iota-sdk/issues/97
       # - name: Add aarch64 target (linux)
@@ -179,7 +179,7 @@ jobs:
 
       # This step is required to support macOS 10.13
       - name: Patch librocksdb-sys (macOS)
-        if: ${{ startsWith(matrix.os, 'macos') }}
+        if: ${{ startsWith(matrix.os, 'macos-13') }}
         run: |
           cargo install cargo-patch@0.3.1
           cp ${{ github.workspace }}/.patches/rocksdb_faligned_allocation.patch .
@@ -192,11 +192,12 @@ jobs:
         working-directory: bindings/nodejs
 
       - name: Build Node.js prebuild (x64)
+        if: ${{ startsWith(matrix.os, 'macos-13') }}
         run: yarn run prebuild-x64
         working-directory: bindings/nodejs
 
       - name: Build Node.js prebuild (macos, arm64)
-        if: ${{ startsWith(matrix.os, 'macos') }}
+        if: ${{ startsWith(matrix.os, 'macos-latest') }}
         run: yarn run prebuild-macos-arm64
         working-directory: bindings/nodejs
 
@@ -211,23 +212,23 @@ jobs:
       #   run: yarn run prebuild-windows-arm64
       #   working-directory: bindings/nodejs
 
-      - name: Import code signing assets (macOS)
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        env:
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          MAC_CERT_BASE64: ${{ secrets.MAC_CERT_BASE64 }}
-          MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
-        # Based on https://github.com/Apple-Actions/import-codesign-certs/blob/master/src/security.ts
-        run: |
-          security create-keychain -p $KEYCHAIN_PASSWORD signing.keychain
-          security set-keychain-settings -lut 3600 signing.keychain
-          security unlock-keychain -p $KEYCHAIN_PASSWORD signing.keychain
-          echo $MAC_CERT_BASE64 | base64 -D -o signing.p12
-          security import signing.p12 -k signing.keychain -f pkcs12 -T "/usr/bin/codesign" -T "/usr/bin/security" -P $MAC_CERT_PASSWORD
-          rm signing.p12
-          security -q set-key-partition-list -S apple-tool:,apple: -k $KEYCHAIN_PASSWORD signing.keychain > /dev/null
-          security -v list-keychains -s signing.keychain
-          security find-identity -vp codesigning
+      # - name: Import code signing assets (macOS)
+      #   if: ${{ startsWith(matrix.os, 'macos') }}
+      #   env:
+      #     KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      #     MAC_CERT_BASE64: ${{ secrets.MAC_CERT_BASE64 }}
+      #     MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+      #   # Based on https://github.com/Apple-Actions/import-codesign-certs/blob/master/src/security.ts
+      #   run: |
+      #     security create-keychain -p $KEYCHAIN_PASSWORD signing.keychain
+      #     security set-keychain-settings -lut 3600 signing.keychain
+      #     security unlock-keychain -p $KEYCHAIN_PASSWORD signing.keychain
+      #     echo $MAC_CERT_BASE64 | base64 -D -o signing.p12
+      #     security import signing.p12 -k signing.keychain -f pkcs12 -T "/usr/bin/codesign" -T "/usr/bin/security" -P $MAC_CERT_PASSWORD
+      #     rm signing.p12
+      #     security -q set-key-partition-list -S apple-tool:,apple: -k $KEYCHAIN_PASSWORD signing.keychain > /dev/null
+      #     security -v list-keychains -s signing.keychain
+      #     security find-identity -vp codesigning
 
       - name: Prepare Github release
         id: prepare_release
@@ -236,27 +237,27 @@ jobs:
           echo "tag_name=iota-sdk-nodejs-v$(cat package.json | jq -r '.version')" >> "$GITHUB_OUTPUT"
         working-directory: bindings/nodejs
 
-      - name: Sign and notarize index.node binary (macOS arm64)
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        env:
-          AC_USERNAME: ${{ secrets.ASC_APPLE_ID }}
-          AC_PASSWORD: ${{ secrets.ASC_PASSWORD }}
-        working-directory: bindings/nodejs
-        run: |
-          TAR_NAME=sdk-v$(cat package.json | jq -r '.version')-napi-v6-darwin-arm64.tar.gz
+      # - name: Sign and notarize index.node binary (macOS arm64)
+      #   if: ${{ startsWith(matrix.os, 'macos') }}
+      #   env:
+      #     AC_USERNAME: ${{ secrets.ASC_APPLE_ID }}
+      #     AC_PASSWORD: ${{ secrets.ASC_PASSWORD }}
+      #   working-directory: bindings/nodejs
+      #   run: |
+      #     TAR_NAME=sdk-v$(cat package.json | jq -r '.version')-napi-v6-darwin-arm64.tar.gz
 
-          # unpack to only get the index.node
-          tar -xvf prebuilds/@iota/$TAR_NAME
+      #     # unpack to only get the index.node
+      #     tar -xvf prebuilds/@iota/$TAR_NAME
 
-          gon gon-config.json
+      #     gon gon-config.json
 
-          unzip -o binary.zip
+      #     unzip -o binary.zip
 
-          mkdir -p build/Release
+      #     mkdir -p build/Release
 
-          mv -f index.node build/Release/index.node
+      #     mv -f index.node build/Release/index.node
 
-          tar -czf prebuilds/@iota/$TAR_NAME build/Release/index.node
+      #     tar -czf prebuilds/@iota/$TAR_NAME build/Release/index.node
 
       - name: Upload prebuild to Github release
         uses: softprops/action-gh-release@v1
