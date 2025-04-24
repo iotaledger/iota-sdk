@@ -241,7 +241,7 @@ class SecretManager():
         })
 
     def get_seed(self) -> HexStr:
-        """Get the seed from the Stronghold vault, that was stored by `StoreMnemonic`.
+        """Get the seed from the Stronghold vault, that was stored by `store_mnemonic `.
         """
         return self._call_method('getSeed')
 
