@@ -175,7 +175,8 @@ jobs:
       - name: Patch librocksdb-sys (macOS)
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
-          cargo install cargo-patch
+          cargo --version
+          cargo install cargo-patch@0.3.1
           cp ${{ github.workspace }}/.patches/rocksdb_faligned_allocation.patch .
           git apply --ignore-space-change --ignore-whitespace ${{ github.workspace }}/.patches/macos_cargo_toml.patch
           cat Cargo.toml
