@@ -80,6 +80,15 @@ pub(crate) async fn call_secret_manager_method_internal(
                 return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
             }
         }
+        #[cfg(feature = "stronghold")]
+        SecretManagerMethod::GetSeed => {
+            if let SecretManager::Stronghold(secret_manager) = &*secret_manager {
+                let hex_seed = secret_manager.get_seed().await?;
+                Response::MnemonicHexSeed(hex_seed)
+            } else {
+                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
+            }
+        }
     };
     Ok(response)
 }

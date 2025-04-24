@@ -88,6 +88,17 @@ export class SecretManager {
     }
 
     /**
+     * Get the seed from the Stronghold vault, that was stored by `storeMnemonic()`.
+     */
+    async getSeed(): Promise<HexEncodedString> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getSeed',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Sign a transaction.
      *
      * @param preparedTransactionData An instance of `PreparedTransactionData`.

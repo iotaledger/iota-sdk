@@ -49,6 +49,7 @@ where
         .unwrap_or_else(|panic| Ok(panic_to_response_message(panic)))
 }
 
+#[allow(clippy::result_large_err)]
 pub(crate) fn convert_panics<F: FnOnce() -> Result<Response>>(f: F) -> Result<Response> {
     match catch_unwind(AssertUnwindSafe(f)) {
         Ok(result) => result,
