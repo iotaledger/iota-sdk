@@ -6,55 +6,55 @@ env:
   CARGO_INCREMENTAL: 0
 
 jobs:
-  publish-nodejs:
-    runs-on: ubuntu-latest
+  # publish-nodejs:
+  #   runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: bindings/nodejs
+  #   defaults:
+  #     run:
+  #       working-directory: bindings/nodejs
 
-    steps:
-      - uses: actions/checkout@v3
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Set up Rust
-        uses: ./.github/actions/setup-rust
+  #     - name: Set up Rust
+  #       uses: ./.github/actions/setup-rust
 
-      # Required for ledger-nano
-      - name: Install required packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install libudev-dev libusb-1.0-0-dev
+  #     # Required for ledger-nano
+  #     - name: Install required packages
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install libudev-dev libusb-1.0-0-dev
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18.x"
-          registry-url: "https://registry.npmjs.org"
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "18.x"
+  #         registry-url: "https://registry.npmjs.org"
 
-      - name: Install Yarn
-        run: npm i -g yarn
+  #     - name: Install Yarn
+  #       run: npm i -g yarn
 
-      - name: Install JS dependencies
-        run: yarn
+  #     - name: Install JS dependencies
+  #       run: yarn
 
-      - name: Build project
-        run: yarn build
+  #     - name: Build project
+  #       run: yarn build
 
-      - name: Update Cargo.toml with git
-        run: sed -i 's#path = "../core"#git = "https://github.com/iotaledger/iota-sdk", rev = "'$GITHUB_SHA'"#g' Cargo.toml
+  #     - name: Update Cargo.toml with git
+  #       run: sed -i 's#path = "../core"#git = "https://github.com/iotaledger/iota-sdk", rev = "'$GITHUB_SHA'"#g' Cargo.toml
 
-      - name: Print Cargo.toml
-        run: cat Cargo.toml
+  #     - name: Print Cargo.toml
+  #       run: cat Cargo.toml
 
-      - name: Publish nodejs bindings to NPM
-        shell: sh
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: yarn publish --access public
+  #     - name: Publish nodejs bindings to NPM
+  #       shell: sh
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #       run: yarn publish --access public
 
   nodejs-binding-prebuild:
     runs-on: ${{ matrix.os }}
-    needs: publish-nodejs
+    # needs: publish-nodejs
     strategy:
       fail-fast: false
       matrix:
