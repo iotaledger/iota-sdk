@@ -1,5 +1,6 @@
 # IOTA SDK Library
 
+[![Release](https://img.shields.io/github/v/release/iotaledger/iota-sdk.svg)](https://github.com/iotaledger/iota-sdk/releases)
 [![Coverage Status](https://coveralls.io/repos/github/iotaledger/iota-sdk/badge.svg?branch=develop)](https://coveralls.io/github/iotaledger/iota-sdk?branch=develop)
 
 The IOTA SDK is a Rust-based project that provides a convenient and efficient way to interact with nodes in the
