@@ -1,3 +1,8 @@
+| :warning: WARNING                                                                                                                      |
+| :------------------------------------------------------------------------------------------------------------------------------------- |
+| This repository has been deprecated since [IOTA Rebased went live on Mainnet](https://blog.iota.org/builders-welcome-rebase-complete/) |
+| Please use https://github.com/iotaledger/iota/tree/develop/crates/iota-sdk instead                                                     |
+
 # IOTA SDK Library
 
 [![Coverage Status](https://coveralls.io/repos/github/iotaledger/iota-sdk/badge.svg?branch=develop)](https://coveralls.io/github/iotaledger/iota-sdk?branch=develop)
@@ -10,9 +15,9 @@ modules: `client` and `wallet`.
 ## Table of Contents
 
 - [Requirements](#requirements)
-    - [Dependencies](#dependencies)
+  - [Dependencies](#dependencies)
 - [Getting Started](#getting-started)
-    - [Install the IOTA SDK](#install-the-iota-sdk)
+  - [Install the IOTA SDK](#install-the-iota-sdk)
 - [Client](#client-usage)
 - [Wallet](#wallet-usage)
 - [Examples](#examples)
@@ -41,7 +46,7 @@ modules: `client` and `wallet`.
 This library follows the following branching strategy:
 
 | Branch       | Description                                                                                                                    |
-|--------------|--------------------------------------------------------------------------------------------------------------------------------|
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | `develop`    | Ongoing development for future releases of the staging networks. This branch gets merged into `staging` on release.            |
 | `production` | The latest releases for the IOTA network.                                                                                      |
 | `staging`    | The latest releases for the Shimmer network.                                                                                   |
